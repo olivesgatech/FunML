@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Sign Function for Classification</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #cbd5e1;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+    }
+    body {
+      padding: 14px;
+    }
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 12px 16px;
+      margin: 14px 0 16px;
+    }
+    .control {
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+    }
+    .control label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .control input[type="range"] {
+      flex: 1;
+    }
+    .value {
+      min-width: 56px;
+      text-align: right;
+      font-weight: 700;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 16px;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    button:hover {
+      background: var(--bg);
+    }
+    .plots {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+    .plot-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .plot {
+      width: 100%;
+      height: 500px;
+    }
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    code {
+      background: #eef2ff;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+    @media (max-width: 960px) {
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .plots {
+        grid-template-columns: 1fr;
+      }
+      .plot {
+        height: 430px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Interactive Sign Function for Classification</h1>
+    <p>This notebook combines the Sandbox sign-function plot with the 1D classification data from the linear-boundary example.</p>
+
+    <div class="controls">
+      <div class="control">
+        <label for="mean0Range">Class 0 mean</label>
+        <div class="control-row">
+          <input id="mean0Range" type="range" min="-5" max="0" step="0.1" value="-2">
+          <span class="value" id="mean0Value">-2.0</span>
+        </div>
+      </div>
+      <div class="control">
+        <label for="mean1Range">Class 1 mean</label>
+        <div class="control-row">
+          <input id="mean1Range" type="range" min="0" max="5" step="0.1" value="2">
+          <span class="value" id="mean1Value">2.0</span>
+        </div>
+      </div>
+      <div class="control">
+        <label for="scaleRange">Class spread</label>
+        <div class="control-row">
+          <input id="scaleRange" type="range" min="0.2" max="2.5" step="0.1" value="1.0">
+          <span class="value" id="scaleValue">1.0</span>
+        </div>
+      </div>
+      <div class="control">
+        <label for="boundaryRange">Decision boundary</label>
+        <div class="control-row">
+          <input id="boundaryRange" type="range" min="-5" max="5" step="0.1" value="0">
+          <span class="value" id="boundaryValue">0.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="midpointButton" type="button">Use midpoint boundary</button>
+      <button id="regenerateButton" type="button">Regenerate data</button>
+      <button id="resetButton" type="button">Reset demo</button>
+    </div>
+
+    <div class="plots">
+      <div class="plot-card"><div class="plot" id="signPlot"></div></div>
+      <div class="plot-card"><div class="plot" id="classificationPlot"></div></div>
+    </div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const mean0Range = document.getElementById("mean0Range");
+    const mean1Range = document.getElementById("mean1Range");
+    const scaleRange = document.getElementById("scaleRange");
+    const boundaryRange = document.getElementById("boundaryRange");
+    const mean0Value = document.getElementById("mean0Value");
+    const mean1Value = document.getElementById("mean1Value");
+    const scaleValue = document.getElementById("scaleValue");
+    const boundaryValue = document.getElementById("boundaryValue");
+    const midpointButton = document.getElementById("midpointButton");
+    const regenerateButton = document.getElementById("regenerateButton");
+    const resetButton = document.getElementById("resetButton");
+    const status = document.getElementById("status");
+
+    const xLine = Array.from({ length: 400 }, (_, i) => -10 + (20 * i) / 399);
+    let randomSeed = 0;
+    let state = null;
+    let signInitialized = false;
+    let classificationInitialized = false;
+
+    function mulberry32(seed) {
+      return function() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function randomNormal(rand) {
+      let u = 0;
+      let v = 0;
+      while (u === 0) u = rand();
+      while (v === 0) v = rand();
+      return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function format(value) {
+      return Number(value).toFixed(1);
+    }
+
+    function signFunction(x, boundary) {
+      return x >= boundary ? 1 : -1;
+    }
+
+    function generateState(mean0, mean1, scale, seed) {
+      const rand = mulberry32(seed);
+      const xClass0 = Array.from({ length: 20 }, () => mean0 + randomNormal(rand) * scale);
+      const xClass1 = Array.from({ length: 20 }, () => mean1 + randomNormal(rand) * scale);
+      const midpoint = (xClass0.reduce((a, b) => a + b, 0) / xClass0.length + xClass1.reduce((a, b) => a + b, 0) / xClass1.length) / 2;
+      return { xClass0, xClass1, midpoint, seed };
+    }
+
+    function updatePlots() {
+      const mean0 = Number(mean0Range.value);
+      const mean1 = Number(mean1Range.value);
+      const scale = Number(scaleRange.value);
+      const boundary = Number(boundaryRange.value);
+
+      mean0Value.textContent = format(mean0);
+      mean1Value.textContent = format(mean1);
+      scaleValue.textContent = format(scale);
+      boundaryValue.textContent = format(boundary);
+
+      const signY = xLine.map((x) => Math.sign(x));
+      const classSignY = xLine.map((x) => signFunction(x, boundary));
+
+      const signData = [
+        {
+          x: xLine,
+          y: signY,
+          mode: "lines",
+          type: "scatter",
+          name: "sign(x)",
+          line: { color: "#2563eb", width: 3 }
+        }
+      ];
+
+      const signLayout = {
+        title: { text: "sign(x) Function", font: { size: 18 } },
+        margin: { l: 60, r: 20, t: 48, b: 48 },
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        xaxis: { title: "x", range: [-10, 10], gridcolor: "#e2e8f0", zerolinecolor: "#64748b" },
+        yaxis: { title: "sign(x)", range: [-1.2, 1.2], gridcolor: "#e2e8f0", zerolinecolor: "#64748b", tickvals: [-1, 0, 1] },
+        legend: { x: 0.03, y: 0.97, bgcolor: "rgba(255,255,255,0.9)" }
+      };
+
+      const classificationData = [
+        {
+          x: state.xClass0,
+          y: Array(state.xClass0.length).fill(-1),
+          mode: "markers",
+          type: "scatter",
+          name: "Class 0",
+          marker: { color: "#dc2626", size: 8 }
+        },
+        {
+          x: state.xClass1,
+          y: Array(state.xClass1.length).fill(1),
+          mode: "markers",
+          type: "scatter",
+          name: "Class 1",
+          marker: { color: "#2563eb", size: 8 }
+        },
+        {
+          x: xLine,
+          y: classSignY,
+          mode: "lines",
+          type: "scatter",
+          name: "sign(theta^T x)",
+          line: { color: "#16a34a", width: 3 }
+        },
+        {
+          x: [boundary, boundary],
+          y: [-1.15, 1.15],
+          mode: "lines",
+          type: "scatter",
+          name: "Decision boundary",
+          line: { color: "#7c3aed", width: 2, dash: "dash" }
+        }
+      ];
+
+      const classificationLayout = {
+        title: { text: "Sign Function for Classification", font: { size: 18 } },
+        margin: { l: 60, r: 20, t: 48, b: 48 },
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        xaxis: { title: "x", range: [-6.5, 6.5], gridcolor: "#e2e8f0", zerolinecolor: "#64748b" },
+        yaxis: { title: "Sign(x)", range: [-1.2, 1.2], gridcolor: "#e2e8f0", zerolinecolor: "#64748b", tickvals: [-1, 0, 1] },
+        legend: { x: 0.03, y: 0.97, bgcolor: "rgba(255,255,255,0.9)" }
+      };
+
+      if (!signInitialized) {
+        Plotly.newPlot("signPlot", signData, signLayout, { responsive: true, displayModeBar: false });
+        signInitialized = true;
+      } else {
+        Plotly.react("signPlot", signData, signLayout, { responsive: true, displayModeBar: false });
+      }
+
+      if (!classificationInitialized) {
+        Plotly.newPlot("classificationPlot", classificationData, classificationLayout, { responsive: true, displayModeBar: false });
+        classificationInitialized = true;
+      } else {
+        Plotly.react("classificationPlot", classificationData, classificationLayout, { responsive: true, displayModeBar: false });
+      }
+
+      status.innerHTML =
+        `Current boundary: <code>${format(boundary)}</code>. ` +
+        `Midpoint boundary from the sampled class centers: <code>${format(state.midpoint)}</code>. ` +
+        `Labels are represented as <code>-1</code> and <code>+1</code>, matching the lecture’s sign-function classification setup.`;
+    }
+
+    function regenerateData(preserveBoundary = true) {
+      const mean0 = Number(mean0Range.value);
+      const mean1 = Number(mean1Range.value);
+      const scale = Number(scaleRange.value);
+      state = generateState(mean0, mean1, scale, randomSeed);
+      if (!preserveBoundary) {
+        boundaryRange.value = state.midpoint.toFixed(1);
+      }
+      updatePlots();
+    }
+
+    function resetDemo() {
+      randomSeed = 0;
+      mean0Range.value = "-2";
+      mean1Range.value = "2";
+      scaleRange.value = "1.0";
+      state = generateState(-2, 2, 1.0, randomSeed);
+      boundaryRange.value = state.midpoint.toFixed(1);
+      updatePlots();
+    }
+
+    mean0Range.addEventListener("input", () => regenerateData(true));
+    mean1Range.addEventListener("input", () => regenerateData(true));
+    scaleRange.addEventListener("input", () => regenerateData(true));
+    boundaryRange.addEventListener("input", updatePlots);
+    midpointButton.addEventListener("click", () => {
+      boundaryRange.value = state.midpoint.toFixed(1);
+      updatePlots();
+    });
+    regenerateButton.addEventListener("click", () => {
+      randomSeed += 1;
+      regenerateData(true);
+    });
+    resetButton.addEventListener("click", resetDemo);
+
+    resetDemo();
+  </script>
+</body>
+</html>

@@ -90,7 +90,7 @@
 <li><p>Data Point F: <span class="math inline">\((3.5, 2)\)</span> - Class 1</p></li>
 </ul>
 <p>The new data point to classify is <span class="math inline">\((3, 2.5)\)</span>.</p>
-<p><img alt="image" src="img/lecture2/example1.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<section class="interactive-notebook"><h3>Interactive Notebook: k-NN Example 1</h3><p>Click inside the interactive plot to move the new point. Classification updates automatically.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/knn_example1_interactive.html" style="height:760px;" title="Interactive k-NN Example 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fknn_example1_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The first step is to compute the Euclidean distance between the new point and each existing point.</p>
 <p><strong>Step 1: Calculate Euclidean Distances</strong></p>
 <ul>
@@ -116,7 +116,7 @@
 <li><p>Data Point E: <span class="math inline">\((7.2, 4.7)\)</span> - Class 0 (Outlier)</p></li>
 </ul>
 <p>The new data point to classify is <span class="math inline">\((7.5, 4.5)\)</span>.</p>
-<p><img alt="image" src="img/lecture2/example2.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<section class="interactive-notebook"><h3>Interactive Notebook: k-NN Example 2 (Outlier Sensitivity)</h3><p>Use Manhattan distance, vary k, and toggle the outlier to see how the prediction changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/knn_example2_interactive.html" style="height:780px;" title="Interactive k-NN Example 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fknn_example2_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>After computing Manhattan distances, we can examine how the choice of <span class="math inline">\(k\)</span> affects robustness to the outlier.</p>
 <p>When <span class="math inline">\(k=1\)</span>, the closest point is the outlier (Point E), so the new point is classified as Class 0. However, if we remove the outlier, the nearest neighbor becomes Point D, resulting in a Class 1 prediction.</p>
 <p>If instead we use <span class="math inline">\(k=3\)</span>, the three nearest neighbors include two Class 1 points and one Class 0 point. This leads to a Class 1 prediction, showing how larger values of <span class="math inline">\(k\)</span> can reduce sensitivity to noise.</p>
