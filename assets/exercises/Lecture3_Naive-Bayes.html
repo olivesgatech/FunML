@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p>Assume that you are given the Iris dataset, consisting of flower measurements. Recall that each measurement is comprised of four variables, denoted by <span class="math inline">\([x_1\; x_2\; x_3\; x_4]\)</span>. Here <span class="math inline">\(x_1\)</span> is the sepal length, <span class="math inline">\(x_2\)</span> is the sepal width, <span class="math inline">\(x_3\)</span> is the petal length, and <span class="math inline">\(x_4\)</span> is the petal width. All the measurements are continuous variables in centimeter units. A machine learning model <span class="math inline">\(f(\cdot)\)</span> is trained to estimate <span class="math inline">\(x_4\)</span> given <span class="math inline">\([x_1\; x_2\; x_3]\)</span> as the inputs. Which one of the following tasks does <span class="math inline">\(f(\cdot)\)</span> perform?</p>
+<ol>
+<li><p>Classification</p></li>
+<li><p>Regression</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Regression</p>
+<p><strong>Explanation:</strong><br/>
+The model <span class="math inline">\(f(\cdot)\)</span> is predicting a continuous variable <span class="math inline">\(x_4\)</span> based on other continuous variables <span class="math inline">\([x_1\; x_2\; x_3]\)</span>. Since the output is a real-valued quantity rather than a discrete class label, this is a regression task.</p></li>
+<li><p><strong>Question:</strong><br/>
+You are given a dataset of handwritten digit images. Each image has been labeled with the correct digit (0–9). However, you are asked to develop a system that groups the images based on similarity, without using the provided labels during the training process.</p>
+<p>Which type of learning approach should you use for this task?</p>
+<ol>
+<li><p>Supervised Learning</p></li>
+<li><p>Unsupervised Learning</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Unsupervised Learning</p>
+<p><strong>Explanation:</strong><br/>
+Even though the dataset contains labels, the task explicitly states that the labels should not be used during training. Since the goal is to group similar images together based only on their features, this corresponds to unsupervised learning (specifically clustering).</p></li>
+<li><p>Given the following four points in a 2D space:</p>
+<p><span class="math display">\[P_1 = (1,2), \quad P_2 = (3,4), \quad P_3 = (5,1), \quad P_4 = (7,3)\]</span></p>
+<p>Calculate the <span class="math inline">\(k=2\)</span> nearest neighbors to the new point <span class="math inline">\(P_{\text{new}}=(4,2)\)</span> using the Manhattan distance metric.</p>
+<p><strong>Solution:</strong><br/>
+<span class="math inline">\(P_3\)</span> and one of <span class="math inline">\(\{P_1, P_2\}\)</span></p>
+<p><strong>Explanation:</strong><br/>
+First compute the Manhattan distance between the new point and each existing point:</p>
+<p><span class="math display">\[\text{Distance to } P_1 = |4-1| + |2-2| = 3\]</span></p>
+<p><span class="math display">\[\text{Distance to } P_2 = |4-3| + |2-4| = 1+2 = 3\]</span></p>
+<p><span class="math display">\[\text{Distance to } P_3 = |4-5| + |2-1| = 1+1 = 2\]</span></p>
+<p><span class="math display">\[\text{Distance to } P_4 = |4-7| + |2-3| = 3+1 = 4\]</span></p>
+<p>The closest point is <span class="math inline">\(P_3\)</span> with distance 2. The next closest distance is 3, which is shared by both <span class="math inline">\(P_1\)</span> and <span class="math inline">\(P_2\)</span>. Therefore, the second nearest neighbor is not unique unless a tie-breaking rule is specified. Thus the two nearest neighbors are <span class="math inline">\(P_3\)</span> and either <span class="math inline">\(P_1\)</span> or <span class="math inline">\(P_2\)</span>.</p></li>
+<li><p>Given the following feature values for a dataset (feature 1):</p>
+<p><span class="math display">\[\mathbf{x}_{:,1} = [42, 23, 4, 16, 15, 8]\]</span></p>
+<p>Normalize the data using min–max normalization to scale the feature to the range <span class="math inline">\([0,1]\)</span>. Provide the normalized value for <span class="math inline">\(x_{4,1}=16\)</span>.</p>
+<p><strong>Solution:</strong><br/>
+0.316</p>
+<p><strong>Explanation:</strong><br/>
+First compute the minimum and maximum values:</p>
+<p><span class="math display">\[\min(\mathbf{x}_{:,1}) = 4, \qquad \max(\mathbf{x}_{:,1}) = 42\]</span></p>
+<p>Apply the min–max normalization formula:</p>
+<p><span class="math display">\[x_{4,1}' =
+\frac{x_{4,1}-\min(\mathbf{x}_{:,1})}
+{\max(\mathbf{x}_{:,1})-\min(\mathbf{x}_{:,1})}
+=
+\frac{16-4}{42-4}
+=
+\frac{12}{38}
+\approx 0.316\]</span></p>
+<p>Thus, the normalized value of <span class="math inline">\(x_{4,1}=16\)</span> is approximately 0.316.</p></li>
+<li><p>In a Naïve Bayes classifier, you are given the following prior probabilities and likelihoods for two binary features “free” and “win”:</p>
+<p><span class="math display">\[P(\text{Spam}) = 0.5, \qquad P(\text{Not Spam}) = 0.5\]</span></p>
+<p><span class="math display">\[P(\text{“free”}=1 \mid \text{Spam}) = 0.6, \qquad
+P(\text{“free”}=1 \mid \text{Not Spam}) = 0.3\]</span></p>
+<p><span class="math display">\[P(\text{“win”}=1 \mid \text{Spam}) = 0.7, \qquad
+P(\text{“win”}=1 \mid \text{Not Spam}) = 0.2\]</span></p>
+<p><strong>(i) Calculate the unnormalized Naïve Bayes score for Spam given that the email contains both words.</strong></p>
+<p><strong>Solution:</strong><br/>
+0.21</p>
+<p><strong>Explanation:</strong><br/>
+Using the Naïve Bayes independence assumption:</p>
+<p><span class="math display">\[P(\text{“free”}=1,\text{“win”}=1 \mid \text{Spam})
+=
+0.6 \times 0.7
+=
+0.42.\]</span></p>
+<p>The unnormalized Naïve Bayes score is:</p>
+<p><span class="math display">\[\text{Score}(\text{Spam})
+=
+P(\text{Spam})
+P(\text{“free”}=1 \mid \text{Spam})
+P(\text{“win”}=1 \mid \text{Spam})
+=
+0.5 \times 0.6 \times 0.7
+=
+0.21.\]</span></p>
+<p><strong>(ii) Compute the normalized posterior probability</strong></p>
+<p><span class="math display">\[P(\text{Spam}\mid \text{“free”}=1,\text{“win”}=1).\]</span></p>
+<p><strong>Solution:</strong></p>
+<p><span class="math display">\[P(\text{Spam}\mid x)
+=
+\frac{0.21}{0.21+0.03}
+=
+0.875.\]</span></p>
+<p><strong>Explanation:</strong><br/>
+First compute the unnormalized score for Not Spam:</p>
+<p><span class="math display">\[P(\text{“free”}=1,\text{“win”}=1 \mid \text{Not Spam})
+=
+0.3 \times 0.2
+=
+0.06,\]</span></p>
+<p><span class="math display">\[\text{Score}(\text{Not Spam})
+=
+0.06 \times 0.5
+=
+0.03.\]</span></p>
+<p>Now normalize:</p>
+<p><span class="math display">\[P(\text{Spam}\mid x)
+=
+\frac{\text{Score}(\text{Spam})}
+{\text{Score}(\text{Spam})+\text{Score}(\text{Not Spam})}
+=
+\frac{0.21}{0.24}
+=
+0.875.\]</span></p>
+<p><strong>(iii) Based on your result, classify the email.</strong></p>
+<p><strong>Solution:</strong><br/>
+Spam</p>
+<p><strong>Explanation:</strong><br/>
+Since</p>
+<p><span class="math display">\[P(\text{Spam}\mid x)=0.875
+&gt;
+P(\text{Not Spam}\mid x)=0.125,\]</span></p>
+<p>the classifier predicts the email is <strong>Spam</strong>.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

@@ -1,0 +1,508 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  ECE 2806: AI First (AI Foundations) — Lecture 22
+%  Machine Learning: Transformers
+%  Style modeled after FunML Lecture 18 notes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[11pt]{article}
+
+% ── Geometry ──
+\usepackage[margin=1in]{geometry}
+
+% ── Fonts & Encoding ──
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+
+% ── Math ──
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+
+% ── Graphics & Figures ──
+\usepackage{graphicx}
+\usepackage{float}
+
+% ── Hyperlinks ──
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue,citecolor=blue]{hyperref}
+
+% ── Lists ──
+\usepackage{enumitem}
+
+% ── Boxes (Key Takeaways, Examples) ──
+\usepackage[most]{tcolorbox}
+\newtcolorbox{keytakeaway}{
+  colback=gray!10,
+  colframe=gray!50,
+  title=Key Takeaways,
+  fonttitle=\bfseries
+}
+\newtcolorbox{examplebox}[1][]{
+  colback=blue!5,
+  colframe=blue!40,
+  title={#1},
+  fonttitle=\bfseries
+}
+
+% ── Headers & Footers ──
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Lecture 22: Transformers}
+\rhead{22-\thepage}
+\cfoot{}
+
+% ── Section numbering ──
+\renewcommand{\thesection}{22.\arabic{section}}
+\renewcommand{\thesubsection}{22.\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{22.\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+% ── Title ──
+\title{\vspace{-1.5cm}
+\textbf{ECE 2806 (AI First) AI Foundations} \\[6pt]
+\Large Lecture 22: Machine Learning --- Transformers}
+\author{
+\textbf{Instructor:} Ghassan AlRegib \\[4pt]
+\small Georgia Institute of Technology
+}
+\date{}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\noindent
+\textbf{Disclaimer:} All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib, Georgia Tech.
+
+\vspace{6pt}
+\noindent
+\textbf{License:} These lecture notes are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+% ══════════════════════════════════════════════════════════
+\section{Lecture Objectives}
+% ══════════════════════════════════════════════════════════
+
+This lecture introduces the \textbf{Transformer} architecture, which has become the foundational building block for modern large language models and, more recently, for computer vision systems. We cover the general basics of Transformers, including self-attention, multi-head attention, positional encodings, training regularization, decoding, and the output loss. We then extend the discussion to \textbf{Vision Transformers (ViT)}, which adapt the Transformer encoder to image data.
+
+\medskip
+\noindent\textbf{Outline:}
+\begin{itemize}[nosep]
+  \item General Basics of Transformers
+  \item Basic Blocks: Encoder and Decoder
+  \item Self-Attention Mechanism
+  \item Multi-Head Attention
+  \item Positional Encodings
+  \item Training Regularization (Residual Connections \& Layer Norm)
+  \item Decoding and Output Loss
+  \item Vision Transformers (ViT)
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════
+\section{The Transformer Architecture}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Background and Motivation}
+
+The Transformer was introduced in the seminal paper \emph{``Attention Is All You Need''} by Vaswani et al.\ (2017). The original task motivating the Transformer architecture was \textbf{translation between languages}. Unlike recurrent neural networks (RNNs) and LSTMs, which process sequences one token at a time, Transformers process all tokens simultaneously through an attention mechanism, enabling massive parallelization during training.
+
+\subsection{Encoder--Decoder Structure}
+
+The basic structure of the Transformer consists of \textbf{6 stacks of encoders} with the output connected to \textbf{6 stacks of decoders}.
+
+\subsubsection{Encoder Block}
+
+Each encoder block contains two sub-layers:
+\begin{enumerate}[nosep]
+  \item \textbf{Self-Attention Layer:} The encoder receives an input that flows into a self-attention layer that computes contextual relationships between all positions in the input sequence.
+  \item \textbf{Feed-Forward Neural Network:} The output of the self-attention layer is fed into a position-wise feed-forward neural network (an MLP network) that processes each position independently.
+\end{enumerate}
+
+\subsubsection{Decoder Block}
+
+The decoder block is the same as the encoder block with an \textbf{additional attention layer}. This extra attention layer helps the decoder focus on relevant parts of the input sequence produced by the encoder (this is the \emph{cross-attention} mechanism described in Section~\ref{sec:cross-attention}).
+
+\subsection{Input Representation: Tensors and Embeddings}
+
+Data must first be encoded into a tensor that can be interpreted by a computational model. These tensors can be generated by any embedding algorithm (e.g., word2vec, learned embeddings). The embedding tensors are fed into the bottom encoder layer. Each word flows through its own path in the self-attention layer.
+
+\medskip
+\noindent\textbf{Tensor flow through encoders:}
+\begin{enumerate}[nosep]
+  \item Input vectors are passed into the self-attention layer, which produces new vectors encoding contextual relationships.
+  \item These vectors are passed through the feed-forward neural network to produce another set of vectors.
+  \item The resulting vectors are then passed into the next encoding block.
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════
+\section{Self-Attention}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Motivation}
+
+The goal of all language models is for a model to learn relevant associations between different parts of a sequence. Consider the sentence:
+
+\begin{quote}
+``The animal didn't cross the street because \textbf{it} was too tired.''
+\end{quote}
+
+\noindent What does ``it'' refer to? Attention is about \textbf{learning associations} to better encode dependencies in data. Self-attention allows the model to relate different positions of a single sequence in order to compute a contextual representation of the sequence.
+
+\subsection{Query, Key, and Value Vectors}
+\label{sec:qkv}
+
+For each input vector, the self-attention mechanism creates three vectors:
+\begin{itemize}[nosep]
+  \item \textbf{Query (Q)} --- ``What am I looking for?'' Represents the current word's question about which other words it should attend to.
+  \item \textbf{Key (K)} --- ``What do I contain?'' Represents a word's label or identity, used for matching against queries.
+  \item \textbf{Value (V)} --- ``What information do I carry?'' The actual content that gets passed forward, weighted by the attention scores.
+\end{itemize}
+
+These vectors are computed by multiplying the input embedding by three learned weight matrices:
+\begin{align}
+  Q &= X \cdot W_Q, \qquad K = X \cdot W_K, \qquad V = X \cdot W_V
+\end{align}
+
+\begin{examplebox}[Example: ``The cat sat on the mat'']
+When processing the word ``sat'':
+\begin{itemize}[nosep]
+  \item $Q$(\text{``sat''}) asks: ``Who performed this action?''
+  \item $K$(\text{``cat''}) answers: ``I am a noun/subject.''
+  \item $K$(\text{``mat''}) answers: ``I am a location noun.''
+  \item The $Q \cdot K$ score is highest for ``cat'' $\rightarrow$ strong match!
+  \item $V$(\text{``cat''}) provides the actual semantic features of ``cat'' that get mixed into the new representation of ``sat.''
+\end{itemize}
+\end{examplebox}
+
+\subsection{Why Separate Q, K, and V?}
+
+\textbf{Why not use the same vector for both Q and K?} If $Q = K$, every word's dot product with itself would always dominate, causing the model to mostly attend to itself. Separate projections let the model learn \textbf{asymmetric relationships}: ``verbs look for subjects'' is different from ``subjects look for verbs.''
+
+\medskip
+\noindent\textbf{Key Insight --- Asymmetric Attention:}
+Consider pronoun resolution: ``it'' should strongly attend to ``animal,'' but ``animal'' may not need to attend to ``it.'' Having separate $W_Q$ and $W_K$ matrices gives the model the freedom to learn these directional dependencies:
+\[
+  \text{Attention}(Q_1, K_2) \neq \text{Attention}(Q_2, K_1) \quad \text{in general.}
+\]
+
+\noindent\textbf{Why a Separate Value (V)?} This decouples ``how to match'' ($Q \cdot K$) from ``what to retrieve'' ($V$). The information passed forward may differ from what is used for matching.
+
+\begin{examplebox}[Analogy: Library Search]
+\begin{itemize}[nosep]
+  \item \textbf{Query} = Your search term when you walk into a library: ``I need a book about deep learning.''
+  \item \textbf{Key} = The label on each book's spine: ``Neural Networks,'' ``Cooking,'' ``History,'' etc. You compare your Query against every Key to find the best match.
+  \item \textbf{Value} = The actual content inside the book. Once you find the right book, the Value is the information you take away.
+  \item The label on the spine (Key) is \emph{not} the same as the content inside (Value)!
+\end{itemize}
+\end{examplebox}
+
+\subsection{The Full Attention Formula}
+
+The attention function is defined as:
+\begin{equation}
+  \boxed{\text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{Q \cdot K^\top}{\sqrt{d_k}}\right) \cdot V}
+  \label{eq:attention}
+\end{equation}
+
+\noindent\textbf{Step-by-step breakdown:}
+\begin{enumerate}[nosep]
+  \item \textbf{Project} input $X$ into $Q$, $K$, $V$ using three learned weight matrices.
+  \item \textbf{Compute compatibility scores:} $\text{Score} = Q \cdot K^\top$ (dot product between every query and every key).
+  \item \textbf{Scale} by $\sqrt{d_k}$ to prevent large dot products from pushing softmax into saturated regions where gradients vanish.
+  \item \textbf{Apply softmax} to convert raw scores into attention weights (probabilities that sum to 1).
+  \item \textbf{Multiply} attention weights by $V$ $\rightarrow$ weighted sum of value vectors = contextual representation.
+\end{enumerate}
+
+\noindent\textbf{Summary of roles:}
+\begin{itemize}[nosep]
+  \item $Q \cdot K^\top$ decides \emph{where to look}.
+  \item $V$ decides \emph{what to retrieve}.
+  \item Softmax decides \emph{how much}.
+\end{itemize}
+
+\subsection{Self-Attention Step by Step}
+
+\subsubsection{Step 1: Compute Scores}
+We want to create scores between all pairs of words in the input sequence. This is calculated by taking the dot product (cosine similarity) between every query and key vector. Note that the score should generally be highest for a word with itself.
+
+\subsubsection{Step 2: Scale and Softmax}
+Divide scores by $\sqrt{d_k}$ for dimensionality normalization and pass the result through softmax. This score shows how relevant all other words are to the word at the current position. In machine learning, many operations are designed to enable stable gradient flow.
+
+\subsubsection{Step 3: Weighted Sum of Values}
+Multiply each value vector by the softmax score. Sum up the weighted value vectors. This weighted sum vector is the output of the self-attention layer for a specific word.
+
+\subsubsection{Matrix Perspective}
+In practice, all vectors can be collected at once into a single matrix by multiplying the input by the weight matrices that generate $Q$, $K$, and $V$. This allows for faster and more efficient implementation through matrix operations:
+\[
+  \text{Attention}(Q, K, V) = \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V
+\]
+
+% ══════════════════════════════════════════════════════════
+\section{Multi-Head Attention}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Motivation and Mechanism}
+
+Instead of performing a single attention computation, multi-head attention uses \textbf{many self-attention layers in parallel} and combines all their output vectors. This expands the model's ability to focus on different positions and different types of relationships simultaneously.
+
+Each attention head creates a different \textbf{representation subspace} for the same input sequence. Different attention heads can arrive at different weighting strategies, allowing the model to capture syntactic, semantic, and positional relationships in parallel.
+
+\subsection{Formal Definition}
+
+Given $h$ attention heads, each head $i$ computes:
+\[
+  \text{head}_i = \text{Attention}(Q W_i^Q,\; K W_i^K,\; V W_i^V)
+\]
+where $W_i^Q \in \mathbb{R}^{d_{\text{model}} \times d_k}$, $W_i^K \in \mathbb{R}^{d_{\text{model}} \times d_k}$, and $W_i^V \in \mathbb{R}^{d_{\text{model}} \times d_v}$ are learned projection matrices for head $i$.
+
+The outputs of all heads are concatenated and linearly projected:
+\[
+  \text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\, W^O
+\]
+where $W^O \in \mathbb{R}^{h \cdot d_v \times d_{\text{model}}}$ is a learned output projection matrix.
+
+% ══════════════════════════════════════════════════════════
+\section{Positional Encodings}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Why Positional Information Is Needed}
+
+Unlike RNNs, Transformers process all positions in parallel and have no inherent notion of token order. Therefore, we need to \textbf{add a time/position vector} to every word that provides information about where the vector belongs in a sequence.
+
+\subsection{Design Principles}
+
+There are many different potential ways to encode position. The major requirement is that the embedding vectors of positions closer to each other should be more similar in some defined way.
+
+The original Transformer uses sinusoidal positional encodings:
+\begin{align}
+  PE_{(\text{pos}, 2i)}   &= \sin\!\left(\frac{\text{pos}}{10000^{2i/d_{\text{model}}}}\right) \\[4pt]
+  PE_{(\text{pos}, 2i+1)} &= \cos\!\left(\frac{\text{pos}}{10000^{2i/d_{\text{model}}}}\right)
+\end{align}
+where $\text{pos}$ is the position in the sequence and $i$ is the dimension index. These encodings are added element-wise to the input embeddings before feeding them into the encoder.
+
+% ══════════════════════════════════════════════════════════
+\section{Training Regularization: Residual Connections and Layer Normalization}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Residual Connections}
+
+To ensure stable training, information needs to flow across different layers through \textbf{residual connections} (skip connections). For each sub-layer (self-attention or feed-forward), the output is:
+\[
+  \text{Output} = \text{LayerNorm}(X + \text{SubLayer}(X))
+\]
+This allows gradients to flow directly through the network and mitigates the vanishing gradient problem in deep architectures. Additional normalization layers restrict the range of possible values.
+
+\subsection{Layer Normalization}
+
+\textbf{Batch normalization} is not applicable in sequence modeling since the number of ``words'' processed per batch is unknown during training.
+
+\textbf{Layer normalization} normalizes channel-wise for a batch size of $N=1$ at inference. Similar to batch normalization, it uses learnable parameters $\beta$ and $\gamma$:
+\[
+  \text{LayerNorm}(x) = \gamma \cdot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta
+\]
+
+\noindent\textbf{Advantages over batch normalization:}
+\begin{itemize}[nosep]
+  \item Layer norm can operate with any batch size.
+  \item Batch norm requires storage of running mean and variance during training to be used at inference; layer norm does not.
+\end{itemize}
+
+% ══════════════════════════════════════════════════════════
+\section{Cross-Attention}
+\label{sec:cross-attention}
+% ══════════════════════════════════════════════════════════
+
+\textbf{Self-attention} is used when all the $Q$, $K$, and $V$ come from the same input. When we want to learn how different inputs (e.g., text and image, encoder output and decoder input) are related to each other, we use \textbf{cross-attention}.
+
+In cross-attention, we use the same attention formula (Eq.~\ref{eq:attention}), except:
+\begin{itemize}[nosep]
+  \item The \textbf{Key (K)} and \textbf{Value (V)} come from one source (the encoder output).
+  \item The \textbf{Query (Q)} comes from a different source (the decoder).
+\end{itemize}
+
+\begin{examplebox}[Example: Translation]
+\begin{itemize}[nosep]
+  \item \textbf{Encoder source:} ``Je suis \'etudiant'' (French)
+  \item \textbf{Decoder target:} ``I am a \_'' (English, being generated)
+  \item $K$ and $V$ are derived from the encoder's output for the French sentence.
+  \item $Q$ is derived from the decoder's current state for the English sentence.
+  \item Cross-attention: $\text{softmax}(Q \cdot K^\top / \sqrt{d_k}) \cdot V$
+\end{itemize}
+\end{examplebox}
+
+% ══════════════════════════════════════════════════════════
+\section{Decoding}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Decoder Input}
+
+The output of the top encoder is transformed into attention vectors $K$ and $V$. These vectors are passed into each decoder block via cross-attention. The decoding process is \textbf{autoregressive}:
+\begin{enumerate}[nosep]
+  \item The output of each time step is fed into the bottom decoder at the next time step.
+  \item This process is repeated for each output token.
+  \item Generation continues until an end-of-sequence character is reached.
+\end{enumerate}
+
+\subsection{Final Layer and Softmax}
+
+The output of the decoder stack is passed through a \textbf{linear layer} (a fully connected layer of neurons) that maps the vectors into a probability distribution over the vocabulary:
+\[
+  P(\text{word}_i) = \text{softmax}(W \cdot h + b)
+\]
+where $h$ is the decoder output vector. Each cell in this probability vector can represent words, characters, punctuation, and other defined language constructs.
+
+\subsection{Loss Function for Training}
+
+The Transformer is trained using \textbf{cross-entropy loss} between the predicted probability vector and the ground-truth output vector:
+\[
+  \mathcal{L} = -\sum_{i=1}^{|V|} y_i \log \hat{y}_i
+\]
+where $|V|$ is the vocabulary size, $y_i$ is the one-hot encoded target, and $\hat{y}_i$ is the predicted probability for word $i$.
+
+% ══════════════════════════════════════════════════════════
+\section{Vision Transformers (ViT)}
+% ══════════════════════════════════════════════════════════
+
+Vision Transformers adapt the Transformer architecture for \textbf{image processing as a sequence}. The key idea is to treat image patches as ``words'' and feed them into a standard Transformer encoder. Depending on the application, the output embedding is fed into a classifier like an MLP (for classification) or a decoder (for segmentation or dense prediction).
+
+\subsection{Step 1: Patchify}
+
+Divide the given image into $16 \times 16$ patches. Each patch can be considered as a ``word'' in the sequence. Based on the application, the size of the patches can vary. For an image of size $H \times W$, the number of patches is:
+\[
+  N = \frac{H \times W}{P^2}
+\]
+where $P$ is the patch size (e.g., $P = 16$).
+
+\subsection{Step 2: Linear Projection}
+
+Each patch is flattened into a 1D vector and passed through a set of linear filters (a learned projection):
+\[
+  z_i = x_i^{\text{patch}} \cdot E, \qquad E \in \mathbb{R}^{P^2 \cdot C \times D}
+\]
+where $C$ is the number of channels and $D$ is the embedding dimension.
+
+In theory, the linear projection is a dot product between the input and the learned weights. In practice, it is implemented using \textbf{convolutional filters} to enhance efficiency.
+
+\subsection{Step 3: Position Embeddings}
+
+Position embeddings are learned vectors with the same size as the patch embeddings. They are \textbf{added} to the patch embeddings so the model can distinguish positions:
+\[
+  z_i' = z_i + E_{\text{pos}}^{(i)}
+\]
+
+A special learnable \texttt{[CLS]} token is prepended to the sequence of patch embeddings for classification tasks.
+
+\subsection{Step 4: Self-Attention in ViT}
+
+We apply the same attention function (Eq.~\ref{eq:attention}) to the $Q$, $K$, and $V$ derived from the patch embeddings. The dimensionality in images is much higher because we have $196 + 1$ tokens (for a $224 \times 224$ image with $16 \times 16$ patches, plus the \texttt{[CLS]} token), each of 768 dimensions ($256 \times 3$ channels).
+
+\subsection{Step 5: Classification}
+
+The outputs from the encoder model are passed through an MLP (multi-layer perceptron). The MLP is typically a single fully connected layer followed by a ReLU non-linearity. The \texttt{[CLS]} token's output representation is used as the image-level representation for classification.
+
+% ══════════════════════════════════════════════════════════
+\section{Transformer Encoder Architecture Details}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Architecture Components}
+
+The Transformer encoder block consists of:
+\begin{enumerate}[nosep]
+  \item \textbf{Layer Normalization}
+  \item \textbf{Multi-Head Self-Attention}
+  \item \textbf{Residual Connection}
+  \item \textbf{Layer Normalization}
+  \item \textbf{Feed-Forward Network (MLP)}
+  \item \textbf{Residual Connection}
+\end{enumerate}
+
+These components are repeated $L$ times (residual blocks) to form the full encoder.
+
+\subsection{Comparison: RNNs vs.\ Transformers}
+
+\begin{center}
+\begin{tabular}{p{5.5cm}p{5.5cm}}
+\hline
+\textbf{RNNs} & \textbf{Transformers} \\
+\hline
+Process inputs using $U$ & $Q$ = Query matrix \\
+Perform state updates using $W$ & $K$ = Key matrix \\
+Perform output updates using $V$ & $V$ = Value matrix \\
+All three MLPs are learned & All three projection matrices are learned \\
+Sequential processing & Parallel processing \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Self-Attention in Vision}
+
+The self-attention mechanism captures relationships between input patch embeddings. It computes a weighted sum of all patch embeddings, where the weights are determined by the relevance of each patch to the current one. Multi-head attention employs multiple sets of learnable parameters (attention heads) to capture different types of relationships.
+
+Transformers are trained via \textbf{self-supervision} --- for example, masked image modeling or contrastive learning in the vision domain.
+
+% ══════════════════════════════════════════════════════════
+\section{Summary}
+% ══════════════════════════════════════════════════════════
+
+\begin{keytakeaway}
+\begin{itemize}[nosep]
+  \item The Transformer architecture replaces recurrence with \textbf{self-attention}, enabling parallel processing of entire sequences.
+  \item \textbf{Self-attention} computes contextual representations by learning Query, Key, and Value projections from input embeddings.
+  \item The attention formula $\text{Attention}(Q,K,V) = \text{softmax}(QK^\top / \sqrt{d_k})\,V$ is the core building block.
+  \item \textbf{Multi-head attention} runs multiple attention computations in parallel, capturing different types of relationships.
+  \item \textbf{Positional encodings} inject sequence order information that is otherwise absent in the attention mechanism.
+  \item \textbf{Cross-attention} connects the encoder and decoder, allowing the decoder to focus on relevant parts of the encoder output.
+  \item \textbf{Residual connections and layer normalization} ensure stable gradient flow during training of deep Transformer models.
+  \item The decoder operates \textbf{autoregressively}, generating one token at a time using cross-entropy loss.
+  \item \textbf{Vision Transformers (ViT)} adapt the Transformer encoder to images by splitting them into patches, linearly projecting them, and applying standard self-attention.
+  \item ViT demonstrates that Transformers can match or surpass CNNs on vision tasks when trained on large datasets.
+\end{itemize}
+\end{keytakeaway}
+
+% ══════════════════════════════════════════════════════════
+\section{Q \& A Section}
+% ══════════════════════════════════════════════════════════
+
+\begin{enumerate}
+  \item \textbf{Question:} What problem do Transformers solve compared to RNNs?
+
+  \textbf{Solution:} RNNs process sequences one token at a time, making them inherently sequential and slow to train on long sequences. They also suffer from vanishing gradients over long dependencies. Transformers replace recurrence with self-attention, which processes all positions in parallel and computes direct pairwise relationships between any two tokens regardless of their distance in the sequence.
+
+  \item \textbf{Question:} Why are there separate Query, Key, and Value vectors instead of a single representation?
+
+  \textbf{Solution:} If the same vector were used for both querying and being queried, each token's dot product with itself would dominate, causing the model to mostly attend to itself. Separate $Q$ and $K$ projections allow the model to learn asymmetric relationships (e.g., ``it'' attends to ``animal'' but not necessarily vice versa). A separate $V$ decouples matching from retrieval: the information used for matching need not be the same as the information passed forward.
+
+  \item \textbf{Question:} Why do we scale by $\sqrt{d_k}$ in the attention formula?
+
+  \textbf{Solution:} For large values of $d_k$, the dot products $Q \cdot K^\top$ grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. Dividing by $\sqrt{d_k}$ keeps the variance of the dot products at a manageable scale, ensuring stable gradient flow during training.
+
+  \item \textbf{Question:} What is the difference between self-attention and cross-attention?
+
+  \textbf{Solution:} In self-attention, all three matrices $Q$, $K$, and $V$ are derived from the same input (e.g., the encoder input). In cross-attention, $Q$ comes from one source (e.g., the decoder) while $K$ and $V$ come from another source (e.g., the encoder output). Cross-attention allows the decoder to attend to relevant parts of the encoder's representation.
+
+  \item \textbf{Question:} Why is layer normalization preferred over batch normalization in Transformers?
+
+  \textbf{Solution:} Batch normalization computes statistics across a batch for each feature, which is problematic in sequence modeling because sequence lengths vary. Layer normalization computes statistics across all features for each individual sample, making it independent of batch size and sequence length. It also does not require storing running statistics from training for use at inference.
+
+  \item \textbf{Question:} How does a Vision Transformer differ from a standard Transformer?
+
+  \textbf{Solution:} A Vision Transformer (ViT) adapts the Transformer encoder for image data. Instead of word embeddings, ViT divides an image into fixed-size patches (e.g., $16 \times 16$), flattens each patch, and linearly projects it into an embedding. Position embeddings are added so the model can distinguish spatial locations. The patch embeddings are then processed by a standard Transformer encoder, and the output is used for classification or other downstream tasks.
+
+  \item \textbf{Question:} Why is the Transformer decoder autoregressive?
+
+  \textbf{Solution:} In sequence generation tasks (e.g., translation), each output token depends on all previously generated tokens. The decoder generates tokens one at a time, feeding each prediction back as input for the next step. This autoregressive property ensures that the model can condition on its own prior outputs, which is essential for maintaining coherent and contextually correct sequences.
+
+  \item \textbf{Question:} What role does the \texttt{[CLS]} token play in Vision Transformers?
+
+  \textbf{Solution:} The \texttt{[CLS]} (classification) token is a special learnable embedding prepended to the sequence of patch embeddings. Through self-attention across all Transformer layers, the \texttt{[CLS]} token aggregates information from all patches. Its final output representation serves as the image-level representation, which is then passed to the classification head (MLP) for making predictions.
+\end{enumerate}
+
+% ══════════════════════════════════════════════════════════
+\section{References}
+% ══════════════════════════════════════════════════════════
+
+\begin{itemize}[nosep]
+  \item Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.~N., Kaiser, {\L}., \& Polosukhin, I. (2017). Attention is all you need. \emph{Advances in Neural Information Processing Systems}, 30.
+  \item Alammar, J., \& Grootendorst, M. (2024). \emph{Hands-on Large Language Models: Language Understanding and Generation}. O'Reilly Media, Inc.
+  \item Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J., \& Houlsby, N. (2020). An image is worth 16x16 words: Transformers for image recognition at scale. \emph{arXiv preprint arXiv:2010.11929}.
+  \item Ba, J.~L., Kiros, J.~R., \& Hinton, G.~E. (2016). Layer normalization. \emph{arXiv preprint arXiv:1607.06450}.
+\end{itemize}
+
+\end{document}

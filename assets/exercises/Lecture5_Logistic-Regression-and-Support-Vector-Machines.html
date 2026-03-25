@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p>Consider the two figures below:</p>
+<div class="center">
+<p><img alt="image" src="../../lectures/img/lecture4/qa1-soft-hard.png"/></p>
+</div>
+<p>The left figure shows a dataset with a hard margin SVM classifier, while the right figure shows the same dataset with a soft margin SVM classifier.</p>
+<p>Now, imagine introducing an outlier close to the decision boundary but on the incorrect side of it.</p>
+<div class="center">
+<p><img alt="image" src="../../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
+</div>
+<p>Which classifier will better handle the outlier, and why?</p>
+<ol>
+<li><p>Hard Margin SVM: Because it maximizes the margin, it will automatically adjust the decision boundary to accommodate the outlier, resulting in a better separation of classes.</p></li>
+<li><p>Soft Margin SVM: Because it allows some misclassification, it will tolerate the outlier and not drastically change the decision boundary, leading to a more stable classification.</p></li>
+<li><p>Hard Margin SVM: Because it doesn’t allow misclassification, it will better manage the outlier by pushing it to the correct side of the decision boundary.</p></li>
+<li><p>Soft Margin SVM: Because it uses a nonlinear kernel, it will correctly classify the outlier without affecting the other data points.</p></li>
+</ol>
+<p><strong>Solution:</strong> The correct answer is <strong>B) Soft Margin SVM</strong>.</p>
+<p>The soft margin SVM is designed to allow some misclassification or margin violations, which makes it more robust in the presence of outliers. When an outlier is introduced near the decision boundary but on the incorrect side, the soft margin SVM can tolerate this outlier without significantly altering the decision boundary. This is due to the introduction of slack variables <span class="math inline">\(\xi_i\)</span> in the optimization problem, allowing some points to fall within the margin or even be misclassified: <span class="math display">\[\min_{\mathbf{w}, b, \xi} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{N} \xi_i\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i\]</span> The term <span class="math inline">\(C \sum_{i=1}^{N} \xi_i\)</span> penalizes the slack variables, balancing the margin width and the tolerance for misclassified points. A smaller <span class="math inline">\(C\)</span> allows for a wider margin and more tolerance for outliers, resulting in a more stable model in the presence of noise or misclassified points.</p>
+<p>In contrast, the hard margin SVM does not allow any misclassification, so introducing an outlier forces the SVM to adjust the decision boundary to perfectly classify all points, including the outlier. This can lead to significant changes in the decision boundary, potentially resulting in overfitting and poor generalization.</p>
+<div class="center">
+<p><img alt="image" src="../../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
+</div></li>
+<li><p>For the next few questions, we’ll be looking at the kernel trick. Let’s consider the following dataset:</p>
+<div class="center">
+<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-2d.png"/></p>
+</div>
+<p>Notice that the data is not linearly separable. Now we can either use a nonlinear classifier, or we could introduce nonlinearity into the data input itself. What if we transform the inputs into a higher dimension space, where some of the dimensions introduce nonlinearity? For example,</p>
+<p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
+<div class="center">
+<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
+</div>
+<p>Now we can fit a linear boundary (a plane) to separate the data. Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>
+<p>Given a <span class="math inline">\(d\)</span>-dimensional input, how many possible nonlinear interaction terms can be introduced in the transformation?</p>
+<ol>
+<li><p><span class="math inline">\(2^d\)</span></p></li>
+<li><p><span class="math inline">\(d^2\)</span></p></li>
+<li><p><span class="math inline">\(\binom{d}{2}\)</span></p></li>
+<li><p><span class="math inline">\(d \times (d-1)\)</span></p></li>
+</ol>
+<p><strong>Solution:</strong> The correct answer is <span class="math inline">\(\textbf{a) } 2^d\)</span>.</p>
+<p>A subset-product feature is formed by choosing any subset of the <span class="math inline">\(d\)</span> input dimensions and multiplying the chosen coordinates together. For each dimension, we have two choices: include it or exclude it from the product. Therefore, the total number of possible subset-products is <span class="math inline">\(2^d\)</span> (including the empty subset, which corresponds to the constant feature <span class="math inline">\(1\)</span>). This exponential growth is one reason explicit feature expansion becomes infeasible in high dimensions, and motivates using kernels to compute these inner products implicitly.</p></li>
+<li><p>But do we actually need to compute the transformations? Recall the loss function we derived from the original optimization problem:</p>
+<p><span class="math display">\[L = -\frac{1}{2}\sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j \mathbf{x^T_i} \mathbf{x_j} + \sum_{i=1}^{N} \alpha_i\]</span></p>
+<p>It turns out that if we modify the original optimization problem to:</p>
+<p><span class="math display">\[\min_{\mathbf{w}, b} \quad \frac{1}{2} \|\mathbf{w}\|^2 \\
+\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \phi(\mathbf{x}_i) + b) - 1 \geq 0, \quad \forall i\]</span></p>
+<p>Then the resulting dual problem and corresponding loss function involve the kernel <span class="math inline">\(K(\mathbf{x}_i, \mathbf{x}_j) = \phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j)\)</span>:</p>
+<p><span class="math display">\[L = -\frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j K(\mathbf{x}_i, \mathbf{x}_j) + \sum_{i=1}^{N} \alpha_i\]</span></p>
+<p>So all we care about computing is the kernel <span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j)\)</span>. As an example, what is the kernel corresponding to the following input mapping (<span class="math inline">\(\phi:\mathbb{R}^2\rightarrow\mathbb{R}^6\)</span>)?</p>
+<p><span class="math display">\[\phi(\mathbf{x}) = (x_1^2, \sqrt{2}x_1x_2, x_2^2, \sqrt{2}x_1, \sqrt{2}x_2, 1)\]</span></p>
+<ol>
+<li><p><span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T \mathbf{x}_j)^2\)</span></p></li>
+<li><p><span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T \mathbf{x}_j + 1)^2\)</span></p></li>
+<li><p><span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j) = \sqrt{(\mathbf{x}_i^T \mathbf{x}_j + 1)}\)</span></p></li>
+<li><p><span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T \mathbf{x}_j + 1)\)</span></p></li>
+</ol>
+<p><strong>Solution:</strong> The correct answer is <span class="math inline">\(\textbf{b) } K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T \mathbf{x}_j + 1)^2\)</span>.</p>
+<p>To see why this is true, consider the expansion: <span class="math display">\[\begin{aligned}
+\phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j) &amp;= x_{i1}^2x_{j1}^2 + \sqrt{2}x_{i1}x_{i2}\sqrt{2}x_{j1}x_{j2} + x_{i2}^2x_{j2}^2 + \sqrt{2}x_{i1}\sqrt{2}x_{j1} + \sqrt{2}x_{i2}\sqrt{2}x_{j2} + 1 \\
+&amp;= x_{i1}^2x_{j1}^2 + 2x_{i1}x_{i2}x_{j1}x_{j2} + x_{i2}^2x_{j2}^2 + 2x_{i1}x_{j1} + 2x_{i2}x_{j2} + 1 \\
+&amp;= (x_{i1}x_{j1} + x_{i2}x_{j2} + 1)^2 \\
+&amp;= (\mathbf{x}_i^T \mathbf{x}_j + 1)^2\end{aligned}\]</span></p>
+<p>Notice that <span class="math inline">\(K(\mathbf{x}_i, \mathbf{x}_j)\)</span> is much easier to compute directly than computing the dot product of the transformed vectors separately.</p></li>
+<li><p><strong>(Conceptual)</strong> Logistic Regression and a linear SVM can both produce linear decision boundaries of the form <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=0\)</span>. What is the <em>main difference</em> in what they optimize?</p>
+<ol>
+<li><p>Logistic Regression maximizes the geometric margin; SVM maximizes likelihood.</p></li>
+<li><p>Logistic Regression minimizes cross-entropy (negative log-likelihood); SVM maximizes the margin (equivalently minimizes <span class="math inline">\(\|\mathbf{w}\|\)</span> with margin constraints).</p></li>
+<li><p>Logistic Regression requires kernels; SVM cannot use kernels.</p></li>
+<li><p>Logistic Regression only works for separable data; SVM works for all data.</p></li>
+</ol>
+<p><strong>Solution:</strong> The correct answer is <strong>B)</strong>.</p>
+<p>Logistic Regression fits probabilities by minimizing cross-entropy (negative log-likelihood). Hard/soft-margin SVMs instead choose a separator with a large margin (and with soft margin, trade off violations via <span class="math inline">\(C\)</span>).</p></li>
+<li><p><strong>(Applied)</strong> You are training a linear SVM on a real dataset with a few mislabeled points (label noise). As you increase <span class="math inline">\(C\)</span> from very small to very large, what behavior do you expect, and why?</p>
+<ol>
+<li><p>Increasing <span class="math inline">\(C\)</span> typically increases the margin width and improves robustness to noise.</p></li>
+<li><p>Increasing <span class="math inline">\(C\)</span> typically decreases the margin width and makes the classifier fit the training data more tightly, which can overfit noisy labels.</p></li>
+<li><p>Increasing <span class="math inline">\(C\)</span> has no effect because SVMs ignore misclassified points.</p></li>
+<li><p>Increasing <span class="math inline">\(C\)</span> forces the use of a nonlinear kernel, which always improves generalization.</p></li>
+</ol>
+<p><strong>Solution:</strong> The correct answer is <strong>B)</strong>.</p>
+<p>A larger <span class="math inline">\(C\)</span> penalizes slack variables more, so the optimizer prefers fewer margin violations even if that means a narrower margin and a more complex boundary in feature space. With label noise/outliers, this can reduce robustness and hurt test performance.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

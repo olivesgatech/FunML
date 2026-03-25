@@ -1,0 +1,1439 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage, array}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{algorithmicx}
+\usepackage{tabularx} 
+\usepackage{array} 
+
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{8}{Polynomial Regression}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+% \section{Recap}
+
+% In the previous lecture, we looked at Linear Regression. This model aims to find an estimated y based on the following formula.
+% \[
+%   \mathbf{\hat{y}} = \mathbf{X} \boldsymbol{\hat{\theta}} + \boldsymbol{\epsilon}
+% \]
+
+% This generalized regression form differs from the classic y = mx + c since we need to analyze the $\epsilon$  term as the residual error; it does not represent the associated bias. The goal is to minimize this error. 
+
+% Instead of using a Gradient Descent in order to minimize the residual error, we use the Normal Equation to directly solve this by making assumptions about $\epsilon$. We assume that it is a Gaussian Distribution which gives us a probability density function with $\mu$ and $\sigma^2$. A closed-form solution of the Least Squares Loss Function gives us the Normal Equation. 
+
+\section{Overview}
+
+This lecture extends \textbf{linear regression} to settings where the relationship between inputs and outputs is \textbf{nonlinear}. We will see that many nonlinear models can still be written in a form that is \textbf{linear in the parameters} by introducing a feature mapping $\phi(\cdot)$. In particular, \textbf{polynomial regression} creates nonlinear behavior by expanding the original inputs into polynomial features, while keeping the prediction rule in the simple form $\hat{y}=\boldsymbol{\theta^T}\phi(\boldsymbol{x})$.
+
+The first theme of the lecture is \textbf{high-degree polynomial regression}. We motivate why polynomial features are useful, how they capture curvature and interactions (cross terms) in multi-feature datasets, and why increasing the polynomial degree increases model capacity. We emphasize the core trade-off: higher degree can improve expressiveness, but it also increases the number of features rapidly and can lead to \textbf{overfitting}, where the model fits noise rather than the underlying signal.
+
+The second theme is \textbf{training by gradient descent}. While the Normal Equation provides a closed-form solution for least squares regression, it becomes computationally expensive and numerically fragile as the feature dimension grows (especially after polynomial expansion). This motivates iterative optimization. We review the gradient descent update rule $\boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})$, interpret the learning rate $\alpha$ as a step size, and compare Batch, Stochastic, and Mini-batch gradient descent as practical alternatives with different stability and computational trade-offs. We also preview common optimization considerations, including convergence behavior, learning rate selection, and the role of learning-rate schedules.
+
+The third theme is \textbf{regularization}. Polynomial regression can easily become a high-capacity model, so controlling complexity is essential for good generalization. We introduce regularization as adding a penalty term to the least squares objective, typically written as
+\[
+\min_{\boldsymbol{\theta}}\ 
+\frac{1}{N}\sum_{i=1}^{N}
+\left(\boldsymbol{\theta}^T \boldsymbol{\phi}(\mathbf{x}_i) - y_i\right)^2
++ \lambda\,\Omega(\boldsymbol{\theta}).
+\]
+We discuss how $L_2$ regularization (Ridge) tends to shrink weights smoothly and improve numerical stability, while $L_1$ regularization (Lasso) can encourage sparsity and act as a form of feature selection. Conceptually, regularization shifts the solution toward simpler models, reducing variance and improving test-time performance.
+
+Overall, the lecture proceeds from constructing nonlinear models via polynomial feature maps, to optimizing their parameters efficiently with gradient-based methods, and finally to preventing overfitting through regularization. By the end, you should be able to explain how polynomial regression is built, how it is trained in practice, and why regularization is often necessary when model capacity grows.
+
+\section{Nonlinear Regression}
+
+When the relationship between the input and output variables is not linear, a standard linear regression model is insufficient. Instead, we introduce a nonlinear regression framework through a feature transformation.
+
+Rather than directly using the original feature matrix $\mathbf{X}$, we map each input vector $\mathbf{x}_i$ into a higher-dimensional feature space using a nonlinear transformation $\boldsymbol{\phi}(\mathbf{x}_i)$. The regression model then becomes
+
+\[
+y_i = \boldsymbol{\theta}^T \boldsymbol{\phi}(\mathbf{x}_i)
+\]
+
+Although this model can represent nonlinear relationships in the original input space, it remains \textit{linear in the parameters} $\theta$. This is an extension of the linear model in a transformed feature space, as illustrated in Figure 8.1.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture8/non-linear regression.png}
+    \caption{Linear model in transformed feature space capturing nonlinear relationships}
+\end{figure}
+
+More expressive nonlinear regression models use multiple basis functions:
+
+\[
+y_i = \theta_0 + \theta_1\phi_1(\mathbf{x}_i) + \theta_2\phi_2(\mathbf{x}_i) + \dots + \theta_m\phi_m(\mathbf{x}_i), \quad i = 1,\dots,N
+\]
+
+In matrix form, if we define the transformed design matrix
+
+\[
+\boldsymbol{\Phi} =
+\begin{bmatrix}
+\boldsymbol{\phi}(\mathbf{x}_1)^T \\
+\boldsymbol{\phi}(\mathbf{x}_2)^T \\
+\vdots \\
+\boldsymbol{\phi}(\mathbf{x}_N)^T
+\end{bmatrix}
+\]
+
+then the model becomes
+
+\[
+\boldsymbol{\hat{y}} = \boldsymbol{\Phi} \boldsymbol{\theta}
+\]
+
+This formulation allows us to reuse all tools from linear regression (least squares, gradient descent, regularization) while modeling nonlinear relationships through feature engineering.
+
+\section{Polynomial Regression}
+
+A common and important special case of nonlinear regression is \textbf{polynomial regression}. This method is used when the relationship between the input and output exhibits curvature that cannot be captured by a linear function. Instead of assuming linear dependence on the original feature, we expand the input using polynomial basis functions.
+
+For a single input feature $x$, the feature mapping is defined as
+
+\[
+\boldsymbol{\phi}(\boldsymbol{x_i}) = [1, x_i, x_i^2, x_i^3, \dots, x_i^m]^T
+\]
+
+where $m$ is the degree of the polynomial. The regression model becomes
+
+\[
+\hat{y}_i = \theta_0 + \theta_1 x_i + \theta_2 x_i^2 + \dots + \theta_m x_i^m
+\]
+
+Although the model is nonlinear in the input variable $x$, it remains \textbf{linear in the parameters} $\boldsymbol \theta$, which allows us to use all linear regression optimization techniques.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture8/Nonlinear data generated via quadratic equation and Polynomial regression model prediction fitted to data.png}
+    \caption{Nonlinear data generated from a quadratic function with noise and the fitted polynomial regression curve}
+\end{figure}
+
+In matrix form, the transformed design matrix becomes
+
+\[
+\mathbf{\Phi} =
+\begin{bmatrix}
+1 & x_1 & x_1^2 & \dots & x_1^m \\
+1 & x_2 & x_2^2 & \dots & x_2^m \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & x_N & x_N^2 & \dots & x_N^m
+\end{bmatrix}
+\]
+
+so that
+
+\[
+\hat{\mathbf{y}} = \mathbf{\Phi}\boldsymbol{\theta}
+\]
+
+This framework naturally extends to multiple input features, where polynomial terms also include cross-products such as $x_1 x_2$, $x_1^2 x_2$, etc., leading to higher expressive power but also rapid growth in feature dimensionality.
+
+\subsection{High-Degree Polynomial Regression}
+
+When the input vector has multiple features, polynomial regression extends the feature mapping to include powers and interactions between features. Suppose each data point has $P$ input features,
+
+\[
+\mathbf{x}_i = [x_{i,1}, x_{i,2}, \dots, x_{i,P}]^T.
+\]
+
+A polynomial feature mapping of degree $m$ includes all monomials whose total degree is less than or equal to $m$. For example, with $P = 2$ features and polynomial degree $m = 2$, the model becomes
+
+\[
+y_i = \theta_0 
++ \theta_1 x_{i,1} 
++ \theta_2 x_{i,2} 
++ \theta_3 x_{i,1}^2 
++ \theta_4 x_{i,2}^2 
++ \theta_5 x_{i,1} x_{i,2} 
++ \epsilon_i.
+\]
+
+Here, the term $x_{i,1}x_{i,2}$ represents an interaction between features, allowing the model to capture more complex relationships.
+
+More generally, polynomial regression with multiple features constructs a feature vector
+
+\[
+\phi(\mathbf{x}_i) = 
+[1, x_{i,1}, \dots, x_{i,P}, x_{i,1}^2, x_{i,1}x_{i,2}, \dots, x_{i,P}^m]^T,
+\]
+
+leading again to a linear model in the parameters,
+
+\[
+\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i).
+\]
+
+Stacking all transformed feature vectors produces the polynomial design matrix
+
+\[
+\boldsymbol{\Phi} =
+\begin{bmatrix}
+\phi(\mathbf{x}_1)^T \\
+\phi(\mathbf{x}_2)^T \\
+\vdots \\
+\phi(\mathbf{x}_N)^T
+\end{bmatrix},
+\qquad
+\hat{\mathbf{y}} = \boldsymbol{\Phi}\boldsymbol{\theta}.
+\]
+
+However, the number of features grows rapidly with both $P$ and $m$. The total number of polynomial terms (including interactions) is
+
+\[
+\binom{P + m}{m},
+\]
+
+which can become very large even for moderate $P$ and $m$. For example, a dataset like IRIS with $P=4$ features and degree $m=4$ already produces $70$ polynomial features. This rapid growth increases computational cost and the risk of overfitting, motivating the need for regularization and more efficient optimization methods.
+
+
+% \subsection{Least Squares Cost Function}
+
+% The least squares loss for polynomial regression is
+
+% \[
+% L(\theta) = \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)^2 
+% = \frac{1}{N} \sum_{i=1}^{N} (\theta^T \phi(x_i) - y_i)^2
+% \]
+
+% Here, $L(\theta)$ is the loss function dependent on the model parameters $\theta$. The term $\frac{1}{N}\sum_{i=1}^N$ computes the mean squared error across all $N$ data points. The model prediction is $\hat{y}_i = \theta^T \phi(x_i)$, where $\phi(x_i)$ denotes the nonlinear feature mapping applied to the input. Squaring the residual $(\hat{y}_i - y_i)$ penalizes larger prediction errors more strongly.
+
+\subsection{Least Squares Cost Function}
+
+The least squares loss for polynomial regression is
+
+\[
+L(\boldsymbol{\theta}) 
+= \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)^2 
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2.
+\]
+
+Here, $L(\boldsymbol{\theta})$ is the loss function dependent on the model parameters $\boldsymbol{\theta}$. The term $\frac{1}{N}\sum_{i=1}^N$ computes the mean squared error across all $N$ data points. The model prediction is
+
+\[
+\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i),
+\]
+
+where $\phi(\mathbf{x}_i)$ denotes the nonlinear feature mapping applied to the input. Squaring the residual $(\hat{y}_i - y_i)$ penalizes larger prediction errors more strongly.
+
+In matrix form, the loss can be written compactly as
+
+\[
+L(\boldsymbol{\theta})
+= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.
+\]
+
+
+% \subsection{Finding Optimal Parameters}
+
+% We seek model parameters $\theta$ that minimize the least squares loss
+
+% \[
+% L(\theta) = \frac{1}{N} \sum_{i=1}^{N} (\theta^T \phi(x_i) - y_i)^2
+% \]
+
+% This is an optimization problem over the parameter vector $\theta$. The optimal parameters $\theta^*$ satisfy the first-order optimality condition
+
+% \[
+% \nabla_{\theta} L(\theta) = 0
+% \]
+
+% where $\nabla_{\theta} L(\theta)$ denotes the gradient of the loss function with respect to $\theta$. Solving this condition yields the parameter values that minimize the mean squared error.
+
+
+\subsection{Finding Optimal Parameters}
+
+We seek model parameters $\boldsymbol{\theta}$ that minimize the least squares loss
+
+\[
+L(\boldsymbol{\theta}) 
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2
+= \frac{1}{N}\|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.
+\]
+
+This is an optimization problem over the parameter vector $\boldsymbol{\theta}$.  
+The optimal parameters $\boldsymbol{\theta}^\ast$ satisfy the first-order optimality condition
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}) = 0.
+\]
+
+\paragraph{Gradient of the loss.}
+Taking the gradient of the matrix form gives
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}).
+\]
+
+Setting the gradient equal to zero yields the \textbf{normal equations}
+
+\[
+\boldsymbol{\Phi}^T \boldsymbol{\Phi}\boldsymbol{\theta} 
+= \boldsymbol{\Phi}^T \mathbf{y}.
+\]
+
+\paragraph{Closed-form solution.}
+If $\boldsymbol{\Phi}^T\boldsymbol{\Phi}$ is invertible, the optimal parameters are
+
+\[
+\boxed{
+\boldsymbol{\theta}^\ast
+= (\boldsymbol{\Phi}^T\boldsymbol{\Phi})^{-1}\boldsymbol{\Phi}^T\mathbf{y}
+}
+\]
+
+This provides a closed-form solution for polynomial regression.
+
+
+\subsection{The Normal Equation}
+
+For models that are linear in the parameters (including polynomial regression and other feature-mapped models), the least squares loss admits a closed-form solution. Let $\boldsymbol{\Phi}$ be the design matrix, where each row is $\phi(\mathbf{x}_i)^T$, and let $\mathbf{y}$ be the vector of targets.
+
+The loss function is
+
+\[
+L(\boldsymbol{\theta}) = \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.
+\]
+
+Taking the gradient with respect to $\boldsymbol{\theta}$ and setting it to zero:
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}) = 0.
+\]
+
+Rearranging gives
+
+\[
+\boldsymbol{\Phi}^T \boldsymbol{\Phi}\boldsymbol{\theta}
+= \boldsymbol{\Phi}^T \mathbf{y},
+\]
+
+which leads to the \textbf{Normal Equation}:
+
+\[
+\boldsymbol{\theta}
+= (\boldsymbol{\Phi}^T \boldsymbol{\Phi})^{-1} \boldsymbol{\Phi}^T \mathbf{y}.
+\]
+
+This provides a direct solution without iterative optimization methods such as gradient descent, provided that $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$ is invertible.
+
+\subsection*{Hypothesis Function}
+
+For models that are linear in the parameters, the hypothesis function can be written in matrix form as
+
+\[
+\hat{\mathbf{y}} = \boldsymbol{\Phi}\boldsymbol{\theta}
+\]
+
+where $\boldsymbol{\Phi}$ is the design matrix whose $i$-th row is $\phi(\mathbf{x}_i)^T$, and $\boldsymbol{\theta}$ is the parameter vector. Each prediction is therefore
+
+\[
+\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i).
+\]
+
+This formulation includes linear regression, polynomial regression, and other feature-mapped models.
+
+Linear regression is recovered as a special case when $\phi(\mathbf{x}) = \mathbf{x}$.
+
+\subsection*{Cost Function}
+
+The mean squared error loss is defined as
+
+\[
+L(\boldsymbol{\theta}) 
+= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2
+\]
+
+where $N$ is the number of training examples.
+
+% \subsection*{Normal Equation Derivation}
+
+% To minimize the cost function, we take the derivative of $J(\theta)$ with respect to $\theta$ and set it to zero:
+
+% \[
+% \frac{\partial J(\theta)}{\partial \theta} = 0
+% \]
+
+% This leads to the \textbf{Normal Equation}:
+
+% \[
+% \theta = (X^T X)^{-1} X^T y
+% \]
+
+% \subsection*{Key Points}
+
+% \begin{itemize}
+%     \item $X^T$ is the transpose of the matrix $X$,
+%     \item $(X^T X)^{-1}$ is the inverse of the matrix product $X^T X$,
+%     \item $y$ is the vector of output values (target values).
+% \end{itemize}
+
+% The normal equation provides a closed-form solution for $\theta$, but it requires that $X^T X$ be invertible. This might not always be the case, particularly in scenarios with multicollinearity or when $X$ is not full rank.
+
+
+\subsection{Computational Complexity of the Normal Equation}
+
+The computational cost of solving the Normal Equation is dominated by the linear algebra operations required to form and invert the matrix $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$, where $\boldsymbol{\Phi}$ is the design matrix with $N$ training examples and $P$ features (including any feature mappings such as polynomial terms).
+
+Forming the matrix product $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$ requires $\mathcal{O}(N P^2)$ operations, since each of the $P^2$ entries involves a sum over $N$ training examples. The subsequent matrix inversion of the $P \times P$ matrix $\boldsymbol{\Phi}^T \boldsymbol{\Phi}$ has a computational complexity of $\mathcal{O}(P^3)$. Therefore, the overall computational complexity of computing the Normal Equation solution is
+
+\[
+\mathcal{O}(N P^2 + P^3).
+\]
+
+When the number of features $P$ is small, this cost is manageable, and the Normal Equation provides an efficient direct solution. However, as $P$ increases, the cubic term $\mathcal{O}(P^3)$ quickly becomes the dominant factor. This makes the method computationally expensive for high-dimensional feature spaces, particularly when polynomial feature expansions are used.
+
+The Normal Equation is therefore most appropriate in settings where the number of training examples is much larger than the number of features ($N \gg P$) and the feature dimension remains moderate. In high-dimensional problems, especially those arising from nonlinear feature mappings or large-scale datasets, iterative optimization methods such as gradient descent are preferred, since they avoid explicit matrix inversion and scale more favorably with dimensionality.
+
+\section{Gradient Descent}
+
+\subsection{Overview}
+Gradient descent (GD) methods, including Batch GD, Stochastic GD, and Mini-batch GD, are commonly used for optimization in machine learning tasks. Each method shows different characteristics in terms of convergence behavior.
+
+\subsection{Finding Optimal Parameters (Gradient Descent)}
+
+The Gradient Descent algorithm is used to find model parameters that minimize the loss function. We start from an initial parameter vector $\boldsymbol{\theta}$, which may produce a high loss. By iteratively moving in the direction of the \textbf{negative gradient} of the loss, the parameters are updated to reduce the error.
+
+There exists an optimal set of parameters $\boldsymbol{\theta}^\ast$ that minimizes the loss. Moving the parameters away from this point increases the loss.
+
+In practice, it is almost impossible to achieve zero loss on real data. While prediction accuracy can sometimes reach $100\%$, we do not directly optimize accuracy. Instead, we minimize a continuous loss function measuring the difference between the true targets $\mathbf{y}$ and the predictions $\hat{\mathbf{y}}$. Using a continuous loss produces a smooth, typically convex, optimization landscape that is easier to optimize.
+
+Understanding the idea of a \emph{gradient} is therefore essential. In Figure~8.3, the horizontal axis represents $\theta_1$ in the single-feature case. With multiple features, additional axes correspond to parameters $\theta_i$, producing a bowl-shaped loss surface in higher dimensions.
+
+\begin{figure} [h]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture8/The negative gradient (derivative) .png}
+    \caption{The negative gradient (derivative)
+            points to the direction of the
+            greatest rate of decrease of the
+            cost function. Its magnitude is the
+            slope of the function in that
+            direction}
+    \label{fig:enter-label}
+\end{figure}
+The gradient is a tangent. We assume the shape and choose to travel along this gradient to pick our next point. Every path to the next point is a straight line. When we see a graph we visualize a continuous distribution, however, in a more practical setting, we move a certain distance in a straight line and the directionality of this point is given by the gradient. The learning rate is what gives you the distance you travel. Think of this as a vector with a scalar given by the learning rate and the direction given by the gradient. 
+
+The algorithm is called a Gradient Descent since we are moving in the direction of descending toward the minimum of the loss function. By definition, a gradient is in the direction of steepest \textit{ascent}. Hence, we use the negative of the gradient to indicate that we'd like to \textit{descend} the loss surface.
+
+\subsection{Gradients of the Least Squares Loss Function}
+
+For models that are linear in the parameters with feature mapping $\phi(\mathbf{x})$, the mean squared error loss is
+
+\[
+L(\boldsymbol{\theta})
+= \frac{1}{N} \sum_{i=1}^{N} \big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)^2
+= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2
+\]
+
+where $\boldsymbol{\Phi}$ is the design matrix whose $i$-th row is $\phi(\mathbf{x}_i)^T$.
+
+\subsubsection*{Gradient (Component Form)}
+
+The derivative with respect to parameter $\theta_p$ is
+
+\[
+\frac{\partial L(\boldsymbol{\theta})}{\partial \theta_p}
+=
+\frac{2}{N} \sum_{i=1}^{N}
+\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)\,\phi_p(\mathbf{x}_i)
+\]
+
+where $\phi_p(\mathbf{x}_i)$ is the $p$-th feature in the transformed vector $\phi(\mathbf{x}_i)$.
+
+\subsubsection*{Gradient (Matrix Form)}
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+=
+\frac{2}{N}\,\boldsymbol{\Phi}^T (\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y})
+\]
+
+This is the form typically used in implementations.
+
+\subsubsection*{Gradient Descent Update Rule}
+
+\[
+\boldsymbol{\theta}^{(t+1)} 
+= \boldsymbol{\theta}^{(t)} 
+- \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})
+\]
+
+where $\alpha$ is the learning rate and $t$ is the iteration index.
+
+\subsubsection*{Large-Scale Training Considerations}
+
+When the number of training examples $N$ is large, computing the full gradient 
+$\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y})$ at every step becomes computationally expensive. Instead, approximate gradients are used.
+
+Batch Gradient Descent computes the gradient using the entire dataset at each iteration. This approach is accurate but slow when $N$ is large.
+
+Stochastic Gradient Descent (SGD) updates parameters using a single randomly chosen training example at each step. This method is computationally cheap but introduces noise into the updates.
+
+Mini-batch Gradient Descent uses small subsets of the training data at each step. It balances stability and efficiency and is the most common approach in practice.
+
+Training proceeds iteratively until parameter updates become small or the loss stops decreasing.
+
+
+\subsection{Aside: Contour Plots}
+
+Before exploring the behavior of different Gradient Descent (GD) methods, we introduce the notion of \textit{contour plots}. We consider an optimization setting where we aim to minimize a cost function \( L(\boldsymbol{\theta}) \) over two parameters, \(\theta_0\) and \(\theta_1\). This produces a \textit{loss landscape} over the parameter space, which GD navigates in order to find a minimum.
+
+Although we could visualize this optimization process using a 3D surface plot, it is often difficult to extract key insights from a static 3D view. Important features may be hidden depending on the viewing angle, making interpretation challenging.
+
+As an example, consider the following loss landscape:
+
+\begin{center}
+    \includegraphics[scale=0.5]{img/lecture8/loss-landscape.png}
+\end{center}
+
+Instead, we use a contour plot to represent the same loss landscape in 2D. In a contour plot, each \textit{contour line} represents points where the cost function \( L(\boldsymbol{\theta}) \) has the same value. Moving along a contour line does not change the value of the cost function.
+
+The goal of optimization is to find the minimum of the cost function, which corresponds to the lowest point on the surface. On a contour plot, this minimum is typically located at the center of the innermost contour. The trajectory traced by Gradient Descent on a contour plot shows how the parameters are updated step by step as we move toward this minimum.
+
+\paragraph{Steps to Create a Contour Plot}
+
+To construct a contour plot for a given cost function:
+
+\begin{enumerate}
+    \item Define a grid of values for \( \theta_0 \) and \( \theta_1 \).
+    \item Compute the value of the cost function at each grid point.
+    \item Plot contour lines corresponding to different \textit{levels} (constant values) of the cost function.
+    \item Overlay the path taken by a GD algorithm to visualize how it traverses the contours toward the minimum.
+\end{enumerate}
+
+For our example:
+
+\begin{center}
+    \includegraphics[scale=0.5]{img/lecture8/contour-plot.png}
+\end{center}
+
+\paragraph{What Contour Plots Reveal}
+
+From a contour plot, we can infer several important properties of the loss landscape:
+
+\begin{itemize}
+    \item \textbf{Curvature and gradient magnitude:} Closely spaced contours indicate a steep region (large gradient magnitude), while widely spaced contours indicate a flatter region (small gradient magnitude).
+    
+    \item \textbf{Optimization efficiency:} The paths taken by different GD variants show how efficiently each method reduces the cost.
+    
+    \item \textbf{Learning rate effects:} A learning rate that is too large can cause overshooting across contours, while one that is too small leads to slow progress. Contour plots help visualize these different behaviors.
+\end{itemize}
+
+\paragraph{Higher Dimensions}
+
+In higher-dimensional settings (more than two parameters), direct visualization becomes difficult. Common strategies include visualizing 2D slices of the parameter space, or using color/time to encode additional dimensions. The choice of visualization depends on the problem.
+
+\subsection{Batch Gradient Descent}
+
+In \textbf{Batch Gradient Descent}, the gradient of the loss function is computed using the \textit{entire training dataset} at every iteration. For the Mean Squared Error (MSE) loss, this means we evaluate
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}) 
+= \frac{2}{N} \mathbf{X}^T (\mathbf{X}\boldsymbol{\theta} - \mathbf{y})
+\]
+
+using all $N$ training examples before updating the parameters.
+
+The update rule is
+
+\[
+\boldsymbol{\theta}^{(t+1)} 
+= \boldsymbol{\theta}^{(t)} 
+- \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+\]
+
+where $\alpha$ is the learning rate. Because each update uses the full dataset, the direction of descent is accurate, leading to \textbf{smooth and stable convergence}. The loss surface often appears bowl-shaped for convex problems, and the algorithm steadily moves toward the minimum.
+
+However, the drawback is computational cost. Each step requires processing all $N$ samples, which becomes very expensive when $N$ is large. Therefore, Batch Gradient Descent is best suited for \textbf{small to medium-sized datasets} where stability is more important than speed.
+
+\begin{algorithm}[H]
+\caption{Batch Gradient Descent (MSE)}
+\begin{algorithmic}[1]
+\Require Training data $\{(x_i,y_i)\}_{i=1}^N$, feature map $\phi(\cdot)$, learning rate $\alpha$, epochs $E$
+\State Initialize $\boldsymbol{\theta} \leftarrow 0$ (or small random values)
+\For{$e=1$ to $E$}
+    \State $\mathbf{g} \leftarrow \frac{2}{N}\sum_{i=1}^{N}\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)$
+    \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \mathbf{g}$
+\EndFor
+\State \Return $\boldsymbol{\theta}$
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture8/Convergence path of Batch GD.png}
+    \caption{Convergence path of Batch Gradient Descent}
+\end{figure}
+
+
+
+\subsection{Stochastic Gradient Descent (SGD)}
+
+In \textbf{Stochastic Gradient Descent (SGD)}, the model parameters are updated using \textit{only one training example at a time}. Instead of computing the gradient over the entire dataset, we approximate it using a single randomly selected sample $(x_i, y_i)$:
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+\approx
+2\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)\phi(\mathbf{x}_i)
+\]
+
+The update becomes
+
+\[
+\boldsymbol{\theta}^{(t+1)} =
+\boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})
+\]
+
+Since each update is extremely fast, SGD can process very large datasets efficiently. However, because the gradient is based on only one sample, the updates are noisy. As a result, the convergence path is more erratic and may oscillate around the minimum rather than settling smoothly.
+
+Despite the noise, this randomness can help the algorithm escape shallow local minima and can act as a form of \textbf{implicit regularization}, often improving generalization performance. SGD is especially useful when:
+
+\begin{itemize}
+    \item The dataset is very large,
+    \item The loss function is non-convex,
+    \item Fast, online updates are required.
+\end{itemize}
+
+
+\begin{algorithm}[H]
+\caption{Stochastic Gradient Descent (MSE)}
+\begin{algorithmic}[1]
+\Require Training data $\{(x_i,y_i)\}_{i=1}^N$, feature map $\phi(\cdot)$, learning rate $\alpha$, epochs $E$
+\State Initialize $\boldsymbol{\theta} \leftarrow 0$ (or small random values)
+\For{$e=1$ to $E$}
+    \For{$i=1$ to $N$ (random order)}
+        \State $\mathbf{g} \leftarrow 2\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)$
+        \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \mathbf{g}$
+    \EndFor
+\EndFor
+\State \Return $\boldsymbol{\theta}$
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture8/Convergence path of Stochastic GD.png}
+    \caption{Convergence path of Stochastic Gradient Descent}
+\end{figure}
+
+
+\subsection{Mini-batch Gradient Descent}
+
+\textbf{Mini-batch Gradient Descent} combines ideas from Batch and Stochastic Gradient Descent. Instead of using all $N$ samples or just one sample, we use a small subset (mini-batch) of size $b$.
+
+Let $\Phi_b$ be the design matrix formed from the mini-batch and $\mathbf{y}_b$ the corresponding targets. The gradient approximation becomes
+
+\[
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+=
+\frac{2}{b}\,\Phi_b^T(\Phi_b\boldsymbol{\theta}-\mathbf{y}_b)
+\]
+
+The update rule remains
+
+\[
+\boldsymbol{\theta}^{(t+1)}
+=
+\boldsymbol{\theta}^{(t)}-\alpha\nabla_{\boldsymbol{\theta}}L(\boldsymbol{\theta})
+\]
+
+This approach provides a balance:
+
+\begin{itemize}
+    \item More stable convergence than SGD,
+    \item Faster updates than Batch GD,
+    \item Efficient use of vectorized operations and parallel hardware (GPUs).
+\end{itemize}
+
+Each epoch processes $N/b$ mini-batches, allowing the model to explore the loss surface while maintaining computational efficiency. Mini-batch Gradient Descent is the \textbf{standard method used in modern machine learning and deep learning systems}.
+
+\begin{algorithm}[H]
+\caption{Mini-batch Gradient Descent (MSE)}
+\begin{algorithmic}[1]
+\Require Training data $\{(x_i,y_i)\}_{i=1}^N$, feature map $\phi(\cdot)$, learning rate $\alpha$, epochs $E$, batch size $b$
+\State Initialize $\boldsymbol{\theta} \leftarrow 0$ (or small random values)
+\For{$e=1$ to $E$}
+    \State Shuffle training data
+    \For{each mini-batch $\mathcal{B}$ of size $b$}
+        \State Construct $\Phi_b$ and $\mathbf{y}_b$ from $\mathcal{B}$
+        \State $\mathbf{g} \leftarrow \frac{2}{b}\,\Phi_b^T(\Phi_b\boldsymbol{\theta}-\mathbf{y}_b)$
+        \State $\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\alpha\mathbf{g}$
+    \EndFor
+\EndFor
+\State \Return $\boldsymbol{\theta}$
+\end{algorithmic}
+\end{algorithm}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture8/Convergence path of mini-batch GD.png}
+    \caption{Convergence path of Mini-batch Gradient Descent}
+\end{figure}
+
+
+\subsection{Performance Comparisons}
+
+Let \(N\) be the number of training instances and \(P\) be the number of features. The performance, memory requirements, and whether normalization is required are compared among methods mentioned previously.
+
+\begin{table}[htbp]
+\centering
+\scriptsize
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|
+                              >{\centering\arraybackslash}X|
+                              >{\centering\arraybackslash}X|
+                              >{\centering\arraybackslash}X|
+                              >{\centering\arraybackslash}X|}
+\hline
+\textbf{Algorithm} &
+\textbf{Performance with Large $N$} &
+\textbf{Memory Space Requirements} &
+\textbf{Performance with Large $P$} &
+\textbf{Normalization Required?} \\
+\hline
+Normal Equation & Fast & High & Slow & No \\
+Batch GD & Slow & High & Fast & Yes \\
+Stochastic GD & Fast & Minimum & Fast & Yes \\
+Mini-batch GD & Fast & Relative to batch size & Fast & Yes \\
+\hline
+\end{tabularx}
+\caption{Comparison of Gradient Descent Methods}
+\end{table}
+
+
+Stochastic and Mini-batch GD perform fastest with large datasets due to incremental updates, while Normal Equation and Batch GD use more memory. The Normal Equation is slower when \(P\) is large because of matrix inversion. Gradient Descent methods require normalization for faster convergence, but the Normal Equation does not.
+
+
+\subsection{Epoch vs Iteration}
+
+In training algorithms such as Gradient Descent, two commonly used terms are \textbf{epoch} and \textbf{iteration}. Although they are related, they describe different aspects of the learning process.
+
+\textbf{Epoch:}  
+An epoch refers to one complete pass through the \textit{entire training dataset}. During one epoch, every training example has been used once for updating the model (either individually or as part of a batch).
+
+\textbf{Iteration:}  
+An iteration refers to a \textit{single parameter update step}. The number of samples used in an iteration depends on the type of Gradient Descent being used.
+
+The relationship between epochs and iterations depends on whether Batch, Stochastic, or Mini-batch Gradient Descent is used.
+
+\begin{table}[H]
+    \centering
+    \renewcommand{\arraystretch}{2}
+    \begin{tabular}{|>{\centering\arraybackslash}m{2.7cm}|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{4cm}|>{\centering\arraybackslash}m{4cm}|}
+        \hline
+        & \textbf{Batch GD} & \textbf{Stochastic GD} & \textbf{Mini-batch GD} \\
+        \hline
+        \textbf{In one iteration:} &
+        The gradient is computed using the entire dataset and one update step is performed. &
+        One randomly selected training sample is used to compute the gradient and update the parameters. &
+        A small subset (mini-batch) of size \( b \) is used to compute the gradient and update the parameters. \\
+        \hline
+        \textbf{An epoch completes:} &
+        After 1 iteration (since the full dataset is used each time). &
+        After \( N \) iterations (when all \( N \) samples have been used once on average). &
+        After \( \frac{N}{b} \) iterations (when all mini-batches have been processed). \\
+        \hline
+    \end{tabular}
+    \caption{Relationship between Epochs and Iterations for different Gradient Descent methods}
+\end{table}
+
+\subsection{Convergence}
+
+Although Batch Gradient Descent (Batch GD), Stochastic Gradient Descent (SGD), and Mini-batch Gradient Descent differ in how they compute updates, they all aim to minimize the same loss function and typically move toward the same region of the parameter space. In practice, all three methods tend to end up \emph{near} the minimum of the loss surface, meaning they reach a neighborhood where the loss is low and further improvements become small.
+
+However, their trajectories near the minimum look quite different. Batch GD computes the gradient using the \emph{entire} training set at every step, so each update direction closely matches the true steepest descent direction. As a result, Batch GD usually follows a smooth, stable path and can settle at the minimum (or extremely close to it), with little to no oscillation once it arrives. The trade-off is that each step is computationally expensive: evaluating the full gradient requires processing all $N$ training examples, so Batch GD can be slow when the dataset is large.
+
+In contrast, SGD and Mini-batch GD use \emph{approximate} gradients computed from one example (SGD) or a small batch (Mini-batch). This makes each update much cheaper and often allows faster progress early in training, especially for large datasets. The downside is that these gradient estimates contain noise, so the updates do not perfectly align with the true steepest descent direction. Consequently, instead of stopping cleanly at the minimum, SGD and Mini-batch GD typically continue to fluctuate or “jitter” around it. Importantly, this does not mean they fail to converge; with an appropriate learning rate schedule (for example, gradually decreasing the learning rate over time), the step sizes shrink, the oscillations become smaller, and both SGD and Mini-batch GD can converge to the minimum or very close to it.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P1.png}
+    \caption{Visualization of Batch, Stochastic, and Mini-batch Gradient Descent convergence.}
+    \label{fig:P1.png}
+\end{figure}
+
+Convergence in Gradient Descent refers to the point at which further parameter updates produce negligible improvement in the objective function. In theory, one might say training stops when the loss becomes zero. In practice, this almost never occurs, especially in noisy or high-dimensional datasets.
+
+Instead, convergence is defined using a stopping criterion. A common approach is to monitor the magnitude of the gradient. When the gradient becomes sufficiently small,
+
+\[
+\|\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})\| < \epsilon,
+\]
+
+we stop the optimization. The threshold $\epsilon$ is called the \textbf{tolerance}. It determines how close we require the solution to be to a stationary point.
+
+In machine learning, finding the exact minimizer of the training loss is not always desirable. Over-optimizing on the training data can reduce generalization performance. Therefore, stopping once the improvement becomes small often leads to better performance on unseen data (early stopping acts as a form of regularization).
+
+The behavior of convergence differs across Gradient Descent variants:
+
+Batch Gradient Descent follows the true gradient of the loss surface and, for convex problems, converges smoothly toward the minimum.
+
+Stochastic Gradient Descent (SGD) and Mini-batch Gradient Descent introduce noise into the gradient estimate. As a result, instead of settling exactly at the minimum, they typically oscillate around it. Learning rate schedules (decaying the learning rate over time) help reduce this oscillation and improve convergence.
+
+The learning rate $\alpha$ plays a critical role in convergence:
+
+\begin{itemize}
+\item If $\alpha$ is too small, updates are tiny and convergence is very slow.
+\item If $\alpha$ is too large, the algorithm may overshoot the minimum, causing divergence or oscillation.
+\end{itemize}
+
+A properly chosen learning rate allows the algorithm to reach a neighborhood of the minimum efficiently.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\linewidth]{img/lecture8/Convergence (All).png}
+    \caption{Different Gradient Descent methods converge toward the minimum but exhibit different trajectories}
+\end{figure}
+
+\subsection{Pitfalls}
+
+Gradient Descent methods work well in many settings, but several practical challenges can affect convergence and solution quality.
+
+First, the shape of the loss surface plays an important role. For linear regression, the loss is convex and contains a single global minimum. However, in many modern machine learning models (especially neural networks), the loss is non-convex and contains multiple local minima and saddle points. Depending on initialization, the algorithm may converge to different solutions.
+
+Second, optimization dynamics influence behavior. Batch Gradient Descent follows the exact gradient and can become trapped near flat regions or saddle points. Stochastic and Mini-batch Gradient Descent introduce noise into the updates, which can help the algorithm move away from saddle points and explore the loss surface more effectively. However, this noise also makes convergence more erratic.
+
+Third, the learning rate is critical. A very small learning rate leads to extremely slow convergence, while a very large learning rate can cause divergence or oscillations. Choosing an appropriate learning rate (or using adaptive learning rate methods) is essential.
+
+Another common issue is poor feature scaling. If features have very different magnitudes, the loss surface becomes elongated, causing Gradient Descent to zig-zag and converge slowly. Normalization or standardization significantly improves convergence.
+
+Finally, numerical issues can arise when features are highly correlated, making the problem ill-conditioned. This leads to unstable updates and slow progress.
+
+Understanding these pitfalls helps in selecting the right optimization strategy and preprocessing steps for reliable training. \\
+
+\subsection{Learning Rate Schedulers}
+
+Previously, we've emphasized the critical role of selecting a good learning rate in the success of Gradient Descent. The learning rate controls how large the step is that we take in the direction of the negative gradient. If the learning rate is too small, gradient descent may converge too slowly, while a large learning rate may cause the algorithm to overshoot the minimum or oscillate around it, potentially never converging.
+
+Hence, in practice, using a fixed learning rate may not always be the best approach. The optimal learning rate can vary over the course of the optimization process. Early in training, larger learning rates encourage exploration of the loss surface, while later smaller learning rates allow fine-grained convergence near minima. For this reason we rely on \textit{learning rate schedulers}, which are strategies for generating dynamic learning rates. The following are some standard learning rate schedulers:
+
+\paragraph{1. Linear Decay:}
+In Linear Decay, the learning rate decreases by a fixed amount at each iteration:
+\[
+\alpha(t) = \alpha_0 - \eta \cdot t
+\]
+where \( \alpha_0 \) is the initial learning rate, and \( \eta \) is the decay rate (e.g., \( 0.01 \)). The learning rate decreases linearly with each iteration, making it a simple approach for controlling the learning rate. In practice, linear decay is often clipped to a minimum value to prevent the learning rate from becoming negative.
+
+\paragraph{2. Step Decay:}
+In Step Decay, the learning rate decreases by a fixed factor at specific intervals, which are usually predefined based on the number of epochs or iterations. The learning rate remains constant for a certain number of iterations, and then suddenly drops:
+\[
+\alpha(t) = \alpha_0 \cdot \gamma^{\left\lfloor \frac{t}{T} \right\rfloor}
+\]
+where \( \alpha_0 \) is the initial learning rate, \( \gamma \) is the decay factor (e.g. $0.5$), and \( T \) is the number of iterations between each step (e.g. $10$). This scheduler is simple to implement and provides sudden reductions in learning rate, which can be helpful for escaping plateaus in the loss landscape.
+
+\paragraph{3. Exponential Decay:}
+In Exponential Decay, the learning rate decreases at every iteration according to an exponential function:
+\[
+\alpha(t) = \alpha_0 \cdot e^{-\lambda t}
+\]
+where \( \alpha_0 \) is the initial learning rate and \( \lambda \) is the decay rate (e.g., \( 0.01 \)), controlling how quickly the learning rate decreases. This scheduler provides a smooth and continuous reduction in the learning rate over time, making it a common choice when steady convergence is preferred.
+
+\paragraph{4. Cosine Annealing:}
+In Cosine Annealing, the learning rate follows a cosine curve over time:
+\[
+\alpha(t) = \frac{\alpha_0}{2} \left(1 + \cos\left(\frac{t \pi}{T}\right)\right)
+\]
+where \( \alpha_0 \) is the initial learning rate and \( T \) is the total number of iterations. Cosine Annealing gradually reduces the learning rate in a cosine pattern, allowing for larger learning rates early in the optimization and smaller rates as convergence approaches. The cosine schedule can also be extended with restarts to allow for periodic exploration, which can help the optimizer escape shallow local minima, saddle points, or flat plateaus, or be reformulated to allow for a nonzero minimum learning rate.
+
+% \section{Second-Order Optimization: Newton's Method}
+
+% \subsection{Jacobian and Hessian Matrices}
+
+% The Jacobian matrix is a matrix composed of first-order partial derivatives of a multivariable function. It describes how a function changes with respect to each variable and is commonly used in optimization and nonlinear systems. The Hessian matrix extends this idea by collecting second-order partial derivatives. It is an \( n \times n \) square matrix that captures the curvature of a function and plays a central role in second-order optimization methods.
+
+% For example, consider the function \( f(x,y) = x^2y + y^2x \). The Hessian matrix for this function is
+% \[
+% H_f(x,y)=
+% \begin{pmatrix}
+% 2y & 2x+2y\\
+% 2x+2y & 2x
+% \end{pmatrix}.
+% \]
+
+% \subsection{Optimization}
+
+% Second-order optimization methods use curvature information to guide the search for a minimum. While first-order methods such as Gradient Descent rely only on the slope of the loss surface, second-order methods additionally use the Hessian matrix to capture how the surface bends. This curvature information allows the optimizer to take more informed steps toward the minimum.
+
+% When the Hessian matrix is positive semi-definite,
+% \[
+% \Delta\theta^T H(\theta)\Delta\theta \ge 0 \quad \text{for any } \Delta\theta,
+% \]
+% the loss surface locally behaves like a convex parabola. In this setting, curvature information can be used to construct a more accurate local model of the loss function.
+
+% Using a second-order Taylor approximation, the loss near a point \( \theta \) can be written as
+% \[
+% L(\theta+\Delta\theta)\approx L(\theta)+\Delta\theta^T\nabla_\theta L(\theta)+\frac{1}{2}\Delta\theta^T H(\theta)\Delta\theta.
+% \]
+% To find the minimum of this quadratic approximation, we set the derivative with respect to \( \Delta\theta \) equal to zero:
+% \[
+% \nabla_\theta L(\theta)+H(\theta)\Delta\theta=0,
+% \]
+% which yields the optimal update direction
+% \[
+% \Delta\theta = -(H(\theta))^{-1}\nabla_\theta L(\theta).
+% \]
+
+% Substituting this update into the iterative optimization framework leads to the Newton’s Method update rule
+% \[
+% \theta^{t+1}=\theta^t-\alpha (H(\theta))^{-1}\nabla_\theta L(\theta).
+% \]
+
+% For comparison, standard Gradient Descent uses only first-order information:
+% \[
+% \theta^{t+1}=\theta^t-\alpha \nabla_\theta L(\theta^t).
+% \]
+
+% A matrix is positive semi-definite when it is symmetric and has non-negative eigenvalues, which guarantees locally convex curvature and enables reliable descent toward a minimum.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P2.png}
+%     \caption{Visualization of the function with respect to parameters \(w_1\) and \(w_2\) (quadratic function in blue)}
+%     \label{fig:P2.png}
+% \end{figure}
+
+
+
+% \subsection{Convexity}
+
+% In optimization, the concept of convexity plays a crucial role in determining how easily we can find the global minimum of a function. A function \( f(\theta) \) is said to be \textit{convex} if, for any two points \( \theta_1 \) and \( \theta_2 \) within its domain, the line segment connecting \( f(\theta_1) \) and \( f(\theta_2) \) lies above or on the graph of the function itself. Formally, for any \( \theta_1, \theta_2 \in \mathrm{dom}(f) \) and \( \lambda \in [0,1] \):
+% \[
+% f(\lambda \theta_1 + (1-\lambda) \theta_2) \leq \lambda f(\theta_1) + (1-\lambda) f(\theta_2).
+% \]
+
+% This property guarantees that the function has a single global minimum and no other local minima, making optimization significantly easier.
+
+% For twice-differentiable functions, convexity can be checked using the Hessian matrix. A function is convex if its Hessian is positive semi-definite everywhere:
+% \[
+% H(\theta) \succeq 0.
+% \]
+% This means the loss surface curves upward in every direction, forming a bowl-shaped landscape that guides optimization algorithms toward the global minimum.
+
+% In contrast, \textit{non-convex} functions do not satisfy the convexity condition. The line segment between two points may lie below the function curve, producing multiple local minima and maxima. In these cases, optimization algorithms such as gradient descent may become trapped in local minima and fail to reach the global solution.
+
+
+% \subsection{Convergence}
+
+% Newton's method is particularly powerful for minimizing \textit{convex} functions. Because it incorporates curvature information through the Hessian, it produces a quadratic approximation of the loss surface at every step. This allows the algorithm to move directly toward the minimum rather than following the slower zig-zag path typical of gradient descent.
+
+% Near the optimum, Newton’s method exhibits \textbf{quadratic convergence}, meaning the error decreases extremely rapidly once the algorithm is close to the minimum. In contrast, gradient descent typically achieves only \textbf{linear convergence}, requiring many more iterations to reach a similar level of accuracy.
+
+% However, Newton's method becomes less reliable for \textit{non-convex} functions. When the Hessian is not positive semi-definite, the quadratic approximation may point toward a saddle point or even a local maximum. As illustrated in the figures, the method may converge to an undesirable local minimum, move toward a local maximum, or oscillate between regions due to incorrect curvature information. 
+
+% For this reason, Newton’s method is most effective when the loss function is convex or when the optimization has already reached a region close to a local minimum.
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P3.png}
+%     \caption{Newton's Method Convergence: Convex Functions}
+%     \label{fig:P3.png}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P4.png}
+%     \caption{Newton's Method Convergence: Non-Convex Functions}
+%     \label{fig:P4.png}
+% \end{figure}
+
+
+% \subsection{Computational Complexity}
+
+% Although Newton’s method can converge in fewer iterations than first-order methods, it is significantly more expensive per iteration. The main challenge is the Hessian matrix, which is a \(P \times P\) matrix containing all second-order partial derivatives of the loss function.
+
+% Storing the Hessian requires \(O(P^2)\) memory, which quickly becomes impractical for models with many parameters. Computing the Hessian itself requires \(O(P^2)\) operations, and computing its inverse requires approximately \(O(P^3)\) time. Therefore, the total computational cost per Newton update is dominated by the matrix inversion step:
+
+% \[
+% \theta^{t+1} = \theta^t - \alpha \left(H(\theta)\right)^{-1} \nabla_{\theta} L(\theta)
+% \]
+
+% Where \(H(\theta)\) is the Hessian matrix:
+% \[
+% H(\theta) = \nabla_{\theta}^2 L(\theta)
+% \]
+
+% \[
+% \boxed{\textbf{Total time per iteration of Newton's Method: } O(P^3)}
+% \]
+
+% Because modern machine learning models often contain millions of parameters, directly computing and inverting the Hessian is typically infeasible. For this reason, most large-scale learning algorithms rely on first-order methods such as Gradient Descent or use approximate second-order methods (e.g., quasi-Newton methods) that avoid explicit Hessian computation.
+
+
+
+% % \subsection{Newton’s Method: Second-order Taylor Approximation}
+
+% % Newton’s method is a local optimization technique that uses a second-order Taylor series approximation of the loss function to obtain a more accurate estimate of the direction toward the minimum. Instead of relying only on the gradient, this approach incorporates curvature information through second-order derivatives, leading to faster convergence near an optimum.
+
+% % Using a second-order Taylor expansion, the loss function around the current parameter vector can be approximated as
+% % \[
+% % L(\theta + \Delta \theta) \approx L(\theta) + \Delta \theta^T \nabla_\theta L(\theta) + \frac{1}{2} \Delta \theta^T H(\theta) \Delta \theta .
+% % \]
+% % Here, \(\nabla_\theta L(\theta)\) denotes the gradient of the loss function, while \(H(\theta)=\nabla_\theta^2 L(\theta)\) is the Hessian matrix, which contains all second-order partial derivatives:
+% % \[
+% % H(\theta)=
+% % \begin{pmatrix}
+% % \frac{\partial^2 L(\theta)}{\partial \theta_1^2} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_1 \partial \theta_p} \\
+% % \vdots & \ddots & \vdots \\
+% % \frac{\partial^2 L(\theta)}{\partial \theta_p \partial \theta_1} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_p^2}
+% % \end{pmatrix}.
+% % \]
+
+% % This formulation assumes that the loss function is twice differentiable so that the Hessian exists. The resulting quadratic approximation provides a more accurate local model of the loss surface than first-order methods alone, allowing Newton’s method to move toward the minimum more efficiently, particularly when the optimization is close to convergence.
+
+
+
+% \section{Coordinate Search}
+
+% \subsection{Optimization}
+
+% Coordinate search is a simple optimization technique that does not rely on gradients or second-order derivatives. Instead of computing the steepest descent direction, the algorithm explores the parameter space by moving along one coordinate axis at a time. At each iteration, the method tests whether moving in the positive or negative direction of a coordinate decreases the loss, and updates the parameters accordingly. The update rule is
+
+% \[
+% \theta^{t+1} = \theta^t \pm \alpha e_j
+% \]
+
+% where \(e_j = [0, \ldots, 1, \ldots, 0]^T\) is the \(j\)-th standard basis vector, which selects the coordinate direction being explored.
+
+% This approach is useful when gradients are unavailable, difficult to compute, or expensive to evaluate. Because it does not require derivatives, coordinate search belongs to the class of \textit{derivative-free optimization} methods. However, this simplicity comes at a cost: the algorithm may require many function evaluations and can be slower than gradient-based methods in high-dimensional problems.
+
+% Figure~\ref{fig:P5.png} illustrates how the algorithm explores descent directions along coordinate axes, moving step-by-step toward lower values of the objective function.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P5.png}
+%     \caption{Coordinate Search Algorithm: Exploring Descent Directions Along Coordinate Axes}
+%     \label{fig:P5.png}
+% \end{figure}
+
+
+% \section{Coordinate Descent}
+
+% \subsection{Optimization}
+
+% Coordinate descent is an optimization strategy that improves the objective function by updating \textit{one parameter at a time}. Instead of computing a full gradient vector across all parameters, the algorithm isolates a single coordinate direction and performs a one–dimensional optimization step along that axis. This greatly simplifies each update and reduces computational cost, especially in high–dimensional problems.
+
+% At each iteration, the algorithm selects a coordinate index \( j \in \{1,\dots,P\} \) and updates only the corresponding parameter while keeping all other parameters fixed. For a continuously differentiable loss function \(L(\theta)\), the update rule becomes
+
+% \[
+% \theta_j^{t+1} = \theta_j^t - \alpha \nabla_{\theta_j} L(\theta).
+% \]
+
+% This process is repeated across coordinates until convergence. The coordinates may be selected cyclically, randomly, or based on a heuristic such as the largest gradient magnitude. By decomposing a high–dimensional optimization problem into a sequence of simpler one–dimensional updates, coordinate descent can be particularly effective for large-scale machine learning problems where computing full gradients is expensive.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P6.png}
+%     \caption{Coordinate Descent Algorithm: Stepwise Optimization Along Coordinate Axes}
+%     \label{fig:P6.png}
+% \end{figure}
+
+% \subsection{Convergence}
+
+% In early iterations, coordinate search methods can make progress by exploring all coordinate directions, but coordinate descent quickly becomes more efficient once gradient information is used. Because each step directly follows the partial derivative with respect to a single parameter, the algorithm typically identifies descent directions faster and reduces the loss more effectively than coordinate search.
+
+% As illustrated in Figure~\ref{fig:P7.png}, coordinate descent tends to reach lower-cost regions of the objective function in fewer iterations. Although each step only adjusts one parameter, the repeated sequence of updates gradually drives the parameters toward a minimum. This stepwise progress often produces a characteristic ``zig-zag'' path toward the optimum.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P7.png}
+%     \caption{Comparison of Coordinate Search (Left) and Coordinate Descent (Right): Efficiency in Finding Lower Cost Function Values}
+%     \label{fig:P7.png}
+% \end{figure}
+
+% \subsection{Advantages}
+
+% One of the main strengths of coordinate descent is its simplicity. Each update requires only a partial derivative with respect to a single parameter, making the method easy to implement and computationally inexpensive. Unlike second-order methods such as Newton's method, coordinate descent does not require storing or inverting large matrices, which makes it highly scalable to problems with many parameters.
+
+% Because of its low memory requirements and cheap updates, coordinate descent is widely used in large-scale machine learning applications such as Lasso regression, sparse optimization, and high-dimensional linear models.
+
+% \subsection{Limitations}
+
+% Despite its simplicity, coordinate descent has important limitations. The algorithm can struggle when the objective function is non-smooth or when variables are highly coupled. In such cases, improving one parameter at a time may lead to slow progress, oscillations, or convergence to suboptimal points such as saddle points.
+
+% Figure~\ref{fig:P8.png} illustrates an example of a non-smooth multivariable function. The sharp corners of the level curves make it difficult for the algorithm to determine a consistent descent direction. As a result, the optimization path (shown in redred) can stall or progress very slowly toward the global minimum.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P8.png}
+%     \caption{A Case of Non-Smooth Multivariable Function}
+%     \label{fig:P8.png}
+% \end{figure}
+
+% The red trajectory highlights how the optimization may stagnate or move inefficiently due to the non-smooth geometry of the loss surface.
+
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+
+\item \textbf{Question 1:}
+
+Suppose you are training a machine learning model using Gradient Descent (GD) on a dataset with \( N = 1{,}000{,}000 \) training examples and \( P = 100 \) features. You consider the following options:
+\begin{itemize}
+    \item Batch Gradient Descent
+    \item Stochastic Gradient Descent
+    \item Mini-batch Gradient Descent with a batch size of \( b = 10{,}000 \)
+\end{itemize}
+Assuming you perform one full epoch of training for each method, calculate the number of iterations required for each optimization scheme.
+
+\begin{enumerate}
+    \item Batch GD: 1 iteration; Stochastic GD: 1{,}000{,}000 iterations; Mini-batch GD: 100 iterations
+    \item Batch GD: 1{,}000{,}000 iterations; Stochastic GD: 1 iteration; Mini-batch GD: 100 iterations
+    \item Batch GD: 100 iterations; Stochastic GD: 10 iterations; Mini-batch GD: 1{,}000 iterations
+    \item Batch GD: 1 iteration; Stochastic GD: 100{,}000 iterations; Mini-batch GD: 10 iterations
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{A)}.
+
+\textbf{Solution:}
+
+In \textbf{Batch GD}, one iteration computes the gradient using the \emph{entire} dataset. Therefore, \textbf{one epoch} corresponds to \textbf{1 iteration}.
+
+In \textbf{Stochastic GD}, one iteration uses \emph{one} training example. Therefore, \textbf{one epoch} requires
+\[
+N = 1{,}000{,}000 \text{ iterations.}
+\]
+
+In \textbf{Mini-batch GD} with batch size \(b = 10{,}000\), one iteration processes one batch. The number of batches per epoch is
+\[
+\frac{N}{b} \;=\; \frac{1{,}000{,}000}{10{,}000} \;=\; 100,
+\]
+so \textbf{one epoch} requires \textbf{100 iterations}.
+
+\vspace{6pt}
+
+\item \textbf{Question 2:}
+
+Suppose you have a limited memory capacity that allows you to process a maximum of 50{,}000 data points at a time. Which optimization methods can you use without exceeding the memory limit?
+\begin{enumerate}
+    \item Only Stochastic GD
+    \item Stochastic GD and Mini-batch GD with \( b \leq 50{,}000 \)
+    \item Batch GD and Mini-batch GD with \( b = 50{,}000 \)
+    \item All methods can be used without exceeding the memory limit
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{B)}.
+
+\textbf{Solution:}
+
+\textbf{Batch GD} processes the entire dataset per iteration. For \(N=1{,}000{,}000\), this exceeds the memory limit of 50{,}000 samples.
+
+\textbf{Stochastic GD} processes one sample per iteration, which is always within the memory limit.
+
+\textbf{Mini-batch GD} processes \(b\) samples per iteration, so it is feasible as long as \(b \le 50{,}000\).
+
+\vspace{6pt}
+
+\item \textbf{Question 3:}
+
+If you wish to perform 10 full passes over the data using Mini-batch GD with \( b = 20{,}000 \), how many iterations will this require?
+\begin{enumerate}
+    \item 50 iterations
+    \item 5{,}000 iterations
+    \item 1{,}000 iterations
+    \item 500 iterations
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{D)}.
+
+\textbf{Solution:}
+
+Batches per epoch:
+\[
+\frac{N}{b} \;=\; \frac{1{,}000{,}000}{20{,}000} \;=\; 50.
+\]
+For \(10\) epochs, total iterations:
+\[
+50 \times 10 \;=\; 500 \text{ iterations.}
+\]
+
+\vspace{6pt}
+
+\item \textbf{Question 4:}
+
+Consider the following contour plot for MSE loss of a 2D linear model, as well as the contour plot for the \(L_1\)-norm of the parameters.
+\begin{center}
+    \includegraphics[scale=0.5]{img/lecture8/qa-mse-contour.png}
+\end{center}
+Which of the following contour plots most likely represents the contour plot for the \(L_1\)-regularized MSE loss on the same model?
+\begin{center}
+    \includegraphics[scale=0.5]{img/lecture8/qa-mse-l1-options.png}
+\end{center}
+
+\textbf{Answer:} The correct answer is \textbf{A)}.
+
+\textbf{Solution:}
+
+The $L_1$-regularized objective is
+\[
+J(\theta) = \mathrm{MSE}(\theta) + \lambda \|\theta\|_1 .
+\]
+
+This objective combines two different contour geometries:
+
+\begin{itemize}
+    \item The MSE loss produces \emph{smooth elliptical contours}.
+    \item The $L_1$ norm produces \emph{diamond-shaped contours with sharp corners on the coordinate axes}.
+\end{itemize}
+
+When the $L_1$ penalty is added to the MSE loss, the resulting contours become a
+\emph{distorted ellipse} that inherits the \emph{axis-aligned corners (kinks)} from the $L_1$ norm.
+These corners reflect the sparsity-inducing behavior of $L_1$ regularization, which encourages
+parameters to become exactly zero.
+
+Options (c) and (d) resemble the contours of the individual terms (MSE alone or $L_1$ alone), so they cannot represent the combined objective.
+
+Among the remaining choices, option (b) still appears too smooth and elliptical, similar to the unregularized MSE loss.  
+Option (a) shows the expected \emph{elliptical shape with visible axis-aligned kinks}, which is characteristic of an $L_1$-regularized objective.
+
+Therefore, option (a) is the correct contour plot.
+
+
+\item \textbf{Question 5: Linear vs Polynomial Regression (Numerical + Visual)}
+
+We generate synthetic data from a nonlinear function and compare how well
+a linear model and a polynomial model fit the data using Mean Squared Error (MSE).
+
+We sample data from the ground-truth function
+\[
+y = \sin(2\pi x) + \epsilon, \qquad \epsilon \sim \mathcal{N}(0,\,0.1^2).
+\]
+
+We fit two models:
+
+\begin{itemize}
+    \item Linear regression (degree 1)
+    \item Polynomial regression (degree 5)
+\end{itemize}
+
+Which model should achieve the lower training MSE? Why?
+
+\textbf{Answer:} Polynomial regression (degree 5).
+
+\textbf{Solution:}
+
+\textbf{Step 1: Generate synthetic dataset}
+
+We sample training inputs and noisy targets:
+\[
+x_i \sim \text{Uniform}(0,1), \qquad 
+y_i = \sin(2\pi x_i) + \epsilon_i.
+\]
+
+This produces a clearly \textbf{nonlinear} dataset.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{img/lecture8/qa_q5_linear_vs_poly_fit.png}
+\caption{Linear vs Polynomial Regression fit on nonlinear data}
+\end{figure}
+
+\textbf{Step 2: Fit linear regression}
+
+Design matrix:
+\[
+\mathbf{X}_{\text{lin}} =
+\begin{bmatrix}
+1 & x_1\\
+\vdots & \vdots\\
+1 & x_N
+\end{bmatrix}
+\]
+
+Model:
+\[
+\hat{\mathbf{y}} = \mathbf{X}_{\text{lin}}\boldsymbol{\theta}_{\text{lin}}.
+\]
+
+Training MSE:
+\[
+\mathrm{MSE}_{\text{linear}}
+= \frac{1}{N}\|\mathbf{y} - \hat{\mathbf{y}}\|_2^2.
+\]
+
+Because the true relationship is nonlinear, the linear model has
+\textbf{high bias} and cannot capture the curvature of the data.
+
+\textbf{Step 3: Fit polynomial regression (degree 5)}
+
+Polynomial feature map:
+\[
+\boldsymbol{\phi}(x) = [1, x, x^2, x^3, x^4, x^5]^T.
+\]
+
+Design matrix:
+\[
+\mathbf{X}_{\text{poly}} =
+\begin{bmatrix}
+\boldsymbol{\phi}(x_1)^T\\
+\vdots\\
+\boldsymbol{\phi}(x_N)^T
+\end{bmatrix}.
+\]
+
+Model:
+\[
+\hat{\mathbf{y}} = \mathbf{X}_{\text{poly}}\boldsymbol{\theta}_{\text{poly}}.
+\]
+
+This model has greater flexibility and can approximate the sinusoidal
+shape of the data.
+
+\textbf{Step 4: Numerical comparison (reproducible simulation)}
+
+For the generated dataset ($N=50$):
+
+\[
+\mathrm{MSE}_{\text{linear}} = 0.1691
+\]
+\[
+\mathrm{MSE}_{\text{poly}} = 0.0052
+\]
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\linewidth]{img/lecture8/qa_q5_mse_comparison.png}
+\caption{Training MSE comparison}
+\end{figure}
+
+Polynomial regression achieves a dramatically lower training error.
+
+\textbf{Key Insight}
+
+\begin{itemize}
+    \item Linear regression \textbf{underfits} nonlinear data (high bias).
+    \item Polynomial regression reduces bias and captures curvature.
+    \item Increasing model complexity can significantly reduce training MSE.
+\end{itemize}
+
+
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,308 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<p>The following table shows the clustering results from two different methods on five samples, along with the ground truth (GT) cluster assignments.</p>
+<table>
+<caption>Clustering outputs of two methods along with ground truth values.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Sample</th>
+<th style="text-align: center;">Features</th>
+<th style="text-align: center;">GT Cluster</th>
+<th style="text-align: center;">Method 1</th>
+<th style="text-align: center;">Method 2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">[0,1]</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">[1,1]</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">[3,1]</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">[5,1]</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">[6,1]</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">3</td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li><p><strong>Question:</strong> What is the <strong>Rand Index (RI)</strong> for each method, calculated across all five samples? <strong>Options:</strong></p>
+<ol>
+<li><p>Method 1: 0.80, Method 2: 0.60</p></li>
+<li><p>Method 1: 0.60, Method 2: 0.85</p></li>
+<li><p>Method 1: 0.75, Method 2: 0.90</p></li>
+<li><p>Method 1: 0.80, Method 2: 0.95</p></li>
+</ol>
+<p><strong>Solution:</strong> The Rand Index (RI) is calculated as the ratio of the number of agreements between the two clusterings (both in-cluster and out-of-cluster pairs) to the total number of possible pairs. We first need to examine each pair of samples and compare their cluster assignments in both the ground truth and the clustering methods.<br/>
+<br/>
+For Method 1:</p>
+<table>
+<caption>Cluster Assignments for Ground Truth and Method 1</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Pairs of Samples</th>
+<th style="text-align: center;">Ground Truth Clusters (GT)</th>
+<th style="text-align: center;">Method 1 Clusters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">(S1, S2)</td>
+<td style="text-align: center;">(C1, C1)</td>
+<td style="text-align: center;">(C1, C1)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S1, S3)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S1, S4)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S1, S5)</td>
+<td style="text-align: center;">(C1, C3)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S2, S3)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S2, S4)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S2, S5)</td>
+<td style="text-align: center;">(C1, C3)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S3, S4)</td>
+<td style="text-align: center;">(C2, C2)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S3, S5)</td>
+<td style="text-align: center;">(C2, C3)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S4, S5)</td>
+<td style="text-align: center;">(C2, C3)</td>
+<td style="text-align: center;">(C3, C3)</td>
+</tr>
+</tbody>
+</table>
+<p>From the table, we can count:</p>
+<ul>
+<li><p><span class="math inline">\(a = 1\)</span> (pair (S1, S2) where both GT and Method 1 agree that the clusters are in the same cluster).</p></li>
+<li><p><span class="math inline">\(b = 1\)</span> (pair (S3, S4) where GT says same cluster but Method 1 says different).</p></li>
+<li><p><span class="math inline">\(c = 1\)</span> (pair (S4, S5) where Method 1 says same cluster but GT says different).</p></li>
+<li><p><span class="math inline">\(d = 7\)</span> (remaining pairs where both GT and Method 1 agree that the samples are in different clusters).</p></li>
+</ul>
+<p>Thus, the Rand Index for Method 1 is: <span class="math display">\[\text{Rand Index for Method 1} = \frac{a + d}{a + b + c + d} = \frac{1+7}{1+1+1+7} = 0.80\]</span></p>
+<p>For Method 2:</p>
+<table>
+<caption>Cluster Assignments for Ground Truth and Method 2</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Pairs of Samples</th>
+<th style="text-align: center;">Ground Truth Clusters (GT)</th>
+<th style="text-align: center;">Method 2 Clusters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">(S1, S2)</td>
+<td style="text-align: center;">(C1, C1)</td>
+<td style="text-align: center;">(C1, C2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S1, S3)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C2)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S1, S4)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S1, S5)</td>
+<td style="text-align: center;">(C1, C3)</td>
+<td style="text-align: center;">(C1, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S2, S3)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C2, C2)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S2, S4)</td>
+<td style="text-align: center;">(C1, C2)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S2, S5)</td>
+<td style="text-align: center;">(C1, C3)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S3, S4)</td>
+<td style="text-align: center;">(C2, C2)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">(S3, S5)</td>
+<td style="text-align: center;">(C2, C3)</td>
+<td style="text-align: center;">(C2, C3)</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">(S4, S5)</td>
+<td style="text-align: center;">(C2, C3)</td>
+<td style="text-align: center;">(C3, C3)</td>
+</tr>
+</tbody>
+</table>
+<p>From the table, we can count:</p>
+<ul>
+<li><p><span class="math inline">\(a = 0\)</span> (no pairs where both GT and Method 1 agree that the clusters are in the same cluster).</p></li>
+<li><p><span class="math inline">\(b = 2\)</span> (pairs (S1, S2) and (S3, S4) where GT says same cluster but Method 1 says different).</p></li>
+<li><p><span class="math inline">\(c = 2\)</span> (pairs (S2, S3) and (S4, S5) where Method 1 says same cluster but GT says different).</p></li>
+<li><p><span class="math inline">\(d = 6\)</span> (remaining pairs where both GT and Method 1 agree that the samples are in different clusters).</p></li>
+</ul>
+<p>Thus, the Rand Index for Method 2 is: <span class="math display">\[\text{Rand Index for Method 2} = \frac{a + d}{a + b + c + d} = \frac{0 + 6}{0+2+2+6} = 0.60\]</span></p>
+<p>Hence, the correct answer is <strong>(a) Method 1: 0.80, Method 2: 0.60</strong>.</p></li>
+<li><p><strong>Question 2:</strong> Compute the Silhouette Score for each sample based on the clusters in Method 1.</p>
+<p><strong>Solution:</strong> We use Euclidean distance on the feature vectors. In Method 1 the clusters are: <span class="math display">\[C_1=\{S1,S2\}, \quad C_2=\{S3\}, \quad C_3=\{S4,S5\}.\]</span> Recall:</p>
+<ul>
+<li><p><span class="math inline">\(a_i\)</span> = average distance to points in the same cluster</p></li>
+<li><p><span class="math inline">\(b_i\)</span> = minimum average distance to points in another cluster</p></li>
+<li><p><span class="math inline">\(s(x_i)=\frac{b_i-a_i}{\max(a_i,b_i)}\)</span></p></li>
+</ul>
+<p>By convention, if a point is the <strong>only sample in its cluster</strong>, its silhouette value is set to <span class="math inline">\(0\)</span>.</p>
+<p><strong>Example: Sample 1</strong></p>
+<ul>
+<li><p>Sample 1 is in Cluster 1 with Sample 2.</p></li>
+<li><p>Internal dissimilarity: <span class="math display">\[a_1 = d(S1,S2) = \sqrt{(1-0)^2+(1-1)^2}=1\]</span></p></li>
+<li><p>Distance to Cluster 2: <span class="math display">\[d(S1,S3)=\sqrt{(3-0)^2}=3\]</span></p></li>
+<li><p>Average distance to Cluster 3: <span class="math display">\[\frac{d(S1,S4)+d(S1,S5)}{2}=\frac{5+6}{2}=5.5\]</span> Therefore <span class="math inline">\(b_1=\min(3,5.5)=3\)</span>. <span class="math display">\[s(x_1)=\frac{3-1}{\max(1,3)}=\frac{2}{3}\approx0.67\]</span></p></li>
+</ul>
+<p>Using the same procedure for all samples:</p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: center;">Sample</th>
+<th style="text-align: center;">Cluster (Method 1)</th>
+<th style="text-align: center;"><span class="math inline">\(a_i\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(b_i\)</span></th>
+<th style="text-align: center;">Silhouette Score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">3.00</td>
+<td style="text-align: center;">0.67</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">2.00</td>
+<td style="text-align: center;">0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">0.00</td>
+<td style="text-align: center;">2.50</td>
+<td style="text-align: center;">0.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">2.00</td>
+<td style="text-align: center;">0.50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">1.00</td>
+<td style="text-align: center;">3.00</td>
+<td style="text-align: center;">0.67</td>
+</tr>
+</tbody>
+</table>
+<p>Hence, the silhouette scores for all samples are shown above.</p></li>
+<li><p><strong>Question 3:</strong> Compute the Cluster Purity for both Method 1 and Method 2 based on the ground truth clusters.</p>
+<p><strong>Solution:</strong> For Method 1:</p>
+<ul>
+<li><p>Cluster 1 (Method 1) has 2 samples, both from GT Cluster 1.</p></li>
+<li><p>Cluster 2 (Method 1) has 1 sample, which belongs to GT Cluster 2.</p></li>
+<li><p>Cluster 3 (Method 1) has 2 samples, one from GT Cluster 2 and one from GT Cluster 3.</p></li>
+</ul>
+<p>Purity (Method 1): <span class="math display">\[\text{Purity} = \frac{1}{5} (2 + 1 + 1) = 0.8\]</span></p>
+<p>For Method 2:</p>
+<ul>
+<li><p>Cluster 1 (Method 2) has 1 sample, from Ground Truth Cluster 1.</p></li>
+<li><p>Cluster 2 (Method 2) has 2 samples, one from Ground Truth Cluster 1 and one from Ground Truth Cluster 2.</p></li>
+<li><p>Cluster 3 (Method 2) has 2 samples, one from Ground Truth Cluster 2 and one from Ground Truth Cluster 3.</p></li>
+</ul>
+<p>Purity (Method 2): <span class="math display">\[\text{Purity} = \frac{1}{5} (1 + 1 + 1) = 0.60\]</span></p>
+<p>Thus, Method 1 has a purity score of 0.80, while Method 2 has a purity score of 0.60.</p></li>
+<li><p><strong>Question:</strong> Which of the three metrics (Rand Index, Silhouette Coefficient, Purity) would be <strong>more appropriate</strong> for a dataset where the number of ground truth clusters is unknown, and why? <strong>Options:</strong></p>
+<ol>
+<li><p>Rand Index, since it compares to a ground truth.</p></li>
+<li><p>Silhouette Coefficient, since it measures separation between clusters.</p></li>
+<li><p>Purity, since it indicates correctness of clustering assignment.</p></li>
+<li><p>None, because no metric is sufficient when ground truth is unknown.</p></li>
+</ol>
+<p><strong>Solution:</strong> The <strong>Silhouette Coefficient</strong> is more appropriate in cases where the number of ground truth clusters is unknown because it evaluates the quality of the clustering based on how well-separated and compact the clusters are, without needing ground truth labels.</p>
+<p>The correct answer is <strong>(b) Silhouette Coefficient</strong>.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

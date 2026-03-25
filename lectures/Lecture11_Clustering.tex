@@ -1,0 +1,1239 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage, float}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{outlines}
+\usepackage{changepage}
+\usepackage[parfill]{parskip}
+\usepackage{hyperref}
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{10}{Clustering}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+% \section{Recap and Lecture Objectives}
+
+% In the previous lecture, we continued our study of regression models and the key tools used to train and evaluate them. We covered gradient-based optimization methods for fitting regression models, including Newton’s Method and Coordinate Search, and we discussed how regularization improves generalization in linear regression, with particular emphasis on Ridge and Lasso. We also reviewed common performance measures for regression such as Mean Squared Error (MSE), Mean Absolute Error (MAE), and the Coefficient of Determination ($R^2$).
+
+% This lecture is split into two parts. First, we focus on regression model validation, including the train/validation/test split, learning curves, and the bias--variance tradeoff. Second, we introduce clustering as a core unsupervised learning task, covering what clustering is used for, key terminology and formalization, and common proximity measures for comparing data points.
+
+
+% \section{Regression Model Validation} 
+% \subsection{Training, Validation, and Test}
+% The \textbf{testing dataset} of the data is kept away and never used during model training.
+% \begin{outline}
+%     \1 This is only used at the point that a model is completely trained.
+%     \1 It is typically used to evaluate competing models.
+%     \1 It contains data spanning various real-world classes.
+% \end{outline}
+
+% The \textbf{training and validation datasets} of the data are used to train the regression model.
+% \begin{outline}
+%     \1 The \textbf{\textit{training dataset}} is used to actually train the model (so the model learns from this data).
+%     \1 The \textbf{\textit{validation dataset}} is used to fine-tune a model's hyperparameters and evaluate its performance prior to testing the model on the test set.
+%         \2 The model sees this data during training but doesn't dynamically learn from it. This is also typically about 20\% to 30\% of the training data.
+%         \2 One commonly-used method for training and validation is \textbf{\textit{cross-validation}}. This is where there are multiple folds on the data, and each fold has a different section of the data used as the validation set. This is typically performed for each combination of hyperparameters.
+% \end{outline}
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[scale=0.5]{img/lecture10/traintestsplit.png}
+%     \caption{Visual demonstration of training and testing split for data.}
+% \end{figure}
+
+% The procedure for \textbf{k-fold cross-validation} is as summarized below:
+% \begin{outline}[enumerate]
+%     \1 Shuffle the dataset randomly.
+%     \1 Split the dataset into k roughly equal groups.
+%     \1 For each group:
+%         \2 Use that group as a validation set.
+%         \2 Combine the remaining $k-1$ groups as one training dataset.
+%         \2 Fit a model on the training set and evaluate it on the validation set.
+%         \2 Retain the evaluation scores and discard the model.
+% \end{outline}
+
+% After this process, the model can then be trained on the whole training set (training + validation) to produce the final model that can be used to make predictions on the test set.
+
+% \exercise{For example, a 10-fold cross-validation would split the data into 10 equally sized parts, and in each fold, it would use of the parts as a validation set and the other 9 as the training set. Then, it could repeat this for each of the 10 parts of the data and average the scores to get the overall validation score. This is also demonstrated in Figure 10.2.}
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[scale=0.5]{img/lecture10/crossvalidation.png}
+%     \caption{Cross validation exercise.}
+% \end{figure}
+
+% \break \subsection{Learning Curves}
+% Learning curves allow us to visualize the progression of the effect of training on more and more data on the error on both training data and validation data. Generally, we see two trends:
+% \begin{outline}
+%     \1 Training error starts low and increases as more training data is added.
+%     \1 Validation error starts high and decreases as more training data is added.
+% \end{outline}
+
+% The procedure for generating learning curves is shown below:
+% \begin{outline}[enumerate]
+%     \1 Set aside a validation set of size $v$, where the total training dataset is of size $n$.
+%     \1 For $k = 1$ to $n-v$.
+%         \2 Take the first $k$ samples to be the training set.
+%         \2 Fit the model on the training set and evaluate it on the validation set.
+%         \2 Retain the training and validation scores and discard the model.
+% \end{outline}
+
+% When you have models of lower complexities (ex. with lower degrees of freedom, or low degree of polynomial regression), this tends toward \textbf{underfitting}, which is where the model is not able to capture the primary features of the dataset. This is shown in the learning curve as generally high errors with the learning curves quickly reaching a plateau in both training and validation. To combat underfitting, you generally want to increase model complexity.
+
+% When you have models of higher complexities, this tends toward \textbf{overfitting}, which is where the model trains too stringently on the training set (trying to fit to individual data points) and thus is not able to generalize as much to the validation and overall datasets. This is shown in the learning curve as a large gap between the training and validation learning curves. To combat overfitting, you generally want to increase training data.
+
+% These effects are reflected in Figures 10.3 and 10.4.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[scale=0.5]{img/lecture10/learningcurveexample.png}
+%     \caption{Example of two learning curves, demonstrating underfitting and overfitting.}
+% \end{figure}
+
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[scale=0.5]{img/lecture10/modelcomplexity.png}
+%     \caption{Example of model complexity causing difference between training and testing error.}
+% \end{figure}
+
+% \break \subsection{Bias-Variance Tradeoff}
+% Assuming you could train a regression model multiple times, each time with new data, then the models will have a range of prediction scores.
+% \begin{outline}
+%     \1 \textbf{Bias} is the average prediction scores of these models (on average how far the predicted values are from the true values). High average error contributes to bias, and so it is directly related to \textit{low model complexity} and thus lack of flexibility. Overfitting, on the other hand, causes very low bias.
+%     \1 \textbf{Variance} is the degree of variability in the predictions. High variance occurs due to overfitting, so the model is too flexible and thus fits strongly to the training data but doesn't generalize; thus it is directly related to \textit{high model complexity}. Underfitting, on the other hand, causes very low variance.
+% \end{outline}
+
+% Assuming $\mathbf{x}$ is a test data sample, $f(\mathbf{x})$ is its true target, and $\hat{f}(\mathbf{x})$ is the model prediction for $\mathbf{x}$, we have the following equations:
+% \begin{outline}
+%     \1 Bias is the square of the difference between predicted and true target: $$\text{Bias}^2 = (E[\hat{f}(\mathbf{x})] - f(\mathbf{x}))^2$$.
+%     \1 Variance is the variance of all predictions made by different models: $$\text{Variance} = E[(\hat{f}(\mathbf{x}) - E[\hat{f}(\mathbf{x})])^2]$$
+%     \1 Thus, the total error can be decomposed as such: 
+%     \begin{align*}
+%         Error(\mathbf{x}) &= E[(f(\mathbf{x}) - \hat{f}(\mathbf{x}))^2]\\
+%     &= (E[\hat{f}(\mathbf{x})] - f(\mathbf{x}))^2 + E[(\hat{f}(\mathbf{x}) - E[\hat{f}(\mathbf{x})])^2] + \sigma_e^2 \\
+%     &= \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}
+%     \end{align*}
+% \end{outline}
+
+% Figure 10.5 visually demonstrates the bias-variance tradeoff with a dartboard, along with how it pertains to learning curves. Generally, you want a model that minimizes the total error, so it compromises a little bias and a little variance for the lowest possible overall error.
+
+% \begin{figure}[htbp]
+%     \centering
+%     \begin{multicols}{2}
+%     \includegraphics[scale=0.35]{img/lecture10/biasvariancedarts.png}
+%     \includegraphics[scale=0.45]{img/lecture10/biasvariancelc.png}
+%     \end{multicols}
+%     \caption{Bias and variance tradeoff in learning curves as related to model complexity, along with total error.}
+% \end{figure}
+
+\section{Introduction to Clustering}
+\subsection{Recap}
+
+In supervised learning, we train models using labeled data. Each training example comes as a sample–label pair, and the model learns a mapping from inputs to outputs. For instance, we might train an image classifier using images of cats labeled as 0 and dogs labeled as 1. Similarly, we could label text with the emotion it expresses and train a model to detect emotion from new text.
+
+In contrast, unsupervised learning does not require labels. Instead of learning from sample–label pairs, the goal is to discover structure in the data by grouping together samples that share similar characteristics. For example, given a collection of audio clips, an unsupervised method might group them by speaker identity based on voice characteristics. Likewise, words can be grouped based on the contexts in which they commonly appear, forming clusters of semantically related terms.
+
+Clustering is a core example of unsupervised learning. The objective is to group a set of samples so that items in the same group (called a \textit{cluster}) are more similar to each other than they are to items in other clusters. To do this effectively, we need to make several key choices. First, we must decide which features of the samples will be used for comparison. Next, we need a proximity (or similarity/distance) measure that quantifies how close two samples are based on those features. Finally, we need a clustering algorithm that uses these proximity relationships to assign similar samples to the same cluster.
+
+\subsection{Common Uses}
+
+Clustering has many practical applications across science, engineering, and industry. 
+One of the most well-known applications is \textbf{image segmentation}. In image 
+segmentation, clustering is used to partition a digital image into multiple regions. 
+Each region groups pixels that are similar in some way, such as color, brightness, 
+or texture. The result is a simplified representation of the image that highlights 
+important structures and boundaries, which is useful in medical imaging, 
+autonomous driving, and computer vision.
+
+Another common application is \textbf{document and news article clustering}. 
+In this setting, each article is treated as a data point and represented by features 
+derived from the words it contains (for example, word frequencies or embeddings). 
+Clustering can then automatically group articles into topics such as politics, 
+sports, or technology. This task is challenging because news topics evolve over time, 
+making the data dynamic and constantly changing.
+
+Clustering also plays an important role in scientific discovery. For example, 
+\textbf{language clustering} is used in linguistics to group languages based on 
+structural similarity, and \textbf{species clustering} is used in evolutionary 
+biology to group organisms according to shared traits and behaviors.
+
+A non-exhaustive list of additional applications includes:
+\begin{multicols}{2}
+\begin{itemize}
+    \item Recommender systems
+    \item Genome sequence analysis
+    \item Analysis of antimicrobial activity
+    \item Grouping of shopping items
+    \item Search result grouping
+    \item Slippy map optimization
+    \item Crime analysis
+    \item Climatology
+\end{itemize}
+\end{multicols}
+
+\subsection{Terminologies}
+
+Figure \ref{clusteringdefs} illustrates several core concepts that are used 
+throughout clustering methods. Before studying specific algorithms, it is 
+important to understand the terminology that describes how clustering works.
+
+\medskip
+\noindent\textbf{Features.}  
+Each data sample is described by a set of measurable attributes called 
+\textit{features}. For a dataset with $N$ samples and $P$ features, the 
+$i$th sample is represented as
+\[
+\mathbf{x}_i = [x_{i1}, x_{i2}, \ldots, x_{iP}]^T .
+\]
+This means each sample corresponds to a point in a $P$-dimensional feature 
+space. For example, if we cluster news articles, features may represent 
+word frequencies; if we cluster images, features may represent color or 
+texture statistics.
+
+\medskip
+\noindent\textbf{Proximity measures.}  
+Clustering relies on a notion of similarity (or dissimilarity) between 
+samples. This is quantified using a \textit{proximity measure}. In the 
+illustrative figure, the proximity measure is the $\ell_2$ distance 
+(Euclidean distance), which measures how far apart two samples are in the 
+feature space. Samples that are closer together are considered more similar.
+
+\medskip
+\noindent\textbf{Clusters.}  
+A \textit{cluster} is a group of samples that are more similar to each other 
+than to samples in other groups. In Figure~\ref{clusteringdefs}, the clusters 
+are visually represented using different colors.
+
+\medskip
+\noindent\textbf{Hard vs.\ soft clustering.}  
+In \textbf{hard clustering} (also called \textit{crisp clustering}), each 
+sample belongs to exactly one cluster. This is the scenario shown in the 
+figure. In contrast, \textbf{soft (fuzzy) clustering} allows each sample to 
+belong to multiple clusters with different degrees of membership. For 
+example, a sample might belong to one cluster with probability $0.7$ and 
+another cluster with probability $0.3$, reflecting uncertainty or overlap 
+between groups.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{img/lecture10/clusteringdefinitions.png}
+    \caption{Illustration of key clustering terminology.}
+    \label{clusteringdefs}
+\end{figure}
+
+\subsection{Formalization}
+
+We now describe clustering more formally. Suppose we are given a dataset
+\[
+\mathbf{X} = \{\mathbf{x}_1,\ldots,\mathbf{x}_N\},
+\]
+where each sample $\mathbf{x}_i \in \mathbb{R}^P$ is a point in a 
+$P$-dimensional feature space.
+
+Clustering aims to partition the dataset into $K$ groups,
+\[
+\{\mathcal{C}_1, \mathcal{C}_2, \ldots, \mathcal{C}_K\},
+\]
+called clusters. A valid clustering must satisfy three properties:
+
+\begin{enumerate}
+    \item \textbf{All samples are assigned to a cluster}
+    \[
+    \bigcup_{k=1}^{K} \mathcal{C}_k = \mathbf{X}.
+    \]
+    Every data point must belong to some cluster.
+
+    \item \textbf{Clusters are non-empty}
+    \[
+    \mathcal{C}_k \neq \varnothing, \quad k=1,\ldots,K.
+    \]
+    Each cluster must contain at least one sample.
+
+    \item \textbf{Clusters do not overlap (hard clustering)}
+    \[
+    \mathcal{C}_k \cap \mathcal{C}_j = \varnothing, \quad k \neq j.
+    \]
+    In hard clustering, each sample belongs to only one cluster.
+\end{enumerate}
+
+\paragraph{Example.}
+In Figure~\ref{clusteringdefs}, all samples are assigned a color, so the 
+entire dataset is covered by the clusters. Each colored region contains at 
+least one point, so no cluster is empty. Finally, each sample has exactly one 
+color and clusters do not overlap, making this an example of \textbf{hard 
+clustering}.
+
+\section{Proximity Measures}
+
+Clustering relies on a notion of similarity between data points. 
+To group samples into clusters, we need a way to quantify how similar 
+or dissimilar two samples $\mathbf{x}_j$ and $\mathbf{x}_k$ are.
+
+A \textbf{similarity function} $s(\mathbf{x}_j,\mathbf{x}_k)$ produces 
+large values when samples are similar (for example between 0 and 1), 
+while a \textbf{distance (dissimilarity) function} 
+$d(\mathbf{x}_j,\mathbf{x}_k)$ produces large values when samples are 
+far apart (ranging from 0 to $+\infty$). In practice, clustering 
+algorithms may use either similarity or distance measures depending 
+on the application.
+
+In the following subsections, we introduce several commonly used 
+proximity measures.
+
+
+\paragraph{Running Example (used throughout this section)}
+
+To compare proximity measures, we use the same four 2-D samples from Lecture 10 (slide 27):
+
+\[
+\mathbf{x}_1=(0,2),\quad
+\mathbf{x}_2=(2,0),\quad
+\mathbf{x}_3=(3,1),\quad
+\mathbf{x}_4=(5,1).
+\]
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cc}
+\hline
+sample & $x_{i,1}$ & $x_{i,2}$\\
+\hline
+$\mathbf{x}_1$ & 0 & 2\\
+$\mathbf{x}_2$ & 2 & 0\\
+$\mathbf{x}_3$ & 3 & 1\\
+$\mathbf{x}_4$ & 5 & 1\\
+\hline
+\end{tabular}
+\caption{Running example used to compare proximity measures.}
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\linewidth]{img/lecture10/running_example.png}
+\caption{Visualization of the running example points used throughout Section 10.2.}
+\label{fig:running-example}
+\end{figure}
+
+We will compute pairwise distances using different metrics and observe how
+the notion of “closeness’’ changes depending on the chosen measure.
+
+\subsection{Euclidean Distance}
+
+The most familiar distance is the \textbf{Euclidean distance}:
+\[
+d(\mathbf{x}_j,\mathbf{x}_k)
+=\sqrt{\sum_{i=1}^{P}(x_{ji}-x_{ki})^2}.
+\]
+
+This is the straight-line distance between two points in feature space
+and is therefore often called the \textbf{$L_2$ distance}.
+
+\paragraph{Geometric intuition.}
+Euclidean distance measures the length of the shortest path between two
+points. Because squared differences are used, larger coordinate
+differences have a stronger influence on the distance.  
+This metric works best when features are dense and measured on
+comparable scales.
+
+\paragraph{Euclidean distances on the running example}
+
+Example calculation:
+\[
+d_2(\mathbf{x}_1,\mathbf{x}_2)
+=\sqrt{(0-2)^2+(2-0)^2}
+=\sqrt{8}\approx 2.828
+\]
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccc}
+\hline
+$r=2$ & $\mathbf{x}_1$ & $\mathbf{x}_2$ & $\mathbf{x}_3$ & $\mathbf{x}_4$\\
+\hline
+$\mathbf{x}_1$ & 0 & 2.828 & 3.162 & 5.099\\
+$\mathbf{x}_2$ & 2.828 & 0 & 1.414 & 3.162\\
+$\mathbf{x}_3$ & 3.162 & 1.414 & 0 & 2\\
+$\mathbf{x}_4$ & 5.099 & 3.162 & 2 & 0\\
+\hline
+\end{tabular}
+\caption{Pairwise Euclidean distances for the running example.}
+\end{table}
+
+\paragraph{Interpretation.}
+Under Euclidean distance, the closest pair is
+$\mathbf{x}_2$ and $\mathbf{x}_3$ ($d\approx1.414$).  
+Comparing this table with the Manhattan and $L_\infty$ results
+shows that different metrics can change which points are considered
+nearest neighbors.
+
+\subsection{Manhattan Distance}
+
+The \textbf{Manhattan distance} measures the sum of absolute differences:
+\[
+d(\mathbf{x}_j,\mathbf{x}_k)=\sum_{i=1}^{P}|x_{ji}-x_{ki}|.
+\]
+
+Also known as the \textbf{$L_1$ distance} or \textbf{city-block distance}, 
+this metric measures distance as if we were moving along a grid of 
+horizontal and vertical streets.
+
+\paragraph{Geometric intuition.}
+Unlike Euclidean distance (straight-line distance), Manhattan distance
+restricts movement to axis-aligned directions.  
+This makes it less sensitive to a single large coordinate difference and
+often more robust in high-dimensional or sparse settings.
+
+\paragraph{Manhattan distances on the running example}
+
+Example calculation:
+\[
+d_1(\mathbf{x}_1,\mathbf{x}_2)=|0-2|+|2-0|=4
+\]
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccc}
+\hline
+$r=1$ & $\mathbf{x}_1$ & $\mathbf{x}_2$ & $\mathbf{x}_3$ & $\mathbf{x}_4$\\
+\hline
+$\mathbf{x}_1$ & 0 & 4 & 4 & 6\\
+$\mathbf{x}_2$ & 4 & 0 & 2 & 4\\
+$\mathbf{x}_3$ & 4 & 2 & 0 & 2\\
+$\mathbf{x}_4$ & 6 & 4 & 2 & 0\\
+\hline
+\end{tabular}
+\caption{Pairwise Manhattan distances for the running example.}
+\end{table}
+
+\paragraph{Interpretation.}
+Notice that $\mathbf{x}_2$ and $\mathbf{x}_3$ are the closest pair under
+Manhattan distance ($d=2$).  
+The ordering of nearest neighbors differs from Euclidean distance,
+highlighting how the choice of metric changes our notion of
+“closeness.’’
+
+\subsection{Minkowski Distance}
+
+The \textbf{Minkowski distance} provides a single family of distances that
+includes many commonly used metrics as special cases:
+\[
+d_r(\mathbf{x}_j,\mathbf{x}_k)
+=\left(\sum_{i=1}^{P}|x_{ji}-x_{ki}|^r\right)^{1/r}.
+\]
+
+Rather than defining separate distance formulas, Minkowski distance
+introduces a parameter $r$ that \emph{controls the geometry} of distance.
+By changing $r$, we smoothly move between different notions of closeness.
+
+\paragraph{Special cases.}
+\begin{itemize}
+\item $r=1$  → Manhattan distance ($L_1$)
+\item $r=2$  → Euclidean distance ($L_2$)
+\item $r\to\infty$ → Maximum coordinate difference ($L_\infty$)
+\item $r=0$  → Number of differing coordinates ($L_0$, not a true norm)
+\end{itemize}
+
+\paragraph{Geometric intuition.}
+The parameter $r$ controls how strongly large coordinate differences
+affect the distance:
+
+\begin{itemize}
+\item Small $r$ (near $1$): distances depend on the \emph{sum} of differences.
+\item Large $r$: distances are dominated by the \emph{largest} difference.
+\end{itemize}
+
+Thus, Minkowski distance acts as a “tuning knob’’ that determines how we
+measure closeness in feature space.
+
+\subsubsection{Limit Case: $L_\infty$ Distance}
+
+As $r\rightarrow\infty$, the largest coordinate difference dominates and
+the distance becomes
+
+\[
+d_\infty(\mathbf{x}_j,\mathbf{x}_k)=
+\max_i |x_{ji}-x_{ki}|.
+\]
+
+This distance asks:
+\begin{center}
+\emph{“What is the worst coordinate difference?”}
+\end{center}
+
+\paragraph{Running example.}
+Pairwise $L_\infty$ distances for the four points:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccc}
+\hline
+$r=\infty$ & $\mathbf{x}_1$ & $\mathbf{x}_2$ & $\mathbf{x}_3$ & $\mathbf{x}_4$\\
+\hline
+$\mathbf{x}_1$ & 0 & 2 & 3 & 5\\
+$\mathbf{x}_2$ & 2 & 0 & 1 & 3\\
+$\mathbf{x}_3$ & 3 & 1 & 0 & 2\\
+$\mathbf{x}_4$ & 5 & 3 & 2 & 0\\
+\hline
+\end{tabular}
+\caption{$L_\infty$ distances on the running example.}
+\end{table}
+
+Notice how the distance is determined by the largest coordinate difference.
+For example,
+\[
+d_\infty(\mathbf{x}_1,\mathbf{x}_3)=\max(|0-3|,|2-1|)=3.
+\]
+
+\subsubsection{Limit Case: $L_0$ Coordinate Difference Count}
+
+When $r=0$, the Minkowski expression becomes the number of coordinates that differ:
+\[
+d_0(\mathbf{x}_j,\mathbf{x}_k)=
+\#\{i : x_{ji}\neq x_{ki}\}.
+\]
+
+This quantity is \emph{not a true norm}, but it is useful in practice
+for measuring how many features change.
+
+\paragraph{Running example.}
+
+Going back to this running example, we get:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|cccc}
+\hline
+$r=0$ & $\mathbf{x}_1$ & $\mathbf{x}_2$ & $\mathbf{x}_3$ & $\mathbf{x}_4$\\
+\hline
+$\mathbf{x}_1$ & 0 & 2 & 2 & 2\\
+$\mathbf{x}_2$ & 2 & 0 & 2 & 2\\
+$\mathbf{x}_3$ & 2 & 2 & 0 & 1\\
+$\mathbf{x}_4$ & 2 & 2 & 1 & 0\\
+\hline
+\end{tabular}
+\caption{$L_0$ coordinate difference counts on the running example.}
+\end{table}
+
+For instance,
+\[
+d_0(\mathbf{x}_3,\mathbf{x}_4)=1
+\]
+because only the first coordinate differs.
+
+\paragraph{Key takeaway.}
+Minkowski distance unifies multiple distance measures and shows that
+different metrics correspond to different ways of defining “closeness’’.
+Choosing a distance metric therefore directly affects clustering results.
+\subsection{Cosine Similarity}
+
+\textbf{Cosine similarity} measures the angle between two vectors in 
+feature space:
+\[
+s(\mathbf{x}_j,\mathbf{x}_k)=\cos\theta
+=\frac{\mathbf{x}_j^T\mathbf{x}_k}{\|\mathbf{x}_j\|\|\mathbf{x}_k\|}
+=\frac{\sum_{i=1}^{P}x_{ji}x_{ki}}
+{\sqrt{\sum_{i=1}^{P}x_{ji}^2}\sqrt{\sum_{i=1}^{P}x_{ki}^2}}.
+\]
+
+Rather than measuring distance in space, cosine similarity measures 
+\textit{directional similarity}. This makes it especially useful for 
+high-dimensional sparse data such as text documents.
+
+The value of $\cos\theta$ lies in $[-1,1]$:
+\begin{itemize}
+\item $1$ → vectors point in the same direction (maximum similarity)
+\item $0$ → vectors are orthogonal (uncorrelated)
+\item $-1$ → vectors point in opposite directions
+\end{itemize}
+
+A corresponding distance is often defined as
+\[
+d = 1 - \cos\theta,
+\]
+which lies in $[0,2]$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4]{img/lecture10/cosinesimilarity.png}
+    \caption{Special cases of cosine similarity.}
+\end{figure}
+
+\paragraph{Example.}
+Cosine similarity is computationally efficient for sparse vectors because 
+only non-zero entries contribute to the dot product.
+
+\[
+\mathbf{x}_1=[3\ 2\ 0\ 5\ 0\ 0\ 0\ 2\ 0\ 0]^T,\quad
+\mathbf{x}_2=[1\ 0\ 0\ 0\ 0\ 0\ 0\ 1\ 0\ 2]^T
+\]
+
+\[
+s(\mathbf{x}_1,\mathbf{x}_2)=
+\frac{3\cdot1+2\cdot1}{\sqrt{3^2+2^2+5^2+2^2}\sqrt{1^2+1^2+2^2}}
+\approx 0.315
+\]
+
+\[
+d=1-s\approx 0.685
+\]
+
+
+\section{Covariance Matrix and Uncertainty}
+
+The covariance matrix is a key tool for understanding the relationships between 
+multiple variables in a dataset. In clustering and distance-based learning, it 
+provides the mathematical foundation for understanding the \textit{shape} and 
+\textit{orientation} of data in feature space.
+
+Suppose we are given a dataset $\mathbf{X}$ with $N$ samples and $P$ features. 
+The covariance matrix $\Sigma$ captures how pairs of features vary together. 
+The $(i,j)$ entry of the covariance matrix is the covariance between the 
+$i^{th}$ and $j^{th}$ features:
+\[
+\sigma(x_i, x_j) = \frac{1}{N-1} \sum_{k=1}^{N} (x_{ki} - \bar{x}_i)(x_{kj} - \bar{x}_j).
+\]
+Here, $\bar{x}_i$ and $\bar{x}_j$ are the means of features $i$ and $j$.  
+The diagonal entries $\sigma(x_i,x_i)$ represent the \textbf{variance} of 
+individual features, while the off-diagonal entries represent how features vary 
+together. A positive covariance indicates that two features tend to increase 
+together, a negative covariance indicates that one feature tends to increase as 
+the other decreases, and a covariance of zero indicates that the features are 
+uncorrelated.
+
+\paragraph{Correlation (Normalized Covariance).}
+Because covariance depends on the scale of the features, it is often useful to 
+normalize it to obtain the \textbf{correlation coefficient}:
+\[
+\rho(x_i,x_j)=\frac{\sigma(x_i,x_j)}
+{\sqrt{\sigma(x_i,x_i)\sigma(x_j,x_j)}}.
+\]
+This quantity lies in the interval $[-1,1]$ and provides a scale-independent and 
+easily interpretable measure of the strength and direction of the relationship 
+between variables.
+
+\subsection*{Covariance and the Geometry of Data}
+
+One of the most important roles of the covariance matrix is that it describes the 
+\textbf{geometry of the data distribution}. When the covariance matrix equals the 
+identity matrix ($\Sigma = I$), the data forms a spherical distribution, meaning all features have equal variance and are uncorrelated.
+When the covariance matrix 
+contains non-zero off-diagonal entries, the distribution becomes elliptical (or 
+ellipsoidal in higher dimensions), indicating that the features are correlated 
+and that the data is stretched along certain directions.
+
+This geometric interpretation will directly explain why Mahalanobis
+distance works, which we introduce in the next section. The orientation of the resulting ellipse is determined by the 
+\textbf{eigenvectors} of $\Sigma$, while the spread along each direction is 
+determined by the corresponding \textbf{eigenvalues}. Eigenvectors define the principal axes of the data distribution,
+while eigenvalues quantify the variance along those axes, and eigenvalues 
+quantify how much variation occurs along those directions. Large eigenvalues 
+indicate directions of high variability, while small eigenvalues correspond to 
+directions where the data is tightly concentrated.
+
+These ideas form the foundation of several important machine learning methods, 
+including Principal Component Analysis (PCA), Gaussian Mixture Models, and 
+anomaly detection methods.
+
+\subsection*{Covariance as a Measure of Uncertainty}
+
+Covariance matrices also provide a natural way to quantify \textbf{uncertainty} 
+in multivariate settings. For a single variable, uncertainty is typically 
+visualized using a confidence interval. For multiple variables, this concept 
+extends to \textbf{confidence ellipses} (or ellipsoids in higher dimensions). 
+These ellipses are centered at the mean of the data, oriented according to the 
+eigenvectors of the covariance matrix, and scaled according to the square roots 
+of the eigenvalues.
+
+For example, a 95\% confidence ellipse represents the region in which we expect 
+approximately 95\% of the data points to lie. Large eigenvalues correspond to 
+greater uncertainty and therefore produce longer ellipse axes, while smaller 
+eigenvalues indicate greater certainty and produce shorter axes.
+
+This geometric view of uncertainty is fundamental in probabilistic machine 
+learning. Many models assume that data follows a multivariate Gaussian 
+distribution, where the covariance matrix directly determines the model’s 
+confidence in its predictions. Understanding covariance therefore explains why Mahalanobis distance works,
+how Gaussian clustering produces elliptical clusters, and how uncertainty can be represented in high-dimensional data.
+
+These geometric and probabilistic interpretations of covariance lead
+naturally to a distance measure that respects the shape of the data
+distribution. This idea motivates the Mahalanobis distance introduced
+next.
+
+\section{Mahalanobis Distance}
+
+Building on the covariance matrix introduced in the previous section,
+the \textbf{Mahalanobis distance} incorporates feature correlations and data scale:
+\[
+d_M(\mathbf{x}_j,\mathbf{x}_k)
+= \sqrt{(\mathbf{x}_j-\mathbf{x}_k)^T\Sigma^{-1}(\mathbf{x}_j-\mathbf{x}_k)},
+\]
+where $\Sigma$ is the covariance matrix of the dataset.
+
+Multiplication by $\Sigma^{-1/2}$ whitens the data, transforming the
+distribution into an isotropic Gaussian where Euclidean distance applies.
+
+Unlike Euclidean distance, this metric accounts for the
+\textit{shape of the data distribution}. It rescales directions with
+high variance and compresses directions with low variance.
+
+If $\Sigma = I$, Mahalanobis distance reduces to Euclidean distance.
+
+This distance is especially useful for:
+\begin{itemize}
+\item Detecting outliers
+\item Modeling elliptical or correlated clusters
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{img/lecture10/mahalanobisdistance.png}
+    \caption{Mahalanobis distance adapts to the covariance structure of the data.}
+\end{figure}
+
+Intuitively, Mahalanobis distance measures how many
+\textit{multivariate standard deviations} apart two samples are.
+
+\subsection*{Running Demonstration: Same Euclidean Distance, Different Mahalanobis Distance}
+
+To understand why Mahalanobis distance matters, we fix two points:
+\[
+\mathbf{x}_a=(0,0), \qquad \mathbf{x}_b=(2,0)
+\]
+
+Their Euclidean distance is constant:
+\[
+d_E(\mathbf{x}_a,\mathbf{x}_b)=2.
+\]
+
+To visualize each covariance structure, we generate synthetic samples 
+from $\mathcal{N}(\mathbf{0},\Sigma_i)$ and highlight the two fixed 
+points $\mathbf{x}_a=(0,0)$ and $\mathbf{x}_b=(2,0)$.
+
+We now construct five Gaussian distributions with different covariance
+matrices and compute the Mahalanobis distance between the \textit{same}
+two points.
+
+\bigskip
+\noindent\textbf{Case 1 — Isotropic Gaussian (Baseline)}
+
+\[
+\Sigma_1=
+\begin{bmatrix}
+1 & 0\\
+0 & 1
+\end{bmatrix},
+\qquad
+\Sigma_1^{-1}=I
+\]
+
+\[
+d_M^2=(2,0)I\begin{bmatrix}2\\0\end{bmatrix}=4
+\quad\Rightarrow\quad
+d_M=2.
+\]
+
+\textit{Mahalanobis equals Euclidean when the data is spherical.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/lecture10/case1_isotropic.png}
+    \caption{Samples from $\mathcal{N}(\mathbf{0},\Sigma_1)$. 
+    The highlighted markers denote the fixed points
+    $\mathbf{x}_a=(0,0)$ and $\mathbf{x}_b=(2,0)$.
+}
+\end{figure}
+
+\bigskip
+\noindent\textbf{Case 2 — Large Variance in $x$-direction}
+
+\[
+\Sigma_2=
+\begin{bmatrix}
+4 & 0\\
+0 & 1
+\end{bmatrix},
+\qquad
+\Sigma_2^{-1}=
+\begin{bmatrix}
+1/4 & 0\\
+0 & 1
+\end{bmatrix}
+\]
+
+\[
+d_M^2=1
+\quad\Rightarrow\quad
+d_M=1.
+\]
+
+\textit{Movement along high-variance directions is less surprising, so
+distance shrinks.}
+
+Geometrically, the data ellipse is stretched along the $x$-axis.
+Displacement along this direction lies inside a wider ellipse,
+so it corresponds to fewer standard deviations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/lecture10/case2_large_var_x.png}
+    \caption{Samples from $\mathcal{N}(\mathbf{0},\Sigma_2)$. 
+    High variance along the $x$-direction stretches the data horizontally.}
+\end{figure}
+
+\bigskip
+\noindent\textbf{Case 3 — Small Variance in $x$-direction}
+
+\[
+\Sigma_3=
+\begin{bmatrix}
+0.25 & 0\\
+0 & 1
+\end{bmatrix},
+\qquad
+\Sigma_3^{-1}=
+\begin{bmatrix}
+4 & 0\\
+0 & 1
+\end{bmatrix}
+\]
+
+\[
+d_M^2=16
+\quad\Rightarrow\quad
+d_M=4.
+\]
+
+\textit{Movement along low-variance directions is very surprising, so
+distance grows.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/lecture10/case3_small_var_x.png}
+    \caption{Samples from $\mathcal{N}(\mathbf{0},\Sigma_3)$. 
+    Low variance along the $x$-direction compresses the data horizontally.}
+\end{figure}
+
+Here the ellipse is compressed along the $x$-axis.
+A horizontal displacement quickly exits the high-density region,
+so it corresponds to many standard deviations.
+
+\bigskip
+\noindent\textbf{Case 4 — Correlated Features}
+
+\[
+\Sigma_4=
+\begin{bmatrix}
+1 & 0.8\\
+0.8 & 1
+\end{bmatrix},
+\qquad
+\Sigma_4^{-1}=
+\begin{bmatrix}
+2.78 & -2.22\\
+-2.22 & 2.78
+\end{bmatrix}
+\]
+
+\[
+d_M \approx 3.33.
+\]
+
+\textit{Correlation rotates the principal axes of the data ellipse.} 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/lecture10/case4_correlated.png}
+    \caption{Samples from $\mathcal{N}(\mathbf{0},\Sigma_4)$. 
+    Correlation rotates the principal axes of the distribution.}
+\end{figure}
+
+The displacement vector $(2,0)$ is no longer aligned with a principal
+direction of variance, so the effective distance increases.
+
+\bigskip
+\noindent\textbf{Case 5 — Rotated Elliptical Distribution}
+
+\[
+\Sigma_5=
+\begin{bmatrix}
+2.125 & 1.875\\
+1.875 & 2.125
+\end{bmatrix},
+\qquad
+\Sigma_5^{-1}=
+\begin{bmatrix}
+1.062 & -0.937\\
+-0.937 & 1.062
+\end{bmatrix}
+\]
+
+\[
+d_M \approx 2.06.
+\]
+
+\textit{Distance depends on alignment with principal axes rather than
+the coordinate axes.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{img/lecture10/case5_rotated.png}
+    \caption{Samples from $\mathcal{N}(\mathbf{0},\Sigma_5)$. 
+    Distance depends on alignment with the principal axes.}
+\end{figure}
+
+Mahalanobis distance depends on alignment with eigenvectors of $\Sigma$,
+not with the coordinate axes.
+
+These figures visually illustrate how the same Euclidean displacement 
+can correspond to very different standardized distances under 
+different covariance structures.
+
+\paragraph{Important Interpretation.}
+Level sets of Mahalanobis distance satisfy
+\[
+(\mathbf{x}-\mu)^T\Sigma^{-1}(\mathbf{x}-\mu)=c,
+\]
+which defines ellipses aligned with the eigenvectors of $\Sigma$.
+Euclidean distance instead produces circular level sets.
+
+Mahalanobis distance is therefore the natural distance measure for
+Gaussian-distributed data.
+
+\subsection*{Key Takeaway}
+
+\begin{center}
+\begin{tabular}{c|c|c}
+Distribution & Euclidean Distance & Mahalanobis Distance\\
+\hline
+Isotropic & 2 & 2\\
+Large variance in $x$ & 2 & 1\\
+Small variance in $x$ & 2 & 4\\
+Correlated features & 2 & 3.33\\
+Rotated ellipse & 2 & 2.06
+\end{tabular}
+\end{center}
+
+\bigskip
+
+Even when Euclidean distance is identical, Mahalanobis distance changes
+because it measures distance \textit{relative to the data distribution}.
+It answers the question:
+
+\[
+\text{``How unusual is this displacement for this dataset?''}
+\]
+
+% \section{Additional Details}
+
+% \subsection{Covariance Matrices and Uncertainty}
+
+% The covariance matrix is a key tool for understanding the relationships between 
+% multiple variables in a dataset. In clustering and distance-based learning, it 
+% provides the mathematical foundation for understanding the \textit{shape} and 
+% \textit{orientation} of data in feature space.
+
+% Suppose we are given a dataset $\mathbf{X}$ with $N$ samples and $P$ features. 
+% The covariance matrix $\Sigma$ captures how pairs of features vary together. 
+% The $(i,j)$ entry of the covariance matrix is the covariance between the 
+% $i^{th}$ and $j^{th}$ features:
+% \[
+% \sigma(x_i, x_j) = \frac{1}{N-1} \sum_{k=1}^{N} (x_{ki} - \bar{x}_i)(x_{kj} - \bar{x}_j).
+% \]
+% Here, $\bar{x}_i$ and $\bar{x}_j$ are the means of features $i$ and $j$.  
+% The diagonal entries $\sigma(x_i,x_i)$ represent the \textbf{variance} of 
+% individual features, while the off-diagonal entries represent how features vary 
+% together. A positive covariance indicates that two features tend to increase 
+% together, a negative covariance indicates that one feature tends to increase as 
+% the other decreases, and a covariance of zero indicates that the features are 
+% uncorrelated.
+
+% \paragraph{Correlation (Normalized Covariance).}
+% Because covariance depends on the scale of the features, it is often useful to 
+% normalize it to obtain the \textbf{correlation coefficient}:
+% \[
+% \rho(x_i,x_j)=\frac{\sigma(x_i,x_j)}
+% {\sqrt{\sigma(x_i,x_i)\sigma(x_j,x_j)}}.
+% \]
+% This quantity lies in the interval $[-1,1]$ and provides a scale-independent and 
+% easily interpretable measure of the strength and direction of the relationship 
+% between variables.
+
+% \subsection*{Covariance and the Geometry of Data}
+
+% One of the most important roles of the covariance matrix is that it describes the 
+% \textbf{geometry of the data distribution}. When the covariance matrix equals the 
+% identity matrix ($\Sigma = I$), the data forms a spherical distribution, meaning 
+% all features have equal variance and are independent. When the covariance matrix 
+% contains non-zero off-diagonal entries, the distribution becomes elliptical (or 
+% ellipsoidal in higher dimensions), indicating that the features are correlated 
+% and that the data is stretched along certain directions.
+
+% This geometric interpretation explains why Mahalanobis distance works: it 
+% rescales the feature space according to the spread and correlations present in 
+% the data. The orientation of the resulting ellipse is determined by the 
+% \textbf{eigenvectors} of $\Sigma$, while the spread along each direction is 
+% determined by the corresponding \textbf{eigenvalues}. Eigenvectors can be 
+% interpreted as the directions of maximum variation in the data, and eigenvalues 
+% quantify how much variation occurs along those directions. Large eigenvalues 
+% indicate directions of high variability, while small eigenvalues correspond to 
+% directions where the data is tightly concentrated.
+
+% These ideas form the foundation of several important machine learning methods, 
+% including Principal Component Analysis (PCA), Gaussian Mixture Models, and 
+% anomaly detection methods.
+
+% \subsection*{Covariance as a Measure of Uncertainty}
+
+% Covariance matrices also provide a natural way to quantify \textbf{uncertainty} 
+% in multivariate settings. For a single variable, uncertainty is typically 
+% visualized using a confidence interval. For multiple variables, this concept 
+% extends to \textbf{confidence ellipses} (or ellipsoids in higher dimensions). 
+% These ellipses are centered at the mean of the data, oriented according to the 
+% eigenvectors of the covariance matrix, and scaled according to the square roots 
+% of the eigenvalues.
+
+% For example, a 95\% confidence ellipse represents the region in which we expect 
+% approximately 95\% of the data points to lie. Large eigenvalues correspond to 
+% greater uncertainty and therefore produce longer ellipse axes, while smaller 
+% eigenvalues indicate greater certainty and produce shorter axes.
+
+% This geometric view of uncertainty is fundamental in probabilistic machine 
+% learning. Many models assume that data follows a multivariate Gaussian 
+% distribution, where the covariance matrix directly determines the model’s 
+% confidence in its predictions. Understanding covariance therefore helps explain 
+% why Mahalanobis distance works, how Gaussian clustering produces elliptical 
+% clusters, and how uncertainty can be represented and visualized in 
+% high-dimensional data.
+
+
+\section{Q\&A Section}
+The following table shows the regression outputs from three different models on five samples, along with the ground-truth (GT) values. We will use this table to build intuition about bias, variance, and underfitting.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|}
+        \hline
+        Sample & GT & Model 1 & Model 2 & Model 3 \\ \hline
+        1      & 5  & 4.8    & 5.2    & 5.0    \\ \hline
+        2      & 6  & 4.7    & 5.3    & 6.0    \\ \hline
+        3      & 7  & 4.9    & 5.5    & 7.2    \\ \hline
+        4      & 8  & 5.0    & 5.7    & 8.0    \\ \hline
+        5      & 9  & 5.2    & 5.9    & 9.3    \\ \hline
+    \end{tabular}
+    \caption{Regression outputs of three models along with ground truth values.}
+\end{table}
+
+\vspace{0.3cm}
+
+\noindent\textbf{Important note.}
+In the formal bias--variance decomposition, bias and variance are defined with 
+respect to many possible training datasets. Since we only have one dataset here, 
+we will use a \textbf{simplified empirical proxy}: we treat the model predictions 
+across samples as if they were repeated predictions. This lets us build intuition 
+about bias and variance without requiring multiple datasets.
+
+\begin{enumerate}
+    \item \textbf{Question:} \newline
+    What is the average \textbf{empirical bias proxy} for each model across the five samples?
+    \newline \newline
+    \textbf{Options:}
+    \begin{enumerate}
+        \item Model 1: 2.92, Model 2: 0.44, Model 3: 0.08
+        \item Model 1: 6.33, Model 2: 4.19, Model 3: 2.01
+        \item Model 1: 2.92, Model 2: 1.44, Model 3: 0.08
+        \item Model 1: 1.92, Model 2: 4.19, Model 3: 2.01
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    We approximate bias using the squared difference between the model’s mean prediction and the ground truth values for each sample.
+    \newline
+    
+    \textbf{Model 1}:
+    \[
+    \text{Mean of Model 1's predictions} = \frac{4.8 + 4.7 + 4.9 + 5.0 + 5.2}{5} = 4.92
+    \]
+    \[
+    \text{Avg Bias for Model 1} = \frac{(4.92 - 5)^2 + (4.92 - 6)^2 + (4.92 - 7)^2 + (4.92 - 8)^2 + (4.92 - 9)^2}{5} = 6.33
+    \]
+
+    \textbf{Model 2}:
+    \[
+    \text{Mean of Model 2's predictions} = \frac{5.2 + 5.3 + 5.5 + 5.7 + 5.9}{5} = 5.52
+    \]
+    \[
+    \text{Avg Bias for Model 2} = \frac{(5.52 - 5)^2 + (5.52 - 6)^2 + (5.52 - 7)^2 + (5.52 - 8)^2 + (5.52 - 9)^2}{5} = 4.19
+    \]
+
+    \textbf{Model 3}:
+    \[
+    \text{Mean of Model 3's predictions} = \frac{5.0 + 6.0 + 7.2 + 8.0 + 9.3}{5} = 7.1
+    \]
+    \[
+    \text{Avg Bias for Model 3} = \frac{(7.1 - 5)^2 + (7.1 - 6)^2 + (7.1 - 7)^2 + (7.1 - 8)^2 + (7.1 - 9)^2}{5} = 2.01
+    \]
+    The correct answer is \textbf{(b) Model 1: 6.33, Model 2: 4.19, Model 3: 2.01}.
+
+    \item \textbf{Question:} \newline
+    What is the average \textbf{empirical variance proxy} for each model?
+    \newline \newline
+    \textbf{Options:}
+    \begin{enumerate}
+        \item Model 1: 0.03, Model 2: 0.08, Model 3: 0.13
+        \item Model 1: 0.05, Model 2: 0.12, Model 3: 0.15
+        \item Model 1: 0.04, Model 2: 0.08, Model 3: 0.12
+        \item Model 1: 0.03, Model 2: 0.07, Model 3: 2.26
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    We approximate variance as the variance of the model’s predictions.
+    
+    Variance is calculated as the average of the squared differences between each model’s predictions and its mean prediction.
+    
+    \textbf{Model 1}:
+    \[
+    \text{Variance for Model 1} = \frac{(4.8 - 4.92)^2 + (4.7 - 4.92)^2 + (4.9 - 4.92)^2 + (5.0 - 4.92)^2 + (5.2 - 4.92)^2}{5} = 0.03
+    \]
+
+    \textbf{Model 2}:
+    \[
+    \text{Variance for Model 2} = \frac{(5.2 - 5.52)^2 + (5.3 - 5.52)^2 + (5.5 - 5.52)^2 + (5.7 - 5.52)^2 + (5.9 - 5.52)^2}{5} = 0.07
+    \]
+
+    \textbf{Model 3}:
+    \[
+    \text{Variance for Model 3} = \frac{(5.0 - 7.1)^2 + (6.0 - 7.1)^2 + (7.2 - 7.1)^2 + (8.0 - 7.1)^2 + (9.3 - 7.1)^2}{5} = 2.26
+    \]
+    
+    The correct answer is \textbf{(d) Model 1: 0.03, Model 2: 0.07, Model 3: 2.26}.
+
+    \item \textbf{Question:} \newline
+    If the differences in bias/variance values are significant enough, would we expect model 1 is more likely to have overfit or underfit?
+    \newline \newline
+    \textbf{Options:}
+    \begin{enumerate}
+        \item Underfit
+        \item Overfit
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    Model 1 exhibits \textbf{underfitting} because it has high bias and low variance, meaning it is too simple and fails to capture the complexity of the data. Hence, the correct answer is \textbf{(a) Underfit}.
+\end{enumerate}
+
+\end{document}

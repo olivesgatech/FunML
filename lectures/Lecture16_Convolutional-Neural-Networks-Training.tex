@@ -1,0 +1,684 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage, hyperref, float}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{15}{Convolutional Neural Networks: Training}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+% \section{Recap}
+
+% In the previous lecture, we discussed the history and evolution of CNN architectures, as well as their associated pros and cons. In particular, we discussed LeNet, AlexNet, VGG, GoogleNet, and ResNet.
+
+\section{Lecture Objectives}
+
+In this lecture, we study optimization techniques used to train Convolutional Neural Networks (CNNs). We begin by introducing gradient descent and its variants, including stochastic and mini-batch training, and examine how momentum improves optimization in ill-conditioned loss landscapes. We then explore adaptive learning rate methods such as AdaGrad, RMSProp, and Adam, and discuss their advantages and limitations. Next, we briefly introduce second-order optimization methods, including Newton’s Method, BFGS, and L-BFGS. Finally, we develop intuition for interpreting CNN models by visualizing filters and understanding how learned features evolve across layers.
+
+\section{Loss Landscape of CNNs}
+
+The parameters of a CNN are learned through backpropagation and gradient-based optimization. However, training deep neural networks is challenging because the associated loss function defines a highly complex \textbf{loss landscape}. This landscape describes how the loss changes with respect to the network’s weights and biases.
+
+Unlike the convex objectives studied earlier in the course, neural network loss functions are \textbf{non-convex}. As a result, the loss surface contains many stationary points, including \textbf{local minima} and \textbf{saddle points}, where gradients become small or vanish. These properties make optimization significantly more difficult.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture16/loss_landscape_CNN.png}
+    \caption{Example of a non-convex loss landscape with local minima and saddle points.}
+    \label{fig:cnnlosslandscape}
+\end{figure}
+
+\medskip
+
+In addition to non-convexity, neural network loss surfaces are often \textbf{ill-conditioned}. The curvature of the loss may vary dramatically across different parameter directions. Small changes in some parameters can cause large changes in the loss, while other directions remain relatively flat. This anisotropic curvature can cause optimization algorithms to oscillate, overshoot minima, or converge very slowly.
+
+Another challenge arises from the use of \textbf{stochastic gradients}. In practice, gradients are computed using mini-batches of data rather than the full dataset. While this greatly reduces computation, it introduces noise into the gradient estimates, making the optimization trajectory more erratic.
+
+\medskip
+
+Together, non-convexity, ill-conditioning, and noisy gradients make training deep neural networks a difficult optimization problem. These challenges motivate the development of advanced optimization methods such as momentum, adaptive learning rates, and Adam.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{img/lecture16/graddescent.png}
+    \caption{Gradient descent and the effect of learning rate. Small learning rates lead to slow convergence, while large learning rates may cause overshooting or divergence.}
+    \label{fig:graddescent}
+\end{figure}
+
+\section{Gradient Descent}
+
+Gradient Descent is a foundational optimization algorithm used to minimize a loss function by iteratively updating model parameters. At each step, the algorithm computes the gradient of the loss function with respect to the parameters and moves in the direction of steepest descent.
+
+The basic gradient descent update rules are
+
+\begin{equation}
+    \mathbf{W}(t+1) = \mathbf{W}(t) - \alpha
+    \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}
+\end{equation}
+
+\begin{equation}
+    \mathbf{b}(t+1) = \mathbf{b}(t) - \alpha
+    \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{b}}
+\end{equation}
+
+\noindent where \( \alpha \) is the learning rate, a hyperparameter controlling the step size of each update. By repeatedly applying these updates, the parameters move toward a minimum of the loss surface.
+
+\subsection{Variations of Gradient Descent}
+
+Computing gradients over an entire dataset at every update can be computationally expensive for large-scale problems. To address this, several variants of gradient descent are commonly used. Consider a dataset of size \(N\).
+
+\subsubsection{Batch Gradient Descent (BGD)}
+
+Batch Gradient Descent computes gradients using the \textbf{entire training dataset} at every update step. Gradients from all datapoints are averaged before updating the parameters.
+
+This method provides the most accurate estimate of the true gradient and produces stable convergence. However, it is computationally expensive and impractical for modern deep learning datasets.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture16/batch_gd.png}
+    \caption{Batch Gradient Descent convergence path.}
+\end{figure}
+
+\subsubsection{Stochastic Gradient Descent (SGD)}
+
+Stochastic Gradient Descent updates the model using \textbf{one randomly selected datapoint} at each iteration. This greatly reduces memory and computational cost.
+
+Because each update uses only one sample, the gradient estimate has high variance. This introduces noise into the optimization path, producing an erratic but fast trajectory.
+
+Interestingly, this noise can be beneficial: it helps the optimizer escape saddle points and shallow local minima in non-convex loss landscapes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture16/stochastic_gd.png}
+    \caption{Stochastic Gradient Descent convergence path.}
+\end{figure}
+
+\subsubsection{Mini-batch Gradient Descent (MBGD)}
+
+Mini-batch Gradient Descent provides a compromise between BGD and SGD. The dataset is divided into batches of size \(b\), and gradients are computed using each mini-batch.
+
+This approach reduces gradient variance compared to SGD while remaining computationally efficient. It also allows efficient parallel computation on GPUs and modern hardware.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture16/minibatch_gd.png}
+    \caption{Mini-batch Gradient Descent convergence path.}
+\end{figure}
+
+\medskip
+
+Mini-batch gradient descent is the \textbf{standard training method in deep learning}. It balances computational efficiency, stability, and the beneficial stochasticity needed to optimize highly non-convex neural network loss functions.
+
+\section{Loss Functions and Gradient Descent Challenges}
+
+\subsection{Loss Surface Geometries}
+
+The loss surface in neural network training can be viewed as a high-dimensional landscape that describes how the loss function changes with respect to the model parameters. Each point in this landscape corresponds to a particular choice of parameters, and the goal of training is to navigate this surface toward regions of low loss. In modern neural networks, this surface is extremely high dimensional and highly non-convex, leading to a geometry that is far more complicated than the simple convex objectives studied earlier in the course.
+
+As a result, optimization becomes challenging: instead of a single bowl-shaped surface with a unique global minimum, neural networks often exhibit a rugged landscape with flat regions, steep valleys, and many stationary points.
+
+\subsection{Challenges with Optimization and its Impact on Gradient Descent}
+
+Two major obstacles encountered when navigating the loss surface are \textbf{local minima} and \textbf{saddle points}. Both correspond to locations where gradients become small or vanish, which can slow or halt gradient-based optimization.
+
+\paragraph{Local Minima}
+A local minimum is a point on the loss surface where the loss is smaller than in nearby regions but is not necessarily the smallest possible value overall. Gradient descent is a local optimization method, meaning it only uses nearby information (the gradient), so it cannot easily determine whether it has reached a globally optimal solution or merely a locally optimal one.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/Loss_function_visual.png}
+\caption{Loss surfaces may contain many local minima and flat regions where gradient descent can slow down or stop, potentially leading to suboptimal solutions.}
+\label{fig:loss_function_ex}
+\end{figure}
+
+\paragraph{Saddle Points}
+Saddle points are stationary points where the gradient is zero but the point is neither a minimum nor a maximum. They are especially problematic in high dimensions and occur far more frequently than poor local minima in modern neural networks.
+
+At a saddle point:
+\begin{itemize}
+    \item The gradient is near zero, so progress becomes very slow.
+    \item Some directions have positive curvature (loss increases), while others have negative curvature (loss decreases).
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/saddle_point.jpg}
+\caption{At saddle points, gradients vanish even though better solutions exist in certain directions. This can significantly slow training.}
+\label{fig:saddle_ex}
+\end{figure}
+
+In practice, these challenges explain why training deep neural networks requires careful optimization strategies such as momentum, adaptive learning rates (e.g., Adam), and stochastic gradient descent. These techniques help models escape flat regions and saddle points and make steady progress toward good solutions.
+
+\section{Enhancing Gradient Descent with Momentum}
+
+\subsection{Intuition Behind Momentum}
+
+At its simplest, neural network parameter optimization can be thought of as a ball rolling down a loss surface, with the goal of identifying the lowest point (point of lowest loss). Given this, then in this analogy, using \textbf{momentum} helps the ball pass over flat regions and avoid getting stuck in small bumps or local minima. In this way the ball can continue to progress towards the optimal solution while overcoming the challenges discussed in the previous section.
+
+\subsection{Mathematical Formulation of Momentum}
+The momentum-based gradient descent update can be described using the following equations:
+
+\[
+\mathbf{v}(t+1) = \beta \mathbf{v}(t) + \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} t
+\]
+
+\[
+\mathbf{W}(t+1) = \mathbf{W}(t) - \alpha \mathbf{v}(t+1)
+\]
+
+where:
+\begin{itemize}
+    \item \( \mathbf{v}(t) \) is the velocity term at time \( t \).
+    \item \( \beta \) is the coefficient of momentum, typically a value close to but less than 1 (e.g., 0.99). It controls how much of the past velocity is retained.
+    \item \( \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} (t)\) is the gradient of the loss function with respect to the weights at time \( t \).
+\end{itemize}
+
+\noindent In standard gradient descent, the update for the weight \( \mathbf{w} \) at each step $t$ is based solely on the gradient of the loss function $L(\theta)$. However, in momentum-based gradient descent, an additional term called the velocity (or momentum term) 
+$v(t)$ is introduced. This velocity term keeps track of the past gradients and is used to ``smooth" the updates in the current iteration. This means that even if the gradient is 0 at a plateau or saddle point, the algorithm can continue forward and overcome these points. If we consider $\beta = 0 $, then the above formula reduces to the standard Stochastic Gradient Descent (SGD) algorithm. Despite this, an issue with momentum-based gradient descent done like this is that it can cause the optimization algorithm to overshoot and in certain cases completely miss the global minima.
+
+\subsection{Velocity as an Exponential Running Average}
+
+The velocity term in the momentum-based gradient descent can be interpreted as an exponentially weighted running average of past gradients:
+
+\[
+\mathbf{v}(t+1) = \beta \mathbf{v}(t) + \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} t
+\]
+
+\noindent Continuing to apply the recurrence relation iteratively, we get:
+
+\[
+\mathbf{v}(t+1) = \beta \left( \beta \mathbf{v}(t-1) + \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} (t-1) \right) + \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} t
+\]
+
+\[
+= \beta^2 \mathbf{v}(t-1) + \beta \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t-1) + \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} t
+\]
+
+\noindent This shows that the velocity term effectively accumulates the gradients over multiple past iterations, weighted by powers of $ \beta $. The higher the value of $\beta $, the more influence past gradients have on the current velocity. The velocity term is essentially a weighted sum of all past gradients, with weights that decay exponentially over time. This exponential running average of gradients allows the optimization algorithm to handle noisy gradients better but better account for the true effects the gradients should have on the momentum so that overshoot is minimized, leading to faster and more stable convergence.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/gradient_plus_mumentum.jpg}
+\caption{When gradient decent is combined with the concept of momentum the optimization algorithm has a driving force even when the gradient at a given point is 0. This helps the algorithm overcome local minima and saddle points and continue towards the global solution, as seen in the image.}
+\label{fig:mumentum_ex}
+\end{figure}
+
+\section{Condition Numbers Within Optimization}
+
+\subsection{Loss Curvature and the Hessian Matrix}
+
+The curvature of the loss function plays a central role in shaping the landscape of the loss surface. As discussed earlier, most neural network objectives are highly non-convex, which makes parameter optimization significantly more challenging than the convex problems studied earlier in the course. One powerful way to understand the local curvature of a loss function is through the \textbf{Hessian matrix}, which captures second-order information about how the loss changes with respect to the model parameters.
+
+\noindent The Hessian matrix \( \mathbf{H}(\boldsymbol{\theta}) \) is defined as
+
+\[
+\mathbf{H}(\boldsymbol{\theta}) =
+\begin{bmatrix}
+\frac{\partial^2 L(\boldsymbol{\theta})}{\partial \theta_1^2} & \cdots & \frac{\partial^2 L(\boldsymbol{\theta})}{\partial \theta_1 \partial \theta_P} \\
+\vdots & \ddots & \vdots \\
+\frac{\partial^2 L(\boldsymbol{\theta})}{\partial \theta_P \partial \theta_1} & \cdots & \frac{\partial^2 L(\boldsymbol{\theta})}{\partial \theta_P^2}
+\end{bmatrix}
+\]
+
+\noindent where \( \mathbf{H}(\boldsymbol{\theta}) \in \mathbb{R}^{P \times P} \) is a square matrix containing the second-order partial derivatives of the loss function \( L(\boldsymbol{\theta}) \) with respect to the parameters. While gradients describe the slope of the loss surface, the Hessian describes how that slope changes, providing a quantitative measure of curvature.
+
+\medskip
+
+The eigenvalues and eigenvectors of the Hessian provide a geometric interpretation of the local shape of the loss surface. The eigenvectors indicate the \textbf{principal directions of curvature}, while the eigenvalues indicate the \textbf{principal curvatures}—that is, how sharply the loss changes along those directions. Large eigenvalues correspond to steep curvature, while small eigenvalues correspond to flat directions.
+
+\medskip
+
+\noindent When the Hessian is positive definite (for example, near a local minimum), we can use its eigenvalues to define the \textbf{condition number} of the loss surface:
+
+\[
+\text{Condition Number} = \frac{\lambda_{\max}}{\lambda_{\min}}
+\]
+
+\noindent where \( \lambda_{\max} \) and \( \lambda_{\min} \) denote the largest and smallest positive eigenvalues of the Hessian. The condition number measures how differently the loss surface curves in different directions.
+
+\medskip
+
+A \textbf{large condition number} indicates that the loss surface is highly anisotropic: the curvature is steep in some directions and very flat in others. Geometrically, this produces a long, narrow valley in the loss landscape.
+
+\medskip
+
+From a geometric perspective, this has an important consequence for gradient descent. To avoid overshooting in the steep direction, the algorithm must use a small learning rate. However, this same small step size leads to extremely slow progress along the flat direction. As a result, the optimization trajectory often exhibits a characteristic zig-zag path across the valley, causing slow and inefficient convergence. Loss surfaces with large condition numbers are therefore referred to as \textbf{ill-conditioned}.
+
+\medskip
+
+One way to mitigate the challenges of ill-conditioning is to use optimization algorithms that adapt the learning rate for each parameter individually. By adjusting step sizes based on local curvature, adaptive methods can make larger progress along flat directions while remaining stable in steep directions. In the following sections, we will explore several adaptive optimization algorithms and examine how they improve convergence in practice.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/Curvature.png}
+\caption{An illustration of anisotropic curvature: the surface is much steeper in one direction than another, producing a narrow valley that slows gradient descent.}
+\label{fig:curvature_ex}
+\end{figure}
+
+
+\section{AdaGrad - Adaptive Gradient Algorithm}
+
+\subsection{Overview}
+
+The AdaGrad (Adaptive Gradient) algorithm was one of the first optimization methods to introduce \textbf{per-parameter adaptive learning rates}. Instead of using a single global step size, AdaGrad adjusts the learning rate for each parameter based on the historical sum of squared gradients. As a result, parameters that consistently experience large gradients receive smaller updates, while parameters with small or infrequent gradients receive relatively larger updates. This adaptive behavior helps achieve more stable convergence in high-dimensional optimization problems.
+
+\subsection{Intuition Behind AdaGrad}
+
+The key idea behind AdaGrad is to accumulate squared gradients over time and use this information to rescale parameter updates. Directions with higher curvature tend to produce larger gradients, which causes the accumulated sum to grow faster in those directions. Consequently, the effective learning rate in these directions becomes smaller, resulting in dampened updates.
+
+This element-wise scaling makes AdaGrad sensitive to the local geometry of the loss surface and helps reduce the zig-zag behavior seen in ill-conditioned optimization problems. Additionally, parameters that are updated infrequently maintain relatively large learning rates, which makes AdaGrad particularly effective for problems with \textbf{sparse features}, such as natural language processing and recommendation systems.
+
+\subsection{Mathematical Formulation}
+
+AdaGrad updates the model parameters \( \mathbf{W} \) using the following equations:
+
+\[
+\mathbf{G}(t+1) = \mathbf{G}(t) + \left( \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t) \right)^2
+\]
+
+\[
+\mathbf{W}(t+1) = \mathbf{W}(t) - 
+\frac{\alpha}{\sqrt{\mathbf{G}(t+1) + \epsilon}}
+\cdot 
+\frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t)
+\]
+
+\noindent where
+\begin{itemize}
+    \item \( \mathbf{G}(t+1) \) is the accumulated sum of squared gradients for each parameter,
+    \item \( \alpha \) is the global learning rate,
+    \item \( \epsilon \) is a small constant used to prevent division by zero.
+\end{itemize}
+
+In directions with large curvature, gradients tend to be larger, causing the accumulated value in \( \mathbf{G}(t+1) \) to grow quickly. This reduces the effective learning rate in those directions, preventing overly large parameter updates and promoting stable convergence.
+
+\subsection{Advantages and Drawbacks of AdaGrad}
+
+AdaGrad offers several advantages. Its adaptive learning rates help address ill-conditioned optimization problems and reduce the need for manual learning rate tuning. The algorithm is particularly well suited for sparse data settings, where infrequent features benefit from larger updates.
+
+However, AdaGrad also has a significant limitation. Because it continually accumulates squared gradients, the denominator in the update rule grows monotonically over time. As a result, the effective learning rate steadily decreases and can eventually become extremely small. In long training runs, this may cause learning to slow dramatically or even stop altogether before reaching a good solution.
+
+This limitation makes AdaGrad less suitable for deep learning and other non-convex problems that require sustained exploration of the parameter space. Later adaptive optimization methods, such as RMSProp and Adam, were developed to address this issue by preventing the learning rate from decaying too aggressively.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/Adagrad.jpg}
+\caption{AdaGrad adapts the learning rate to follow the optimal path in ill-conditioned problems, reducing oscillations compared to standard gradient descent.}
+\label{fig:adagrad_ex}
+\end{figure}
+
+\section{RMSProp - Root Mean Square Propagation}
+
+\subsection{Overview}
+
+RMSProp is an adaptive learning rate optimization algorithm designed to address the main limitation of AdaGrad. While AdaGrad accumulates squared gradients indefinitely—causing the learning rate to shrink toward zero—RMSProp introduces a \textbf{decay factor} that maintains a running average of recent squared gradients. This prevents the denominator from growing without bound and allows learning to continue throughout training.
+
+\subsection{Intuition Behind RMSProp}
+
+AdaGrad rescales the learning rate using the sum of all past squared gradients. Although this helps initially, the accumulation grows monotonically, eventually causing updates to become extremely small.
+
+RMSProp solves this problem by replacing the cumulative sum with an \textbf{exponentially decaying average}. Instead of treating all past gradients equally, RMSProp assigns more importance to recent gradients and gradually “forgets’’ older ones. This allows the optimizer to remain responsive to the current shape of the loss surface while still benefiting from adaptive step sizes.
+
+From a geometric perspective, RMSProp continues to rescale updates to handle ill-conditioned curvature, but it avoids the premature learning slowdown that affects AdaGrad.
+
+\subsection{Mathematical Formulation}
+
+RMSProp updates the model parameters \( \mathbf{W} \) using
+
+\[
+\mathbf{G}(t+1) = \beta \mathbf{G}(t) + (1 - \beta)
+\left( \frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}} (t) \right)^2
+\]
+
+\[
+\mathbf{W}(t+1) = \mathbf{W}(t) -
+\frac{\alpha}{\sqrt{\mathbf{G}(t+1) + \epsilon}}
+\cdot
+\frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t)
+\]
+
+\noindent where
+\begin{itemize}
+    \item \( \mathbf{G}(t+1) \) is an exponentially weighted moving average of squared gradients,
+    \item \( \beta \) is the decay rate (typically \( \beta \approx 0.9 \)),
+    \item \( \alpha \) is the global learning rate,
+    \item \( \epsilon \) is a small constant used to prevent division by zero.
+\end{itemize}
+
+The decay factor \( \beta \) acts as a \textbf{forgetting mechanism}, ensuring that the optimizer focuses primarily on recent gradient information.
+
+\subsection{Why RMSProp Improves on AdaGrad}
+
+By preventing the accumulated gradient term from growing indefinitely, RMSProp maintains a stable effective learning rate throughout training. This allows the optimizer to continue making meaningful progress even in long training runs and in highly non-convex loss landscapes.
+
+As a result, RMSProp typically converges faster and more reliably than AdaGrad, particularly for deep neural networks. This idea of combining adaptive learning rates with momentum will be further extended in the Adam optimizer, which builds directly on RMSProp.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\linewidth]{img/lecture16/RMSProp.png}
+\caption{Comparison of optimization trajectories. RMSProp follows a similar path to AdaGrad but converges faster by preventing the learning rate from shrinking too aggressively.}
+\label{fig:rmsprop_ex}
+\end{figure}
+
+\section{Adam - Adaptive Moment Estimation}
+
+\subsection{Overview}
+
+Adam combines the key ideas behind \textbf{momentum} and \textbf{RMSProp} into a single optimizer. Like RMSProp, Adam adapts the learning rate for each parameter using a running average of squared gradients. Like momentum, it maintains a running average of past gradients to accelerate optimization and reduce oscillations. This combination makes Adam a powerful and widely used optimizer for training deep neural networks.
+
+\subsection{Intuition Behind Adam}
+
+Adam maintains two moving averages during training. The first tracks the \textbf{mean of the gradients} (momentum), which helps smooth noisy updates and accelerate movement in consistent directions. The second tracks the \textbf{variance of the gradients} (adaptive scaling), which adjusts step sizes based on local curvature.
+
+Together, these two mechanisms allow Adam to move quickly along shallow directions while remaining stable in steep directions, making it both fast and robust in high-dimensional and non-convex optimization problems.
+
+\subsection{Mathematical Formulation}
+
+Adam maintains two running averages:
+\begin{itemize}
+    \item The first moment \( \mathbf{v} \) (mean of gradients),
+    \item The second moment \( \mathbf{G} \) (mean of squared gradients).
+\end{itemize}
+
+\[
+\mathbf{v}(t+1) = \beta_1 \mathbf{v}(t) + (1 - \beta_1)
+\frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t)
+\]
+
+\[
+\mathbf{G}(t+1) = \beta_2 \mathbf{G}(t) + (1 - \beta_2)
+\left(\frac{\partial L(\boldsymbol{\theta})}{\partial \mathbf{W}}(t)\right)^2
+\]
+
+Because these moving averages start at zero, they are biased toward zero in early iterations. Adam therefore uses \textbf{bias correction}:
+
+\[
+\hat{\mathbf{v}}(t+1) = \frac{\mathbf{v}(t+1)}{1 - \beta_1^t}, 
+\quad
+\hat{\mathbf{G}}(t+1) = \frac{\mathbf{G}(t+1)}{1 - \beta_2^t}
+\]
+
+The parameter update becomes
+
+\[
+\mathbf{W}(t+1) = \mathbf{W}(t) -
+\frac{\alpha}{\sqrt{\hat{\mathbf{G}}(t+1)} + \epsilon}
+\cdot \hat{\mathbf{v}}(t+1)
+\]
+
+\noindent where typical values are \( \beta_1 = 0.9 \), \( \beta_2 = 0.999 \).
+
+\subsection{Advantages of Adam}
+
+Adam combines the strengths of momentum and adaptive learning rates, which allows it to converge quickly and reliably in many deep learning tasks. The momentum component accelerates optimization by smoothing noisy gradient updates and enabling faster movement along consistent descent directions. At the same time, the adaptive learning rate mechanism rescales updates for each parameter individually, helping the optimizer remain stable in steep directions while making meaningful progress in flatter regions of the loss surface.
+
+Adam is also particularly effective when gradients are noisy or sparse, and it typically requires less manual hyperparameter tuning than many other optimizers. These properties make Adam a strong default choice for a wide range of deep learning applications.
+
+\subsection{Drawbacks of Adam}
+
+Despite its popularity, Adam is not always the best optimizer. A key limitation is that Adam can sometimes produce solutions that \textit{generalize worse} than those found by stochastic gradient descent (SGD) with momentum. Empirically, SGD often achieves better test performance in large-scale vision and language models.
+
+Additionally, Adam’s adaptive learning rates can occasionally lead to overly aggressive or unstable updates, particularly when hyperparameters are poorly tuned.
+
+For this reason, many modern training pipelines begin with Adam for fast progress and later switch to SGD for improved generalization.
+
+\medskip
+
+Adam represents a powerful culmination of the adaptive optimization ideas introduced in AdaGrad and RMSProp, combining momentum and adaptive scaling into a single unified method.
+\section{Visualizing Filters in Convolutional Neural Networks}
+
+Thus far, we have analyzed CNNs from an architectural and optimization perspective. Despite their strong performance, however, CNNs are often criticized for their \textbf{black-box nature}: modern networks contain millions of parameters distributed across many layers, making it difficult to understand how predictions are formed. One way to build intuition is by visualizing the filters learned by different convolutional layers. These visualizations reveal how CNNs progressively transform raw pixels into meaningful high-level representations.
+
+\medskip
+
+In the first convolutional layer, filters primarily detect \emph{low-level features} such as edges, gradients, and color contrasts. Each filter (or kernel) is a small matrix of learnable weights that is slid across the image. At each location, the filter computes a weighted sum of the pixels within a local \textbf{receptive field}. The result is a \emph{feature map} that highlights where a particular pattern appears in the image.
+
+Figure~\ref{fig:earlyfilter} illustrates an example kernel designed to detect edges in a grayscale image. When convolved with an input image, the resulting feature map highlights edge locations and captures transitions from light-to-dark and dark-to-light regions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture16/earlylayer.png}
+    \caption{An example convolution of a $17 \times 17 \times 1$ image with a $3 \times 3$ edge-detection kernel.}
+    \label{fig:earlyfilter}
+\end{figure}
+
+As we move deeper into the network, features become increasingly abstract. Early layers detect edges and colors, middle layers detect textures and shapes, and deeper layers respond to object parts and semantic concepts. This hierarchical feature learning is a defining property of convolutional neural networks.
+
+\subsection{Visualizing AlexNet's Filters}
+
+One of the most influential CNN architectures is \textbf{AlexNet}, which won the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) in 2012 and sparked the modern deep learning revolution in computer vision. AlexNet consists of five convolutional layers followed by three fully connected layers. The early layers learn low-level features, while deeper layers combine these features to form increasingly complex representations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{img/lecture16/alexnet.png}
+    \caption{AlexNet architecture. An image of size $224\times224\times3$ is processed through multiple convolutional layers with progressively smaller filters.}
+\end{figure}
+
+\medskip
+
+The first convolutional layer of AlexNet contains 64 filters of size $11\times11\times3$. These filters act as edge and color detectors and respond strongly to simple visual patterns such as lines, edges, and color contrasts.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture16/alexnet-firstlayer.png}
+    \caption{Filters from the first convolutional layer of AlexNet.}
+    \label{fig:alexnet-firstlayer}
+\end{figure}
+
+As we progress deeper into the network, filters become less visually interpretable but more semantically meaningful. The second and third convolutional layers begin combining edges and textures into more complex shapes and patterns. The number of filters and channels also increases, reflecting the accumulation of features learned from previous layers.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture16/alexnet-secondthird.png}
+    \caption{Filters from the second and third convolutional layers of AlexNet showing more abstract patterns.}
+    \label{fig:deeper-layer-filters}
+\end{figure}
+
+By the final convolutional layer, filters respond to highly specific object parts. Figure~\ref{fig:final-layer} shows activation maps from the fifth convolutional layer when a school bus image is input to AlexNet. One filter activates strongly in regions corresponding to wheels, demonstrating how deeper layers learn detectors for meaningful object components.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{img/lecture16/final-filter.png}
+    \caption{Activation maps from the fifth convolutional layer of AlexNet. The highlighted filter responds strongly to wheels across multiple images.}
+    \label{fig:final-layer}
+\end{figure}
+
+\medskip
+
+These visualizations provide strong evidence that CNNs learn hierarchical representations of visual data. Rather than memorizing images, the network gradually builds increasingly complex features—from edges to textures to object parts—allowing it to recognize high-level semantic concepts. Filter visualization therefore offers an important window into the internal mechanisms of deep neural networks.
+
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+    \item \textbf{Question 1:}
+    \newline
+    You are training a Neural Network on a dataset with 1 million datapoints. Describe the advantages and disadvantages of using SGD, MBGD, and BGD?
+    \newline
+    \textbf{Answer:}
+    \begin{itemize}
+        \item SGD
+        \begin{itemize}
+            \item Advantages: Very memory efficient due to weight and bias updates from each datapoint. Can help escape local minima due to high update variance.
+            \item Disadvantages: High variance in update steps can lead to slower and less stable convergence paths.
+        \end{itemize}
+        \item MBGD
+        \begin{itemize}
+            \item Advantages: Balances stability and efficiency by calculating gradients over small batches. Allows for a faster convergence than BGD, but also a smoother convergence path than SGD.
+            \item Disadvantages: Variable sizes of batches can affect the speed and stability of training.
+        \end{itemize}
+        \item BGD
+        \begin{itemize}
+            \item Advantages: Most stable updates and smoothes convergence path due to gradient updates from then entire dataset.
+            \item Disadvantages: Significantly expensive computationally due to the requirement of processing every datapoint, and almost never implemented in practice.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Question 2:}
+    \newline
+    You are tasked with training a Neural Network on a large dataset consisting of sparse and dense features. You need to choose an appropriate optimizer to ensure stable convergence and adaptability to varying feature importance. Discuss the advantages and disadvantages of Adagrad, RMSprop, and Adam.
+    \newline
+    \textbf{Answer:}
+    \begin{itemize}
+        \item Adagrad
+        \begin{itemize}
+            \item Advantages: Suitable for sparse data since it changes the learning rates per parameter.
+            \item Disadvantages: Experiences rapid learning decay, which is less ideal for long-term training on dense features.
+        \end{itemize}
+        \item RMSprop
+        \begin{itemize}
+            \item Advantages: Improves upon Adagrad's rapid decay issue by utilizing a moving average of squared gradients. This stabilizes the learning rate.
+            \item Disadvantages: Can be sensitive to the choice of learning rate. It does not include momentum, which can limit its convergence speed. Due to the moving average of squared gradients, RMS prop may also struggle with sparse gradients as the moving average may diminsh.
+        \end{itemize}
+        \item Adam
+        \begin{itemize}
+            \item Advantages: Improves upon RMSprop by incorporating momentum, allowing for smoother convergence and adaptation to varying feature importance..
+            \item Disadvantages: Can sometimes lead to poorer performance compared to SGD with momentum because adaptive learning rates can cause the optimizer to settle in sharp minima of the loss function.
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{Question 3:}
+    \newline
+    Explain why ill-conditioned loss surfaces cause gradient descent to converge slowly. How do adaptive optimizers help address this issue?
+    
+    \newline
+    \textbf{Answer:}
+    Ill-conditioned loss surfaces have very different curvature in different directions. This creates a long, narrow valley where the loss changes rapidly in one direction and slowly in another. Gradient descent must use a small learning rate to avoid overshooting in steep directions, which leads to slow progress along flat directions and a zig-zag optimization path. Adaptive optimizers rescale updates for each parameter based on gradient history, allowing larger steps in flat directions and smaller steps in steep directions, improving convergence speed.
+    
+    \item \textbf{Question 4:}
+    \newline
+    Why is Mini-batch Gradient Descent the standard training method in deep learning?
+    
+    \newline
+    \textbf{Answer:}
+    Mini-batch Gradient Descent provides a balance between the stability of Batch Gradient Descent and the efficiency of Stochastic Gradient Descent. It reduces computational cost while maintaining a relatively low-variance gradient estimate. Additionally, mini-batches allow efficient parallel computation on GPUs and introduce a small amount of stochasticity that helps escape saddle points and local minima. For these reasons, it is the default optimization strategy in modern deep learning.
+    
+    \item \textbf{Question 5:}
+    \newline
+    Describe how the features learned by CNN filters change as we move from early layers to deeper layers.
+    
+    \newline
+    \textbf{Answer:}
+    Early convolutional layers learn low-level features such as edges, gradients, and color contrasts. Middle layers combine these features to detect textures, shapes, and patterns. Deeper layers learn high-level semantic features such as object parts and meaningful visual concepts (e.g., wheels or faces). This hierarchical feature learning enables CNNs to transform raw pixels into high-level representations useful for classification.
+
+\end{enumerate}
+
+\end{document}

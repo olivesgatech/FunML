@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> What problem do Transformers solve compared to RNNs?</p>
+<p><strong>Solution:</strong> RNNs process sequences one token at a time, making them inherently sequential and slow to train on long sequences. They also suffer from vanishing gradients over long dependencies. Transformers replace recurrence with self-attention, which processes all positions in parallel and computes direct pairwise relationships between any two tokens regardless of their distance in the sequence.</p></li>
+<li><p><strong>Question:</strong> Why are there separate Query, Key, and Value vectors instead of a single representation?</p>
+<p><strong>Solution:</strong> If the same vector were used for both querying and being queried, each token’s dot product with itself would dominate, causing the model to mostly attend to itself. Separate <span class="math inline">\(Q\)</span> and <span class="math inline">\(K\)</span> projections allow the model to learn asymmetric relationships (e.g., “it” attends to “animal” but not necessarily vice versa). A separate <span class="math inline">\(V\)</span> decouples matching from retrieval: the information used for matching need not be the same as the information passed forward.</p></li>
+<li><p><strong>Question:</strong> Why do we scale by <span class="math inline">\(\sqrt{d_k}\)</span> in the attention formula?</p>
+<p><strong>Solution:</strong> For large values of <span class="math inline">\(d_k\)</span>, the dot products <span class="math inline">\(Q \cdot K^\top\)</span> grow large in magnitude, pushing the softmax function into regions where it has extremely small gradients. Dividing by <span class="math inline">\(\sqrt{d_k}\)</span> keeps the variance of the dot products at a manageable scale, ensuring stable gradient flow during training.</p></li>
+<li><p><strong>Question:</strong> What is the difference between self-attention and cross-attention?</p>
+<p><strong>Solution:</strong> In self-attention, all three matrices <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> are derived from the same input (e.g., the encoder input). In cross-attention, <span class="math inline">\(Q\)</span> comes from one source (e.g., the decoder) while <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> come from another source (e.g., the encoder output). Cross-attention allows the decoder to attend to relevant parts of the encoder’s representation.</p></li>
+<li><p><strong>Question:</strong> Why is layer normalization preferred over batch normalization in Transformers?</p>
+<p><strong>Solution:</strong> Batch normalization computes statistics across a batch for each feature, which is problematic in sequence modeling because sequence lengths vary. Layer normalization computes statistics across all features for each individual sample, making it independent of batch size and sequence length. It also does not require storing running statistics from training for use at inference.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer differ from a standard Transformer?</p>
+<p><strong>Solution:</strong> A Vision Transformer (ViT) adapts the Transformer encoder for image data. Instead of word embeddings, ViT divides an image into fixed-size patches (e.g., <span class="math inline">\(16 \times 16\)</span>), flattens each patch, and linearly projects it into an embedding. Position embeddings are added so the model can distinguish spatial locations. The patch embeddings are then processed by a standard Transformer encoder, and the output is used for classification or other downstream tasks.</p></li>
+<li><p><strong>Question:</strong> Why is the Transformer decoder autoregressive?</p>
+<p><strong>Solution:</strong> In sequence generation tasks (e.g., translation), each output token depends on all previously generated tokens. The decoder generates tokens one at a time, feeding each prediction back as input for the next step. This autoregressive property ensures that the model can condition on its own prior outputs, which is essential for maintaining coherent and contextually correct sequences.</p></li>
+<li><p><strong>Question:</strong> What role does the <code>[CLS]</code> token play in Vision Transformers?</p>
+<p><strong>Solution:</strong> The <code>[CLS]</code> (classification) token is a special learnable embedding prepended to the sequence of patch embeddings. Through self-attention across all Transformer layers, the <code>[CLS]</code> token aggregates information from all patches. Its final output representation serves as the image-level representation, which is then passed to the classification head (MLP) for making predictions.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

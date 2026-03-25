@@ -1,0 +1,1339 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage,hyperref}
+\usepackage{algorithm,algpseudocode}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{float}
+\usepackage{hyperref}
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{11}{Clustering}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+\section{Lecture Objectives}
+
+In the previous lecture, we introduced the concept of clustering, discussed its
+motivation, and explored several real-world applications. We also developed the
+mathematical foundations required to measure similarity and understand the
+geometry of data in feature space. Building on that foundation, this lecture
+focuses on one of the most widely used clustering algorithms in practice:
+\textbf{k-means clustering}.
+
+The goal of this lecture is to move from conceptual understanding to algorithmic
+implementation. We will formalize the k-means problem, study the standard
+training and inference procedures, analyze convergence behavior, and examine
+practical considerations such as initialization and the choice of the number of
+clusters. By the end of this lecture, students should understand both the theory
+and the practical workflow required to apply k-means clustering to real datasets.
+
+\section{K-Means Clustering}
+
+In this lecture, we develop a complete understanding of the k-means clustering
+pipeline. We begin by formulating the k-means optimization problem and
+interpreting its objective function. We then present the standard iterative
+algorithm used to learn cluster centroids and assign data points to clusters.
+
+Next, we discuss the \textbf{convergence criteria} of the algorithm and explain
+why the objective function decreases monotonically during training. We then walk
+through a detailed step-by-step example to build geometric intuition for how the
+algorithm behaves in practice.
+
+Finally, we study the \textbf{initialization problem}, which plays a crucial role
+in the quality and stability of the final clustering solution. This includes
+strategies for choosing the number of clusters and selecting good initial
+centroid locations.
+
+
+\subsection{K-Means Problem Statement}
+
+K-means clustering aims to partition a dataset into a predefined number of
+groups, or clusters, such that data points within the same cluster are similar
+to each other and dissimilar to points in other clusters. Formally, we are given
+a dataset
+\[
+X=\{x_1,x_2,\ldots,x_N\},
+\]
+where each data sample $x_i=[x_{i1},x_{i2},\ldots,x_{iP}]^T$ lies in a
+$P$-dimensional feature space. The goal is to divide the dataset into $k$
+clusters $\{C_1,C_2,\ldots,C_k\}$, where the value of $k$ is chosen in advance.
+
+The key idea behind k-means is that each cluster is represented by a
+\textbf{centroid}, which acts as the “center” of the cluster. Every data point is
+assigned to the cluster whose centroid is closest to it according to the
+Euclidean distance. This assignment rule encourages points that are spatially
+close in the feature space to be grouped together.
+
+Once cluster assignments are made, the centroid of each cluster is recomputed as
+the mean of the data points assigned to that cluster:
+\[
+m_j = \frac{1}{|C_j|} \sum_{x_i \in C_j} x_i.
+\]
+This definition explains the name \emph{k-means}: each cluster center is the mean
+of its assigned points.
+
+Intuitively, the algorithm searches for cluster centers that best summarize the
+data. By repeatedly assigning points to the nearest centroid and recomputing the
+means, the algorithm gradually moves the centroids toward regions of high data
+density.
+
+This process can be interpreted as minimizing the total squared distance between
+data points and their assigned centroids. This objective, known as the
+\emph{within-cluster sum of squares (WCSS)}, will be formally introduced in the
+next section.
+
+
+\subsection{Standard Algorithm of k-Means Clustering}
+
+The k-means algorithm follows an iterative optimization procedure that alternates
+between two simple steps: assigning data points to clusters and updating cluster
+centers. Although each step is straightforward, repeatedly alternating between
+them gradually improves the clustering solution. Intuitively, the algorithm
+starts with an initial guess of where cluster centers might be located and then
+refines these guesses until the assignments stop changing.
+
+This alternating procedure is an example of \textbf{coordinate descent}: during
+each iteration, the algorithm improves the cluster assignments while keeping the
+centroids fixed, and then improves the centroid locations while keeping the
+assignments fixed. Each iteration reduces the clustering objective (within-
+cluster sum of squares), which guarantees that the algorithm will eventually
+converge.
+
+The k-means algorithm consists of two main phases: a \textbf{training phase}, in
+which centroids are learned from the dataset, and an \textbf{inference phase}, in
+which new data points are assigned to the nearest learned centroid.
+
+\begin{algorithm}[H]
+\caption{k-Means Clustering Algorithm (Training Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Data points $X = \{x_1, x_2, ..., x_N\}$, Number of clusters $k$
+\State \textbf{Output:} Centroids $M = \{m_1, m_2, ..., m_k\}$, Cluster memberships $C_j$
+\State Randomly initialize $k$ centroids $M^{(0)} = \{m_1^{(0)}, m_2^{(0)}, ..., m_k^{(0)}\}$ from the data \textbf{(Step 1)} 
+\Repeat
+    \State Assign each data point $x_i$ to the nearest centroid: \textbf{(Step 2)}
+    \[
+    C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_2 \leq \|x_i - m_l^{(t)}\|_2, \forall l, 1 \leq l \leq k \right\}
+    \]
+    \State Recompute the centroids for each cluster: \textbf{(Step 3)}
+    \[
+    m_j^{(t+1)} = \frac{1}{\left|C_j^{(t)}\right|} \sum_{x_i \in C_j^{(t)}} x_i, 
+    \quad \forall j,\ 1 \leq j \leq k
+    \]
+\Until{convergence criterion is met (e.g., centroids do not change significantly or a fixed number of iterations) \textbf{(Step 4)}}
+\State \textbf{Return:} Final centroids $M$ and cluster memberships $C_j$
+\end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.38\linewidth]{img/lecture11/Screenshot 2024-09-29 at 10.43.43 AM.png}
+    \caption{k-Means Clustering Standard Algorithm Procedure}
+    \label{fig:enter-label}
+\end{figure}
+
+Once the centroids have been learned, the clustering model can be used to assign
+new data points to clusters. This stage is referred to as the \textbf{inference
+phase}. Unlike the training phase, no centroid updates occur here; the learned
+centroids are treated as fixed representatives of the clusters. The assignment
+process is therefore computationally inexpensive and requires only distance
+computations.
+
+\begin{algorithm}[H]
+\caption{k-Means Clustering Algorithm (Inference Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} New data point $x_{\text{new}}$, Final centroids $M = \{m_1, m_2, ..., m_k\}$
+\State \textbf{Output:} Cluster assignment for $x_{\text{new}}$
+\State Compute the Euclidean distance between $x_{\text{new}}$ and each centroid $m_j$:
+\[
+d_j = \|x_{\text{new}} - m_j\|_2, \quad \forall j, 1 \leq j \leq k
+\]
+\State Assign $x_{\text{new}}$ to the cluster with the closest centroid:
+\[
+\text{Cluster}(x_{\text{new}}) = \arg \min_{j} d_j
+\]
+\State \textbf{Return:} The cluster assignment for $x_{\text{new}}$
+\end{algorithmic}
+\end{algorithm}
+
+
+
+\section{Convergence Criteria}
+
+Convergence criteria are used to determine when the algorithm should stop.
+In k-means, convergence is typically declared when the cluster assignments no
+longer change, the centroids no longer move appreciably, or the objective
+function stops decreasing.
+
+\begin{enumerate}
+    \item \textbf{Cluster assignments become static:}
+    no data points are reassigned to a different cluster between two iterations.
+
+    \item \textbf{Centroids become static:}
+    centroid updates become negligible (or exactly unchanged).
+
+    \item \textbf{The objective stops improving:}
+    the change in the sum of squared distances (SSD) between iterations becomes
+    very small.
+\end{enumerate}
+
+To define the objective, let $C_j$ be the $j$th cluster and $m_j$ be its centroid.
+Using Euclidean distance, the \textbf{Sum of Squared Distances (SSD)} is:
+\begin{equation}
+    \mathrm{SSD} = \sum_{j=1}^k \sum_{x_i \in C_j} \|x_i - m_j\|_2^2.
+\end{equation}
+
+Each iteration of k-means consists of an assignment step and an update step.
+Both steps are guaranteed to \textbf{never increase} the SSD:
+assigning each point to the nearest centroid reduces the distance within each
+cluster, and recomputing centroids as means minimizes the squared distance within
+each cluster given fixed assignments. As a result, the SSD decreases monotonically
+with every iteration.
+
+Since there are only finitely many possible cluster assignments, the algorithm
+must eventually stop. This guarantees that k-means always converges in a finite
+number of iterations.
+
+It is important to note, however, that k-means converges to a
+\textbf{local minimum}, not necessarily the global optimum. The final solution
+depends on the initial centroid placement, which is why different random
+initializations can produce different clustering results.
+
+
+\section{Examples of k-Means Clustering}
+
+\subsection{First Iteration}
+With the problem statement, standard algorithm, and convergence criteria introduced, we will now look at a few examples to enhance our concept. This is the sample data we will work within this example.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.12.16 AM.png}
+    \caption{Data Points}
+    \label{fig:enter-label}
+\end{figure}
+
+Step 1 of the algorithm states we will randomly choose k points from all data points to be the initial centroids. So we predefined $k=3$, and chose $m_1$,$m_2$, and $m_3$ as centroids.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.14.26 AM.png}
+    \caption{Initialized centroids}
+    \label{fig:enter-label}
+\end{figure}
+
+Step 2 is the assignment step. We need to determine cluster membership for each sample using the Euclidean distance equation:
+\[ C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_2 \leq \|x_i - m_l^{(t)}\|_2 \, \forall l, 1 \leq l \leq k \right\}. \]
+For example, if sample \( x_1 \) has coordinates (0.8, 4.2) and the centroid \( m_1 \) has coordinates (2.1, 3.9), then the Euclidean distance is calculated as:
+\[ d(x_1, m_1) = \sqrt{(0.8 - 2.1)^2 + (4.2 - 3.9)^2} \approx 1.334. \] 
+
+Assuming this distance is the smallest, $x_1$ will be assigned to cluster $C_1$. After determining cluster membership for each sample, the following result is obtained. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.31.47 AM.png}
+    \caption{Assignment of all samples using Euclidean distance}
+    \label{fig:enter-label}
+\end{figure}
+
+Step 3 is the update step, where we need to re-estimate centroids (mean) of all three current clusters using the formula $m_j = \frac{1}{|C_j|} \sum_{x_i \in C_j} x_i, \quad \forall j, 1 \leq j \leq 3$. For example, does $m_1$ centroid, the updated mean will be calculated by $m_1=(\frac{0.8+2.1+3.2+3.7+....+7.3}{9},\frac{4.1+3.9+4.3+....+3.1}{9})$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.07.38 PM.png}
+    \caption{centroids move the to the calculated mean of the clusters}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{Second Iteration}
+Now, we have to repeat steps 2 and 3 in the second iteration since we have not yet reached the convergence criteria. First, we need to re-assign cluster membership for each point. Repeat step 2 calculation using the equation
+\[ C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_2 \leq \|x_i - m_l^{(t)}\|_2 \, \forall l, 1 \leq l \leq k \right\}. \]
+we reached this plot: 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.10.20 PM.png}
+    \caption{Second iteration assignment cluster membership}
+    \label{fig:enter-label}
+\end{figure}
+
+Based on the reassigned clusters, we need to update the centroids using the previously introduced equation for step 3:$m_j = \frac{1}{|C_j|} \sum_{x_i \in C_j} x_i, \quad \forall j, 1 \leq j \leq 3$ 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.18.27 PM.png}
+    \caption{second iteration update step: Re-estimate centroids}
+    \label{fig:enter-label}
+\end{figure}
+
+\subsection{Third Iteration}
+
+With the new centroid, we need to reassign the samples to the clusters in the third iteration since the convergence criteria have yet to be met. The assignment step will reassign samples to their respective centroids using the Euclidean distance equation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 1.38.32 PM.png}
+    \caption{Third iteration assignment step}
+    \label{fig:enter-label}
+
+
+After the assignment step, we will repeat step 3 to update and re-estimate centroids: 
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 1.41.59 PM.png}
+    \caption{Third iteration update step}
+    \label{fig:enter-label}
+\end{figure}
+\end{figure}
+
+\subsection{Fourth Iteration}
+We will reassign every point. However, since there are no changes in cluster membership, the algorithm converges as the convergence criteria are met. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.01.26 PM.png}
+    \caption{Converged Algorithm, and final cluster assignment}
+    \label{fig:enter-label}
+\end{figure}
+
+
+\section{Initialization}
+
+The outcome of k-means depends strongly on initialization. Unlike many
+supervised learning algorithms, k-means optimizes a non-convex objective, which
+means the algorithm can converge to different local minima depending on the
+starting point. As a result, two runs of k-means on the same dataset can produce
+different clustering results if the initialization changes.
+
+In practice, two choices matter most:
+(1) the number of clusters $k$, and 
+(2) how the initial centroids are selected. 
+Poor initialization can lead to slow convergence and/or a suboptimal local
+minimum of the SSD objective.
+
+\begin{enumerate}
+
+\item \textbf{Choosing the number of clusters $k$.}
+
+If $k$ is too small, distinct groups may be merged. If $k$ is too large,
+natural groups may be split into multiple clusters. This highlights an important
+trade-off: small $k$ leads to overly simple models (under-segmentation), while
+large $k$ leads to overly complex models (over-segmentation).
+
+Figure~\ref{fig:k-choice} illustrates that when the ground truth has 3 clusters,
+choosing $k=8$ forces the algorithm to produce many small clusters that do not
+match the true structure. Notice that increasing $k$ always reduces the SSD
+objective, but this does not necessarily improve the interpretability or quality
+of the clustering.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.21.34 PM.png}
+    \caption{Different choices of $k$ lead to different clustering results.}
+    \label{fig:k-choice}
+\end{figure}
+
+\item \textbf{Choosing initial centroids.}
+
+Even when the correct value of $k$ is chosen, the algorithm may still converge to
+different solutions depending on the initial centroid locations. Because k-means
+iteratively refines clusters using local updates, the algorithm may become
+trapped in a local minimum of the SSD objective.
+
+Figure~\ref{fig:init-centroids} shows that selecting centroids in different
+regions of the space can produce drastically different cluster assignments. In
+one case, the algorithm quickly finds a good clustering, while in another case,
+it converges to a poorer solution.
+
+This sensitivity to initialization is the main motivation behind improved
+initialization methods such as \textbf{k-means++}, which selects well-separated
+starting centroids to increase the likelihood of finding a better solution.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.23.47 PM.png}
+    \caption{Different methods of initializing centroids can change the outcome.}
+    \label{fig:init-centroids}
+\end{figure}
+
+\end{enumerate}
+
+
+\subsection{Choice of $k$}
+
+Selecting the number of clusters is one of the most important and challenging
+decisions when using k-means. Because clustering is an unsupervised task, the
+true number of groups is typically unknown, and different values of $k$ can lead
+to very different interpretations of the same dataset.
+
+There are several common strategies for selecting $k$:
+
+\begin{enumerate}
+    \item \textbf{Domain knowledge.}
+    Use prior knowledge of the problem to estimate how many groups are expected.
+    In many real-world applications, subject-matter expertise provides strong
+    guidance. For example, in customer segmentation, a business may already know
+    that customers fall into a small number of marketing segments.
+
+    \item \textbf{Elbow / objective-based selection.}
+    Run k-means for multiple values of $k$ and choose a value that balances model
+    simplicity and fit by examining the SSD objective:
+    \[
+    \mathrm{SSD}(k) = \sum_{j=1}^k \sum_{x_i \in C_j} \|x_i - m_j\|_2^2.
+    \]
+    As $k$ increases, SSD always decreases because more clusters provide more
+    flexibility. However, beyond a certain point the improvement becomes small.
+    The \emph{elbow point}—where the curve bends and begins to flatten—often
+    provides a reasonable compromise between underfitting (too few clusters)
+    and overfitting (too many clusters).
+
+    \item \textbf{Validation-based selection.}
+    If an external evaluation metric is available (for example, labeled data used
+    only for evaluation), clustering results for different values of $k$ can be
+    compared using that metric. In practice, internal validation metrics such as
+    silhouette score or Davies–Bouldin index are also commonly used when labels
+    are not available.
+\end{enumerate}
+
+\subsection{Choice of Initial Centroids}
+
+Initialization plays a critical role in the success of k-means because the
+algorithm converges to a local minimum of the objective function. Poor initial
+centroids can lead to slow convergence or suboptimal clustering results.
+
+We focus on \textbf{k-means++}, a widely used initialization method that improves
+stability and reduces the chance of poor local minima compared to uniform random
+initialization. Instead of choosing all centroids randomly, k-means++ selects the
+first centroid uniformly at random and then chooses subsequent centroids with
+probability proportional to their squared distance from the nearest existing
+centroid. This encourages new centroids to be far apart from each other and
+spread across the dataset.
+
+In practice, k-means++ significantly improves both convergence speed and
+clustering quality, which is why it is the default initialization method in most
+modern machine learning libraries.
+
+
+% \section{k-Means ++}
+% k-Means algorithm performance is highly dependent on the choice of initial centroids. Choosing all the centroids at random can lead to a solution corresponding to a local minima which is much larger than the global minima, when considering the sum of squared distances within each cluster as the objective function being minimized. \\
+
+% k-Means++ is an algorithm to make a better choice of initial centroids to prevent an arbitrarily bad local minima. In the k-Means++ algorithm, the centroids are chosen at random in a sequential order from the set of data points.\\
+
+% The algorithm for choosing the initial centroids is described below: 
+% \begin{enumerate}
+%     \item[1.] Randomly choose the first center from the set of data points, let us call it $m_1$ .
+%     \item[2.] For each of the remaining data points $\mathbf{x}_i$, find $d(\mathbf{x}_i)$ = $||m_{closest} - \mathbf{x}_i||$ which is the distance between $x_i$ and the closest center. Initially, we only have one center to compute this distance but in future iterations we compute the distance from all the centers and choose the smallest one.
+%     \item[3.] For each point, we then calculate $p(\mathbf{x}_i)$ = $\frac{d(\mathbf{x}_i)}{\Sigma_id(\mathbf{x}_i)^2}$ . This helps us develop a probability distribution of the data points from which we need to pick the next centroid. Note that the data points with a higher probability are farther away from the previously chosen centroids.
+%     \item [4.] Choose the next centroid from the data set at random with probability proportional to $p$ which was computed in the previous step.
+%     \item [5.] Repeat steps 2, 3 and 4 until all k centers have been chosen.
+% \end{enumerate}
+
+% Once the initial centers are chosen, the standard k-Means clustering can be carried out.
+
+\section{k-Means++}
+
+The performance of k-means is highly dependent on the choice of initial
+centroids. Random initialization can lead to convergence to a poor local minimum
+of the SSD objective. \textbf{k-means++} is an initialization strategy designed to
+pick well-separated initial centroids, which typically improves both convergence
+speed and solution quality.
+
+In k-means++, centroids are chosen sequentially:
+
+\begin{enumerate}
+    \item Randomly choose the first centroid from the dataset; call it $m_1$.
+
+    \item For each remaining point $x_i$, compute its distance to the nearest
+    chosen centroid:
+    \[
+    D(x_i) = \min_{1 \leq j \leq t} \|x_i - m_j\|_2,
+    \]
+    where $t$ is the number of centroids chosen so far.
+
+    \item Choose the next centroid by sampling a data point with probability
+    proportional to the \emph{squared} distance:
+    \[
+    p(x_i) = \frac{D(x_i)^2}{\sum_{r} D(x_r)^2}.
+    \]
+
+    \item Repeat Steps 2--3 until $k$ centroids have been chosen.
+
+\end{enumerate}
+
+Once the initial centroids are selected, the standard k-means iterations
+(assignment + update) are run until convergence.
+
+
+\section{Strengths of k-Means}
+
+One of the primary reasons for the widespread adoption of k-means clustering is
+its simplicity. The algorithm is conceptually easy to understand: it repeatedly
+groups points by proximity and moves cluster centers to the mean of the assigned
+points. This intuitive geometric interpretation makes k-means an excellent
+introductory clustering method and allows it to be implemented with only a few
+lines of code.
+
+Another major advantage of k-means is its computational efficiency. The time
+complexity of the algorithm is approximately $O(tkN)$, where $N$ is the number of
+data samples, $k$ is the number of clusters, and $t$ is the number of iterations
+until convergence. In most practical applications, both $k$ and $t$ are small
+relative to $N$, which makes k-means scale linearly with the size of the dataset.
+This scalability allows k-means to be applied to very large datasets, making it a
+popular choice in industry-scale machine learning pipelines.
+
+Finally, k-means is one of the most widely used clustering algorithms in
+practice. Its speed, simplicity, and effectiveness make it a standard baseline
+method for many clustering tasks. In many real-world applications, k-means is the
+first algorithm practitioners try before moving on to more sophisticated
+approaches.
+
+\section{Weaknesses of k-Means}
+
+Despite its strengths, k-means also has several important limitations. One of the
+most significant challenges is that the user must specify the number of clusters
+$k$ in advance. In many real-world problems, the true number of clusters is not
+known beforehand, which makes choosing $k$ difficult and often requires
+additional analysis such as the elbow method or validation-based approaches.
+
+Another limitation is that k-means does not guarantee convergence to the global
+optimum of the objective function. Because the algorithm relies on iterative
+updates starting from randomly chosen initial centroids, it can converge to
+different local minima depending on the initialization. This sensitivity to
+initialization is one of the main motivations behind improved methods such as
+k-means++.
+
+K-means is also restricted to data for which the mean is a meaningful
+representative of a cluster. This assumption makes the algorithm unsuitable for
+categorical or non-numeric data. In such cases, alternative methods such as
+k-modes or k-medoids are more appropriate because they use different notions of
+cluster centers and distance measures.
+
+Finally, k-means is highly sensitive to outliers. Since centroids are computed as
+means, a small number of extreme data points can significantly shift the cluster
+centers and distort the final clustering result. Outliers may arise due to noise,
+measurement errors, or rare events, and their presence can reduce clustering
+quality if not handled carefully. Figure~\ref{fig:kmeans-outlier} illustrates how
+a single outlier can lead to an undesirable clustering result.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.32\linewidth]{img/lecture11/images/Dataset.jpg}
+    \includegraphics[width=0.32\linewidth]{img/lecture11/images/Undesirable_clustering.jpg}
+    \includegraphics[width=0.32\linewidth]{img/lecture11/images/Ideal_clustering.jpg}
+    \caption{Sensitivity of k-means to outliers. Left: original dataset.
+    Middle: undesirable clustering influenced by an outlier.
+    Right: desirable clustering without the outlier.}
+    \label{fig:kmeans-outlier}
+\end{figure}
+
+For a more in-depth analysis of these issues, please refer to the theoretical
+discussion in \footnote{\href{https://arxiv.org/pdf/1602.08254}{Theoretical Analysis of the k-Means Algorithm}},
+particularly Section 2.2. An accessible illustration of the sensitivity of
+k-means to outliers can be found in
+\footnote{\href{https://medium.com/analytics-vidhya/effect-of-outliers-on-k-means-algorithm-using-python-7ba85821ea23}{Effect of outliers on K-Means algorithm using Python}}.
+
+
+
+% \begin{figure}[H]
+%     \center
+%     \includegraphics[scale=0.2]{img/lecture11/images/Dataset.jpg}
+%     \caption{Dataset}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \center
+%     \includegraphics[scale=0.2]{img/lecture11/images/Ideal_clustering.jpg}
+%     \caption{Desirable clustering}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \center
+%     \includegraphics[scale=0.2]{img/lecture11/images/Undesirable_clustering.jpg}
+%     \caption{Undesirable clustering}
+% \end{figure}
+
+\section{Variants of k-Means}
+
+While k-means is simple and widely used, its limitations motivate several
+extensions and variants that modify the algorithm to better handle large
+datasets, outliers, and different distance measures. In practice, k-means is
+often viewed as a foundational method from which many related clustering
+algorithms are derived.
+
+Recall the key assumptions behind standard k-means. Cluster centers are
+represented by the \textbf{mean} of the data points, Euclidean distance is used
+as the similarity measure, and all data points are processed during every
+iteration of training. These assumptions work well in many settings but can
+become problematic when datasets are extremely large, contain outliers, or
+require alternative distance metrics. For this reason, several variants of
+k-means have been developed to address these practical challenges.
+
+In this lecture, we focus on three important variants:
+
+\begin{enumerate}
+\item \textbf{Mini-batch k-means:} improves \textbf{scalability} by using small
+random subsets of the data during training, making it suitable for very large
+datasets.
+
+\item \textbf{k-medians:} improves \textbf{robustness to outliers} by replacing
+the mean with the median as the cluster representative, which reduces the
+influence of extreme values.
+
+\item \textbf{k-medoids:} allows the use of \textbf{arbitrary distance metrics}
+and selects actual data points as cluster centers rather than computed averages.
+\end{enumerate}
+
+Together, these variants demonstrate how the basic k-means framework can be
+adapted to handle different practical challenges while preserving the core idea
+of iterative assignment and update.
+
+
+
+\section{Mini-batch k-Means}
+
+Mini-batch k-means is a scalable variant of standard k-means designed for
+very large datasets. Instead of using the entire dataset in every iteration,
+the algorithm updates cluster centroids using small random subsets of the data
+called \textbf{mini-batches}. This idea is closely related to stochastic and
+mini-batch optimization methods used throughout machine learning.
+
+The key motivation is computational efficiency. In standard k-means, every
+iteration requires computing distances between all $N$ data points and all
+$k$ centroids. When $N$ is large, this becomes expensive in both time and
+memory. Mini-batch k-means reduces this cost by processing only a small subset
+of size $b \ll N$ at each iteration while still attempting to minimize the same
+sum-of-squared-distance objective.
+
+\subsection{Key Idea}
+
+Mini-batch k-means modifies only the \textbf{centroid update step}.
+The assignment step remains identical to standard k-means.
+
+At each iteration:
+\begin{itemize}
+\item Instead of using all data points, randomly sample a small batch.
+\item Assign only the sampled points to the nearest centroids.
+\item Update centroids using a \textbf{running average}.
+\end{itemize}
+
+This makes each iteration much cheaper while still gradually improving the
+cluster centers.
+
+\paragraph{Why a running average?}
+
+Because each mini-batch contains only a subset of the data, the centroid update
+cannot simply be the mean of the entire cluster. Instead, mini-batch k-means
+maintains a \textbf{running estimate} of the centroid using information from
+previous batches. This allows the algorithm to approximate the full-data
+solution over time.
+
+\subsection{Algorithm}
+
+The mini-batch k-Means algorithm follows the same overall structure as
+standard k-means, but replaces the full-dataset centroid update with a
+mini-batch (stochastic) update. The algorithm still alternates between
+assignment and centroid update steps, but each iteration uses only a small
+random subset of the data.
+
+\begin{algorithm}[H]
+\caption{Mini-batch k-Means Clustering Algorithm (Training Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Data points $X = \{x_1, x_2, ..., x_N\}$, Number of clusters $k$, Mini-batch size $b$
+\State \textbf{Output:} Centroids $M = \{m_1, m_2, ..., m_k\}$, Cluster memberships $C_j$
+\State Initialize $k$ centroids $M^{(0)} = \{m_1^{(0)}, m_2^{(0)}, ..., m_k^{(0)}\}$ randomly from the data
+\Repeat
+    \State Randomly sample a mini-batch of $b$ data points from $X$
+    \State Assign each sample in the mini-batch to the nearest centroid:
+    \[
+    C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_2 \leq \|x_i - m_l^{(t)}\|_2, \forall l, 1 \leq l \leq k \right\}
+    \]
+    \State Update the centroids by keeping a running average of the assignments in each mini-batch:
+    \[
+    m_j^{(t+1)} = \frac{|C_j^{(t-1)}| \cdot m_j^{(t-1)} + \sum_{x_i \in C_j^{(t)}} x_i}{|C_j^{(t-1)}| + |C_j^{(t)}|}
+    \]
+    \State Repeat steps 2, 3, and 4 for a fixed number of iterations or until convergence
+\Until{convergence or a fixed number of iterations}
+\State \textbf{Return:} Final centroids $M$ and cluster memberships $C_j$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Understanding the centroid update.}
+Unlike standard k-means, which recomputes centroids using all assigned data
+points, mini-batch k-means updates centroids using a \textbf{running average}.
+The term $|C_j^{(t-1)}|$ represents how many points have contributed to the
+centroid so far, while $|C_j^{(t)}|$ is the number of points assigned in the
+current mini-batch. This update performs a weighted average between the
+previous centroid and the new batch observations. As more mini-batches are
+processed, the centroid gradually converges toward the true mean of the full
+dataset. This update rule can be viewed as an \textbf{online (streaming)}
+approximation of the standard k-means update.
+
+\noindent Once the training phase is complete, the model can be used to assign
+new data points to the nearest centroid in the inference phase, as described
+below:
+
+\begin{algorithm}[H]
+\caption{Mini-batch k-Means Clustering Algorithm (Inference Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} New data point $x_{\text{new}}$, Final centroids $M = \{m_1, m_2, ..., m_k\}$
+\State \textbf{Output:} Cluster assignment for $x_{\text{new}}$
+\State Compute the Euclidean distance between $x_{\text{new}}$ and each centroid $m_j$:
+\[
+d_j = \|x_{\text{new}} - m_j\|_2, \quad \forall j, 1 \leq j \leq k
+\]
+\State Assign $x_{\text{new}}$ to the cluster with the closest centroid:
+\[
+\text{Cluster}(x_{\text{new}}) = \arg \min_{j} d_j
+\]
+\State \textbf{Return:} The cluster assignment for $x_{\text{new}}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Relationship to Standard k-Means}
+
+Mini-batch k-means optimizes the same objective as standard k-means but uses
+\textbf{noisy, approximate updates}. Because only a subset of the data is used
+at each step, the centroid updates are less precise than those computed using
+the full dataset. However, the dramatic reduction in computational cost often
+outweighs this small loss in accuracy.
+
+In practice, mini-batch k-means typically produces clusterings that are very
+similar to those obtained by standard k-means while requiring only a fraction
+of the computation time. This makes it a widely used method for clustering
+large-scale datasets in modern machine learning pipelines.
+
+
+\subsection{Performance}
+
+The primary motivation behind mini-batch k-means is improving the scalability of
+clustering for very large datasets. In standard k-means, each iteration requires
+computing distances between all $N$ data points and all $k$ centroids. When $N$
+is very large, this repeated full pass over the dataset becomes computationally
+expensive and memory-intensive.
+
+Mini-batch k-means addresses this challenge by updating centroids using only a
+small random subset (mini-batch) of the data at each iteration. Instead of
+processing the entire dataset repeatedly, the algorithm performs many fast,
+approximate updates using batches of size $b \ll N$. This dramatically reduces
+the cost per iteration and allows the algorithm to scale to datasets containing
+millions of data points.
+
+Because mini-batch k-means uses only a subset of the data at each step, the
+centroid updates are noisier and more approximate than in standard k-means. As a
+result, the final clustering may differ slightly from the solution obtained by
+full-batch k-means. However, in practice this trade-off is often acceptable:
+mini-batch k-means typically produces clusters that are very similar to those
+from standard k-means while requiring only a fraction of the computation time.
+
+This introduces an important machine learning trade-off between \textbf{speed and
+accuracy}. Standard k-means is more precise but slower, while mini-batch
+k-means is much faster but slightly less accurate.
+
+Figure~\ref{fig:minibatch_speed} illustrates the computational advantage of
+mini-batch k-means. The plot shows training time versus clustering error. We can
+observe that mini-batch k-means reaches low error values significantly faster
+than standard k-means, demonstrating its scalability advantage for large
+datasets.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{img/lecture11/images/mini_batch_comp.jpg}
+    \caption{Mini-batch k-means reduces computation time by using small random
+    subsets of the data during training.}
+    \label{fig:minibatch_speed}
+\end{figure}
+
+While mini-batch k-means is faster, the resulting clusters are not identical to
+those produced by full k-means. Figure~\ref{fig:minibatch_compare} compares the
+cluster assignments produced by the two algorithms. The first two panels show
+that the overall cluster structure is very similar, while the third panel
+highlights the small differences in assignments between the methods.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{img/lecture11/images/Mini-batch-k-Means-diff.jpg}
+    \caption{Comparison of clustering results from mini-batch k-means and
+    standard k-means. The solutions are similar but not identical.}
+    \label{fig:minibatch_compare}
+\end{figure}
+
+In practice, mini-batch k-means is often preferred when datasets are large and
+training time is a critical constraint, whereas standard k-means may be chosen
+when the highest possible clustering accuracy is required.
+
+\section{k-Medians Clustering}
+
+k-Medians clustering is a variant of k-means designed to improve robustness to
+outliers. Recall that in k-means, cluster centers are computed using the mean of
+the points assigned to each cluster. Because the mean is highly sensitive to
+extreme values, even a small number of outliers can significantly shift the
+centroid and distort the clustering result. k-Medians addresses this limitation
+by replacing the mean with the \textbf{median} as the cluster representative.
+
+For a given set $\chi = \{\mathbf{x}_1, \mathbf{x}_2, ...,\mathbf{x}_N\}$ of
+$N$ points where each $\mathbf{x}_i \in \mathbb{R}^p$, the \textbf{geometric
+(spatial) median} is defined as the point $\mathbf{m}$ that minimizes the sum of
+distances to all data points:
+\[
+\mathbf{m} = \arg \min_{\mathbf{m}} \sum_{i=1}^{N} \|\mathbf{x}_i - \mathbf{m}\|_2.
+\]
+
+Intuitively, the geometric median is the point that minimizes the total travel
+distance to all samples. Unlike the mean, it is far less affected by extreme
+values. This makes k-Medians more robust in datasets containing noise, corrupted
+measurements, or rare events.
+
+In practice, computing the exact geometric median can be computationally
+expensive. Therefore, a common approximation is the \textbf{marginal median}.
+Instead of minimizing the total Euclidean distance jointly across all features,
+we compute the scalar median independently along each feature dimension and then
+combine these medians into a vector. Although this approximation is simpler, it
+retains the key robustness properties of the median.
+
+A second key difference from k-means is the distance metric used. k-Medians
+typically uses the \textbf{Manhattan (L1) distance} instead of Euclidean
+distance:
+\[
+\|\mathbf{x} - \mathbf{m}\|_1 = \sum_{p=1}^{P} |x_p - m_p|.
+\]
+This distance measure aligns naturally with the median and further improves
+robustness to outliers. As a result, k-Medians tends to produce clusters that are
+less influenced by extreme points and more representative of the majority of the
+data.
+
+\subsection{Algorithm}
+
+Like k-means, the k-Medians algorithm alternates between an assignment step and
+an update step. The training phase iteratively refines cluster medians, while the
+inference phase assigns new points to the nearest median.
+
+\begin{algorithm}[H]
+\caption{k-Medians Clustering Algorithm (Training Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Data points $X = \{x_1, x_2, ..., x_N\}$, Number of clusters $k$
+\State \textbf{Output:} Medians $M = \{m_1, m_2, ..., m_k\}$, Cluster memberships $C_j$
+\State Initialize $k$ medians randomly from the data
+\Repeat
+    \State Assign each data point to the nearest median using Manhattan distance:
+    \[
+    C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_1 \leq \|x_i - m_l^{(t)}\|_1,\ \forall l \right\}
+    \]
+    \State Update the median of each cluster:
+    \[
+    m_j^{(t+1)} = \arg \min_{\mathbf{m}} \sum_{x_i \in C_j^{(t)}} \|\mathbf{x}_i - \mathbf{m}\|_2
+    \]
+\Until{convergence or a fixed number of iterations}
+\State \textbf{Return:} Final medians and cluster memberships
+\end{algorithmic}
+\end{algorithm}
+
+Once training is complete, new data points can be assigned to clusters in the
+inference phase using the nearest-median rule:
+
+\begin{algorithm}[H]
+\caption{k-Medians Clustering Algorithm (Inference Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} New data point $x_{\text{new}}$, Final medians $M = \{m_1, m_2, ..., m_k\}$
+\State Compute Manhattan distances:
+\[
+d_j = \|x_{\text{new}} - m_j\|_1
+\]
+\State Assign to nearest cluster:
+\[
+\text{Cluster}(x_{\text{new}}) = \arg \min_j d_j
+\]
+\State \textbf{Return:} Cluster assignment
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Key takeaway.}
+k-Medians replaces the mean with the median and Euclidean distance with L1
+distance. This simple change makes the algorithm significantly more robust to
+outliers while preserving the same iterative clustering framework as k-means.
+
+
+
+\section{k-Medoids Clustering}
+
+k-Medoids clustering is a variant of k-Means clustering that generalizes k-Medians clustering by allowing the use of arbitrary distance measures. Unlike k-Means, which uses centroids, k-Medoids selects actual data points as the representative centers of clusters, making it more robust to noise and outliers.
+
+A \textbf{medoid} is defined as the data point of a cluster whose average dissimilarity to all other data points in the cluster is minimal. For a given set $\chi = \{\mathbf{x}_1, \mathbf{x}_2, ...\mathbf{x}_N\}$ of $N$ points with each $x_i \in \mathbb{R}^p$, the medoid is defined as the sample $\mathbf{m} \in \chi$ that satisfies:
+\[
+\arg \min_{\mathbf{m} \in \chi} \sum_{i=1}^N d(\mathbf{x}_i, \mathbf{m})
+\]
+where $d(\mathbf{x}_i, \mathbf{m})$ is an arbitrary distance metric between $\mathbf{x}_i$ and $\mathbf{m}$.
+
+
+Using this definition, the overall clustering objective becomes:
+
+\[
+J = \sum_{j=1}^k \sum_{x_i \in C_j} d(x_i, m_j)
+\]
+
+k-Medoids aims to minimize the total dissimilarity between data points and their assigned medoids. This is analogous to the k-means objective, but uses a general distance metric
+instead of squared Euclidean distance. Because medoids are actual data points,
+this objective is more robust to outliers and non-Euclidean distances.
+
+
+\paragraph{Comparison to k-Means.}
+k-Means uses the mean of cluster points as the center, which can be strongly
+affected by extreme values (outliers). In contrast, k-Medoids restricts cluster
+centers to be actual data points and minimizes distances rather than squared
+distances. This makes k-Medoids more robust in the presence of noise, outliers,
+and non-Euclidean distance metrics (e.g., Manhattan or cosine distance).
+
+
+\subsection{Algorithm}
+
+\paragraph{Key idea of the update step.}
+Unlike k-Means, where centroids are updated using a closed-form mean,
+k-Medoids must search for a better representative data point.
+The algorithm therefore tests whether replacing a medoid with another
+point in the same cluster reduces the total clustering cost.
+If a swap decreases the objective, the new point becomes the medoid.
+This process is sometimes called a \textit{swap-based optimization}.
+
+Below is the k-Medoids clustering algorithm, separated into the training and inference phases:
+
+\begin{algorithm}[H]
+\caption{k-Medoids Clustering Algorithm (Training Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Data points $X = \{x_1, x_2, ..., x_N\}$, Number of clusters $k$
+\State \textbf{Output:} Medoids $M = \{m_1, m_2, ..., m_k\}$, Cluster memberships $C_j$
+\State Randomly select $k$ data points as the initial medoids 
+\Repeat
+    \State Assign each data point to the nearest medoid based on the chosen distance metric:
+    \[
+    C_j^{(t)} = \left\{ x_i : d(x_i, m_j^{(t)}) \leq d(x_i, m_l^{(t)}), \forall l, 1 \leq l \leq k \right\}
+    \]
+    \State For each medoid, examine all points in its cluster to determine if any point provides a lower cost when swapped with the medoid:
+    \begin{enumerate}
+        \item Swap medoid $m_j$ with a point $x_i$ in the same cluster
+        \item Recompute the distances between all points in the cluster and the new medoid
+        \item Calculate the total cost (sum of distances). If the cost increases, revert the swap
+    \end{enumerate}
+    \State Repeat steps 2 and 3 until the cost no longer decreases significantly
+\Until{convergence or a fixed number of iterations}
+\State \textbf{Return:} Final medoids $M$ and cluster memberships $C_j$
+\end{algorithmic}
+\end{algorithm}
+
+Because each successful swap reduces the total clustering cost,
+the objective decreases monotonically until convergence to a local optimum.
+
+\noindent After training is complete, new data points can be assigned to clusters based on the medoids found in the training phase. The following is the inference procedure:
+
+\begin{algorithm}[H]
+\caption{k-Medoids Clustering Algorithm (Inference Phase)}
+\begin{algorithmic}[1]
+\State \textbf{Input:} New data point $x_{\text{new}}$, Final medoids $M = \{m_1, m_2, ..., m_k\}$
+\State \textbf{Output:} Cluster assignment for $x_{\text{new}}$
+\State Compute the distance between $x_{\text{new}}$ and each medoid $m_j$ using the same distance metric:
+\[
+d_j = d(x_{\text{new}}, m_j), \quad \forall j, 1 \leq j \leq k
+\]
+\State Assign $x_{\text{new}}$ to the cluster with the closest medoid:
+\[
+\text{Cluster}(x_{\text{new}}) = \arg \min_{j} d_j
+\]
+\State \textbf{Return:} The cluster assignment for $x_{\text{new}}$
+\end{algorithmic}
+\end{algorithm}
+
+We now illustrate the algorithm step-by-step on a small 2D dataset.
+
+\subsection{Example}
+
+We are provided with the following data set:
+
+\begin{figure}[H]
+    \center
+    \includegraphics[scale=0.5]{img/lecture11/images/k_medoids_data.jpg}
+    \caption{Dataset and graphical representation}
+\end{figure}
+
+We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algorithm with L-1 norm distance (Manhattan distance) metric.
+
+\begin{enumerate}
+    \item Initialization and Assignment: \\\\
+    Randomly assign selected medoids: $\mathbf{m}_1 = \mathbf{x}_4 = $(4, 7) and $\mathbf{m}_2 = \mathbf{x}_9 = (8,2)$
+
+    \begin{figure}[H]
+        \center
+        \includegraphics[scale=0.2]{img/lecture11/images/k-med-init-assign.jpg}
+        \caption{Initial assignment to clusters}
+    \end{figure}
+
+    Each data sample is assigned the medoid which is closer to it. The total cost of clustering is computed as the sum of distances of each sample from its assigned cluster medoid.
+
+    \item Update: Iteration 1 
+    \begin{enumerate}
+        \item Updating medoid $\mathbf{m}_1$ :
+        Check samples associated with $\mathbf{m}_1$ to see if any of them can provide a better total cost.
+    
+        
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_1_a_table.jpg}
+            \caption{Computing alternate center costs}
+        \end{figure}
+
+        Current medoid $\mathbf{x}_4$ has a total cost of 13, which is the minimum cost, so $\mathbf{x}_4$ remains the value of medoid $\mathbf{m}_1$
+        
+
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_1_a_split.jpg}
+            \caption{Clusters after updating $\mathbf{m}_1$}
+        \end{figure}
+        
+    
+        \item Updating medoid $\mathbf{m}_2$ :
+        Check samples associated with $\mathbf{m}_2$ to see if any of them can provide a better total cost.
+
+        
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/k-med-update-1-b-table.jpg}
+            \caption{Computing alternate center costs}
+        \end{figure}
+
+        Sample $\mathbf{x}_7$ provides a total cost of 7 which is lower than the total cost of the current medoid $\mathbf{x}_9$ which is 11. Therefore, medoid $\mathbf{m}_2$ moves to $\mathbf{x}_7$.
+
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_1_b_split.jpg}
+            \caption{Clusters after updating $\mathbf{m}_2$}
+        \end{figure}
+        
+    \end{enumerate}
+
+    \item Update Step: Reassign the entire dataset based on new medoids. Recompute distances relative to new medoids: $\mathbf{m}_1 = \mathbf{x}_4 = $ (4,7) and $\mathbf{m}_2 = \mathbf{x}_7 = $ (7,3) .
+
+    \begin{figure}[H]
+        \center
+        \includegraphics[scale=0.2]{img/lecture11/images/k-med-reassign.jpg}
+        \caption{Re-assignment of all samples to clusters}
+    \end{figure}
+        
+    \item Update Step: Iteration 2
+    \begin{enumerate}
+        \item Updating medoid $\mathbf{m}_1$ :
+        Check samples associated with $\mathbf{m}_1$ to see if any of them can provide a better total cost.
+    
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_2_a_table.jpg}
+            \caption{Computing alternate center costs}
+        \end{figure}
+    
+        Current medoid $\mathbf{x}_4$ has a total cost of 9, which is the minimum cost, so $\mathbf{x}_4$ remains the value of medoid $\mathbf{m}_1$
+
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/udpate_2_a_graph.jpg}
+            \caption{Clusters after updating $\mathbf{m}_1$}
+        \end{figure}
+
+        
+        \item Updating medoid $\mathbf{m}_2$ :
+        Check samples associated with $\mathbf{m}_2$ to see if any of them can provide a better total cost.
+
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_2_b_table.jpg}
+            \caption{Computing alternate center costs}
+        \end{figure}
+        
+        Current medoid $\mathbf{x}_7$ has a total cost of 10, which is the minimum cost, so $\mathbf{x}_7$ remains the value of medoid $\mathbf{m}_2$
+
+        \begin{figure}[H]
+            \center
+            \includegraphics[scale=0.2]{img/lecture11/images/update_2_b_graph.jpg}
+            \caption{Clusters after updating $\mathbf{m}_2$}
+        \end{figure}
+        
+    \end{enumerate}
+
+    \item Since the cost of clustering does not decrease any more, the algorithm terminates.
+\end{enumerate}
+
+This final configuration represents a locally optimal clustering
+under the Manhattan distance metric.
+
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+
+\item \textbf{Question:} \newline
+Given the following centroids for a k-means clustering model:
+\[
+M_1 = (2, 3), \quad M_2 = (7, 8), \quad M_3 = (5, 2)
+\]
+and a new data point $x_{\text{new}} = (4, 4)$, which cluster should
+$x_{\text{new}}$ be assigned to using the Euclidean distance metric?
+\textbf{If there is a tie, choose the cluster with the smaller index.}
+\newline \newline
+\textbf{Options:}
+\begin{enumerate}
+    \item Cluster 1
+    \item Cluster 2
+    \item Cluster 3
+\end{enumerate}
+
+\textbf{Solution:} \newline
+We compute the Euclidean distance from $x_{\text{new}}=(4,4)$ to each centroid:
+\[
+d(x_{\text{new}}, M_1) = \sqrt{(4 - 2)^2 + (4 - 3)^2} = \sqrt{5} \approx 2.24
+\]
+\[
+d(x_{\text{new}}, M_2) = \sqrt{(4 - 7)^2 + (4 - 8)^2} = \sqrt{25} = 5
+\]
+\[
+d(x_{\text{new}}, M_3) = \sqrt{(4 - 5)^2 + (4 - 2)^2} = \sqrt{5} \approx 2.24
+\]
+There is a tie between Cluster 1 and Cluster 3. By the tie-break rule (smaller
+index), we assign $x_{\text{new}}$ to \textbf{Cluster 1}. Therefore, the correct
+answer is \textbf{(a) Cluster 1}.
+
+
+\item \textbf{Question:} \newline
+    In a k-Medoids clustering model, the following medoids were determined after training:
+    \[
+    M_1 = (1, 5), \quad M_2 = (4, 5)
+    \]
+    A new data point $x_{\text{new}} = (3, 6)$ arrives. Using the Chebyshev distance (L-infinity norm), which cluster does $x_{\text{new}}$ belong to?
+    \newline \newline
+    \textbf{Options:}
+    \begin{enumerate}
+        \item Cluster 1
+        \item Cluster 2
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    The Chebyshev distance between two points $(x_1, y_1)$ and $(x_2, y_2)$ is calculated as:
+    \[
+    d(x_{\text{new}}, M_j) = \max\{|x_1 - x_2|, |y_1 - y_2|\}
+    \]
+    We calculate the Chebyshev distance between $x_{\text{new}} = (3, 6)$ and each medoid:
+    \[
+    d(x_{\text{new}}, M_1) = \max\{|3 - 1|, |6 - 5|\} = \max\{2, 1\} = 2
+    \]
+    \[
+    d(x_{\text{new}}, M_2) = \max\{|3 - 4|, |6 - 5|\} = \max\{1, 1\} = 1
+    \]
+    Since the distance to Cluster 2 is lower, we will assign $x_{\text{new}}$ to Cluster.
+    The correct answer is \textbf{(b) Cluster 2}.
+
+\item \textbf{Question:} \newline
+In standard k-means, each iteration alternates between:
+(i) assigning each point to its nearest centroid, and
+(ii) updating each centroid to be the mean of its assigned points.
+Which statement is \textbf{most correct} about the SSD objective
+\[
+\mathrm{SSD} = \sum_{j=1}^k \sum_{x_i \in C_j} \|x_i - m_j\|_2^2
+\]
+during these steps?
+\newline \newline
+\textbf{Options:}
+\begin{enumerate}
+    \item The assignment step can increase SSD, but the update step always decreases it.
+    \item The assignment step never increases SSD, and the update step never increases SSD.
+    \item The assignment step always decreases SSD, but the update step can increase it.
+    \item SSD can increase in both steps, but typically decreases in practice.
+\end{enumerate}
+
+\textbf{Solution:} \newline
+Fix the centroids $\{m_j\}_{j=1}^k$. The assignment step chooses, for each $x_i$,
+the cluster whose centroid is closest, which minimizes $\|x_i - m_j\|_2^2$ among
+all clusters. Therefore, reassigning points to their nearest centroids cannot
+increase the total SSD. \newline
+Next, fix the assignments $\{C_j\}_{j=1}^k$. For each cluster $C_j$, the centroid
+update sets
+\[
+m_j \leftarrow \frac{1}{|C_j|}\sum_{x_i \in C_j} x_i,
+\]
+which is the minimizer of $\sum_{x_i\in C_j}\|x_i - m\|_2^2$ over $m$ (the mean
+minimizes squared Euclidean error). Thus the update step also cannot increase SSD.
+Hence SSD is non-increasing in both steps. The correct answer is \textbf{(b)}.
+
+
+\item \textbf{Question:} \newline
+In k-means++, after selecting some centroids, each remaining point $x_i$ is sampled
+as the next centroid with probability
+\[
+p(x_i)=\frac{D(x_i)^2}{\sum_r D(x_r)^2},
+\quad\text{where } D(x_i)=\min_{1\le j\le t}\|x_i-m_j\|_2.
+\]
+Which statement best captures the \textbf{effect} of this rule?
+\newline \newline
+\textbf{Options:}
+\begin{enumerate}
+    \item Points closer to existing centroids are more likely to be selected next.
+    \item Points farther from existing centroids are more likely to be selected next.
+    \item All points are equally likely to be selected next (uniform sampling).
+    \item The next centroid must be the single farthest point (deterministic).
+\end{enumerate}
+
+\textbf{Solution:} \newline
+Because $p(x_i)$ is proportional to $D(x_i)^2$, points with larger distance
+to their nearest already-chosen centroid receive larger probability mass.
+This encourages centroids to be well-separated and spread across the dataset.
+Therefore, the correct answer is \textbf{(b)}.
+
+
+\item \textbf{Question:} \newline
+Mini-batch k-means uses a running-average style centroid update rather than
+recomputing the exact mean over all points in a cluster each iteration.
+Which is the \textbf{main reason} for using a running average?
+\newline \newline
+\textbf{Options:}
+\begin{enumerate}
+    \item It guarantees convergence to the global minimum of SSD.
+    \item It reduces per-iteration computation by avoiding full passes over all $N$ points.
+    \item It makes the method robust to outliers by replacing the mean with the median.
+    \item It eliminates the need to choose the number of clusters $k$.
+\end{enumerate}
+
+\textbf{Solution:} \newline
+Mini-batch k-means processes only a small batch of size $b\ll N$ per iteration.
+Since each update sees only a subset of points, the algorithm cannot compute the
+true full-dataset cluster means every step. A running average incorporates past
+information across many mini-batches while keeping each iteration cheap.
+Thus the main motivation is computational scalability. The correct answer is \textbf{(b)}.
+
+
+\item \textbf{Question:} \newline
+You have a dataset with occasional extreme outliers. You want cluster centers to be
+less affected by these outliers. Which modification is \textbf{most appropriate}?
+\newline \newline
+\textbf{Options:}
+\begin{enumerate}
+    \item Use k-means with Euclidean distance and means (standard k-means).
+    \item Use k-medians with Manhattan (L1) distance and medians.
+    \item Use k-means++ initialization; this alone makes k-means robust to outliers.
+    \item Increase $k$; more clusters always makes the solution robust to outliers.
+\end{enumerate}
+
+\textbf{Solution:} \newline
+The mean is sensitive to extreme values, so standard k-means centroids can be pulled
+toward outliers. Replacing the mean with the median improves robustness, and pairing
+this with Manhattan (L1) distance aligns naturally with median-based updates.
+Therefore, the best choice is \textbf{k-medians with L1 distance}. The correct answer is \textbf{(b)}.
+    
+\end{enumerate}
+
+
+\end{document}
+
+

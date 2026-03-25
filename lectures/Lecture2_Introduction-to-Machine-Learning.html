@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Introduction to Machine Learning</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <div class="center">
+</div>
+
+
+
+
+
+<h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
+<p>This lecture introduces the fundamental concepts that form the foundation of machine learning. We begin by distinguishing artificial intelligence, machine learning, and deep learning, and by discussing how machines acquire and use knowledge compared to humans. We then present the main machine learning paradigms, including supervised, unsupervised, and reinforcement learning, along with common machine learning tasks such as regression, classification, clustering, and dimensionality reduction. The lecture also provides a high-level overview of deep learning and its growing impact. Finally, we review the essential mathematical foundations required for the course, including core concepts from linear algebra and probability theory that will be used throughout subsequent lectures.</p>
+<h1 data-number="2" id="artificial-intelligence"><span class="header-section-number">2.</span> Artificial Intelligence</h1>
+<p>There is no universally accepted definition of artificial intelligence (AI), partly because natural intelligence itself is not fully understood or formally defined. In general, AI refers to a system’s ability to correctly interpret external data, learn from that data, and use those learnings to achieve specific goals and tasks through flexible adaptation.</p>
+<p>Artificial intelligence, sometimes called machine intelligence or computational intelligence, describes intelligence demonstrated by machines, in contrast to the natural intelligence displayed by humans. AI is often used to describe systems that mimic cognitive functions typically associated with the human mind, such as learning, reasoning, and problem solving. Early AI systems were primarily rule-based, meaning that all rules and exceptions had to be explicitly programmed by humans.</p>
+<p>Despite advances in automation, humans still play a critical role in the development, supervision, and improvement of AI systems. Human expertise is often required to design models, interpret results, and ensure that AI systems operate reliably and ethically.</p>
+<h2 data-number="2.1" id="humans-vs-ai"><span class="header-section-number">2.1</span> Humans vs AI</h2>
+<p>AI-driven applications typically excel in speed of execution, computational accuracy, and the ability to perform repetitive or large-scale tasks without fatigue. These systems are particularly effective in tedious and monotonous jobs such as large-scale data analysis, automated inspection, and pattern detection across massive datasets. In contrast, human intelligence is characterized by adaptive learning, reasoning from limited data, creativity, and the ability to transfer knowledge across different domains. Unlike most AI systems, humans do not always rely on large amounts of pre-labeled data to learn new concepts <span class="citation" data-cites="springboard_ai">(Gupta 2021)</span>.</p>
+<p>Despite the impressive capabilities of modern AI systems, humans still play a central role in defining problems, curating data, interpreting results, and ensuring responsible use of these technologies. AI systems are tools that augment human decision making rather than completely replace it.</p>
+<p>One of the true challenges of artificial intelligence is solving tasks that are easy for humans to perform but difficult to formalize mathematically. For example, humans can recognize faces, understand sarcasm in language, or navigate unfamiliar environments with little effort, yet these tasks remain challenging for AI systems because they require complex perception, context understanding, and generalization abilities.</p>
+<h1 data-number="3" id="knowledge"><span class="header-section-number">3.</span> Knowledge</h1>
+<p>Knowledge can generally be categorized into three main types: explicit knowledge, implicit knowledge, and tacit knowledge. Understanding these distinctions is important in machine learning because different types of knowledge require different approaches for representation and learning.</p>
+<p>Explicit knowledge refers to knowledge that is easy to articulate, document, and share with others. This type of knowledge can be written down in textbooks, manuals, or databases and is often structured in a way that allows it to be easily communicated. For example, a factual statement such as “The capital of the State of Georgia is Atlanta” represents explicit knowledge because it can be clearly expressed and transferred between individuals or systems.</p>
+<p>Implicit knowledge refers to the practical application of explicit knowledge. It often involves skills or procedures that can be learned through instruction and practice. Unlike explicit knowledge, implicit knowledge is demonstrated through action rather than simply stated as facts. For example, knowing how to operate a photocopier or apply a known procedure in a new setting represents implicit knowledge, as it involves applying previously learned information to accomplish a task.</p>
+<p>Tacit knowledge refers to knowledge gained through personal experience that is often difficult to express formally or transfer through written or verbal communication. This type of knowledge typically develops through practice, observation, and intuition. Examples include skills such as swimming, reading social cues, speaking fluently in a language, or recognizing faces. Tacit knowledge is particularly challenging for artificial intelligence systems because it is difficult to fully formalize or encode into explicit rules.</p>
+<h1 data-number="4" id="machine-learning"><span class="header-section-number">4.</span> Machine Learning</h1>
+<p>Machine learning (ML) is a subset of artificial intelligence that focuses on developing algorithms that can learn patterns from data and improve their performance over time without being explicitly programmed for every possible scenario. Instead of relying on manually written rules, machine learning systems build mathematical models using sample data, commonly referred to as training data, to make predictions or decisions.</p>
+<p>Traditional rule-based AI systems require engineers to explicitly define all rules and exceptions. While effective for well-defined problems, these systems often fail when dealing with complex environments where rules are difficult to specify. Machine learning addresses this limitation by allowing systems to automatically discover patterns and relationships directly from data. This makes ML particularly useful in applications where the underlying structure of the problem is unknown or too complex to model manually.</p>
+<p>Machine learning is considered superior to purely rule-based approaches in many real-world scenarios because it can adapt to new data, generalize to unseen situations, and improve performance as more data becomes available. Examples of successful machine learning applications include machine translation, recommender systems, fraud detection, speech recognition, and medical diagnosis.</p>
+<p>At a high level, a machine learning system typically follows three main steps:</p>
+<ul>
+<li><p><strong>Training:</strong> The model learns patterns from labeled or unlabeled data.</p></li>
+<li><p><strong>Validation:</strong> The model is evaluated and tuned to improve performance.</p></li>
+<li><p><strong>Testing:</strong> The trained model is applied to new unseen data.</p></li>
+</ul>
+<p>Machine learning has enabled major advances across many fields, particularly in areas involving large amounts of data. Some of the most important application domains are described below.</p>
+<h2 data-number="4.1" id="recommendation-systems"><span class="header-section-number">4.1</span> Recommendation Systems</h2>
+<p>Recommendation systems are machine learning systems designed to suggest relevant items to users based on their preferences, behavior, or similarities to other users. These systems are widely used in online platforms to personalize user experiences and increase engagement.</p>
+<p>For example, streaming platforms such as Netflix recommend movies based on viewing history, e-commerce platforms such as Amazon recommend products based on browsing behavior, and music platforms such as Spotify recommend songs based on listening patterns. These systems often rely on techniques such as collaborative filtering, content-based filtering, or hybrid approaches that combine both methods.</p>
+<p>The key challenge in recommendation systems is predicting user preferences from incomplete and noisy data. Machine learning models address this by identifying hidden patterns in user interactions and learning similarities between users or items.</p>
+<h2 data-number="4.2" id="computer-vision"><span class="header-section-number">4.2</span> Computer Vision</h2>
+<p>Computer vision is a field of machine learning focused on enabling machines to interpret and understand visual information such as images and videos. This area has seen significant advances due to deep learning, particularly through convolutional neural networks (CNNs).</p>
+<p>Common computer vision tasks include image classification, object detection, image segmentation, and facial recognition. For example, autonomous vehicles rely on computer vision to detect pedestrians and traffic signs, medical imaging systems use computer vision to detect tumors, and security systems use facial recognition for identity verification.</p>
+<p>One of the main challenges in computer vision is dealing with variations in lighting, viewpoint, noise, and occlusion. Machine learning models address these challenges by learning robust feature representations directly from large image datasets.</p>
+<h2 data-number="4.3" id="natural-language-processing"><span class="header-section-number">4.3</span> Natural Language Processing</h2>
+<p>Natural language processing (NLP) focuses on enabling machines to understand, interpret, and generate human language. Because human language is highly ambiguous and context dependent, NLP remains one of the most challenging areas of artificial intelligence.</p>
+<p>Examples of NLP applications include machine translation, chatbots, sentiment analysis, speech recognition, and text summarization. Modern NLP systems often rely on deep learning architectures such as transformers, which power large language models like GPT.</p>
+<p>The main challenge in NLP is enabling machines to capture meaning, context, and relationships between words. Machine learning models address this by learning statistical representations of language from large text corpora, allowing systems to recognize patterns in syntax, semantics, and context.</p>
+<p>Together, these application areas demonstrate the broad impact of machine learning across technology, science, and society. As computational resources and data availability continue to grow, machine learning is expected to play an increasingly important role in solving complex real-world problems.</p>
+<h1 data-number="5" id="paradigms-of-machine-learning"><span class="header-section-number">5.</span> Paradigms of Machine Learning</h1>
+<p>Machine learning algorithms can be broadly categorized based on the type of data available during training and how the learning process is structured. The three primary paradigms are supervised learning, unsupervised learning, and reinforcement learning. Each paradigm differs in how information is provided to the model and what objective the model attempts to optimize.</p>
+<h2 data-number="5.1" id="supervised-learning"><span class="header-section-number">5.1</span> Supervised Learning</h2>
+<p>Supervised learning is the most common machine learning paradigm and involves training a model using labeled data. In this setting, each training example consists of an input along with a corresponding correct output, often called a label. The goal of supervised learning is to learn a mapping from inputs to outputs so that the model can accurately predict labels for new, unseen data.</p>
+<p>For example, in an image classification task, a dataset may contain images of cats labeled as 0 and images of dogs labeled as 1. The model learns patterns that distinguish these categories and uses those patterns to classify new images. Other examples include predicting housing prices from property features (regression) or identifying whether an email is spam or not (classification).</p>
+<p>Supervised learning problems are typically divided into two major categories: regression, where the goal is to predict continuous values, and classification, where the goal is to predict discrete categories.</p>
+<h2 data-number="5.2" id="unsupervised-learning"><span class="header-section-number">5.2</span> Unsupervised Learning</h2>
+<p>Unsupervised learning involves training models on data that does not include labels. Instead of learning a mapping between inputs and outputs, the goal is to discover hidden structure or patterns within the data itself. This often involves grouping similar data points together or identifying meaningful low-dimensional representations of the data.</p>
+<p>For example, given a collection of audio recordings without speaker labels, an unsupervised learning algorithm might group recordings according to similarities in voice characteristics. Similarly, unsupervised learning can be used in customer segmentation, anomaly detection, and dimensionality reduction.</p>
+<p>Common unsupervised learning techniques include clustering algorithms such as k-means and hierarchical clustering, as well as dimensionality reduction methods such as principal component analysis (PCA).</p>
+<h2 data-number="5.3" id="reinforcement-learning"><span class="header-section-number">5.3</span> Reinforcement Learning</h2>
+<p>Reinforcement learning differs from supervised and unsupervised learning in that the model learns by interacting with an environment rather than from a fixed dataset. In this paradigm, an agent takes actions within an environment and receives feedback in the form of rewards or penalties. The goal of the agent is to learn a strategy, called a policy, that maximizes the total cumulative reward over time.</p>
+<p>For example, in a game such as Tetris, an agent may receive a positive reward for clearing rows and a negative reward for creating blocked spaces. By repeatedly interacting with the environment and observing the consequences of its actions, the agent gradually learns which actions lead to better long-term outcomes.</p>
+<p>Reinforcement learning has been successfully applied in robotics, game playing, recommendation systems, and autonomous systems. One of the key challenges in reinforcement learning is balancing exploration (trying new actions to gain information) with exploitation (choosing actions known to produce good results).</p>
+<h1 data-number="6" id="tasks-in-machine-learning"><span class="header-section-number">6.</span> Tasks in Machine Learning</h1>
+<p>Machine learning problems can be categorized in two complementary ways. Learning paradigms describe how models learn from data (for example supervised, unsupervised, or reinforcement learning), while machine learning tasks describe what the model is expected to predict or discover. In this section, we focus on the most common machine learning tasks.</p>
+<p>Machine learning tasks are typically categorized based on the type of output a model is expected to produce during testing. These tasks define the objective of the learning process and determine how model performance is evaluated. Some of the most common machine learning tasks include regression, classification, clustering, and dimensionality reduction.</p>
+<h2 data-number="6.1" id="regression"><span class="header-section-number">6.1</span> Regression</h2>
+<p>Regression refers to predicting a continuous numerical value based on one or more input variables. In regression problems, the output variable typically represents a measurable quantity such as price, temperature, probability, or risk score. The goal of regression is to learn the relationship between input variables (independent variables) and the output variable (dependent variable) so that accurate predictions can be made on unseen data.</p>
+<p>For example, a regression model may be used to predict housing prices based on features such as square footage, number of bedrooms, and location. Other examples include predicting stock prices, estimating medical risk scores, forecasting energy consumption, or predicting traffic flow. In each case, the model attempts to learn a functional relationship between inputs and outputs.</p>
+<p>Common regression models include linear regression, polynomial regression, decision trees, and neural networks. Later in this course, we will study regression as one of the fundamental problems that motivates many machine learning algorithms.</p>
+<h2 data-number="6.2" id="classification"><span class="header-section-number">6.2</span> Classification</h2>
+<p>Classification refers to predicting which category or class a new observation belongs to. Unlike regression, where outputs are continuous, classification produces discrete outputs representing class membership. The goal is to learn decision boundaries that separate different categories based on the input features.</p>
+<p>For example, classification models can be used to determine whether an email is spam or not, whether a medical image contains a tumor, whether a handwritten digit corresponds to a particular number, or whether a financial transaction is fraudulent. Classification problems may be binary (two classes) or multiclass (more than two classes).</p>
+<p>Common classification algorithms include logistic regression, decision trees, support vector machines, nearest neighbor methods, and neural networks. Many modern artificial intelligence applications rely heavily on classification models, particularly in computer vision and natural language processing.</p>
+<h2 data-number="6.3" id="clustering"><span class="header-section-number">6.3</span> Clustering</h2>
+<p>Clustering is an unsupervised learning task that involves dividing data into groups, called clusters, such that data points within the same group are more similar to each other than to those in other groups. Unlike classification, clustering does not require labeled data and instead attempts to discover natural structure within the dataset.</p>
+<p>For example, clustering may be used to segment customers based on purchasing behavior, group similar documents together, organize images by visual similarity, or identify patterns in biological data. The main challenge in clustering is defining what it means for data points to be similar and determining the appropriate number of clusters.</p>
+<p>Common clustering methods include k-means clustering, hierarchical clustering, Gaussian mixture models, and density-based clustering methods. Clustering is often used as an exploratory tool to better understand datasets before applying supervised learning methods.</p>
+<h2 data-number="6.4" id="dimensionality-reduction"><span class="header-section-number">6.4</span> Dimensionality Reduction</h2>
+<p>Dimensionality reduction involves reducing the number of features or variables in a dataset while preserving as much important information as possible. This is often necessary because high-dimensional data can be computationally expensive to process and may contain redundant, irrelevant, or noisy information.</p>
+<p>For example, an image consisting of thousands of pixels may be represented using a smaller set of informative features without significantly affecting performance. Dimensionality reduction is commonly used for data visualization, noise reduction, feature extraction, and improving computational efficiency. It also helps mitigate the curse of dimensionality, which refers to the challenges that arise when working with very high-dimensional datasets.</p>
+<p>Common dimensionality reduction techniques include principal component analysis (PCA), singular value decomposition (SVD), manifold learning methods, and neural network–based approaches such as autoencoders.</p>
+<p>These tasks form the foundation of many machine learning applications, and many real-world systems combine multiple tasks together. For example, a computer vision system may first reduce dimensionality to extract meaningful features, then cluster similar patterns, and finally perform classification to recognize objects.</p>
+<p>Importantly, these tasks often align with the learning paradigms introduced earlier. For example, regression and classification are typically supervised learning tasks because they require labeled data, while clustering and dimensionality reduction are usually unsupervised learning tasks. Reinforcement learning, in contrast, focuses on sequential decision-making problems where an agent learns through interaction with an environment rather than through static prediction tasks.</p>
+<h1 data-number="7" id="deep-learning"><span class="header-section-number">7.</span> Deep Learning</h1>
+<p>Deep learning is a subfield of machine learning that focuses on models capable of learning hierarchical representations directly from data. These models learn multiple levels of abstraction, allowing machines to build complex concepts from simpler ones. For example, in image recognition tasks, early layers of a deep neural network may learn to detect edges, later layers may learn shapes, and deeper layers may learn object-level representations.</p>
+<p>One of the major advantages of deep learning is its ability to perform end-to-end learning. Traditional machine learning methods often rely on manually designed features, which require significant domain expertise and engineering effort. In contrast, deep learning models automatically learn useful feature representations directly from raw data, reducing the need for manual feature engineering and often improving performance.</p>
+<p>Although the first artificial neural network models were proposed in the 1950s, deep learning only became widely successful in the last two decades. This progress has been driven by three main factors: the availability of large datasets, significant increases in computational power (particularly through GPUs and specialized hardware), and improvements in training algorithms.</p>
+<p>Modern deep learning models have grown significantly in size and capability. For example, large language models such as GPT-based systems contain billions or even trillions of parameters and are capable of performing tasks such as text generation, reasoning, translation, and question answering. The increasing real-world impact of deep learning has led to major investments from academia and industry, accelerating research and deployment across fields such as healthcare, autonomous systems, robotics, and scientific discovery.</p>
+<p>Because deep learning models rely heavily on mathematical optimization, linear algebra, and probability theory, understanding these mathematical foundations is essential for studying modern machine learning methods.</p>
+<h1 data-number="8" id="ai-vs-ml-vs-dl"><span class="header-section-number">8.</span> AI vs ML vs DL</h1>
+<p>Artificial intelligence (AI), machine learning (ML), and deep learning (DL) are closely related fields that are often confused. Artificial intelligence is the broadest concept and refers to systems designed to perform tasks that typically require human intelligence. Machine learning is a subset of AI that focuses on algorithms that learn patterns from data rather than relying solely on explicitly programmed rules. Deep learning is a further subset of machine learning that focuses on neural networks with multiple layers capable of learning hierarchical representations.</p>
+<figure>
+<img alt="Relationship between artificial intelligence, machine learning, and deep learning. Deep learning is a subset of machine learning, which itself is a subset of artificial intelligence." id="fig:ai_ml_dl" src="img/lecture1/AI_ML_DL_circles.jpeg" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Relationship between artificial intelligence, machine learning, and deep learning. Deep learning is a subset of machine learning, which itself is a subset of artificial intelligence.</figcaption>
+</figure>
+<p>Figure <a data-reference="fig:ai_ml_dl" data-reference-type="ref" href="#fig:ai_ml_dl">1</a> illustrates the relationship between these three areas. Machine learning represents a subset of artificial intelligence that focuses specifically on data-driven learning methods, while deep learning represents a subset of machine learning that uses multi-layer neural networks to automatically learn feature representations.</p>
+<p>Compared to deep learning, traditional machine learning methods often rely more heavily on manually designed features, a process known as feature engineering. Designing these features can require significant domain knowledge and time. Deep learning reduces this need by automatically learning useful representations directly from raw data, allowing models to develop complex concepts from simpler patterns.</p>
+<p>For example, in a traditional computer vision system, engineers might manually design features such as edge detectors or texture descriptors. In contrast, a deep learning model can automatically learn these features during training, often achieving better performance when sufficient data is available.</p>
+<p>Understanding the relationship between AI, ML, and DL helps clarify the scope of this course. While artificial intelligence is a broad discipline, this course primarily focuses on the mathematical foundations of machine learning, including the principles that also support modern deep learning systems.</p>
+<h1 data-number="9" id="review-of-linear-algebra"><span class="header-section-number">9.</span> Review of Linear Algebra</h1>
+<p>Linear algebra forms one of the most important mathematical foundations of machine learning. Most machine learning models represent data, parameters, and predictions using vectors and matrices, and many learning algorithms rely heavily on matrix operations and linear transformations. In this section, we review the key linear algebra concepts that will be used throughout the course.</p>
+<h2 data-number="9.1" id="basic-objects"><span class="header-section-number">9.1</span> Basic objects</h2>
+<p>Machine learning models operate on several fundamental mathematical objects. The simplest of these is a scalar, which is a single numerical value such as <span class="math inline">\(x \in \R\)</span>. Scalars are often used to represent individual measurements, parameters, or outputs.</p>
+<p>A vector is an ordered collection of numbers, typically represented as a column vector <span class="math inline">\(\mathbf{x} \in \R^{n\times 1}\)</span>. Vectors are commonly used to represent data points, feature sets, or parameter collections in machine learning. For example, a data sample with <span class="math inline">\(n\)</span> features can be represented as a vector containing those feature values.</p>
+<p>A matrix is a two-dimensional array of numbers, denoted <span class="math inline">\(A \in \R^{m\times n}\)</span>, where <span class="math inline">\(m\)</span> represents the number of rows and <span class="math inline">\(n\)</span> represents the number of columns. Matrices are often used to represent datasets, where rows correspond to samples and columns correspond to features. Matrices also represent transformations applied to vectors, such as weight matrices in neural networks.</p>
+<p>A tensor is a higher-order generalization of vectors and matrices. Tensors are multi-dimensional arrays used to store structured data such as images, videos, or batches of features. For example, a color image may be represented as a three-dimensional tensor (height, width, color channels), while a batch of images may be represented as a four-dimensional tensor.</p>
+<h2 data-number="9.2" id="why-linear-algebra-matters-in-ml"><span class="header-section-number">9.2</span> Why linear algebra matters in ML</h2>
+<p>Linear algebra provides the language used to describe most machine learning models. Data points are typically represented as vectors, model parameters are represented as matrices, and predictions are often computed using matrix operations.</p>
+<p>For example, consider a linear model that predicts outputs from input features. A data sample may be represented as a feature vector <span class="math inline">\(\mathbf{x}_i \in \R^d\)</span>. A linear model may then compute a prediction using:</p>
+<p><span class="math display">\[\mathbf{y}_i = W^\top \mathbf{x}_i + \mathbf{b},\]</span></p>
+<p>where <span class="math inline">\(W\)</span> is a weight matrix and <span class="math inline">\(\mathbf{b}\)</span> is a bias vector. This type of linear transformation appears throughout machine learning, including regression, classification, and neural networks.</p>
+<p>Because modern machine learning relies heavily on these representations, understanding linear algebra is essential for understanding how models process data and learn patterns.</p>
+<h2 data-number="9.3" id="essential-operations"><span class="header-section-number">9.3</span> Essential operations</h2>
+<p>Several fundamental linear algebra operations appear repeatedly in machine learning algorithms. One important operation is the inner product (or dot product), defined as:</p>
+<p><span class="math display">\[\langle \mathbf{x}, \mathbf{y} \rangle = \mathbf{x}^\top \mathbf{y} = \sum_i x_i y_i.\]</span></p>
+<p>This operation measures similarity between vectors and appears frequently in similarity measures, projections, and optimization objectives.</p>
+<p>Another important operation is matrix-vector multiplication, written as:</p>
+<p><span class="math display">\[A\mathbf{x} = \mathbf{b}.\]</span></p>
+<p>This represents applying a linear transformation to a vector and is the core operation used in linear models and neural networks.</p>
+<p>Matrix multiplication is also fundamental:</p>
+<p><span class="math display">\[C = AB, \qquad A \in \R^{m\times n},\; B \in \R^{n\times p},\; C \in \R^{m\times p}.\]</span></p>
+<p>This operation allows multiple linear transformations to be composed together and is heavily used in deep learning architectures.</p>
+<p>The Hadamard product, written as:</p>
+<p><span class="math display">\[(A \odot B)_{ij} = A_{ij} B_{ij},\]</span></p>
+<p>refers to elementwise multiplication and is commonly used in neural network operations and attention mechanisms.</p>
+<p>Finally, the transpose operation:</p>
+<p><span class="math display">\[(A^\top)_{ij} = A_{ji}\]</span></p>
+<p>swaps the rows and columns of a matrix and appears frequently in optimization and matrix decompositions.</p>
+<h2 data-number="9.4" id="identity-and-inverse"><span class="header-section-number">9.4</span> Identity and inverse</h2>
+<p>The identity matrix <span class="math inline">\(I_n \in \R^{n\times n}\)</span> is a special matrix that leaves vectors unchanged when multiplied:</p>
+<p><span class="math display">\[I_n \mathbf{x} = \mathbf{x}.\]</span></p>
+<p>This matrix plays a role similar to the number 1 in multiplication.</p>
+<p>If a matrix <span class="math inline">\(A\)</span> is invertible, then there exists another matrix <span class="math inline">\(A^{-1}\)</span> such that:</p>
+<p><span class="math display">\[A^{-1}A = I_n.\]</span></p>
+<p>Matrix inverses appear in many machine learning algorithms, particularly in closed-form solutions such as least squares regression. However, not all matrices are invertible, and in practice numerical methods are often preferred over direct inversion.</p>
+<h2 data-number="9.5" id="norms"><span class="header-section-number">9.5</span> Norms</h2>
+<p>Norms are functions that measure the magnitude or size of vectors and matrices. They are commonly used in machine learning to measure error, regularization penalties, and distances between data points.</p>
+<p>Some common vector norms include:</p>
+<p><span class="math display">\[\begin{aligned}
+\|\mathbf{x}\|_1 &amp;= \sum_i |x_i|, \\
+\|\mathbf{x}\|_2 &amp;= \left(\sum_i x_i^2\right)^{1/2}, \\
+\|\mathbf{x}\|_p &amp;= \left(\sum_i |x_i|^p\right)^{1/p}.\end{aligned}\]</span></p>
+<p>The <span class="math inline">\(\ell_1\)</span> norm is often used in sparse modeling, while the <span class="math inline">\(\ell_2\)</span> norm appears frequently in optimization and regularization.</p>
+<p>For matrices, a common norm is the Frobenius norm:</p>
+<p><span class="math display">\[\|A\|_F = \left(\sum_{i,j} A_{ij}^2\right)^{1/2} = \sqrt{\Tr(AA^\top)}.\]</span></p>
+<p>This norm measures the overall magnitude of a matrix and is often used in optimization objectives.</p>
+<h2 data-number="9.6" id="eigenvalues-and-eigenvectors"><span class="header-section-number">9.6</span> Eigenvalues and eigenvectors</h2>
+<p>Eigenvalues and eigenvectors describe important structural properties of matrices. For a matrix <span class="math inline">\(A\)</span>, an eigenvector is a vector whose direction remains unchanged when multiplied by the matrix, while the eigenvalue describes how much that vector is scaled.</p>
+<p>If a matrix is diagonalizable, it can be written as:</p>
+<p><span class="math display">\[A = V\,\mathrm{diag}(\lambda)\,V^{-1},\]</span></p>
+<p>where the columns of <span class="math inline">\(V\)</span> are eigenvectors and <span class="math inline">\(\lambda\)</span> contains the eigenvalues.</p>
+<p>Eigenvalues and eigenvectors are fundamental in many machine learning methods, including principal component analysis (PCA), spectral clustering, and stability analysis of learning algorithms.</p>
+<h2 data-number="9.7" id="singular-value-decomposition-svd"><span class="header-section-number">9.7</span> Singular value decomposition (SVD)</h2>
+<p>The singular value decomposition (SVD) is one of the most important matrix factorizations in machine learning. For any matrix <span class="math inline">\(A \in \R^{m\times n}\)</span>, SVD allows us to write:</p>
+<p><span class="math display">\[A = UDV^\top,\]</span></p>
+<p>where:</p>
+<ul>
+<li><p><span class="math inline">\(U\)</span> contains left singular vectors,</p></li>
+<li><p><span class="math inline">\(D\)</span> contains singular values,</p></li>
+<li><p><span class="math inline">\(V\)</span> contains right singular vectors.</p></li>
+</ul>
+<p>SVD provides a way to understand the structure of a matrix and is widely used in data analysis, dimensionality reduction, and numerical optimization.</p>
+<h3 class="unnumbered" id="why-svd-appears-in-ml">Why SVD appears in ML</h3>
+<p>SVD plays an important role in dimensionality reduction. If <span class="math inline">\(X \in \R^{N\times P}\)</span> is a data matrix, we can approximate it using only the largest singular values and their corresponding vectors. A rank-<span class="math inline">\(q\)</span> approximation keeps only the dominant singular directions, reducing feature dimension from <span class="math inline">\(P\)</span> to <span class="math inline">\(q\)</span> while preserving most of the important information.</p>
+<p>This idea forms the mathematical basis of principal component analysis (PCA), which is widely used for feature extraction and visualization.</p>
+<h2 data-number="9.8" id="moorepenrose-pseudoinverse"><span class="header-section-number">9.8</span> Moore–Penrose pseudoinverse</h2>
+<p>In many machine learning problems, matrices are not square or not invertible. In these cases, we use the Moore–Penrose pseudoinverse, which generalizes the concept of matrix inversion.</p>
+<p>If <span class="math inline">\(A = UDV^\top\)</span>, then the pseudoinverse is defined as:</p>
+<p><span class="math display">\[A^{\dagger} = VD^{-1}U^\top,\]</span></p>
+<p>where inversion is applied only to nonzero singular values.</p>
+<p>The pseudoinverse is particularly important in machine learning because it provides closed-form solutions for least squares problems and appears in many optimization methods.</p>
+<h1 data-number="10" id="review-of-probability-theory"><span class="header-section-number">10.</span> Review of Probability Theory</h1>
+<p>Probability theory provides the mathematical framework for reasoning about uncertainty. Since machine learning models must make predictions from incomplete or noisy data, probability plays a central role in modeling uncertainty, estimating parameters, and evaluating predictions. Many machine learning algorithms, including regression, classification, and deep learning, can be interpreted through a probabilistic lens.</p>
+<p>In this section, we review the core probability concepts that will be used throughout the course.</p>
+<h2 data-number="10.1" id="foundational-objects"><span class="header-section-number">10.1</span> Foundational objects</h2>
+<p>Probability theory begins with three fundamental components. The first is the sample space, denoted <span class="math inline">\(\Omega\)</span>, which represents the set of all possible outcomes of a random experiment. For example, if we flip a coin, the sample space is:</p>
+<p><span class="math display">\[\Omega = \{\text{Heads}, \text{Tails}\}.\]</span></p>
+<p>The second component is the event space <span class="math inline">\(\mathcal{F}\)</span>, which consists of subsets of the sample space. Each subset represents an event of interest. For example, the event of obtaining heads corresponds to the subset <span class="math inline">\(\{\text{Heads}\}\)</span>.</p>
+<p>The third component is the probability measure <span class="math inline">\(P\)</span>, which assigns probabilities to events. The probability measure defines how likely each event is and must obey certain mathematical rules.</p>
+<p>Together, <span class="math inline">\((\Omega, \mathcal{F}, P)\)</span> define a probability space.</p>
+<h2 data-number="10.2" id="axioms-of-probability"><span class="header-section-number">10.2</span> Axioms of probability</h2>
+<p>Probability is governed by three basic axioms. For any event <span class="math inline">\(A \in \mathcal{F}\)</span>, the probability must satisfy:</p>
+<p><span class="math display">\[\begin{aligned}
+0 &amp;\le P(A) \le 1, \\
+P(\Omega) &amp;= 1.\end{aligned}\]</span></p>
+<p>The first axiom states that probabilities must lie between zero and one. The second states that the probability of all possible outcomes occurring must equal one.</p>
+<p>A third important rule concerns mutually exclusive events. If events <span class="math inline">\(A_1, A_2, \dots\)</span> cannot occur simultaneously, then:</p>
+<p><span class="math display">\[P\!\left(\bigcup_i A_i\right) = \sum_i P(A_i).\]</span></p>
+<p>This rule allows probabilities of disjoint outcomes to be added together.</p>
+<h2 data-number="10.3" id="useful-rules"><span class="header-section-number">10.3</span> Useful rules</h2>
+<p>Several important rules follow directly from the probability axioms. For example, if event <span class="math inline">\(A\)</span> is contained within event <span class="math inline">\(B\)</span>, then:</p>
+<p><span class="math display">\[A \subseteq B \implies P(A) \le P(B).\]</span></p>
+<p>This reflects the intuitive idea that a more restrictive event cannot be more probable than a broader one.</p>
+<p>Another important rule is the complement rule:</p>
+<p><span class="math display">\[P(\Omega \setminus A) = 1 - P(A),\]</span></p>
+<p>which states that the probability of an event not occurring equals one minus the probability that it does occur.</p>
+<p>The inclusion–exclusion rule gives the probability of two events occurring:</p>
+<p><span class="math display">\[P(A \cup B) = P(A) + P(B) - P(A \cap B).\]</span></p>
+<p>Conditional probability is also fundamental:</p>
+<p><span class="math display">\[P(A \mid B) = \frac{P(A \cap B)}{P(B)}.\]</span></p>
+<p>This quantity measures how likely event <span class="math inline">\(A\)</span> is given that event <span class="math inline">\(B\)</span> has already occurred. Conditional probability forms the basis of Bayesian inference and many probabilistic machine learning models.</p>
+<p>Two events are said to be independent if:</p>
+<p><span class="math display">\[P(A \cap B) = P(A)P(B).\]</span></p>
+<p>Independence plays an important role in simplifying probabilistic models and appears frequently in assumptions made by machine learning algorithms.</p>
+<h2 data-number="10.4" id="random-variables"><span class="header-section-number">10.4</span> Random variables</h2>
+<p>A random variable is a function that maps outcomes from the sample space to real numbers:</p>
+<p><span class="math display">\[X : \Omega \to \R.\]</span></p>
+<p>Random variables allow us to convert outcomes into numerical quantities that can be analyzed mathematically.</p>
+<p>Random variables are typically categorized as either discrete or continuous. A discrete random variable takes values from a finite or countable set, such as the outcome of rolling a die. A continuous random variable takes values from a continuous range, such as measurements of height or temperature.</p>
+<p>Random variables are central to machine learning because they allow us to model uncertain quantities such as labels, predictions, and noise.</p>
+<h2 data-number="10.5" id="pmf-cdf-and-pdf"><span class="header-section-number">10.5</span> PMF, CDF, and PDF</h2>
+<p>The behavior of a random variable is described by its probability distribution.</p>
+<p>For a discrete random variable <span class="math inline">\(X\)</span>, the probability mass function (PMF) is defined as:</p>
+<p><span class="math display">\[p_X(x) = P(X=x).\]</span></p>
+<p>This function assigns a probability to each possible value and must satisfy:</p>
+<p><span class="math display">\[0 \le p_X(x) \le 1, \qquad \sum_x p_X(x)=1.\]</span></p>
+<p>The cumulative distribution function (CDF) is defined as:</p>
+<p><span class="math display">\[F_X(x) = P(X \le x).\]</span></p>
+<p>The CDF applies to both discrete and continuous variables and describes the probability that the random variable is less than or equal to a given value.</p>
+<p>For continuous random variables, probabilities are described using the probability density function (PDF):</p>
+<p><span class="math display">\[f_X(x) = \frac{d}{dx}F_X(x).\]</span></p>
+<p>The PDF must satisfy:</p>
+<p><span class="math display">\[\int_{-\infty}^{\infty} f_X(x)\,dx = 1.\]</span></p>
+<p>Unlike discrete probabilities, continuous densities do not directly give probabilities at a single point. Instead, probabilities are computed over intervals.</p>
+<h2 data-number="10.6" id="joint-distributions-and-the-chain-rule"><span class="header-section-number">10.6</span> Joint distributions and the chain rule</h2>
+<p>Machine learning often involves multiple random variables. Their relationships are described using joint distributions.</p>
+<p>For two random variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, the joint distribution describes their simultaneous behavior:</p>
+<p><span class="math display">\[\begin{aligned}
+p_{X,Y}(x,y) &amp;= P(X=x, Y=y), \\
+F_{X,Y}(x,y) &amp;= P(X\le x, Y\le y).\end{aligned}\]</span></p>
+<p>From joint distributions we can derive conditional distributions, which are heavily used in probabilistic modeling.</p>
+<p>A key identity is the chain rule of probability:</p>
+<p><span class="math display">\[p(x_1,x_2,\dots,x_n) = p(x_1)\prod_{i=2}^n p(x_i\mid x_1,\dots,x_{i-1}).\]</span></p>
+<p>This factorization is extremely important in machine learning because it allows complex distributions to be broken into simpler conditional relationships. Many modern models, including graphical models, autoregressive models, and transformers, rely on this factorization idea.</p>
+<h2 data-number="10.7" id="expectation-variance-and-covariance"><span class="header-section-number">10.7</span> Expectation, variance, and covariance</h2>
+<p>Expectation represents the average value of a random variable. For a discrete random variable:</p>
+<p><span class="math display">\[\E[X] = \sum_x x p_X(x),\]</span></p>
+<p>and for a continuous random variable:</p>
+<p><span class="math display">\[\E[X] = \int_{-\infty}^{\infty} x f_X(x)\,dx.\]</span></p>
+<p>Expectation plays a central role in machine learning because many learning objectives involve minimizing expected error.</p>
+<p>Variance measures how spread out a random variable is around its mean:</p>
+<p><span class="math display">\[\Var(X) = \E[(X-\E[X])^2].\]</span></p>
+<p>Covariance measures how two variables vary together:</p>
+<p><span class="math display">\[\Cov(X,Y) = \E[(X-\E[X])(Y-\E[Y])].\]</span></p>
+<p>These quantities are important in machine learning because they describe uncertainty, feature relationships, and appear in methods such as PCA and Gaussian models.</p>
+<h2 data-number="10.8" id="important-distributions"><span class="header-section-number">10.8</span> Important distributions</h2>
+<p>Certain probability distributions appear frequently in machine learning.</p>
+<h3 class="unnumbered" id="bernoulli-distribution">Bernoulli distribution</h3>
+<p>The Bernoulli distribution models binary outcomes such as success/failure or true/false. For a random variable <span class="math inline">\(X \in \{0,1\}\)</span> with parameter <span class="math inline">\(q\)</span>:</p>
+<p><span class="math display">\[P(X=1)=q, \qquad P(X=0)=1-q.\]</span></p>
+<p>This can also be written compactly as:</p>
+<p><span class="math display">\[P(X=x)=q^x(1-q)^{1-x}, \qquad x\in\{0,1\}.\]</span></p>
+<p>Bernoulli distributions form the basis of binary classification models such as logistic regression.</p>
+<h3 class="unnumbered" id="gaussian-distribution">Gaussian distribution</h3>
+<p>The Gaussian (normal) distribution is one of the most important distributions in machine learning. A univariate Gaussian with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> has density:</p>
+<p><span class="math display">\[\mathcal{N}(x;\mu,\sigma^2) =
+\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).\]</span></p>
+<p>Gaussian distributions are widely used because many natural processes approximately follow this distribution and because they have convenient mathematical properties.</p>
+<h3 class="unnumbered" id="multivariate-gaussian-distribution">Multivariate Gaussian distribution</h3>
+<p>The multivariate Gaussian generalizes the Gaussian distribution to vectors. For <span class="math inline">\(\mathbf{x} \in \R^n\)</span> with mean <span class="math inline">\(\boldsymbol{\mu}\)</span> and covariance matrix <span class="math inline">\(\Sigma\)</span>:</p>
+<p><span class="math display">\[\mathcal{N}(\mathbf{x};\boldsymbol{\mu},\Sigma)
+=
+\frac{1}{(2\pi)^{n/2}\det(\Sigma)^{1/2}}
+\exp\!\left(
+-\frac{1}{2}
+(\mathbf{x}-\boldsymbol{\mu})^\top
+\Sigma^{-1}
+(\mathbf{x}-\boldsymbol{\mu})
+\right).\]</span></p>
+<p>This distribution is fundamental in machine learning because it models correlated features and appears in many algorithms such as Gaussian mixture models, Bayesian inference, and Kalman filtering.</p>
+<h2 data-number="10.9" id="law-of-total-probability"><span class="header-section-number">10.9</span> Law of total probability</h2>
+<p>The law of total probability allows us to decompose the probability of an event into contributions from mutually exclusive cases. Suppose <span class="math inline">\(\{B_1,\dots,B_n\}\)</span> forms a partition of the sample space (meaning the events are disjoint and cover all possibilities). Then:</p>
+<p><span class="math display">\[P(A) = \sum_{i=1}^n P(A \mid B_i)P(B_i).\]</span></p>
+<p>This rule is important because it allows us to compute probabilities by conditioning on simpler or more interpretable events.</p>
+<p>For example, suppose we want the probability that a classifier makes an error. We may condition on the true class:</p>
+<p><span class="math display">\[P(\text{error}) =
+P(\text{error} \mid y=0)P(y=0)
++
+P(\text{error} \mid y=1)P(y=1).\]</span></p>
+<p>This decomposition appears frequently in machine learning when analyzing expected loss and classification error.</p>
+<h2 data-number="10.10" id="bayes-rule"><span class="header-section-number">10.10</span> Bayes rule</h2>
+<p>Bayes rule provides a way to reverse conditional probabilities. It follows directly from the definition of conditional probability:</p>
+<p><span class="math display">\[P(A \mid B) =
+\frac{P(B \mid A)P(A)}{P(B)}.\]</span></p>
+<p>Using the law of total probability, this can also be written as:</p>
+<p><span class="math display">\[P(A \mid B)
+=
+\frac{P(B \mid A)P(A)}
+{\sum_i P(B \mid A_i)P(A_i)}.\]</span></p>
+<p>Bayes rule is fundamental in machine learning because it provides the basis for Bayesian inference and probabilistic classification.</p>
+<p>In machine learning notation, Bayes rule is often written as:</p>
+<p><span class="math display">\[P(y \mid x)
+=
+\frac{P(x \mid y)P(y)}{P(x)}.\]</span></p>
+<p>This interpretation is often described as:</p>
+<p><span class="math display">\[\text{posterior} =
+\frac{\text{likelihood} \times \text{prior}}
+{\text{evidence}}.\]</span></p>
+<p>This formula explains how we update our belief about a label <span class="math inline">\(y\)</span> after observing data <span class="math inline">\(x\)</span>. Many models such as Naive Bayes classifiers and Bayesian neural networks rely on this principle.</p>
+<h2 data-number="10.11" id="jensens-inequality"><span class="header-section-number">10.11</span> Jensen’s inequality</h2>
+<p>Jensen’s inequality is one of the most important mathematical tools in machine learning theory. It describes how convex functions interact with expectations.</p>
+<p>If <span class="math inline">\(f\)</span> is a convex function and <span class="math inline">\(X\)</span> is a random variable, then:</p>
+<p><span class="math display">\[f(\E[X]) \le \E[f(X)].\]</span></p>
+<p>If <span class="math inline">\(f\)</span> is concave, the inequality reverses:</p>
+<p><span class="math display">\[f(\E[X]) \ge \E[f(X)].\]</span></p>
+<p>This result is important because many machine learning loss functions are convex, and Jensen’s inequality helps us derive bounds and guarantees.</p>
+<p>One particularly important example involves the logarithm function, which is concave:</p>
+<p><span class="math display">\[\log(\E[X]) \ge \E[\log X].\]</span></p>
+<p>This property appears frequently in machine learning, including:</p>
+<ul>
+<li><p>Log-likelihood optimization</p></li>
+<li><p>Variational inference</p></li>
+<li><p>EM algorithm derivations</p></li>
+<li><p>KL divergence proofs</p></li>
+<li><p>Risk bounds</p></li>
+</ul>
+<p>Intuitively, Jensen’s inequality tells us that applying a nonlinear transformation before averaging is not the same as applying it after averaging. This subtle difference is extremely important in statistical learning theory.</p>
+<h1 class="unnumbered" id="bibliography">References</h1>
+<div class="references csl-bib-body hanging-indent" id="refs" role="doc-bibliography">
+<div class="csl-entry" id="ref-springboard_ai" role="doc-biblioentry">
+Gupta, Sakshi. 2021. <span>“Artificial Intelligence Vs. Human Intelligence: Who Will Build the Future?”</span> <a href="https://www.springboard.com/blog/data-science/artificial-intelligence-vs-human-intelligence/">https://www.springboard.com/blog/data-science/artificial-intelligence-vs-human-intelligence/</a>.
+</div>
+</div>
+
+</main>
+</body>
+</html>

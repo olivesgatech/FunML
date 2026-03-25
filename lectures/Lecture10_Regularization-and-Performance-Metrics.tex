@@ -1,0 +1,1858 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{cite}
+\newcommand{\vecb}[1]{\boldsymbol{#1}} % bold Greek / symbols
+\newcommand{\matb}[1]{\mathbf{#1}}     % bold matrices
+\newcommand{\vb}[1]{\mathbf{#1}}       % bold vectors (latin)
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+% \renewcommand{\cite}[1]{[#1]}
+% \def\beginrefs{\begin{list}
+%         {[\arabic{equation}]}{\usecounter{equation}
+%          \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+%          \setlength{\labelwidth}{1.6truecm}}}
+% \def\endrefs{\end{list}}
+% \def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{9}{Regularization and Performance Metrics}{Ghassan AlRegib and Mohit Prabhushankar}{}%
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+% \section{Gradient Descent}
+
+% \subsection{Overview}
+% Gradient descent (GD) methods, including Batch GD, Stochastic GD, and Mini-batch GD, are commonly used for optimization in machine learning tasks. Each method shows different characteristics in terms of convergence behavior.
+
+% \subsection{Convergence of GD Methods}
+% \begin{itemize}
+%     \item All GD methods end up near the minimum.
+%     \item Batch GD’s path stops at the minimum, while Stochastic GD and Mini-batch GD continue to fluctuate near it.
+%     \item Batch GD is slow, requiring a lot of time for each step.
+%     \item Both Stochastic GD and Mini-batch GD would also reach the minimum if a good learning schedule is used.
+% \end{itemize}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P1.png}
+%     \caption{Visualization of Batch, Stochastic, and Mini-batch Gradient Descent convergence.}
+%     \label{fig:P1.png}
+% \end{figure}
+
+
+% \subsection{Performance Comparisons}
+% Let \(N\) be the number of training instances and \(P\) be the number of features. The performance, memory requirements, and whether normalization is required are compared among methods mentioned previously.
+
+% \begin{table}[htbp]
+% \centering % Left-align the table
+% \scriptsize % Reduce the font size for a compact table
+% \begin{tabular}{|p{3cm}|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
+% \hline
+% \textbf{Algorithm} & \textbf{Performance with Large \(N\)} & \textbf{Memory Space Requirements} & \textbf{Performance with Large \(P\)} & \textbf{Normalization Required?} \\
+% \hline
+% Normal Equation & Fast & High & Slow & No \\
+% Batch GD & Slow & High & Fast & Yes \\
+% Stochastic GD & Fast & Minimum & Fast & Yes \\
+% Mini-batch GD & Fast & Relative to batch size & Fast & Yes \\
+% \hline
+% \end{tabular}
+% \caption{Comparison of Gradient Descent Methods}
+% \end{table}
+
+% Stochastic and Mini-batch GD perform fastest with large datasets due to incremental updates, while Normal Equation and Batch GD use more memory. The Normal Equation is slower when \(P\) is large because of matrix inversion. Gradient Descent methods require normalization for faster convergence, but the Normal Equation does not.
+
+
+
+% \subsection{Newton’s Method: Second-order Taylor Approximation}
+% Newton’s method is a local optimization scheme based on the second-order Taylor series approximation. 
+
+% \begin{itemize}
+%     \item The second order Taylor series approximation:
+%     \[
+%     L(\theta + \Delta \theta) \approx L(\theta) + \Delta \theta^T \nabla_\theta L(\theta) + \frac{1}{2} \Delta \theta^T H(\theta) \Delta \theta
+%     \]
+    
+%     \item \(\nabla_\theta L(\theta)\) is the gradient, \(H(\theta) = \nabla_\theta^2 L(\theta)\) is the second-order derivative of \(L(\theta)\), also called the Hessian matrix:
+%     \[
+%     H(\theta) = \nabla_\theta^2 L(\theta) = 
+%     \begin{pmatrix}
+%     \frac{\partial^2 L(\theta)}{\partial \theta_1^2} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_1 \partial \theta_p} \\
+%     \vdots & \ddots & \vdots \\
+%     \frac{\partial^2 L(\theta)}{\partial \theta_p \partial \theta_1} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_p^2}
+%     \end{pmatrix}
+%     \]
+    
+%     \item Assumes that \(L(\theta)\) is twice differentiable.
+    
+%     \item Quadratic approximation.
+    
+%     \item Better local approximation of \(L(\theta)\) than only using first-order gradient.
+% \end{itemize}
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P2.png}
+%     \caption{Visualization of the Function with Respect to Parameters \(w_1\) and \(w_2\) (quadratic function in blue)}
+%     \label{fig:P2.png}
+% \end{figure}
+
+
+% \section{Newton's Method}
+% \subsection{Jacobian and Hessian Matrices}
+% \begin{itemize}
+%     \item The Jacobian matrix is a matrix composed of first-order partial derivatives of a multivariable function.
+%     \item The Hessian matrix is an \(n \times n\) square matrix composed of second-order partial derivatives shown previously.
+% \end{itemize}
+
+% For example, if \( f(x, y) = x^2 y + y^2 x \), the Hessian matrix is:
+
+% \[
+% H_f(x, y) =
+% \begin{pmatrix}
+% 2y & 2x + 2y \\
+% 2x + 2y & 2x
+% \end{pmatrix}
+% \]
+
+
+
+
+
+% \subsection{Optimization}
+
+% \begin{itemize}
+%     \item Unlike a hyperplane, a quadratic function does not have a `steepest descent direction' to move to minima. However, a quadratic has global minima when it is \textit{convex}.
+    
+%     \item \textbf{Note}: The Hessian matrix is positive semi-definite, i.e., 
+%     \[
+%     \Delta \theta^T H(\theta) \Delta \theta \geq 0 \quad \text{for any} \ \Delta \theta.
+%     \]
+%     Thus, \(L(\theta + \Delta \theta)\) describes a convex parabola.
+    
+%     \item To find the minimum of convex \(L(\theta + \Delta \theta)\), we set its first derivative \(\nabla_{\theta}L(\theta + \Delta \theta) = 0\) and solve for the optimal \(\Delta \theta\):
+    
+%     \[
+%     L(\theta + \Delta \theta) \approx L(\theta) + \Delta \theta^T \nabla_\theta L(\theta) + \frac{1}{2} \Delta \theta^T H(\theta) \Delta \theta
+%     \]
+%     \[
+%     \nabla_\theta L(\theta + \Delta \theta) = \nabla_\theta L(\theta) + H(\theta) \Delta \theta = 0
+%     \]
+%     \[
+%     \implies \Delta \theta = -(H(\theta))^{-1} \nabla_\theta L(\theta)
+%     \]
+    
+%     \item Thus, the Newton's Method takes the form:
+%     \[
+%     \theta^{t+1} = \theta^t - \alpha (H(\theta))^{-1} \nabla_\theta L(\theta)
+%     \]
+% \end{itemize}
+
+% \begin{flushright}
+% \begin{minipage}{0.45\textwidth}
+%     \textbf{Gradient descent:}
+%     \[
+%     \theta^{t+1} = \theta^t - \alpha \nabla_\theta L(\theta^t)
+%     \]
+% \end{minipage}
+% \end{flushright}
+
+% \textit{Matrix is positive semi-definite when it is symmetric with non-negative eigenvalues.}
+
+% \subsection{Convexity}
+% In optimization, the concept of convexity plays a crucial role in determining how easily we can find the global minimum of a function. A function \( f(\theta) \) is said to be \textit{convex} if, for any two points \( \vecb{\theta}_1 \) and \( \vecb{\theta}_2 \) within its domain, the line segment connecting \( f(\theta_1) \) and \( f(\theta_2) \) lies above or on the graph of the function itself. Formally, for any \( \theta_1, \theta_2 \in \mathrm{dom}(f) \) and \( \lambda \in [0,1] \):
+% \[
+% f(\lambda \theta_1 + (1-\lambda) \theta_2) \leq \lambda f(\theta_1) + (1-\lambda) f(\theta_2)
+% \]
+% This property ensures that the function does not have any local minima other than the global minimum, making it relatively easy to optimize.
+
+% On the other hand, \textit{non-convex} functions are those that do not satisfy the convexity condition. For such functions, the line segment between two points can lie below the function curve. Non-convex functions often contain multiple local minima and maxima, which makes finding the global minimum significantly more challenging. Standard optimization algorithms, such as gradient descent, can get stuck in local minima, making it difficult to reach the global solution.
+% % \begin{center}
+% %     \includegraphics[scale=0.5]{img/lecture9/convexity.png}
+% % \end{center}
+
+% \subsection{Convergence}
+
+% Newton's method is a powerful algorithm, particularly for minimizing \textit{convex} functions. It uses quadratic approximation, which is more precise than linear approximation at each step, and is often more effective than gradient descent, as it requires fewer steps for convergence. However, it is more difficult to use Newton's method to optimize \textit{non-convex} functions. At concave portions of such a function, the algorithm can climb to a local maximum or oscillate.
+
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P3.png}
+%     \caption{Newton's Method Convergence: Convex Functions}
+%     \label{fig:P3.png}
+% \end{figure}
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P4.png}
+%     \caption{Newton's Method Convergence: Non-Convex Functions}
+%     \label{fig:P4.png}
+% \end{figure}
+
+
+% \subsection{Computational Complexity}
+% Newton's method requires far more memory and computation than a first-order algorithm. The Hessian is a \(P \times P\) matrix of second derivatives. Computing its inverse matrix causes scaling issues with input dimension.
+
+% \[
+% \theta^{t+1} = \theta^t - \alpha \left(H(\theta)\right)^{-1} \nabla_{\theta} L(\theta)
+% \]
+
+% Where \(H(\theta)\) is the Hessian matrix:
+% \[
+% H(\theta) = \nabla_{\theta}^2 L(\theta)
+% \]
+
+% \section{Coordinate Search}
+
+% \subsection{Optimization}
+% Coordinate search is a simpler optimization technique compared to first and second-order approximation methods. It searches through all coordinate axes and their negatives at each step of the parameter space. The update rule is:
+
+% \[
+% \theta^{t+1} = \theta^t \pm \alpha e_j
+% \]
+
+% Where \(e_j = [0, \ldots, 1, \ldots, 0]^T\) is the j-th standard basis vector, determining the descent direction among all \(P\) dimensions.
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P5.png}
+%     \caption{Coordinate Search Algorithm: Exploring Descent Directions Along Coordinate Axes}
+%     \label{fig:P5.png}
+% \end{figure}
+
+
+% \section{Coordinate Descent}
+% \subsection{Optimization}
+% The coordinate descent algorithm examines one coordinate axis (and its negative) at each step and updates in this direction if it produces a descent. The algorithm is as follows:
+
+% \begin{itemize}
+%     \item The \textbf{coordinate descent} algorithm examines one coordinate axis (and its negative) at each step and updates in this direction if it produces descent.
+    
+%     \item In the case of a continuously differentiable \(L(\theta)\), a coordinate descent algorithm is:
+%     \begin{itemize}
+%         \item Until convergence is reached:
+%         \begin{itemize}
+%             \item Choose an index \(j\) from 1 to \(P\).
+%             \item Update \(\theta_j^{t+1} = \theta_j^t - \alpha \nabla_{\theta_j} L(\theta)\)
+%         \end{itemize}
+%     \end{itemize}
+% \end{itemize}
+
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P6.png}
+%     \caption{Coordinate Descent Algorithm: Stepwise Optimization Along Coordinate Axes}
+%     \label{fig:P6.png}
+% \end{figure}
+
+
+
+
+
+
+% \subsection{Convergence}
+% \begin{itemize}
+%     \item The first few steps of coordinate search are effective because they search over all coordinate axes.
+%     \item Coordinate descent quickly finds a lower point on the cost function, overtaking the search method.
+% \end{itemize}
+
+
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P7.png}
+%     \caption{Comparison of Coordinate Search(Left) and Coordinate Descent(Right): Efficiency in Finding Lower Cost Function Values}
+%     \label{fig:P7.png}
+% \end{figure}
+
+
+
+
+
+
+
+
+
+
+
+% \subsection{Advantages}
+% \begin{itemize}
+%     \item Very simple and easy to implement.
+%     \item Scalable, with less memory consumption compared to second-order methods.
+% \end{itemize}
+
+% \subsection{Limitations}
+% \begin{itemize}
+%     \item Difficult to optimize non-smooth multivariable functions.
+% \end{itemize}
+
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.4\textwidth]{img/lecture9/P8.png}
+%     \caption{A Case of Non-Smooth Multivariable Function}
+%     \label{fig:P8.png}
+% \end{figure}
+
+% The plot shows how the optimization struggles to progress towards the global minimum due to the non-smoothness of the function, causing it to stagnate at a local minimum or saddle point. The red line indicates the path of the algorithm, highlighting the difficulty in optimizing such functions.
+
+
+% \section{Overview}
+
+% In previous lectures, we introduced linear regression and studied first-order
+% optimization methods such as Gradient Descent for minimizing training error. However, 
+% successfully training a model involves much more than simply finding parameters 
+% that minimize loss on the training dataset. In this lecture, we extend optimization beyond first-order methods by introducing
+% \textbf{Newton’s Method} and coordinate-based optimization strategies. 
+
+% In practice, machine learning requires answering three fundamental questions:
+
+% \begin{enumerate}
+%     \item \textbf{How do we efficiently optimize model parameters?}
+%     \item \textbf{How do we prevent models from overfitting?}
+%     \item \textbf{How do we evaluate and validate model performance?}
+% \end{enumerate}
+
+% This lecture addresses these questions by connecting optimization, 
+% regularization, performance metrics, and model validation into a unified view 
+% of building models that generalize well to unseen data.
+
+% \medskip
+% \noindent\textbf{First}, we introduce alternative optimization techniques 
+% beyond Gradient Descent, including \textbf{Newton’s Method}, 
+% \textbf{Coordinate Search}, and \textbf{Coordinate Descent}. 
+% These methods highlight different trade-offs between convergence speed, 
+% computational cost, and scalability.
+
+% \medskip
+% \noindent\textbf{Second}, we introduce \textbf{regularization}, a key technique 
+% for controlling model complexity and improving generalization. 
+% We study three widely used regularized linear models:
+% \begin{itemize}
+%     \item Ridge Regression ($\ell_2$ regularization)
+%     \item Lasso Regression ($\ell_1$ regularization)
+%     \item Elastic Net (combined $\ell_1 + \ell_2$ regularization)
+% \end{itemize}
+
+% \medskip
+% \noindent\textbf{Third}, we discuss \textbf{performance metrics} used to evaluate 
+% regression models, including MSE, RMSE, MAE, and $R^2$.
+
+% \medskip
+% \noindent\textbf{Fourth}, we introduce essential \textbf{model validation} tools 
+% used in real machine learning workflows, including:
+% \begin{itemize}
+%     \item Training/validation/test splits
+%     \item Learning curves
+%     \item Cross-validation
+%     \item Model complexity and the bias–variance tradeoff
+% \end{itemize}
+
+% \medskip
+% \noindent\textbf{Finally}, we connect these practical ideas to statistical 
+% learning theory by introducing the concept of \textbf{model capacity} and the 
+% \textbf{VC dimension}, providing intuition for why regularization and validation 
+% are necessary for modern machine learning.
+
+% \medskip
+% \noindent Together, these topics form the foundation for building models that 
+% not only fit data well, but also generalize reliably to new and unseen examples.
+
+
+\section{Recap and Lecture Objectives}
+
+In the previous lecture, we continued our study of regression models and the key tools used to train and evaluate them. We covered optimization methods for fitting regression models, including gradient-based approaches as well as \textbf{Newton’s Method} and \textbf{Coordinate Search}. We also discussed how \textbf{regularization} improves generalization in linear regression, with particular emphasis on \textbf{Ridge} and \textbf{Lasso}, and we reviewed common performance measures such as Mean Squared Error (MSE), Mean Absolute Error (MAE), and the Coefficient of Determination ($R^2$).
+
+In this lecture, we build on those foundations by organizing the regression workflow end-to-end. We begin by summarizing optimization methods beyond basic gradient descent, including \textbf{Newton’s Method} (which uses curvature through the Hessian) and \textbf{coordinate-based methods} such as Coordinate Search and Coordinate Descent. Next, we revisit \textbf{regularization}—including Ridge ($\ell_2$), Lasso ($\ell_1$), and Elastic Net—to understand how controlling coefficient magnitudes helps prevent overfitting. We then review key \textbf{performance metrics} for regression, including MSE, RMSE, MAE, and $R^2$.
+
+Finally, the main focus of this lecture is \textbf{model validation and evaluation}. We introduce the train/validation/test split, learning curves, cross-validation, and the bias--variance tradeoff, which together provide a practical framework for understanding model generalization and performance on unseen data. We also highlight how evaluation becomes more subtle when labels are noisy or ambiguous.
+
+
+
+\section{Second-Order Optimization: Newton's Method}
+
+Second-order optimization methods improve upon Gradient Descent by using curvature information of the loss surface. Instead of relying only on the slope (first derivative), these methods also use second derivatives to better estimate the location of the minimum.
+
+\subsection{Jacobian and Hessian Matrices}
+
+The Jacobian matrix is a matrix composed of first-order partial derivatives of a multivariable function. It describes how a function changes with respect to each variable and is commonly used in optimization and nonlinear systems. The Hessian matrix extends this idea by collecting second-order partial derivatives. It is an \( n \times n \) square matrix that captures the curvature of a function and plays a central role in second-order optimization methods.
+
+For example, consider the function \( f(x,y) = x^2y + y^2x \). The Hessian matrix for this function is
+\[
+H_f(x,y)=
+\begin{pmatrix}
+2y & 2x+2y\\
+2x+2y & 2x
+\end{pmatrix}.
+\]
+
+\subsection{Optimization}
+
+Second-order optimization methods use curvature information to guide the search for a minimum. While first-order methods such as Gradient Descent rely only on the slope of the loss surface, second-order methods additionally use the Hessian matrix to capture how the surface bends. This curvature information allows the optimizer to take more informed steps toward the minimum.
+
+When the Hessian matrix is positive semi-definite,
+\[
+\Delta\vecb{\theta}^T \matb{H}(\vecb{\theta})\Delta\vecb{\theta} \ge 0
+\quad \text{for any } \Delta\vecb{\theta}.
+\]
+the loss surface locally behaves like a convex parabola. In this setting, curvature information can be used to construct a more accurate local model of the loss function.
+
+Using a second-order Taylor approximation, the loss near a point \( \vecb{\theta} \) can be written as
+\[
+L(\vecb{\theta}+\Delta\vecb{\theta})
+\approx
+L(\vecb{\theta})
++\Delta\vecb{\theta}^T\nabla_{\vecb{\theta}} L(\vecb{\theta})
++\frac{1}{2}\Delta\vecb{\theta}^T \matb{H}(\vecb{\theta})\Delta\vecb{\theta}.
+\]
+To find the minimum of this quadratic approximation, we set the derivative with respect to \( \Delta\theta \) equal to zero:
+\[
+\nabla_{\vecb{\theta}} L(\vecb{\theta})
++\matb{H}(\vecb{\theta})\Delta\vecb{\theta}=0,
+\]
+
+which yields the optimal update direction
+\[
+\Delta\vecb{\theta}
+=
+-\matb{H}(\vecb{\theta})^{-1}
+\nabla_{\vecb{\theta}} L(\vecb{\theta}).
+\]
+
+Substituting this update into the iterative optimization framework leads to the Newton’s Method update rule
+\[
+\vecb{\theta}^{t+1}
+=
+\vecb{\theta}^{t}
+-\alpha \matb{H}(\vecb{\theta})^{-1}
+\nabla_{\vecb{\theta}} L(\vecb{\theta}).
+\]
+
+For comparison, standard Gradient Descent uses only first-order information:
+\[
+\vecb{\theta}^{t+1}
+=
+\vecb{\theta}^{t}
+-\alpha \nabla_{\vecb{\theta}} L(\vecb{\theta}^{t}).
+\]
+
+
+A matrix is positive semi-definite when it is symmetric and has non-negative eigenvalues, which guarantees locally convex curvature and enables reliable descent toward a minimum.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P2.png}
+    \caption{Visualization of the function with respect to parameters \(w_1\) and \(w_2\) (quadratic function in blue)}
+    \label{fig:P2.png}
+\end{figure}
+
+
+\subsection{Convexity}
+
+In optimization, the concept of convexity plays a crucial role in determining how easily we can find the global minimum of a function. A function \( f(\vecb{\theta}) \) is said to be \textit{convex} if, for any two points \( \vecb{\theta}_1 \) and \( \vecb{\theta}_2 \) within its domain, the line segment connecting \( f(\theta_1) \) and \( f(\theta_2) \) lies above or on the graph of the function itself. Formally, for any \( \vecb{\theta}_1, \vecb{\theta}_2 \in \mathrm{dom}(f) \) and \( \lambda \in [0,1] \):
+\[
+f(\lambda \vecb{\theta}_1 + (1-\lambda) \vecb{\theta}_2)
+\leq \lambda f(\vecb{\theta}_1) + (1-\lambda) f(\vecb{\theta}_2).
+\]
+
+This property guarantees that the function has a single global minimum and no other local minima, making optimization significantly easier.
+
+For twice-differentiable functions, convexity can be checked using the Hessian matrix. A function is convex if its Hessian is positive semi-definite everywhere:
+\[
+\matb{H}(\vecb{\theta}) \succeq 0.
+\]
+This means the loss surface curves upward in every direction, forming a bowl-shaped landscape that guides optimization algorithms toward the global minimum.
+
+In contrast, \textit{non-convex} functions do not satisfy the convexity condition. The line segment between two points may lie below the function curve, producing multiple local minima and maxima. In these cases, optimization algorithms such as gradient descent may become trapped in local minima and fail to reach the global solution.
+
+
+\subsection{Convergence}
+
+Newton's method is particularly powerful for minimizing \textit{convex} functions. Because it incorporates curvature information through the Hessian, it produces a quadratic approximation of the loss surface at every step. This allows the algorithm to move directly toward the minimum rather than following the slower zig-zag path typical of gradient descent.
+
+Near the optimum, Newton’s method exhibits \textbf{quadratic convergence}, meaning the error decreases extremely rapidly once the algorithm is close to the minimum. In contrast, gradient descent typically achieves only \textbf{linear convergence}, requiring many more iterations to reach a similar level of accuracy.
+
+However, Newton's method becomes less reliable for \textit{non-convex} functions. When the Hessian is not positive semi-definite, the quadratic approximation may point toward a saddle point or even a local maximum. As illustrated in the figures, the method may converge to an undesirable local minimum, move toward a local maximum, or oscillate between regions due to incorrect curvature information. 
+
+For this reason, Newton’s method is most effective when the loss function is convex or when the optimization has already reached a region close to a local minimum.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P3.png}
+    \caption{Newton's Method Convergence: Convex Functions}
+    \label{fig:P3.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P4.png}
+    \caption{Newton's Method Convergence: Non-Convex Functions}
+    \label{fig:P4.png}
+\end{figure}
+
+
+\subsection{Computational Complexity}
+
+Although Newton’s method can converge in fewer iterations than first-order methods, it is significantly more expensive per iteration. The main challenge is the Hessian matrix, which is a \(P \times P\) matrix containing all second-order partial derivatives of the loss function.
+
+Storing the Hessian requires \(O(P^2)\) memory, which quickly becomes impractical for models with many parameters. Computing the Hessian itself requires \(O(P^2)\) operations, and computing its inverse requires approximately \(O(P^3)\) time. Therefore, the total computational cost per Newton update is dominated by the matrix inversion step:
+
+\[
+\vecb{\theta}^{t+1}
+=
+\vecb{\theta}^{t}
+-\alpha \matb{H}(\vecb{\theta})^{-1}
+\nabla_{\vecb{\theta}} L(\vecb{\theta})
+\]
+
+Where \(\matb{H}(\vecb{\theta})\) is the Hessian matrix:
+\[
+\matb{H}(\vecb{\theta})=\nabla_{\vecb{\theta}}^2 L(\vecb{\theta})
+\]
+
+\[
+\boxed{\textbf{Total time per iteration of Newton's Method: } O(P^3)}
+\]
+
+Because modern machine learning models often contain millions of parameters, directly computing and inverting the Hessian is typically infeasible. For this reason, most large-scale learning algorithms rely on first-order methods such as Gradient Descent or use approximate second-order methods (e.g., quasi-Newton methods) that avoid explicit Hessian computation.
+
+
+
+% \subsection{Newton’s Method: Second-order Taylor Approximation}
+
+% Newton’s method is a local optimization technique that uses a second-order Taylor series approximation of the loss function to obtain a more accurate estimate of the direction toward the minimum. Instead of relying only on the gradient, this approach incorporates curvature information through second-order derivatives, leading to faster convergence near an optimum.
+
+% Using a second-order Taylor expansion, the loss function around the current parameter vector can be approximated as
+% \[
+% L(\theta + \Delta \theta) \approx L(\theta) + \Delta \theta^T \nabla_\theta L(\theta) + \frac{1}{2} \Delta \theta^T H(\theta) \Delta \theta .
+% \]
+% Here, \(\nabla_\theta L(\theta)\) denotes the gradient of the loss function, while \(H(\theta)=\nabla_\theta^2 L(\theta)\) is the Hessian matrix, which contains all second-order partial derivatives:
+% \[
+% H(\theta)=
+% \begin{pmatrix}
+% \frac{\partial^2 L(\theta)}{\partial \theta_1^2} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_1 \partial \theta_p} \\
+% \vdots & \ddots & \vdots \\
+% \frac{\partial^2 L(\theta)}{\partial \theta_p \partial \theta_1} & \cdots & \frac{\partial^2 L(\theta)}{\partial \theta_p^2}
+% \end{pmatrix}.
+% \]
+
+% This formulation assumes that the loss function is twice differentiable so that the Hessian exists. The resulting quadratic approximation provides a more accurate local model of the loss surface than first-order methods alone, allowing Newton’s method to move toward the minimum more efficiently, particularly when the optimization is close to convergence.
+
+
+
+\section{Coordinate Search}
+
+When gradient information is unavailable or too expensive to compute, derivative-free optimization methods provide an alternative strategy.
+
+\subsection{Optimization}
+
+Coordinate search is a simple optimization technique that does not rely on gradients or second-order derivatives. Instead of computing the steepest descent direction, the algorithm explores the parameter space by moving along one coordinate axis at a time. At each iteration, the method tests whether moving in the positive or negative direction of a coordinate decreases the loss, and updates the parameters accordingly. The update rule is
+
+\[
+\vecb{\theta}^{t+1}
+=
+\vecb{\theta}^{t}
+\pm \alpha \vb{e}_j
+\]
+
+
+where \(\vb{e}_j = [0, \ldots, 1, \ldots, 0]^T\) is the \(j\)-th standard basis vector, which selects the coordinate direction being explored.
+
+This approach is useful when gradients are unavailable, difficult to compute, or expensive to evaluate. Because it does not require derivatives, coordinate search belongs to the class of \textit{derivative-free optimization} methods. However, this simplicity comes at a cost: the algorithm may require many function evaluations and can be slower than gradient-based methods in high-dimensional problems.
+
+Figure~\ref{fig:P5.png} illustrates how the algorithm explores descent directions along coordinate axes, moving step-by-step toward lower values of the objective function.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P5.png}
+    \caption{Coordinate Search Algorithm: Exploring Descent Directions Along Coordinate Axes}
+    \label{fig:P5.png}
+\end{figure}
+
+
+\section{Coordinate Descent}
+
+While Coordinate Search explores directions without using gradients, Coordinate Descent improves efficiency by incorporating partial derivative information.
+
+\subsection{Optimization}
+
+Coordinate descent is an optimization strategy that improves the objective function by updating \textit{one parameter (one coordinate of $\vecb{\theta}$) at a time}. Instead of computing a full gradient vector across all parameters, the algorithm isolates a single coordinate direction and performs a one–dimensional optimization step along that axis. This greatly simplifies each update and reduces computational cost, especially in high–dimensional problems.
+
+At each iteration, the algorithm selects a coordinate index \( j \in \{1,\dots,P\} \) and updates only the corresponding parameter while keeping all other parameters fixed. For a continuously differentiable loss function \(L(\vecb{\theta})\), the update rule becomes
+
+\[
+\theta_j^{t+1}
+=
+\theta_j^{t}
+-\alpha \nabla_{\theta_j} L(\vecb{\theta}).
+\]
+
+This process is repeated across coordinates until convergence. The coordinates may be selected cyclically, randomly, or based on a heuristic such as the largest gradient magnitude. By decomposing a high–dimensional optimization problem into a sequence of simpler one–dimensional updates, coordinate descent can be particularly effective for large-scale machine learning problems where computing full gradients is expensive.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P6.png}
+    \caption{Coordinate Descent Algorithm: Stepwise Optimization Along Coordinate Axes}
+    \label{fig:P6.png}
+\end{figure}
+
+\subsection{Convergence}
+
+In early iterations, coordinate search methods can make progress by exploring all coordinate directions, but coordinate descent quickly becomes more efficient once gradient information is used. Because each step directly follows the partial derivative with respect to a single parameter, the algorithm typically identifies descent directions faster and reduces the loss more effectively than coordinate search.
+
+As illustrated in Figure~\ref{fig:P7.png}, coordinate descent tends to reach lower-cost regions of the objective function in fewer iterations. Although each step only adjusts one parameter, the repeated sequence of updates gradually drives the parameters toward a minimum. This stepwise progress often produces a characteristic ``zig-zag'' path toward the optimum.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P7.png}
+    \caption{Comparison of Coordinate Search (Left) and Coordinate Descent (Right): Efficiency in Finding Lower Cost Function Values}
+    \label{fig:P7.png}
+\end{figure}
+
+\subsection{Advantages}
+
+One of the main strengths of coordinate descent is its simplicity. Each update requires only a partial derivative with respect to a single parameter, making the method easy to implement and computationally inexpensive. Unlike second-order methods such as Newton's method, coordinate descent does not require storing or inverting large matrices, which makes it highly scalable to problems with many parameters.
+
+Because of its low memory requirements and cheap updates, coordinate descent is widely used in large-scale machine learning applications such as Lasso regression, sparse optimization, and high-dimensional linear models.
+
+\subsection{Limitations}
+
+Despite its simplicity, coordinate descent has important limitations. The algorithm can struggle when the objective function is non-smooth or when variables are highly coupled. In such cases, improving one parameter at a time may lead to slow progress, oscillations, or convergence to suboptimal points such as saddle points.
+
+Figure~\ref{fig:P8.png} illustrates an example of a non-smooth multivariable function. The sharp corners of the level curves make it difficult for the algorithm to determine a consistent descent direction. As a result, the optimization path (shown in red) can stall or progress very slowly toward the global minimum.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P8.png}
+    \caption{A Case of Non-Smooth Multivariable Function}
+    \label{fig:P8.png}
+\end{figure}
+
+The red trajectory highlights how the optimization may stagnate or move inefficiently due to the non-smooth geometry of the loss surface.
+
+
+
+\section{Summary of Optimization Methods}
+
+We now summarize the optimization methods discussed in Lecture 8 (first-order methods)
+and Lecture 9 (second-order and coordinate-based methods).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{c|c|c|c}
+\textbf{Method} & \textbf{Uses Gradient?} & \textbf{Uses Hessian?} & \textbf{Per–Iteration Cost} \\
+\hline
+Gradient Descent & Yes & No & Low \\
+Newton’s Method & Yes & Yes & Very High ($O(P^3)$) \\
+Coordinate Search & No & No & Medium \\
+Coordinate Descent & Partial & No & Low \\
+\end{tabular}
+\caption{Comparison of Optimization Methods}
+\end{table}
+
+Each method presents a trade-off between computational cost and convergence speed. In practice, the choice of optimizer depends on the size of the dataset, the number of parameters, and the availability of derivative information.
+
+
+% \section{Regularized Linear Models}
+
+% \subsection{Overview}
+
+% Regularized linear models extend ordinary linear regression by adding constraints that control the size of model parameters. In this lecture, we focus on three widely used regularization techniques: \textbf{Ridge Regression}, \textbf{Lasso Regression}, and \textbf{Elastic Net Regression}. Each method introduces a penalty term into the loss function that discourages overly complex models and helps improve generalization performance.
+
+% \subsection{Motivation}
+
+% Regularization is introduced to address a key limitation of standard linear regression: its tendency to overfit the training data when the model becomes too flexible. When a model overfits, it captures noise in the data rather than the true underlying relationship, which leads to poor performance on unseen data.
+
+% Regularization techniques mitigate this issue by constraining the magnitude of the model’s coefficients. By penalizing large parameter values, the model becomes less sensitive to noise and more robust to variations in the training data. In practice, this results in simpler models that generalize better.
+
+% There are several ways to impose such constraints on the coefficients of a linear model. The three most common approaches are Ridge Regression, which penalizes the squared magnitude of coefficients; Lasso Regression, which penalizes the absolute magnitude of coefficients; and Elastic Net Regression, which combines both penalties to balance their strengths.
+
+\section{Ridge Regularization}
+
+\paragraph{Notation note.}
+Some figures in this lecture use the symbol $\gamma$ to denote the regularization strength.
+Throughout the notes, we use $\lambda$ for consistency with the course notation.
+These symbols refer to the same quantity.
+
+\subsection{Formulation}
+
+Standard linear regression models attempt to fit data samples by minimizing the least squares cost. However, this approach can become problematic in practical settings. When features contain noise, the learned coefficients may change dramatically, making the model unstable. Similarly, when only a small amount of training data is available, the model can easily overfit and fail to generalize to new data. These issues arise because large coefficients can have a disproportionately high impact on model predictions.
+
+\textbf{Ridge Regression} (also called \textbf{Tikhonov regularization}) addresses this problem by shrinking the regression coefficients \(\vecb{\theta}\). It does so by imposing a penalty on the squared \(\ell_2\) norm \(\|\vecb{\theta}\|_2^2\), which discourages excessively large parameter values. This penalty is incorporated directly into the training objective.
+
+During training, the regularization term is added to the cost function:
+\[
+L(\vecb{\theta})
+=
+\frac{1}{N}\sum_{i=1}^{N}
+\left(\vecb{\theta}^T\vb{x}_i - y_i\right)^2
++
+\frac{\lambda}{N}\|\vecb{\theta}\|_2^2
+\]
+
+\textbf{We use $\lambda$ to denote the regularization strength to remain consistent with the course notation file.}
+
+where \(\lambda > 0\) is a hyperparameter that controls the strength of the shrinkage. Larger values of \(\lambda\) lead to stronger regularization and smaller coefficients.
+
+It is important to note that the regularization term is used only during training. Once the model has been trained, its performance is evaluated using the standard prediction error without including the regularization penalty.
+
+
+\subsection{Robustness to Noise}
+
+Standard linear regression can be highly sensitive to noise in the training data. When small perturbations or noisy samples are introduced, the fitted regression line can change dramatically, resulting in large variability in the estimated coefficients. This behavior is illustrated in Figure~\ref{fig:P9.png}, where multiple models are trained on slightly different noisy datasets. The gray regression lines vary widely, demonstrating that ordinary least squares can produce unstable parameter estimates when the data contains noise.
+
+Ridge regression addresses this issue by adding an \(L_2\) penalty that discourages large coefficient values. By shrinking the parameters toward zero, the model becomes less sensitive to fluctuations in the data and produces more stable predictions. As shown in Figure~\ref{fig:P10.png}, the fitted lines produced by ridge regression exhibit significantly less variation across noisy datasets. This reduction in variance highlights one of the key benefits of regularization: improved robustness to noise and better generalization to unseen data.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P9.png}
+    \caption{Large variance of slope (coefficients) of linear regression models (gray lines) with induced noise samples (gray dots)}
+    \label{fig:P9.png}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P10.png}
+    \caption{Reduced variance of ridge regression models (gray lines) with induced noise samples (gray dots)}
+    \label{fig:P10.png}
+\end{figure}
+
+
+
+\subsection{Reduce Overfitting to Limited Training Data}
+
+Overfitting becomes particularly severe when only a small amount of training data is available. In such cases, standard linear regression tends to fit the training points too closely, capturing random fluctuations rather than the underlying trend. This behavior is illustrated in Figure~\ref{fig:P11.png}, where the linear regression model (red line) fits the limited training samples almost perfectly but fails to generalize well to new data.
+
+Ridge regression mitigates this problem by constraining the magnitude of the coefficients. The resulting model (blue line) does not pass exactly through the training points but instead captures a smoother and more general trend. As a result, it performs better on unseen test samples (green dots). This example demonstrates how regularization introduces a small amount of bias in exchange for a large reduction in variance, ultimately improving predictive performance.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P11.png}
+    \caption{Ridge Regression vs. Linear Regression}
+    \label{fig:P11.png}
+\end{figure}
+
+
+\subsection{Effect of \(\lambda\) on \(\vecb{\theta}\) Magnitudes}
+
+The regularization strength in ridge regression is controlled by the hyperparameter \(\lambda\), which determines how strongly large coefficients are penalized. When \(\lambda\) is very small, the penalty term has little influence, and the model behaves similarly to standard linear regression. In this regime, the coefficients can take on larger values, allowing the model to closely fit the training data.
+
+As \(\lambda\) increases, the penalty becomes stronger and the coefficients are increasingly shrunk toward zero. This shrinkage reduces model complexity and helps prevent overfitting. When \(\lambda\) becomes very large, the coefficients approach zero and the model converges toward a nearly flat line that approximates the mean of the target variable. Figures~\ref{fig:P12.png} and~\ref{fig:P13.png} illustrate how increasing \(\lambda\) progressively reduces coefficient magnitudes and simplifies model behavior.
+
+This trade-off between model flexibility and regularization strength highlights the bias–variance trade-off: small \(\lambda\) values yield low bias but high variance, while large \(\lambda\) values produce higher bias but lower variance.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/lecture9/P12.png}
+    \caption{Impact of $\lambda$ on Ridge Regression Coefficients}
+    \label{fig:P12.png}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P13.png}
+    \caption{Impact of $\lambda$ on Model Behavior}
+    \label{fig:P13.png}
+\end{figure}
+
+
+\subsection{Normal Equation}
+
+The optimal parameter vector for ridge regression can be derived analytically using the \textbf{normal equation}. Recall that ridge regression augments the standard least-squares objective with an $L_2$ penalty on the parameter vector. In matrix form, the ridge loss function is written as
+
+\[
+L(\vecb{\theta})
+=
+\frac{1}{N}
+(\matb{X}\vecb{\theta}-\vb{y})^T
+(\matb{X}\vecb{\theta}-\vb{y})
++
+\frac{\lambda}{N}\vecb{\theta}^T\vecb{\theta}.
+\]
+
+where $\matb{X}$ is the design matrix, $\vb{y}$ is the target vector, and $\lambda > 0$ is the regularization hyperparameter that controls the strength of the penalty.
+
+To obtain the optimal parameters, we differentiate the loss with respect to $\vecb{\theta}$ and set the gradient equal to zero:
+
+\[
+\nabla_{\vecb{\theta}}L
+=
+2\matb{X}^T\matb{X}\vecb{\theta}
+-2\matb{X}^T\vb{y}
++2\lambda\vecb{\theta}.
+\]
+
+Setting this derivative to zero yields the linear system
+
+\[
+(\matb{X}^T\matb{X}+\lambda\matb{I})\vecb{\theta}
+=
+\matb{X}^T\vb{y}.
+\]
+
+where $\matb{I}$ is the identity matrix. Solving for $\vecb{\theta}$ gives the closed-form ridge regression solution
+
+\[
+\vecb{\theta}
+=
+(\matb{X}^T\matb{X}+\lambda\matb{I})^{-1}
+\matb{X}^T\vb{y}.
+\]
+
+This equation shows how ridge regression stabilizes the solution by adding $\lambda \mathbf{I}$ to $\mathbf{X}^T\mathbf{X}$. This additional term improves numerical stability and ensures the matrix is invertible, especially when features are highly correlated or when the dataset is small.
+
+
+\subsection{Gradient Descent}
+
+Although ridge regression admits a closed-form solution, in many practical machine learning settings the number of parameters is very large. Computing a matrix inverse becomes expensive and memory intensive. For this reason, ridge regression is often solved using \textbf{gradient descent}.
+
+Starting from an initial parameter vector, gradient descent iteratively updates the parameters according to
+
+\[
+\vecb{\theta}^{(t+1)}
+=
+\vecb{\theta}^{(t)}
+-\alpha \nabla_{\vecb{\theta}}L.
+\]
+
+where $\alpha$ is the learning rate. For ridge regression, the gradient of the loss function is
+
+\[
+\nabla_{\vecb{\theta}}L
+=
+-\frac{2}{N}\sum_{i=1}^{N}
+(y_i-\vecb{\theta}^T\vb{x}_i)\vb{x}_i
++\frac{2\lambda}{N}\vecb{\theta}.
+\]
+
+The hyperparameter $\lambda$ controls the trade-off between accurately fitting the training data and keeping the parameter magnitudes small. A small $\lambda$ produces behavior similar to standard linear regression, while a large $\lambda$ increases regularization and produces a smoother, lower-variance model.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{img/lecture9/P14.png}
+    \caption{Gradient Descent Path to Optimal Weights: Minimizing Loss in Ridge Regression}
+    \label{fig:P14.png}
+\end{figure}
+
+
+
+\section{Lasso Regression: Formulation}
+
+\subsection{Overview}
+\textbf{Lasso regression} (Least Absolute Shrinkage and Selection Operator) is a linear regression technique that incorporates \textbf{L1 regularization}, which adds a penalty proportional to the absolute value of the regression coefficients. 
+
+This approach is particularly useful when working with datasets that contain many features, some of which may be irrelevant or only weakly related to the target variable. In such settings, ordinary linear regression can produce unstable models that overfit the training data. Lasso addresses this issue by encouraging simpler models that rely only on the most informative features.
+
+\subsection{L1 Regularization}
+The key difference between Lasso regression and ordinary linear regression is the addition of an \textbf{L1 penalty} to the loss function. This penalty is the sum of the absolute values of the regression coefficients, which discourages large parameter values and promotes sparsity.
+
+The Lasso objective function is given by:
+\[
+L(\vecb{\theta})
+=
+\frac{1}{N}\sum_{i=1}^{N}
+(\vecb{\theta}^T\vb{x}_i-y_i)^2
++
+\lambda\sum_{j=1}^{P}|\theta_j|
+\]
+
+The regularization parameter $\lambda$ controls the strength of the penalty. When $\lambda=0$, the model reduces to standard linear regression. As $\lambda$ increases, the penalty becomes stronger, forcing coefficients to shrink toward zero.
+
+\subsection{Sparse Model}
+A defining property of Lasso regression is that it produces a \textbf{sparse model}. In a sparse model, many regression coefficients become exactly zero. 
+
+This behavior occurs because the L1 penalty introduces sharp “corners” in the optimization landscape. During optimization, the solution often lands exactly on these corners, causing some coefficients to become zero. As a result, Lasso automatically removes features that do not meaningfully contribute to predicting the target variable.
+
+This property makes Lasso especially useful for high-dimensional datasets where the number of features is large.
+
+\subsection{Feature Selection}
+One of the most important advantages of Lasso over Ridge regression (which uses L2 regularization) is its ability to perform \textbf{automatic feature selection}. Because Lasso can drive coefficients to exactly zero, it effectively identifies and retains only the most relevant features while discarding irrelevant ones.
+
+This leads to several practical benefits, including:
+
+- Improved generalization and reduced overfitting
+
+- Simpler and more interpretable models
+
+- Reduced computational cost for downstream tasks
+
+For datasets with many redundant or noisy features, Lasso provides a powerful tool for building compact and interpretable models.
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-21 at 3.39.06 PM.png}
+    \caption{As $\lambda$ increases, coefficients of less important features shrink to zero before those of more important features.}
+\end{figure}
+
+
+\section{Lasso Regularization: Gradient Descent}
+
+Unlike Ridge regression, the L1 penalty used in Lasso is \textbf{not differentiable at zero}. 
+Therefore, we cannot compute a standard gradient. Instead, we use a \textbf{subgradient}.
+
+The subgradient of the Lasso objective is:
+
+\[
+\nabla_{\vecb{\theta}} L(\vecb{\theta})
+=
+-\frac{2}{N}\sum_{i=1}^{N}
+(y_i-\vecb{\theta}^T\vb{x}_i)\vb{x}_i
++\lambda\,\text{sign}(\vecb{\theta})
+\]
+
+where the sign function is defined as
+
+\[
+\text{sign}(\theta_j)=
+\begin{cases}
++1 & \theta_j>0\\
+-1 & \theta_j<0\\
+[-1,1] & \theta_j=0
+\end{cases}
+\]
+
+The hyperparameter $\lambda$ controls the balance between fitting the training data and encouraging sparsity.  
+As $\lambda$ increases, the regularization strength increases, pushing more coefficients toward zero.
+
+
+\section{Lasso vs Ridge Regression}
+
+We now summarize the key differences between Lasso (L1) and Ridge (L2) regularization:
+
+
+\begin{table}[ht]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{ccc}
+            \textbf{Aspect} & \textbf{Lasso (L1)} & \textbf{Ridge (L2)} \\
+            \hline
+            Penalty Term & Sum of absolute values of coefficients & Sum of squared coefficients \\
+            Effect on Coefficients & Drives some coefficients exactly to zero & Shrinks coefficients continuously toward zero \\
+            Feature Selection & Yes (automatic) & No \\
+            Best Used & Many irrelevant features expected & Most features are useful but noisy \\
+        \end{tabular}
+    }
+    \caption{Comparison of Lasso and Ridge Regression}
+    \label{tab:lasso_ridge}
+\end{table}
+
+The key takeaway is that Lasso and Ridge address overfitting in different ways. 
+Ridge regression keeps all features in the model but reduces their influence by shrinking coefficients smoothly toward zero. 
+In contrast, Lasso regression can eliminate features entirely by forcing some coefficients to become exactly zero, producing a simpler and more interpretable model.
+
+In practice, Ridge is often preferred when most features are believed to contain useful information but may be noisy or correlated. 
+Lasso is particularly useful when the dataset contains many irrelevant or redundant features and automatic feature selection is desirable.
+
+
+
+\section{Elastic Net Regularization}
+
+\subsection{Overview}
+Elastic Net regularization is a linear regression technique that combines two  regularization methods: \textbf{Lasso (L1) regularization} and \textbf{Ridge (L2) regularization}. It's used to prevent overfitting by penalizing the magnitude of regression coefficients, and it is particularly useful when dealing with datasets that have a large number of features or when the features are highly correlated (multicollinearity).
+
+
+The Elastic Net formula is as follows:
+
+\[
+L(\vecb{\theta}) =
+\frac{1}{N}\sum_{i=1}^{N}(\vecb{\theta}^T\vb{x}_i-y_i)^2
++ \lambda \left(
+r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\vecb{\theta}\|_2^2
+\right)
+\]
+
+
+The hyperparameter $r \in [0,1]$ controls the balance between the L1 and L2 penalties.
+When $r = 1$, Elastic Net becomes Lasso regression. 
+When $r = 0$, Elastic Net becomes Ridge regression. 
+Values between 0 and 1 create a weighted combination of both penalties.
+
+Elastic Net was introduced to address limitations of using Lasso or Ridge alone. 
+Lasso can perform feature selection, but it may behave unstably when features are highly correlated, often selecting only one feature from a correlated group. Ridge regression handles correlated features well but cannot remove irrelevant features. 
+Elastic Net combines the strengths of both methods by encouraging sparsity while also stabilizing coefficient estimates in the presence of multicollinearity.
+
+
+
+\subsection{Compared to Lasso and Ridge}
+
+How does Elastic Net compare to Lasso and Ridge regularization separately? 
+To highlight their differences, we consider a fixed MSE loss with the following contour plot:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{img/lecture9/P15.png}
+    \caption{Geometric intuition of L1 vs L2 regularization. L1 regularization (Lasso) tends to produce sparse solutions by driving some coefficients exactly to zero, while L2 regularization (Ridge) shrinks coefficients smoothly toward zero without fully eliminating them.}
+    \label{fig:P15.png}
+\end{figure}
+
+The figure illustrates the geometric intuition behind L1 and L2 regularization and helps explain why Elastic Net combines the strengths of both approaches.
+
+The contour lines represent level sets of the Mean Squared Error (MSE) loss in parameter space. The goal of training is to move toward the minimum of this loss surface. The white dots illustrate the path taken by gradient descent starting from an initial point (red square) and moving toward the optimal solution.
+
+\paragraph{Top-left: $\ell_1$ penalty geometry.}
+The diamond-shaped constraint region corresponds to the L1 penalty used in Lasso. Notice that the corners of the diamond lie on the coordinate axes. When the loss contours first touch this constraint region, they often intersect at one of these corners. Because corners lie on the axes, one of the coefficients becomes exactly zero. This explains why Lasso produces \textbf{sparse solutions} and performs \textbf{automatic feature selection}.
+
+\paragraph{Top-right: Lasso optimization path.}
+The gradient descent trajectory shows that the solution is pulled toward the coordinate axes. The final optimum lies on the $\theta_2 = 0$ axis, meaning one parameter has been eliminated entirely.
+
+\paragraph{Bottom-left: $\ell_2$ penalty geometry.}
+The circular constraint region corresponds to the L2 penalty used in Ridge regression. Unlike the diamond shape, the circle has no sharp corners. As a result, the loss contours typically touch the constraint boundary at a smooth point rather than on an axis. This leads to coefficients being \textbf{shrunk toward zero} but rarely becoming exactly zero.
+
+\paragraph{Bottom-right: Ridge optimization path.}
+The gradient descent path moves smoothly toward the center. The final solution lies near the origin, but both parameters remain nonzero. Ridge therefore provides \textbf{stability and shrinkage} without performing feature selection.
+
+\paragraph{Elastic Net as a compromise.}
+Elastic Net combines both penalties, creating a constraint region that lies between the diamond and the circle. This gives it two key advantages:
+
+\begin{itemize}
+    \item Like Lasso, it can produce sparse solutions and perform feature selection.
+    \item Like Ridge, it remains stable when features are highly correlated, avoiding the instability that Lasso can exhibit in such settings.
+\end{itemize}
+
+For this reason, Elastic Net is especially useful in high-dimensional datasets where the number of features is large relative to the number of training samples.
+
+
+
+\section{Performance Metrics}
+
+After training a regression model, we need quantitative ways to evaluate how well it performs. 
+Performance metrics measure the difference between predicted values and the true targets. 
+Different metrics emphasize different types of errors, so in practice multiple metrics are often reported together.
+
+\subsection{Mean Squared Error (MSE)}
+
+The \textbf{Mean Squared Error (MSE)} is one of the most common metrics for regression.  
+It measures the average squared difference between predicted values and true values.
+
+\[
+\text{MSE}(\matb{X},\vecb{\theta})=\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2
+\]
+
+where $\hat{y}_i=\vecb{\theta}^T\vb{x}_i$ is the predicted value.
+
+Squaring the error has two important effects:
+
+\begin{itemize}
+\item Large errors are penalized more heavily than small errors.
+\item The function is smooth and differentiable, making it convenient for optimization.
+\end{itemize}
+
+However, because errors are squared, MSE can be sensitive to outliers.
+
+\subsection{Root Mean Squared Error (RMSE)}
+
+The \textbf{Root Mean Squared Error (RMSE)} is the square root of the MSE:
+
+\[
+\text{RMSE}(\matb{X},\vecb{\theta})=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2}
+\]
+
+RMSE has the same units as the target variable, making it easier to interpret than MSE.  
+For example, if the target variable is measured in dollars, RMSE is also measured in dollars.
+
+\subsection{Mean Absolute Error (MAE)}
+
+The \textbf{Mean Absolute Error (MAE)} measures the average magnitude of prediction errors:
+
+\[
+\text{MAE}(\matb{X},\vecb{\theta})=\frac{1}{N}\sum_{i=1}^{N}|\hat{y}_i-y_i|
+\]
+
+Unlike MSE, MAE does not square the error. This makes MAE:
+
+\begin{itemize}
+\item More robust to outliers
+\item Less sensitive to large individual errors
+\end{itemize}
+
+In practice, MAE and MSE are often reported together to better understand model behavior.
+
+\subsection{Coefficient of Determination ($R^2$)}
+
+The \textbf{Coefficient of Determination} ($R^2$) measures how well the model explains the variance in the target variable.  
+It compares the prediction error of the model to the error of a simple baseline model that always predicts the mean of the data.
+
+\[
+R^2 = 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}}
+\]
+
+where
+
+\[
+SS_{\text{res}}=\sum_{i=1}^{N}(y_i-\hat{y}_i)^2
+\]
+\[
+SS_{\text{tot}}=\sum_{i=1}^{N}(y_i-\bar{y})^2
+\]
+
+Interpretation:
+
+\begin{itemize}
+\item \textbf{$R^2 = 1$}: Perfect predictions.
+\item \textbf{$R^2 = 0$}: Model performs no better than predicting the mean.
+\item \textbf{$R^2 < 0$}: Model performs worse than the mean predictor.
+\end{itemize}
+
+$R^2$ provides a normalized measure of performance and is especially useful when comparing different models on the same dataset.
+
+
+
+
+\section{Model Validation}
+
+Machine learning models must be evaluated carefully to ensure they generalize to unseen data. 
+This section introduces the core tools used to assess model performance and diagnose common 
+issues such as underfitting and overfitting. We discuss dataset splitting, learning curves, 
+cross-validation, model complexity, and the bias–variance tradeoff.
+
+\subsection{Training/Validation/Test Split}
+
+The test set is kept completely separate from model training and validation. Its purpose is to evaluate performance on unseen data and simulate real-world deployment. By assessing the model on this independent dataset, we ensure that reported performance metrics are reliable indicators of real-world performance.
+
+
+It is critical that the \textbf{test set is never used during model development}. 
+If the test set influences model design or hyperparameter tuning, the evaluation 
+becomes biased and overly optimistic. The test set should only be used once, 
+after the final model has been selected.
+
+The training dataset is where the model learns. It’s typically divided into two parts:
+
+\begin{enumerate}
+    \item Training Data: The larger portion used to teach the model by adjusting its parameters based on the loss function.
+    \item Validation Data: A smaller portion used to monitor the model's performance during training. It helps fine-tune hyperparameters and assess the risk of overfitting by providing an unbiased evaluation.
+\end{enumerate}
+
+The validation subset serves as a checkpoint during training. It helps identify issues like overfitting and informs adjustments to model design and hyperparameters. This ensures that the model remains robust and can generalize well to new data. Typically, 20–30\% of the dataset is reserved for testing, while the remaining 
+data is used for training and validation.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.02.54 PM.png}
+    \caption{Visualization of dataset split}
+\end{figure}
+
+
+\paragraph{K-fold Cross-Validation Procedure}
+
+A widely used approach for hyperparameter tuning is $k$-fold cross-validation.
+The procedure is:
+
+\begin{enumerate}
+    \item Shuffle the dataset randomly.
+    \item Split the dataset into $k$ roughly equal subsets (folds).
+    \item For each fold:
+    \begin{itemize}
+        \item Use the fold as the validation set.
+        \item Use the remaining $k-1$ folds as the training set.
+        \item Train the model and record the validation score.
+    \end{itemize}
+    \item Average the validation scores across all folds.
+\end{enumerate}
+
+After cross-validation, the model is retrained on the full training data
+before final evaluation on the test set.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\linewidth]{img/lecture10/crossvalidation.png}
+    \caption{K-fold cross-validation procedure.}
+\end{figure}
+
+
+
+\subsection{Learning Curves}
+
+When we evaluate a model’s performance, we typically look at two key metrics: the training score and the validation score. As we increase the size of the training set, these scores can behave differently, providing valuable insights into the model’s learning process and its ability to generalize.
+
+\begin{enumerate}
+    \item \textbf{Training Score}: The training score indicates how well the model fits the training data. As the size of the training set increases, the training score usually improves. This is because a larger training set provides more examples for the model to learn from, allowing it to better capture the underlying patterns in the data.
+    \item \textbf{Validation Score}: The validation score reflects the model's performance on a separate validation dataset. This score helps assess how well the model can generalize to unseen data. Initially, as the training set size increases, the validation score may also improve, indicating that the model is effectively learning relevant features and relationships.
+
+
+\end{enumerate}
+
+
+Learning curves are a powerful diagnostic tool. By comparing training and validation 
+errors as the dataset size increases, we can determine whether a model is suffering 
+from underfitting (high bias) or overfitting (high variance).
+
+
+
+\paragraph{How Learning Curves Are Generated}
+
+To generate learning curves, we repeatedly train the model using increasing
+amounts of training data and evaluate on a fixed validation set:
+
+\begin{enumerate}
+    \item Reserve a validation set of size $v$ from the dataset of size $n$.
+    \item For $k = 1, 2, \dots, n-v$:
+    \begin{itemize}
+        \item Train the model using the first $k$ training samples.
+        \item Evaluate training and validation error.
+    \end{itemize}
+\end{enumerate}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.09.00 PM.png}
+     \caption{Underfit linear regression model}
+\end{figure}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.09.19 PM.png}
+     \caption{Overfit polynomial regression model}
+
+    
+\end{figure}
+
+
+What we can see from this is that the linear model shows higher error rates and plateaus early in training and validation causing underfitting. The polynomial model on the other hand has a lower error than the linear model but has a wider gap which shows overfitting.
+
+
+
+
+\subsection{Cross Validation}
+
+Cross-validation is a robust statistical technique used in machine learning to evaluate how well a model will perform on independent, unseen data. By partitioning the data into subsets, cross-validation helps ensure that the evaluation of the model is reliable and minimizes the risk of overfitting.
+
+In $k$-fold cross-validation, the dataset is divided into $k$ equal parts. 
+The model is trained $k$ times, each time using a different subset as the validation 
+set and the remaining data for training. The final performance estimate is the 
+average across all $k$ runs.
+
+
+
+
+
+\subsection{Model Complexity vs Prediction Error}
+
+
+Model complexity in machine learning, often measured by degrees of freedom, refers to a model's capacity to fit data, as seen in polynomial regression. As model complexity increases, training error typically decreases because the model can better fit the training data, potentially reaching a point where training error approaches zero, indicating it captures even the noise. Initially, testing error may also decrease as the model learns relevant patterns, but after a certain complexity level, testing error begins to rise due to overfitting—where the model learns noise instead of generalizable patterns. This highlights the bias-variance tradeoff: low-complexity models may have high bias, leading to oversimplified patterns, while high-complexity models can suffer from high variance, fitting training data well but failing on unseen data. Cross-validation helps identify the optimal level of complexity that minimizes 
+generalization error, while regularization mitigates overfitting by penalizing 
+excessive complexity.
+
+
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{img/lecture9/Screenshot 2024-09-22 at 6.22.40 PM.png}
+    \caption{Diagram depicting the effects of model complexity as degrees of freedom increase}
+    
+\end{figure}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\linewidth]{img/lecture10/modelcomplexity.png}
+    \caption{Model complexity vs training and testing error.}
+\end{figure}
+
+
+
+\subsection{Bias-Variance Tradeoff}
+
+The bias–variance tradeoff provides a theoretical explanation for the 
+behavior observed in learning curves and model complexity plots.
+
+Training a Linear Regression model multiple times with different datasets reveals a range of prediction scores, which can provide valuable insights into model performance. The average of these scores, referred to as bias, indicates how consistently the models perform. Models exhibiting high average error are categorized as high-bias, a result of low complexity to capture the underlying patterns in the data. Such models may cause underfitting. In the context of a high-degree Polynomial Regression model, while the bias is significantly reduced due to the model's increased complexity and flexibility, this comes at a cost. The predictions for a given test point can vary dramatically between different polynomial models, indicating a pronounced sensitivity to the training data. This phenomenon, known as variance, arises when the model becomes overly tailored to the nuances of the training dataset, capturing noise rather than the underlying trend. Consequently, high-variance models struggle to generalize effectively to unseen data, resulting in substantially higher prediction errors when applied to new instances. Moreover, this trade-off highlights the delicate balance between bias and variance, underscoring the importance of model selection and regularization techniques to mitigate overfitting/underfitting while still achieving accurate predictions.
+
+
+\paragraph{Bias–Variance Decomposition}
+
+Let $x$ be a test sample, $f(x)$ the true target, and $\hat{f}(x)$ the model prediction.
+The expected squared error can be decomposed as
+
+\[
+E[(f(x) - \hat{f}(x))^2]
+= \underbrace{(E[\hat{f}(x)] - f(x))^2}_{\text{Bias}^2}
++ \underbrace{E[(\hat{f}(x) - E[\hat{f}(x)])^2]}_{\text{Variance}}
++ \underbrace{\sigma_e^2}_{\text{Irreducible Error}}.
+\]
+
+This decomposition explains why increasing model complexity can reduce bias
+but increase variance, and motivates the search for an optimal tradeoff.
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.45\linewidth]{img/lecture10/biasvariancedarts.png}
+%     \includegraphics[width=0.45\linewidth]{img/lecture10/biasvariancelc.png}
+%     \caption{Bias–variance tradeoff illustrated using dartboard analogy and learning curves.}
+% \end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.28.08 PM.png}
+    \caption{A diagram depicting the relationship between model complexity and error}
+\end{figure}
+
+% A model's error score and its ability to generalize are closely related to its complexity, or flexibility. Finding the optimal complexity involves a tradeoff between Bias and Variance. Bias refers to the error due to overly simplistic assumptions, leading to underfitting, while Variance indicates the error from excessive sensitivity to fluctuations in the training data, resulting in overfitting. Increasing a model's complexity generally decreases Bias, allowing it to capture more intricate patterns in the training data. However, this added complexity can also increase Variance, causing the model to perform well on training data but poorly on unseen data, as it may have memorized the training set rather than learned to generalize. Thus, achieving the right level of model complexity is crucial for optimizing performance, ensuring that the model effectively balances Bias and Variance to generalize well to new data.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.30.13 PM.png}
+    \caption{Diagram depicting the bias-variance tradeoff}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\linewidth]{img/lecture9/Screenshot 2024-09-22 at 6.41.12 PM.png}
+    \caption{}
+\end{figure}
+
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{lccc}
+            & \textbf{Linear Model} & \textbf{Low-Degree Polynomial} & \textbf{High-Degree Polynomial} \\
+            \hline
+            \textbf{Bias} & Very High & Low & Very Low \\
+            \textbf{Variance} & Low & Low & High \\
+        \end{tabular}
+    }
+    \caption{Relationship to the previous figure}
+    \label{tab:bias_variance}
+\end{table}
+
+This decomposition motivates the bias–variance tradeoff: increasing model complexity typically reduces bias but increases variance.
+
+% We can derive an equation for the error in the model as follows. Assuming $x$ is a test data sample and we have $f(x)$ as the true target, $\hat{f}(x)$ is the models prediction of x, and finally $E[\hat{f}(x)]$ is the average of the target predictions given by the trained model.
+
+% We can formally decompose prediction error into three components. 
+% Let $f(x)$ denote the true target, $\hat{f}(x)$ the model prediction, and 
+% $E[\hat{f}(x)]$ the expected prediction over many training datasets.
+% The expected squared error can be written as:
+
+% \[
+% E_{\text{error}}(x) =
+% \underbrace{(E[\hat{f}(x)] - f(x))^2}_{\text{Bias}^2}
+% +
+% \underbrace{E[(\hat{f}(x) - E[\hat{f}(x)])^2]}_{\text{Variance}}
+% +
+% \underbrace{\sigma_e^2}_{\text{Irreducible Error}}
+% \]
+
+
+\section{Additional Details}
+
+In this final section, we briefly connect the practical ideas from this lecture 
+to deeper theoretical concepts from statistical learning theory. The goal is not 
+to develop full theory, but to build intuition for why model complexity, data size, 
+and regularization are fundamentally linked.
+
+\subsection{Model Complexity}
+So far, we have discussed model complexity intuitively using learning curves, 
+regularization, and the bias–variance tradeoff. We now take a slightly more 
+formal look at what “model complexity” means.
+
+In general, \textit{model complexity} refers to the capacity of a model to fit a wide variety of functions or datasets. As discussed earlier, a more complex model has a higher capacity to capture intricate patterns in the data, but this can also increase the risk of overfitting. One way to think about model complexity is in terms of how many training samples are needed for the model to learn patterns that generalize well to new data, i.e. produce low test error. However, this quantity can be difficult to characterize. Here are a few typical notions:
+
+\begin{itemize}
+    \item The degree of the model (e.g., the degree of a polynomial in polynomial regression).
+    \item The number of parameters in the model (e.g., weights in a neural network).
+    \item The flexibility of the \textit{hypothesis space} the model operates within.
+\end{itemize}
+
+The first two are essentially the same in that they describe the \textit{size} of the hypothesis space. In particular, the hypothesis space describes the set of all possible functions the model can select from, given the available data and parameters. For finite spaces, the size is a fair measure of complexity. In fact, in this case we can show that the number of samples needed to adequately fit a model is bounded by the (log of the) size of the space. However, when the space is infinite, as is often the case with continuous models like neural networks, then this notion of counting parameters can break down and we need a more careful measure of complexity.
+
+A classical theoretical way to measure model capacity is the  \textit{VC (Vapnik–Chervonenkis) dimension}. You do not need to compute this in practice, but it provides useful intuition about why complex models require more data. The VC dimension is a theoretical tool used to quantify the capacity of a model by determining the maximum number of points that a model can \textit{shatter}. Shattering means that for a given set of points, the model can perfectly classify all possible binary labelings of those points. The higher the VC dimension, the more complex the model and the larger the class of functions it can represent.
+
+For example, a linear classifier in 2D (like a linear SVM or perceptron) has a VC dimension of 3, meaning it can shatter any set of 3 points in the plane, but not necessarily 4.
+
+%%% Insert a simple illustrative figure showing the shattering concept with VC dimension using the linear classifier example %%%
+
+In practice, models with high VC dimensions are prone to overfitting, as they can represent highly complex decision boundaries. However, models with a VC dimension that is too low may underfit, failing to capture important relationships in the data. The key is to choose a model with an appropriate VC dimension for the problem at hand.
+
+While VC dimension is a powerful theoretical concept, it is not always easy to compute for real-world models. Nonetheless, it serves as a guiding principle: models with higher capacity (e.g., more parameters, higher VC dimension) need more training data to generalize well, and regularization becomes crucial to control overfitting in such cases.
+
+This theoretical perspective reinforces the key message of this lecture: 
+as model capacity increases, we must rely on more data, cross-validation, 
+and regularization to ensure good generalization.
+
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.85\textwidth]{img/lecture9/P16}
+%     \caption{
+%     True accuracy vs.\ measured accuracy under label noise.
+%     The shaded region shows the range of possible true accuracies that are
+%     consistent with a given measured accuracy when ground-truth labels are noisy.
+%     As label uncertainty increases, the gap between measured accuracy and true
+%     accuracy grows, highlighting why evaluation becomes difficult under ambiguous
+%     ground truth.
+%     }
+%     \label{fig:P16}
+% \end{figure}
+
+\subsection{Model Evaluation Under Ambiguous Ground Truth}
+
+So far, we have assumed that every training example has a single correct label. 
+However, in many real-world datasets the true label is not perfectly known. 
+Different annotators may disagree, labels may be noisy, and some examples may 
+naturally belong to multiple categories. This situation is known as 
+\textbf{ambiguous ground truth} or \textbf{label noise}.
+
+\subsubsection{Why Accuracy Can Be Misleading}
+
+Standard accuracy assumes that dataset labels are perfectly correct. 
+But suppose that a fraction $\epsilon$ of labels are incorrect or uncertain. 
+Even a perfect model cannot exceed the accuracy of the noisy labels.
+
+\[
+\boxed{
+\text{Observed Accuracy} \;\le\; 1 - \epsilon
+}
+\]
+
+This means a model might appear to plateau at $90\%$ accuracy even if its 
+true performance is much higher. In practice, label noise creates uncertainty 
+about how measured accuracy relates to the model's true accuracy 
+\cite{DBLP:journals/corr/abs-1908-07086, Quesada2025Largescale}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\linewidth]{img/lecture9/P16.png}
+    \caption{\textbf{Measured vs.\ true accuracy under label noise.}
+    The diagonal line represents perfect labels. When labels contain noise,
+    the measured accuracy lies within a band around this line. The shaded
+    region shows the range of possible true accuracies for a given measured
+    accuracy when ground-truth labels are uncertain.}
+    \label{fig:label_noise_accuracy}
+\end{figure}
+
+The shaded region illustrates an important takeaway:
+
+\begin{quote}
+Measured accuracy is not a single number — it represents a \textit{range of possible true performances}.
+\end{quote}
+
+This relationship between measured and true accuracy under noisy labels
+has been studied extensively in recent work \cite{DBLP:journals/corr/abs-1908-07086}.
+
+
+\subsubsection{Human Label Disagreement}
+
+In many tasks, disagreement between humans is not a mistake — it is a 
+signal of inherent ambiguity in the data. For example, an image might 
+contain features of both a dog and a wolf, or a handwritten digit might 
+look like both a 3 and an 8.
+
+Recent research shows that training models using \textbf{distributions 
+of human labels} instead of single “hard” labels can improve 
+generalization and robustness \cite{cifar10h}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{img/lecture9/P17.png}
+    \caption{\textbf{Humans and neural networks disagree in their uncertainty.}
+    Top: examples where humans are confident but CNN predictions are uncertain.
+    Middle: examples where humans are uncertain but CNN predictions are confident.
+    Bottom: examples where both distributions diverge. 
+    This highlights that label disagreement contains useful information about
+    ambiguity in the data.}
+    \label{fig:human_cnn_uncertainty}
+\end{figure}
+
+Rather than treating disagreement as noise, we can treat it as 
+\textbf{information about uncertainty}.
+
+\subsubsection{Practical Implications}
+
+When labels are noisy or ambiguous, model evaluation becomes more subtle. 
+Standard accuracy may \textbf{underestimate true model performance} because the 
+model is being judged against imperfect labels. At the same time, models can 
+\textbf{overfit to label noise}, memorizing incorrect annotations rather than 
+learning generalizable patterns. For this reason, techniques such as 
+\textbf{cross-validation} become even more important, and 
+\textbf{regularization} plays a key role in preventing models from memorizing 
+incorrect labels.
+
+These challenges motivate the use of more robust training and evaluation 
+strategies. In practice, modern machine learning often relies on 
+\textbf{robust evaluation metrics}, \textbf{label smoothing}, and 
+\textbf{probabilistic (soft) labels} that represent uncertainty in annotations 
+rather than assuming a single perfectly correct label. These ideas have become increasingly important in modern machine learning,
+where large-scale datasets often contain imperfect or ambiguous annotations
+\cite{Quesada2025Largescale, cifar10h}.
+
+\\ \\
+\noindent
+\textbf{Key takeaway:} Modern machine learning increasingly treats labels as 
+\textit{probabilistic} rather than perfectly correct.
+
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+
+\item \textbf{Question 1:}
+
+Which optimization method uses Second-order curvature information of the loss function?
+
+\begin{enumerate}
+    \item Gradient Descent
+    \item Coordinate Descent
+    \item Newton’s Method
+    \item Stochastic Gradient Descent
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{C)}.
+
+\textbf{Solution:}
+
+Newton’s Method uses both the gradient and the Hessian matrix:
+\[
+\vecb{\theta}^{t+1}
+=
+\vecb{\theta}^{t}
+-\alpha \matb{H}(\vecb{\theta})^{-1}
+\nabla_{\vecb{\theta}} L(\vecb{\theta}).
+\]
+
+The Hessian contains second derivatives and captures curvature of the loss surface.
+
+\vspace{6pt}
+
+\item \textbf{Question 2:}
+
+Why is Newton’s Method rarely used for very large models?
+
+\begin{enumerate}
+    \item It does not converge.
+    \item It requires storing and inverting a $P\times P$ Hessian matrix.
+    \item It cannot minimize convex functions.
+    \item It requires labeled data.
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{B)}.
+
+\textbf{Solution:}
+
+The Hessian has size $P\times P$.  
+Storing it costs $O(P^2)$ memory and inverting it costs $O(P^3)$ time, which becomes infeasible when $P$ is large.
+
+\vspace{6pt}
+
+\item \textbf{Question 3:}
+
+Which optimization method can be used when gradients are unavailable?
+
+\begin{enumerate}
+    \item Newton’s Method
+    \item Gradient Descent
+    \item Coordinate Search
+    \item Ridge Regression
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{C)}.
+
+\textbf{Solution:}
+
+Coordinate Search is a derivative-free method.  
+It explores directions $\vecb{\theta} \pm \alpha \vb{e}_j$ and accepts moves that reduce the loss.
+
+\vspace{6pt}
+
+\item \textbf{Question 4:}
+
+What is the main effect of Ridge ($\ell_2$) regularization on model coefficients?
+
+\begin{enumerate}
+    \item Sets many coefficients exactly to zero
+    \item Shrinks coefficients smoothly toward zero
+    \item Increases model variance
+    \item Removes correlated features automatically
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{B)}.
+
+\textbf{Solution:}
+
+Ridge adds the penalty $\lambda\|\vecb{\theta}\|_2^2$, which discourages large parameter values and reduces variance, but does not usually force coefficients to exactly zero.
+
+\vspace{6pt}
+
+\item \textbf{Question 5:}
+
+Which regularization technique performs automatic feature selection?
+
+\begin{enumerate}
+    \item Ridge Regression
+    \item Lasso Regression
+    \item Elastic Net with $r=0$
+    \item Mean Squared Error
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{B)}.
+
+\textbf{Solution:}
+
+Lasso uses the $L_1$ penalty applied to the parameter vector $\vecb{\theta}$: $\sum |\theta_j|$, which creates sharp corners in the optimization landscape.  
+Solutions often lie on these corners, causing some coefficients to become exactly zero.
+
+\vspace{6pt}
+
+\item \textbf{Question 6:}
+
+Which metric is most sensitive to large outliers?
+
+\begin{enumerate}
+    \item MAE
+    \item MSE
+    \item Accuracy
+    \item $R^2$
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{B)}.
+
+\textbf{Solution:}
+
+MSE squares the error:
+\[
+(\hat{y}_i - y_i)^2,
+\]
+which heavily penalizes large errors, making it sensitive to outliers.
+
+\vspace{6pt}
+
+\item \textbf{Question 7:}
+
+A model achieves $R^2 = -0.3$ on a test set. What does this mean?
+
+\begin{enumerate}
+    \item Perfect predictions
+    \item Better than predicting the mean
+    \item Worse than predicting the mean
+    \item Overfitting has been eliminated
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{C)}.
+
+\textbf{Solution:}
+
+\[
+R^2 = 1 - \frac{SS_{res}}{SS_{tot}}.
+\]
+If $R^2 < 0$, the model performs worse than simply predicting the mean of the data.
+
+\vspace{6pt}
+
+\item \textbf{Question 8:}
+
+Why must the test set never be used during training or hyperparameter tuning?
+
+\begin{enumerate}
+    \item It increases computation time
+    \item It causes underfitting
+    \item It introduces evaluation bias
+    \item It reduces training accuracy
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{C)}.
+
+\textbf{Solution:}
+
+Using the test set during model development leaks information and produces overly optimistic performance estimates.
+
+\vspace{6pt}
+
+\item \textbf{Question 9:}
+
+Suppose $10\%$ of dataset labels are incorrect. What is the maximum achievable measured accuracy of a perfect model?
+
+\begin{enumerate}
+    \item 100\%
+    \item 95\%
+    \item 90\%
+    \item 80\%
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{C)}.
+
+\textbf{Solution:}
+
+With label noise $\epsilon$:
+\[
+\text{Observed Accuracy} \le 1-\epsilon.
+\]
+If $\epsilon=0.1$, the maximum observed accuracy is $0.9$.
+
+\vspace{6pt}
+
+\item \textbf{Question 10:}
+
+Which method helps estimate generalization performance while using all available data efficiently?
+
+\begin{enumerate}
+    \item Cross-validation
+    \item Gradient Descent
+    \item Newton’s Method
+    \item Coordinate Search
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{A)}.
+
+\textbf{Solution:}
+
+In $k$-fold cross-validation, the model is trained $k$ times using different validation splits, and performance is averaged to estimate generalization error.
+
+
+\item \textbf{Question 11:}
+
+Consider the model complexity vs.\ prediction error curve below.
+
+\begin{center}
+\includegraphics[width=0.6\linewidth]{img/lecture9/qa_bias_variance_curve.png}
+\end{center}
+
+Which region corresponds to an \textbf{underfitting} model?
+
+\begin{enumerate}
+    \item Region A (left side)
+    \item Region B (middle)
+    \item Region C (right side)
+    \item All regions equally
+\end{enumerate}
+
+\textbf{Answer:} The correct answer is \textbf{A)}.
+
+\textbf{Solution:}
+
+On the left side of the curve, the model has low complexity and high bias.  
+It cannot capture patterns in the data, leading to high training and validation error.  
+This is the definition of \textbf{underfitting}.
+
+
+\end{enumerate}
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,705 @@
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage,hyperref, float}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+ \usepackage{hyperref}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+\lecture{16}{Best Practices}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+\section{Lecture Objectives}
+
+In this lecture, we focus on practical best practices for designing, training, evaluating, and debugging deep learning models. We discuss how architectural choices, loss functions, and evaluation metrics influence model performance, and how to handle challenges such as class imbalance and limited data. The lecture also introduces data augmentation, transfer learning, and hyperparameter tuning as strategies for improving generalization. Finally, we explore the role of visualization and diagnostic tools in identifying and resolving common training issues such as underfitting, overfitting, and unstable gradients.
+
+% \section{Previous Lecture}
+% This section reviews essential concepts from previous lecture, which covered training CNN's.
+
+% \subsection{Optimization of Parameters}
+% \begin{itemize}
+%     \item Weights and biases in CNN's are learned through back-propagation and gradient updates using a loss function.
+%     \item Optimization challenges include:
+%     \begin{itemize}
+%         \item Noisy gradients
+%         \item Saddle points
+%         \item Non-convex loss surfaces
+%     \end{itemize}
+% \end{itemize}
+
+% \subsection{Gradient Descent Variants}
+% \begin{itemize}
+%     \item \textbf{Batch Gradient Descent}: Calculates gradients over the entire dataset for stable convergence.
+%     \item \textbf{Stochastic Gradient Descent (SGD)}: Uses single samples per iteration, allowing quicker but noisier convergence.
+%     \item \textbf{Mini-batch Gradient Descent}: Combines aspects of both for a balance between computational efficiency and convergence stability.
+% \end{itemize}
+
+% \subsection{Advanced Optimization Techniques}
+% \begin{itemize}
+%     \item \textbf{Momentum}: Helps in bypassing saddle points by incorporating past gradients.
+%     \item \textbf{AdaGrad, RMSProp, and Adam}: Introduce adaptive learning rates, addressing issues in high-dimensional optimization landscapes.
+%     \begin{itemize}
+%         \item \textbf{Adam} combines RMSProp and momentum, offering the benefits of both approaches.
+%     \end{itemize}
+% \end{itemize}
+
+% \subsection{Higher-order Methods}
+% \begin{itemize}
+%     \item \textbf{Newton's Method} and \textbf{Quasi-Newton Methods} (BFGS, L-BFGS) offer faster convergence.
+%     \item These methods require significant memory and computation, making them ideal for convex optimization problems.
+% \end{itemize}
+
+\section{Model Architecture Selection}
+Choosing the right model architecture depends on the nature of the task. This lecture distinguishes between two main types of CNN architectures: those suited for classification and those for dense prediction tasks. Classification architectures produce a single prediction label for the entire image, while dense prediction architecture produces a label for each pixel in the image. Once the best architecture type is determined, it is generally accepted to use pre-trained models available online instead of starting from scratch. \href{https://pytorch.org/vision/stable/models.html}{PyTorch} has a plethora of pre-trained modules for most applications.
+
+\subsection{Classification Architectures}
+
+Classification CNNs follow a pipeline in which 2D convolutional kernels are stacked across multiple layers to progressively reduce the spatial size of activations while increasing the richness of learned feature representations. As the network depth increases, the model transitions from detecting simple low-level patterns to capturing higher-level semantic features useful for classification.
+
+After the final convolutional layer, the resulting feature maps are flattened and passed through fully connected layers. The network typically concludes with a softmax layer that outputs class probabilities, enabling the model to assign each input image to a specific category.
+
+Careful hyperparameter tuning plays an important role in achieving strong performance. In deeper layers, the number of kernels is often increased to capture more complex patterns. Different pooling strategies, such as max pooling and average pooling, can be explored to balance information retention and dimensionality reduction. Activation functions like ReLU, sigmoid, and variants such as leaky ReLU help introduce nonlinearity and improve training stability. Regularization techniques, including dropout and batch normalization, are commonly used to reduce overfitting. For very deep networks, skip connections—such as those introduced in ResNet—can be incorporated to improve gradient flow and enable more effective training.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim1.png}
+    \caption{Classification Pipeline}
+\label{0}
+    
+\end{figure}
+
+\subsection{Dense Prediction Architectures}
+
+For tasks that require dense, pixel-level outputs—such as image segmentation, super-resolution, depth estimation, and optical flow—fully convolutional architectures are better suited than standard classification CNNs. Unlike classification models that collapse spatial dimensions into a single vector, dense prediction models preserve spatial structure throughout the network so that predictions can be made at every pixel location.
+
+A common design pattern for dense prediction is the \textbf{encoder--decoder structure}. The \textbf{encoder} is similar to a standard classification CNN in that it progressively extracts higher-level feature representations from the input image. However, it does not include fully connected layers, since removing them allows the network to accept variable-sized inputs and maintain spatial correspondence. The encoder typically reduces spatial resolution while increasing the number of feature channels, enabling the model to learn abstract, high-level representations.
+
+The \textbf{decoder} then reconstructs high-resolution outputs from the encoder’s compressed feature representation. This is typically done using upsampling operations such as transposed convolutions (also known as deconvolutions), interpolation followed by convolution, or learned upsampling blocks. The goal is to gradually restore the spatial resolution while refining feature maps to produce accurate pixel-level predictions. In many architectures, skip connections are added between corresponding encoder and decoder layers (e.g., as in U-Net) to help recover fine-grained spatial details lost during downsampling.
+
+\textbf{Pooling layers} are often avoided or used cautiously in dense prediction tasks because they reduce spatial resolution and may degrade fine structural details. Instead, convolutional layers with stride 1 are commonly preferred to preserve resolution. Dilated (atrous) convolutions can also be used to increase the receptive field without reducing spatial dimensions, allowing the network to capture broader contextual information while maintaining high-resolution feature maps.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim2.png}
+    \caption{Dense prediction architecture using mainly convolution}
+    \label{1}
+\end{figure}
+
+\section{Loss Functions}
+
+Choosing an appropriate loss function is essential for effective model training, as the loss defines the objective the network optimizes and directly influences the quality of learned representations.
+
+For \textbf{classification tasks}, the most common choice is \textbf{cross-entropy loss}, which measures the discrepancy between predicted class probabilities and the true labels. This loss encourages the model to assign high probability to the correct class while penalizing incorrect predictions, making it well suited for multi-class classification problems.
+
+For \textbf{dense prediction tasks}, such as image segmentation, losses must operate at the pixel level. \textbf{Pixel-wise cross-entropy loss} is widely used to evaluate classification accuracy for each pixel independently. In addition, the \textbf{Dice loss} is often employed to directly optimize overlap between predicted and ground-truth segmentation masks, making it especially useful when dealing with class imbalance.
+
+For \textbf{image enhancement tasks}, including super-resolution and denoising, reconstruction-based losses are commonly used. \textbf{Mean Squared Error (MSE)} encourages overall pixel-wise fidelity, while \textbf{L1 loss} is often preferred for producing sharper images and reducing excessive smoothing. In practice, these losses are sometimes combined or supplemented with perceptual losses to further improve visual quality.
+
+
+\subsection{Cross-Entropy Loss}
+
+\textbf{Cross-entropy loss} is a standard loss function for classification problems and is best used when class imbalance is limited. It measures how well the predicted probability distribution matches the true label distribution.
+
+\[
+L = - \sum_{i} y_i \log(\hat{y}_i)
+\]
+
+Here, \(i\) denotes the class index, \(y_i\) represents the ground-truth label for the correct class (typically one-hot encoded), and \(\hat{y}_i\) denotes the softmax probability predicted by the network for class \(i\). The negative sign ensures that the loss decreases as the predicted probability of the correct class increases.
+    
+\subsection{Mean Squared Error (MSE) Loss}
+
+\textbf{Mean Squared Error (MSE) loss} is commonly used for regression tasks and measures the average squared difference between predicted and actual values. Because the error is squared, larger deviations are penalized more heavily, making MSE particularly sensitive to large prediction errors and encouraging the model to reduce large mistakes.
+
+\[
+L = \frac{1}{N} \sum_{i=1}^{N} (y_i - \hat{y}_i)^2
+\]
+
+Here, \(N\) denotes the number of samples in the dataset, \(y_i\) represents the ground-truth value for sample \(i\), and \(\hat{y}_i\) denotes the model’s predicted value for sample \(i\).
+
+\subsection{L1 Loss}
+
+\textbf{L1 loss}, also known as \textbf{Mean Absolute Error (MAE)}, measures the absolute difference between predicted and actual values. Unlike MSE, this loss does not square the error, making it less sensitive to outliers and often better suited for tasks where robustness to large deviations is desired.
+
+\[
+L = \frac{1}{N} \sum_{i=1}^{N} |y_i - \hat{y}_i|
+\]
+
+Here, \(N\) denotes the number of samples in the dataset, \(y_i\) represents the ground-truth value for sample \(i\), and \(\hat{y}_i\) denotes the predicted value for sample \(i\).
+
+
+\section{Handling Class Imbalance}
+
+Class imbalance occurs when certain classes appear more frequently than others in a dataset. This poses a problem because, without special precautions, the model may prioritize predicting the majority class accurately at the expense of the minority class. As a result, overall accuracy may appear high while performance on the minority class remains poor. 
+
+A common example of class imbalance occurs in medical diagnosis. Although most test results may be negative, it is critically important to correctly identify the relatively rare positive cases. In such settings, failing to detect minority-class examples can have significant real-world consequences.
+
+\subsection{Weighted Cross Entropy}
+
+\textbf{Weighted cross-entropy loss} is used to address class imbalance by assigning larger penalties to mistakes on underrepresented classes. By increasing the importance of rare classes during training, the model is encouraged to learn more balanced decision boundaries.
+
+\[
+L = - \sum_i w_i \, y_i \log(\hat{y}_i)
+\]
+
+Here, \(i\) denotes the class index, \(y_i\) represents the ground-truth label (typically one-hot encoded), and \(\hat{y}_i\) denotes the softmax probability predicted by the network for class \(i\). The term \(w_i\) is the weight assigned to class \(i\), where larger weights are typically given to less frequent classes. A common rule of thumb is to set the weight inversely proportional to class frequency, \(w_i = \frac{1}{f_i}\), where \(f_i\) is the frequency of class \(i\) in the dataset.
+
+
+\subsection{Focal Loss}
+
+\textbf{Focal loss} is designed to emphasize hard-to-classify examples by reducing the loss contribution from well-classified samples. This makes it particularly useful for highly imbalanced classification problems, such as object detection, where many easy background examples can dominate training.
+
+\[
+L = -\sum_{i} (1 - p_t)^{\gamma} \log(p_t)
+\]
+
+Here, \(p_t\) represents the model’s estimated probability of the true class and is defined as
+\[
+p_t =
+\begin{cases}
+\hat{p} & \text{if the true label } y = 1,\\
+1 - \hat{p} & \text{if the true label } y = 0.
+\end{cases}
+\]
+where \(\hat{p}\) is the probability assigned to the true class. The parameter \(\gamma > 0\) is a focusing hyperparameter, typically chosen between 1 and 3. Larger values of \(\gamma\) increase the emphasis on harder examples by further down-weighting easy, well-classified samples.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim3.png}
+    \caption{Effect of $\gamma$ on focal loss}
+    \label{2}
+\end{figure}
+
+
+\section{Confidence Regularization and Calibration}
+
+In classification tasks, strong predictive accuracy alone is often not sufficient. A model may achieve high accuracy while still producing probabilities that are too confident relative to its true correctness likelihood. This issue is important in downstream decision-making systems because predicted probabilities are often used for thresholding, uncertainty estimation, or integration into larger pipelines. Two common techniques for addressing confidence-related issues are \textbf{label smoothing} and \textbf{temperature scaling}. Although they are related, they are applied at different stages of the learning pipeline and serve slightly different purposes.
+
+Label smoothing is used \textbf{during training} as a regularization method that prevents the network from becoming overly certain about the correct class. Temperature scaling is typically used \textbf{after training} as a post-processing calibration step that adjusts predicted probabilities without changing the predicted class labels. Together, these methods provide practical tools for improving the reliability of classification models.
+
+\subsection{Label Smoothing}
+
+\textbf{Label smoothing} is a regularization technique for classification models trained with cross-entropy loss. Instead of using a hard one-hot target vector, label smoothing replaces the target distribution with a softened version that allocates most of the probability mass to the true class while assigning a small amount of probability mass to the remaining classes. This discourages the model from driving the predicted probability of the correct class arbitrarily close to 1 and helps reduce overconfidence.
+
+Suppose there are \(K\) classes and the original one-hot target vector is denoted by \(\mathbf{y}_{\text{hot}}\). With label smoothing, the target vector becomes
+
+\[
+\mathbf{y}_{\text{LS}} = (1-\alpha)\mathbf{y}_{\text{hot}} + \frac{\alpha}{K}\mathbf{1},
+\]
+
+where \(\alpha \in [0,1]\) is the smoothing parameter, \(K\) is the number of classes, and \(\mathbf{1}\) is the all-ones vector. When \(\alpha = 0\), this reduces to the original one-hot label. As \(\alpha\) increases, the target distribution becomes less peaked and more uniform.
+
+For example, in a 3-class classification problem where the true class is the first class, the one-hot target is
+
+\[
+[1,\,0,\,0].
+\]
+
+If we apply label smoothing with \(\alpha = 0.1\), the new target becomes
+
+\[
+[0.9333,\,0.0333,\,0.0333].
+\]
+
+This softened target prevents the model from learning excessively large logit gaps between the correct class and the incorrect classes.
+
+\subsubsection*{Why Label Smoothing Helps}
+
+To understand why label smoothing is useful, consider the cross-entropy loss applied after a softmax layer. If \(\mathbf{z}\) denotes the logits and \(\mathbf{p}=\text{softmax}(\mathbf{z})\) denotes the predicted class probabilities, then the gradient of the cross-entropy loss with respect to the logits is
+
+\[
+\nabla_{\mathbf{z}} L = \mathbf{p} - \mathbf{y}.
+\]
+
+With one-hot labels, gradient descent encourages \(\mathbf{p}\) to approach a distribution that is as close as possible to a point mass. In practice, this often leads to very large logit differences, making the model overly certain and less well calibrated. By replacing the hard target \(\mathbf{y}\) with the softened target \(\mathbf{y}_{\text{LS}}\), the optimization objective becomes less extreme. The model is still encouraged to predict the correct class with the highest probability, but it is no longer incentivized to place essentially all probability mass on that class.
+
+This yields several practical benefits:
+
+\begin{itemize}
+    \item It reduces overconfidence in the output probabilities.
+    \item It improves generalization by acting as a regularizer.
+    \item It can improve calibration, meaning the predicted probabilities better reflect actual correctness likelihoods.
+    \item It may help when labels are noisy or when classes have some semantic similarity.
+\end{itemize}
+
+\subsubsection*{Practical Considerations}
+
+Label smoothing is most commonly used for multi-class classification problems with softmax outputs and cross-entropy loss. In practice, \(\alpha\) is treated as a hyperparameter, and values such as \(0.05\) or \(0.1\) are often used as a starting point. If \(\alpha\) is too large, however, the targets may become overly uniform and the model may underfit.
+
+A key limitation is that label smoothing modifies the training objective itself. While this often improves calibration and generalization, it can also reduce the network's ability to represent highly confident distinctions when those are actually justified by the data. Therefore, it should be tuned carefully rather than applied blindly.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.62\linewidth]{img/lecture17/label_smoothing_targets.png}
+    \caption{Illustration of label smoothing: a one-hot target distribution is replaced by a softened target distribution that assigns most of the probability mass to the true class while distributing a small amount across the remaining classes.}
+    \label{fig:label_smoothing}
+\end{figure}
+
+\subsection{Temperature Scaling}
+
+\textbf{Temperature scaling} is a post-processing calibration method applied after a classifier has already been trained. Unlike label smoothing, it does not change the learned class boundaries or retrain the model weights. Instead, it rescales the logits before the softmax function using a single positive scalar parameter \(T\), called the \textbf{temperature}.
+
+Let \(\mathbf{z}\) denote the logit vector produced by the trained model. The calibrated probabilities are computed as
+
+\[
+\hat{p}_i = \frac{\exp(z_i/T)}{\sum_{j=1}^{K}\exp(z_j/T)}.
+\]
+
+When \(T=1\), the original softmax probabilities are recovered. When \(T>1\), the softmax distribution becomes softer, meaning the confidence values are reduced and the entropy increases. When \(0<T<1\), the distribution becomes sharper and more confident.
+
+The key idea is that many modern neural networks are accurate but poorly calibrated: their predicted confidence is often higher than their true accuracy. Temperature scaling corrects this by finding a scalar \(T\) on a held-out validation set that improves calibration, typically by minimizing the negative log-likelihood.
+
+\subsubsection*{Why Temperature Scaling Helps}
+
+Modern deep neural networks often produce probabilities that are too extreme even when the final class prediction is correct. For example, a model may assign confidence \(0.95\) to predictions that are actually correct only \(80\%\) of the time. In such a case, the classifier is said to be \textbf{overconfident}. Temperature scaling addresses this by shrinking the logit magnitudes before the softmax is applied, thereby reducing confidence without changing the ranking of the logits.
+
+An important practical property of temperature scaling is that it \textbf{does not change the predicted class label}. Since dividing all logits by the same positive scalar preserves their ordering, the argmax remains unchanged:
+
+\[
+\arg\max_i z_i = \arg\max_i \frac{z_i}{T}.
+\]
+
+Thus, temperature scaling improves calibration while leaving classification accuracy unchanged.
+
+\subsubsection*{Reliability Diagrams and Calibration Error}
+
+Calibration is often analyzed using \textbf{reliability diagrams}, which compare predicted confidence against empirical accuracy across bins of predictions. A perfectly calibrated model would have confidence values that match observed accuracy, so its reliability curve would lie near the diagonal. If the curve lies below the diagonal, the model is overconfident; if it lies above the diagonal, the model is underconfident.
+
+A common scalar summary of calibration quality is the \textbf{Expected Calibration Error (ECE)}, defined as
+
+\[
+\mathrm{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{n}\left| \mathrm{acc}(B_m) - \mathrm{conf}(B_m) \right|,
+\]
+
+where \(B_m\) is the set of samples whose confidence falls into the \(m\)-th bin, \(n\) is the total number of samples, \(\mathrm{acc}(B_m)\) is the average accuracy in that bin, and \(\mathrm{conf}(B_m)\) is the average confidence in that bin. Lower ECE indicates better calibration.
+
+Temperature scaling is widely used because it is simple, computationally cheap, and often very effective in practice. It is especially useful when the model has already been trained and deployed, and we want to improve the trustworthiness of its confidence scores without changing the underlying classifier.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\linewidth]{img/lecture17/temperature_scaling_reliability.png}
+    \caption{Conceptual illustration of calibration using a reliability diagram. A well-calibrated model has accuracy that closely matches confidence across prediction bins. Temperature scaling adjusts confidence values so that the reliability curve moves closer to the diagonal.}
+    \label{fig:temperature_scaling}
+\end{figure}
+
+\subsection{Relationship Between Label Smoothing and Temperature Scaling}
+
+Although both methods aim to reduce overconfidence, they are used in different ways.
+
+\begin{itemize}
+    \item \textbf{Label smoothing} is a \textbf{training-time regularization method}. It changes the target distribution and influences how the model learns.
+    \item \textbf{Temperature scaling} is a \textbf{post-training calibration method}. It leaves the trained classifier unchanged and only adjusts the output probabilities.
+\end{itemize}
+
+Because of this difference, the two methods are not interchangeable. Label smoothing can improve both generalization and calibration by discouraging extreme logits during training, whereas temperature scaling is mainly used to recalibrate an already trained model. In practice, a model may use label smoothing during training and still benefit from temperature scaling afterward if further calibration is needed.
+
+\medskip
+\noindent\textbf{Rule of thumb:}
+\begin{itemize}
+    \item Use \textbf{label smoothing} when the classifier appears to overfit or become overly confident during training.
+    \item Use \textbf{temperature scaling} when the model is already trained and you want better-calibrated probabilities without changing its accuracy.
+\end{itemize}
+
+
+\section{Performance Metrics}
+
+Performance metrics are used to evaluate the effectiveness of a trained model. Choosing the appropriate metric is crucial, as accuracy alone may not provide a complete picture of model performance—especially in the presence of class imbalance. Different metrics capture different aspects of performance and can also be used during hyperparameter tuning by comparing results across multiple configurations and selecting the best-performing model.
+
+\subsection{Precision, Recall, and F1-Score}
+
+\textbf{Precision}, \textbf{recall}, and the \textbf{F1-score} are commonly used evaluation metrics for classification, especially when dealing with imbalanced datasets.
+
+\textbf{Precision} measures how many of the predicted positive samples are actually positive, while \textbf{recall} measures how many of the true positive samples were correctly identified by the model. The \textbf{F1-score} is the harmonic mean of precision and recall, providing a single metric that balances both quantities. The F1-score ranges from 0 to 1, where a value closer to 1 indicates better performance.
+
+\[
+F_1 = \frac{2 \cdot \text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\]
+
+Precision and recall are defined in terms of true positives (TP), false positives (FP), and false negatives (FN) as follows:
+
+\[
+\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}, \qquad
+\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+\]
+
+\subsection{Structural Similarity Index (SSIM)}
+
+\textbf{Structural Similarity Index (SSIM)} is commonly used for evaluating dense prediction tasks such as denoising and super-resolution because it measures perceptual image quality by accounting for spatial structure rather than relying only on pixel-wise differences.
+
+\[
+\text{SSIM}(X, Y) =
+\frac{(2\mu_X\mu_Y + C_1)(2\sigma_{XY} + C_2)}
+{(\mu_X^2 + \mu_Y^2 + C_1)(\sigma_X^2 + \sigma_Y^2 + C_2)}
+\]
+
+Here, \(\mu_x\) and \(\mu_y\) denote the pixel sample means of images \(x\) and \(y\), \(\sigma_x^2\) and \(\sigma_y^2\) denote their variances, and \(\sigma_{xy}\) denotes the covariance between the two images. The constants \(C_1=(k_1L)^2\) and \(C_2=(k_2L)^2\) are stabilization terms used to avoid numerical instability when denominators are small. The quantity \(L\) represents the dynamic range of pixel values (typically \(L=2^b-1\)), and default values are \(k_1=0.01\) and \(k_2=0.03\).
+
+SSIM can be interpreted as the combination of three components that measure \textit{luminance}, \textit{contrast}, and \textit{structure}. These components are defined as
+
+\[
+l(x,y) = \frac{2\mu_x\mu_y + C_1}{\mu_x^2 + \mu_y^2 + C_1}, \qquad
+c(x,y) = \frac{2\sigma_x\sigma_y + C_2}{\sigma_x^2 + \sigma_y^2 + C_2},
+\]
+\[
+s(x,y) = \frac{\sigma_{xy} + C_3}{\sigma_x\sigma_y + C_3},
+\]
+where \(C_3=\frac{C_2}{2}\). The full SSIM metric combines these components as
+\[
+\text{SSIM}(X,Y) = l(x,y)^\alpha \, c(x,y)^\beta \, s(x,y)^\gamma,
+\]
+where the exponents \(\alpha\), \(\beta\), and \(\gamma\) are typically set to 1.
+
+
+\subsection{Complex Wavelet SSIM (CW-SSIM)}
+
+\textbf{Complex Wavelet Structural Similarity (CW-SSIM)} is an extension of SSIM that operates in the complex wavelet domain. Unlike standard SSIM, CW-SSIM is more robust to small geometric distortions such as scaling, translation, and rotation. The output ranges from 0 to 1, where a value of 1 indicates that two signals are perfectly structurally similar, while a value near 0 indicates little to no structural similarity.
+
+\[
+\text{CW-SSIM}(c_x, c_y)
+=
+\frac{2 \sum_{i=1}^{N} |c_{x,i}|\,|c_{y,i}| + K}
+{\sum_{i=1}^{N} |c_{x,i}|^2 + \sum_{i=1}^{N} |c_{y,i}|^2 + K}
+\cdot
+\frac{2 \left| \sum_{i=1}^{N} c_{x,i} c_{y,i}^* \right| + K}
+{2 \sum_{i=1}^{N} |c_{x,i} c_{y,i}^*| + K}
+\]
+
+Here, \(c_{x,i}\) and \(c_{y,i}\) denote the complex wavelet coefficients of images \(x\) and \(y\) at the \(i\)-th spatial location, and \((\cdot)^*\) denotes complex conjugation. The constant \(K\) is a small positive value added to prevent numerical instability and division by zero.
+
+
+\subsection{Analyzing Image Reconstructions with Various Performance Metrics}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim4.png}
+    \caption{Image Reconstructions and their Performance Scores}
+    \label{3}
+\end{figure}
+
+This figure above highlights how different image quality metrics can evaluate reconstructions very differently, emphasizing the importance of choosing metrics carefully.
+
+The first row of reconstructions (a–d) contains visually valid reconstructions. Image (a) represents a perfect reconstruction of the original image, while image (c) achieves a perfect CW-SSIM score, indicating that it preserves structural similarity extremely well even if small pixel-level differences exist.
+
+Reconstructions (e–g) demonstrate a limitation of \textbf{MSE}. Although these images appear noticeably degraded, they can produce MSE values similar to images (b–d). This illustrates that MSE does not always correlate well with perceived visual quality.
+
+Reconstructions (h–l) further highlight the limitations of both \textbf{MSE} and \textbf{SSIM}. These images are visually strong reconstructions of the original image, yet they receive relatively poor MSE and SSIM scores. In contrast, their \textbf{CW-SSIM} scores remain high, reflecting the fact that CW-SSIM better captures structural similarity under small geometric distortions.
+
+Overall, this comparison demonstrates that no single metric fully captures perceptual image quality, and multiple metrics are often needed when evaluating image reconstruction tasks.
+
+\section{Model Debugging}
+
+Model debugging is the process of identifying and resolving issues that prevent a model from learning effectively or generalizing well. Effective debugging helps ensure robust performance on both training and testing datasets by diagnosing problems such as underfitting, overfitting, unstable gradients, poor initialization, or data-related issues.
+
+\subsection{Low Model Capacity}
+
+A model is said to \textbf{underfit} when it achieves low accuracy on both the training and test datasets. This typically indicates that the model is too simple to capture the underlying patterns in the data. In such cases, the solution is to \textbf{increase the model capacity} by adding more layers or units, using richer feature representations, or tuning hyperparameters to allow the model to learn more complex relationships.
+
+\subsection{High Model Capacity}
+
+\textbf{Overfitting} occurs when a model achieves high training accuracy but low test accuracy, indicating that it has memorized the training data rather than learning generalizable patterns. To address this issue, the model capacity should be reduced by decreasing the number of layers or units, or by introducing \textbf{regularization techniques} such as dropout, weight decay, or data augmentation.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim5.png}
+    \caption{Underfitting, Proper Fitting, and Overfitting}
+    \label{4}
+\end{figure}
+
+\section{Data Augmentation}
+
+\textbf{Data augmentation} is a technique used to improve model performance when working with limited datasets. By artificially expanding the training set through label-preserving transformations, we can make models more robust and reduce overfitting without collecting additional data.
+
+Common augmentation techniques involve applying various \textbf{transformations} to training images. These include random cropping, horizontal and vertical flipping, rotation, scaling, blurring, and the addition of Gaussian noise. Such transformations help the model learn invariances to changes in orientation, position, and noise, improving generalization to unseen data.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scriveim6.png}
+    \caption{Examples of Transformations Applied to an Image}
+    \label{fig:5}
+\end{figure}
+
+\section{Transfer Learning}
+
+\textbf{Transfer learning} leverages models that have been pre-trained on large datasets, making it especially useful when the available training data for a new task is limited. By reusing previously learned feature representations, models can converge faster and often achieve better performance than training from scratch. The effectiveness of transfer learning typically depends on how closely the pre-training dataset is related to the target task.
+
+A common strategy in transfer learning is to use \textbf{frozen layers}. In this approach, the early layers of a pretrained network are kept fixed, preserving their learned feature representations, while only the final layers are fine-tuned on the target dataset. This allows the model to adapt to the new task while avoiding overfitting and reducing training time.
+
+
+\section{Visualization and Diagnostics}
+
+\textbf{Visualization and diagnostic tools} are essential for understanding model behavior and identifying performance bottlenecks. By visualizing activations, gradients, loss curves, and network outputs, practitioners can detect issues such as vanishing or exploding gradients, dead neurons, overfitting, or poor convergence.
+
+\subsection{Gradient Checking}
+
+\textbf{Gradient checking} is a debugging technique used to verify the correctness of backpropagation implementations. The idea is to compare analytically computed gradients (via backpropagation) with numerically approximated gradients computed using finite differences. If the two gradients closely match, the implementation is likely correct.
+
+A numerical approximation of the derivative can be computed as
+
+\[
+f'(x) \approx \frac{f(x + \epsilon) - f(x)}{\epsilon},
+\]
+
+where \(\epsilon\) is a small constant (e.g., \(10^{-5}\)). In practice, a symmetric (central) difference approximation is often preferred for higher accuracy.
+
+
+\subsection{Activation Histograms}
+
+\textbf{Activation histograms} are a valuable diagnostic tool for understanding the behavior of neurons in a convolutional neural network (CNN). By visualizing the distribution of activation values across layers, practitioners can detect common training issues such as dead neurons, vanishing gradients, and exploding gradients. These histograms are generated by collecting the output values of neurons in a layer and plotting their distribution, allowing us to observe the range and frequency of activations during training.
+
+One important use of activation histograms is identifying \textbf{dead neurons}. These are neurons that consistently output zero or near-zero values and therefore do not contribute to learning. This issue commonly occurs in networks using ReLU activation functions, where large negative inputs cause neurons to output zero and remain inactive.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim6.png}
+    \caption{Activation Histogram with Dead Neurons and Vanishing Gradients}
+    \label{fig:6}
+\end{figure}
+
+Activation histograms also help diagnose \textbf{vanishing and exploding gradients}. If activation magnitudes become progressively smaller across layers, gradients may vanish; if they grow excessively large, gradients may explode. Observing these trends can guide adjustments to network architecture, initialization, or learning rates. For example, decreasing the learning rate can help mitigate exploding activations, while increasing it or improving initialization may help when activations shrink too quickly.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim8.png}
+    \caption{Activation Histogram with Exploding Gradients}
+    \label{fig:7}
+\end{figure}
+
+A healthy network typically exhibits a \textbf{balanced activation distribution}, where values are reasonably spread around zero rather than collapsing to a spike near zero. Maintaining stable parameter updates—often around 1\% of parameter magnitudes—can contribute to stable training and well-behaved activation distributions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim9.png}
+    \caption{Ideal Activation Histogram}
+    \label{fig:8}
+\end{figure}
+
+Activation histograms can also reveal \textbf{outliers}, where extremely large or small activation values indicate overactive neurons. Such outliers can lead to unstable training and exploding gradients, and may be mitigated using normalization techniques.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim7.png}
+    \caption{Activation Histogram with Outliers}
+    \label{fig:9}
+\end{figure}
+
+In practice, activation histograms should be monitored regularly during training to diagnose network health and guide hyperparameter tuning. If many neurons appear inactive, one might switch from ReLU to Leaky ReLU or adjust the learning rate. Histograms can also indicate whether normalization techniques are needed. \textbf{Batch normalization} stabilizes training by normalizing layer inputs within each mini-batch to have zero mean and unit variance, helping prevent vanishing or exploding gradients. \textbf{Layer normalization}, which normalizes across features for each individual sample, is particularly useful when batch sizes are small or variable, such as in recurrent neural networks.
+
+\section{Weight Initialization}
+
+\textbf{Weight initialization} plays a crucial role in training deep neural networks. Poor initialization can lead to vanishing or exploding gradients, which slows down or completely prevents learning. Proper initialization helps maintain stable signal and gradient magnitudes as they propagate through the network.
+
+\subsection{Xavier Initialization}
+
+\textbf{Xavier initialization} (also known as Glorot initialization) is designed to keep the variance of activations and gradients approximately constant across layers. This helps prevent the signal from shrinking or growing as it moves forward and backward through the network. Xavier initialization is most suitable for networks using \textbf{sigmoid} or \textbf{tanh} activation functions.
+
+\[
+W \sim U\left(-\frac{\sqrt{6}}{\sqrt{n_{in} + n_{out}}}, \frac{\sqrt{6}}{\sqrt{n_{in} + n_{out}}}\right)
+\]
+
+Here, \(n_{in}\) and \(n_{out}\) denote the number of input and output units of the layer. The scaling factor balances the flow of information between layers and helps stabilize training in moderately deep networks.
+
+\subsection{Kaiming Initialization}
+
+\textbf{Kaiming initialization} (also known as He initialization) is specifically designed for networks that use \textbf{ReLU} or ReLU-like activation functions. Since ReLU units output zero for negative inputs, they effectively drop about half of the signal. Kaiming initialization compensates for this by increasing the initial variance of the weights, helping maintain stable forward activations and backward gradients in deep networks.
+
+\[
+W \sim \mathcal{N}\left(0, \frac{2}{n_{in}}\right)
+\]
+
+Here, \(n_{in}\) is the number of input units to the layer. This initialization is widely used in modern deep convolutional networks and typically leads to faster and more stable convergence.
+
+\medskip
+\noindent\textbf{Rule of thumb:}
+\begin{itemize}
+    \item Use \textbf{Xavier initialization} for sigmoid or tanh activations.
+    \item Use \textbf{Kaiming initialization} for ReLU or its variants.
+\end{itemize}
+
+\section{Hyperparameter Tuning}
+
+\textbf{Hyperparameter tuning} is a critical step in building high-performing machine learning and deep learning models. Hyperparameters—such as learning rate, batch size, number of layers, regularization strength, and optimizer settings—are not learned during training and must be selected externally. While manual tuning is possible, it is often slow, inefficient, and unlikely to discover optimal configurations, especially as model complexity grows. Systematic search strategies help automate this process and improve performance in a more principled way.
+
+\subsection{Grid Search}
+
+\textbf{Grid search} is a straightforward and exhaustive approach to hyperparameter optimization. In this method, the practitioner specifies a discrete set of values for each hyperparameter and evaluates the model on \emph{all possible combinations}. This guarantees that the best configuration within the predefined search space is found.
+
+Despite its simplicity, grid search becomes computationally expensive as the number of hyperparameters increases, since the search space grows exponentially. As a result, grid search is most practical when the number of hyperparameters is small or when the search ranges are narrow.
+
+\subsection{Random Search}
+
+\textbf{Random search} improves efficiency by sampling hyperparameter combinations randomly from predefined distributions rather than exhaustively enumerating all possibilities. Surprisingly, random search is often more effective than grid search in high-dimensional spaces because not all hyperparameters contribute equally to performance. By exploring more diverse configurations, random search is more likely to discover strong hyperparameter settings with fewer evaluations.
+
+In practice, random search is widely used as a strong baseline for hyperparameter tuning, especially when computational resources are limited.
+\section{Q\&A Section}
+
+\begin{enumerate}
+
+\item \textbf{Question:}  
+You are training a model to classify images into one of ten categories. The dataset has roughly an equal number of samples for each category. Select the most suitable loss function.
+
+\begin{itemize}
+    \item A. Mean Squared Error (MSE) Loss
+    \item B. Cross-Entropy Loss
+    \item C. L1 Loss
+    \item D. Weighted Cross-Entropy Loss
+\end{itemize}
+
+\textbf{Solution:}  
+\textbf{B. Cross-Entropy Loss.}  
+For multi-class classification with balanced classes, standard cross-entropy loss is the most appropriate choice because it directly optimizes predicted class probabilities. MSE and L1 are primarily used for regression tasks, and weighted cross-entropy is unnecessary when the dataset is balanced.
+
+\medskip
+
+\item \textbf{Question:}  
+You are working on a medical image segmentation task where the goal is to identify tumor regions in MRI scans. Tumor pixels are far fewer than non-tumor pixels. Select the most suitable loss function.
+
+\begin{itemize}
+    \item A. Cross-Entropy Loss
+    \item B. Weighted Cross-Entropy Loss
+    \item C. MSE Loss
+    \item D. Focal Loss
+\end{itemize}
+
+\textbf{Solution:}  
+\textbf{D. Focal Loss.}  
+Severe class imbalance is common in medical segmentation tasks. Focal loss down-weights easy background examples and focuses training on hard, minority-class examples. While weighted cross-entropy can help, focal loss is typically more effective when the imbalance is extreme.
+
+\medskip
+
+\item \textbf{Question:}  
+The activation histogram slope increases in each successive layer, with values extending to large magnitudes, suggesting exploding gradients. What is the most appropriate corrective action?
+
+\begin{itemize}
+    \item A. Increase the learning rate
+    \item B. Decrease the learning rate
+    \item C. Change the activation function to a more aggressive variant like ReLU
+\end{itemize}
+
+\textbf{Solution:}  
+\textbf{B. Decrease the learning rate.}  
+Exploding gradients cause excessively large parameter updates that destabilize training. Reducing the learning rate helps stabilize optimization and prevent divergence. Additional remedies include gradient clipping and improved weight initialization.
+
+\end{enumerate}
+
+
+% \section{Common Notations}
+% \begin{multicols}{2}
+% \begin{itemize}
+%     \item $\mathbf{X}$: Matrix of feature vectors (dataset)
+%     \item $\mathbf{W}$: Weight matrix
+%     \item $N$: Number of data samples
+%     \item $\alpha$: Learning rate
+%     \item $\mathbf{H(\theta)}$: Hessian matrix
+%     \item $E_\theta$: Encoding function
+%     \item $G_\Phi$: Decoding function
+%     \item $\mathbf{b}$: Bias vector
+%     \item $\mathbf{G}(t)$: Second moment at time $t$
+%     \item $f(\cdot)$: Trained neural network
+%     \item $\gamma$: Bias factor
+%     \item $y_i$: Target class
+% \end{itemize}
+% \end{multicols}
+
+\end{document}

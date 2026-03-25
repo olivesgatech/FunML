@@ -1,0 +1,812 @@
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{float}
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+{[\arabic{equation}]}{\usecounter{equation}
+\setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+\setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+\newcommand{\fig}[3]{
+\vspace{#2}
+\begin{center}
+Figure \thelecnum.#1:~#3
+\end{center}
+}
+%%% END_OF_PREAMBLE %%%
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \
+%subsection{} or \subsubsection{} etc
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}
+%{scriber's name}%%%%%%%%
+\lecture{7}{Linear Regression}{Ghassan AlRegib and Mohit Prabhushankar}{}
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \
+\section{Lecture Objectives}
+
+Learn the fundamentals of regression: modeling a relationship between an input variable $x$ and a continuous output variable $y$ by fitting a function $f(\cdot)$ to observed data. This differs from previous topics in that the output is continuous rather than a discrete class label. This lecture focuses on \textbf{linear regression}.
+
+
+% \section{Performance Evaluation} In classification problems, evaluating model performance requires more than simply measuring overall accuracy, especially when classes are imbalanced or when different types of errors carry different costs. Three fundamental metrics used to analyze classifier behavior are \textbf{precision}, \textbf{recall}, and the \textbf{F1 score}. Each metric captures a different aspect of prediction quality. \textbf{Precision} is defined as \[ P = \frac{TP}{TP + FP}, \] and measures the proportion of predicted positive samples that are actually positive. In other words, precision answers the question: \textit{“Of all the samples the model labeled as positive, how many were correct?”} Precision becomes particularly important when the cost of false positives is high. For example, in email spam filtering, incorrectly labeling an important email as spam (a false positive) can be very costly, so high precision is desirable. \textbf{Recall} is defined as \[ R = \frac{TP}{TP + FN}, \] and measures the proportion of actual positive samples that were correctly identified by the model. It answers the question: \textit{“Of all the truly positive samples, how many did the model successfully detect?”} Recall is especially important when false negatives are costly. For instance, in medical diagnosis, failing to detect a disease (a false negative) can have severe consequences, so maximizing recall is often a priority. Because precision and recall often trade off against each other, it is useful to combine them into a single metric. The \textbf{F1 score} is defined as the harmonic mean of precision and recall: \[ F_1 = 2 \times \frac{P \times R}{P + R}. \] The harmonic mean penalizes extreme imbalances between precision and recall, meaning that a high F1 score can only be achieved when both metrics are reasonably high. As a result, the F1 score provides a balanced summary of model performance when both types of errors (false positives and false negatives) are important. \section{Performance Evaluation in Action} \subsection{Precision--Recall Trade-off} For a given dataset, there is typically an inverse relationship between precision and recall as the decision threshold varies. Classifiers often output probabilities, and a threshold is used to convert those probabilities into class labels. A \textbf{stricter threshold} (making it harder to label a data point as positive) results in fewer predicted positives. This reduces the number of false positives, which increases precision, but increases false negatives, which decreases recall. Conversely, a \textbf{softer threshold} (making it easier to label a point as positive) increases recall by reducing false negatives, but may lower precision because more false positives are introduced. Mathematically, precision and recall are defined as \[ \text{Precision} = \frac{TP}{TP+FP}, \qquad \text{Recall} = \frac{TP}{TP+FN}. \] Because these metrics depend on different error terms (FP vs.\ FN), changing the threshold shifts the balance between them. Increasing threshold strictness decreases FP (raising precision) but increases FN (lowering recall), while decreasing the threshold has the opposite effect. In practice, an appropriate balance between precision and recall depends on the application. In safety-critical systems such as medical diagnosis or fraud detection, missing a true positive can be very costly, so higher recall is often preferred even if precision drops. In contrast, in systems where false alarms are expensive (e.g., spam filters or legal alerts), high precision is preferred to avoid incorrect positive predictions. Importantly, the classifier itself is not inherently “good” or “bad” — its performance depends strongly on the chosen decision threshold, which acts as a tunable control. \subsection{ROC Curves} The Receiver Operating Characteristic (ROC) curve visualizes classifier performance across all possible decision thresholds. It plots the \textbf{True Positive Rate (TPR)} against the \textbf{False Positive Rate (FPR)}. \[ \mathrm{TPR} = \frac{TP}{TP+FN} \quad (\text{sensitivity/recall}), \qquad \mathrm{FPR} = \frac{FP}{FP+TN}. \] Specificity, which measures correct identification of negatives, is defined as \[ \mathrm{Specificity} = \frac{TN}{TN+FP}, \] and thus $\mathrm{FPR} = 1 - \mathrm{Specificity}$. Each point on the ROC curve corresponds to a different decision threshold. A curve close to the top-left corner indicates strong performance (high TPR, low FPR). A diagonal line from (0,0) to (1,1) represents random guessing. \begin{figure}[H] \centering \includegraphics[width=0.75\linewidth]{img/lecture7/roc_curve.png} \caption{ROC curve on simulated scores. The dashed diagonal corresponds to random guessing.} \label{fig:roc_curve} \end{figure} The curve’s position well above the diagonal indicates strong separability between classes, achieving high true positive rates even at relatively low false positive rates. \subsection{Area Under the Curve (AUC)} The Area Under the ROC Curve (AUC) summarizes overall classifier performance. AUC always lies between 0 and 1. An AUC of 1 corresponds to a perfect classifier, while 0.5 represents random performance. AUC can also be interpreted probabilistically: it represents the probability that the classifier ranks a randomly chosen positive example higher than a randomly chosen negative example. Thus, AUC measures ranking quality rather than accuracy at a single threshold. \subsection{Evaluation under Imbalanced Data} ROC curves can be misleading when classes are highly imbalanced. In such cases, the number of negative samples is large, making the denominator of FPR ($FP+TN$) large as well. As a result, even many false positives can produce a small FPR, making the classifier appear better than it actually is. A more informative alternative in imbalanced settings is the \textbf{precision--recall (PR) curve}, which plots precision versus recall across thresholds. Because precision directly penalizes false positives, PR curves better reflect performance on the minority positive class. As a rule of thumb, ROC curves are most informative when classes are balanced, while precision--recall curves are preferred when the positive class is rare. \begin{figure}[H] \centering \includegraphics[width=0.75\linewidth]{img/lecture7/pr_curve.png} \caption{Precision--recall curve under class imbalance. Compared to ROC, PR curves more directly reflect performance on the minority (positive) class.} \label{fig:pr_curve} \end{figure} In this example, precision drops steadily as recall increases, illustrating the difficulty of maintaining high precision while capturing more of the minority class. The Average Precision (AP) score summarizes the area under the PR curve and reflects overall performance across thresholds. Compared to ROC AUC, AP is more sensitive to false positives in imbalanced settings, which is why PR analysis is preferred when the positive class is rare.
+
+
+\section{Regression}
+\subsection{Introduction}
+A regression models a relationship between an input variable $x$ and a continuous output variable $y$ by fitting a function $f(\cdot)$ to the observed data. This differs from classifiers in that the output is a continuous variable as opposed to a discrete classification. These regressions can be linear or polynomial, though this lecture will focus on linear regressions.
+
+\subsection{Better Life Index (OECD) Example}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{img/lecture7/bli_scatter_fit.png}
+\caption{Better Life Index example: GDP per capita vs.\ life satisfaction with a linear fit. Training points are used to fit the line; test points illustrate generalization.}
+\label{fig:bli_scatter_fit}
+\end{figure}
+
+It is clear from the inspection of the graph that there is a positive linear correlation between the GDP per capita of the country and its life satisfaction score. This can be modeled with a simple linear equation:
+
+\[ \mathrm{Life Satisfaction} = \theta_0 + \theta_1 \times \mathrm{GDP per Capita}\]
+
+In this equation $\theta_0$ is the bias, or vertical intercept, while $\theta_1$ is the weight, or slope. Because the data is only two dimensional, these are the only parameters needed.
+
+
+\subsection{Residual Diagnostics (Training Set)}
+
+After fitting a regression model, it is useful to inspect \textbf{residuals} $r_i = y_i - \hat{y}_i$ to check whether errors appear centered around zero and whether there are obvious patterns that suggest model mismatch (e.g., nonlinearity or heteroscedasticity).
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture7/bli_residuals_hist.png}
+    \caption{Residual histogram (train).}
+    \label{fig:bli_residuals_hist}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture7/bli_residuals_scatter.png}
+    \caption{Residuals vs.\ predictions (train).}
+    \label{fig:bli_residuals_scatter}
+\end{subfigure}
+\caption{Residual diagnostics for the Better Life Index linear regression model on the training set. Ideally, residuals are roughly centered around zero with no systematic trend versus $\hat{y}$.}
+\label{fig:bli_residual_diagnostics}
+\end{figure}
+
+In this example, the residual histogram appears roughly symmetric and centered near zero, which supports the assumption that the model does not exhibit strong systematic bias. The residuals-versus-predictions plot does not show a clear curve or funnel shape, suggesting that a linear model is a reasonable first approximation and that variance does not obviously increase with prediction magnitude. However, the small dataset size limits how strongly we can rely on visual diagnostics alone.
+
+\subsection{Least Squares Loss Function}
+
+We assume the residual error $\epsilon_i$ is \textbf{independently and identically distributed} (i.i.d.) and drawn from a Normal (Gaussian) distribution with zero mean and variance $\sigma^2$:
+\[
+\epsilon_i \sim \mathcal{N}(0,\sigma^2).
+\]
+The probability density function (PDF) of \(\epsilon_i\) is:
+\[
+p(\epsilon_i) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{\epsilon_i^2}{2\sigma^2}\right).
+\]
+Using the augmented feature vector $\tilde{\mathbf{x}}_i$ defined above, the linear model with noise is
+\[
+y_i = \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} + \epsilon_i.
+\]
+Therefore, the conditional probability of observing \(y_i\), given \(\tilde{\mathbf{x}}_i\) and parameters \(\tilde{\boldsymbol{\theta}}\), is:
+\[
+p(y_i \mid \tilde{\mathbf{x}}_i; \tilde{\boldsymbol{\theta}})
+= \frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).
+\]
+Assuming samples are independent, the likelihood function for the entire dataset is the product of individual probabilities:
+\[
+L(\tilde{\boldsymbol{\theta}}; \mathbf{X}, \mathbf{y})
+= \prod_{i=1}^N p(y_i \mid \tilde{\mathbf{x}}_i; \tilde{\boldsymbol{\theta}})
+= \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).
+\]
+Taking the log-likelihood gives:
+\[
+\log L(\tilde{\boldsymbol{\theta}}; \mathbf{X}, \mathbf{y})
+= N\log\left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)
+-\frac{1}{2\sigma^2}\sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.
+\]
+Maximizing the log-likelihood over \(\tilde{\boldsymbol{\theta}}\) using Maximum Likelihood Estimation (MLE) is equivalent to minimizing the negative log-likelihood. Ignoring constants that do not depend on \(\tilde{\boldsymbol{\theta}}\), this is equivalent to minimizing:
+\[
+\sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.
+\]
+Let \(\hat{\tilde{\boldsymbol{\theta}}}\) denote the MLE/least-squares estimate:
+\[
+\hat{\tilde{\boldsymbol{\theta}}}
+= \arg\max_{\tilde{\boldsymbol{\theta}}} \log L(\tilde{\boldsymbol{\theta}};\mathbf{X},\mathbf{y})
+= \arg\min_{\tilde{\boldsymbol{\theta}}} \sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.
+\]
+Equivalently, we can define the \textbf{Least Squares Loss Function} (Mean Squared Error, MSE) as a function of \(\tilde{\boldsymbol{\theta}}\):
+\[
+L(\tilde{\boldsymbol{\theta}}) = \frac{1}{N} \sum_{i=1}^N (\tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} - y_i)^2
+= \frac{1}{N}\sum_{i=1}^N (\hat{y}_i - y_i)^2,
+\qquad \text{where } \hat{y}_i = \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}}.
+\]
+
+The loss surface for the two-parameter case $(\theta_0,\theta_1)$ is illustrated below, showing its convex quadratic structure:
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\linewidth]{img/lecture7/mse_contour_theta0_theta1.png}
+\caption{Contours of the least squares loss $L(\theta_0,\theta_1)$ for the Better Life Index example (training set). The marked point indicates the minimizer obtained by the normal equation.}
+\label{fig:mse_contours}
+\end{figure}
+
+The Least Squares loss function computes the average squared error between model predictions and targets. We want to find the optimal parameter vector:
+\[
+\hat{\tilde{\boldsymbol{\theta}}} = \arg\min_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}}).
+\]
+To find this optimum, we differentiate \(L(\tilde{\boldsymbol{\theta}})\) with respect to \(\tilde{\boldsymbol{\theta}}\) and set the gradient to zero:
+\[
+\nabla_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}}) = 0.
+\]
+Since the Least Squares loss for linear regression is convex and quadratic, the solution can be found by solving the \textbf{Normal Equation}, derived below.
+
+\noindent The least squares cost function is:
+\[
+L(\tilde{\boldsymbol{\theta}}) = \frac{1}{N}\sum_{i=1}^{N} (\hat{y}_i - y_i)^2
+= \frac{1}{N}\|\mathbf{X}\tilde{\boldsymbol{\theta}}-\mathbf{y}\|_2^2.
+\]
+Expanding in matrix form:
+\begin{align*}
+L(\tilde{\boldsymbol{\theta}})
+&= \frac{1}{N} (\mathbf{X}\tilde{\boldsymbol{\theta}} - \mathbf{y})^T (\mathbf{X}\tilde{\boldsymbol{\theta}} - \mathbf{y}) \\
+&= \frac{1}{N} \left( \tilde{\boldsymbol{\theta}}^T \mathbf{X}^T \mathbf{X}\tilde{\boldsymbol{\theta}}
+- 2 \tilde{\boldsymbol{\theta}}^T \mathbf{X}^T \mathbf{y}
++ \mathbf{y}^T \mathbf{y} \right).
+\end{align*}
+Taking the gradient with respect to \(\tilde{\boldsymbol{\theta}}\):
+\[
+\nabla_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}})
+= \frac{1}{N}\left(2\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}}-2\mathbf{X}^T\mathbf{y}\right).
+\]
+Setting the gradient to zero:
+\[
+\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}} = \mathbf{X}^T\mathbf{y}.
+\]
+If \(\mathbf{X}^T\mathbf{X}\) is invertible, the unique solution is:
+\[
+\hat{\tilde{\boldsymbol{\theta}}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.
+\]
+This is the \textbf{Normal Equation}.
+
+
+\section{Geometric Interpretation of Linear Regression}
+For a dataset \(\mathbf{X} = \begin{bmatrix}
+    \mathbf{x}_1^T \\
+    \mathbf{x}_2^T \\
+    \vdots \\
+    \mathbf{x}_N^T
+\end{bmatrix} = \begin{bmatrix}
+    1 & x_{11} & \dots & x_{1P} \\
+    1 & x_{21} & \dots & x_{2P} \\
+    \vdots & \vdots & \ddots & \vdots \\
+    1 & x_{N1} & \dots & x_{NP}
+\end{bmatrix}\),
+we assume \(N > P+1\), i.e., there are more samples than features. \\ \\
+The columns of \(\mathbf{X} = [\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}]\) define a \((P+1)\)-dimensional linear subspace. We denote this subspace as \(\text{span}(\mathbf{X})\), or \(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\). We want to estimate \(\hat{\mathbf{y}} \in \mathbb{R}^N\) that lies in this linear subspace and is as close as possible to \(\mathbf{y}\):
+\[
+\hat{\mathbf{y}}
+= \underset{\hat{\mathbf{y}} \in \mathrm{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}\}}{\arg\min}
+\|\hat{\mathbf{y}} - \mathbf{y}\|_2
+\]
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\linewidth]{img/lecture7/image.png}
+\caption{2D linear subspace (green) spanned by \( \begin{pmatrix}1 & 1 & 1\end{pmatrix} \text{ and } \begin{pmatrix}1 & -1 & 1\end{pmatrix} \).}
+\end{figure}
+
+\noindent Since \(\hat{\mathbf{y}} \in \text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\), \(\hat{\mathbf{y}}\) will be a linear combination of \(\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\) with a coefficient vector \(\hat{\boldsymbol{\theta}}\) such that:
+\[
+\hat{\mathbf{y}} = \hat{\theta}_0 \mathbf{1} + \hat{\theta}_1 \mathbf{x}_{:,1} + \cdots + \hat{\theta}_P \mathbf{x}_{:,P} = \mathbf{X}\hat{\boldsymbol{\theta}}.
+\]
+To minimize \(\|\hat{\mathbf{y}} - \mathbf{y}\|_2^2\), the desired residual vector \(\mathbf{r} \triangleq \mathbf{y} - \hat{\mathbf{y}}\) must be orthogonal to the entire subspace \(\mathrm{span}(\mathbf{X})\). Equivalently, \(\mathbf{r}\) is orthogonal to \textit{every column} of \(\mathbf{X}\), including the intercept column \(\mathbf{1}\). In matrix form, this orthogonality condition is:
+\[
+\mathbf{X}^T (\mathbf{y} - \hat{\mathbf{y}}) = 0.
+\]
+Hence, the solution for \(\hat{\boldsymbol{\theta}}\) is:
+\[
+\hat{\boldsymbol{\theta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y},
+\]
+and the estimated output vector \(\hat{\mathbf{y}}\) is:
+\[
+\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\theta}} = \mathbf{X} (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.
+\]
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.4\linewidth]{img/lecture7/projectionmatrix.png}
+\caption{Projection of \(\mathbf{y}\) onto \(\hat{\mathbf{y}}\), where the residual \(\mathbf{y} - \hat{\mathbf{y}}\) is orthogonal to the subspace.}
+\end{figure}
+
+\noindent This projection \(\hat{\mathbf{y}}\) can be viewed as an orthogonal projection of \(\mathbf{y}\) onto \(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\).
+
+\section{Singular Value Decomposition (SVD) for Linear Regression}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.4\linewidth]{img/lecture7/SVD.png}
+    \label{fig:enter-label}
+\end{figure}
+
+Recall that in linear regression, we use the normal equation to compute the least-squares estimate of the parameter vector:
+\[
+\hat{\boldsymbol{\theta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.
+\]
+For a data matrix $\mathbf{X}\in\mathbb{R}^{N\times(P+1)}$, the columns $\mathbf{x}_{:,0}, \mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}$ represent features, where $\mathbf{x}_{:,0}=\mathbf{1}$ is the intercept column. These columns are said to be \textbf{linearly independent} if none of them can be written as a weighted combination of the others. When this condition holds, the matrix $\mathbf{X}^T \mathbf{X}$ is invertible, and the normal equation can be applied directly to obtain a unique solution.
+
+However, if some columns of $\mathbf{X}$ are linearly dependent, it means there is redundancy or strong correlation among features. In other words, certain features do not contribute new information because they can be expressed using other features. In this situation, $\mathbf{X}^T \mathbf{X}$ becomes singular (non-invertible), and the normal equation cannot be used in its standard form. This issue is common in real-world datasets where features may overlap in information content.
+
+Singular Value Decomposition (SVD) provides a principled way to handle this problem. The SVD of $\mathbf{X}$ is given by
+\[
+\mathbf{X} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^T,
+\]
+where $\mathbf{U}$ and $\mathbf{V}$ are orthogonal matrices and $\boldsymbol{\Sigma}$ is a diagonal matrix containing the singular values. These singular values indicate how much independent information exists in each direction of the feature space. If any singular values are zero or very close to zero, this signals redundancy in the features. By discarding these near-zero singular values and using the remaining components, we can compute a stable estimate of $\hat{\boldsymbol{\theta}}$ even when $\mathbf{X}^T \mathbf{X}$ is not invertible. This approach effectively removes redundant feature directions and ensures a well-defined regression solution.
+
+
+\section{Multi-output Regression}
+
+In practice, we might encounter data $(\mathbf{x}_1, \mathbf{y}_1), (\mathbf{x}_2, \mathbf{y}_2), \ldots, (\mathbf{x}_N, \mathbf{y}_N)$, where each input $\mathbf{x}_i = [x_{i1}, x_{i2}, \ldots, x_{iP}]^T \in \mathbb{R}^P$ as before, and additionally the vector output $\mathbf{y}_i = [y_{i1}, y_{i2}, \ldots, y_{iK}]^T \in \mathbb{R}^K$ is multi-dimensional. For instance, we might be interested in modeling multiple outputs for a given set of input features. We could build separate models for each output, but there may be relationships between the outputs that we want to incorporate into our modeling.\\ \\
+In particular, if we assume a linear relationship between $\mathbf{x}_i$ and only the $k$-th dimension of $\mathbf{y}_i$, it is the ordinary single-output linear regression we modeled so far:
+\[
+y_{ik} = \tilde{\mathbf{x}}_i^\top \boldsymbol{\theta},
+\]
+where $\tilde{\mathbf{x}}_i = [1;\mathbf{x}_i]$ is the augmented feature vector (including the intercept), and $\boldsymbol{\theta}\in\mathbb{R}^{P+1}$.
+
+If we further assume a linear relationship between $\mathbf{x}_i$ and \textit{all} $K$ dimensions of the output $\mathbf{y}_i \in \mathbb{R}^K$, it is called \textbf{multi-output regression}. The relationship is modeled as follows:
+\[
+\mathbf{Y} = \mathbf{X}\boldsymbol{\Theta},
+\]
+where
+\[
+\mathbf{Y} =
+\begin{pmatrix}
+\mathbf{y}_1^\top \\
+\mathbf{y}_2^\top \\
+\vdots \\
+\mathbf{y}_N^\top
+\end{pmatrix}
+=
+\begin{pmatrix}
+y_{11} & y_{12} & \cdots & y_{1K} \\
+y_{21} & y_{22} & \cdots & y_{2K} \\
+\vdots & \vdots & \ddots & \vdots \\
+y_{N1} & y_{N2} & \cdots & y_{NK}
+\end{pmatrix},
+\quad
+\mathbf{X} =
+\begin{pmatrix}
+\tilde{\mathbf{x}}_1^\top \\
+\tilde{\mathbf{x}}_2^\top \\
+\vdots \\
+\tilde{\mathbf{x}}_N^\top
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & x_{11} & \cdots & x_{1P} \\
+1 & x_{21} & \cdots & x_{2P} \\
+\vdots & \vdots & \ddots & \vdots \\
+1 & x_{N1} & \cdots & x_{NP}
+\end{pmatrix},
+\]
+and
+\[
+\boldsymbol{\Theta} =
+\begin{pmatrix}
+\theta_{01} & \theta_{02} & \cdots & \theta_{0K} \\
+\theta_{11} & \theta_{12} & \cdots & \theta_{1K} \\
+\vdots & \vdots & \ddots & \vdots \\
+\theta_{P1} & \theta_{P2} & \cdots & \theta_{PK}
+\end{pmatrix}
+\in \mathbb{R}^{(P+1)\times K}.
+\]
+
+\subsection{Applications of Multi-output Regression}
+
+Multi-output regression is used in scenarios where multiple related target variables must be predicted simultaneously from the same input features. Instead of building separate models for each target, a multi-output model can capture relationships among outputs, often improving predictive performance and consistency.
+
+One important application is in \textbf{forest property prediction}, where satellite imagery is used to estimate multiple environmental variables at once, such as vegetation height and canopy cover. These quantities are physically related, and modeling them jointly helps the system learn shared spatial and spectral patterns.
+
+Another example is \textbf{soil quality prediction}. In ecological and agricultural studies, researchers may wish to predict several soil indicators simultaneously, such as Acari abundance and overall biodiversity. Since these measures are influenced by common environmental factors, a multi-output approach can leverage shared structure in the data.
+
+Multi-output regression is also common in \textbf{monthly product sales prediction}, where businesses estimate multiple sales-related quantities from product features, pricing, and advertising data. Predicting all outputs together allows the model to capture dependencies across product categories or time periods.
+
+A further application is \textbf{energy consumption estimation} in buildings. Models may predict both heating and cooling loads of residential structures based on architectural features and environmental conditions. These energy demands are interdependent, and learning them jointly often yields more realistic and stable predictions.
+
+\section{Regularization Techniques}
+
+In linear regression, models with many features can easily overfit the training data, especially when features are highly correlated (multicollinearity) or when the number of features is comparable to or larger than the number of samples. Regularization addresses this by adding a penalty on the size of the coefficients, which discourages overly complex models and improves generalization. Regularization therefore introduces a trade-off between fitting the training data well and keeping the model simple. As the strength of regularization increases, model variance decreases but bias increases, making regularization a key tool for managing the bias--variance trade-off.
+
+\subsection{Ridge Regression (L2 Regularization)}
+
+Ridge regression adds a penalty proportional to the squared magnitude of the coefficients:
+
+\[
+L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda \|\boldsymbol{\theta}\|_2^2
+\]
+
+The parameter $\lambda \ge 0$ controls the strength of regularization. When $\lambda = 0$, Ridge regression reduces to ordinary least squares. As $\lambda$ increases, all coefficients are shrunk smoothly toward zero, but none of them become exactly zero. This means Ridge regression keeps all features in the model while reducing their influence. It is particularly useful when features are highly correlated, since it distributes weights across correlated predictors instead of selecting only one. Ridge regression reduces model variance, stabilizes solutions when $\mathbf{X}^T\mathbf{X}$ is nearly singular, and is preferred when many features contribute small or moderate effects rather than a few dominant ones.
+
+\subsection{Lasso Regression (L1 Regularization)}
+
+Lasso regression introduces a penalty based on the L1 norm of the coefficients:
+
+\[
+L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda \|\boldsymbol{\theta}\|_1
+\]
+
+Unlike Ridge regression, the L1 penalty encourages sparsity in the coefficient vector. As $\lambda$ increases, some coefficients are driven exactly to zero, effectively removing those features from the model. This behavior makes Lasso regression a powerful method for automatic feature selection, leading to simpler and more interpretable models. Lasso is particularly useful when only a small subset of features is truly relevant. However, when features are highly correlated, Lasso tends to arbitrarily select one feature and ignore the others, which can make the solution unstable.
+
+\subsection{Elastic Net}
+
+Elastic Net combines both L1 and L2 penalties:
+
+\[
+L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda_1 \|\boldsymbol{\theta}\|_1 + \lambda_2 \|\boldsymbol{\theta}\|_2^2
+\]
+
+This method leverages the benefits of both Ridge and Lasso regression. The L1 component promotes sparsity and feature selection, while the L2 component stabilizes the solution and helps when predictors are correlated. Elastic Net is especially useful in high-dimensional settings where the number of features exceeds the number of samples. It avoids Lasso’s tendency to select only one variable from a correlated group and instead allows groups of correlated features to be selected together.
+
+\subsection{Coefficient Paths as $\lambda$ Varies}
+
+A useful way to visualize the effect of regularization is to plot \textbf{coefficient paths} as a function of the regularization strength $\lambda$. When features are standardized, the relative shrinkage behavior is easier to compare across coefficients.
+
+The coefficient path shows how each model parameter evolves as regularization strength changes. When $\lambda$ is small, the solution is close to ordinary least squares, and coefficients take values that best fit the training data. As $\lambda$ increases, the penalty term becomes more influential, constraining the model parameters and reducing their magnitude. Thus, the path illustrates the transition from a data-fitting regime (low bias, higher variance) to a more constrained regime (higher bias, lower variance).
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture7/ridge_paths.png}
+    \caption{Ridge (L2): coefficients shrink smoothly as $\lambda$ increases.}
+    \label{fig:ridge_paths}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.48\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture7/lasso_paths.png}
+    \caption{Lasso (L1): coefficients are driven to exactly zero, yielding sparsity.}
+    \label{fig:lasso_paths}
+\end{subfigure}
+\caption{Regularization coefficient paths (standardized features). Ridge shrinks all coefficients continuously, while Lasso performs shrinkage plus feature selection by setting some coefficients exactly to zero.}
+\label{fig:coef_paths}
+\end{figure}
+
+The different shapes of the paths reflect the geometry of the regularization penalty. Ridge regression uses an $L_2$ penalty, which penalizes large coefficients quadratically. This leads to smooth, continuous shrinkage of all parameters toward zero without eliminating any entirely. In contrast, the $L_1$ penalty used in Lasso creates sharp corners in the optimization landscape, which causes some coefficients to become exactly zero as $\lambda$ increases. This is why Lasso performs automatic feature selection, while Ridge primarily performs coefficient stabilization.
+
+\subsection*{Summary}
+
+Ridge regression primarily performs coefficient shrinkage and works well when many features contribute to the prediction and multicollinearity is present. Lasso regression performs both shrinkage and feature selection, making it suitable when interpretability and sparsity are important. Elastic Net provides a balance between the two, combining stability and sparsity, and is often preferred in high-dimensional or highly correlated feature spaces. In practice, the regularization parameters are selected using cross-validation to achieve the best trade-off between bias and variance.
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+
+% \item Consider the table below, which shows model predictions and ground truth for a binary classification task.
+
+% \[
+% \begin{tabular}{|c|c|c|}
+% \hline
+% \textbf{Sample} & \textbf{Ground Truth} & \textbf{Model Prediction} \\
+% \hline
+% 1 & 1 & 1 \\
+% 2 & 1 & 0 \\
+% 3 & 0 & 1 \\
+% 4 & 1 & 1 \\
+% 5 & 0 & 0 \\
+% 6 & 0 & 0 \\
+% 7 & 0 & 0 \\
+% 8 & 0 & 1 \\
+% \hline
+% \end{tabular}
+% \]
+
+% Calculate the following evaluation metrics:
+% \begin{itemize}
+%     \item True Positive Rate (TPR), i.e. Sensitivity/Recall
+%     \item False Positive Rate (FPR)
+%     \item Precision
+%     \item Specificity
+%     \item F1 score
+% \end{itemize}
+
+% \textbf{Solution:}
+
+% \textbf{Step 1: Identify TP, FP, TN, FN for each sample}
+
+% \begin{center}
+% \renewcommand{\arraystretch}{1.4}
+% \begin{tabular}{|c|c|c|c|}
+% \hline
+% \textbf{Sample} & \textbf{Ground Truth} & \textbf{Prediction} & \textbf{Type} \\
+% \hline
+% 1 & 1 & 1 & TP \\
+% 2 & 1 & 0 & FN \\
+% 3 & 0 & 1 & FP \\
+% 4 & 1 & 1 & TP \\
+% 5 & 0 & 0 & TN \\
+% 6 & 0 & 0 & TN \\
+% 7 & 0 & 0 & TN \\
+% 8 & 0 & 1 & FP \\
+% \hline
+% \end{tabular}
+% \end{center}
+
+% \textbf{Step 2: Count each category}
+
+% \begin{itemize}
+%     \item \textbf{True Positives (TP)} = 2 (samples 1, 4)
+%     \item \textbf{False Positives (FP)} = 2 (samples 3, 8)
+%     \item \textbf{True Negatives (TN)} = 3 (samples 5, 6, 7)
+%     \item \textbf{False Negatives (FN)} = 1 (sample 2)
+% \end{itemize}
+
+% \textbf{Step 3: Compute evaluation metrics}
+
+% \[
+% \begin{aligned}
+% R=\text{True Positive Rate (TPR)} &= \frac{TP}{TP + FN} = \frac{2}{2 + 1} = \frac{2}{3} \\[6pt]
+% \text{False Positive Rate (FPR)} &= \frac{FP}{FP + TN} = \frac{2}{2 + 3} = \frac{2}{5} \\[6pt]
+% P=\text{Precision} &= \frac{TP}{TP + FP} = \frac{2}{2 + 2} = \frac{1}{2} \\[6pt]
+% \text{Specificity} &= \frac{TN}{TN + FP} = \frac{3}{3 + 2} = \frac{3}{5} \\[6pt]
+% \text{F1 Score} &= 2\times\frac{P\times R}{P + R} 
+% = 2\times\frac{(1/2)(2/3)}{1/2 + 2/3}
+% = \frac{4}{7}
+% \end{aligned}
+% \]
+
+% Notice that
+
+% \[
+% 1-\text{Specificity} = 1-\frac{3}{5} = \frac{2}{5} = \text{FPR}.
+% \]
+
+\item Consider the following dataset with 3 data points and 3 features:
+
+\[
+\mathbf{X} = \begin{bmatrix}
+1 & 1 & 0 \\
+0 & 2 & 1 \\
+1 & 0 & 1
+\end{bmatrix},
+\quad \mathbf{y} = \begin{bmatrix}
+2 \\
+3 \\
+4
+\end{bmatrix}
+\]
+Find the least squares solution for this linear regression problem.
+
+\textbf{Solution:}
+First, compute \(\mathbf{X}^T \mathbf{X}\):
+\[
+\mathbf{X}^T \mathbf{X} = 
+\begin{bmatrix}
+1 & 0 & 1 \\
+1 & 2 & 0 \\
+0 & 1 & 1
+\end{bmatrix}
+\begin{bmatrix}
+1 & 1 & 0 \\
+0 & 2 & 1 \\
+1 & 0 & 1
+\end{bmatrix}
+= \begin{bmatrix}
+2 & 1 & 1 \\
+1 & 5 & 2 \\
+1 & 2 & 2
+\end{bmatrix}
+\]
+Notice that $\det(\mathbf{X}^T \mathbf{X})=2(10-4)-(2-2)+(2-5)=9\neq 0$, hence this matrix is invertible. Now compute \(\mathbf{X}^T \mathbf{y}\):
+\[
+\mathbf{X}^T \mathbf{y} = \begin{bmatrix}
+1 & 0 & 1 \\
+1 & 2 & 0 \\
+0 & 1 & 1
+\end{bmatrix}
+\begin{bmatrix}
+2 \\
+3 \\
+4
+\end{bmatrix}
+= \begin{bmatrix}
+6 \\
+8 \\
+7
+\end{bmatrix}
+\]
+Finally, since \(\mathbf{X}^T \mathbf{X}\) is invertible, we can now compute:
+\[
+\hat{\boldsymbol{\theta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y} = \begin{bmatrix}
+2 & 1 & 1 \\
+1 & 5 & 2 \\
+1 & 2 & 2
+\end{bmatrix}^{-1}
+\begin{bmatrix}
+6 \\
+8 \\
+7
+\end{bmatrix} = \begin{bmatrix}
+5/3 \\
+1/3 \\
+7/3
+\end{bmatrix}
+\]
+
+% \item Now consider the following new dataset and find the solution for the linear regression problem.
+
+% \[
+% \mathbf{X} = \begin{bmatrix}
+% 1 & 0 & 0 \\
+% 0 & 1 & 0 \\
+% 1 & 1 & 0
+% \end{bmatrix},
+% \quad \mathbf{y} = \begin{bmatrix}
+% 1 \\
+% 3 \\
+% 5
+% \end{bmatrix}
+% \]
+
+% \textbf{Solution:}
+% First, compute \(\mathbf{X}^T \mathbf{X}\):
+% \[
+% \mathbf{X}^T \mathbf{X} = 
+% \begin{bmatrix}
+% 1 & 0 & 1 \\
+% 0 & 1 & 1 \\
+% 0 & 0 & 0
+% \end{bmatrix}
+% \begin{bmatrix}
+% 1 & 0 & 0 \\
+% 0 & 1 & 0 \\
+% 1 & 1 & 0
+% \end{bmatrix}
+% = \begin{bmatrix}
+% 2 & 2 & 0 \\
+% 2 & 2 & 0 \\
+% 0 & 0 & 0
+% \end{bmatrix}
+% \]
+% Next, notice that \(\det(\mathbf{X}^T \mathbf{X}) = 0\). Hence, \(\mathbf{X}^T \mathbf{X}\) is not invertible. This means the system cannot be solved directly using the normal equation \((\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}\).\\ \\
+% Observe that the rows of \(\mathbf{X}\) are linearly dependent. In particular, the third row is the sum of the first two, indicating that \(\mathbf{X}\) is rank-deficient. Specifically, \(\text{rank}(\mathbf{X}) = 2<3\).\\ \\
+% Since \(\mathbf{X}^T \mathbf{X}\) is not invertible, we need an alternative approach. One such approach is Singular Value Decomposition (SVD), which can help us find a low-rank solution to the system. The SVD decomposes the matrix \(\mathbf{X}\) into the product of three matrices: \(\mathbf{X} = \mathbf{U} \boldsymbol{\Sigma} \mathbf{V}^T\). The matrix \(\mathbf{U}\) contains the left singular vectors, \(\boldsymbol{\Sigma}\) is a diagonal matrix of singular values, and \(\mathbf{V}^T\) contains the right singular vectors.\\ \\
+% Given the linear dependence in \(\mathbf{X}\), only one singular value will be non-zero. In particular, if we compute the SVD we get:
+% \[
+% \mathbf{U} \approx \begin{bmatrix}
+% .408 & -.707 & -.577 \\
+% .408 & .707 & .577 \\
+% .816 & 0 & .577
+% \end{bmatrix},
+% \quad
+% \boldsymbol{\Sigma} = \begin{bmatrix}
+% \sqrt{3} & 0 & 0 \\
+% 0 & 1 & 0 \\
+% 0 & 0 & 0
+% \end{bmatrix},
+% \quad
+% \mathbf{V} \approx \begin{bmatrix}
+% .707 & -.707 & 0 \\
+% .707 & .707 & 0 \\
+% 0 & 0 & 1
+% \end{bmatrix}
+% \]
+% Now, to construct a \textit{low-rank approximation}, we'll discard the zero singular values (there is $3-\textrm{rank}(\mathbf{X})=1$ of them), the last column of $\mathbf{U}$, and the last row of $\mathbf{V}^T$:
+% \[
+% \mathbf{U^\dagger} \approx \begin{bmatrix}
+% .408 & -.707 \\
+% .408 & .707 \\
+% .816 & 0
+% \end{bmatrix},
+% \quad
+% \boldsymbol{\Sigma}^\dagger = \begin{bmatrix}
+% \sqrt{3} & 0 \\
+% 0 & 1
+% \end{bmatrix},
+% \quad
+% (\mathbf{V}^\dagger)^T \approx \begin{bmatrix}
+% .707 & .707 & 0 \\
+% -.707 & .707 & 0
+% \end{bmatrix}
+% \]
+% It seems like we've lost information by removing columns/rows of the decomposition, but in reality we have the \textit{same information as we did before}, due to the low-rank nature of $\mathbf{X}$. To see this, observe that we can reconstruct $\mathbf{X}$ exactly using the low-rank approximation. Even if we keep our $3$-digit approximations,
+% $$
+% \mathbf{X}^\dagger \approx \mathbf{U^\dagger}\boldsymbol{\Sigma}^\dagger(\mathbf{V}^\dagger)^T \approx \begin{bmatrix}
+% .9995 & -.0002 & 0 \\
+% -.0002 & .9995 & 0 \\
+% .9992 & .9992 & 0
+% \end{bmatrix} \approx \mathbf{X}
+% $$
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Now that we have constructed the low-rank approximation of \(\mathbf{X}\), we can solve the linear system using this approximation. Using the properties of the SVD, the pseudo-inverse of \(\mathbf{X}^\dagger\) is given by:
+
+% \[
+% (\mathbf{X}^\dagger)^+ = \mathbf{V}^\dagger (\boldsymbol{\Sigma}^\dagger)^{-1} (\mathbf{U}^\dagger)^T
+% \]
+
+% Substituting the values we obtained for \(\mathbf{U}^\dagger\), \(\boldsymbol{\Sigma}^\dagger\), and \(\mathbf{V}^\dagger\), we can compute the pseudo-inverse as:
+
+% \[
+% (\mathbf{X}^\dagger)^+ = \begin{bmatrix}
+% .707 & -.707 \\
+% .707 & .707 \\
+% 0 & 0
+% \end{bmatrix}
+% \begin{bmatrix}
+% 1/\sqrt{3} & 0 \\
+% 0 & 1
+% \end{bmatrix}
+% \begin{bmatrix}
+% .408 & .408 & .816 \\
+% -.707 & .707 & 0
+% \end{bmatrix}
+% \]
+
+% Now, we multiply this with the vector \(\mathbf{y} = \begin{bmatrix} 1 \\ 3 \\ 5 \end{bmatrix}\) to get the approximate solution:
+
+% \[
+% \hat{\boldsymbol{\theta}} = (\mathbf{X}^\dagger)^+ \mathbf{y}
+% \]
+
+% After performing the matrix multiplications, we get:
+
+% \[
+% \hat{\boldsymbol{\theta}} \approx \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix}
+% \]
+
+% The low-rank approximation enables us to solve the system in a stable way despite the singularity of \(\mathbf{X}^T \mathbf{X}\).
+
+
+
+% 2/6/2026 Added more questions as exercises
+
+\item \textbf{(Geometric interpretation / projection matrix)}  
+Let $\mathbf{X}\in\mathbb{R}^{N\times(P+1)}$ have full column rank. Define the projection matrix
+\[
+\mathbf{P} = \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T.
+\]
+\begin{enumerate}
+    \item Show that $\mathbf{P}$ is \emph{symmetric}.
+    \item Show that $\mathbf{P}$ is \emph{idempotent}, i.e., $\mathbf{P}^2=\mathbf{P}$.
+    \item Explain (in one sentence) what $\hat{\mathbf{y}}=\mathbf{P}\mathbf{y}$ represents.
+\end{enumerate}
+
+\textbf{Solution:}
+\begin{enumerate}
+    \item Symmetry:
+    \[
+    \mathbf{P}^T = \left(\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\right)^T
+    = \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T = \mathbf{P},
+    \]
+    since $(\mathbf{X}^T\mathbf{X})^{-1}$ is symmetric.
+    \item Idempotence:
+    \[
+    \mathbf{P}^2
+    = \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T
+    = \mathbf{X}(\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T
+    = \mathbf{P}.
+    \]
+    \item Interpretation: $\hat{\mathbf{y}}=\mathbf{P}\mathbf{y}$ is the \emph{orthogonal projection} of $\mathbf{y}$ onto $\mathrm{span}(\mathbf{X})$ (the column space of $\mathbf{X}$).
+\end{enumerate}
+
+\item \textbf{(Ridge regression closed form)}  
+Consider Ridge regression:
+\[
+L(\boldsymbol{\theta})=\frac{1}{N}\|\mathbf{X}\boldsymbol{\theta}-\mathbf{y}\|_2^2+\lambda\|\boldsymbol{\theta}\|_2^2,\qquad \lambda\ge 0.
+\]
+Derive the closed-form minimizer $\hat{\boldsymbol{\theta}}_{\mathrm{ridge}}$.
+
+\textbf{Solution:}
+Differentiate and set the gradient to zero:
+\[
+\nabla_{\boldsymbol{\theta}}L
+= \frac{2}{N}\mathbf{X}^T(\mathbf{X}\boldsymbol{\theta}-\mathbf{y}) + 2\lambda\boldsymbol{\theta} = \mathbf{0}.
+\]
+Rearrange:
+\[
+\left(\frac{1}{N}\mathbf{X}^T\mathbf{X}+\lambda \mathbf{I}\right)\boldsymbol{\theta}
+= \frac{1}{N}\mathbf{X}^T\mathbf{y}.
+\]
+Thus,
+\[
+\hat{\boldsymbol{\theta}}_{\mathrm{ridge}}
+= \left(\mathbf{X}^T\mathbf{X}+N\lambda \mathbf{I}\right)^{-1}\mathbf{X}^T\mathbf{y}.
+\]
+(Equivalently, if the $1/N$ scaling is omitted in the loss definition, the solution becomes
+$\hat{\boldsymbol{\theta}}_{\mathrm{ridge}}=(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})^{-1}\mathbf{X}^T\mathbf{y}$.)
+
+
+
+\end{enumerate}
+
+
+\end{document}

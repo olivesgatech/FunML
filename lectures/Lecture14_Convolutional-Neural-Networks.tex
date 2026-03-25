@@ -1,0 +1,868 @@
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage,hyperref, float}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+
+
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+      
+      \hbox to 6.28in { 
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { 
+      {Courses developed by Professor Ghassan AlRegib 
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu}) 
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+      
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+      
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+      
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}: 
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}: 
+{These lecture notes are licensed under the 
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}: 
+   {\it Please submit any errata you find using the following form: 
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook} 
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+	
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+%%%%%CHANGE HERE%%%%%%%
+%%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+
+
+%%%%%CHANGE HERE%%%%%%%%%
+%%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
+\lecture{13}{Convolutional Neural Networks}{Ghassan AlRegib and Mohit Prabhushankar}{}
+
+\section{Lecture Objectives}
+
+The objective of this lecture is to introduce Convolutional Neural Networks (CNNs) as a powerful extension of Artificial Neural Networks for processing high-dimensional structured data such as images. We begin by examining the limitations of fully-connected neural networks when applied to image data, motivating the need for local connectivity and parameter sharing. We then develop the mathematical foundations of convolution and study the key components of CNN architectures, including convolutional layers, activation functions, pooling layers, and fully-connected layers. Finally, we analyze how convolutional networks transform spatial data into hierarchical feature representations for image classification tasks.
+
+% %%%%%CHANGE HERE%%%%%%%
+% %%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
+% \section{Recap of Last Lecture}
+% %%%%%Use itemize to layout bullet points that are not numbered%%%%%
+% The last lecture focused on some aspects such as:
+% \begin{itemize}
+%     \item Finding optimum weights via solving the \textbf{Normal Equation}   
+%     \item Finding optimum weights via training by \textbf{Gradient Descent}
+%     \item Quick Review of Derivatives
+%         \begin{itemize}
+%             \item Chain Rule
+%             \item Derivative of the sum is the sum of the derivatives
+%             \item Derivative wrt one element of the sum collapses the sum
+%         \end{itemize}
+%     \item Computing the backpropagation error ($ e=L(y,y^*)$) by carrying derivatives from later layers, thereby updating weights until the error $e$ converges
+% \end{itemize}
+
+\section{Limitations of Multi-layered Perceptrons (MLPs)}
+
+\subsection{ANN and MLP Disadvantages}
+
+Artificial Neural Networks (ANNs) and Multi-layered Perceptrons (MLPs) become inefficient when applied to very high-dimensional inputs such as images. In a fully connected architecture, every input pixel connects to every neuron in the next layer. This leads to a rapid growth in the number of parameters.
+
+To illustrate, consider a grayscale image of size $200 \times 200$. Such an image contains $40{,}000$ input features. If a single neuron is fully connected to this image, it requires $40{,}000$ weights. With just $100$ neurons in the first hidden layer, the network would already require $4$ million parameters. This number grows even larger for deeper networks.
+
+An excessively large number of parameters introduces several problems: training becomes computationally expensive, the model becomes harder to optimize, and the risk of overfitting increases significantly when training data is limited. Figure~\ref{fig:mlp_full_connect} illustrates how a fully connected neuron must connect to every input pixel.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image1.png}
+    \caption{A fully connected neuron attached to every input pixel}
+    \label{fig:mlp_full_connect}
+\end{figure}
+
+\subsection{Neural Networks through Local Connectivity}
+
+A key idea that helps address the parameter explosion problem is \textbf{local connectivity}. Instead of connecting each neuron to the entire input image, neurons are connected only to small spatial regions of the input.
+
+For example, rather than connecting to a $200 \times 200$ image, a neuron may connect to a small $3 \times 3$ patch. This reduces the number of weights from $40{,}000$ to just $9$ per neuron. With $100$ neurons, this results in only $900$ parameters instead of millions. This dramatic reduction is illustrated in Figure~\ref{fig:local_connectivity}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image2.png}
+    \caption{Neurons connected to local image patches}
+    \label{fig:local_connectivity}
+\end{figure}
+
+Locally connected inputs are particularly effective when inputs are roughly aligned, such as in face recognition. They are also useful for recognizing objects that may appear anywhere in an image, such as detecting a cup on a table regardless of its position.
+
+\subsection{Stationarity}
+
+Another important assumption used in convolutional neural networks is \textbf{stationarity}. This assumption states that the statistical properties of useful features remain similar across different spatial locations in an image.
+
+Under this assumption, the same set of parameters (called filters or kernels) can be reused across the entire image. This idea is known as \textbf{parameter sharing}. Instead of learning separate weights for every spatial location, the network learns a small set of filters that are applied everywhere. This enables the model to detect the same pattern regardless of where it appears in the image.
+
+Parameter sharing greatly reduces the number of learnable parameters while enabling the model to perform global pattern recognition.
+
+\subsection{ANNs vs. CNNs}
+
+Fully connected ANNs suffer from poor scalability because the number of parameters grows quadratically with the input size. While a $200 \times 200$ image already produces millions of parameters, modern images often exceed $1000 \times 1000$ pixels, making fully connected approaches impractical for image processing.
+
+Convolutional Neural Networks (CNNs) address this limitation by combining these three things:
+\begin{itemize}
+    \item local connectivity
+    \item parameter sharing
+    \item preservation of spatial structure.
+\end{itemize}
+
+By connecting neurons to local patches and reusing filters across the image, CNNs dramatically reduce the number of parameters while preserving spatial relationships. This enables CNNs to learn hierarchical visual features such as edges, textures, shapes, and objects. As a result, CNNs have become the dominant architecture for modern computer vision tasks.
+\section{Mathematical Concept of Convolution (1D and 2D)}
+
+\subsection{1D and 2D Convolutions}
+
+Convolution is a fundamental mathematical operation used to measure the similarity between an input signal and a shifted version of a filter (or kernel). In one dimension, convolution operates on a continuous signal $x(t)$ and a kernel $w(a)$. The kernel is shifted across the input signal, and at each shift the overlapping values are multiplied and integrated. The result of this process is a new signal $y(t)$ that represents how strongly the kernel matches the input at each location. The continuous 1D convolution is defined as
+\[
+y(t)=\int_{-\infty}^{+\infty} x(t-a)\,w(a)\,da.
+\]
+
+Two-dimensional convolution extends the same idea to signals that vary across two spatial dimensions, such as images. In this case, both the input $x(t_1,t_2)$ and the kernel $w(a,b)$ are two-dimensional functions. The kernel is shifted across the input image in both directions, and the output is obtained by computing the integral of the product over all spatial shifts. The continuous 2D convolution is given by
+\[
+y(t_1,t_2)=\int_{-\infty}^{+\infty}\int_{-\infty}^{+\infty}
+x(t_1-a,\,t_2-b)\,w(a,b)\,da\,db.
+\]
+
+In practice, neural networks use the discrete version of these operations, where the integrals are replaced by finite sums. This discrete convolution enables convolutional neural networks to detect patterns such as edges, textures, and shapes in images.
+
+\subsection{2D Discrete Convolution}
+
+The discrete formulation of convolution is the form used in digital image processing and convolutional neural networks. Let $X[t_1, t_2]$ denote the input image and $W[a,b]$ denote a discrete kernel (filter) of size $k_1 \times k_2$. 
+
+At each spatial location $(t_1, t_2)$, the output is computed by taking the element-wise product between the kernel and the corresponding local patch of the input image, and then summing the results. Mathematically,
+
+\[
+Y[t_1, t_2] = \sum_{a=0}^{k_1-1} \sum_{b=0}^{k_2-1} 
+X[t_1 + a,\, t_2 + b] \, W[a,b].
+\]
+
+This operation is performed as the kernel slides across the spatial dimensions of the image. Each output value $Y[t_1,t_2]$ represents the response of the filter at that location. The summation over the kernel dimensions aggregates local spatial information, allowing the network to detect patterns such as edges, textures, or other localized features.
+
+Figure~\ref{fig:2d_discrete_conv} illustrates how the kernel moves across the input image to produce the output feature map.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image3.png}
+    \caption{Illustration of 2D discrete convolution as a sliding kernel operation}
+    \label{fig:2d_discrete_conv}
+\end{figure}
+
+\section{Mechanics of 2D Discrete Convolution}
+
+Having introduced the mathematical formulation of 2D discrete convolution, we now examine how the operation is performed in practice. The goal of this section is to build intuition for how a convolutional kernel slides across an input and produces an output feature map.
+
+\subsection{Example using a $3 \times 3$ Kernel}
+
+\exercise{We examine how a $3 \times 3$ kernel interacts with an input matrix to produce the resulting output feature map.}
+
+Consider an input matrix $X$ and a convolutional kernel $W$ of size $3 \times 3$. At each spatial location $(i,j)$, the kernel is placed over a corresponding $3 \times 3$ patch of the input. The convolution operation at that location consists of three steps:
+
+\begin{enumerate}
+    \item Perform element-wise multiplication between the kernel and the local $3 \times 3$ region of the input.
+    \item Sum the resulting nine values.
+    \item Apply a non-linear activation function $\sigma$.
+\end{enumerate}
+
+This process is repeated as the kernel slides across the entire input matrix, producing the output matrix $Y$, often called a \textbf{feature map}. Figures~\ref{fig:kernel_pos1}--\ref{fig:kernel_pos3} illustrate several example positions of the kernel during this sliding process.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image4.png}
+    \caption{Kernel positioned at $X[0,3]$}
+    \label{fig:kernel_pos1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image5.png}
+    \caption{Kernel positioned at $X[1,3]$}
+    \label{fig:kernel_pos2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image6.png}
+    \caption{Kernel positioned at $X[3,0]$}
+    \label{fig:kernel_pos3}
+\end{figure}
+
+At any spatial position $(i,j)$, the output value is computed by summing the element-wise products between the kernel and the corresponding local patch of the input, followed by a non-linear activation. For the $3 \times 3$ kernel example, the computation is
+
+\[
+Y[i,j] = \sigma \left(
+\sum_{a=0}^{2} \sum_{b=0}^{2}
+X[i+a,\, j+b]\, W[a,b]
+\right).
+\]
+
+More generally, for a kernel of size $k_1 \times k_2$, the convolution operation at location $(i,j)$ is written as
+
+\[
+Y[i,j] = \sigma \left(
+\sum_{a=0}^{k_1-1} \sum_{b=0}^{k_2-1}
+X[i+a,\, j+b]\, W[a,b]
+\right).
+\]
+
+This equation formalizes the sliding-window computation illustrated in the figures. The activation function $\sigma$ introduces non-linearity into the model after the linear convolution operation, allowing convolutional neural networks to learn complex and hierarchical patterns.
+
+\textbf{Remark.} In modern deep learning libraries, this operation is typically implemented as \emph{cross-correlation} (without flipping the kernel). However, the term \emph{convolution} is still commonly used in the deep learning literature.
+
+\subsection{Kernel Intuition}
+
+To further build intuition, we now examine a concrete numerical example of convolution. Figure~\ref{fig:kernel_intuition} illustrates how a $3\times3$ kernel interacts with a small input matrix to produce an output feature map.
+
+As the kernel slides across the input, it repeatedly performs element-wise multiplication with each local $3\times3$ patch and sums the resulting products to produce a single scalar output. This scalar becomes one entry in the output feature map. Repeating this process over all valid spatial positions generates the full output matrix.
+
+A key observation from this example is that the output is typically \textbf{smaller than the input}. For example, a $5\times5$ input convolved with a $3\times3$ kernel (without padding) produces a $3\times3$ output. This occurs because the kernel must remain fully inside the input boundaries while sliding.
+
+From a representation-learning perspective, the output matrix can be viewed as a \textbf{lower-dimensional feature representation} of the input. Instead of storing raw pixel values, the convolution now stores the responses of the learned filter. In other words, the network is transforming raw data into \textbf{feature maps} that emphasize important patterns such as edges, textures, or shapes.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image7.png}
+    \caption{Example of convolution: each output value is the sum of element-wise products between a $3\times3$ kernel and a local input patch.}
+    \label{fig:kernel_intuition}
+\end{figure}
+
+\section{Convolutional Layer}
+
+One of the core components of a Convolutional Neural Network (CNN) is the \textbf{convolutional layer}, which performs the majority of the feature extraction in the network. Unlike fully-connected layers, convolutional layers exploit the spatial structure of the input using three key ideas: \textbf{local connectivity}, \textbf{parameter sharing}, and preservation of \textbf{spatial arrangement}.
+
+First, convolutional layers rely on \textbf{local connectivity}, meaning each neuron is connected only to a small spatial region of the input rather than the entire input. This small region is called the \emph{receptive field}. By focusing on local neighborhoods, the network can efficiently detect simple patterns such as edges, textures, and corners, which later combine into more complex features.
+
+Second, convolutional layers use \textbf{parameter sharing}. The same set of weights (called a \emph{filter} or \emph{kernel}) is applied across all spatial locations of the input image. Instead of learning separate weights for every pixel location, the network learns a small set of filters that are reused across the entire image. This drastically reduces the number of parameters and enables the network to detect the same feature regardless of where it appears in the image.
+
+Finally, convolutional layers preserve the \textbf{spatial arrangement} of the data. The output of a convolutional layer is a set of feature maps that maintain the two-dimensional structure of the input. This spatial preservation allows deeper layers of the network to build hierarchical representations, gradually combining simple patterns into more complex and meaningful visual structures.
+
+
+\subsection{Kernel Application in Spatial Arrangement}
+
+We now extend convolution from 2D grayscale images to real-world \textbf{multi-channel images}. In practice, most images are represented as 3D tensors with dimensions height $\times$ width $\times$ depth. For example, an RGB image of size $32\times32$ has depth 3, corresponding to the red, green, and blue color channels.
+
+Figure~\ref{fig:conv3d} illustrates how convolution operates on such an input. A convolutional filter must span the \textbf{entire depth of the input volume}. Therefore, when the input has shape $32\times32\times3$, a spatial filter of size $5\times5$ becomes a \textbf{$5\times5\times3$ kernel}. This ensures that the filter can simultaneously capture relationships across both spatial dimensions and color channels.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image8.png}
+    \caption{A $32\times32\times3$ RGB image convolved with a $5\times5\times3$ filter.}
+    \label{fig:conv3d}
+\end{figure}
+
+As in the 2D case, the filter slides spatially across the height and width of the image. At each spatial position, the filter performs an element-wise multiplication with the corresponding $5\times5\times3$ patch of the input volume and sums the results to produce a \textbf{single scalar output}. Repeating this process across all spatial locations produces a 2D output map.
+
+Importantly, convolutional layers typically use \textbf{multiple filters}. Each filter learns to detect a different visual pattern (for example, edges, colors, or textures). The output of each filter is called an \textbf{activation map} (or \textbf{feature map}). Stacking the outputs of many filters produces a new 3D volume that becomes the input to the next layer.
+
+Mathematically, each filter performs a dot product between the filter weights and the flattened input patch, followed by the addition of a bias term:
+\[
+w^{T}x + b
+\]
+where $w$ represents the filter weights, $x$ is the vectorized image patch, and $b$ is the bias. This simple linear operation, combined with nonlinear activation functions, allows CNNs to learn rich hierarchical representations of images.
+
+\subsection{Generating Feature Maps}
+
+We now examine how convolutional layers produce \textbf{feature maps}. When a single filter slides across all spatial locations of an input image, it produces a 2D output called a \textbf{feature map}. This occurs because the filter computes one scalar value at every spatial position.
+
+Consider a $32\times32\times3$ input image convolved with a $5\times5\times3$ filter using stride 1 and no padding. Because the filter cannot extend beyond the image boundaries, the spatial dimensions shrink. The resulting feature map has size $28\times28\times1$. The final dimension is 1 because a single filter produces one activation value per spatial location.
+
+In practice, convolutional layers use \textbf{multiple filters} in parallel. Each filter learns to detect a different visual pattern (for example, edges, textures, or color transitions). If we apply $K$ filters, we obtain $K$ separate feature maps. Stacking these maps along the depth dimension forms the output volume of the convolutional layer.
+
+Figure~\ref{fig:featuremaps} illustrates this process. When six $5\times5\times3$ filters are applied to a $32\times32\times3$ image, the output becomes a $28\times28\times6$ volume. Each slice of this volume corresponds to the activation map produced by one filter.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image9.png}
+    \caption{Six $5\times5\times3$ filters generate six $28\times28$ activation maps that are stacked to form a $28\times28\times6$ output volume.}
+    \label{fig:featuremaps}
+\end{figure}
+
+
+\section{Spatial Dimensions Inside Convolutional Layer}
+
+Understanding how spatial dimensions change throughout a convolutional layer is essential for designing and analyzing CNN architectures. In this section, we study a simple example that illustrates how a convolutional filter traverses an input image and how the resulting output dimensions are determined. We will see how the spatial size of the output depends on the filter size and how repeated sliding of the filter produces the full output feature map.
+
+\subsection{Filter Application Example}
+
+Consider a $7\times7$ input image and a $3\times3$ convolutional filter. The filter begins at the top-left corner of the image and slides horizontally across the first row, computing an output value at each valid spatial location. Figure~\ref{fig:conv_row_slide} illustrates this horizontal movement of the filter across the first row of the image.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/image10.png}
+    \caption{The $3\times3$ filter sliding across the first row of the $7\times7$ input.}
+    \label{fig:conv_row_slide}
+\end{figure}
+
+Because the filter has width $3$, it can only be placed where it fully overlaps the input. Along a row of length $7$, the filter can be placed in $5$ valid horizontal positions. Therefore, after completing the first row traversal, the output already contains $5$ columns, as shown in Figure~\ref{fig:first_row_output}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/11.png}
+    \caption{After traversing the first row, the output contains five columns.}
+    \label{fig:first_row_output}
+\end{figure}
+
+Once the filter reaches the end of the first row, it shifts downward by one pixel and repeats the same sliding process across the next row. This process continues until the filter reaches the bottom-right corner of the input image. The final spatial dimensions of the output are therefore $5\times5$, as illustrated in Figure~\ref{fig:final_output_size}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/12.png}
+    \caption{Final output size after the filter finishes traversing the input.}
+    \label{fig:final_output_size}
+\end{figure}
+
+\subsection{Output Size Formula}
+
+The previous example illustrates a general rule for computing the spatial size of the output of a convolutional layer. For an input of spatial size $N \times N$, a filter of size $F \times F$, stride $S$, and padding $P$, the output spatial dimension (per axis) is
+
+\[
+\text{Output size} 
+= \frac{N - F + 2P}{S} + 1.
+\]
+
+This formula is applied independently to both spatial dimensions (height and width).  
+When $P=0$, the operation is called a \textit{valid convolution}, meaning the filter only slides over positions where it fully overlaps the input.
+
+In the previous example we used:
+\[
+N = 7, \quad F = 3, \quad S = 1, \quad P = 0,
+\]
+which gives
+\[
+\frac{7 - 3 + 0}{1} + 1 = 5.
+\]
+
+Thus, the convolution produces a $5 \times 5$ output feature map.
+
+This formula provides immediate intuition about spatial resolution:
+\begin{itemize}
+    \item Larger filters ($F$) reduce the output size.
+    \item Larger padding ($P$) preserves spatial dimensions.
+    \item Larger stride ($S$) downsamples the feature map.
+\end{itemize}
+
+This relationship will be used repeatedly when designing CNN architectures and analyzing how spatial resolution evolves across layers.
+
+
+\subsection{Impact of Stride}
+
+\textbf{Stride} describes how far the convolutional filter moves across the input at each step.  
+While previous examples assumed a stride of $S=1$, increasing the stride reduces the number of positions at which the filter is applied, which in turn reduces the spatial size of the output feature map.
+
+To illustrate this effect, consider again a $7\times7$ input and a $3\times3$ filter.  
+When the stride is increased to $S=2$, the filter moves two pixels at a time horizontally and vertically. As a result, fewer filter positions are evaluated and the output shrinks more aggressively. In this case, the convolution produces a $3\times3$ output instead of the $5\times5$ output obtained when $S=1$.
+
+Figure~\ref{fig:stride_first_row} shows how the filter skips positions along the first row, producing fewer output columns. Figure~\ref{fig:stride_rows} shows that the same skipping behavior occurs vertically, resulting in a smaller output grid.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/13.png}
+    \caption{With stride $S=2$, the filter skips positions along the first row, producing fewer output columns.}
+    \label{fig:stride_first_row}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/14.png}
+    \caption{Stride also applies vertically; skipping rows produces a $3\times3$ output feature map.}
+    \label{fig:stride_rows}
+\end{figure}
+
+\paragraph{When does a stride value work?}
+
+Not every stride value is valid for a given input and filter size.
+With stride $S=1$, the filter visits every possible spatial location of the input
+(Figures~\ref{fig:conv_row_slide}--\ref{fig:final_output_size}).
+With stride $S=2$, the filter still covers the image but in larger steps
+(Figures~\ref{fig:stride_first_row}--\ref{fig:stride_rows}).
+However, when the stride becomes too large (e.g., $S=3$ in this example), the filter no longer fits neatly
+across the input, leading to an invalid configuration in which the filter would extend beyond the image boundaries.
+
+To determine whether a stride value is valid, we use the general convolution output formula:
+\[
+\text{Output size} = \frac{N - F + 2P}{S} + 1
+\]
+
+For the stride analysis example, we assume:
+\[
+N = 7, \quad F = 3, \quad P = 0.
+\]
+
+Evaluating different stride values:
+
+\[
+\begin{aligned}
+S=1 &: \quad \frac{7-3}{1}+1 = 5 \quad (\text{valid}) \\
+S=2 &: \quad \frac{7-3}{2}+1 = 3 \quad (\text{valid}) \\
+S=3 &: \quad \frac{7-3}{3}+1 = 2.33 \quad (\text{invalid})
+\end{aligned}
+\]
+
+If the result is not an integer, the stride does not produce a valid output dimension. Equivalently, a stride is valid only if $N - F + 2P$ is divisible by $S$.
+
+Figure~\ref{fig:stride_formula} summarizes this calculation visually.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/15.png}
+    \caption{Example calculations showing valid and invalid stride values.}
+    \label{fig:stride_formula}
+\end{figure}
+
+\subsection{Zero-Padding}
+
+\textbf{Zero-padding} is a technique used to control the spatial size of the output feature map by adding layers of zeros around the border of the input image. Without padding, a convolutional filter cannot be applied near the edges without extending beyond the image boundaries, which causes the spatial dimensions of the output to shrink after each convolution.
+
+By surrounding the input with zeros, the filter can be applied to edge pixels just as it is applied to central pixels. This allows the convolution operation to be computed across the entire image while preserving spatial resolution.
+
+To illustrate this idea, consider again a $7\times7$ input image and a $3\times3$ filter with stride $S=1$. Without padding, the output size would be $5\times5$. However, if we pad the input with a one-pixel border of zeros, the effective input becomes $9\times9$. Applying the convolution now produces a $7\times7$ output, meaning the spatial dimensions are preserved.
+
+In general, when the kernel size $k$ is odd, choosing padding
+\[
+P = \frac{k-1}{2}
+\]
+ensures that the output has the same spatial dimensions as the input when stride $S=1$. This type of convolution is often referred to as \textbf{“same” convolution}.
+
+Figure~\ref{fig:zero_padding} illustrates how the required padding depends on the kernel size.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/16.png}
+    \caption{Based on kernel size $k$, the input is padded with $(k-1)/2$ zeros on each side to preserve spatial dimensions.}
+    \label{fig:zero_padding}
+\end{figure}
+
+
+\subsection{Dimensions and Parameters}
+
+We can now combine stride, padding, and filter size to describe both the
+\textbf{output dimensions} and the \textbf{number of learnable parameters}
+in a convolutional layer.
+
+\paragraph{Output spatial dimensions}
+
+For a single spatial dimension, the convolution output size is
+
+\[
+\text{Output size}
+= \frac{\text{Input size} + 2P - F}{S} + 1,
+\]
+
+where \(F\) is the filter size, \(S\) is the stride, and \(P\) is the padding.
+
+\medskip
+\textbf{Example.}  
+Suppose the input volume is \(32\times32\times3\) (an RGB image), we use
+filters of size \(5\times5\), stride \(S=1\), and padding \(P=2\).
+Applying the formula gives
+
+\[
+\frac{32 + 2(2) - 5}{1} + 1 = 32.
+\]
+
+Thus, the spatial size is preserved and the output becomes \(32\times32\).
+If we use \(10\) filters, the full output volume is
+
+\[
+32 \times 32 \times 10.
+\]
+
+\paragraph{Number of parameters}
+
+Each filter spans the full depth of the input.  
+Therefore, the number of parameters per filter is
+
+\[
+F \times F \times C_{in} + 1,
+\]
+
+where the \(+1\) accounts for the bias term.
+
+For the example above:
+\[
+5 \times 5 \times 3 + 1 = 76 \text{ parameters per filter}.
+\]
+
+With \(10\) filters:
+\[
+76 \times 10 = 760 \text{ total learnable parameters}.
+\]
+
+\paragraph{General convolutional layer dimensions}
+
+In practice, convolutional layers operate on 4-D tensors.
+
+\[
+\textbf{Input volume: } (N,\, C_{in},\, H_{in},\, W_{in})
+\]
+
+where
+\begin{itemize}
+\item \(N\): number of samples (batch size),
+\item \(C_{in}\): number of input channels,
+\item \(H_{in}, W_{in}\): input height and width.
+\end{itemize}
+
+The convolutional kernels have shape
+\[
+(C_{out},\, C_{in},\, k_0,\, k_1),
+\]
+where \(C_{out}\) is the number of filters and \(k_0,k_1\) are the spatial
+dimensions of each kernel.
+
+The output volume becomes
+\[
+(N,\, C_{out},\, H_{out},\, W_{out}),
+\]
+where
+
+\[
+H_{out} = \frac{H_{in} + 2P_H - k_0}{S_H} + 1,
+\qquad
+W_{out} = \frac{W_{in} + 2P_W - k_1}{S_W} + 1.
+\]
+
+These formulas are fundamental when designing CNN architectures and tracking
+how spatial resolution changes across layers. Figure~\ref{fig:conv_dimensions}
+illustrates the relationship between the input volume, convolutional kernels,
+and the resulting output volume.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/17.png}
+    \caption{Dimension variables for input, kernels, and output volumes.}
+    \label{fig:conv_dimensions}
+\end{figure}
+
+
+\subsection{Interactions with Activation Functions}
+
+Convolutional neural networks are typically built as a sequence of convolutional layers interleaved with nonlinear activation functions such as ReLU. After each convolution, the activation function introduces nonlinearity, allowing the network to learn complex and hierarchical representations rather than simple linear transformations. As data moves deeper into the network, the spatial resolution of the feature maps gradually decreases while the number of feature channels (depth) increases. The number of filters in each layer determines this output depth.
+
+Unlike fully-connected networks, convolutional layers operate on local regions of the input known as the \textbf{receptive field}. Early layers focus on small spatial neighborhoods and learn simple patterns such as edges or textures. As more layers are stacked, the receptive field grows, allowing deeper neurons to capture larger and more global structures within the image. This progressive expansion enables CNNs to learn hierarchical representations, moving from low-level visual patterns to high-level semantic concepts.
+
+Eventually, the extracted feature maps are flattened and passed to fully connected layers. The final layer typically applies a softmax function to produce class probabilities for classification tasks. This end-to-end pipeline transforms raw pixel data into increasingly abstract and discriminative features.
+
+Figure~\ref{fig:receptive_field} illustrates how receptive fields expand across layers.  
+Figure~\ref{fig:cnn_pipeline} shows the full CNN processing pipeline from input to classification.  
+% Figure~\ref{fig:pooling_variants} presents common pooling operations used to reduce spatial resolution.  
+% Figure~\ref{fig:convnet_blocks} summarizes the primary building blocks of ConvNet architectures.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/18.png}
+    \caption{Receptive fields expand across layers: $Z_{1,1}$ has a $3\times3$ receptive field, while deeper units capture larger regions.}
+    \label{fig:receptive_field}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/19.png}
+    \caption{End-to-end CNN pipeline illustrating convolution, activation, pooling, flattening, and fully-connected layers that transform raw images into final class predictions.}
+    \label{fig:cnn_pipeline}
+\end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{img/lecture14/Im2.png}
+%     \caption{Common pooling operations used to downsample feature maps.}
+%     \label{fig:pooling_variants}
+% \end{figure}
+
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.5\linewidth]{img/lecture14/Im3.png}
+%     \caption{Main building blocks of convolutional neural network architectures.}
+%     \label{fig:convnet_blocks}
+% \end{figure}
+
+\section{Pooling Layer and Fully-Connected Layer}
+
+After several convolution and activation stages, CNNs typically use
+\textbf{pooling layers} and \textbf{fully-connected layers} to transform
+feature maps into final predictions.
+
+\subsection{Pooling Layer}
+
+A pooling layer performs a fixed aggregation operation over small spatial
+regions of the feature map. The most common choice is \textbf{max pooling},
+which outputs the maximum value within each local window.
+
+Pooling serves two important purposes:
+
+\begin{itemize}
+    \item \textbf{Spatial downsampling:} pooling reduces the height and width
+    of feature maps, making the representation more compact and reducing
+    computational cost.
+    \item \textbf{Translation invariance:} small shifts in the input image
+    produce similar pooled outputs, making the network less sensitive to the
+    exact spatial location of features.
+\end{itemize}
+
+Unlike convolutional layers, pooling layers have \textbf{no learnable
+parameters}. They simply apply a deterministic operation (such as max or
+average) over local regions.
+
+Common pooling operations are illustrated in
+Figure~\ref{fig:pooling_variants}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{img/lecture14/Im2.png}
+    \caption{Common pooling operations used to downsample feature maps.}
+    \label{fig:pooling_variants}
+\end{figure}
+
+\subsection{Fully-Connected Layer}
+
+After several convolution and pooling stages, the learned feature maps must be
+converted into a final prediction. This is the role of the
+\textbf{fully-connected (FC) layer}.
+
+The output of the final convolutional stage is first \textbf{flattened} into a
+vector. For example, a feature map of size $32\times32\times3$ can be reshaped
+into a vector of length
+\[
+32 \times 32 \times 3 = 3072.
+\]
+
+The fully-connected layer then performs a standard linear transformation:
+\[
+z = W x + b,
+\]
+followed by a nonlinear activation. In classification tasks, the final layer
+typically applies the \textbf{softmax function} to produce class probabilities.
+
+The overall relationship between convolution, pooling, and fully-connected
+layers is summarized in Figure~\ref{fig:cnn_pipeline}.
+
+
+
+
+Together, convolutional layers extract hierarchical features, pooling layers
+compress the spatial representation, and fully-connected layers perform the
+final reasoning needed for prediction.
+
+\section{Terminology}
+
+Before concluding this lecture, we summarize several fundamental terms that are used throughout machine learning and, in particular, when training convolutional neural networks. These concepts clarify how data is modeled, organized, and processed during learning.
+
+\textbf{\textit{Distribution}} refers to a probability model $\mathcal{D}$ over a sample space $\mathcal{X}$ (or $\mathcal{X}\times\mathcal{Y}$ in supervised learning). Intuitively, $\mathcal{D}$ describes how data \emph{could} be generated in the real world. When we say samples are drawn ``from a distribution,'' we often mean $x \sim \mathcal{D}$ (or $(x,y)\sim \mathcal{D}$).
+
+\textbf{\textit{Dataset}} is a finite collection of samples, typically written as
+\[
+\mathcal{S}=\{(x_i,y_i)\}_{i=1}^N \quad \text{(supervised)}, \qquad
+\mathcal{S}=\{x_i\}_{i=1}^N \quad \text{(unsupervised)}.
+\]
+The dataset is commonly treated as i.i.d.\ draws from $\mathcal{D}$ (an assumption that may be imperfect in practice). In CNNs, each $x_i$ could be an image tensor (e.g., $H\times W\times C$) and $y_i$ a class label.
+
+\textbf{\textit{Batch (Mini-batch)}} is a subset of the dataset used to compute a \emph{stochastic} estimate of the loss and gradient during training:
+\[
+\mathcal{B}=\{(x_i,y_i)\}_{i\in I}, \quad |I|=B,
+\]
+where $B$ is the batch size. Mini-batches make training efficient and enable methods like SGD/Adam by updating parameters using gradients computed on $\mathcal{B}$ rather than the full dataset.
+
+\textbf{\textit{Sample (Instance / Example)}} is a single data point. In supervised learning, a sample usually includes both input and target $(x,y)$, where $x$ is the input (features) and $y$ is the ground-truth label. In image classification, $x$ may be a tensor of pixel intensities and $y$ may be one of $K$ classes.
+
+\textbf{\textit{Feature}} is a measurable attribute used to represent a sample. For a vector input $x\in\mathbb{R}^d$, the $j$-th feature is $x_j$. For images, ``features'' can refer to raw pixels (input features) or to learned intermediate representations (feature maps / activations) produced by convolutional layers.
+
+\textbf{\textit{Label (Target)}} is the desired output associated with a sample, denoted $y$. For $K$-class classification, $y$ may be an integer in $\{0,\dots,K-1\}$ or a one-hot vector in $\{0,1\}^K$. CNNs typically produce class scores (logits) that are converted to probabilities via Softmax and trained using cross-entropy loss.
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+    \item \textbf{Question:}
+
+    Given an input image of size \(64 \times 64 \times 3\), apply a convolutional layer with a filter of size \(8 \times 8 \times 3\), stride \(4\), and no padding. Then, apply a \(4 \times 4\) max pooling layer with stride \(1\) and no padding. Compute the size of the final output after the pooling layer.
+
+    \textbf{Solution:}
+    
+    After the convolutional layer (input size: \(H_{\text{in}} = 64\), \(W_{\text{in}} = 64\); filter size: \(k = 8\); stride: \(S = 4\); padding: \(P = 0\)), the output dimensions are:
+    \[
+    H_{\text{out}} = \frac{H_{\text{in}} - k + 2P}{S} + 1 = \frac{64 - 8 + 0}{4} + 1 = \frac{56}{4} + 1 = 14 + 1 = 15
+    \]
+    \[
+    W_{\text{out}} = 15
+    \]
+
+    So, the output size after the convolutional layer is \(15 \times 15\).
+
+    After the pooling layer (input size: \(H_{\text{in}} = 15\), \(W_{\text{in}} = 15\); filter size: \(k = 4\); stride: \(S = 1\); padding: \(P = 0\)), the output dimensions are:
+    \[
+    H_{\text{out}} = \frac{15 - 4}{1} + 1 = 11 + 1 = 12
+    \]
+    \[
+    W_{\text{out}} = 12
+    \]
+
+    Therefore, the final output size after the pooling layer is \(12 \times 12\).
+
+
+    \item \textbf{Question:}
+
+An input image has size \(28 \times 28 \times 1\).  
+A convolutional layer uses \(16\) filters of size \(5 \times 5\), stride \(1\), and padding \(P=2\).
+
+\begin{enumerate}
+\item What is the spatial size of the output?
+\item What is the depth of the output?
+\item What is the full output volume?
+\end{enumerate}
+
+\textbf{Solution:}
+
+Spatial size:
+\[
+\frac{28 + 2(2) - 5}{1} + 1
+= \frac{28 + 4 - 5}{1} + 1
+= 27 + 1 = 28
+\]
+
+So height and width are preserved.
+
+Depth equals the number of filters:
+\[
+C_{out} = 16
+\]
+
+Final output volume:
+\[
+28 \times 28 \times 16
+\]
+
+\item \textbf{Question:}
+
+A convolutional layer receives an input of size \(32 \times 32 \times 3\).  
+It uses \(20\) filters of size \(7 \times 7\) with bias terms.
+
+How many learnable parameters does this layer contain?
+
+\textbf{Solution:}
+
+Parameters per filter:
+\[
+7 \times 7 \times 3 + 1 = 148
+\]
+
+Total parameters:
+\[
+148 \times 20 = 2960
+\]
+
+So the convolutional layer has \(\boxed{2960}\) learnable parameters.
+
+\item \textbf{Question:}
+
+An input has size \(31 \times 31\) and a filter of size \(5 \times 5\) is used with no padding.
+
+Which stride values \(S \in \{1,2,3,4\}\) produce a valid output size?
+
+\textbf{Solution:}
+
+A stride is valid only if
+\[
+\frac{N - F}{S} + 1
+\]
+is an integer.
+
+Here \(N=31, F=5\Rightarrow N-F=26\).
+
+Check each stride:
+
+\[
+S=1:\ \frac{26}{1}+1=27 \quad \text{valid}
+\]
+\[
+S=2:\ \frac{26}{2}+1=14 \quad \text{valid}
+\]
+\[
+S=3:\ \frac{26}{3}+1=9.67 \quad \text{invalid}
+\]
+\[
+S=4:\ \frac{26}{4}+1=7.5 \quad \text{invalid}
+\]
+
+Valid strides: \(\boxed{S=1,2}\).
+
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Logistic Regression</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <div class="center">
+</div>
+
+
+
+
+
+<h1 data-number="1" id="recap"><span class="header-section-number">1.</span> Recap</h1>
+<p>In the previous lecture, we began discussing classification algorithms. We began by defining classification algorithms in terms of input mappings to discrete outputs and discussed some important terminology for machine learning (sample, feature, target class, etc). This discussion continued with identifying types of classification (case-based vs model-based, feature-based vs end-to-end, etc) and how these types differed. Finally, we were introduced to two classification algorithms: k-Nearest Neighbors and Naive-Bayes. We briefly discussed the operating principle of KNN and a sample problem while also mentioning data normalization and cross-validation as important supporting principles. We finished with an introduction to Naive-Bayes, using a frequency-based example to examine how the algorithm used conditional probabilites of a single feature to determine expected output. In this lecture, we extend the Naive-Bayes algorithm to include additional features and classes and begin discussing linear classifiers with specific attention to the logistic regression model.</p>
+<h1 data-number="2" id="naive-bayes"><span class="header-section-number">2.</span> Naive Bayes</h1>
+<h2 data-number="2.1" id="previous-lecture"><span class="header-section-number">2.1</span> Previous Lecture</h2>
+<p>In the previous lecture, we covered the basic Naive Bayes frequentist setup using frequency counts to estimate probabilities from data. The workflow begins by constructing a frequency table for a feature and class labels, converting it into a likelihood table, and then extracting class priors and marginal likelihoods from those counts. With these quantities, we apply Bayes’ Theorem to compute posteriors and choose the class with the largest posterior probability: <span class="math display">\[P(y|\textbf{x}) = \frac{P(\textbf{x}|y)P(y)}{P(\textbf{x})}.\]</span> Conceptually, Naive Bayes uses simple probability estimates to turn observed feature values into a principled decision rule for classification.</p>
+<h2 data-number="2.2" id="case-with-two-or-more-features-and-binary-classification"><span class="header-section-number">2.2</span> Case with Two or More Features and Binary Classification</h2>
+<p>Previously we examined a case of Naive-Bayes where there was only one feature and binary classes. When there are multiple features, we instead determine the posterior probability for a class given each one of these features. <span class="math display">\[P(y|\textbf{$x_1$},\textbf{$x_2$}, ..., x_n)\]</span> Recall from the previous lecture that to solve for the posterior probability we could use Bayes’ Theorem. Here, we substitute the likelihood of a single feature assuming a certain value with that of each feature in our set. <span class="math display">\[P(y|x_1, x_2, ..., x_n ) = \frac{P(x_1, x_2, ..., x_n |y)P(y)}{P(\textbf{x})}\]</span> Naive-Bayes assumes that each feature is independent of one another, so we can transform our feature likelihood with the following equation:</p>
+<p><span class="math display">\[P(x_1, x_2, ..., x_n |y) = P(x_1 | y)P(x_2 | y)...P(x_n | y)\]</span></p>
+<p>For classification, we typically compute scores proportional to the posterior: <span class="math display">\[P(y\mid x_1,\dots,x_n)\propto P(y)\prod_{j=1}^n P(x_j\mid y),\]</span> since the denominator <span class="math inline">\(P(\mathbf{x})\)</span> does not depend on <span class="math inline">\(y\)</span> and therefore does not affect the <span class="math inline">\(\arg\max\)</span> decision rule. Equivalently, we predict <span class="math display">\[\hat{y}=\arg\max_{y\in\mathcal{Y}} \; P(y)\prod_{j=1}^n P(x_j\mid y).\]</span></p>
+<p>Note that for a frequentist model, each likelihood (<span class="math inline">\(P(x_1 | y)\)</span>) would require its own frequency and likelihood table to determine. To create a prediction for a binary classification, we simply find the maximum of the <span class="math inline">\(P(y_1 |x_1, x_2, ..., x_n )\)</span> and <span class="math inline">\(P(y_2 |x_1, x_2, ..., x_n )\)</span>.</p>
+<h2 data-number="2.3" id="case-with-two-or-more-features-and-multiple-classes"><span class="header-section-number">2.3</span> Case with Two or More Features and Multiple Classes</h2>
+<p>Creating a prediction given multiple classes is similar to that of the binary case. For each class <span class="math inline">\(y_k\in\mathcal{Y}\)</span>, Naive Bayes computes a score proportional to the posterior: <span class="math display">\[P(y_k\mid x_1,\dots,x_n)\propto P(y_k)\prod_{j=1}^n P(x_j\mid y_k).\]</span> We then predict the class with the largest score: <span class="math display">\[\hat{y}=\arg\max_{y_k\in\mathcal{Y}} \; P(y_k)\prod_{j=1}^n P(x_j\mid y_k).\]</span></p>
+<p>It should be noted that the maximum posterior probability can be very low or have a similar value to other posterior probabilities (indicating an uncertain classification). This brings into question how <em>confident</em> we are in the model’s output and we can set additional constraints on the model’s output (min. posterior probability / “no-class”) to form a more accurate prediction.</p>
+<h2 data-number="2.4" id="types-of-classifiers"><span class="header-section-number">2.4</span> Types of Classifiers</h2>
+<p>So far, we have described feature likelihoods using a frequentist (or categorical) approach, where probabilities are estimated directly from observed frequency counts in the data. While this approach is simple and effective for discrete features, it can become inefficient or unreliable when features are continuous or when data are sparse.</p>
+<p>An alternative is to model feature likelihoods using parametric probability distributions, where each likelihood <span class="math inline">\(P(x\mid y)\)</span> is assumed to follow a known distribution family characterized by a small number of parameters (such as a mean and standard deviation). These parameters are learned from training data and provide a compact summary of how features behave within each class.</p>
+<p>Common choices include the <strong>Gaussian</strong> distribution for continuous-valued features, the <strong>Bernoulli</strong> distribution for binary features, and the <strong>Multinomial</strong> distribution for count-based or categorical data such as word frequencies in text. The <strong>Complement</strong> distribution is a variant often used in text classification to better handle class imbalance by modeling features based on their occurrence in all other classes.</p>
+<p>By choosing an appropriate likelihood distribution, Naive Bayes classifiers can generalize more effectively, reduce sensitivity to noise, and scale to high-dimensional feature spaces.</p>
+<h2 data-number="2.5" id="pros-cons-of-naive-bayes"><span class="header-section-number">2.5</span> Pros &amp; Cons of Naive-Bayes</h2>
+<p>Naive Bayes is appealing because it is computationally efficient and often performs surprisingly well, especially when features are close to conditionally independent and when data are categorical or can be discretized. It is also easy to implement and scales well to large datasets, which makes it useful in real-time or resource-constrained settings.</p>
+<p>However, the method can suffer from the zero-frequency issue (unseen feature values leading to zero likelihoods without smoothing), and its conditional independence assumption can be strongly violated in real-world data, which may degrade predictive performance.</p>
+<h2 data-number="2.6" id="useful-applications"><span class="header-section-number">2.6</span> Useful Applications</h2>
+<p>Naive Bayes is commonly used in text classification tasks such as spam filtering and sentiment analysis because word occurrences can be treated approximately independently given the class. It is also useful for fast multi-class prediction problems where interpretability and speed matter, and it can serve as a strong baseline in recommendation or categorization systems when features are high-dimensional and sparse. More broadly, its simplicity makes it a practical choice when rapid deployment is needed and a highly expressive model is unnecessary.</p>
+<h2 data-number="2.7" id="notes-on-naive-assumptions"><span class="header-section-number">2.7</span> Notes on Naive Assumptions</h2>
+<p>The equations the Naive-Bayes algorithm is predicated on the assumption that feature inputs are independent. However, in real life, this is often not the case. Take the example in the lecture slides for instance; we use the features of weather and wind speed to determine if it is a good day to play outside. The model assumes these are independent, but we know this to not necessarily be true. But, if we were to assume dependence, then the conditional likelihoods needed to compute our model predictions would require exponentially more data for each possible feature combination. Depending on the number of features, this could be infeasible and indicate a diferrent model should be selected than Naive-Bayes.</p>
+<h1 data-number="3" id="linear-classifiers"><span class="header-section-number">3.</span> Linear Classifiers</h1>
+<h2 data-number="3.1" id="binary-classifiers"><span class="header-section-number">3.1</span> Binary Classifiers</h2>
+<p>To begin our discussion of linear classifiers, we began with a simpler example of binary classifiers. This consists of a classifier operating on a set of tuples containing a single feature and single label <span class="math inline">\((x_i, y_i)\)</span>. The dataset was shown to be separable as linearly adjacent “steps” as a simple classification scheme.</p>
+<h2 data-number="3.2" id="terminology"><span class="header-section-number">3.2</span> Terminology</h2>
+<p>Before developing linear classification models, we clarified several foundational terms that recur throughout machine learning. <strong>Data</strong> refers to the underlying joint distribution over features and labels, while <strong>training data</strong> is a finite sample drawn from that distribution. <strong>Parameters</strong> are the finite set of values that specify a parametric model (for example, <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> in a Gaussian), and <strong>learning</strong> is the process of choosing these parameters from training data. A <strong>loss function</strong> measures error on a single example, <strong>empirical risk</strong> aggregates that loss over a dataset (typically without regularization), and a <strong>cost function</strong> adds regularization terms to encourage robustness and generalization. The <strong>objective function</strong> describes the optimization goal that the learning algorithm seeks to minimize (or maximize), and <strong>empirical loss minimization</strong> refers to fitting a parametric mapping <span class="math inline">\(f_\theta:\textbf{X}\rightarrow\textbf{y}\)</span> by optimizing the chosen cost over the training set.</p>
+<h2 data-number="3.3" id="parametric-modeling"><span class="header-section-number">3.3</span> Parametric Modeling</h2>
+<p>Parametric models fit data using a fixed set of parameters (<span class="math inline">\(\theta\)</span>) to define a mapping function <span class="math inline">\(f_\theta:\textbf{X}\rightarrow\textbf{y}\)</span>. Because the number of parameters is finite, learning reduces to estimating these values from training data, which makes optimization tractable and mathematically well-defined.</p>
+<p><strong>Logistic Regression</strong> is a parametric model that estimates the probability of class membership using a sigmoid function applied to a linear combination of input features. Its parameters control the slope and position of the decision boundary, allowing it to model probabilistic binary classification.</p>
+<p><strong>Perceptron</strong> is an early linear classifier that learns a weight vector to separate two classes using iterative updates based on misclassified samples. It can be viewed as a precursor to modern neural networks, representing a simple but foundational parametric learning rule.</p>
+<p><strong>Linear Support Vector Machines (SVMs)</strong> are parametric classifiers that seek a linear decision boundary maximizing the margin between classes. The learned parameters define a hyperplane that balances classification accuracy with robustness to noise.</p>
+<p><strong>Artificial Neural Networks</strong> generalize parametric modeling by stacking multiple layers of weighted linear transformations and nonlinear activations. Although they may contain many parameters, they still fit within the parametric framework because the number of learnable values is finite and optimized through training.</p>
+<p><strong>Naive Bayes</strong> can also be considered parametric when class-conditional feature distributions are modeled using parameterized probability distributions such as Gaussians. In this case, the learned parameters describe statistical properties of features rather than a direct discriminative decision boundary.</p>
+<h2 data-number="3.4" id="generative-vs.-discriminative-modeling"><span class="header-section-number">3.4</span> Generative vs. Discriminative Modeling</h2>
+<p>The primary difference between generative and discriminative models comes down to <em>how</em> they create their decision boundaries.</p>
+<p>Generative classifiers attempt to find the joint probability distribution of the set of classes. The underlying probabilities which construct the conditional probability distribution <span class="math inline">\(p(y|x)\)</span> are related to some functional form and the parameters for these functions are then determined. Specifically, these are the likelihoods <span class="math inline">\(p(x|y)\)</span> and marginal probabilities <span class="math inline">\(p(y)\)</span> which are estimated from the training data. After determining the parameters for these distributions, the conditional probability <span class="math inline">\(p(y|x)\)</span> is indirectly determined using Bayes’ rule. Some examples of generative classifiers include:</p>
+<ul>
+<li><p>Naive-Bayes</p></li>
+<li><p>Bayesian Networks</p></li>
+<li><p>Markov Random Fields</p></li>
+<li><p>Hidden Markov Models (HMMs)</p></li>
+</ul>
+<p>On the other hand, discriminative classifiers are only concerned with directly estimating the conditional probability <span class="math inline">\(p(y|x)\)</span>. Parameters are then found to create a direct mapping the input features to the output classification. Some examples of discriminative classifiers include:</p>
+<ul>
+<li><p>Logistic Regression</p></li>
+<li><p>Support Vector Machines (SVMs)</p></li>
+<li><p>Traditional Neural Networks</p></li>
+<li><p>Nearest Neighbor</p></li>
+<li><p>Conditional Random Fields (CRFs)</p></li>
+</ul>
+<p>The difference between the two approaches can be highlighted using an example of two classes of objects separated in 2D space. A generative model would attempt to learn why the objects are arranged in space and create a function which would generate classifications based off of different feature inputs (coordinates in this case). A discriminative model would simply separate the space and identify classifications without understanding the underlying distributions.</p>
+<h1 data-number="4" id="logistic-regression"><span class="header-section-number">4.</span> Logistic Regression</h1>
+<h2 data-number="4.1" id="overview"><span class="header-section-number">4.1</span> Overview</h2>
+<p>Logistic regression is a type of classifier that models the probability of a two-class classifcation problem with a <em>sigmoid</em> function. Sigmoid functions, in general, describe <span class="math inline">\(S\)</span>-shaped curves, and we typically want them in the range from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>. In ML, sigmoid functions are usually synonymous with the logistic function: <span class="math display">\[\sigma(x)=\frac{1}{1+e^{-x}}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/logis.png"/></p>
+</div>
+<p>Notice that this function has horizontal asymptotes that bound the <span class="math inline">\(y\)</span>-values 0 and 1, has an <span class="math inline">\(S\)</span>-shape in the sense that there is an inflection point in the horizontal center, and it is symmetric around the inflection point. The logistic function can be generalized by parameterizing different properties of the curve, e.g. growth rates, <span class="math inline">\(y\)</span>-intercept, or even the horizontal asymptotes that define the range. These parameterizations are given by the so-called Richard’s curve, although there are several variations (e.g. there is one that doesn’t even require symmetry around the inflection point). We consider a few examples of a basic parameterization here, that varies the location of the inflection point (<span class="math inline">\(x_0\)</span>) and growth rate around it (<span class="math inline">\(k\)</span>).</p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/gen-logis.png"/></p>
+</div>
+<p>While a model of a binary classifier simply displays plotted points from a binary dataset and estimates the decision boundary, a sigmoid function fits this data to a curved line directly estimating the values for posterior <span class="math inline">\(P(y|x)\)</span>.</p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/logis-ex-2d.png"/></p>
+</div>
+<p>If <span class="math inline">\(\textbf{x}\)</span> represents feature vector <span class="math inline">\(\textbf{x}=[x_1, x_2, ..., x_p]^{T}\)</span>, then the sigmoid function can alternatively be expressed as: <span class="math display">\[y\approx\sigma(\textbf{W}^{T}\textbf{x} + \textbf{b})\]</span> where weight matrix <span class="math inline">\(\textbf{W}=[w_1, w_2, ..., w_p]^{T}\)</span> and bias vector <strong>b</strong> are factored in to help estimate desired output <span class="math inline">\(y\)</span>. Notice that these parameterize the logistic function generally, as we did earlier, but in terms of the higher-dimensional input.</p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/logis-ex-3d.png"/></p>
+</div>
+<p>When graphing logistic regression sigmoid functions, the weight matrix <strong>W</strong> will affect how steep the curve’s slope will be when switching from one class to the other. Higher <strong>W</strong> values indicate a steeper slope, while lower values produce a more gentle slope. Likewise, the bias vector <strong>b</strong> controls any shifting left or right. Positive bias moves the entire curve to the right, while negative bias shifts the curve left.</p>
+<h2 data-number="4.2" id="parameter-estimation"><span class="header-section-number">4.2</span> Parameter Estimation</h2>
+<p><strong>Maximum a posteriori:</strong> Maximum a posteriori (MAP) estimation is a method used to estimate the parameters of a statistical model. In MAP estimation, the objective is to find the parameter value that maximizes the <em>posterior distribution</em>, which is the probability of the parameters given the data. This can be mathematically represented as: <span class="math display">\[\hat{\theta}_{MAP} = \arg\max_{\theta} P(\theta|X) = \arg\max_{\theta} \frac{P(X|\theta)P(\theta)}{P(X)}\]</span> Since <span class="math inline">\(P(X)\)</span> is independent of <span class="math inline">\(\theta\)</span>, this simplifies to: <span class="math display">\[\hat{\theta}_{MAP} = \arg\max_{\theta} P(X|\theta)P(\theta)\]</span> This method incorporates prior knowledge about the parameters through the prior distribution <span class="math inline">\(P(\theta)\)</span>.<br/>
+<br/>
+<strong>Maximum Likelihood Estimation:</strong> Maximum Likelihood Estimation (MLE) is a method used to estimate the parameters of a model by maximizing the <em>likelihood function</em>. The MLE approach seeks to find the parameter value that makes the observed data most probable. This is expressed as: <span class="math display">\[\hat{\theta}_{MLE} = \arg\max_{\theta} P(X|\theta)\]</span> In contrast to MAP, MLE does not take into account any prior information (assumes a uniform prior) and purely relies on the observed data.</p>
+<h2 data-number="4.3" id="cost-function"><span class="header-section-number">4.3</span> Cost Function</h2>
+<p>Since we know that <span class="math inline">\(P(y=1\mid \textbf{x}) + P(y=0\mid \textbf{x}) = 1\)</span>, we can write the posterior probabilities as:</p>
+<ul>
+<li><p><span class="math inline">\(P(y=1\mid \textbf{x}) = \sigma(\textbf{W}^{T}\textbf{x} + \textbf{b})\)</span></p></li>
+<li><p><span class="math inline">\(P(y=0\mid \textbf{x}) = 1-\sigma(\textbf{W}^{T}\textbf{x} + \textbf{b})\)</span></p></li>
+</ul>
+<p>If <span class="math inline">\(z(\textbf{x}) = \sigma(\textbf{W}^{T}\textbf{x} + \textbf{b})\)</span>, the cost function <span class="math inline">\(\mathcal{L}(y,\textbf{x})\)</span> should have these properties</p>
+<ul>
+<li><p>For <span class="math inline">\(y=1\)</span>, <span class="math inline">\(\mathcal{L}(y,\textbf{x}) = 
+        \begin{cases}
+            0, &amp; z(\textbf{x})=y\\
+            \infty, &amp; z(\textbf{x})\rightarrow 0\ (=1-y)    
+        \end{cases}\)</span></p></li>
+<li><p>For <span class="math inline">\(y=0\)</span>, <span class="math inline">\(\mathcal{L}(y,\textbf{x}) = 
+        \begin{cases}
+            0, &amp; z(\textbf{x})=y \\
+            \infty, &amp; z(\textbf{x})\rightarrow 1\ (=1-y)
+        \end{cases}\)</span></p></li>
+</ul>
+<div class="center">
+<p><img alt="image" src="img/lecture3/loss-behav.png"/></p>
+</div>
+<p>What this suggests is that the cost function should grow tremendously as the prediction <span class="math inline">\(z(\textbf{x})\)</span> approaches the value opposite to the desired output <span class="math inline">\(y\)</span>. With this being a two-class classification, the only values available for the output are <span class="math inline">\(y=0\)</span> and <span class="math inline">\(y=1\)</span>, so this demonstrates that the prediction is “infinitely” incorrect when it equals the wrong value and correct “with 0 doubt” when it equals the desired value. It turns out that the <span class="math inline">\(\log\)</span> function satisfies these properties very nicely. By combining these properties using the <span class="math inline">\(\log\)</span> function into one equation, it can be rewritten as: <span class="math display">\[\mathcal{L}(y,\textbf{z}) = 
+\begin{cases}
+    -\log(z(\textbf{x})), &amp; y=1\\
+    -\log(1-z(\textbf{x})), &amp; y=0 
+\end{cases}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/log-loss.png"/></p>
+</div>
+<p>This cost function can in fact be derived naturally if we assume the <span class="math inline">\(y\)</span> are drawn iid from a Bernoulli distribution with probability <span class="math inline">\(z(\textbf{x})\)</span> (that is, given the data <span class="math inline">\(\textbf{x}\)</span>, each <span class="math inline">\(y\)</span> has probability <span class="math inline">\(z(\textbf{x})\)</span> of being <span class="math inline">\(1\)</span> and probability <span class="math inline">\(1-z(\textbf{x})\)</span> of being <span class="math inline">\(0\)</span>). Then the conditional PMF (or the <strong>likelihood</strong>) can be written as: <span class="math display">\[P(y\mid\textbf{x}) = z(\textbf{x})^{y}\bigl(1-z(\textbf{x})\bigr)^{1-y}.\]</span> Taking the <span class="math inline">\(\log\)</span>: <span class="math display">\[\log P(y\mid\textbf{x}) = y\log(z(\textbf{x})) + (1-y)\log(1-z(\textbf{x}))\]</span> This gives us the <em>log-likelihood</em> function, which is what we’d like to maximize over the parameters <span class="math inline">\(\theta=\{\textbf{W}, \textbf{b})\)</span>. Equivalently, we can minimize the <strong>negative log-likelihood (NLL)</strong> function: <span class="math display">\[\begin{aligned}
+    -\log P(y\mid\textbf{x}) &amp;= -y\log(z(\textbf{x})) - (1-y)\log(1-z(\textbf{x})) \\
+    &amp; = \begin{cases}
+        -\log(z(\textbf{x})), &amp; y=1\\
+        -\log(1-z(\textbf{x})), &amp; y=0 
+    \end{cases}\end{aligned}\]</span> which is exactly the cost function we derived qualitatively above. Note that this is for a given point <span class="math inline">\((\textbf{x},y)\)</span>, but in ML we’re given a dataset with multiple points <span class="math inline">\(\{(\textbf{x}_i,y_i)\}_{i=1}^N\)</span>. The cost over the dataset can be the average of the costs over all the individual points (alternatively, if we assume i.i.d. sampling of the points then we can derive this mathematically as above), resulting in a total NLL cost function: <span class="math display">\[% LL(\textbf{x},y) = 
+% -\frac{1}{N}\sum_{i=1}^{N}y_i\log(z(\textbf{x}_i))+(1-y_i)\log(1-z(\textbf{x}_i))
+LL(\textbf{x},y) =
+-\frac{1}{N}\sum_{i=1}^{N}\Big[y_i\log(z(\textbf{x}_i))+(1-y_i)\log\big(1-z(\textbf{x}_i)\big)\Big].\]</span> where <span class="math inline">\(N\)</span> is the number of samples in the dataset, <span class="math inline">\(y_i\)</span> is the desired output, and <span class="math inline">\(z(\textbf{x}_i)\)</span> is the probability that the predicted output is <span class="math inline">\(1\)</span> from the logistic regression. This equation is referred to as the <strong>Cross Entropy Cost</strong> for logistic regression. In binary classification, it’s also called the <strong>Binary Cross Entropy Cost</strong>. This cost function has nice properties, e.g. convexity, which implies that there will only be a single global minimum that we must optimize for.</p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/nll-landscape.png"/></p>
+</div>
+<h2 data-number="4.4" id="gradient-descent"><span class="header-section-number">4.4</span> Gradient Descent</h2>
+<p>To better predict desired values, we want to find an optimal set of parameters <span class="math inline">\(\theta = \{\textbf{W},\textbf{b}\}\)</span> to minimize our cost function <span class="math inline">\(LL(x,y,\theta)\)</span>. This is where the concept of <strong>gradient descent</strong> comes in handy. By calculating the derivative, or gradient, of the loss function taken over sequential subsets of the dataset, referred to as <em>epochs</em>, the weights and bias can be updated in proportion to the change in gradient according to the following rule: <span class="math display">\[\mathbf{\theta}(t+1)=\mathbf{\theta(t)}-\alpha\frac{\partial LL(\mathbf{x},y,\mathbf{\theta)}}{\partial\mathbf{\theta}}\]</span> In particular, <span class="math display">\[\mathbf{W}(t+1)=\mathbf{W}(t)-\alpha\frac{\partial LL(\mathbf{x},y,\mathbf{\theta})}{\partial \mathbf{W}}\]</span> <span class="math display">\[\mathbf{b}(t+1)=\mathbf{b}(t)-\alpha\frac{\partial LL(\mathbf{x},y,\mathbf{\theta)}}{\partial \mathbf{b}}\]</span> where <span class="math inline">\(\frac{\partial LL(\mathbf{x},y,\mathbf{\theta)}}{\partial\mathbf{\theta}} = -\frac{1}{N}\sum_{i=1}^{N}(y_i-\sigma(\theta^{T}x_i))x_i\)</span>; <span class="math inline">\(t+1\)</span> and <span class="math inline">\(t\)</span> indicate the next and current epochs, respectively; and <span class="math inline">\(\alpha\)</span> is a defined “learning rate”, which is essentially the step size of the updating process between sequential epochs.<br/>
+<br/>
+<strong>Note</strong>: Notice here that we are assuming <span class="math inline">\(LL(\mathbf{x},y,\mathbf{\theta})\)</span> is <em>differentiable</em> with respect to <span class="math inline">\(\mathbf{\theta}\)</span>.</p>
+<h2 data-number="4.5" id="feature-normalization"><span class="header-section-number">4.5</span> Feature Normalization</h2>
+<p>Since want to minimize the cost function, gradient descent helps us gradually move the cost along the curve towards the minimum, the spot where <span class="math inline">\(\frac{\partial LL(x,y,\theta)}{\partial\theta} = 0\)</span>. At the same time, we need to ensure that the weights should be updated at the same rate through a process called <strong>feature normalization</strong> before continuing to train the model. A common method to do this is called min-max normalization. <span class="math display">\[x_{norm} = \frac{x-min(x)}{max(x)-min(x)}\]</span></p>
+<h2 data-number="4.6" id="regularization"><span class="header-section-number">4.6</span> Regularization</h2>
+<p>While we do want the logistic regression sigmoid to fit well to the dataset values, we also want to avoid the problem of <em>overfitting</em>. Overfitting prevents the model from generalizing to unknown samples, which is detrimental to the learning process.<br/>
+<br/>
+With gradient descent, we know that: <span class="math display">\[\theta(t+1)=\theta(t)-\alpha\frac{\partial LL(\textbf{x},y,\theta)}{\partial\theta}\]</span> where <span class="math inline">\(\frac{\partial LL(\textbf{x},y,\theta)}{\partial\theta} = -\frac{1}{N}\sum_{i=1}^{N}(y_i-\sigma(\theta^{T}x_i))x_i\)</span><br/>
+<br/>
+While attempting to find the best <span class="math inline">\(\sigma(\theta^{T}x_i)=\frac{1}{1+e^{-\theta^{T}x_i}}\)</span>, the approximation may try to estimate as close to <span class="math inline">\(y_i\)</span> as possible. This causes <span class="math inline">\(\theta\)</span> to approach either a positive or negative infinite value, which leads to these overfitting issues. To counteract this, a technique called <strong>regularization</strong> is used to penalize the magnitude of the learned parameters. One regularization method is <span class="math inline">\(\ell_2\)</span>-norm regularization:</p>
+<ul>
+<li><p><span class="math inline">\(L_{\text{reg}}(x,y,\theta)=LL(x,y,\theta)+\frac{\lambda}{2N}\|\theta\|_2^2\)</span></p></li>
+<li><p><span class="math inline">\(\frac{\partial L_{\text{reg}}(x_i,y_i,\theta)}{\partial \theta}
+    = -\frac{1}{N}\sum_{i=1}^{N}\big(y_i-\sigma(\theta^T x_i)\big)x_i+\frac{\lambda}{N}\theta\)</span></p></li>
+</ul>
+<p>where <strong><span class="math inline">\(\lambda\)</span></strong> is the regularization hyper-parameter. The value of <span class="math inline">\(\lambda\)</span> should be chosen to balance the tradeoff between fitting the model well to the training data and penalizing the parameters to prevent overfitting.</p>
+<h2 data-number="4.7" id="hinge-loss"><span class="header-section-number">4.7</span> Hinge Loss</h2>
+<p>An alternative setup for (linear) classification is to fit the data using the sign function: <span class="math display">\[\text{sign}(x)=\begin{cases}
+    +1 &amp; x &gt; 0 \\ 
+    -1 &amp; x &lt; 0
+\end{cases}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/sign.png"/></p>
+</div>
+<p>Note here that we’re assuming <span class="math inline">\(y_i\in\{-1,1\}\)</span> here instead of <span class="math inline">\(\{0,1\}\)</span> as in the logistic model. Hence if we attempt to model the decision boundary with a linear model <span class="math inline">\(\theta^T\textbf{x}\)</span>, then we can model the data using: <span class="math display">\[\text{sign}(\theta^T\textbf{x})=\begin{cases}
+    +1 &amp; \theta^T\textbf{x} &gt; 0 \\ 
+    -1 &amp; \theta^T\textbf{x} &lt; 0
+\end{cases}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/sign-reg.png"/></p>
+</div>
+<p>Given a point <span class="math inline">\((\textbf{x},y)\)</span>, the prediction will be correct if <span class="math inline">\(\theta^T\textbf{x}&gt;0\)</span> for <span class="math inline">\(y=+1\)</span>, or <span class="math inline">\(\theta^T\textbf{x}&lt;0\)</span> for <span class="math inline">\(y=-1\)</span>. This can be expressed succinctly by <span class="math inline">\(-y\theta^T\textbf{x}&lt;0\)</span>.<br/>
+Now to define a cost function, we’d like to penalize the model if it’s incorrect (i.e. if <span class="math inline">\(-y\theta^T\textbf{x}&gt;0\)</span>), and we’d like to penalize it more the more incorrect it is. On the other hand, if it’s correct, we’d like to remain “with 0 doubt” and report <span class="math inline">\(0\)</span> cost. This can be summarized in the following cost function: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)=\max(0,-y\theta^T\textbf{x})\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/hinge-loss.png"/></p>
+</div>
+<p>This is called the <strong>hinge loss</strong>, and it’s conveniently convex as well. Over a dataset <span class="math inline">\(\{\textbf{x}_i,y_i\}_{i=1}^N\)</span>, we can average the cost over all points to get the total loss: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)=\frac{1}{N}\sum_{i=1}^N \max(0,-y_i\theta^T\textbf{x}_i)\]</span> We’d like to invoke gradient descent as we did with cross entropy loss to find a solution. However, notice that the hinge loss is <em>non-differentiable</em> when <span class="math inline">\(-y_i\theta^T x_i = 0\)</span> (i.e., right on the margin), hence we cannot use standard gradient descent everywhere. There are some workarounds for this problem:</p>
+<ol>
+<li><p>We can approximate the hinge loss using the convex and smooth <strong>Softplus function</strong>, which is <span class="math inline">\(\log(1+e^x)\)</span>. Then the hinge loss is approximated: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)\approx\frac{1}{N}\sum_{i=1}^N \log(1+e^{-y_i\theta^T\textbf{x}_i})\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/softplus.png"/></p>
+</div>
+<p>Qualitatively, this is the same as logistic regression.</p></li>
+<li><p>If we’d like to retain and optimize the exact hinge loss, we cannot use gradient descent directly. Instead, we use a technique called <strong>subgradient descent</strong>. The subgradient is a generalization of the gradient that can be used when the function is convex, but not differentiable everywhere. The hinge loss function has a subgradient that can be expressed as: <span class="math display">\[\frac{\partial \mathcal{L}(\mathbf{x},y;\mathbf{\theta})}{\partial \mathbf{\theta}} := 
+    \begin{cases}
+        -y\mathbf{x}, &amp; \text{if } -y\mathbf{\theta}^T\mathbf{x} &gt; 0 \\
+        0 &amp; \text{if } -y\mathbf{\theta}^T\mathbf{x} \leq 0
+    \end{cases}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/subgrad.png"/></p>
+</div>
+<p>which effectively ignores the single non-differentiable point and sets the derivative of the function to <span class="math inline">\(0\)</span> at that point. Note that there are other subgradients that are available for the hinge loss, and for other functions the subgradients may not be expressed this simply (or they may not have subgradients at all). Using the subgradient, the GD steps can proceed as normal.</p></li>
+</ol>
+
+</main>
+</body>
+</html>

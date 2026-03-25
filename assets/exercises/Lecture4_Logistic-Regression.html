@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong><br/>
+Consider a linear regression model <span class="math inline">\(f(\mathbf{x}; \mathbf{\theta}) = \theta_1 x_1 + \theta_2 x_2\)</span> where <span class="math inline">\(\mathbf{x} = [x_1, x_2]^T\)</span> is the 2D input vector, and <span class="math inline">\(\mathbf{\theta} = [\theta_1, \theta_2]^T\)</span> are the model parameters. Given the Mean Squared Error (MSE) loss function: <span class="math display">\[\mathcal{L}_{\text{MSE}}(\mathbf{\theta}) = \frac{1}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right)^2\]</span> where <span class="math inline">\(\hat{y}_i=\theta_1 x_{i1} + \theta_2 x_{i2}\)</span>, derive the gradient of the MSE loss with respect to <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
+<p><strong>Solution:</strong><br/>
+To find the gradient, we first differentiate the MSE loss function with respect to <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span> separately.</p>
+<p>Step 1: Differentiate with respect to <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_1} = \frac{\partial}{\partial \theta_1} \left[ \frac{1}{N} \sum_{i=1}^{N} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right)^2 \right]\]</span> Applying the chain rule: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_1} = \frac{2}{N} \sum_{i=1}^{N} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right) (-x_{i1})\]</span> Simplifying: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_1} = -\frac{2}{N} \sum_{i=1}^{N} x_{i1} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right)\]</span></p>
+<p>Step 2: Differentiate with respect to <span class="math inline">\(\theta_2\)</span>: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_2} = \frac{\partial}{\partial \theta_2} \left[ \frac{1}{N} \sum_{i=1}^{N} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right)^2 \right]\]</span> Again, applying the chain rule: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_2} = \frac{2}{N} \sum_{i=1}^{N} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right) (-x_{i2})\]</span> Simplifying: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{MSE}}(\mathbf{\theta})}{\partial \theta_2} = -\frac{2}{N} \sum_{i=1}^{N} x_{i2} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right)\]</span></p>
+<p>Thus, the gradient of the MSE loss function with respect to <span class="math inline">\(\mathbf{\theta} = [\theta_1, \theta_2]^T\)</span> is: <span class="math display">\[\nabla_{\mathbf{\theta}} \mathcal{L}_{\text{MSE}}(\mathbf{\theta}) = -\frac{2}{N} \sum_{i=1}^{N} \begin{bmatrix} x_{i1} \\ x_{i2} \end{bmatrix} \left( y_i - \theta_1 x_{i1} - \theta_2 x_{i2} \right) = -\frac{2}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right) \mathbf{x}\]</span></p></li>
+<li><p><strong>Question:</strong><br/>
+For a binary classification problem, consider a logistic regression model <span class="math inline">\(\hat{y}_i = \sigma(\theta_1 x_{i1} + \theta_2 x_{i2})\)</span> where <span class="math inline">\(\sigma(z)\)</span> is the sigmoid function, <span class="math inline">\(\mathbf{x}_i = [x_{i1}, x_{i2}]^T\)</span> is the 2D input, and <span class="math inline">\(y_i \in \{0, 1\}\)</span> is the target label. The Cross-Entropy loss function is defined as: <span class="math display">\[\mathcal{L}_{\text{CE}}(\mathbf{\theta}) = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]\]</span> Derive the gradient of the Cross-Entropy loss with respect to <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
+<p><strong>Solution:</strong><br/>
+To find the gradient, we need to differentiate the Cross-Entropy loss function with respect to <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span> separately.</p>
+<p>Step 1: Differentiate with respect to <span class="math inline">\(\theta_1\)</span>:</p>
+<p>The Cross-Entropy loss function is given by: <span class="math display">\[\mathcal{L}_{\text{CE}}(\mathbf{\theta}) = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]\]</span> where <span class="math inline">\(\hat{y}_i = \sigma(\theta_1 x_{i1} + \theta_2 x_{i2})\)</span> and <span class="math inline">\(\sigma(z) = \frac{1}{1 + e^{-z}}\)</span> is the sigmoid function.</p>
+<p>First, let’s compute the derivative of <span class="math inline">\(\hat{y}_i\)</span> with respect to <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\frac{\partial \hat{y}_i}{\partial \theta_1} = \frac{\partial}{\partial \theta_1} \sigma(\theta_1 x_{i1} + \theta_2 x_{i2})\]</span> Using the chain rule: <span class="math display">\[\frac{\partial \hat{y}_i}{\partial \theta_1} = \sigma(\theta_1 x_{i1} + \theta_2 x_{i2}) \left( 1 - \sigma(\theta_1 x_{i1} + \theta_2 x_{i2}) \right) x_{i1}\]</span> This simplifies to: <span class="math display">\[\frac{\partial \hat{y}_i}{\partial \theta_1} = \hat{y}_i (1 - \hat{y}_i) x_{i1}\]</span></p>
+<p>Now, let’s differentiate the Cross-Entropy loss function with respect to <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \theta_1} = \frac{\partial}{\partial \theta_1} \left[ -\frac{1}{N} \sum_{i=1}^{N} \left( y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right) \right]\]</span> Applying the chain rule to differentiate the logarithm terms: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \theta_1} = -\frac{1}{N} \sum_{i=1}^{N} \left[ \frac{y_i}{\hat{y}_i} \cdot \frac{\partial \hat{y}_i}{\partial \theta_1} - \frac{1 - y_i}{1 - \hat{y}_i} \cdot \frac{\partial (1 - \hat{y}_i)}{\partial \theta_1} \right]\]</span> Since <span class="math inline">\(\frac{\partial (1 - \hat{y}_i)}{\partial \theta_1} = -\frac{\partial \hat{y}_i}{\partial \theta_1}\)</span>, we get: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \theta_1} = -\frac{1}{N} \sum_{i=1}^{N} \left[ \frac{y_i}{\hat{y}_i} \hat{y}_i (1 - \hat{y}_i) x_{i1} + \frac{1 - y_i}{1 - \hat{y}_i} \hat{y}_i (1 - \hat{y}_i) x_{i1} \right]\]</span> Simplifying the expression: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \theta_1} = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right) x_{i1}\]</span></p>
+<p>Step 2: Differentiate with respect to <span class="math inline">\(\theta_2\)</span>:</p>
+<p>The process of differentiating with respect to <span class="math inline">\(\theta_2\)</span> is symmetric to the steps outlined above for <span class="math inline">\(\theta_1\)</span>. Thus, we have: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \theta_2} = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right) x_{i2}\]</span></p>
+<p>Conclusion:</p>
+<p>The gradient of the Cross-Entropy loss function with respect to the parameter vector <span class="math inline">\(\mathbf{\theta} = [\theta_1, \theta_2]^T\)</span> is: <span class="math display">\[\nabla_{\mathbf{\theta}} \mathcal{L}_{\text{CE}}(\mathbf{\theta}) = \frac{\partial \mathcal{L}_{\text{CE}}(\mathbf{\theta})}{\partial \mathbf{\theta}} = -\frac{1}{N} \sum_{i=1}^{N} \begin{bmatrix} x_{i1} \\ x_{i2} \end{bmatrix} \left( y_i - \sigma(\theta_1 x_{i1} + \theta_2 x_{i2}) \right) = -\frac{1}{N} \sum_{i=1}^{N} \left( y_i - \hat{y}_i \right) \mathbf{x}\]</span> This gradient can then be used in gradient descent to update the parameters <span class="math inline">\(\mathbf{\theta}\)</span> during the optimization process.</p></li>
+<li><p><strong>Question:</strong><br/>
+Given a binary classification problem with output labels <span class="math inline">\(y_i \in \{-1, 1\}\)</span>, the hinge loss is defined as: <span class="math display">\[\mathcal{L}_{\text{hinge}}(\mathbf{x}_i, y_i; \mathbf{\theta}) = \max(0,  - y_i (\theta_1 x_{i1} + \theta_2 x_{i2}))\]</span> Derive the subgradient of the hinge loss function with respect to <span class="math inline">\(\theta_1\)</span> and <span class="math inline">\(\theta_2\)</span>.</p>
+<p><strong>Solution:</strong><br/>
+The hinge loss function is not differentiable at <span class="math inline">\(- y_i (\theta_1 x_{i1} + \theta_2 x_{i2}) = 0\)</span>, so we use subgradients.</p>
+<p>Step 1: Subgradient with respect to <span class="math inline">\(\theta_1\)</span>: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{hinge}}(\mathbf{x}_i, y_i; \mathbf{\theta})}{\partial \theta_1} = 
+\begin{cases}
+    -y_i x_{i1}, &amp; \text{if }  - y_i (\theta_1 x_{i1} + \theta_2 x_{i2}) &gt; 0 \\
+    0, &amp; \text{otherwise}
+\end{cases}\]</span></p>
+<p>Step 2: Subgradient with respect to <span class="math inline">\(\theta_2\)</span>: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{hinge}}(\mathbf{x}_i, y_i; \mathbf{\theta})}{\partial \theta_2} = 
+\begin{cases}
+    -y_i x_{i2}, &amp; \text{if }  - y_i (\theta_1 x_{i1} + \theta_2 x_{i2}) &gt; 0 \\
+    0, &amp; \text{otherwise}
+\end{cases}\]</span></p>
+<p>Thus, the subgradient of the hinge loss function with respect to <span class="math inline">\(\mathbf{\theta} = [\theta_1, \theta_2]^T\)</span> is: <span class="math display">\[\frac{\partial \mathcal{L}_{\text{hinge}}(\mathbf{x}_i, y_i; \mathbf{\theta})}{\partial \mathbf{\theta}} = 
+\begin{cases}
+    -y_i \begin{bmatrix} x_{i1} \\ x_{i2} \end{bmatrix}, &amp; \text{if }  - y_i (\theta_1 x_{i1} + \theta_2 x_{i2}) &gt; 0 \\
+    \begin{bmatrix} 0 \\ 0 \end{bmatrix}, &amp; \text{otherwise}
+\end{cases}\]</span></p></li>
+</ol></section>
+</main>
+</body>
+</html>
