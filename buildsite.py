@@ -251,6 +251,7 @@ window.MathJax = {
       C: "\\\\mathbb{C}",
       E: "\\\\mathbb{E}",
       Var: "\\\\operatorname{Var}",
+      Cov: "\\\\operatorname{Cov}",
       Tr: "\\\\operatorname{Tr}",
     }
   }
