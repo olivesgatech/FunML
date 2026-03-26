@@ -1275,7 +1275,9 @@ def sync_portal_index(index_path: Path, lecture_pages):
     if media_key.lower() == "lecture0":
       a["data-disable-slides"] = "true"
       a["data-hide-viewer-actions"] = "true"
-    a["href"] = "#"
+    a["href"] = f"lectures/{filename}"
+    a["target"] = "_blank"
+    a["rel"] = "noopener noreferrer"
     a["role"] = "listitem"
 
     if idx is not None:
