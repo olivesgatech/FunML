@@ -241,6 +241,22 @@ pre, code {
 }
 """
 
+MATHJAX_CONFIG = """<script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\\\mathbb{R}",
+      N: "\\\\mathbb{N}",
+      Z: "\\\\mathbb{Z}",
+      C: "\\\\mathbb{C}",
+      E: "\\\\mathbb{E}",
+      Var: "\\\\operatorname{Var}",
+      Tr: "\\\\operatorname{Tr}",
+    }
+  }
+};
+</script>"""
+
 
 def run(cmd):
   print(" ".join(cmd))
@@ -693,6 +709,7 @@ def build_single_html(
   <meta charset="utf-8"/>
   <title>{title}</title>
   <link rel="stylesheet" href="../assets/style.css"/>
+  {MATHJAX_CONFIG}
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
@@ -1576,6 +1593,7 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
   <meta charset="utf-8"/>
   <title>FunML Exercises</title>
   <link rel="stylesheet" href="style.css"/>
+  {MATHJAX_CONFIG}
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
@@ -1602,6 +1620,7 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
   <meta charset="utf-8"/>
   <title>Exercises</title>
   <link rel="stylesheet" href="../style.css"/>
+  {MATHJAX_CONFIG}
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
