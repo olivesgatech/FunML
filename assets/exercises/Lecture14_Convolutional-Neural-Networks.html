@@ -11,41 +11,64 @@
   <section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong></p>
-<p>Given an input image of size <span class="math inline">\(64 \times 64 \times 3\)</span>, apply a convolutional layer with a filter of size <span class="math inline">\(8 \times 8 \times 3\)</span>, stride <span class="math inline">\(4\)</span>, and no padding. Then, apply a <span class="math inline">\(4 \times 4\)</span> max pooling layer with stride <span class="math inline">\(1\)</span> and no padding. Compute the size of the final output after the pooling layer.</p>
+<p>Given an input image of size <span class="math inline">\(64 \times 64
+\times 3\)</span>, apply a convolutional layer with a filter of size
+<span class="math inline">\(8 \times 8 \times 3\)</span>, stride <span class="math inline">\(4\)</span>, and no padding. Then, apply a <span class="math inline">\(4 \times 4\)</span> max pooling layer with stride
+<span class="math inline">\(1\)</span> and no padding. Compute the size
+of the final output after the pooling layer.</p>
 <p><strong>Solution:</strong></p>
-<p>After the convolutional layer (input size: <span class="math inline">\(H_{\text{in}} = 64\)</span>, <span class="math inline">\(W_{\text{in}} = 64\)</span>; filter size: <span class="math inline">\(k = 8\)</span>; stride: <span class="math inline">\(S = 4\)</span>; padding: <span class="math inline">\(P = 0\)</span>), the output dimensions are: <span class="math display">\[H_{\text{out}} = \frac{H_{\text{in}} - k + 2P}{S} + 1 = \frac{64 - 8 + 0}{4} + 1 = \frac{56}{4} + 1 = 14 + 1 = 15\]</span> <span class="math display">\[W_{\text{out}} = 15\]</span></p>
+<p>After the convolutional layer (input size: <span class="math inline">\(H_{\text{in}} = 64\)</span>, <span class="math inline">\(W_{\text{in}} = 64\)</span>; filter size: <span class="math inline">\(k = 8\)</span>; stride: <span class="math inline">\(S = 4\)</span>; padding: <span class="math inline">\(P = 0\)</span>), the output dimensions are: <span class="math display">\[H_{\text{out}} = \frac{H_{\text{in}} - k + 2P}{S}
++ 1 = \frac{64 - 8 + 0}{4} + 1 = \frac{56}{4} + 1 = 14 + 1 = 15\]</span>
+<span class="math display">\[W_{\text{out}} = 15\]</span></p>
 <p>So, the output size after the convolutional layer is <span class="math inline">\(15 \times 15\)</span>.</p>
-<p>After the pooling layer (input size: <span class="math inline">\(H_{\text{in}} = 15\)</span>, <span class="math inline">\(W_{\text{in}} = 15\)</span>; filter size: <span class="math inline">\(k = 4\)</span>; stride: <span class="math inline">\(S = 1\)</span>; padding: <span class="math inline">\(P = 0\)</span>), the output dimensions are: <span class="math display">\[H_{\text{out}} = \frac{15 - 4}{1} + 1 = 11 + 1 = 12\]</span> <span class="math display">\[W_{\text{out}} = 12\]</span></p>
+<p>After the pooling layer (input size: <span class="math inline">\(H_{\text{in}} = 15\)</span>, <span class="math inline">\(W_{\text{in}} = 15\)</span>; filter size: <span class="math inline">\(k = 4\)</span>; stride: <span class="math inline">\(S = 1\)</span>; padding: <span class="math inline">\(P = 0\)</span>), the output dimensions are: <span class="math display">\[H_{\text{out}} = \frac{15 - 4}{1} + 1 = 11 + 1 =
+12\]</span> <span class="math display">\[W_{\text{out}} =
+12\]</span></p>
 <p>Therefore, the final output size after the pooling layer is <span class="math inline">\(12 \times 12\)</span>.</p></li>
 <li><p><strong>Question:</strong></p>
-<p>An input image has size <span class="math inline">\(28 \times 28 \times 1\)</span>. A convolutional layer uses <span class="math inline">\(16\)</span> filters of size <span class="math inline">\(5 \times 5\)</span>, stride <span class="math inline">\(1\)</span>, and padding <span class="math inline">\(P=2\)</span>.</p>
+<p>An input image has size <span class="math inline">\(28 \times 28
+\times 1\)</span>. A convolutional layer uses <span class="math inline">\(16\)</span> filters of size <span class="math inline">\(5 \times 5\)</span>, stride <span class="math inline">\(1\)</span>, and padding <span class="math inline">\(P=2\)</span>.</p>
 <ol>
 <li><p>What is the spatial size of the output?</p></li>
 <li><p>What is the depth of the output?</p></li>
 <li><p>What is the full output volume?</p></li>
 </ol>
 <p><strong>Solution:</strong></p>
-<p>Spatial size: <span class="math display">\[\frac{28 + 2(2) - 5}{1} + 1
+<p>Spatial size: <span class="math display">\[\frac{28 + 2(2) - 5}{1} +
+1
 = \frac{28 + 4 - 5}{1} + 1
 = 27 + 1 = 28\]</span></p>
 <p>So height and width are preserved.</p>
 <p>Depth equals the number of filters: <span class="math display">\[C_{out} = 16\]</span></p>
-<p>Final output volume: <span class="math display">\[28 \times 28 \times 16\]</span></p></li>
+<p>Final output volume: <span class="math display">\[28 \times 28 \times
+16\]</span></p></li>
 <li><p><strong>Question:</strong></p>
 <p>A convolutional layer receives an input of size <span class="math inline">\(32 \times 32 \times 3\)</span>. It uses <span class="math inline">\(20\)</span> filters of size <span class="math inline">\(7 \times 7\)</span> with bias terms.</p>
 <p>How many learnable parameters does this layer contain?</p>
 <p><strong>Solution:</strong></p>
-<p>Parameters per filter: <span class="math display">\[7 \times 7 \times 3 + 1 = 148\]</span></p>
-<p>Total parameters: <span class="math display">\[148 \times 20 = 2960\]</span></p>
-<p>So the convolutional layer has <span class="math inline">\(\boxed{2960}\)</span> learnable parameters.</p></li>
+<p>Parameters per filter: <span class="math display">\[7 \times 7 \times
+3 + 1 = 148\]</span></p>
+<p>Total parameters: <span class="math display">\[148 \times 20 =
+2960\]</span></p>
+<p>So the convolutional layer has <span class="math inline">\(\boxed{2960}\)</span> learnable
+parameters.</p></li>
 <li><p><strong>Question:</strong></p>
-<p>An input has size <span class="math inline">\(31 \times 31\)</span> and a filter of size <span class="math inline">\(5 \times 5\)</span> is used with no padding.</p>
-<p>Which stride values <span class="math inline">\(S \in \{1,2,3,4\}\)</span> produce a valid output size?</p>
+<p>An input has size <span class="math inline">\(31 \times 31\)</span>
+and a filter of size <span class="math inline">\(5 \times 5\)</span> is
+used with no padding.</p>
+<p>Which stride values <span class="math inline">\(S \in
+\{1,2,3,4\}\)</span> produce a valid output size?</p>
 <p><strong>Solution:</strong></p>
-<p>A stride is valid only if <span class="math display">\[\frac{N - F}{S} + 1\]</span> is an integer.</p>
-<p>Here <span class="math inline">\(N=31, F=5\Rightarrow N-F=26\)</span>.</p>
+<p>A stride is valid only if <span class="math display">\[\frac{N -
+F}{S} + 1\]</span> is an integer.</p>
+<p>Here <span class="math inline">\(N=31, F=5\Rightarrow
+N-F=26\)</span>.</p>
 <p>Check each stride:</p>
-<p><span class="math display">\[S=1:\ \frac{26}{1}+1=27 \quad \text{valid}\]</span> <span class="math display">\[S=2:\ \frac{26}{2}+1=14 \quad \text{valid}\]</span> <span class="math display">\[S=3:\ \frac{26}{3}+1=9.67 \quad \text{invalid}\]</span> <span class="math display">\[S=4:\ \frac{26}{4}+1=7.5 \quad \text{invalid}\]</span></p>
+<p><span class="math display">\[S=1:\ \frac{26}{1}+1=27 \quad
+\text{valid}\]</span> <span class="math display">\[S=2:\
+\frac{26}{2}+1=14 \quad \text{valid}\]</span> <span class="math display">\[S=3:\ \frac{26}{3}+1=9.67 \quad
+\text{invalid}\]</span> <span class="math display">\[S=4:\
+\frac{26}{4}+1=7.5 \quad \text{invalid}\]</span></p>
 <p>Valid strides: <span class="math inline">\(\boxed{S=1,2}\)</span>.</p></li>
 </ol></section>
 </main>

@@ -10,22 +10,54 @@
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> What is the main objective of an autoencoder, and how does it differ from supervised learning?</p>
-<p><strong>Solution:</strong> An autoencoder learns a compact latent representation of the input and reconstructs the original data from this representation. Unlike supervised learning, it does not use labels and is trained by minimizing reconstruction error. Its goal is to capture the underlying structure of the data rather than predict target outputs.</p></li>
-<li><p><strong>Question:</strong> Under what conditions is a linear autoencoder equivalent to PCA?</p>
-<p><strong>Solution:</strong> When the network has no nonlinear activations and is trained using squared reconstruction loss, a linear autoencoder learns the same principal subspace as PCA. In this case, <span class="math display">\[\hat{\mathbf{X}}=\mathbf{X}V_KV_K^T,\]</span> which corresponds to projection onto the top <span class="math inline">\(K\)</span> principal components.</p></li>
-<li><p><strong>Question:</strong> Why do nonlinear autoencoders often achieve lower reconstruction error than linear autoencoders on image data?</p>
-<p><strong>Solution:</strong> Image data typically lies on nonlinear manifolds. Nonlinear activation functions allow the encoder and decoder to learn nonlinear transformations, enabling the model to capture more complex patterns than linear subspace methods.</p></li>
-<li><p><strong>Question:</strong> When training a fully-connected autoencoder on MNIST, what is the dimensionality of each input sample?</p>
-<p><strong>Solution:</strong> Each MNIST image is <span class="math inline">\(28\times28\)</span>. Fully-connected networks require vector inputs, so the image is flattened into a vector of length <span class="math display">\[28\times28=784.\]</span></p></li>
-<li><p><strong>Question:</strong> What is a key limitation of fully-connected autoencoders for image data?</p>
-<p><strong>Solution:</strong> They treat pixels independently and ignore spatial structure, leading to many parameters and inefficient learning of spatial patterns.</p></li>
-<li><p><strong>Question:</strong> Why are convolutional autoencoders better suited for image reconstruction?</p>
-<p><strong>Solution:</strong> Convolutional layers share weights across spatial locations and preserve locality, allowing the network to learn spatial features efficiently with far fewer parameters.</p></li>
-<li><p><strong>Question:</strong> Compute the output size of a transposed convolution with input size <span class="math inline">\(4\)</span>, kernel size <span class="math inline">\(3\)</span>, stride <span class="math inline">\(2\)</span>, and padding <span class="math inline">\(1\)</span>.</p>
-<p><strong>Solution:</strong> <span class="math display">\[\text{output size}=s(n-1)+k-2p\]</span> <span class="math display">\[=2(4-1)+3-2(1)=7.\]</span></p></li>
-<li><p><strong>Question:</strong> Why do digit clusters overlap in the 2D latent space learned by a fully-connected autoencoder?</p>
-<p><strong>Solution:</strong> The autoencoder is trained only to reconstruct inputs, not to separate classes. Therefore, the latent space reflects visual similarity rather than class separability, leading to overlapping clusters.</p></li>
+<li><p><strong>Question:</strong> What is the main objective of an
+autoencoder, and how does it differ from supervised learning?</p>
+<p><strong>Solution:</strong> An autoencoder learns a compact latent
+representation of the input and reconstructs the original data from this
+representation. Unlike supervised learning, it does not use labels and
+is trained by minimizing reconstruction error. Its goal is to capture
+the underlying structure of the data rather than predict target
+outputs.</p></li>
+<li><p><strong>Question:</strong> Under what conditions is a linear
+autoencoder equivalent to PCA?</p>
+<p><strong>Solution:</strong> When the network has no nonlinear
+activations and is trained using squared reconstruction loss, a linear
+autoencoder learns the same principal subspace as PCA. In this case,
+<span class="math display">\[\hat{\mathbf{X}}=\mathbf{X}V_KV_K^T,\]</span>
+which corresponds to projection onto the top <span class="math inline">\(K\)</span> principal components.</p></li>
+<li><p><strong>Question:</strong> Why do nonlinear autoencoders often
+achieve lower reconstruction error than linear autoencoders on image
+data?</p>
+<p><strong>Solution:</strong> Image data typically lies on nonlinear
+manifolds. Nonlinear activation functions allow the encoder and decoder
+to learn nonlinear transformations, enabling the model to capture more
+complex patterns than linear subspace methods.</p></li>
+<li><p><strong>Question:</strong> When training a fully-connected
+autoencoder on MNIST, what is the dimensionality of each input
+sample?</p>
+<p><strong>Solution:</strong> Each MNIST image is <span class="math inline">\(28\times28\)</span>. Fully-connected networks
+require vector inputs, so the image is flattened into a vector of length
+<span class="math display">\[28\times28=784.\]</span></p></li>
+<li><p><strong>Question:</strong> What is a key limitation of
+fully-connected autoencoders for image data?</p>
+<p><strong>Solution:</strong> They treat pixels independently and ignore
+spatial structure, leading to many parameters and inefficient learning
+of spatial patterns.</p></li>
+<li><p><strong>Question:</strong> Why are convolutional autoencoders
+better suited for image reconstruction?</p>
+<p><strong>Solution:</strong> Convolutional layers share weights across
+spatial locations and preserve locality, allowing the network to learn
+spatial features efficiently with far fewer parameters.</p></li>
+<li><p><strong>Question:</strong> Compute the output size of a
+transposed convolution with input size <span class="math inline">\(4\)</span>, kernel size <span class="math inline">\(3\)</span>, stride <span class="math inline">\(2\)</span>, and padding <span class="math inline">\(1\)</span>.</p>
+<p><strong>Solution:</strong> <span class="math display">\[\text{output
+size}=s(n-1)+k-2p\]</span> <span class="math display">\[=2(4-1)+3-2(1)=7.\]</span></p></li>
+<li><p><strong>Question:</strong> Why do digit clusters overlap in the
+2D latent space learned by a fully-connected autoencoder?</p>
+<p><strong>Solution:</strong> The autoencoder is trained only to
+reconstruct inputs, not to separate classes. Therefore, the latent space
+reflects visual similarity rather than class separability, leading to
+overlapping clusters.</p></li>
 </ol></section>
 </main>
 </body>

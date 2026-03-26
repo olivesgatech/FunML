@@ -16,113 +16,378 @@
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture introduces autoencoders as an unsupervised learning approach for learning compact latent representations that preserve the essential structure of the data while enabling reconstruction of the original inputs. We begin by motivating representation learning through dimensionality reduction and briefly connecting autoencoders to principal component analysis as a linear baseline for capturing dominant variance. We then develop the core encoder–decoder framework and compare linear autoencoders with nonlinear autoencoders, emphasizing how nonlinearities allow the model to represent more complex, non-linear structure beyond a single subspace. Next, we study practical architectures on MNIST, including fully-connected and convolutional autoencoders, and examine how their learned latent spaces and reconstructions differ in quality. Finally, we discuss how convolutional decoders restore spatial resolution through upsampling mechanisms such as unpooling, max-unpooling with indices, and transposed convolution (including how to compute output sizes), and we conclude with qualitative reconstruction examples and latent-space visualizations.</p>
+<p>This lecture introduces autoencoders as an unsupervised learning
+approach for learning compact latent representations that preserve the
+essential structure of the data while enabling reconstruction of the
+original inputs. We begin by motivating representation learning through
+dimensionality reduction and briefly connecting autoencoders to
+principal component analysis as a linear baseline for capturing dominant
+variance. We then develop the core encoder–decoder framework and compare
+linear autoencoders with nonlinear autoencoders, emphasizing how
+nonlinearities allow the model to represent more complex, non-linear
+structure beyond a single subspace. Next, we study practical
+architectures on MNIST, including fully-connected and convolutional
+autoencoders, and examine how their learned latent spaces and
+reconstructions differ in quality. Finally, we discuss how convolutional
+decoders restore spatial resolution through upsampling mechanisms such
+as unpooling, max-unpooling with indices, and transposed convolution
+(including how to compute output sizes), and we conclude with
+qualitative reconstruction examples and latent-space visualizations.</p>
 <h1 data-number="2" id="autoencoders"><span class="header-section-number">2.</span> Autoencoders</h1>
 <h2 data-number="2.1" id="motivation"><span class="header-section-number">2.1</span> Motivation</h2>
-<p>In unsupervised learning, the goal is to learn a lower-dimensional representation <span class="math inline">\(Z\)</span> that captures the essential structure of the data <span class="math inline">\(\mathbf{X}\)</span>. This representation can then be used to reconstruct the data, providing insights into its underlying structure. The <span class="math inline">\(Z\)</span>-space, which often has fewer dimensions than <span class="math inline">\(\mathbf{X}\)</span>, serves various purposes, including data visualization by mapping <span class="math inline">\(\mathbf{X}\)</span> to a 2-dimensional space, dimensionality reduction for compressing images, documents, or text, and supporting subsequent supervised tasks by using <span class="math inline">\(Z\)</span> as a basis for further training or fine-tuning.</p>
-<p>An autoencoder is a type of model used for unsupervised learning that aims to learn a lower-dimensional representation <span class="math inline">\(Z\)</span> from the unlabeled input data <span class="math inline">\(\mathbf{X}\)</span>. In the case of linear dimensionality reduction, principal component analysis (PCA) can be used to project <span class="math inline">\(\mathbf{X}\)</span> onto a <span class="math inline">\(K\)</span>-dimensional subspace<br/>
+<p>In unsupervised learning, the goal is to learn a lower-dimensional
+representation <span class="math inline">\(Z\)</span> that captures the
+essential structure of the data <span class="math inline">\(\mathbf{X}\)</span>. This representation can then
+be used to reconstruct the data, providing insights into its underlying
+structure. The <span class="math inline">\(Z\)</span>-space, which often
+has fewer dimensions than <span class="math inline">\(\mathbf{X}\)</span>, serves various purposes,
+including data visualization by mapping <span class="math inline">\(\mathbf{X}\)</span> to a 2-dimensional space,
+dimensionality reduction for compressing images, documents, or text, and
+supporting subsequent supervised tasks by using <span class="math inline">\(Z\)</span> as a basis for further training or
+fine-tuning.</p>
+<p>An autoencoder is a type of model used for unsupervised learning that
+aims to learn a lower-dimensional representation <span class="math inline">\(Z\)</span> from the unlabeled input data <span class="math inline">\(\mathbf{X}\)</span>. In the case of linear
+dimensionality reduction, principal component analysis (PCA) can be used
+to project <span class="math inline">\(\mathbf{X}\)</span> onto a <span class="math inline">\(K\)</span>-dimensional subspace<br/>
 </p>
-<figure>
-<img alt="Autoencoder and Reconstruction" id="fig:enter-label" src="img/lecture18/Screenshot%202024-10-30%20at%204.36.04%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Autoencoder and Reconstruction</figcaption>
+<figure data-latex-placement="H" id="fig:enter-label">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%204.36.04%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Autoencoder and Reconstruction</figcaption>
 </figure>
-<h2 data-number="2.2" id="principal-component-analysis-pca"><span class="header-section-number">2.2</span> Principal Component Analysis (PCA)</h2>
-<p>The intuition behind Principal Component Analysis (PCA) is that it finds the simplest way to represent data by focusing on the directions with the most variation, or “spread.” Imagine you have a dataset with many variables that are related to each other. In most real-world datasets, some features are more influential than others in explaining the variability. PCA identifies these key directions, called principal components, to represent the data in a reduced yet meaningful way.</p>
-<p>PCA begins by finding the direction along which the data varies the most; this becomes the first principal component and captures the maximum possible variance with a single line. Next, PCA identifies the direction of the next largest variation that is perpendicular (and therefore uncorrelated) to the first component. This becomes the second principal component. The process continues, producing a sequence of orthogonal directions that capture decreasing amounts of variance.</p>
-<p>In many datasets, most of the meaningful variation lies along just a few of these principal components. As a result, the remaining components can often be ignored with minimal loss of information. For example, a dataset that originally has ten dimensions may be well represented by only two or three principal components. By projecting the data onto these few components, PCA reduces the dimensionality of the dataset while preserving its essential structure.</p>
-<figure>
-<img alt="Illustration of PCA for dimensionality reduction. Left: The original dataset in three dimensions. The points lie roughly near a tilted plane, indicating that much of the variation occurs along only a few directions. Right: The same dataset after applying PCA and projecting onto the first two principal components. The projection preserves the dominant variance while reducing the dimensionality from 3D to 2D." id="fig:pca_example" src="img/lecture18/output.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true"><strong>Illustration of PCA for dimensionality reduction.</strong> <strong>Left:</strong> The original dataset in three dimensions. The points lie roughly near a tilted plane, indicating that much of the variation occurs along only a few directions. <strong>Right:</strong> The same dataset after applying PCA and projecting onto the first two principal components. The projection preserves the dominant variance while reducing the dimensionality from 3D to 2D.</figcaption>
+<h2 data-number="2.2" id="principal-component-analysis-pca"><span class="header-section-number">2.2</span> Principal Component Analysis
+(PCA)</h2>
+<p>The intuition behind Principal Component Analysis (PCA) is that it
+finds the simplest way to represent data by focusing on the directions
+with the most variation, or “spread.” Imagine you have a dataset with
+many variables that are related to each other. In most real-world
+datasets, some features are more influential than others in explaining
+the variability. PCA identifies these key directions, called principal
+components, to represent the data in a reduced yet meaningful way.</p>
+<p>PCA begins by finding the direction along which the data varies the
+most; this becomes the first principal component and captures the
+maximum possible variance with a single line. Next, PCA identifies the
+direction of the next largest variation that is perpendicular (and
+therefore uncorrelated) to the first component. This becomes the second
+principal component. The process continues, producing a sequence of
+orthogonal directions that capture decreasing amounts of variance.</p>
+<p>In many datasets, most of the meaningful variation lies along just a
+few of these principal components. As a result, the remaining components
+can often be ignored with minimal loss of information. For example, a
+dataset that originally has ten dimensions may be well represented by
+only two or three principal components. By projecting the data onto
+these few components, PCA reduces the dimensionality of the dataset
+while preserving its essential structure.</p>
+<figure data-latex-placement="H" id="fig:pca_example">
+<img src="img/lecture18/output.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption><strong>Illustration of PCA for dimensionality
+reduction.</strong> <strong>Left:</strong> The original dataset in three
+dimensions. The points lie roughly near a tilted plane, indicating that
+much of the variation occurs along only a few directions.
+<strong>Right:</strong> The same dataset after applying PCA and
+projecting onto the first two principal components. The projection
+preserves the dominant variance while reducing the dimensionality from
+3D to 2D.</figcaption>
 </figure>
-<p>Figure <a data-reference="fig:pca_example" data-reference-type="ref" href="#fig:pca_example">2</a> illustrates how PCA reduces dimensionality while preserving the most important structure in the data. The original three-dimensional dataset lies close to a lower-dimensional subspace, which allows PCA to project the data onto two principal components with minimal information loss.</p>
+<p>Figure <a data-reference="fig:pca_example" data-reference-type="ref" href="#fig:pca_example">2</a> illustrates how PCA reduces
+dimensionality while preserving the most important structure in the
+data. The original three-dimensional dataset lies close to a
+lower-dimensional subspace, which allows PCA to project the data onto
+two principal components with minimal information loss.</p>
 <h2 data-number="2.3" id="linear-autoencoder"><span class="header-section-number">2.3</span> Linear Autoencoder</h2>
-<p>A linear autoencoder is a neural network for dimensionality reduction that learns a lower-dimensional representation <span class="math inline">\(Z\)</span> of the input data <span class="math inline">\(\mathbf{X}\)</span> using only linear transformations. When trained using squared reconstruction loss and without nonlinear activation functions, a linear autoencoder is closely related to principal component analysis (PCA).</p>
-<p>In this setup, the encoder consists of a fully connected layer with weight matrix <span class="math inline">\(V_K \in \mathbb{R}^{P \times K}\)</span>, mapping the input to a latent representation <span class="math display">\[Z = \mathbf{X} V_K.\]</span> The decoder reconstructs the input using another fully connected layer with weights <span class="math inline">\(V_K^T\)</span>, producing <span class="math display">\[\hat{\mathbf{X}} = Z V_K^T = \mathbf{X} V_K V_K^T.\]</span></p>
-<p>The model is trained by minimizing the squared reconstruction loss <span class="math display">\[L(\mathbf{X}, \hat{\mathbf{X}}) = \|\mathbf{X} - \hat{\mathbf{X}}\|_F^2.\]</span></p>
-<p>When the columns of <span class="math inline">\(V_K\)</span> are orthonormal and correspond to the top <span class="math inline">\(K\)</span> eigenvectors of <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span>, the linear autoencoder projects the data onto the same <span class="math inline">\(K\)</span>-dimensional subspace found by PCA. In this case, the learned representation spans the principal subspace that captures the largest variance in the data.</p>
-<figure>
-<img alt="Linear AutoEncoders" id="fig:enter-label" src="img/lecture18/Screenshot%202024-10-30%20at%204.38.07%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Linear AutoEncoders</figcaption>
+<p>A linear autoencoder is a neural network for dimensionality reduction
+that learns a lower-dimensional representation <span class="math inline">\(Z\)</span> of the input data <span class="math inline">\(\mathbf{X}\)</span> using only linear
+transformations. When trained using squared reconstruction loss and
+without nonlinear activation functions, a linear autoencoder is closely
+related to principal component analysis (PCA).</p>
+<p>In this setup, the encoder consists of a fully connected layer with
+weight matrix <span class="math inline">\(V_K \in \mathbb{R}^{P \times
+K}\)</span>, mapping the input to a latent representation <span class="math display">\[Z = \mathbf{X} V_K.\]</span> The decoder
+reconstructs the input using another fully connected layer with weights
+<span class="math inline">\(V_K^T\)</span>, producing <span class="math display">\[\hat{\mathbf{X}} = Z V_K^T = \mathbf{X} V_K
+V_K^T.\]</span></p>
+<p>The model is trained by minimizing the squared reconstruction loss
+<span class="math display">\[L(\mathbf{X}, \hat{\mathbf{X}}) =
+\|\mathbf{X} - \hat{\mathbf{X}}\|_F^2.\]</span></p>
+<p>When the columns of <span class="math inline">\(V_K\)</span> are
+orthonormal and correspond to the top <span class="math inline">\(K\)</span> eigenvectors of <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span>, the linear
+autoencoder projects the data onto the same <span class="math inline">\(K\)</span>-dimensional subspace found by PCA. In
+this case, the learned representation spans the principal subspace that
+captures the largest variance in the data.</p>
+<figure data-latex-placement="H" id="fig:enter-label">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%204.38.07%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Linear AutoEncoders</figcaption>
 </figure>
 <h2 data-number="2.4" id="nonlinear-autoencoders"><span class="header-section-number">2.4</span> Nonlinear Autoencoders</h2>
-<p>Unlike linear autoencoders, which restrict the model to linear projections, nonlinear autoencoders introduce nonlinear activation functions (such as ReLU, sigmoid, or tanh) in the encoder and decoder networks. This allows the model to learn nonlinear transformations of the input data <span class="math inline">\(\mathbf{X}\)</span> and map it to a latent representation that lies on a nonlinear manifold.</p>
-<p>Formally, the encoder and decoder become nonlinear functions, <span class="math display">\[Z = E_\theta(\mathbf{X}), \qquad \hat{\mathbf{X}} = G_\Phi(Z),\]</span> and the model is trained by minimizing the same reconstruction loss <span class="math inline">\(\|\mathbf{X}-\hat{\mathbf{X}}\|_F^2\)</span>. Because of the nonlinear activations, the equivalence with PCA no longer holds, and the autoencoder is no longer limited to learning a linear subspace.</p>
-<p>This added flexibility enables nonlinear autoencoders to capture complex structures and variations in data that cannot be represented by linear dimensionality reduction. As a result, they are particularly effective for high-dimensional datasets such as images, where the data often lies on curved, lower-dimensional manifolds embedded in high-dimensional space.</p>
-<figure>
-<img alt="Nonlinear Autoencoders" id="fig:enter-label" src="img/lecture18/Screenshot%202024-10-30%20at%204.38.15%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Nonlinear Autoencoders</figcaption>
+<p>Unlike linear autoencoders, which restrict the model to linear
+projections, nonlinear autoencoders introduce nonlinear activation
+functions (such as ReLU, sigmoid, or tanh) in the encoder and decoder
+networks. This allows the model to learn nonlinear transformations of
+the input data <span class="math inline">\(\mathbf{X}\)</span> and map
+it to a latent representation that lies on a nonlinear manifold.</p>
+<p>Formally, the encoder and decoder become nonlinear functions, <span class="math display">\[Z = E_\theta(\mathbf{X}), \qquad \hat{\mathbf{X}}
+= G_\Phi(Z),\]</span> and the model is trained by minimizing the same
+reconstruction loss <span class="math inline">\(\|\mathbf{X}-\hat{\mathbf{X}}\|_F^2\)</span>.
+Because of the nonlinear activations, the equivalence with PCA no longer
+holds, and the autoencoder is no longer limited to learning a linear
+subspace.</p>
+<p>This added flexibility enables nonlinear autoencoders to capture
+complex structures and variations in data that cannot be represented by
+linear dimensionality reduction. As a result, they are particularly
+effective for high-dimensional datasets such as images, where the data
+often lies on curved, lower-dimensional manifolds embedded in
+high-dimensional space.</p>
+<figure data-latex-placement="H" id="fig:enter-label">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%204.38.15%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Nonlinear Autoencoders</figcaption>
 </figure>
 <h1 data-number="3" id="fully-connected-autoencoders"><span class="header-section-number">3.</span> Fully-connected Autoencoders</h1>
-<p>In fully-connected autoencoders, both the encoder and decoder are implemented using dense (fully-connected) neural network layers. Figure <a data-reference="fig:fc-ae-structure" data-reference-type="ref" href="#fig:fc-ae-structure">5</a> illustrates the basic encoder–decoder structure.</p>
-<figure>
-<img alt="Fully-connected autoencoder encoder–decoder structure." id="fig:fc-ae-structure" src="img/lecture18/Screenshot%202024-10-30%20at%204.56.26%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Fully-connected autoencoder encoder–decoder structure.</figcaption>
+<p>In fully-connected autoencoders, both the encoder and decoder are
+implemented using dense (fully-connected) neural network layers.
+Figure <a data-reference="fig:fc-ae-structure" data-reference-type="ref" href="#fig:fc-ae-structure">5</a> illustrates the basic
+encoder–decoder structure.</p>
+<figure data-latex-placement="H" id="fig:fc-ae-structure">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%204.56.26%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Fully-connected autoencoder encoder–decoder
+structure.</figcaption>
 </figure>
-<p>Fully-connected autoencoders can be applied to the MNIST handwritten digit dataset for dimensionality reduction and feature extraction. Each MNIST image has size <span class="math inline">\(28\times28\)</span> and is flattened into a 784-dimensional vector before being fed into the network. The architecture typically consists of several fully-connected layers with ReLU activations in the hidden layers and a sigmoid activation in the output layer to reconstruct pixel intensities.</p>
-<figure>
-<img alt="Example fully-connected autoencoder architecture for MNIST." id="fig:fc-ae-mnist" src="img/lecture18/Screenshot%202024-11-02%20at%208.54.57%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Example fully-connected autoencoder architecture for MNIST.</figcaption>
+<p>Fully-connected autoencoders can be applied to the MNIST handwritten
+digit dataset for dimensionality reduction and feature extraction. Each
+MNIST image has size <span class="math inline">\(28\times28\)</span> and
+is flattened into a 784-dimensional vector before being fed into the
+network. The architecture typically consists of several fully-connected
+layers with ReLU activations in the hidden layers and a sigmoid
+activation in the output layer to reconstruct pixel intensities.</p>
+<figure data-latex-placement="H" id="fig:fc-ae-mnist">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%208.54.57%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Example fully-connected autoencoder architecture for
+MNIST.</figcaption>
 </figure>
-<p>Let the dataset be <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{N \times P}\)</span>, where each input vector <span class="math inline">\(\mathbf{x}_i \in \mathbb{R}^P\)</span> and the weight matrix of layer <span class="math inline">\(k\)</span> is <span class="math inline">\(\mathbf{W}^{(k)} \in \mathbb{R}^{P^{(k)} \times P^{(k-1)}}\)</span>. During training, the encoder compresses the input into a low-dimensional latent representation (for example, 32 dimensions), and the decoder reconstructs the image from this representation by minimizing reconstruction error.</p>
-<p>Because MNIST images are flattened into vectors, the network treats each pixel independently and does not explicitly exploit spatial structure. Nevertheless, nonlinear fully-connected autoencoders learn more expressive latent representations than linear autoencoders, producing sharper reconstructions and lower mean squared reconstruction error.</p>
-<figure>
-<img alt="MNIST reconstructions using linear and nonlinear fully-connected autoencoders. Nonlinear models produce sharper reconstructions." id="fig:fc-ae-results" src="img/lecture18/Screenshot%202024-10-30%20at%206.37.17%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">MNIST reconstructions using linear and nonlinear fully-connected autoencoders. Nonlinear models produce sharper reconstructions.</figcaption>
+<p>Let the dataset be <span class="math inline">\(\mathbf{X} \in
+\mathbb{R}^{N \times P}\)</span>, where each input vector <span class="math inline">\(\mathbf{x}_i \in \mathbb{R}^P\)</span> and the
+weight matrix of layer <span class="math inline">\(k\)</span> is <span class="math inline">\(\mathbf{W}^{(k)} \in \mathbb{R}^{P^{(k)} \times
+P^{(k-1)}}\)</span>. During training, the encoder compresses the input
+into a low-dimensional latent representation (for example, 32
+dimensions), and the decoder reconstructs the image from this
+representation by minimizing reconstruction error.</p>
+<p>Because MNIST images are flattened into vectors, the network treats
+each pixel independently and does not explicitly exploit spatial
+structure. Nevertheless, nonlinear fully-connected autoencoders learn
+more expressive latent representations than linear autoencoders,
+producing sharper reconstructions and lower mean squared reconstruction
+error.</p>
+<figure data-latex-placement="H" id="fig:fc-ae-results">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%206.37.17%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>MNIST reconstructions using linear and nonlinear
+fully-connected autoencoders. Nonlinear models produce sharper
+reconstructions.</figcaption>
 </figure>
-<h2 data-number="3.1" id="visualization-of-learned-filters-second-and-third-layers"><span class="header-section-number">3.1</span> Visualization of Learned Filters: Second and Third Layers</h2>
-<p>To better understand what the autoencoder learns internally, we can visualize the learned weight matrices by reshaping them into image-like filters. For the second layer, the weights <span class="math inline">\(\mathbf{W}^{(2)}\)</span> can be reshaped into 64 filters of size <span class="math inline">\(8 \times 16\)</span>, while the third-layer weights <span class="math inline">\(\mathbf{W}^{(3)}\)</span> can be reshaped into 32 filters of size <span class="math inline">\(8 \times 8\)</span>. These visualizations provide insight into how representations evolve across network depth.</p>
-<p>Compared to the linear autoencoder, the nonlinear autoencoder tends to use neurons more selectively, leading to sparser and more specialized feature representations. As the network becomes deeper, the learned filters become increasingly abstract and less visually interpretable. Early layers tend to capture simple structures, while deeper layers encode more complex and distributed patterns, illustrating the hierarchical nature of representation learning.</p>
-<figure>
-<img alt="2rd layer" id="fig:enter-label" src="img/lecture18/Screenshot%202024-10-30%20at%206.55.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">2rd layer</figcaption>
+<h2 data-number="3.1" id="visualization-of-learned-filters-second-and-third-layers"><span class="header-section-number">3.1</span> Visualization of Learned
+Filters: Second and Third Layers</h2>
+<p>To better understand what the autoencoder learns internally, we can
+visualize the learned weight matrices by reshaping them into image-like
+filters. For the second layer, the weights <span class="math inline">\(\mathbf{W}^{(2)}\)</span> can be reshaped into 64
+filters of size <span class="math inline">\(8 \times 16\)</span>, while
+the third-layer weights <span class="math inline">\(\mathbf{W}^{(3)}\)</span> can be reshaped into 32
+filters of size <span class="math inline">\(8 \times 8\)</span>. These
+visualizations provide insight into how representations evolve across
+network depth.</p>
+<p>Compared to the linear autoencoder, the nonlinear autoencoder tends
+to use neurons more selectively, leading to sparser and more specialized
+feature representations. As the network becomes deeper, the learned
+filters become increasingly abstract and less visually interpretable.
+Early layers tend to capture simple structures, while deeper layers
+encode more complex and distributed patterns, illustrating the
+hierarchical nature of representation learning.</p>
+<figure data-latex-placement="H" id="fig:enter-label">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%206.55.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>2rd layer</figcaption>
 </figure>
-<figure>
-<img alt="3rd layer" id="fig:enter-label" src="img/lecture18/Screenshot%202024-10-30%20at%206.55.09%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">3rd layer</figcaption>
+<figure data-latex-placement="H" id="fig:enter-label">
+<img src="img/lecture18/Screenshot%202024-10-30%20at%206.55.09%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>3rd layer</figcaption>
 </figure>
-<h1 data-number="4" id="visualization-of-2d-latent-space"><span class="header-section-number">4.</span> Visualization of 2D Latent Space</h1>
-<p>To better understand how autoencoders organize data internally, we can restrict the latent space to two dimensions and visualize how the input samples are embedded. Figure <a data-reference="fig:2d-latent" data-reference-type="ref" href="#fig:2d-latent">10</a> shows the 2D latent representation of a fully-connected autoencoder trained on the MNIST dataset, where each point corresponds to an input image and is color-coded by its true digit label.</p>
-<figure>
-<img alt="Two-dimensional latent space learned by a fully-connected autoencoder." id="fig:2d-latent" src="img/lecture18/Screenshot%202024-11-02%20at%209.31.18%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Two-dimensional latent space learned by a fully-connected autoencoder.</figcaption>
+<h1 data-number="4" id="visualization-of-2d-latent-space"><span class="header-section-number">4.</span> Visualization of 2D Latent
+Space</h1>
+<p>To better understand how autoencoders organize data internally, we
+can restrict the latent space to two dimensions and visualize how the
+input samples are embedded. Figure <a data-reference="fig:2d-latent" data-reference-type="ref" href="#fig:2d-latent">10</a> shows
+the 2D latent representation of a fully-connected autoencoder trained on
+the MNIST dataset, where each point corresponds to an input image and is
+color-coded by its true digit label.</p>
+<figure data-latex-placement="H" id="fig:2d-latent">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.18%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Two-dimensional latent space learned by a fully-connected
+autoencoder.</figcaption>
 </figure>
-<p>By compressing images into a two-dimensional representation, the autoencoder enables direct visualization of how the model organizes the data. Although clusters corresponding to different digits begin to emerge, there is still significant overlap between classes. This limited separability occurs because the autoencoder is trained in an unsupervised manner and is optimized only for reconstruction rather than classification.</p>
-<p>The latent space also exhibits regions that do not correspond to realistic digits. Samples generated from these areas appear distorted or ambiguous, revealing discontinuities in the learned representation. These gaps highlight an important limitation of fully-connected autoencoders: they may learn latent spaces that are not smooth or well-structured, which can lead to unrealistic reconstructions when sampling from arbitrary latent locations.</p>
+<p>By compressing images into a two-dimensional representation, the
+autoencoder enables direct visualization of how the model organizes the
+data. Although clusters corresponding to different digits begin to
+emerge, there is still significant overlap between classes. This limited
+separability occurs because the autoencoder is trained in an
+unsupervised manner and is optimized only for reconstruction rather than
+classification.</p>
+<p>The latent space also exhibits regions that do not correspond to
+realistic digits. Samples generated from these areas appear distorted or
+ambiguous, revealing discontinuities in the learned representation.
+These gaps highlight an important limitation of fully-connected
+autoencoders: they may learn latent spaces that are not smooth or
+well-structured, which can lead to unrealistic reconstructions when
+sampling from arbitrary latent locations.</p>
 <h1 data-number="5" id="convolutional-autoencoders"><span class="header-section-number">5.</span> Convolutional Autoencoders</h1>
-<p>Fully-connected autoencoders treat each input feature independently and therefore do not exploit the spatial structure present in images. This leads to redundant parameters and inefficient learning of spatial patterns. Convolutional autoencoders address this limitation by replacing dense layers with convolutional layers that share weights across spatial locations. This parameter sharing introduces a strong spatial inductive bias, enabling the model to capture local patterns such as edges, textures, and shapes more effectively.</p>
-<p>Figure <a data-reference="fig:conv-autoencoder" data-reference-type="ref" href="#fig:conv-autoencoder">11</a> illustrates the overall architecture of a convolutional autoencoder. The encoder uses convolution and pooling operations to gradually reduce spatial resolution and compress the input into a latent representation, while the decoder reconstructs the image by progressively restoring spatial resolution.</p>
-<figure>
-<img alt="Overview of convolutional autoencoder architecture." id="fig:conv-autoencoder" src="img/lecture18/Screenshot%202024-11-02%20at%209.31.42%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Overview of convolutional autoencoder architecture.</figcaption>
+<p>Fully-connected autoencoders treat each input feature independently
+and therefore do not exploit the spatial structure present in images.
+This leads to redundant parameters and inefficient learning of spatial
+patterns. Convolutional autoencoders address this limitation by
+replacing dense layers with convolutional layers that share weights
+across spatial locations. This parameter sharing introduces a strong
+spatial inductive bias, enabling the model to capture local patterns
+such as edges, textures, and shapes more effectively.</p>
+<p>Figure <a data-reference="fig:conv-autoencoder" data-reference-type="ref" href="#fig:conv-autoencoder">11</a> illustrates the overall
+architecture of a convolutional autoencoder. The encoder uses
+convolution and pooling operations to gradually reduce spatial
+resolution and compress the input into a latent representation, while
+the decoder reconstructs the image by progressively restoring spatial
+resolution.</p>
+<figure data-latex-placement="H" id="fig:conv-autoencoder">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.42%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Overview of convolutional autoencoder
+architecture.</figcaption>
 </figure>
-<p>A more detailed view of the encoder–decoder structure is shown in Figure <a data-reference="fig:encoder-decoder" data-reference-type="ref" href="#fig:encoder-decoder">12</a>. The encoder performs downsampling through convolution and pooling, whereas the decoder performs upsampling using unpooling and transposed convolution to reconstruct the image.</p>
-<figure>
-<img alt="Encoder and decoder structure in convolutional autoencoders." id="fig:encoder-decoder" src="img/lecture18/Screenshot%202024-11-02%20at%209.31.52%E2%80%AFAM.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Encoder and decoder structure in convolutional autoencoders.</figcaption>
+<p>A more detailed view of the encoder–decoder structure is shown in
+Figure <a data-reference="fig:encoder-decoder" data-reference-type="ref" href="#fig:encoder-decoder">12</a>. The encoder performs
+downsampling through convolution and pooling, whereas the decoder
+performs upsampling using unpooling and transposed convolution to
+reconstruct the image.</p>
+<figure data-latex-placement="H" id="fig:encoder-decoder">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.52%E2%80%AFAM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Encoder and decoder structure in convolutional
+autoencoders.</figcaption>
 </figure>
-<p>It is important to note that the decoder is not a strict mathematical inverse of the encoder. Downsampling operations inevitably discard some information, and the decoder reconstructs the input only approximately from the compressed latent representation. During upsampling, operations such as transposed convolution and unpooling learn to restore spatial structure by filling in missing details based on patterns learned during training rather than by exactly reversing the encoder.</p>
+<p>It is important to note that the decoder is not a strict mathematical
+inverse of the encoder. Downsampling operations inevitably discard some
+information, and the decoder reconstructs the input only approximately
+from the compressed latent representation. During upsampling, operations
+such as transposed convolution and unpooling learn to restore spatial
+structure by filling in missing details based on patterns learned during
+training rather than by exactly reversing the encoder.</p>
 <h2 data-number="5.1" id="unpooling"><span class="header-section-number">5.1</span> Unpooling</h2>
-<p>In convolutional autoencoders, <strong>unpooling</strong> is used in the decoder to increase the spatial resolution of feature maps that were previously reduced by pooling operations. While pooling compresses information by downsampling, unpooling attempts to reverse this process by expanding feature maps back to larger spatial dimensions. Unlike pooling, however, unpooling does not uniquely recover the original activations; instead, it relies on heuristic upsampling strategies.</p>
+<p>In convolutional autoencoders, <strong>unpooling</strong> is used in
+the decoder to increase the spatial resolution of feature maps that were
+previously reduced by pooling operations. While pooling compresses
+information by downsampling, unpooling attempts to reverse this process
+by expanding feature maps back to larger spatial dimensions. Unlike
+pooling, however, unpooling does not uniquely recover the original
+activations; instead, it relies on heuristic upsampling strategies.</p>
 <p>Two common unpooling strategies are illustrated in Figure <a data-reference="fig:unpooling" data-reference-type="ref" href="#fig:unpooling">13</a>.</p>
-<figure>
-<img alt="Unpooling strategies. Left: Nearest-neighbor upsampling duplicates values to increase resolution. Right: Bed-of-nails upsampling inserts zeros between original activations." id="fig:unpooling" src="img/lecture18/Screenshot%202024-11-02%20at%209.41.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true"><strong>Unpooling strategies.</strong> Left: Nearest-neighbor upsampling duplicates values to increase resolution. Right: Bed-of-nails upsampling inserts zeros between original activations.</figcaption>
+<figure data-latex-placement="H" id="fig:unpooling">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.41.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption><strong>Unpooling strategies.</strong> Left:
+Nearest-neighbor upsampling duplicates values to increase resolution.
+Right: Bed-of-nails upsampling inserts zeros between original
+activations.</figcaption>
 </figure>
-<p><strong>Nearest-neighbor unpooling</strong> expands the feature map by repeating each value into a larger block. For example, a <span class="math inline">\(2 \times 2\)</span> input can be expanded into a <span class="math inline">\(4 \times 4\)</span> output by duplicating each value into a <span class="math inline">\(2 \times 2\)</span> region. This produces a piecewise-constant, block-like structure.</p>
-<p><strong>Bed-of-nails unpooling</strong> increases spatial resolution by inserting zeros between the original pixel values. The original activations remain in fixed locations, while newly created positions are set to zero, resulting in a sparse intermediate representation. Subsequent convolutional layers then learn how to fill in these missing values.</p>
-<p>In practice, unpooling is often combined with learned convolutional layers to reconstruct higher-resolution feature maps in the decoder.</p>
+<p><strong>Nearest-neighbor unpooling</strong> expands the feature map
+by repeating each value into a larger block. For example, a <span class="math inline">\(2 \times 2\)</span> input can be expanded into a
+<span class="math inline">\(4 \times 4\)</span> output by duplicating
+each value into a <span class="math inline">\(2 \times 2\)</span>
+region. This produces a piecewise-constant, block-like structure.</p>
+<p><strong>Bed-of-nails unpooling</strong> increases spatial resolution
+by inserting zeros between the original pixel values. The original
+activations remain in fixed locations, while newly created positions are
+set to zero, resulting in a sparse intermediate representation.
+Subsequent convolutional layers then learn how to fill in these missing
+values.</p>
+<p>In practice, unpooling is often combined with learned convolutional
+layers to reconstruct higher-resolution feature maps in the decoder.</p>
 <h2 data-number="5.2" id="max-unpooling"><span class="header-section-number">5.2</span> Max-unpooling</h2>
-<figure>
-<img alt="Max-unpooling using stored pooling indices." id="fig:max-unpooling" src="img/lecture18/Screenshot%202024-11-02%20at%209.24.28%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Max-unpooling using stored pooling indices.</figcaption>
+<figure data-latex-placement="H" id="fig:max-unpooling">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.24.28%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Max-unpooling using stored pooling indices.</figcaption>
 </figure>
-<p>Max-unpooling is an upsampling technique designed to partially reverse the spatial information loss introduced by max-pooling. During max-pooling, the indices of the maximum values within each pooling window are recorded. Max-unpooling reuses these stored indices to place the pooled activations back into their original spatial locations, while the remaining positions are filled with zeros.</p>
-<p>Unlike nearest-neighbor or bed-of-nails unpooling, which apply fixed heuristics, max-unpooling leverages information from the forward pass of the encoder. By restoring activations to the locations where the strongest responses originally occurred, the decoder preserves spatial alignment with the input. This spatial consistency is especially important for image reconstruction and dense prediction tasks such as segmentation.</p>
-<h2 data-number="5.3" id="learnable-upsampling-transposed-convolution-with-stride"><span class="header-section-number">5.3</span> Learnable Upsampling: Transposed Convolution with Stride</h2>
-<figure>
-<img alt="Learnable upsampling using transposed convolution." id="fig:learnable-upsampling" src="img/lecture18/Screenshot%202024-11-02%20at%208.32.21%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Learnable upsampling using transposed convolution.</figcaption>
+<p>Max-unpooling is an upsampling technique designed to partially
+reverse the spatial information loss introduced by max-pooling. During
+max-pooling, the indices of the maximum values within each pooling
+window are recorded. Max-unpooling reuses these stored indices to place
+the pooled activations back into their original spatial locations, while
+the remaining positions are filled with zeros.</p>
+<p>Unlike nearest-neighbor or bed-of-nails unpooling, which apply fixed
+heuristics, max-unpooling leverages information from the forward pass of
+the encoder. By restoring activations to the locations where the
+strongest responses originally occurred, the decoder preserves spatial
+alignment with the input. This spatial consistency is especially
+important for image reconstruction and dense prediction tasks such as
+segmentation.</p>
+<h2 data-number="5.3" id="learnable-upsampling-transposed-convolution-with-stride"><span class="header-section-number">5.3</span> Learnable Upsampling:
+Transposed Convolution with Stride</h2>
+<figure data-latex-placement="H" id="fig:learnable-upsampling">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%208.32.21%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Learnable upsampling using transposed
+convolution.</figcaption>
 </figure>
-<p>Transposed convolution is a learnable upsampling operation commonly used in the decoder of convolutional autoencoders. It is sometimes called <em>fractionally-strided convolution</em> or <em>deconvolution</em> (although it is not a true inverse of convolution). Conceptually, transposed convolution can be viewed as performing unpooling followed by a convolution, but in a single learnable operation.</p>
-<p>In standard convolution, multiple input pixels contribute to a single output pixel through a weighted sum. In contrast, transposed convolution reverses this mapping: each input pixel contributes to multiple output pixels. This allows the spatial resolution of feature maps to increase while learning how to distribute information across the larger output grid.</p>
-<p>The output spatial size of a transposed convolution (per dimension) is given by <span class="math display">\[\text{output size} = \text{stride}\,(\text{input size} - 1) + \text{kernel size} - 2 \times \text{padding}.\]</span></p>
-<p>For example, for a <span class="math inline">\(3 \times 3\)</span> transposed convolution with stride 2 and padding 1 applied to an input of size 3, the output size becomes <span class="math display">\[5 = 2(3-1) + 3 - 2(1).\]</span></p>
-<p>This learnable upsampling allows the decoder to restore spatial resolution while learning how to generate realistic high-resolution feature maps.</p>
+<p>Transposed convolution is a learnable upsampling operation commonly
+used in the decoder of convolutional autoencoders. It is sometimes
+called <em>fractionally-strided convolution</em> or
+<em>deconvolution</em> (although it is not a true inverse of
+convolution). Conceptually, transposed convolution can be viewed as
+performing unpooling followed by a convolution, but in a single
+learnable operation.</p>
+<p>In standard convolution, multiple input pixels contribute to a single
+output pixel through a weighted sum. In contrast, transposed convolution
+reverses this mapping: each input pixel contributes to multiple output
+pixels. This allows the spatial resolution of feature maps to increase
+while learning how to distribute information across the larger output
+grid.</p>
+<p>The output spatial size of a transposed convolution (per dimension)
+is given by <span class="math display">\[\begin{equation}
+\text{output size} = \text{stride}\,(\text{input size} - 1) +
+\text{kernel size} - 2 \times \text{padding}.
+\end{equation}\]</span></p>
+<p>For example, for a <span class="math inline">\(3 \times 3\)</span>
+transposed convolution with stride 2 and padding 1 applied to an input
+of size 3, the output size becomes <span class="math display">\[\begin{equation}
+5 = 2(3-1) + 3 - 2(1).
+\end{equation}\]</span></p>
+<p>This learnable upsampling allows the decoder to restore spatial
+resolution while learning how to generate realistic high-resolution
+feature maps.</p>
 <h2 data-number="5.4" id="training-on-mnist"><span class="header-section-number">5.4</span> Training on MNIST</h2>
-<p>We now consider a convolutional autoencoder trained on the MNIST handwritten digit dataset. Figure <a data-reference="fig:conv-autoencoder-mnist" data-reference-type="ref" href="#fig:conv-autoencoder-mnist">16</a> illustrates the overall architecture. The network follows a typical encoder–decoder design, where the encoder compresses the input image into a compact latent representation and the decoder reconstructs the image from this representation.</p>
-<figure>
-<img alt="Convolutional autoencoder architecture for MNIST. The encoder progressively reduces spatial resolution to form a compact latent representation, while the decoder reconstructs the image using transposed convolutions." id="fig:conv-autoencoder-mnist" src="img/lecture18/Screenshot%202024-11-02%20at%209.20.33%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true"><strong>Convolutional autoencoder architecture for MNIST.</strong> The encoder progressively reduces spatial resolution to form a compact latent representation, while the decoder reconstructs the image using transposed convolutions.</figcaption>
+<p>We now consider a convolutional autoencoder trained on the MNIST
+handwritten digit dataset. Figure <a data-reference="fig:conv-autoencoder-mnist" data-reference-type="ref" href="#fig:conv-autoencoder-mnist">16</a> illustrates the
+overall architecture. The network follows a typical encoder–decoder
+design, where the encoder compresses the input image into a compact
+latent representation and the decoder reconstructs the image from this
+representation.</p>
+<figure data-latex-placement="H" id="fig:conv-autoencoder-mnist">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%209.20.33%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption><strong>Convolutional autoencoder architecture for
+MNIST.</strong> The encoder progressively reduces spatial resolution to
+form a compact latent representation, while the decoder reconstructs the
+image using transposed convolutions.</figcaption>
 </figure>
-<p><strong>Encoder.</strong> The encoder begins with a convolutional layer containing 16 kernels of size <span class="math inline">\(3\times3\)</span> with padding 1 and ReLU activation, producing feature maps of size <span class="math inline">\(16\times28\times28\)</span>. Max pooling with stride 2 then reduces the spatial resolution to <span class="math inline">\(16\times14\times14\)</span>. A second convolutional layer with 8 kernels (again <span class="math inline">\(3\times3\)</span>, padding 1, ReLU) produces feature maps of size <span class="math inline">\(8\times14\times14\)</span>, followed by another pooling layer that reduces the representation to <span class="math inline">\(8\times7\times7\)</span>. This compressed feature map serves as the latent representation <span class="math inline">\(Z\)</span>.</p>
-<p><strong>Decoder.</strong> The decoder mirrors the encoder using transposed convolutions to increase spatial resolution. A transposed convolution with 16 kernels of size <span class="math inline">\(2\times2\)</span> and stride 2 upsamples the feature maps to <span class="math inline">\(16\times14\times14\)</span>. A final transposed convolution with a single <span class="math inline">\(2\times2\)</span> kernel and sigmoid activation reconstructs the output image of size <span class="math inline">\(1\times28\times28\)</span>.</p>
-<p>Convolutional autoencoders trained on MNIST typically achieve lower reconstruction error (measured using mean squared error) compared to linear autoencoders, demonstrating their ability to capture spatial structure in images. Figure <a data-reference="fig:input-reconstruction" data-reference-type="ref" href="#fig:input-reconstruction">17</a> shows examples of original images and their reconstructions.</p>
-<figure>
-<img alt="Original vs reconstructed MNIST images. The autoencoder learns a compact representation that preserves the key structure of the digits." id="fig:input-reconstruction" src="img/lecture18/Screenshot%202024-11-02%20at%208.28.20%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true"><strong>Original vs reconstructed MNIST images.</strong> The autoencoder learns a compact representation that preserves the key structure of the digits.</figcaption>
+<p><strong>Encoder.</strong> The encoder begins with a convolutional
+layer containing 16 kernels of size <span class="math inline">\(3\times3\)</span> with padding 1 and ReLU
+activation, producing feature maps of size <span class="math inline">\(16\times28\times28\)</span>. Max pooling with
+stride 2 then reduces the spatial resolution to <span class="math inline">\(16\times14\times14\)</span>. A second
+convolutional layer with 8 kernels (again <span class="math inline">\(3\times3\)</span>, padding 1, ReLU) produces
+feature maps of size <span class="math inline">\(8\times14\times14\)</span>, followed by another
+pooling layer that reduces the representation to <span class="math inline">\(8\times7\times7\)</span>. This compressed feature
+map serves as the latent representation <span class="math inline">\(Z\)</span>.</p>
+<p><strong>Decoder.</strong> The decoder mirrors the encoder using
+transposed convolutions to increase spatial resolution. A transposed
+convolution with 16 kernels of size <span class="math inline">\(2\times2\)</span> and stride 2 upsamples the
+feature maps to <span class="math inline">\(16\times14\times14\)</span>.
+A final transposed convolution with a single <span class="math inline">\(2\times2\)</span> kernel and sigmoid activation
+reconstructs the output image of size <span class="math inline">\(1\times28\times28\)</span>.</p>
+<p>Convolutional autoencoders trained on MNIST typically achieve lower
+reconstruction error (measured using mean squared error) compared to
+linear autoencoders, demonstrating their ability to capture spatial
+structure in images. Figure <a data-reference="fig:input-reconstruction" data-reference-type="ref" href="#fig:input-reconstruction">17</a> shows examples of
+original images and their reconstructions.</p>
+<figure data-latex-placement="H" id="fig:input-reconstruction">
+<img src="img/lecture18/Screenshot%202024-11-02%20at%208.28.20%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption><strong>Original vs reconstructed MNIST images.</strong> The
+autoencoder learns a compact representation that preserves the key
+structure of the digits.</figcaption>
 </figure>
 
 </main>

@@ -10,27 +10,48 @@
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Why is stacking multiple <span class="math inline">\(3\times3\)</span> convolutions preferred over a single <span class="math inline">\(7\times7\)</span> convolution?</p>
-<p><strong>Solution:</strong> Stacking three <span class="math inline">\(3\times3\)</span> layers yields the same receptive field but:</p>
+<li><p><strong>Question:</strong> Why is stacking multiple <span class="math inline">\(3\times3\)</span> convolutions preferred over a
+single <span class="math inline">\(7\times7\)</span> convolution?</p>
+<p><strong>Solution:</strong> Stacking three <span class="math inline">\(3\times3\)</span> layers yields the same receptive
+field but:</p>
 <ul>
-<li><p>Uses fewer parameters: <span class="math inline">\(27C^2\)</span> vs <span class="math inline">\(49C^2\)</span></p></li>
+<li><p>Uses fewer parameters: <span class="math inline">\(27C^2\)</span>
+vs <span class="math inline">\(49C^2\)</span></p></li>
 <li><p>Adds more nonlinearities (ReLU between layers)</p></li>
 <li><p>Improves representational power</p></li>
 </ul></li>
-<li><p><strong>Question:</strong> What design choice made VGG computationally expensive?</p>
-<p><strong>Solution:</strong> VGG is very deep and uses large fully connected layers, resulting in roughly <strong>138 million parameters</strong>.</p></li>
-<li><p><strong>Question:</strong> What is the core idea behind the Inception module?</p>
-<p><strong>Solution:</strong> Apply multiple operations in parallel (<span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, <span class="math inline">\(5\times5\)</span>, pooling) and concatenate outputs to capture multi-scale features efficiently.</p></li>
-<li><p><strong>Question:</strong> Why are <span class="math inline">\(1\times1\)</span> convolutions critical in GoogLeNet?</p>
-<p><strong>Solution:</strong> They act as bottleneck layers that reduce channel depth and computational cost before expensive convolutions.</p></li>
-<li><p><strong>Question:</strong> Write the Batch Normalization transformation.</p>
+<li><p><strong>Question:</strong> What design choice made VGG
+computationally expensive?</p>
+<p><strong>Solution:</strong> VGG is very deep and uses large fully
+connected layers, resulting in roughly <strong>138 million
+parameters</strong>.</p></li>
+<li><p><strong>Question:</strong> What is the core idea behind the
+Inception module?</p>
+<p><strong>Solution:</strong> Apply multiple operations in parallel
+(<span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, <span class="math inline">\(5\times5\)</span>, pooling) and concatenate
+outputs to capture multi-scale features efficiently.</p></li>
+<li><p><strong>Question:</strong> Why are <span class="math inline">\(1\times1\)</span> convolutions critical in
+GoogLeNet?</p>
+<p><strong>Solution:</strong> They act as bottleneck layers that reduce
+channel depth and computational cost before expensive
+convolutions.</p></li>
+<li><p><strong>Question:</strong> Write the Batch Normalization
+transformation.</p>
 <p><strong>Solution:</strong> <span class="math display">\[\mu_B=\frac{1}{m}\sum x_i,\quad
 \sigma_B^2=\frac{1}{m}\sum (x_i-\mu_B)^2\]</span> <span class="math display">\[\hat{x}_i=\frac{x_i-\mu_B}{\sqrt{\sigma_B^2+\epsilon}},\quad
 y_i=\gamma \hat{x}_i+\beta\]</span></p></li>
-<li><p><strong>Question:</strong> What is the key idea of a residual block?</p>
-<p><strong>Solution:</strong> Instead of learning <span class="math inline">\(H(x)\)</span> directly, ResNet learns the residual: <span class="math display">\[H(x)=F(x)+x\]</span> This identity shortcut ensures gradients flow easily during backpropagation.</p></li>
-<li><p><strong>Question:</strong> Why was ResNet a turning point in deep learning?</p>
-<p><strong>Solution:</strong> It showed that depth was not the main limitation—<strong>optimization</strong> was. Residual connections enabled training of extremely deep networks and achieved super-human ImageNet performance.</p></li>
+<li><p><strong>Question:</strong> What is the key idea of a residual
+block?</p>
+<p><strong>Solution:</strong> Instead of learning <span class="math inline">\(H(x)\)</span> directly, ResNet learns the
+residual: <span class="math display">\[H(x)=F(x)+x\]</span> This
+identity shortcut ensures gradients flow easily during
+backpropagation.</p></li>
+<li><p><strong>Question:</strong> Why was ResNet a turning point in deep
+learning?</p>
+<p><strong>Solution:</strong> It showed that depth was not the main
+limitation—<strong>optimization</strong> was. Residual connections
+enabled training of extremely deep networks and achieved super-human
+ImageNet performance.</p></li>
 </ol></section>
 </main>
 </body>

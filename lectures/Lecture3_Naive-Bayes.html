@@ -16,172 +16,576 @@
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In this lecture, we provide an overview of classification in machine learning and place it within the broader context of learning from data. In particular, we distinguish between supervised and unsupervised learning and explain how learning algorithms improve their predictions by leveraging experience gained from training data.</p>
-<p>We also introduce the key challenges involved in classification tasks. This includes defining classification as the problem of mapping inputs <span class="math inline">\(X\)</span> to discrete outputs <span class="math inline">\(Y\)</span>, as well as understanding why this task can be difficult in practice. A central challenge is identifying appropriate decision boundaries that separate different classes and generalize well to unseen examples.</p>
-<p>Next, we explain predictor and classifier modeling, along with the general process by which a classifier is trained and then used for prediction. This provides a foundation for understanding how machine learning models move from raw data to decisions.</p>
-<p>We then discuss several important types of classification models. In particular, we compare case-based and model-based methods, feature-based and end-to-end methods, and different output settings including binary, multi-class, multi-label, and multi-output classification.</p>
-<p>Finally, we introduce and explain two specific classification algorithms: the <span class="math inline">\(k\)</span>-Nearest Neighbor (<span class="math inline">\(k\)</span>-NN) classifier and the Naïve Bayes classifier. Through examples and case studies, we illustrate how these methods work and how they can be applied to practical classification problems.</p>
+<p>In this lecture, we provide an overview of classification in machine
+learning and place it within the broader context of learning from data.
+In particular, we distinguish between supervised and unsupervised
+learning and explain how learning algorithms improve their predictions
+by leveraging experience gained from training data.</p>
+<p>We also introduce the key challenges involved in classification
+tasks. This includes defining classification as the problem of mapping
+inputs <span class="math inline">\(X\)</span> to discrete outputs <span class="math inline">\(Y\)</span>, as well as understanding why this task
+can be difficult in practice. A central challenge is identifying
+appropriate decision boundaries that separate different classes and
+generalize well to unseen examples.</p>
+<p>Next, we explain predictor and classifier modeling, along with the
+general process by which a classifier is trained and then used for
+prediction. This provides a foundation for understanding how machine
+learning models move from raw data to decisions.</p>
+<p>We then discuss several important types of classification models. In
+particular, we compare case-based and model-based methods, feature-based
+and end-to-end methods, and different output settings including binary,
+multi-class, multi-label, and multi-output classification.</p>
+<p>Finally, we introduce and explain two specific classification
+algorithms: the <span class="math inline">\(k\)</span>-Nearest Neighbor
+(<span class="math inline">\(k\)</span>-NN) classifier and the Naïve
+Bayes classifier. Through examples and case studies, we illustrate how
+these methods work and how they can be applied to practical
+classification problems.</p>
 <h1 data-number="2" id="the-learning-algorithm"><span class="header-section-number">2.</span> The Learning Algorithm</h1>
-<p>Machine learning algorithms can generally be divided into two main categories: supervised learning and unsupervised learning. The key difference between these two paradigms is whether the training data includes target labels that guide the learning process.</p>
-<p><strong>Unsupervised learning</strong> refers to the setting where no target labels are provided. Instead, the algorithm is given only the input data <span class="math inline">\(x\)</span> and must discover structure in the data on its own. In this setting, the goal is typically to identify patterns, similarities, or latent structure within the dataset. Unsupervised learning algorithms therefore operate on datasets that contain multiple features but lack labeled outputs. Rather than predicting a target, these methods aim to learn useful properties about how the data is organized.</p>
-<p>One of the most common objectives in unsupervised learning is clustering, which involves grouping similar examples together based on their feature similarity. More generally, unsupervised learning is often used to discover hidden patterns, identify underlying structure, or reduce dimensionality in complex datasets. These techniques are particularly useful in exploratory data analysis, where the goal is to better understand the data before building predictive models.</p>
-<p>Common examples of unsupervised learning algorithms include k-means clustering, hierarchical (agglomerative) clustering, Gaussian mixture models (GMMs), principal component analysis (PCA), and autoencoders. Each of these methods approaches the problem differently, but they all share the goal of extracting meaningful structure from unlabeled data.</p>
-<p>In contrast, <strong>supervised learning</strong> refers to the setting where each training example is paired with a target label <span class="math inline">\(y\)</span>. In this case, the goal of the algorithm is to learn a mapping from inputs <span class="math inline">\(x\)</span> to outputs <span class="math inline">\(y\)</span>, often expressed probabilistically as <span class="math inline">\(p(y \mid x)\)</span>. Because the algorithm learns from examples where the correct answers are known, the process is referred to as “supervised,” similar to how a student learns under the guidance of an instructor.</p>
-<p>Supervised learning algorithms therefore work with datasets where each example is associated with a label or target value. Using these labeled examples, the algorithm learns a function that can generalize to new inputs. For example, in the Iris dataset, measurements of iris flowers such as sepal length and petal width are paired with species labels. A supervised learning algorithm can analyze this dataset and learn how to classify new flowers into one of the three species based on their measurements.</p>
-<p>The key idea behind supervised learning is that the labeled data provides guidance about what constitutes a correct prediction. By observing many examples of input-output pairs, the model gradually learns the relationship between features and targets.</p>
-<p>Common examples of supervised learning algorithms include logistic regression, decision trees and random forests, support vector machines (SVMs), the <span class="math inline">\(k\)</span>-Nearest Neighbor classifier, and neural networks such as convolutional neural networks (CNNs), recurrent neural networks (RNNs), and multilayer perceptrons (MLPs). These algorithms differ in complexity and modeling assumptions, but they all share the goal of learning predictive relationships from labeled data.</p>
+<p>Machine learning algorithms can generally be divided into two main
+categories: supervised learning and unsupervised learning. The key
+difference between these two paradigms is whether the training data
+includes target labels that guide the learning process.</p>
+<p><strong>Unsupervised learning</strong> refers to the setting where no
+target labels are provided. Instead, the algorithm is given only the
+input data <span class="math inline">\(x\)</span> and must discover
+structure in the data on its own. In this setting, the goal is typically
+to identify patterns, similarities, or latent structure within the
+dataset. Unsupervised learning algorithms therefore operate on datasets
+that contain multiple features but lack labeled outputs. Rather than
+predicting a target, these methods aim to learn useful properties about
+how the data is organized.</p>
+<p>One of the most common objectives in unsupervised learning is
+clustering, which involves grouping similar examples together based on
+their feature similarity. More generally, unsupervised learning is often
+used to discover hidden patterns, identify underlying structure, or
+reduce dimensionality in complex datasets. These techniques are
+particularly useful in exploratory data analysis, where the goal is to
+better understand the data before building predictive models.</p>
+<p>Common examples of unsupervised learning algorithms include k-means
+clustering, hierarchical (agglomerative) clustering, Gaussian mixture
+models (GMMs), principal component analysis (PCA), and autoencoders.
+Each of these methods approaches the problem differently, but they all
+share the goal of extracting meaningful structure from unlabeled
+data.</p>
+<p>In contrast, <strong>supervised learning</strong> refers to the
+setting where each training example is paired with a target label <span class="math inline">\(y\)</span>. In this case, the goal of the
+algorithm is to learn a mapping from inputs <span class="math inline">\(x\)</span> to outputs <span class="math inline">\(y\)</span>, often expressed probabilistically as
+<span class="math inline">\(p(y \mid x)\)</span>. Because the algorithm
+learns from examples where the correct answers are known, the process is
+referred to as “supervised,” similar to how a student learns under the
+guidance of an instructor.</p>
+<p>Supervised learning algorithms therefore work with datasets where
+each example is associated with a label or target value. Using these
+labeled examples, the algorithm learns a function that can generalize to
+new inputs. For example, in the Iris dataset, measurements of iris
+flowers such as sepal length and petal width are paired with species
+labels. A supervised learning algorithm can analyze this dataset and
+learn how to classify new flowers into one of the three species based on
+their measurements.</p>
+<p>The key idea behind supervised learning is that the labeled data
+provides guidance about what constitutes a correct prediction. By
+observing many examples of input-output pairs, the model gradually
+learns the relationship between features and targets.</p>
+<p>Common examples of supervised learning algorithms include logistic
+regression, decision trees and random forests, support vector machines
+(SVMs), the <span class="math inline">\(k\)</span>-Nearest Neighbor
+classifier, and neural networks such as convolutional neural networks
+(CNNs), recurrent neural networks (RNNs), and multilayer perceptrons
+(MLPs). These algorithms differ in complexity and modeling assumptions,
+but they all share the goal of learning predictive relationships from
+labeled data.</p>
 <h1 data-number="3" id="classification"><span class="header-section-number">3.</span> Classification</h1>
-<p>Classification is the task of approximating a mapping function <span class="math display">\[f: X \rightarrow Y,\]</span> where <span class="math inline">\(X\)</span> represents the space of input variables (also called features) and <span class="math inline">\(Y\)</span> represents a finite set of discrete output variables known as classes. The objective of classification is to assign each input object in <span class="math inline">\(X\)</span> to the correct class in <span class="math inline">\(Y\)</span>. In practice, this mapping is learned from labeled training data, where each example consists of an input feature vector paired with its correct class label.</p>
-<p>A central idea in classification is the concept of a <strong>decision boundary</strong>. During training, the model attempts to learn boundaries that separate data belonging to different classes. These boundaries allow the model to generalize beyond the training data and correctly classify new, unseen examples. Once the decision boundary is learned, classification of a new data point reduces to determining which region of the input space the point belongs to.</p>
-<p>In two-dimensional problems, decision boundaries can often be visualized as lines or curves separating regions of different classes. In higher-dimensional feature spaces, these boundaries become separating surfaces (or hypersurfaces). Although these boundaries may not be easily visualized in high dimensions, the same geometric intuition still applies: classification involves partitioning the input space into regions associated with different labels.</p>
-<h2 data-number="3.1" id="classification-vs-regression-vs-clustering"><span class="header-section-number">3.1</span> Classification vs Regression vs Clustering</h2>
-<p>It is important to distinguish classification from two other major types of machine learning problems: regression and clustering. While these tasks may appear similar, they differ in their goals and the types of outputs they produce.</p>
-<p>Classification focuses on predicting discrete labels. The model learns decision boundaries between labeled examples and uses those boundaries to assign class labels to new data points. For example, classifying emails as spam or not spam is a classification task because the output is categorical.</p>
-<p>Regression, in contrast, focuses on predicting continuous numerical values. Instead of learning boundaries between classes, regression models learn functions (which may be linear or nonlinear) that map inputs to real-valued outputs. For example, predicting house prices from property features is a regression problem because the output is a continuous number.</p>
-<p>Clustering differs from both classification and regression because it operates without labels. In clustering, the goal is to group similar data points together based on their features. The number of clusters is sometimes specified beforehand, although some algorithms can estimate it automatically. Clustering is therefore an unsupervised learning task focused on discovering structure rather than predicting known labels.</p>
-<h2 data-number="3.2" id="types-of-classification-models"><span class="header-section-number">3.2</span> Types of Classification Models</h2>
-<p>Classification models can be categorized in several useful ways depending on how they learn from data and how they make predictions.</p>
-<p>One important distinction is between <strong>case-based</strong> and <strong>model-based</strong> methods. Case-based methods do not explicitly learn a compact parametric model during training. Instead, they store the training data and defer most of the computation until prediction time. When a new example arrives, the algorithm compares it to stored examples and makes a prediction based on similarity. A classic example of this approach is the <span class="math inline">\(k\)</span>-Nearest Neighbor (k-NN) classifier, which assigns labels based on the most similar stored training examples.</p>
-<p>Model-based methods, on the other hand, construct an explicit predictive model during training. This model summarizes the information contained in the training data and can be used to make fast predictions later. Examples of model-based classification methods include decision trees, Naïve Bayes classifiers, and artificial neural networks. These approaches typically require more computation during training but allow faster prediction once the model has been learned.</p>
-<p>Another useful distinction is between <strong>feature-based</strong> and <strong>end-to-end</strong> approaches. Feature-based models rely on explicitly defined feature vectors that represent important properties of the data. In these approaches, feature engineering plays a critical role in model performance. In contrast, end-to-end models learn directly from raw inputs and automatically discover useful feature representations during training. Deep learning models are a prominent example of this approach.</p>
-<p>Classification problems can also be categorized based on the number and type of outputs. In <strong>binary classification</strong>, the goal is to distinguish between two classes. For example, determining whether a transaction is fraudulent or legitimate is a binary classification task. Many classical algorithms, such as support vector machines (SVMs), were originally designed for this setting.</p>
-<p>In <strong>multi-class classification</strong>, the model must choose among more than two possible classes. For example, identifying which species of plant an image belongs to is a multi-class classification problem. Algorithms such as random forests and neural networks naturally extend to this setting.</p>
-<p>In <strong>multi-label classification</strong>, each example may belong to multiple classes simultaneously. This differs from multi-class classification because the labels are not mutually exclusive. For example, an image might simultaneously contain a person, a bicycle, and a building. In this case, the model must assign multiple labels to the same input.</p>
-<p>Finally, in <strong>multi-output classification</strong>, the model predicts multiple target variables at the same time. Each output may itself be binary or multi-class. This setting arises when several related prediction tasks must be solved simultaneously, such as predicting multiple attributes of an object from a single input.</p>
-<h1 data-number="4" id="k-nearest-neighbor-k-nn-classifier"><span class="header-section-number">4.</span> k-Nearest Neighbor (k-NN) Classifier</h1>
-<p>The <span class="math inline">\(k\)</span>-Nearest Neighbor (k-NN) classifier is one of the simplest and most intuitive machine learning algorithms. It is a non-parametric learning method that can be used for both classification and regression tasks. The main idea behind k-NN is that similar data points tend to belong to the same class. Instead of learning an explicit model during training, k-NN makes predictions by directly comparing new data points to previously seen examples.</p>
-<p>One of the main strengths of k-NN is its simplicity. The algorithm does not require an explicit training phase in the traditional sense. Instead, it stores the training dataset and performs computation only when a prediction is needed. Because of this, k-NN is sometimes computationally cheap during training but more expensive during prediction, since distances must be computed against many stored samples.</p>
+<p>Classification is the task of approximating a mapping function <span class="math display">\[f: X \rightarrow Y,\]</span> where <span class="math inline">\(X\)</span> represents the space of input variables
+(also called features) and <span class="math inline">\(Y\)</span>
+represents a finite set of discrete output variables known as classes.
+The objective of classification is to assign each input object in <span class="math inline">\(X\)</span> to the correct class in <span class="math inline">\(Y\)</span>. In practice, this mapping is learned
+from labeled training data, where each example consists of an input
+feature vector paired with its correct class label.</p>
+<p>A central idea in classification is the concept of a <strong>decision
+boundary</strong>. During training, the model attempts to learn
+boundaries that separate data belonging to different classes. These
+boundaries allow the model to generalize beyond the training data and
+correctly classify new, unseen examples. Once the decision boundary is
+learned, classification of a new data point reduces to determining which
+region of the input space the point belongs to.</p>
+<p>In two-dimensional problems, decision boundaries can often be
+visualized as lines or curves separating regions of different classes.
+In higher-dimensional feature spaces, these boundaries become separating
+surfaces (or hypersurfaces). Although these boundaries may not be easily
+visualized in high dimensions, the same geometric intuition still
+applies: classification involves partitioning the input space into
+regions associated with different labels.</p>
+<h2 data-number="3.1" id="classification-vs-regression-vs-clustering"><span class="header-section-number">3.1</span> Classification vs Regression vs
+Clustering</h2>
+<p>It is important to distinguish classification from two other major
+types of machine learning problems: regression and clustering. While
+these tasks may appear similar, they differ in their goals and the types
+of outputs they produce.</p>
+<p>Classification focuses on predicting discrete labels. The model
+learns decision boundaries between labeled examples and uses those
+boundaries to assign class labels to new data points. For example,
+classifying emails as spam or not spam is a classification task because
+the output is categorical.</p>
+<p>Regression, in contrast, focuses on predicting continuous numerical
+values. Instead of learning boundaries between classes, regression
+models learn functions (which may be linear or nonlinear) that map
+inputs to real-valued outputs. For example, predicting house prices from
+property features is a regression problem because the output is a
+continuous number.</p>
+<p>Clustering differs from both classification and regression because it
+operates without labels. In clustering, the goal is to group similar
+data points together based on their features. The number of clusters is
+sometimes specified beforehand, although some algorithms can estimate it
+automatically. Clustering is therefore an unsupervised learning task
+focused on discovering structure rather than predicting known
+labels.</p>
+<h2 data-number="3.2" id="types-of-classification-models"><span class="header-section-number">3.2</span> Types of Classification
+Models</h2>
+<p>Classification models can be categorized in several useful ways
+depending on how they learn from data and how they make predictions.</p>
+<p>One important distinction is between <strong>case-based</strong> and
+<strong>model-based</strong> methods. Case-based methods do not
+explicitly learn a compact parametric model during training. Instead,
+they store the training data and defer most of the computation until
+prediction time. When a new example arrives, the algorithm compares it
+to stored examples and makes a prediction based on similarity. A classic
+example of this approach is the <span class="math inline">\(k\)</span>-Nearest Neighbor (k-NN) classifier,
+which assigns labels based on the most similar stored training
+examples.</p>
+<p>Model-based methods, on the other hand, construct an explicit
+predictive model during training. This model summarizes the information
+contained in the training data and can be used to make fast predictions
+later. Examples of model-based classification methods include decision
+trees, Naïve Bayes classifiers, and artificial neural networks. These
+approaches typically require more computation during training but allow
+faster prediction once the model has been learned.</p>
+<p>Another useful distinction is between <strong>feature-based</strong>
+and <strong>end-to-end</strong> approaches. Feature-based models rely on
+explicitly defined feature vectors that represent important properties
+of the data. In these approaches, feature engineering plays a critical
+role in model performance. In contrast, end-to-end models learn directly
+from raw inputs and automatically discover useful feature
+representations during training. Deep learning models are a prominent
+example of this approach.</p>
+<p>Classification problems can also be categorized based on the number
+and type of outputs. In <strong>binary classification</strong>, the goal
+is to distinguish between two classes. For example, determining whether
+a transaction is fraudulent or legitimate is a binary classification
+task. Many classical algorithms, such as support vector machines (SVMs),
+were originally designed for this setting.</p>
+<p>In <strong>multi-class classification</strong>, the model must choose
+among more than two possible classes. For example, identifying which
+species of plant an image belongs to is a multi-class classification
+problem. Algorithms such as random forests and neural networks naturally
+extend to this setting.</p>
+<p>In <strong>multi-label classification</strong>, each example may
+belong to multiple classes simultaneously. This differs from multi-class
+classification because the labels are not mutually exclusive. For
+example, an image might simultaneously contain a person, a bicycle, and
+a building. In this case, the model must assign multiple labels to the
+same input.</p>
+<p>Finally, in <strong>multi-output classification</strong>, the model
+predicts multiple target variables at the same time. Each output may
+itself be binary or multi-class. This setting arises when several
+related prediction tasks must be solved simultaneously, such as
+predicting multiple attributes of an object from a single input.</p>
+<h1 data-number="4" id="k-nearest-neighbor-k-nn-classifier"><span class="header-section-number">4.</span> k-Nearest Neighbor (k-NN)
+Classifier</h1>
+<p>The <span class="math inline">\(k\)</span>-Nearest Neighbor (k-NN)
+classifier is one of the simplest and most intuitive machine learning
+algorithms. It is a non-parametric learning method that can be used for
+both classification and regression tasks. The main idea behind k-NN is
+that similar data points tend to belong to the same class. Instead of
+learning an explicit model during training, k-NN makes predictions by
+directly comparing new data points to previously seen examples.</p>
+<p>One of the main strengths of k-NN is its simplicity. The algorithm
+does not require an explicit training phase in the traditional sense.
+Instead, it stores the training dataset and performs computation only
+when a prediction is needed. Because of this, k-NN is sometimes
+computationally cheap during training but more expensive during
+prediction, since distances must be computed against many stored
+samples.</p>
 <h2 data-number="4.1" id="overview"><span class="header-section-number">4.1</span> Overview</h2>
-<p>The k-NN classifier is often described as a <strong>lazy learner</strong>. This means that, unlike many other machine learning methods, it does not build a compressed model representation during training. Instead, it postpones all computation until a query is made. When a new data point arrives, the algorithm compares it to the stored training data and determines its class based on similarity.</p>
-<p>Historically, k-NN dates back to the 1970s and has been widely used in pattern recognition, statistical estimation, and information retrieval. Despite its simplicity, it remains an important baseline method and is often used when interpretability and simplicity are desired.</p>
-<p>k-NN is also considered a <strong>non-parametric</strong> method because it does not assume a fixed functional form for the model. The main parameter that must be chosen is <span class="math inline">\(k\)</span>, the number of neighbors used to make predictions. This flexibility allows the method to adapt to many different data distributions, although it also makes the choice of <span class="math inline">\(k\)</span> an important design decision.</p>
+<p>The k-NN classifier is often described as a <strong>lazy
+learner</strong>. This means that, unlike many other machine learning
+methods, it does not build a compressed model representation during
+training. Instead, it postpones all computation until a query is made.
+When a new data point arrives, the algorithm compares it to the stored
+training data and determines its class based on similarity.</p>
+<p>Historically, k-NN dates back to the 1970s and has been widely used
+in pattern recognition, statistical estimation, and information
+retrieval. Despite its simplicity, it remains an important baseline
+method and is often used when interpretability and simplicity are
+desired.</p>
+<p>k-NN is also considered a <strong>non-parametric</strong> method
+because it does not assume a fixed functional form for the model. The
+main parameter that must be chosen is <span class="math inline">\(k\)</span>, the number of neighbors used to make
+predictions. This flexibility allows the method to adapt to many
+different data distributions, although it also makes the choice of <span class="math inline">\(k\)</span> an important design decision.</p>
 <h2 data-number="4.2" id="algorithm"><span class="header-section-number">4.2</span> Algorithm</h2>
-<p>The basic procedure of the k-NN algorithm can be understood as a sequence of intuitive steps. Suppose we are given a dataset of labeled samples and we want to classify a new data point.</p>
-<p>First, we compute the distance between the new sample and every stored sample in the dataset using a chosen distance metric. This step measures how similar the new example is to previously observed examples.</p>
-<p>Next, we identify the <span class="math inline">\(k\)</span> samples that are closest to the new point. These are called the nearest neighbors. The assumption is that these nearby points provide the most useful information about the likely class of the new example.</p>
-<p>Finally, we assign the class label based on the majority class among these neighbors. In other words, the new data point is classified according to the most common label among its nearest neighbors.</p>
-<p>A useful special case occurs when <span class="math inline">\(k=1\)</span>. In this case, the new sample is simply assigned the class of its single nearest neighbor. While this can lead to very flexible decision boundaries, it can also make the model highly sensitive to noise, resulting in high variance.</p>
+<p>The basic procedure of the k-NN algorithm can be understood as a
+sequence of intuitive steps. Suppose we are given a dataset of labeled
+samples and we want to classify a new data point.</p>
+<p>First, we compute the distance between the new sample and every
+stored sample in the dataset using a chosen distance metric. This step
+measures how similar the new example is to previously observed
+examples.</p>
+<p>Next, we identify the <span class="math inline">\(k\)</span> samples
+that are closest to the new point. These are called the nearest
+neighbors. The assumption is that these nearby points provide the most
+useful information about the likely class of the new example.</p>
+<p>Finally, we assign the class label based on the majority class among
+these neighbors. In other words, the new data point is classified
+according to the most common label among its nearest neighbors.</p>
+<p>A useful special case occurs when <span class="math inline">\(k=1\)</span>. In this case, the new sample is
+simply assigned the class of its single nearest neighbor. While this can
+lead to very flexible decision boundaries, it can also make the model
+highly sensitive to noise, resulting in high variance.</p>
 <h2 data-number="4.3" id="distance-metrics"><span class="header-section-number">4.3</span> Distance Metrics</h2>
-<p>A key component of k-NN is how distance is measured between data points. Since the algorithm relies entirely on similarity comparisons, the choice of distance metric can strongly influence performance. Let <span class="math inline">\(\mathbf{x}, \mathbf{y} \in \mathbb{R}^d\)</span>, where <span class="math inline">\(d\)</span> is the number of features.</p>
-<p>One of the most commonly used distance measures is the <strong>Euclidean distance</strong>, defined as</p>
-<p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{d} (x_i - y_i)^2}.\]</span></p>
-<p>This distance measures the straight-line distance between two points in feature space. It is most appropriate when features are continuous and have similar scales. However, Euclidean distance can be sensitive to features with large magnitudes.</p>
-<p>Another commonly used metric is the <strong>Manhattan distance</strong>, defined as</p>
-<p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) = \sum_{i=1}^{d} |x_i - y_i|.\]</span></p>
-<p>This distance measures the sum of absolute differences between feature values. It can be interpreted as the distance traveled along axis-aligned paths (like navigating city blocks). Manhattan distance is sometimes more robust to outliers than Euclidean distance.</p>
-<p>A more general formulation is the <strong>Minkowski distance</strong>,</p>
+<p>A key component of k-NN is how distance is measured between data
+points. Since the algorithm relies entirely on similarity comparisons,
+the choice of distance metric can strongly influence performance. Let
+<span class="math inline">\(\mathbf{x}, \mathbf{y} \in
+\mathbb{R}^d\)</span>, where <span class="math inline">\(d\)</span> is
+the number of features.</p>
+<p>One of the most commonly used distance measures is the
+<strong>Euclidean distance</strong>, defined as</p>
+<p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) =
+\sqrt{\sum_{i=1}^{d} (x_i - y_i)^2}.\]</span></p>
+<p>This distance measures the straight-line distance between two points
+in feature space. It is most appropriate when features are continuous
+and have similar scales. However, Euclidean distance can be sensitive to
+features with large magnitudes.</p>
+<p>Another commonly used metric is the <strong>Manhattan
+distance</strong>, defined as</p>
+<p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) =
+\sum_{i=1}^{d} |x_i - y_i|.\]</span></p>
+<p>This distance measures the sum of absolute differences between
+feature values. It can be interpreted as the distance traveled along
+axis-aligned paths (like navigating city blocks). Manhattan distance is
+sometimes more robust to outliers than Euclidean distance.</p>
+<p>A more general formulation is the <strong>Minkowski
+distance</strong>,</p>
 <p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) =
 \left(
 \sum_{i=1}^{d} |x_i - y_i|^q
 \right)^{\frac{1}{q}},\]</span></p>
-<p>where <span class="math inline">\(q \geq 1\)</span> is a parameter. This distance generalizes both Euclidean distance (when <span class="math inline">\(q=2\)</span>) and Manhattan distance (when <span class="math inline">\(q=1\)</span>). By adjusting <span class="math inline">\(q\)</span>, we can control how strongly large feature differences are penalized.</p>
-<p>Finally, when working with categorical data rather than numerical features, the <strong>Hamming distance</strong> is often used:</p>
+<p>where <span class="math inline">\(q \geq 1\)</span> is a parameter.
+This distance generalizes both Euclidean distance (when <span class="math inline">\(q=2\)</span>) and Manhattan distance (when <span class="math inline">\(q=1\)</span>). By adjusting <span class="math inline">\(q\)</span>, we can control how strongly large
+feature differences are penalized.</p>
+<p>Finally, when working with categorical data rather than numerical
+features, the <strong>Hamming distance</strong> is often used:</p>
 <p><span class="math display">\[d(\mathbf{x}, \mathbf{y}) =
 \sum_{i=1}^{d} \mathbf{1}[x_i \neq y_i].\]</span></p>
-<p>This distance simply counts the number of positions where two feature vectors differ. It is particularly useful for binary features, categorical attributes, or string comparisons.</p>
-<h2 data-number="4.4" id="example-1-classification-using-euclidean-distance"><span class="header-section-number">4.4</span> Example 1: Classification Using Euclidean Distance</h2>
-<p>To better understand how k-NN works, consider the following example. Suppose we have a dataset consisting of six labeled data points, and we want to classify a new point based on its nearest neighbors.</p>
+<p>This distance simply counts the number of positions where two feature
+vectors differ. It is particularly useful for binary features,
+categorical attributes, or string comparisons.</p>
+<h2 data-number="4.4" id="example-1-classification-using-euclidean-distance"><span class="header-section-number">4.4</span> Example 1: Classification Using
+Euclidean Distance</h2>
+<p>To better understand how k-NN works, consider the following example.
+Suppose we have a dataset consisting of six labeled data points, and we
+want to classify a new point based on its nearest neighbors.</p>
+<div class="minipage">
 <ul>
-<li><p>Data Point A: <span class="math inline">\((1, 2)\)</span> - Class 0</p></li>
-<li><p>Data Point B: <span class="math inline">\((2, 3.5)\)</span> - Class 0</p></li>
-<li><p>Data Point C: <span class="math inline">\((4, 1)\)</span> - Class 1</p></li>
-<li><p>Data Point D: <span class="math inline">\((4, 4)\)</span> - Class 1</p></li>
-<li><p>Data Point E: <span class="math inline">\((1.5, 4)\)</span> - Class 0</p></li>
-<li><p>Data Point F: <span class="math inline">\((3.5, 2)\)</span> - Class 1</p></li>
+<li><p>Data Point A: <span class="math inline">\((1, 2)\)</span> - Class
+0</p></li>
+<li><p>Data Point B: <span class="math inline">\((2, 3.5)\)</span> -
+Class 0</p></li>
+<li><p>Data Point C: <span class="math inline">\((4, 1)\)</span> - Class
+1</p></li>
+<li><p>Data Point D: <span class="math inline">\((4, 4)\)</span> - Class
+1</p></li>
+<li><p>Data Point E: <span class="math inline">\((1.5, 4)\)</span> -
+Class 0</p></li>
+<li><p>Data Point F: <span class="math inline">\((3.5, 2)\)</span> -
+Class 1</p></li>
 </ul>
-<p>The new data point to classify is <span class="math inline">\((3, 2.5)\)</span>.</p>
+<p>The new data point to classify is <span class="math inline">\((3,
+2.5)\)</span>.</p>
+</div>
 <section class="interactive-notebook"><h3>Interactive Notebook: k-NN Example 1</h3><p>Click inside the interactive plot to move the new point. Classification updates automatically.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/knn_example1_interactive.html" style="height:760px;" title="Interactive k-NN Example 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fknn_example1_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<p>The first step is to compute the Euclidean distance between the new point and each existing point.</p>
+<p>The first step is to compute the Euclidean distance between the new
+point and each existing point.</p>
 <p><strong>Step 1: Calculate Euclidean Distances</strong></p>
 <ul>
-<li><p><span class="math inline">\(d(\text{New Point}, A) \approx 2.06\)</span></p></li>
-<li><p><span class="math inline">\(d(\text{New Point}, B) \approx 1.41\)</span></p></li>
-<li><p><span class="math inline">\(d(\text{New Point}, C) \approx 1.80\)</span></p></li>
-<li><p><span class="math inline">\(d(\text{New Point}, D) \approx 1.80\)</span></p></li>
-<li><p><span class="math inline">\(d(\text{New Point}, E) \approx 2.12\)</span></p></li>
-<li><p><span class="math inline">\(d(\text{New Point}, F) \approx 0.71\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, A) \approx
+2.06\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, B) \approx
+1.41\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, C) \approx
+1.80\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, D) \approx
+1.80\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, E) \approx
+2.12\)</span></p></li>
+<li><p><span class="math inline">\(d(\text{New Point}, F) \approx
+0.71\)</span></p></li>
 </ul>
 <p>Next, we identify the nearest neighbors.</p>
 <p><strong>Step 2: Identify Nearest Neighbors</strong></p>
-<p>If we choose <span class="math inline">\(k=3\)</span>, the three closest points are F, B, and C (with C chosen over D in the tie). These points therefore determine the prediction.</p>
+<p>If we choose <span class="math inline">\(k=3\)</span>, the three
+closest points are F, B, and C (with C chosen over D in the tie). These
+points therefore determine the prediction.</p>
 <p><strong>Step 3: Assign Class Label</strong></p>
-<p>Among these neighbors, two belong to Class 1 (F and C) and one belongs to Class 0 (B). Since Class 1 is the majority, the new point is classified as <strong>Class 1</strong>.</p>
-<h2 data-number="4.5" id="example-2-classification-with-an-outlier-using-manhattan-distance"><span class="header-section-number">4.5</span> Example 2: Classification with an Outlier Using Manhattan Distance</h2>
-<p>Now consider a second example where an outlier is present in the dataset.</p>
+<p>Among these neighbors, two belong to Class 1 (F and C) and one
+belongs to Class 0 (B). Since Class 1 is the majority, the new point is
+classified as <strong>Class 1</strong>.</p>
+<h2 data-number="4.5" id="example-2-classification-with-an-outlier-using-manhattan-distance"><span class="header-section-number">4.5</span> Example 2: Classification with
+an Outlier Using Manhattan Distance</h2>
+<p>Now consider a second example where an outlier is present in the
+dataset.</p>
+<div class="minipage">
 <ul>
-<li><p>Data Point A: <span class="math inline">\((1.2, 2.8)\)</span> - Class 0</p></li>
-<li><p>Data Point B: <span class="math inline">\((3.7, 4.1)\)</span> - Class 0</p></li>
-<li><p>Data Point C: <span class="math inline">\((6.2, 5.0)\)</span> - Class 1</p></li>
-<li><p>Data Point D: <span class="math inline">\((7.5, 3.8)\)</span> - Class 1</p></li>
-<li><p>Data Point E: <span class="math inline">\((7.2, 4.7)\)</span> - Class 0 (Outlier)</p></li>
+<li><p>Data Point A: <span class="math inline">\((1.2, 2.8)\)</span> -
+Class 0</p></li>
+<li><p>Data Point B: <span class="math inline">\((3.7, 4.1)\)</span> -
+Class 0</p></li>
+<li><p>Data Point C: <span class="math inline">\((6.2, 5.0)\)</span> -
+Class 1</p></li>
+<li><p>Data Point D: <span class="math inline">\((7.5, 3.8)\)</span> -
+Class 1</p></li>
+<li><p>Data Point E: <span class="math inline">\((7.2, 4.7)\)</span> -
+Class 0 (Outlier)</p></li>
 </ul>
-<p>The new data point to classify is <span class="math inline">\((7.5, 4.5)\)</span>.</p>
+<p>The new data point to classify is <span class="math inline">\((7.5,
+4.5)\)</span>.</p>
+</div>
 <section class="interactive-notebook"><h3>Interactive Notebook: k-NN Example 2 (Outlier Sensitivity)</h3><p>Use Manhattan distance, vary k, and toggle the outlier to see how the prediction changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/knn_example2_interactive.html" style="height:780px;" title="Interactive k-NN Example 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fknn_example2_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<p>After computing Manhattan distances, we can examine how the choice of <span class="math inline">\(k\)</span> affects robustness to the outlier.</p>
-<p>When <span class="math inline">\(k=1\)</span>, the closest point is the outlier (Point E), so the new point is classified as Class 0. However, if we remove the outlier, the nearest neighbor becomes Point D, resulting in a Class 1 prediction.</p>
-<p>If instead we use <span class="math inline">\(k=3\)</span>, the three nearest neighbors include two Class 1 points and one Class 0 point. This leads to a Class 1 prediction, showing how larger values of <span class="math inline">\(k\)</span> can reduce sensitivity to noise.</p>
-<p>This example illustrates an important tradeoff. Small values of <span class="math inline">\(k\)</span> can lead to very flexible decision boundaries but may be sensitive to noise. Larger values of <span class="math inline">\(k\)</span> provide smoother decision boundaries but may oversimplify the data structure.</p>
+<p>After computing Manhattan distances, we can examine how the choice of
+<span class="math inline">\(k\)</span> affects robustness to the
+outlier.</p>
+<p>When <span class="math inline">\(k=1\)</span>, the closest point is
+the outlier (Point E), so the new point is classified as Class 0.
+However, if we remove the outlier, the nearest neighbor becomes Point D,
+resulting in a Class 1 prediction.</p>
+<p>If instead we use <span class="math inline">\(k=3\)</span>, the three
+nearest neighbors include two Class 1 points and one Class 0 point. This
+leads to a Class 1 prediction, showing how larger values of <span class="math inline">\(k\)</span> can reduce sensitivity to noise.</p>
+<p>This example illustrates an important tradeoff. Small values of <span class="math inline">\(k\)</span> can lead to very flexible decision
+boundaries but may be sensitive to noise. Larger values of <span class="math inline">\(k\)</span> provide smoother decision boundaries
+but may oversimplify the data structure.</p>
 <h2 data-number="4.6" id="choosing-the-value-of-k"><span class="header-section-number">4.6</span> Choosing the Value of <span class="math inline">\(k\)</span></h2>
-<p>Choosing the value of <span class="math inline">\(k\)</span> is one of the most important design decisions in k-NN. Small values of <span class="math inline">\(k\)</span> tend to produce models with low bias but high variance, meaning they may overfit the training data. Larger values of <span class="math inline">\(k\)</span> reduce variance but may increase bias, potentially causing underfitting.</p>
-<p>In practice, cross-validation is commonly used to determine a good value of <span class="math inline">\(k\)</span>. By evaluating performance on validation data, we can select a value that balances bias and variance appropriately.</p>
+<p>Choosing the value of <span class="math inline">\(k\)</span> is one
+of the most important design decisions in k-NN. Small values of <span class="math inline">\(k\)</span> tend to produce models with low bias
+but high variance, meaning they may overfit the training data. Larger
+values of <span class="math inline">\(k\)</span> reduce variance but may
+increase bias, potentially causing underfitting.</p>
+<p>In practice, cross-validation is commonly used to determine a good
+value of <span class="math inline">\(k\)</span>. By evaluating
+performance on validation data, we can select a value that balances bias
+and variance appropriately.</p>
 <h2 data-number="4.7" id="feature-scaling"><span class="header-section-number">4.7</span> Feature Scaling</h2>
-<p>Because k-NN relies on distance calculations, it is very sensitive to the scale of features. If one feature has values much larger than another, it may dominate the distance calculation even if it is not more important.</p>
+<p>Because k-NN relies on distance calculations, it is very sensitive to
+the scale of features. If one feature has values much larger than
+another, it may dominate the distance calculation even if it is not more
+important.</p>
 <h3 data-number="4.7.1" id="min-max-normalization"><span class="header-section-number">4.7.1</span> Min-Max Normalization</h3>
-<p>One common solution is <strong>min–max normalization</strong>, which rescales each feature to lie between 0 and 1:</p>
+<p>One common solution is <strong>min–max normalization</strong>, which
+rescales each feature to lie between 0 and 1:</p>
 <p><span class="math display">\[x'_{i,j} =
 \frac{x_{i,j} - \min(x_{:,j})}
 {\max(x_{:,j}) - \min(x_{:,j})}.\]</span></p>
-<p>Here, <span class="math inline">\(x'_{i,j}\)</span> represents the normalized value, while <span class="math inline">\(\min(x_{:,j})\)</span> and <span class="math inline">\(\max(x_{:,j})\)</span> represent the minimum and maximum values of the feature across the dataset. This transformation ensures that all features contribute more equally to distance calculations.</p>
+<p>Here, <span class="math inline">\(x'_{i,j}\)</span> represents
+the normalized value, while <span class="math inline">\(\min(x_{:,j})\)</span> and <span class="math inline">\(\max(x_{:,j})\)</span> represent the minimum and
+maximum values of the feature across the dataset. This transformation
+ensures that all features contribute more equally to distance
+calculations.</p>
 <h3 data-number="4.7.2" id="z-score-standardization"><span class="header-section-number">4.7.2</span> Z-Score Standardization</h3>
-<p>Another widely used scaling method is <strong>z-score standardization</strong>, which transforms features to have mean zero and unit variance:</p>
+<p>Another widely used scaling method is <strong>z-score
+standardization</strong>, which transforms features to have mean zero
+and unit variance:</p>
 <p><span class="math display">\[x'_{i,j} =
 \frac{x_{i,j} - \mu_j}{\sigma_j}.\]</span></p>
-<p>Here, <span class="math inline">\(\mu_j\)</span> is the mean of feature <span class="math inline">\(j\)</span>, and <span class="math inline">\(\sigma_j\)</span> is its standard deviation. This method is particularly useful when features have different variances or when outliers may distort min–max scaling.</p>
-<p>By ensuring that features are on comparable scales, these normalization techniques significantly improve the performance and reliability of distance-based methods such as k-NN.</p>
+<p>Here, <span class="math inline">\(\mu_j\)</span> is the mean of
+feature <span class="math inline">\(j\)</span>, and <span class="math inline">\(\sigma_j\)</span> is its standard deviation. This
+method is particularly useful when features have different variances or
+when outliers may distort min–max scaling.</p>
+<p>By ensuring that features are on comparable scales, these
+normalization techniques significantly improve the performance and
+reliability of distance-based methods such as k-NN.</p>
 <h1 data-number="5" id="naïve-bayes-classifier"><span class="header-section-number">5.</span> Naïve Bayes Classifier</h1>
-<p>The Naïve Bayes classifier is a probabilistic classification method based on Bayes’ theorem. Its defining assumption is that the input features are <em>conditionally independent</em> given the class label. This assumption is called “naïve” because, in many real-world datasets, features are not truly independent. Nevertheless, the method often performs surprisingly well in practice, especially in applications such as text classification, spam filtering, and document categorization.</p>
-<p>One reason Naïve Bayes is so useful is that it provides a simple and mathematically interpretable way to estimate the probability of each class for a given input. Rather than directly learning a decision boundary as some classifiers do, it models how likely the observed features are under each class and then uses probability rules to infer the most likely class. This makes it a natural example of a probabilistic classifier.</p>
+<p>The Naïve Bayes classifier is a probabilistic classification method
+based on Bayes’ theorem. Its defining assumption is that the input
+features are <em>conditionally independent</em> given the class label.
+This assumption is called “naïve” because, in many real-world datasets,
+features are not truly independent. Nevertheless, the method often
+performs surprisingly well in practice, especially in applications such
+as text classification, spam filtering, and document categorization.</p>
+<p>One reason Naïve Bayes is so useful is that it provides a simple and
+mathematically interpretable way to estimate the probability of each
+class for a given input. Rather than directly learning a decision
+boundary as some classifiers do, it models how likely the observed
+features are under each class and then uses probability rules to infer
+the most likely class. This makes it a natural example of a
+probabilistic classifier.</p>
 <h2 data-number="5.1" id="overview-1"><span class="header-section-number">5.1</span> Overview</h2>
-<p>The central assumption of the Naïve Bayes classifier is that all features are conditionally independent once the class label is known. In other words, after conditioning on the class, the value of one feature is assumed not to affect the value of another. Although this assumption is often not exactly true, it greatly simplifies both the mathematics and the estimation procedure.</p>
-<p>Naïve Bayes is also a <strong>generative model</strong>. This means it models the class prior <span class="math inline">\(P(y)\)</span> and the class-conditional distribution <span class="math inline">\(P(\mathbf{x}\mid y)\)</span>, rather than directly modeling <span class="math inline">\(P(y\mid \mathbf{x})\)</span>. Once these quantities are estimated, Bayes’ theorem is used to compute the posterior probability of each class given the observed feature vector. Because it only requires estimating relatively simple probabilities or feature statistics, Naïve Bayes is especially effective when the data is high-dimensional or when only a modest amount of training data is available.</p>
+<p>The central assumption of the Naïve Bayes classifier is that all
+features are conditionally independent once the class label is known. In
+other words, after conditioning on the class, the value of one feature
+is assumed not to affect the value of another. Although this assumption
+is often not exactly true, it greatly simplifies both the mathematics
+and the estimation procedure.</p>
+<p>Naïve Bayes is also a <strong>generative model</strong>. This means
+it models the class prior <span class="math inline">\(P(y)\)</span> and
+the class-conditional distribution <span class="math inline">\(P(\mathbf{x}\mid y)\)</span>, rather than directly
+modeling <span class="math inline">\(P(y\mid \mathbf{x})\)</span>. Once
+these quantities are estimated, Bayes’ theorem is used to compute the
+posterior probability of each class given the observed feature vector.
+Because it only requires estimating relatively simple probabilities or
+feature statistics, Naïve Bayes is especially effective when the data is
+high-dimensional or when only a modest amount of training data is
+available.</p>
 <h2 data-number="5.2" id="bayes-theorem"><span class="header-section-number">5.2</span> Bayes’ Theorem</h2>
-<p>The Naïve Bayes classifier is built on Bayes’ theorem: <span class="math display">\[P(y \mid \mathbf{x}) = \frac{P(\mathbf{x} \mid y)P(y)}{P(\mathbf{x})}.\]</span></p>
-<p>This equation relates several important probabilities. The term <span class="math inline">\(P(y \mid \mathbf{x})\)</span> is called the <strong>posterior probability</strong>; it is the probability that the class is <span class="math inline">\(y\)</span> after observing the feature vector <span class="math inline">\(\mathbf{x}\)</span>. The term <span class="math inline">\(P(\mathbf{x} \mid y)\)</span> is called the <strong>likelihood</strong>; it measures how likely the observed feature vector is under class <span class="math inline">\(y\)</span>. The term <span class="math inline">\(P(y)\)</span> is the <strong>prior probability</strong> of class <span class="math inline">\(y\)</span>, reflecting how common that class is before seeing the input. Finally, <span class="math inline">\(P(\mathbf{x})\)</span> is the <strong>evidence</strong> or marginal likelihood, which ensures that the posterior probabilities across all classes sum to one.</p>
-<p>When making a prediction, <span class="math inline">\(P(\mathbf{x})\)</span> is the same for all candidate classes because the observed feature vector is fixed. Therefore, for classification purposes, we often compare classes using the proportional relation <span class="math display">\[P(y \mid \mathbf{x}) \propto P(\mathbf{x} \mid y)P(y).\]</span></p>
-<p>The “naïve” assumption now enters the picture. If we assume that the features <span class="math inline">\(x_1, x_2, \dots, x_d\)</span> are conditionally independent given the class label <span class="math inline">\(y\)</span>, then the likelihood can be factorized as <span class="math display">\[P(\mathbf{x} \mid y) = \prod_{i=1}^{d} P(x_i \mid y).\]</span></p>
-<p>This simplification is what makes Naïve Bayes computationally attractive. Instead of estimating a potentially very complicated joint distribution over all features, we only need to estimate one-feature-at-a-time conditional probabilities. As a result, the posterior used for prediction becomes <span class="math display">\[P(y \mid \mathbf{x}) \propto P(y)\prod_{i=1}^{d} P(x_i \mid y).\]</span></p>
-<p>Even though the independence assumption is strong and often violated in real datasets, Naïve Bayes can still perform well because correct classification does not require the estimated probabilities to be perfect. In many problems, it is enough for the model to rank the candidate classes correctly.</p>
-<h2 data-number="5.3" id="types-of-naïve-bayes-models"><span class="header-section-number">5.3</span> Types of Naïve Bayes Models</h2>
-<p>There are several variants of Naïve Bayes, and the appropriate version depends on the nature of the feature values.</p>
-<p><strong>Gaussian Naïve Bayes</strong> is used when the features are continuous-valued. In this model, each feature is assumed to follow a Gaussian (normal) distribution within each class. For each class <span class="math inline">\(y\)</span>, the model estimates a mean and variance for each feature using the training examples that belong to that class. The conditional likelihood of feature <span class="math inline">\(x_i\)</span> under class <span class="math inline">\(y\)</span> is then given by <span class="math display">\[P(x_i \mid y) =
+<p>The Naïve Bayes classifier is built on Bayes’ theorem: <span class="math display">\[P(y \mid \mathbf{x}) = \frac{P(\mathbf{x} \mid
+y)P(y)}{P(\mathbf{x})}.\]</span></p>
+<p>This equation relates several important probabilities. The term <span class="math inline">\(P(y \mid \mathbf{x})\)</span> is called the
+<strong>posterior probability</strong>; it is the probability that the
+class is <span class="math inline">\(y\)</span> after observing the
+feature vector <span class="math inline">\(\mathbf{x}\)</span>. The term
+<span class="math inline">\(P(\mathbf{x} \mid y)\)</span> is called the
+<strong>likelihood</strong>; it measures how likely the observed feature
+vector is under class <span class="math inline">\(y\)</span>. The term
+<span class="math inline">\(P(y)\)</span> is the <strong>prior
+probability</strong> of class <span class="math inline">\(y\)</span>,
+reflecting how common that class is before seeing the input. Finally,
+<span class="math inline">\(P(\mathbf{x})\)</span> is the
+<strong>evidence</strong> or marginal likelihood, which ensures that the
+posterior probabilities across all classes sum to one.</p>
+<p>When making a prediction, <span class="math inline">\(P(\mathbf{x})\)</span> is the same for all
+candidate classes because the observed feature vector is fixed.
+Therefore, for classification purposes, we often compare classes using
+the proportional relation <span class="math display">\[P(y \mid
+\mathbf{x}) \propto P(\mathbf{x} \mid y)P(y).\]</span></p>
+<p>The “naïve” assumption now enters the picture. If we assume that the
+features <span class="math inline">\(x_1, x_2, \dots, x_d\)</span> are
+conditionally independent given the class label <span class="math inline">\(y\)</span>, then the likelihood can be factorized
+as <span class="math display">\[P(\mathbf{x} \mid y) = \prod_{i=1}^{d}
+P(x_i \mid y).\]</span></p>
+<p>This simplification is what makes Naïve Bayes computationally
+attractive. Instead of estimating a potentially very complicated joint
+distribution over all features, we only need to estimate
+one-feature-at-a-time conditional probabilities. As a result, the
+posterior used for prediction becomes <span class="math display">\[P(y
+\mid \mathbf{x}) \propto P(y)\prod_{i=1}^{d} P(x_i \mid y).\]</span></p>
+<p>Even though the independence assumption is strong and often violated
+in real datasets, Naïve Bayes can still perform well because correct
+classification does not require the estimated probabilities to be
+perfect. In many problems, it is enough for the model to rank the
+candidate classes correctly.</p>
+<h2 data-number="5.3" id="types-of-naïve-bayes-models"><span class="header-section-number">5.3</span> Types of Naïve Bayes
+Models</h2>
+<p>There are several variants of Naïve Bayes, and the appropriate
+version depends on the nature of the feature values.</p>
+<p><strong>Gaussian Naïve Bayes</strong> is used when the features are
+continuous-valued. In this model, each feature is assumed to follow a
+Gaussian (normal) distribution within each class. For each class <span class="math inline">\(y\)</span>, the model estimates a mean and
+variance for each feature using the training examples that belong to
+that class. The conditional likelihood of feature <span class="math inline">\(x_i\)</span> under class <span class="math inline">\(y\)</span> is then given by <span class="math display">\[P(x_i \mid y) =
 \frac{1}{\sqrt{2\pi\sigma_y^2}}
-\mathrm{e}^{-\frac{(x_i - \mu_y)^2}{2\sigma_y^2}}.\]</span> Under the Naïve Bayes assumption, the full likelihood becomes <span class="math display">\[P(\mathbf{x} \mid y) = \prod_{i=1}^{d} P(x_i \mid y).\]</span> In practice, the mean and variance are usually estimated separately for each feature and each class. Gaussian Naïve Bayes is a good fit when the data consists of real-valued measurements such as lengths, temperatures, or sensor values.</p>
-<p><strong>Multinomial Naïve Bayes</strong> is commonly used for count-based data, especially in text classification. In document modeling, for example, the features may represent how many times each word appears in a document. In this setting, the likelihood is modeled using a multinomial distribution: <span class="math display">\[P(\mathbf{x} \mid y)=
+\mathrm{e}^{-\frac{(x_i - \mu_y)^2}{2\sigma_y^2}}.\]</span> Under the
+Naïve Bayes assumption, the full likelihood becomes <span class="math display">\[P(\mathbf{x} \mid y) = \prod_{i=1}^{d} P(x_i \mid
+y).\]</span> In practice, the mean and variance are usually estimated
+separately for each feature and each class. Gaussian Naïve Bayes is a
+good fit when the data consists of real-valued measurements such as
+lengths, temperatures, or sensor values.</p>
+<p><strong>Multinomial Naïve Bayes</strong> is commonly used for
+count-based data, especially in text classification. In document
+modeling, for example, the features may represent how many times each
+word appears in a document. In this setting, the likelihood is modeled
+using a multinomial distribution: <span class="math display">\[P(\mathbf{x} \mid y)=
 \frac{\left(\sum_{j=1}^d x_j\right)!}{\prod_{j=1}^d x_j!}
-\prod_{j=1}^d \theta_{y,j}^{\,x_j}.\]</span> Here, <span class="math inline">\(\theta_{y,j}\)</span> denotes the probability of feature <span class="math inline">\(j\)</span> under class <span class="math inline">\(y\)</span>. The multinomial coefficient is constant with respect to the class and is therefore often omitted during classification, since it does not affect which class receives the highest posterior score. Multinomial Naïve Bayes is especially popular in bag-of-words models for text.</p>
-<p><strong>Bernoulli Naïve Bayes</strong> is used when the features are binary indicators. In this case, each feature simply records whether a certain attribute is present or absent. For instance, in spam filtering, a feature might indicate whether the word “free” appears in an email. If <span class="math inline">\(x_j \in \{0,1\}\)</span>, then the likelihood under class <span class="math inline">\(y\)</span> is <span class="math display">\[P(\mathbf{x} \mid y)=\prod_{j=1}^d p_{y,j}^{\,x_j}(1-p_{y,j})^{(1-x_j)}.\]</span> This model is well-suited for feature vectors that describe presence or absence rather than counts or continuous measurements.</p>
-<h2 data-number="5.4" id="advantages-and-disadvantages"><span class="header-section-number">5.4</span> Advantages and Disadvantages</h2>
-<p>Naïve Bayes has several practical advantages. First, it is computationally efficient. Training is usually fast because the model only needs to estimate simple quantities such as counts, means, variances, or conditional probabilities. Prediction is also fast, which makes the method suitable for large datasets and real-time applications.</p>
-<p>A second advantage is that Naïve Bayes naturally handles multi-class problems. Unlike some classifiers that are fundamentally binary and require additional design choices to extend to multiple classes, Naïve Bayes directly computes posterior scores for each class and selects the most probable one.</p>
-<p>A third advantage is its low storage requirement. Rather than storing all training examples, as in case-based methods like k-NN, Naïve Bayes only stores a small number of parameters per class. This can make it memory-efficient and easy to deploy.</p>
-<p>However, Naïve Bayes also has important limitations. One well-known issue is the <strong>zero-frequency problem</strong>. If a certain feature value never appears with a particular class in the training data, then the estimated conditional probability for that event becomes zero. Because Naïve Bayes multiplies many such probabilities together, a single zero can force the entire posterior score for that class to zero. This problem is often addressed by smoothing techniques such as Laplace smoothing.</p>
-<p>Another limitation is the strong independence assumption. In many real-world datasets, features are correlated. For example, in text data, the presence of one word may make another word more likely to appear. Since Naïve Bayes ignores such dependencies, its estimated probabilities may not accurately reflect the true underlying distribution.</p>
-<p>Finally, Naïve Bayes is often criticized for poor probability calibration. Even when it predicts the correct class, the numerical probabilities it produces may be overly confident. This means that while it can be an excellent classifier, its posterior probabilities should not always be interpreted as highly accurate confidence estimates.</p>
+\prod_{j=1}^d \theta_{y,j}^{\,x_j}.\]</span> Here, <span class="math inline">\(\theta_{y,j}\)</span> denotes the probability of
+feature <span class="math inline">\(j\)</span> under class <span class="math inline">\(y\)</span>. The multinomial coefficient is
+constant with respect to the class and is therefore often omitted during
+classification, since it does not affect which class receives the
+highest posterior score. Multinomial Naïve Bayes is especially popular
+in bag-of-words models for text.</p>
+<p><strong>Bernoulli Naïve Bayes</strong> is used when the features are
+binary indicators. In this case, each feature simply records whether a
+certain attribute is present or absent. For instance, in spam filtering,
+a feature might indicate whether the word “free” appears in an email. If
+<span class="math inline">\(x_j \in \{0,1\}\)</span>, then the
+likelihood under class <span class="math inline">\(y\)</span> is <span class="math display">\[P(\mathbf{x} \mid y)=\prod_{j=1}^d
+p_{y,j}^{\,x_j}(1-p_{y,j})^{(1-x_j)}.\]</span> This model is well-suited
+for feature vectors that describe presence or absence rather than counts
+or continuous measurements.</p>
+<h2 data-number="5.4" id="advantages-and-disadvantages"><span class="header-section-number">5.4</span> Advantages and
+Disadvantages</h2>
+<p>Naïve Bayes has several practical advantages. First, it is
+computationally efficient. Training is usually fast because the model
+only needs to estimate simple quantities such as counts, means,
+variances, or conditional probabilities. Prediction is also fast, which
+makes the method suitable for large datasets and real-time
+applications.</p>
+<p>A second advantage is that Naïve Bayes naturally handles multi-class
+problems. Unlike some classifiers that are fundamentally binary and
+require additional design choices to extend to multiple classes, Naïve
+Bayes directly computes posterior scores for each class and selects the
+most probable one.</p>
+<p>A third advantage is its low storage requirement. Rather than storing
+all training examples, as in case-based methods like k-NN, Naïve Bayes
+only stores a small number of parameters per class. This can make it
+memory-efficient and easy to deploy.</p>
+<p>However, Naïve Bayes also has important limitations. One well-known
+issue is the <strong>zero-frequency problem</strong>. If a certain
+feature value never appears with a particular class in the training
+data, then the estimated conditional probability for that event becomes
+zero. Because Naïve Bayes multiplies many such probabilities together, a
+single zero can force the entire posterior score for that class to zero.
+This problem is often addressed by smoothing techniques such as Laplace
+smoothing.</p>
+<p>Another limitation is the strong independence assumption. In many
+real-world datasets, features are correlated. For example, in text data,
+the presence of one word may make another word more likely to appear.
+Since Naïve Bayes ignores such dependencies, its estimated probabilities
+may not accurately reflect the true underlying distribution.</p>
+<p>Finally, Naïve Bayes is often criticized for poor probability
+calibration. Even when it predicts the correct class, the numerical
+probabilities it produces may be overly confident. This means that while
+it can be an excellent classifier, its posterior probabilities should
+not always be interpreted as highly accurate confidence estimates.</p>
 <h2 data-number="5.5" id="applications"><span class="header-section-number">5.5</span> Applications</h2>
-<p>Naïve Bayes is widely used in text classification tasks such as spam detection, sentiment analysis, topic labeling, and document categorization. It is especially effective in these settings because text data often has very high dimensionality, and the method can still train efficiently with relatively limited data.</p>
-<p>The model is also suitable for real-time prediction tasks because of its low computational cost. Once the necessary probabilities or statistics have been estimated, prediction can be performed very quickly.</p>
-<p>In addition, Naïve Bayes has been used in recommendation-related and content-based filtering settings, where classes or preferences may be inferred from observed item or user attributes. While more sophisticated models are often used in large-scale recommendation systems, Naïve Bayes provides a useful and interpretable baseline.</p>
-<h2 data-number="5.6" id="example-done-in-class-available-in-lecture-slides"><span class="header-section-number">5.6</span> Example (done in class &amp; available in lecture slides)</h2>
-<p>Consider a weather dataset in which the goal is to predict whether a game will be played based on observed weather conditions such as whether it is sunny or rainy, and whether the wind is strong or weak. A Naïve Bayes solution to this problem typically begins by converting the dataset into a set of frequency counts. These counts are then used to estimate the likelihood of each feature value under each class. Finally, Bayes’ theorem is applied to compute the posterior probability for each class, and the class with the larger posterior probability is chosen as the prediction.</p>
-<p>This general workflow appears repeatedly in Naïve Bayes applications: first estimate priors and class-conditional probabilities from data, then combine them probabilistically to classify new inputs.</p>
-<h2 data-number="5.7" id="another-example-email-spam-classification"><span class="header-section-number">5.7</span> Another Example: Email Spam Classification</h2>
-<p>In this example, we build a simple spam filter using the Bernoulli Naïve Bayes classifier. The goal is to classify emails as either “Spam” or “Not Spam” based on whether certain keywords are present.</p>
+<p>Naïve Bayes is widely used in text classification tasks such as spam
+detection, sentiment analysis, topic labeling, and document
+categorization. It is especially effective in these settings because
+text data often has very high dimensionality, and the method can still
+train efficiently with relatively limited data.</p>
+<p>The model is also suitable for real-time prediction tasks because of
+its low computational cost. Once the necessary probabilities or
+statistics have been estimated, prediction can be performed very
+quickly.</p>
+<p>In addition, Naïve Bayes has been used in recommendation-related and
+content-based filtering settings, where classes or preferences may be
+inferred from observed item or user attributes. While more sophisticated
+models are often used in large-scale recommendation systems, Naïve Bayes
+provides a useful and interpretable baseline.</p>
+<h2 data-number="5.6" id="example-done-in-class-available-in-lecture-slides"><span class="header-section-number">5.6</span> Example (done in class &amp;
+available in lecture slides)</h2>
+<p>Consider a weather dataset in which the goal is to predict whether a
+game will be played based on observed weather conditions such as whether
+it is sunny or rainy, and whether the wind is strong or weak. A Naïve
+Bayes solution to this problem typically begins by converting the
+dataset into a set of frequency counts. These counts are then used to
+estimate the likelihood of each feature value under each class. Finally,
+Bayes’ theorem is applied to compute the posterior probability for each
+class, and the class with the larger posterior probability is chosen as
+the prediction.</p>
+<p>This general workflow appears repeatedly in Naïve Bayes applications:
+first estimate priors and class-conditional probabilities from data,
+then combine them probabilistically to classify new inputs.</p>
+<h2 data-number="5.7" id="another-example-email-spam-classification"><span class="header-section-number">5.7</span> Another Example: Email Spam
+Classification</h2>
+<p>In this example, we build a simple spam filter using the Bernoulli
+Naïve Bayes classifier. The goal is to classify emails as either “Spam”
+or “Not Spam” based on whether certain keywords are present.</p>
 <p><strong>Step 1: Dataset</strong></p>
-<p>Consider the following dataset of emails. Each feature indicates whether a specific keyword is present (1) or absent (0).</p>
+<p>Consider the following dataset of emails. Each feature indicates
+whether a specific keyword is present (1) or absent (0).</p>
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"><strong>Email</strong></th>
 <th style="text-align: center;"><strong>Contains “offer”</strong></th>
 <th style="text-align: center;"><strong>Contains “free”</strong></th>
@@ -190,49 +594,49 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">Spam</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">Spam</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">Spam</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">Not Spam</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">Not Spam</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">6</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">Spam</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">7</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
@@ -242,14 +646,17 @@
 </tbody>
 </table>
 </div>
-<p>We would like to classify a new email with feature vector <span class="math inline">\((1,1,0)\)</span>. This means the email contains the words “offer” and “free,” but does not contain the word “win.”</p>
-<p><strong>Step 2: Convert the Dataset into Frequency Tables</strong></p>
-<p>To apply Naïve Bayes, we first count how often each feature value appears within each class.</p>
+<p>We would like to classify a new email with feature vector <span class="math inline">\((1,1,0)\)</span>. This means the email contains
+the words “offer” and “free,” but does not contain the word “win.”</p>
+<p><strong>Step 2: Convert the Dataset into Frequency
+Tables</strong></p>
+<p>To apply Naïve Bayes, we first count how often each feature value
+appears within each class.</p>
 <p><strong>Feature: contains “offer”</strong></p>
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"></th>
 <th style="text-align: center;">Spam</th>
 <th style="text-align: center;">Not Spam</th>
@@ -257,19 +664,19 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Yes (1)</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">3</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">No (0)</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">4</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Total</td>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">3</td>
@@ -282,7 +689,7 @@
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"></th>
 <th style="text-align: center;">Spam</th>
 <th style="text-align: center;">Not Spam</th>
@@ -290,19 +697,19 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Yes (1)</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">3</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">No (0)</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">4</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Total</td>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">3</td>
@@ -315,7 +722,7 @@
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"></th>
 <th style="text-align: center;">Spam</th>
 <th style="text-align: center;">Not Spam</th>
@@ -323,19 +730,19 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Yes (1)</td>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">4</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">No (0)</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">3</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Total</td>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">3</td>
@@ -345,43 +752,44 @@
 </table>
 </div>
 <p><strong>Step 3: Build the Likelihood Table</strong></p>
-<p>Using these frequency tables, we estimate the conditional probabilities needed for Bernoulli Naïve Bayes.</p>
+<p>Using these frequency tables, we estimate the conditional
+probabilities needed for Bernoulli Naïve Bayes.</p>
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"><strong>Feature</strong></th>
 <th style="text-align: center;"><strong>P(Feature <span class="math inline">\(\mid\)</span> Spam)</strong></th>
 <th style="text-align: center;"><strong>P(Feature <span class="math inline">\(\mid\)</span> Not Spam)</strong></th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Contains “offer” (1)</td>
 <td style="text-align: center;"><span class="math inline">\(2/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(1/3\)</span></td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">Does not contain “offer” (0)</td>
 <td style="text-align: center;"><span class="math inline">\(2/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(2/3\)</span></td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Contains “free” (1)</td>
 <td style="text-align: center;"><span class="math inline">\(2/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(1/3\)</span></td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">Does not contain “free” (0)</td>
 <td style="text-align: center;"><span class="math inline">\(2/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(2/3\)</span></td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">Contains “win” (1)</td>
 <td style="text-align: center;"><span class="math inline">\(4/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(0/3\)</span></td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">Does not contain “win” (0)</td>
 <td style="text-align: center;"><span class="math inline">\(0/4\)</span></td>
 <td style="text-align: center;"><span class="math inline">\(3/3\)</span></td>
@@ -389,12 +797,16 @@
 </tbody>
 </table>
 </div>
-<p><strong>Step 4: Apply Bayes’ Theorem and Make a Prediction</strong></p>
-<p>We now compute the posterior score for each class. Since the same evidence term appears in both class posteriors, we only need to compare the unnormalized posterior values.</p>
+<p><strong>Step 4: Apply Bayes’ Theorem and Make a
+Prediction</strong></p>
+<p>We now compute the posterior score for each class. Since the same
+evidence term appears in both class posteriors, we only need to compare
+the unnormalized posterior values.</p>
 <p>The prior probabilities are <span class="math display">\[P(\text{Spam}) = \frac{4}{7},
 \qquad
 P(\text{Not Spam}) = \frac{3}{7}.\]</span></p>
-<p>For the new email <span class="math inline">\((1,1,0)\)</span>, the spam score is <span class="math display">\[P(\text{Spam} \mid (1,1,0))
+<p>For the new email <span class="math inline">\((1,1,0)\)</span>, the
+spam score is <span class="math display">\[P(\text{Spam} \mid (1,1,0))
 \propto
 P(\text{Spam})
 \times
@@ -419,18 +831,69 @@ P(\text{win}=0 \mid \text{Not Spam}),\]</span> which gives <span class="math dis
 \frac{3}{7}\times\frac{1}{3}\times\frac{1}{3}\times\frac{3}{3}
 =
 \frac{1}{21}.\]</span></p>
-<p>Since the score for Spam is zero and the score for Not Spam is positive, the classifier predicts that the new email is <strong>Not Spam</strong>.</p>
-<p>This example clearly shows the <strong>zero-frequency problem</strong>. Because the training set contains no spam emails without the word “win,” the model assigns <span class="math display">\[P(\text{win}=0 \mid \text{Spam}) = 0,\]</span> and this single zero causes the entire posterior score for the Spam class to collapse to zero. In practice, this issue is typically handled using <strong>Laplace smoothing</strong>, which adds a small positive count to each feature-class combination so that no probability becomes exactly zero.</p>
+<p>Since the score for Spam is zero and the score for Not Spam is
+positive, the classifier predicts that the new email is <strong>Not
+Spam</strong>.</p>
+<p>This example clearly shows the <strong>zero-frequency
+problem</strong>. Because the training set contains no spam emails
+without the word “win,” the model assigns <span class="math display">\[P(\text{win}=0 \mid \text{Spam}) = 0,\]</span>
+and this single zero causes the entire posterior score for the Spam
+class to collapse to zero. In practice, this issue is typically handled
+using <strong>Laplace smoothing</strong>, which adds a small positive
+count to each feature-class combination so that no probability becomes
+exactly zero.</p>
 <h1 data-number="6" id="additional-details"><span class="header-section-number">6.</span> Additional Details</h1>
-<p>Before moving further into machine learning, it is useful to clarify several foundational terms that appear throughout this lecture and in many other learning problems.</p>
-<p>A <strong>sample</strong> is a single data item that the model processes. Depending on the application, a sample could be a document, an image, an audio clip, a video segment, a row in a spreadsheet or database, or any other object that can be represented numerically. In machine learning, each sample corresponds to one example in the dataset.</p>
-<p><strong>Features</strong> are the measurable properties or descriptive attributes used to represent a sample. These may include physical measurements, counts, categories converted into numbers, or other characteristics that capture useful information about the data item. The choice of features is important because it determines what information the model can use to make predictions.</p>
-<p>A <strong>feature vector</strong> is the numerical representation of a sample obtained by combining all of its features into a single vector. If a sample is described by <span class="math inline">\(n\)</span> features, then its representation is an <span class="math inline">\(n\)</span>-dimensional vector. This feature vector serves as the input to a machine learning model.</p>
-<p><strong>Feature extraction</strong> is the process of transforming raw data into a feature vector. In many cases, raw data such as images, audio, or text is not directly suitable for a classical machine learning algorithm, so it must first be converted into a structured numerical representation. Feature extraction may also reduce dimensionality by retaining the most informative aspects of the data while discarding less useful details.</p>
-<p>The <strong>target class</strong> is the correct output label that a model is intended to predict in a classification problem. For example, the target class could indicate the species of a flower, whether an email is spam, or whether an image contains a certain object. In supervised learning, the training data includes these target labels so that the model can learn the relationship between inputs and outputs.</p>
-<p>A <strong>learning model</strong> is the family or class of functions that the algorithm searches over in order to approximate the mapping from inputs to outputs. This includes both the structure of the model and its learnable parameters. For example, a decision tree, a logistic regression classifier, and a neural network are all different kinds of learning models.</p>
-<p>The <strong>training algorithm</strong> is the procedure used to adjust the model parameters based on the training data. Its goal is to improve the model’s performance by finding parameter values that produce accurate predictions. Examples of training algorithms include gradient descent, backpropagation, and other optimization procedures.</p>
-<p>Finally, the <strong>training set</strong> is the portion of the dataset used to fit the model, while the <strong>evaluation set</strong> (or test set) is used to assess the model’s performance on previously unseen data. This distinction is important because a good machine learning model should not only perform well on the training data, but also generalize well to new examples.</p>
+<p>Before moving further into machine learning, it is useful to clarify
+several foundational terms that appear throughout this lecture and in
+many other learning problems.</p>
+<p>A <strong>sample</strong> is a single data item that the model
+processes. Depending on the application, a sample could be a document,
+an image, an audio clip, a video segment, a row in a spreadsheet or
+database, or any other object that can be represented numerically. In
+machine learning, each sample corresponds to one example in the
+dataset.</p>
+<p><strong>Features</strong> are the measurable properties or
+descriptive attributes used to represent a sample. These may include
+physical measurements, counts, categories converted into numbers, or
+other characteristics that capture useful information about the data
+item. The choice of features is important because it determines what
+information the model can use to make predictions.</p>
+<p>A <strong>feature vector</strong> is the numerical representation of
+a sample obtained by combining all of its features into a single vector.
+If a sample is described by <span class="math inline">\(n\)</span>
+features, then its representation is an <span class="math inline">\(n\)</span>-dimensional vector. This feature vector
+serves as the input to a machine learning model.</p>
+<p><strong>Feature extraction</strong> is the process of transforming
+raw data into a feature vector. In many cases, raw data such as images,
+audio, or text is not directly suitable for a classical machine learning
+algorithm, so it must first be converted into a structured numerical
+representation. Feature extraction may also reduce dimensionality by
+retaining the most informative aspects of the data while discarding less
+useful details.</p>
+<p>The <strong>target class</strong> is the correct output label that a
+model is intended to predict in a classification problem. For example,
+the target class could indicate the species of a flower, whether an
+email is spam, or whether an image contains a certain object. In
+supervised learning, the training data includes these target labels so
+that the model can learn the relationship between inputs and
+outputs.</p>
+<p>A <strong>learning model</strong> is the family or class of functions
+that the algorithm searches over in order to approximate the mapping
+from inputs to outputs. This includes both the structure of the model
+and its learnable parameters. For example, a decision tree, a logistic
+regression classifier, and a neural network are all different kinds of
+learning models.</p>
+<p>The <strong>training algorithm</strong> is the procedure used to
+adjust the model parameters based on the training data. Its goal is to
+improve the model’s performance by finding parameter values that produce
+accurate predictions. Examples of training algorithms include gradient
+descent, backpropagation, and other optimization procedures.</p>
+<p>Finally, the <strong>training set</strong> is the portion of the
+dataset used to fit the model, while the <strong>evaluation set</strong>
+(or test set) is used to assess the model’s performance on previously
+unseen data. This distinction is important because a good machine
+learning model should not only perform well on the training data, but
+also generalize well to new examples.</p>
 
 </main>
 </body>

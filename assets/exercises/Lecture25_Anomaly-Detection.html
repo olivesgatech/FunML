@@ -10,16 +10,80 @@
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p>What is the primary challenge in defining anomalies within a dataset? <strong>Answer:</strong> The primary challenge is accurately defining “normal” behavior. Since anomalies are detected as deviations from normal patterns, an incorrect definition of normality can lead to false positives or false negatives. <strong>Explanation:</strong> Anomaly detection relies on modeling the statistical properties of normal data. If the model of normal behavior is inaccurate or incomplete, the detection process becomes unreliable.</p></li>
-<li><p>Why are anomalies often considered the most significant data points in a dataset? <strong>Answer:</strong> Anomalies correspond to rare and unusual events such as fraud, failures, or medical abnormalities. <strong>Explanation:</strong> Although rare, anomalies often carry the most actionable information and are therefore critical in many real-world applications.</p></li>
-<li><p>What are the two main components of a statistical anomaly detection algorithm? <strong>Answer:</strong> (1) A statistic that measures data behavior, and (2) a decision rule that determines whether a sample is anomalous. <strong>Explanation:</strong> The statistic quantifies how unusual a sample is, while the decision rule applies a threshold to classify it as normal or anomalous.</p></li>
-<li><p>What is the trade-off between True Positive Rate (TPR) and False Positive Rate (FPR)? <strong>Answer:</strong> Lowering the threshold <span class="math inline">\(\gamma\)</span> increases TPR but also increases FPR, while raising <span class="math inline">\(\gamma\)</span> decreases FPR but may miss anomalies. <strong>Explanation:</strong> Threshold selection determines the sensitivity of the detector and directly affects detection performance.</p></li>
-<li><p>What is the main challenge of density-based anomaly detection methods? <strong>Answer:</strong> Density estimation becomes difficult in high-dimensional spaces due to the curse of dimensionality. <strong>Explanation:</strong> As dimensionality increases, data become sparse and probability density estimation becomes computationally expensive and prone to overfitting.</p></li>
-<li><p>Why is unsupervised anomaly detection often formulated as a ranking problem? <strong>Answer:</strong> Because models typically output anomaly scores rather than class labels. <strong>Explanation:</strong> Samples are ranked by their anomaly score, and the most abnormal samples are flagged based on a threshold or top-<span class="math inline">\(k\)</span> selection.</p></li>
-<li><p>Why are anomalies easier to detect using Isolation Forest compared to density estimation? <strong>Answer:</strong> Anomalies are easier to isolate and require fewer random splits in decision trees. <strong>Explanation:</strong> Isolation Forest exploits the fact that anomalous points are rare and different, leading to shorter path lengths during recursive partitioning.</p></li>
-<li><p>Why do reconstruction-based methods detect anomalies using reconstruction error? <strong>Answer:</strong> Models trained on normal data reconstruct normal samples well but fail to reconstruct anomalies. <strong>Explanation:</strong> Large reconstruction errors indicate that the input does not lie on the learned manifold of normal data.</p></li>
-<li><p>Why is Maximum Softmax Probability (MSP) useful for detecting out-of-distribution samples? <strong>Answer:</strong> Out-of-distribution inputs typically produce lower softmax confidence scores. <strong>Explanation:</strong> Neural networks tend to assign high probability to familiar data and lower confidence to unfamiliar inputs.</p></li>
-<li><p>Why is anomaly detection challenging in high-dimensional data? <strong>Answer:</strong> Distance and density measures become less informative in high dimensions. <strong>Explanation:</strong> This phenomenon, known as the curse of dimensionality, makes it harder to distinguish normal and anomalous samples reliably.</p></li>
+<li><p>What is the primary challenge in defining anomalies within a
+dataset?<br/>
+<strong>Answer:</strong> The primary challenge is accurately defining
+“normal” behavior. Since anomalies are detected as deviations from
+normal patterns, an incorrect definition of normality can lead to false
+positives or false negatives.<br/>
+<strong>Explanation:</strong> Anomaly detection relies on modeling the
+statistical properties of normal data. If the model of normal behavior
+is inaccurate or incomplete, the detection process becomes
+unreliable.</p></li>
+<li><p>Why are anomalies often considered the most significant data
+points in a dataset?<br/>
+<strong>Answer:</strong> Anomalies correspond to rare and unusual events
+such as fraud, failures, or medical abnormalities.<br/>
+<strong>Explanation:</strong> Although rare, anomalies often carry the
+most actionable information and are therefore critical in many
+real-world applications.</p></li>
+<li><p>What are the two main components of a statistical anomaly
+detection algorithm?<br/>
+<strong>Answer:</strong> (1) A statistic that measures data behavior,
+and (2) a decision rule that determines whether a sample is
+anomalous.<br/>
+<strong>Explanation:</strong> The statistic quantifies how unusual a
+sample is, while the decision rule applies a threshold to classify it as
+normal or anomalous.</p></li>
+<li><p>What is the trade-off between True Positive Rate (TPR) and False
+Positive Rate (FPR)?<br/>
+<strong>Answer:</strong> Lowering the threshold <span class="math inline">\(\gamma\)</span> increases TPR but also increases
+FPR, while raising <span class="math inline">\(\gamma\)</span> decreases
+FPR but may miss anomalies.<br/>
+<strong>Explanation:</strong> Threshold selection determines the
+sensitivity of the detector and directly affects detection
+performance.</p></li>
+<li><p>What is the main challenge of density-based anomaly detection
+methods?<br/>
+<strong>Answer:</strong> Density estimation becomes difficult in
+high-dimensional spaces due to the curse of dimensionality.<br/>
+<strong>Explanation:</strong> As dimensionality increases, data become
+sparse and probability density estimation becomes computationally
+expensive and prone to overfitting.</p></li>
+<li><p>Why is unsupervised anomaly detection often formulated as a
+ranking problem?<br/>
+<strong>Answer:</strong> Because models typically output anomaly scores
+rather than class labels.<br/>
+<strong>Explanation:</strong> Samples are ranked by their anomaly score,
+and the most abnormal samples are flagged based on a threshold or
+top-<span class="math inline">\(k\)</span> selection.</p></li>
+<li><p>Why are anomalies easier to detect using Isolation Forest
+compared to density estimation?<br/>
+<strong>Answer:</strong> Anomalies are easier to isolate and require
+fewer random splits in decision trees.<br/>
+<strong>Explanation:</strong> Isolation Forest exploits the fact that
+anomalous points are rare and different, leading to shorter path lengths
+during recursive partitioning.</p></li>
+<li><p>Why do reconstruction-based methods detect anomalies using
+reconstruction error?<br/>
+<strong>Answer:</strong> Models trained on normal data reconstruct
+normal samples well but fail to reconstruct anomalies.<br/>
+<strong>Explanation:</strong> Large reconstruction errors indicate that
+the input does not lie on the learned manifold of normal data.</p></li>
+<li><p>Why is Maximum Softmax Probability (MSP) useful for detecting
+out-of-distribution samples?<br/>
+<strong>Answer:</strong> Out-of-distribution inputs typically produce
+lower softmax confidence scores.<br/>
+<strong>Explanation:</strong> Neural networks tend to assign high
+probability to familiar data and lower confidence to unfamiliar
+inputs.</p></li>
+<li><p>Why is anomaly detection challenging in high-dimensional
+data?<br/>
+<strong>Answer:</strong> Distance and density measures become less
+informative in high dimensions.<br/>
+<strong>Explanation:</strong> This phenomenon, known as the curse of
+dimensionality, makes it harder to distinguish normal and anomalous
+samples reliably.</p></li>
 </ol></section>
 </main>
 </body>

@@ -22,18 +22,6 @@ const topHandoutDemos = document.getElementById('top-handout-demos');
 const topHandoutDisclaimer = document.getElementById('top-handout-disclaimer');
 let lectureMedia = {};
 
-const setNewTabAttributes = (linkEl) => {
-  if (!linkEl) return;
-  linkEl.setAttribute('target', '_blank');
-  linkEl.setAttribute('rel', 'noopener noreferrer');
-};
-
-const clearNewTabAttributes = (linkEl) => {
-  if (!linkEl) return;
-  linkEl.removeAttribute('target');
-  linkEl.removeAttribute('rel');
-};
-
 const closeAllDropdowns = () => {
   dropdownToggles.forEach((toggle) => {
     toggle.setAttribute('aria-expanded', 'false');
@@ -54,15 +42,11 @@ const updateResourceLink = (linkEl, href, label) => {
   if (href) {
     linkEl.classList.remove('disabled');
     linkEl.setAttribute('href', href);
-    linkEl.setAttribute('aria-disabled', 'false');
-    setNewTabAttributes(linkEl);
     linkEl.textContent = label;
     return;
   }
   linkEl.classList.add('disabled');
   linkEl.setAttribute('href', '#');
-  linkEl.setAttribute('aria-disabled', 'true');
-  clearNewTabAttributes(linkEl);
   linkEl.textContent = label;
 };
 
@@ -73,17 +57,17 @@ const escapeHtml = (value) => String(value || '')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#39;');
 
-const normalizeVideoUrl = (url) => {
+const toYouTubeEmbedUrl = (url) => {
   if (!url) return '';
   try {
     const parsed = new URL(url);
     if (parsed.hostname.includes('youtu.be')) {
       const id = parsed.pathname.replace('/', '');
-      return id ? `https://www.youtube.com/watch?v=${id}` : url;
+      return id ? `https://www.youtube.com/embed/${id}?rel=0` : url;
     }
     if (parsed.hostname.includes('youtube.com')) {
       const id = parsed.searchParams.get('v');
-      return id ? `https://www.youtube.com/watch?v=${id}` : url;
+      return id ? `https://www.youtube.com/embed/${id}?rel=0` : url;
     }
     return url;
   } catch {
@@ -169,9 +153,9 @@ const updateLectureMedia = () => {
   }
   const items = recordings
     .map((recording, idx) => {
-      const href = normalizeVideoUrl(recording.url || '');
+      const href = toYouTubeEmbedUrl(recording.url || '');
       const label = normalizeRecordingLabel(recording.label, idx);
-      return `<a class="video-menu-link" href="${escapeHtml(href)}" role="menuitem" target="_blank" rel="noopener noreferrer" data-kind="Video" data-video-label="${escapeHtml(label)}">${escapeHtml(label)}</a>`;
+      return `<a class="video-menu-link" href="${escapeHtml(href)}" role="menuitem" data-kind="Video" data-video-label="${escapeHtml(label)}">${escapeHtml(label)}</a>`;
     })
     .join('');
   videoLinks.innerHTML = `<div class="video-dropdown"><a class="resource-link video-trigger" aria-expanded="false" href="#">Video</a><div class="dropdown-menu video-dropdown-menu" role="menu">${items}</div></div>`;
@@ -187,7 +171,7 @@ const getLectureResources = (item) => {
   const exercisesHref = toExerciseHref(notesHref) || (lectureKey ? `assets/exercises/${lectureKey}.html` : '');
   const recordings = media.recordings || [];
   const videos = recordings.map((recording, idx) => ({
-    href: normalizeVideoUrl(recording.url || ''),
+    href: toYouTubeEmbedUrl(recording.url || ''),
     label: normalizeRecordingLabel(recording.label, idx),
   }));
   return {
@@ -204,10 +188,10 @@ const renderTopMenu = (menuEl, entries, kind) => {
   if (!menuEl) return;
   const links = entries
     .map((entry) => (
-      `<a href="${entry.href}" role="menuitem" target="_blank" rel="noopener noreferrer" data-kind="${kind}" data-kind-label="${entry.kindLabel || kind}" data-lecture-key="${entry.lectureKey}">${entry.label}</a>`
+      `<a href="${entry.href}" role="menuitem" data-kind="${kind}" data-kind-label="${entry.kindLabel || kind}" data-lecture-key="${entry.lectureKey}">${entry.label}</a>`
     ))
     .join('');
-  menuEl.innerHTML = links || '<a href="#" role="menuitem" aria-disabled="true">No items available</a>';
+  menuEl.innerHTML = links || '<a href="#" role="menuitem">No items available</a>';
 };
 
 const updateTopMenus = () => {
@@ -244,44 +228,27 @@ const updateTopMenus = () => {
   );
 };
 
-const keepDisabledLinksInactive = (event) => {
+const openResourceHref = (href, kindLabel) => {
+  if (!href || href === '#') return;
+  const activeItem = document.querySelector('.lecture-item.active');
+  const context = !activeItem
+    ? { title: 'Lecture', meta: '' }
+    : {
+      title: activeItem.dataset.title || activeItem.querySelector('.lecture-title')?.textContent || 'Lecture',
+      meta: activeItem.dataset.meta || activeItem.querySelector('.lecture-meta')?.textContent || '',
+    };
+  if (lectureFrame) lectureFrame.src = href;
+  if (lectureTitle) lectureTitle.textContent = `${context.title} - ${kindLabel}`;
+  if (lectureMeta) lectureMeta.textContent = context.meta || '';
+};
+
+const openResourceInViewer = (event, kindLabel) => {
   const linkEl = event.currentTarget;
-  const href = linkEl?.getAttribute('href');
-  if (!linkEl || linkEl.classList.contains('disabled') || !href || href === '#') {
-    event.preventDefault();
-  }
+  event.preventDefault();
+  if (!linkEl || linkEl.classList.contains('disabled')) return;
+  const href = linkEl.getAttribute('href');
+  openResourceHref(href, kindLabel);
 };
-
-const openLinkInNewTab = (linkEl) => {
-  const href = linkEl?.getAttribute('href');
-  if (!href || href === '#' || linkEl.classList.contains('disabled')) return;
-  window.open(href, '_blank', 'noopener,noreferrer');
-};
-
-const configureLectureItemLink = (item) => {
-  if (!item) return;
-  const href = item.dataset.lecture || '#';
-  item.setAttribute('href', href);
-  if (href === '#') {
-    clearNewTabAttributes(item);
-    item.setAttribute('aria-disabled', 'true');
-    return;
-  }
-  setNewTabAttributes(item);
-  item.setAttribute('aria-disabled', 'false');
-};
-
-const setStaticLinkHref = (linkEl, href) => {
-  if (!linkEl) return;
-  linkEl.setAttribute('href', href);
-  setNewTabAttributes(linkEl);
-};
-
-lectureItems.forEach(configureLectureItemLink);
-setStaticLinkHref(topDemosLink, 'assets/demos.html');
-setStaticLinkHref(topDisclaimerLink, 'assets/disclaimer.html');
-setStaticLinkHref(topHandoutDemos, 'assets/demos.html');
-setStaticLinkHref(topHandoutDisclaimer, 'assets/disclaimer.html');
 
 if (navToggle && navMenu) {
   navToggle.addEventListener('click', () => {
@@ -309,6 +276,7 @@ if (lectureList) {
   lectureList.addEventListener('click', (event) => {
     const item = event.target.closest('.lecture-item');
     if (!item) return;
+    event.preventDefault();
     setActiveLecture(item);
   });
 }
@@ -340,30 +308,63 @@ fetch('assets/media_resources.json')
   });
 
 if (slidesLink) {
-  slidesLink.addEventListener('click', keepDisabledLinksInactive);
+  slidesLink.addEventListener('click', (event) => openResourceInViewer(event, 'Slides'));
 }
 
 if (exerciseLink) {
-  exerciseLink.addEventListener('click', keepDisabledLinksInactive);
+  exerciseLink.addEventListener('click', (event) => openResourceInViewer(event, 'Exercises'));
 }
 
 if (notesLink) {
-  notesLink.addEventListener('click', keepDisabledLinksInactive);
+  notesLink.addEventListener('click', (event) => openResourceInViewer(event, 'Lecture Notes'));
 }
 
 if (demosLink) {
-  demosLink.addEventListener('click', keepDisabledLinksInactive);
+  demosLink.addEventListener('click', (event) => openResourceInViewer(event, 'Demos'));
+}
+
+if (topDemosLink) {
+  topDemosLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    openResourceHref('assets/demos.html', 'Demos');
+  });
+}
+
+if (topDisclaimerLink) {
+  topDisclaimerLink.addEventListener('click', (event) => {
+    event.preventDefault();
+    openResourceHref('assets/disclaimer.html', 'Disclaimer');
+  });
+}
+
+if (topHandoutDemos) {
+  topHandoutDemos.addEventListener('click', (event) => {
+    event.preventDefault();
+    openResourceHref('assets/demos.html', 'Demos');
+  });
+}
+
+if (topHandoutDisclaimer) {
+  topHandoutDisclaimer.addEventListener('click', (event) => {
+    event.preventDefault();
+    openResourceHref('assets/disclaimer.html', 'Disclaimer');
+  });
 }
 
 if (navMenu) {
   navMenu.addEventListener('click', (event) => {
     const link = event.target.closest('.dropdown-menu a[data-kind][data-lecture-key]');
     if (!link) return;
+    event.preventDefault();
     const lectureKey = link.dataset.lectureKey;
+    const href = link.getAttribute('href');
+    const kind = link.dataset.kind || 'Lecture Notes';
+    const kindLabel = link.dataset.kindLabel || kind;
     const item = findLectureItemByKey(lectureKey);
     if (item) {
       setActiveLecture(item);
     }
+    openResourceHref(href, kindLabel);
     closeAllDropdowns();
   });
 }
@@ -384,6 +385,10 @@ if (videoLinks) {
 
     const link = event.target.closest('.video-menu-link');
     if (!link) return;
+    event.preventDefault();
+    const kind = link.dataset.kind || 'Video';
+    const label = link.dataset.videoLabel;
+    openResourceHref(link.getAttribute('href'), label ? `${kind} (${label})` : kind);
     closeVideoDropdown();
   });
 }
@@ -398,7 +403,16 @@ document.querySelectorAll('.click-card').forEach((card) => {
     }
     const link = card.querySelector('a.resource-link:not(.disabled)');
     if (!link) return;
-    openLinkInNewTab(link);
+    const kind = link.id === 'slides-link'
+      ? 'Slides'
+      : link.id === 'exercise-link'
+        ? 'Exercises'
+        : link.id === 'notes-link'
+          ? 'Lecture Notes'
+          : link.id === 'demos-link'
+            ? 'Demos'
+            : 'Video';
+    openResourceHref(link.getAttribute('href'), kind);
   });
 });
 

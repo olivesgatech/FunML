@@ -10,21 +10,83 @@
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong>You are solving a binary classification task in which you design an ANN with a single output neuron in order to solve. Let the output of this neuron be <span class="math inline">\(z\)</span>. The final output of your network, <span class="math inline">\(y'\)</span> is given by: <span class="math inline">\(y'=\sigma(ReLU(z))\)</span>. You classify all inputs with a final value <span class="math inline">\(y' \geq 0.5\)</span> as a part of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span> and all values with a final value of <span class="math inline">\(y' &lt; 0.5\)</span> as a part of <span class="math inline">\(class\)</span> <span class="math inline">\(B\)</span>. What problem are you going to encounter in this instance? <strong>Solution:</strong>The issue in this instance is that everything would always be classified as a member of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span>. This is because using <span class="math inline">\(ReLU\)</span> will always output a result in the range of <span class="math inline">\([0,\infty]\)</span>. Since any input value greater than or equal to <span class="math inline">\(0\)</span> will always cause the sigmoid function to output a value greater than or equal to <span class="math inline">\(0.5\)</span>, this means that <span class="math inline">\(\sigma(ReLU(z))\geq0.5\)</span> regardless of the value of <span class="math inline">\(z\)</span>. Therefore, this will always result in everything being classified as a member of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span> which is a problem.</p></li>
-<li><p><strong>Question:</strong>An artificial neural network is designed with <span class="math inline">\(k\)</span> inputs, and is wanting to make a boolean function to determine its class. In the worst case, how many hidden units might be required to solve for its class? <strong>Solution:</strong>In the worst case, exactly representing an arbitrary Boolean function with a single-hidden-layer network may require an exponential number of hidden units in <span class="math inline">\(k\)</span> (e.g., <span class="math inline">\(\Theta(2^k)\)</span> in the worst case).</p></li>
-<li><p><strong>Question:</strong> How many tunable parameters are there in this Neural Network?</p>
+<li><p><strong>Question:</strong><br/>
+You are solving a binary classification task in which you design an ANN
+with a single output neuron in order to solve. Let the output of this
+neuron be <span class="math inline">\(z\)</span>. The final output of
+your network, <span class="math inline">\(y'\)</span> is given by:
+<span class="math inline">\(y'=\sigma(ReLU(z))\)</span>. You
+classify all inputs with a final value <span class="math inline">\(y' \geq 0.5\)</span> as a part of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span> and all values with a final value of
+<span class="math inline">\(y' &lt; 0.5\)</span> as a part of <span class="math inline">\(class\)</span> <span class="math inline">\(B\)</span>. What problem are you going to
+encounter in this instance?<br/>
+<br/>
+<strong>Solution:</strong><br/>
+The issue in this instance is that everything would always be classified
+as a member of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span>. This is because using <span class="math inline">\(ReLU\)</span> will always output a result in the
+range of <span class="math inline">\([0,\infty]\)</span>. Since any
+input value greater than or equal to <span class="math inline">\(0\)</span> will always cause the sigmoid function
+to output a value greater than or equal to <span class="math inline">\(0.5\)</span>, this means that <span class="math inline">\(\sigma(ReLU(z))\geq0.5\)</span> regardless of the
+value of <span class="math inline">\(z\)</span>. Therefore, this will
+always result in everything being classified as a member of <span class="math inline">\(class\)</span> <span class="math inline">\(A\)</span> which is a problem.<br/>
+</p></li>
+<li><p><strong>Question:</strong><br/>
+An artificial neural network is designed with <span class="math inline">\(k\)</span> inputs, and is wanting to make a
+boolean function to determine its class. In the worst case, how many
+hidden units might be required to solve for its class?<br/>
+<br/>
+<strong>Solution:</strong><br/>
+In the worst case, exactly representing an arbitrary Boolean function
+with a single-hidden-layer network may require an exponential number of
+hidden units in <span class="math inline">\(k\)</span> (e.g., <span class="math inline">\(\Theta(2^k)\)</span> in the worst case).<br/>
+</p></li>
+<li><p><strong>Question:</strong><br/>
+How many tunable parameters are there in this Neural Network?</p>
 <div class="center">
 <p><img alt="image" src="../../lectures/img/lecture5/network.png" style="width:10cm"/></p>
 </div>
-<p><strong>Solution:</strong> Assuming the network is fully connected between consecutive layers and each non-input neuron has a bias: <span class="math display">\[\#\text{weights} = 3\cdot 4 + 4\cdot 4 + 4\cdot 2 = 36,\qquad
-    \#\text{biases} = 4+4+2 = 10.\]</span> Thus the total number of tunable parameters is <span class="math inline">\(36+10=46\)</span>.</p></li>
-<li><p><strong>Question:</strong>You train a network on 20 samples trying to solve a classification task. Training converges and you see that the training loss is very high. You then decide to train this network on 10,000 more examples. Is your approach to fixing the problem correct? <strong>Solution:</strong> Probably not. If the training loss is high even after training has converged, the model is underfitting (high bias) or optimization is failing. Adding more data typically helps with variance/generalization, but it usually does not reduce training loss by itself. Better fixes include increasing model capacity (more hidden units/layers), improving optimization (learning rate/optimizer), feature scaling, and checking data/labels.</p></li>
-<li><p><strong>Question:</strong>What is the derivative of the Sigmoid function? <strong>Solution:</strong><span class="math inline">\(        \sigma^{'}(x) = \frac{\delta}{\delta x} (1+ e^{-x})^{-1} = -(1+e^{-x})^{-2} (-e^{-x}) = \frac{1}{1+e^{-x}} \frac{e^{-x}}{1+e^{-x}} = \sigma(x) (1 - \sigma(x))
-    \)</span> This is an interesting characteristic of the Sigmoid function, that the derivative is simply 1 minus itself, times itself!</p></li>
-<li><p><strong>Question (Applied):</strong> You train a deep neural network and notice training accuracy is stuck near random chance. List two possible causes related to activation functions.</p>
-<p><strong>Solution:</strong> Possible causes include vanishing gradients (e.g., sigmoid/tanh saturation), dead ReLU neurons, poor weight initialization, or learning rate issues.</p></li>
-<li><p><strong>Question (Computational):</strong> A fully connected layer maps 20 inputs to 15 hidden units. How many parameters does this layer have?</p>
-<p><strong>Solution:</strong> Weights: <span class="math inline">\(20 \times 15 = 300\)</span>, Biases: <span class="math inline">\(15\)</span>, Total = 315 parameters.</p></li>
+<p><strong>Solution:</strong> Assuming the network is fully connected
+between consecutive layers and each non-input neuron has a bias: <span class="math display">\[\#\text{weights} = 3\cdot 4 + 4\cdot 4 + 4\cdot 2
+= 36,\qquad
+    \#\text{biases} = 4+4+2 = 10.\]</span> Thus the total number of
+tunable parameters is <span class="math inline">\(36+10=46\)</span>.<br/>
+</p></li>
+<li><p><strong>Question:</strong><br/>
+You train a network on 20 samples trying to solve a classification task.
+Training converges and you see that the training loss is very high. You
+then decide to train this network on 10,000 more examples. Is your
+approach to fixing the problem correct?<br/>
+<br/>
+<strong>Solution:</strong><br/>
+Probably not. If the training loss is high even after training has
+converged, the model is underfitting (high bias) or optimization is
+failing. Adding more data typically helps with variance/generalization,
+but it usually does not reduce training loss by itself. Better fixes
+include increasing model capacity (more hidden units/layers), improving
+optimization (learning rate/optimizer), feature scaling, and checking
+data/labels.<br/>
+</p></li>
+<li><p><strong>Question:</strong><br/>
+What is the derivative of the Sigmoid function?<br/>
+<br/>
+<strong>Solution:</strong><br/>
+<span class="math inline">\(        \sigma^{'}(x) =
+\frac{\delta}{\delta x} (1+ e^{-x})^{-1} = -(1+e^{-x})^{-2} (-e^{-x}) =
+\frac{1}{1+e^{-x}} \frac{e^{-x}}{1+e^{-x}} = \sigma(x) (1 -
+\sigma(x))\)</span><br/>
+<br/>
+This is an interesting characteristic of the Sigmoid function, that the
+derivative is simply 1 minus itself, times itself!</p></li>
+<li><p><strong>Question (Applied):</strong> You train a deep neural
+network and notice training accuracy is stuck near random chance. List
+two possible causes related to activation functions.</p>
+<p><strong>Solution:</strong> Possible causes include vanishing
+gradients (e.g., sigmoid/tanh saturation), dead ReLU neurons, poor
+weight initialization, or learning rate issues.</p></li>
+<li><p><strong>Question (Computational):</strong> A fully connected
+layer maps 20 inputs to 15 hidden units. How many parameters does this
+layer have?</p>
+<p><strong>Solution:</strong> Weights: <span class="math inline">\(20
+\times 15 = 300\)</span>, Biases: <span class="math inline">\(15\)</span>, Total = 315 parameters.</p></li>
 </ol></section>
 </main>
 </body>

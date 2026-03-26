@@ -16,54 +16,157 @@
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>Learn the fundamentals of regression: modeling a relationship between an input variable <span class="math inline">\(x\)</span> and a continuous output variable <span class="math inline">\(y\)</span> by fitting a function <span class="math inline">\(f(\cdot)\)</span> to observed data. This differs from previous topics in that the output is continuous rather than a discrete class label. This lecture focuses on <strong>linear regression</strong>.</p>
+<p>Learn the fundamentals of regression: modeling a relationship between
+an input variable <span class="math inline">\(x\)</span> and a
+continuous output variable <span class="math inline">\(y\)</span> by
+fitting a function <span class="math inline">\(f(\cdot)\)</span> to
+observed data. This differs from previous topics in that the output is
+continuous rather than a discrete class label. This lecture focuses on
+<strong>linear regression</strong>.</p>
 <h1 data-number="2" id="regression"><span class="header-section-number">2.</span> Regression</h1>
 <h2 data-number="2.1" id="introduction"><span class="header-section-number">2.1</span> Introduction</h2>
-<p>A regression models a relationship between an input variable <span class="math inline">\(x\)</span> and a continuous output variable <span class="math inline">\(y\)</span> by fitting a function <span class="math inline">\(f(\cdot)\)</span> to the observed data. This differs from classifiers in that the output is a continuous variable as opposed to a discrete classification. These regressions can be linear or polynomial, though this lecture will focus on linear regressions.</p>
-<h2 data-number="2.2" id="better-life-index-oecd-example"><span class="header-section-number">2.2</span> Better Life Index (OECD) Example</h2>
-<figure>
-<img alt="Better Life Index example: GDP per capita vs. life satisfaction with a linear fit. Training points are used to fit the line; test points illustrate generalization." id="fig:bli_scatter_fit" src="img/lecture7/bli_scatter_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Better Life Index example: GDP per capita vs. life satisfaction with a linear fit. Training points are used to fit the line; test points illustrate generalization.</figcaption>
+<p>A regression models a relationship between an input variable <span class="math inline">\(x\)</span> and a continuous output variable <span class="math inline">\(y\)</span> by fitting a function <span class="math inline">\(f(\cdot)\)</span> to the observed data. This
+differs from classifiers in that the output is a continuous variable as
+opposed to a discrete classification. These regressions can be linear or
+polynomial, though this lecture will focus on linear regressions.</p>
+<h2 data-number="2.2" id="better-life-index-oecd-example"><span class="header-section-number">2.2</span> Better Life Index (OECD)
+Example</h2>
+<figure data-latex-placement="H" id="fig:bli_scatter_fit">
+<img src="img/lecture7/bli_scatter_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Better Life Index example: GDP per capita vs. life
+satisfaction with a linear fit. Training points are used to fit the
+line; test points illustrate generalization.</figcaption>
 </figure>
-<p>It is clear from the inspection of the graph that there is a positive linear correlation between the GDP per capita of the country and its life satisfaction score. This can be modeled with a simple linear equation:</p>
-<p><span class="math display">\[\mathrm{Life Satisfaction} = \theta_0 + \theta_1 \times \mathrm{GDP per Capita}\]</span></p>
-<p>In this equation <span class="math inline">\(\theta_0\)</span> is the bias, or vertical intercept, while <span class="math inline">\(\theta_1\)</span> is the weight, or slope. Because the data is only two dimensional, these are the only parameters needed.</p>
-<h2 data-number="2.3" id="residual-diagnostics-training-set"><span class="header-section-number">2.3</span> Residual Diagnostics (Training Set)</h2>
-<p>After fitting a regression model, it is useful to inspect <strong>residuals</strong> <span class="math inline">\(r_i = y_i - \hat{y}_i\)</span> to check whether errors appear centered around zero and whether there are obvious patterns that suggest model mismatch (e.g., nonlinearity or heteroscedasticity).</p>
-<figure>
-<img alt="Residual histogram (train)." id="fig:bli_residuals_hist" src="img/lecture7/bli_residuals_hist.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Residual histogram (train).</figcaption>
+<p>It is clear from the inspection of the graph that there is a positive
+linear correlation between the GDP per capita of the country and its
+life satisfaction score. This can be modeled with a simple linear
+equation:</p>
+<p><span class="math display">\[\mathrm{Life Satisfaction} = \theta_0 +
+\theta_1 \times \mathrm{GDP per Capita}\]</span></p>
+<p>In this equation <span class="math inline">\(\theta_0\)</span> is the
+bias, or vertical intercept, while <span class="math inline">\(\theta_1\)</span> is the weight, or slope. Because
+the data is only two dimensional, these are the only parameters
+needed.</p>
+<h2 data-number="2.3" id="residual-diagnostics-training-set"><span class="header-section-number">2.3</span> Residual Diagnostics (Training
+Set)</h2>
+<p>After fitting a regression model, it is useful to inspect
+<strong>residuals</strong> <span class="math inline">\(r_i = y_i -
+\hat{y}_i\)</span> to check whether errors appear centered around zero
+and whether there are obvious patterns that suggest model mismatch
+(e.g., nonlinearity or heteroscedasticity).</p>
+<figure data-latex-placement="H" id="fig:bli_residual_diagnostics">
+<figure id="fig:bli_residuals_hist">
+<img src="img/lecture7/bli_residuals_hist.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Residual histogram (train).</figcaption>
 </figure>
-<figure>
-<img alt="Residuals vs. predictions (train)." id="fig:bli_residuals_scatter" src="img/lecture7/bli_residuals_scatter.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Residuals vs. predictions (train).</figcaption>
+<figure id="fig:bli_residuals_scatter">
+<img src="img/lecture7/bli_residuals_scatter.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Residuals vs. predictions (train).</figcaption>
 </figure>
-<p>In this example, the residual histogram appears roughly symmetric and centered near zero, which supports the assumption that the model does not exhibit strong systematic bias. The residuals-versus-predictions plot does not show a clear curve or funnel shape, suggesting that a linear model is a reasonable first approximation and that variance does not obviously increase with prediction magnitude. However, the small dataset size limits how strongly we can rely on visual diagnostics alone.</p>
-<h2 data-number="2.4" id="least-squares-loss-function"><span class="header-section-number">2.4</span> Least Squares Loss Function</h2>
-<p>We assume the residual error <span class="math inline">\(\epsilon_i\)</span> is <strong>independently and identically distributed</strong> (i.i.d.) and drawn from a Normal (Gaussian) distribution with zero mean and variance <span class="math inline">\(\sigma^2\)</span>: <span class="math display">\[\epsilon_i \sim \mathcal{N}(0,\sigma^2).\]</span> The probability density function (PDF) of <span class="math inline">\(\epsilon_i\)</span> is: <span class="math display">\[p(\epsilon_i) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{\epsilon_i^2}{2\sigma^2}\right).\]</span> Using the augmented feature vector <span class="math inline">\(\tilde{\mathbf{x}}_i\)</span> defined above, the linear model with noise is <span class="math display">\[y_i = \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} + \epsilon_i.\]</span> Therefore, the conditional probability of observing <span class="math inline">\(y_i\)</span>, given <span class="math inline">\(\tilde{\mathbf{x}}_i\)</span> and parameters <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>, is: <span class="math display">\[p(y_i \mid \tilde{\mathbf{x}}_i; \tilde{\boldsymbol{\theta}})
+<figcaption>Residual diagnostics for the Better Life Index linear
+regression model on the training set. Ideally, residuals are roughly
+centered around zero with no systematic trend versus <span class="math inline">\(\hat{y}\)</span>.</figcaption>
+</figure>
+<p>In this example, the residual histogram appears roughly symmetric and
+centered near zero, which supports the assumption that the model does
+not exhibit strong systematic bias. The residuals-versus-predictions
+plot does not show a clear curve or funnel shape, suggesting that a
+linear model is a reasonable first approximation and that variance does
+not obviously increase with prediction magnitude. However, the small
+dataset size limits how strongly we can rely on visual diagnostics
+alone.</p>
+<h2 data-number="2.4" id="least-squares-loss-function"><span class="header-section-number">2.4</span> Least Squares Loss
+Function</h2>
+<p>We assume the residual error <span class="math inline">\(\epsilon_i\)</span> is <strong>independently and
+identically distributed</strong> (i.i.d.) and drawn from a Normal
+(Gaussian) distribution with zero mean and variance <span class="math inline">\(\sigma^2\)</span>: <span class="math display">\[\epsilon_i \sim \mathcal{N}(0,\sigma^2).\]</span>
+The probability density function (PDF) of <span class="math inline">\(\epsilon_i\)</span> is: <span class="math display">\[p(\epsilon_i) = \frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\left(-\frac{\epsilon_i^2}{2\sigma^2}\right).\]</span> Using the
+augmented feature vector <span class="math inline">\(\tilde{\mathbf{x}}_i\)</span> defined above, the
+linear model with noise is <span class="math display">\[y_i =
+\tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} +
+\epsilon_i.\]</span> Therefore, the conditional probability of observing
+<span class="math inline">\(y_i\)</span>, given <span class="math inline">\(\tilde{\mathbf{x}}_i\)</span> and parameters <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>, is: <span class="math display">\[p(y_i \mid \tilde{\mathbf{x}}_i;
+\tilde{\boldsymbol{\theta}})
 = \frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).\]</span> Assuming samples are independent, the likelihood function for the entire dataset is the product of individual probabilities: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}; \mathbf{X}, \mathbf{y})
-= \prod_{i=1}^N p(y_i \mid \tilde{\mathbf{x}}_i; \tilde{\boldsymbol{\theta}})
+\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top
+\tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).\]</span> Assuming
+samples are independent, the likelihood function for the entire dataset
+is the product of individual probabilities: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}; \mathbf{X},
+\mathbf{y})
+= \prod_{i=1}^N p(y_i \mid \tilde{\mathbf{x}}_i;
+\tilde{\boldsymbol{\theta}})
 = \prod_{i=1}^N \frac{1}{\sqrt{2\pi\sigma^2}}
-\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).\]</span> Taking the log-likelihood gives: <span class="math display">\[\log L(\tilde{\boldsymbol{\theta}}; \mathbf{X}, \mathbf{y})
+\exp\left(-\frac{(y_i - \tilde{\mathbf{x}}_i^\top
+\tilde{\boldsymbol{\theta}})^2}{2\sigma^2}\right).\]</span> Taking the
+log-likelihood gives: <span class="math display">\[\log
+L(\tilde{\boldsymbol{\theta}}; \mathbf{X}, \mathbf{y})
 = N\log\left(\frac{1}{\sqrt{2\pi\sigma^2}}\right)
--\frac{1}{2\sigma^2}\sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span> Maximizing the log-likelihood over <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span> using Maximum Likelihood Estimation (MLE) is equivalent to minimizing the negative log-likelihood. Ignoring constants that do not depend on <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>, this is equivalent to minimizing: <span class="math display">\[\sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span> Let <span class="math inline">\(\hat{\tilde{\boldsymbol{\theta}}}\)</span> denote the MLE/least-squares estimate: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}}
-= \arg\max_{\tilde{\boldsymbol{\theta}}} \log L(\tilde{\boldsymbol{\theta}};\mathbf{X},\mathbf{y})
-= \arg\min_{\tilde{\boldsymbol{\theta}}} \sum_{i=1}^N (y_i - \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span> Equivalently, we can define the <strong>Least Squares Loss Function</strong> (Mean Squared Error, MSE) as a function of <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}) = \frac{1}{N} \sum_{i=1}^N (\tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} - y_i)^2
+-\frac{1}{2\sigma^2}\sum_{i=1}^N (y_i -
+\tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span>
+Maximizing the log-likelihood over <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span> using Maximum
+Likelihood Estimation (MLE) is equivalent to minimizing the negative
+log-likelihood. Ignoring constants that do not depend on <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>, this is
+equivalent to minimizing: <span class="math display">\[\sum_{i=1}^N (y_i
+- \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span> Let
+<span class="math inline">\(\hat{\tilde{\boldsymbol{\theta}}}\)</span>
+denote the MLE/least-squares estimate: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}}
+= \arg\max_{\tilde{\boldsymbol{\theta}}} \log
+L(\tilde{\boldsymbol{\theta}};\mathbf{X},\mathbf{y})
+= \arg\min_{\tilde{\boldsymbol{\theta}}} \sum_{i=1}^N (y_i -
+\tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}})^2.\]</span>
+Equivalently, we can define the <strong>Least Squares Loss
+Function</strong> (Mean Squared Error, MSE) as a function of <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}) = \frac{1}{N}
+\sum_{i=1}^N (\tilde{\mathbf{x}}_i^\top \tilde{\boldsymbol{\theta}} -
+y_i)^2
 = \frac{1}{N}\sum_{i=1}^N (\hat{y}_i - y_i)^2,
-\qquad \text{where } \hat{y}_i = \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}}.\]</span></p>
-<p>The loss surface for the two-parameter case <span class="math inline">\((\theta_0,\theta_1)\)</span> is illustrated below, showing its convex quadratic structure:</p>
-<figure>
-<img alt="Contours of the least squares loss L(\theta_0,\theta_1) for the Better Life Index example (training set). The marked point indicates the minimizer obtained by the normal equation." id="fig:mse_contours" src="img/lecture7/mse_contour_theta0_theta1.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Contours of the least squares loss <span class="math inline">\(L(\theta_0,\theta_1)\)</span> for the Better Life Index example (training set). The marked point indicates the minimizer obtained by the normal equation.</figcaption>
+\qquad \text{where } \hat{y}_i =
+\tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}}.\]</span></p>
+<p>The loss surface for the two-parameter case <span class="math inline">\((\theta_0,\theta_1)\)</span> is illustrated below,
+showing its convex quadratic structure:</p>
+<figure data-latex-placement="H" id="fig:mse_contours">
+<img src="img/lecture7/mse_contour_theta0_theta1.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Contours of the least squares loss <span class="math inline">\(L(\theta_0,\theta_1)\)</span> for the Better Life
+Index example (training set). The marked point indicates the minimizer
+obtained by the normal equation.</figcaption>
 </figure>
-<p>The Least Squares loss function computes the average squared error between model predictions and targets. We want to find the optimal parameter vector: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}} = \arg\min_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}}).\]</span> To find this optimum, we differentiate <span class="math inline">\(L(\tilde{\boldsymbol{\theta}})\)</span> with respect to <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span> and set the gradient to zero: <span class="math display">\[\nabla_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}}) = 0.\]</span> Since the Least Squares loss for linear regression is convex and quadratic, the solution can be found by solving the <strong>Normal Equation</strong>, derived below.</p>
-<p>The least squares cost function is: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}) = \frac{1}{N}\sum_{i=1}^{N} (\hat{y}_i - y_i)^2
-= \frac{1}{N}\|\mathbf{X}\tilde{\boldsymbol{\theta}}-\mathbf{y}\|_2^2.\]</span> Expanding in matrix form: <span class="math display">\[\begin{aligned}
+<p>The Least Squares loss function computes the average squared error
+between model predictions and targets. We want to find the optimal
+parameter vector: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}} =
+\arg\min_{\tilde{\boldsymbol{\theta}}}
+L(\tilde{\boldsymbol{\theta}}).\]</span> To find this optimum, we
+differentiate <span class="math inline">\(L(\tilde{\boldsymbol{\theta}})\)</span> with
+respect to <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span> and set the
+gradient to zero: <span class="math display">\[\nabla_{\tilde{\boldsymbol{\theta}}}
+L(\tilde{\boldsymbol{\theta}}) = 0.\]</span> Since the Least Squares
+loss for linear regression is convex and quadratic, the solution can be
+found by solving the <strong>Normal Equation</strong>, derived
+below.</p>
+<p>The least squares cost function is: <span class="math display">\[L(\tilde{\boldsymbol{\theta}}) =
+\frac{1}{N}\sum_{i=1}^{N} (\hat{y}_i - y_i)^2
+=
+\frac{1}{N}\|\mathbf{X}\tilde{\boldsymbol{\theta}}-\mathbf{y}\|_2^2.\]</span>
+Expanding in matrix form: <span class="math display">\[\begin{align*}
 L(\tilde{\boldsymbol{\theta}})
-&amp;= \frac{1}{N} (\mathbf{X}\tilde{\boldsymbol{\theta}} - \mathbf{y})^T (\mathbf{X}\tilde{\boldsymbol{\theta}} - \mathbf{y}) \\
-&amp;= \frac{1}{N} \left( \tilde{\boldsymbol{\theta}}^T \mathbf{X}^T \mathbf{X}\tilde{\boldsymbol{\theta}}
+&amp;= \frac{1}{N} (\mathbf{X}\tilde{\boldsymbol{\theta}} -
+\mathbf{y})^T (\mathbf{X}\tilde{\boldsymbol{\theta}} - \mathbf{y}) \\
+&amp;= \frac{1}{N} \left( \tilde{\boldsymbol{\theta}}^T \mathbf{X}^T
+\mathbf{X}\tilde{\boldsymbol{\theta}}
 - 2 \tilde{\boldsymbol{\theta}}^T \mathbf{X}^T \mathbf{y}
-+ \mathbf{y}^T \mathbf{y} \right).\end{aligned}\]</span> Taking the gradient with respect to <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>: <span class="math display">\[\nabla_{\tilde{\boldsymbol{\theta}}} L(\tilde{\boldsymbol{\theta}})
-= \frac{1}{N}\left(2\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}}-2\mathbf{X}^T\mathbf{y}\right).\]</span> Setting the gradient to zero: <span class="math display">\[\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}} = \mathbf{X}^T\mathbf{y}.\]</span> If <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> is invertible, the unique solution is: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span> This is the <strong>Normal Equation</strong>.</p>
-<h1 data-number="3" id="geometric-interpretation-of-linear-regression"><span class="header-section-number">3.</span> Geometric Interpretation of Linear Regression</h1>
-<p>For a dataset <span class="math inline">\(\mathbf{X} = \begin{bmatrix}
++ \mathbf{y}^T \mathbf{y} \right).
+\end{align*}\]</span> Taking the gradient with respect to <span class="math inline">\(\tilde{\boldsymbol{\theta}}\)</span>: <span class="math display">\[\nabla_{\tilde{\boldsymbol{\theta}}}
+L(\tilde{\boldsymbol{\theta}})
+=
+\frac{1}{N}\left(2\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}}-2\mathbf{X}^T\mathbf{y}\right).\]</span>
+Setting the gradient to zero: <span class="math display">\[\mathbf{X}^T\mathbf{X}\tilde{\boldsymbol{\theta}}
+= \mathbf{X}^T\mathbf{y}.\]</span> If <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> is invertible, the
+unique solution is: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}} = (\mathbf{X}^T
+\mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span> This is the
+<strong>Normal Equation</strong>.</p>
+<h1 data-number="3" id="geometric-interpretation-of-linear-regression"><span class="header-section-number">3.</span> Geometric Interpretation of
+Linear Regression</h1>
+<p>For a dataset <span class="math inline">\(\mathbf{X} =
+\begin{bmatrix}
     \mathbf{x}_1^T \\
     \mathbf{x}_2^T \\
     \vdots \\
@@ -73,29 +176,111 @@ L(\tilde{\boldsymbol{\theta}})
     1 &amp; x_{21} &amp; \dots &amp; x_{2P} \\
     \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
     1 &amp; x_{N1} &amp; \dots &amp; x_{NP}
-\end{bmatrix}\)</span>, we assume <span class="math inline">\(N &gt; P+1\)</span>, i.e., there are more samples than features.<br/>
+\end{bmatrix}\)</span>, we assume <span class="math inline">\(N &gt;
+P+1\)</span>, i.e., there are more samples than features.<br/>
 <br/>
-The columns of <span class="math inline">\(\mathbf{X} = [\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}]\)</span> define a <span class="math inline">\((P+1)\)</span>-dimensional linear subspace. We denote this subspace as <span class="math inline">\(\text{span}(\mathbf{X})\)</span>, or <span class="math inline">\(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\)</span>. We want to estimate <span class="math inline">\(\hat{\mathbf{y}} \in \mathbb{R}^N\)</span> that lies in this linear subspace and is as close as possible to <span class="math inline">\(\mathbf{y}\)</span>: <span class="math display">\[\hat{\mathbf{y}}
-= \underset{\hat{\mathbf{y}} \in \mathrm{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}\}}{\arg\min}
+The columns of <span class="math inline">\(\mathbf{X} = [\mathbf{1},
+\mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}]\)</span> define a <span class="math inline">\((P+1)\)</span>-dimensional linear subspace. We
+denote this subspace as <span class="math inline">\(\text{span}(\mathbf{X})\)</span>, or <span class="math inline">\(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots,
+\mathbf{x}_{:,P}\}\)</span>. We want to estimate <span class="math inline">\(\hat{\mathbf{y}} \in \mathbb{R}^N\)</span> that
+lies in this linear subspace and is as close as possible to <span class="math inline">\(\mathbf{y}\)</span>: <span class="math display">\[\hat{\mathbf{y}}
+= \underset{\hat{\mathbf{y}} \in \mathrm{span}\{\mathbf{1},
+\mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}\}}{\arg\min}
 \|\hat{\mathbf{y}} - \mathbf{y}\|_2\]</span></p>
-<figure>
-<img alt="2D linear subspace (green) spanned by \begin{pmatrix}1 &amp; 1 &amp; 1\end{pmatrix} \text{ and } \begin{pmatrix}1 &amp; -1 &amp; 1\end{pmatrix}." src="img/lecture7/image.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">2D linear subspace (green) spanned by <span class="math inline">\(\begin{pmatrix}1 &amp; 1 &amp; 1\end{pmatrix} \text{ and } \begin{pmatrix}1 &amp; -1 &amp; 1\end{pmatrix}\)</span>.</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture7/image.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>2D linear subspace (green) spanned by <span class="math inline">\(\begin{pmatrix}1 &amp; 1 &amp; 1\end{pmatrix}
+\text{ and } \begin{pmatrix}1 &amp; -1 &amp;
+1\end{pmatrix}\)</span>.</figcaption>
 </figure>
-<p>Since <span class="math inline">\(\hat{\mathbf{y}} \in \text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\)</span>, <span class="math inline">\(\hat{\mathbf{y}}\)</span> will be a linear combination of <span class="math inline">\(\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\)</span> with a coefficient vector <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> such that: <span class="math display">\[\hat{\mathbf{y}} = \hat{\theta}_0 \mathbf{1} + \hat{\theta}_1 \mathbf{x}_{:,1} + \cdots + \hat{\theta}_P \mathbf{x}_{:,P} = \mathbf{X}\hat{\boldsymbol{\theta}}.\]</span> To minimize <span class="math inline">\(\|\hat{\mathbf{y}} - \mathbf{y}\|_2^2\)</span>, the desired residual vector <span class="math inline">\(\mathbf{r} \triangleq \mathbf{y} - \hat{\mathbf{y}}\)</span> must be orthogonal to the entire subspace <span class="math inline">\(\mathrm{span}(\mathbf{X})\)</span>. Equivalently, <span class="math inline">\(\mathbf{r}\)</span> is orthogonal to <em>every column</em> of <span class="math inline">\(\mathbf{X}\)</span>, including the intercept column <span class="math inline">\(\mathbf{1}\)</span>. In matrix form, this orthogonality condition is: <span class="math display">\[\mathbf{X}^T (\mathbf{y} - \hat{\mathbf{y}}) = 0.\]</span> Hence, the solution for <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> is: <span class="math display">\[\hat{\boldsymbol{\theta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y},\]</span> and the estimated output vector <span class="math inline">\(\hat{\mathbf{y}}\)</span> is: <span class="math display">\[\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\theta}} = \mathbf{X} (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span></p>
-<figure>
-<img alt="Projection of \mathbf{y} onto \hat{\mathbf{y}}, where the residual \mathbf{y} - \hat{\mathbf{y}} is orthogonal to the subspace." src="img/lecture7/projectionmatrix.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Projection of <span class="math inline">\(\mathbf{y}\)</span> onto <span class="math inline">\(\hat{\mathbf{y}}\)</span>, where the residual <span class="math inline">\(\mathbf{y} - \hat{\mathbf{y}}\)</span> is orthogonal to the subspace.</figcaption>
+<p>Since <span class="math inline">\(\hat{\mathbf{y}} \in
+\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots,
+\mathbf{x}_{:,P}\}\)</span>, <span class="math inline">\(\hat{\mathbf{y}}\)</span> will be a linear
+combination of <span class="math inline">\(\mathbf{1}, \mathbf{x}_{:,1},
+\dots, \mathbf{x}_{:,P}\)</span> with a coefficient vector <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> such that:
+<span class="math display">\[\hat{\mathbf{y}} = \hat{\theta}_0
+\mathbf{1} + \hat{\theta}_1 \mathbf{x}_{:,1} + \cdots + \hat{\theta}_P
+\mathbf{x}_{:,P} = \mathbf{X}\hat{\boldsymbol{\theta}}.\]</span> To
+minimize <span class="math inline">\(\|\hat{\mathbf{y}} -
+\mathbf{y}\|_2^2\)</span>, the desired residual vector <span class="math inline">\(\mathbf{r} \triangleq \mathbf{y} -
+\hat{\mathbf{y}}\)</span> must be orthogonal to the entire subspace
+<span class="math inline">\(\mathrm{span}(\mathbf{X})\)</span>.
+Equivalently, <span class="math inline">\(\mathbf{r}\)</span> is
+orthogonal to <em>every column</em> of <span class="math inline">\(\mathbf{X}\)</span>, including the intercept
+column <span class="math inline">\(\mathbf{1}\)</span>. In matrix form,
+this orthogonality condition is: <span class="math display">\[\mathbf{X}^T (\mathbf{y} - \hat{\mathbf{y}}) =
+0.\]</span> Hence, the solution for <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> is: <span class="math display">\[\hat{\boldsymbol{\theta}} = (\mathbf{X}^T
+\mathbf{X})^{-1} \mathbf{X}^T \mathbf{y},\]</span> and the estimated
+output vector <span class="math inline">\(\hat{\mathbf{y}}\)</span> is:
+<span class="math display">\[\hat{\mathbf{y}} =
+\mathbf{X}\hat{\boldsymbol{\theta}} = \mathbf{X} (\mathbf{X}^T
+\mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span></p>
+<figure data-latex-placement="h">
+<img src="img/lecture7/projectionmatrix.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Projection of <span class="math inline">\(\mathbf{y}\)</span> onto <span class="math inline">\(\hat{\mathbf{y}}\)</span>, where the residual
+<span class="math inline">\(\mathbf{y} - \hat{\mathbf{y}}\)</span> is
+orthogonal to the subspace.</figcaption>
 </figure>
-<p>This projection <span class="math inline">\(\hat{\mathbf{y}}\)</span> can be viewed as an orthogonal projection of <span class="math inline">\(\mathbf{y}\)</span> onto <span class="math inline">\(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\)</span>.</p>
-<h1 data-number="4" id="singular-value-decomposition-svd-for-linear-regression"><span class="header-section-number">4.</span> Singular Value Decomposition (SVD) for Linear Regression</h1>
-<p><img alt="image" id="fig:enter-label" src="img/lecture7/SVD.png" style="width:24.00%; max-width:24.00%; height:auto;"/> <span id="fig:enter-label" label="fig:enter-label">[fig:enter-label]</span></p>
-<p>Recall that in linear regression, we use the normal equation to compute the least-squares estimate of the parameter vector: <span class="math display">\[\hat{\boldsymbol{\theta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span> For a data matrix <span class="math inline">\(\mathbf{X}\in\mathbb{R}^{N\times(P+1)}\)</span>, the columns <span class="math inline">\(\mathbf{x}_{:,0}, \mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}\)</span> represent features, where <span class="math inline">\(\mathbf{x}_{:,0}=\mathbf{1}\)</span> is the intercept column. These columns are said to be <strong>linearly independent</strong> if none of them can be written as a weighted combination of the others. When this condition holds, the matrix <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> is invertible, and the normal equation can be applied directly to obtain a unique solution.</p>
-<p>However, if some columns of <span class="math inline">\(\mathbf{X}\)</span> are linearly dependent, it means there is redundancy or strong correlation among features. In other words, certain features do not contribute new information because they can be expressed using other features. In this situation, <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> becomes singular (non-invertible), and the normal equation cannot be used in its standard form. This issue is common in real-world datasets where features may overlap in information content.</p>
-<p>Singular Value Decomposition (SVD) provides a principled way to handle this problem. The SVD of <span class="math inline">\(\mathbf{X}\)</span> is given by <span class="math display">\[\mathbf{X} = \mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^T,\]</span> where <span class="math inline">\(\mathbf{U}\)</span> and <span class="math inline">\(\mathbf{V}\)</span> are orthogonal matrices and <span class="math inline">\(\boldsymbol{\Sigma}\)</span> is a diagonal matrix containing the singular values. These singular values indicate how much independent information exists in each direction of the feature space. If any singular values are zero or very close to zero, this signals redundancy in the features. By discarding these near-zero singular values and using the remaining components, we can compute a stable estimate of <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> even when <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> is not invertible. This approach effectively removes redundant feature directions and ensures a well-defined regression solution.</p>
+<p>This projection <span class="math inline">\(\hat{\mathbf{y}}\)</span>
+can be viewed as an orthogonal projection of <span class="math inline">\(\mathbf{y}\)</span> onto <span class="math inline">\(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots,
+\mathbf{x}_{:,P}\}\)</span>.</p>
+<h1 data-number="4" id="singular-value-decomposition-svd-for-linear-regression"><span class="header-section-number">4.</span> Singular Value Decomposition
+(SVD) for Linear Regression</h1>
+<figure data-latex-placement="h!" id="fig:enter-label">
+<p><img alt="image" src="img/lecture7/SVD.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<span data-label="fig:enter-label" id="fig:enter-label"></span></p>
+</figure>
+<p>Recall that in linear regression, we use the normal equation to
+compute the least-squares estimate of the parameter vector: <span class="math display">\[\hat{\boldsymbol{\theta}} = (\mathbf{X}^T
+\mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}.\]</span> For a data matrix
+<span class="math inline">\(\mathbf{X}\in\mathbb{R}^{N\times(P+1)}\)</span>,
+the columns <span class="math inline">\(\mathbf{x}_{:,0},
+\mathbf{x}_{:,1}, \ldots, \mathbf{x}_{:,P}\)</span> represent features,
+where <span class="math inline">\(\mathbf{x}_{:,0}=\mathbf{1}\)</span>
+is the intercept column. These columns are said to be <strong>linearly
+independent</strong> if none of them can be written as a weighted
+combination of the others. When this condition holds, the matrix <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> is invertible,
+and the normal equation can be applied directly to obtain a unique
+solution.</p>
+<p>However, if some columns of <span class="math inline">\(\mathbf{X}\)</span> are linearly dependent, it
+means there is redundancy or strong correlation among features. In other
+words, certain features do not contribute new information because they
+can be expressed using other features. In this situation, <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> becomes singular
+(non-invertible), and the normal equation cannot be used in its standard
+form. This issue is common in real-world datasets where features may
+overlap in information content.</p>
+<p>Singular Value Decomposition (SVD) provides a principled way to
+handle this problem. The SVD of <span class="math inline">\(\mathbf{X}\)</span> is given by <span class="math display">\[\mathbf{X} =
+\mathbf{U}\boldsymbol{\Sigma}\mathbf{V}^T,\]</span> where <span class="math inline">\(\mathbf{U}\)</span> and <span class="math inline">\(\mathbf{V}\)</span> are orthogonal matrices and
+<span class="math inline">\(\boldsymbol{\Sigma}\)</span> is a diagonal
+matrix containing the singular values. These singular values indicate
+how much independent information exists in each direction of the feature
+space. If any singular values are zero or very close to zero, this
+signals redundancy in the features. By discarding these near-zero
+singular values and using the remaining components, we can compute a
+stable estimate of <span class="math inline">\(\hat{\boldsymbol{\theta}}\)</span> even when <span class="math inline">\(\mathbf{X}^T \mathbf{X}\)</span> is not
+invertible. This approach effectively removes redundant feature
+directions and ensures a well-defined regression solution.</p>
 <h1 data-number="5" id="multi-output-regression"><span class="header-section-number">5.</span> Multi-output Regression</h1>
-<p>In practice, we might encounter data <span class="math inline">\((\mathbf{x}_1, \mathbf{y}_1), (\mathbf{x}_2, \mathbf{y}_2), \ldots, (\mathbf{x}_N, \mathbf{y}_N)\)</span>, where each input <span class="math inline">\(\mathbf{x}_i = [x_{i1}, x_{i2}, \ldots, x_{iP}]^T \in \mathbb{R}^P\)</span> as before, and additionally the vector output <span class="math inline">\(\mathbf{y}_i = [y_{i1}, y_{i2}, \ldots, y_{iK}]^T \in \mathbb{R}^K\)</span> is multi-dimensional. For instance, we might be interested in modeling multiple outputs for a given set of input features. We could build separate models for each output, but there may be relationships between the outputs that we want to incorporate into our modeling.<br/>
+<p>In practice, we might encounter data <span class="math inline">\((\mathbf{x}_1, \mathbf{y}_1), (\mathbf{x}_2,
+\mathbf{y}_2), \ldots, (\mathbf{x}_N, \mathbf{y}_N)\)</span>, where each
+input <span class="math inline">\(\mathbf{x}_i = [x_{i1}, x_{i2},
+\ldots, x_{iP}]^T \in \mathbb{R}^P\)</span> as before, and additionally
+the vector output <span class="math inline">\(\mathbf{y}_i = [y_{i1},
+y_{i2}, \ldots, y_{iK}]^T \in \mathbb{R}^K\)</span> is
+multi-dimensional. For instance, we might be interested in modeling
+multiple outputs for a given set of input features. We could build
+separate models for each output, but there may be relationships between
+the outputs that we want to incorporate into our modeling.<br/>
 <br/>
-In particular, if we assume a linear relationship between <span class="math inline">\(\mathbf{x}_i\)</span> and only the <span class="math inline">\(k\)</span>-th dimension of <span class="math inline">\(\mathbf{y}_i\)</span>, it is the ordinary single-output linear regression we modeled so far: <span class="math display">\[y_{ik} = \tilde{\mathbf{x}}_i^\top \boldsymbol{\theta},\]</span> where <span class="math inline">\(\tilde{\mathbf{x}}_i = [1;\mathbf{x}_i]\)</span> is the augmented feature vector (including the intercept), and <span class="math inline">\(\boldsymbol{\theta}\in\mathbb{R}^{P+1}\)</span>.</p>
-<p>If we further assume a linear relationship between <span class="math inline">\(\mathbf{x}_i\)</span> and <em>all</em> <span class="math inline">\(K\)</span> dimensions of the output <span class="math inline">\(\mathbf{y}_i \in \mathbb{R}^K\)</span>, it is called <strong>multi-output regression</strong>. The relationship is modeled as follows: <span class="math display">\[\mathbf{Y} = \mathbf{X}\boldsymbol{\Theta},\]</span> where <span class="math display">\[\mathbf{Y} =
+In particular, if we assume a linear relationship between <span class="math inline">\(\mathbf{x}_i\)</span> and only the <span class="math inline">\(k\)</span>-th dimension of <span class="math inline">\(\mathbf{y}_i\)</span>, it is the ordinary
+single-output linear regression we modeled so far: <span class="math display">\[y_{ik} = \tilde{\mathbf{x}}_i^\top
+\boldsymbol{\theta},\]</span> where <span class="math inline">\(\tilde{\mathbf{x}}_i = [1;\mathbf{x}_i]\)</span>
+is the augmented feature vector (including the intercept), and <span class="math inline">\(\boldsymbol{\theta}\in\mathbb{R}^{P+1}\)</span>.</p>
+<p>If we further assume a linear relationship between <span class="math inline">\(\mathbf{x}_i\)</span> and <em>all</em> <span class="math inline">\(K\)</span> dimensions of the output <span class="math inline">\(\mathbf{y}_i \in \mathbb{R}^K\)</span>, it is
+called <strong>multi-output regression</strong>. The relationship is
+modeled as follows: <span class="math display">\[\mathbf{Y} =
+\mathbf{X}\boldsymbol{\Theta},\]</span> where <span class="math display">\[\mathbf{Y} =
 \begin{pmatrix}
 \mathbf{y}_1^\top \\
 \mathbf{y}_2^\top \\
@@ -131,38 +316,143 @@ y_{N1} &amp; y_{N2} &amp; \cdots &amp; y_{NK}
 \theta_{P1} &amp; \theta_{P2} &amp; \cdots &amp; \theta_{PK}
 \end{pmatrix}
 \in \mathbb{R}^{(P+1)\times K}.\]</span></p>
-<h2 data-number="5.1" id="applications-of-multi-output-regression"><span class="header-section-number">5.1</span> Applications of Multi-output Regression</h2>
-<p>Multi-output regression is used in scenarios where multiple related target variables must be predicted simultaneously from the same input features. Instead of building separate models for each target, a multi-output model can capture relationships among outputs, often improving predictive performance and consistency.</p>
-<p>One important application is in <strong>forest property prediction</strong>, where satellite imagery is used to estimate multiple environmental variables at once, such as vegetation height and canopy cover. These quantities are physically related, and modeling them jointly helps the system learn shared spatial and spectral patterns.</p>
-<p>Another example is <strong>soil quality prediction</strong>. In ecological and agricultural studies, researchers may wish to predict several soil indicators simultaneously, such as Acari abundance and overall biodiversity. Since these measures are influenced by common environmental factors, a multi-output approach can leverage shared structure in the data.</p>
-<p>Multi-output regression is also common in <strong>monthly product sales prediction</strong>, where businesses estimate multiple sales-related quantities from product features, pricing, and advertising data. Predicting all outputs together allows the model to capture dependencies across product categories or time periods.</p>
-<p>A further application is <strong>energy consumption estimation</strong> in buildings. Models may predict both heating and cooling loads of residential structures based on architectural features and environmental conditions. These energy demands are interdependent, and learning them jointly often yields more realistic and stable predictions.</p>
+<h2 data-number="5.1" id="applications-of-multi-output-regression"><span class="header-section-number">5.1</span> Applications of Multi-output
+Regression</h2>
+<p>Multi-output regression is used in scenarios where multiple related
+target variables must be predicted simultaneously from the same input
+features. Instead of building separate models for each target, a
+multi-output model can capture relationships among outputs, often
+improving predictive performance and consistency.</p>
+<p>One important application is in <strong>forest property
+prediction</strong>, where satellite imagery is used to estimate
+multiple environmental variables at once, such as vegetation height and
+canopy cover. These quantities are physically related, and modeling them
+jointly helps the system learn shared spatial and spectral patterns.</p>
+<p>Another example is <strong>soil quality prediction</strong>. In
+ecological and agricultural studies, researchers may wish to predict
+several soil indicators simultaneously, such as Acari abundance and
+overall biodiversity. Since these measures are influenced by common
+environmental factors, a multi-output approach can leverage shared
+structure in the data.</p>
+<p>Multi-output regression is also common in <strong>monthly product
+sales prediction</strong>, where businesses estimate multiple
+sales-related quantities from product features, pricing, and advertising
+data. Predicting all outputs together allows the model to capture
+dependencies across product categories or time periods.</p>
+<p>A further application is <strong>energy consumption
+estimation</strong> in buildings. Models may predict both heating and
+cooling loads of residential structures based on architectural features
+and environmental conditions. These energy demands are interdependent,
+and learning them jointly often yields more realistic and stable
+predictions.</p>
 <h1 data-number="6" id="regularization-techniques"><span class="header-section-number">6.</span> Regularization Techniques</h1>
-<p>In linear regression, models with many features can easily overfit the training data, especially when features are highly correlated (multicollinearity) or when the number of features is comparable to or larger than the number of samples. Regularization addresses this by adding a penalty on the size of the coefficients, which discourages overly complex models and improves generalization. Regularization therefore introduces a trade-off between fitting the training data well and keeping the model simple. As the strength of regularization increases, model variance decreases but bias increases, making regularization a key tool for managing the bias–variance trade-off.</p>
-<h2 data-number="6.1" id="ridge-regression-l2-regularization"><span class="header-section-number">6.1</span> Ridge Regression (L2 Regularization)</h2>
-<p>Ridge regression adds a penalty proportional to the squared magnitude of the coefficients:</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda \|\boldsymbol{\theta}\|_2^2\]</span></p>
-<p>The parameter <span class="math inline">\(\lambda \ge 0\)</span> controls the strength of regularization. When <span class="math inline">\(\lambda = 0\)</span>, Ridge regression reduces to ordinary least squares. As <span class="math inline">\(\lambda\)</span> increases, all coefficients are shrunk smoothly toward zero, but none of them become exactly zero. This means Ridge regression keeps all features in the model while reducing their influence. It is particularly useful when features are highly correlated, since it distributes weights across correlated predictors instead of selecting only one. Ridge regression reduces model variance, stabilizes solutions when <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> is nearly singular, and is preferred when many features contribute small or moderate effects rather than a few dominant ones.</p>
-<h2 data-number="6.2" id="lasso-regression-l1-regularization"><span class="header-section-number">6.2</span> Lasso Regression (L1 Regularization)</h2>
-<p>Lasso regression introduces a penalty based on the L1 norm of the coefficients:</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda \|\boldsymbol{\theta}\|_1\]</span></p>
-<p>Unlike Ridge regression, the L1 penalty encourages sparsity in the coefficient vector. As <span class="math inline">\(\lambda\)</span> increases, some coefficients are driven exactly to zero, effectively removing those features from the model. This behavior makes Lasso regression a powerful method for automatic feature selection, leading to simpler and more interpretable models. Lasso is particularly useful when only a small subset of features is truly relevant. However, when features are highly correlated, Lasso tends to arbitrarily select one feature and ignore the others, which can make the solution unstable.</p>
+<p>In linear regression, models with many features can easily overfit
+the training data, especially when features are highly correlated
+(multicollinearity) or when the number of features is comparable to or
+larger than the number of samples. Regularization addresses this by
+adding a penalty on the size of the coefficients, which discourages
+overly complex models and improves generalization. Regularization
+therefore introduces a trade-off between fitting the training data well
+and keeping the model simple. As the strength of regularization
+increases, model variance decreases but bias increases, making
+regularization a key tool for managing the bias–variance trade-off.</p>
+<h2 data-number="6.1" id="ridge-regression-l2-regularization"><span class="header-section-number">6.1</span> Ridge Regression (L2
+Regularization)</h2>
+<p>Ridge regression adds a penalty proportional to the squared magnitude
+of the coefficients:</p>
+<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N}
+\sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda
+\|\boldsymbol{\theta}\|_2^2\]</span></p>
+<p>The parameter <span class="math inline">\(\lambda \ge 0\)</span>
+controls the strength of regularization. When <span class="math inline">\(\lambda = 0\)</span>, Ridge regression reduces to
+ordinary least squares. As <span class="math inline">\(\lambda\)</span>
+increases, all coefficients are shrunk smoothly toward zero, but none of
+them become exactly zero. This means Ridge regression keeps all features
+in the model while reducing their influence. It is particularly useful
+when features are highly correlated, since it distributes weights across
+correlated predictors instead of selecting only one. Ridge regression
+reduces model variance, stabilizes solutions when <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span> is nearly
+singular, and is preferred when many features contribute small or
+moderate effects rather than a few dominant ones.</p>
+<h2 data-number="6.2" id="lasso-regression-l1-regularization"><span class="header-section-number">6.2</span> Lasso Regression (L1
+Regularization)</h2>
+<p>Lasso regression introduces a penalty based on the L1 norm of the
+coefficients:</p>
+<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N}
+\sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda
+\|\boldsymbol{\theta}\|_1\]</span></p>
+<p>Unlike Ridge regression, the L1 penalty encourages sparsity in the
+coefficient vector. As <span class="math inline">\(\lambda\)</span>
+increases, some coefficients are driven exactly to zero, effectively
+removing those features from the model. This behavior makes Lasso
+regression a powerful method for automatic feature selection, leading to
+simpler and more interpretable models. Lasso is particularly useful when
+only a small subset of features is truly relevant. However, when
+features are highly correlated, Lasso tends to arbitrarily select one
+feature and ignore the others, which can make the solution unstable.</p>
 <h2 data-number="6.3" id="elastic-net"><span class="header-section-number">6.3</span> Elastic Net</h2>
 <p>Elastic Net combines both L1 and L2 penalties:</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N} \sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda_1 \|\boldsymbol{\theta}\|_1 + \lambda_2 \|\boldsymbol{\theta}\|_2^2\]</span></p>
-<p>This method leverages the benefits of both Ridge and Lasso regression. The L1 component promotes sparsity and feature selection, while the L2 component stabilizes the solution and helps when predictors are correlated. Elastic Net is especially useful in high-dimensional settings where the number of features exceeds the number of samples. It avoids Lasso’s tendency to select only one variable from a correlated group and instead allows groups of correlated features to be selected together.</p>
+<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N}
+\sum_{i=1}^{N} (\mathbf{x}_i^T \boldsymbol{\theta} - y_i)^2 + \lambda_1
+\|\boldsymbol{\theta}\|_1 + \lambda_2
+\|\boldsymbol{\theta}\|_2^2\]</span></p>
+<p>This method leverages the benefits of both Ridge and Lasso
+regression. The L1 component promotes sparsity and feature selection,
+while the L2 component stabilizes the solution and helps when predictors
+are correlated. Elastic Net is especially useful in high-dimensional
+settings where the number of features exceeds the number of samples. It
+avoids Lasso’s tendency to select only one variable from a correlated
+group and instead allows groups of correlated features to be selected
+together.</p>
 <h2 data-number="6.4" id="coefficient-paths-as-lambda-varies"><span class="header-section-number">6.4</span> Coefficient Paths as <span class="math inline">\(\lambda\)</span> Varies</h2>
-<p>A useful way to visualize the effect of regularization is to plot <strong>coefficient paths</strong> as a function of the regularization strength <span class="math inline">\(\lambda\)</span>. When features are standardized, the relative shrinkage behavior is easier to compare across coefficients.</p>
-<p>The coefficient path shows how each model parameter evolves as regularization strength changes. When <span class="math inline">\(\lambda\)</span> is small, the solution is close to ordinary least squares, and coefficients take values that best fit the training data. As <span class="math inline">\(\lambda\)</span> increases, the penalty term becomes more influential, constraining the model parameters and reducing their magnitude. Thus, the path illustrates the transition from a data-fitting regime (low bias, higher variance) to a more constrained regime (higher bias, lower variance).</p>
-<figure>
-<img alt="Ridge (L2): coefficients shrink smoothly as \lambda increases." id="fig:ridge_paths" src="img/lecture7/ridge_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Ridge (L2): coefficients shrink smoothly as <span class="math inline">\(\lambda\)</span> increases.</figcaption>
+<p>A useful way to visualize the effect of regularization is to plot
+<strong>coefficient paths</strong> as a function of the regularization
+strength <span class="math inline">\(\lambda\)</span>. When features are
+standardized, the relative shrinkage behavior is easier to compare
+across coefficients.</p>
+<p>The coefficient path shows how each model parameter evolves as
+regularization strength changes. When <span class="math inline">\(\lambda\)</span> is small, the solution is close
+to ordinary least squares, and coefficients take values that best fit
+the training data. As <span class="math inline">\(\lambda\)</span>
+increases, the penalty term becomes more influential, constraining the
+model parameters and reducing their magnitude. Thus, the path
+illustrates the transition from a data-fitting regime (low bias, higher
+variance) to a more constrained regime (higher bias, lower
+variance).</p>
+<figure data-latex-placement="H" id="fig:coef_paths">
+<figure id="fig:ridge_paths">
+<img src="img/lecture7/ridge_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Ridge (L2): coefficients shrink smoothly as <span class="math inline">\(\lambda\)</span> increases.</figcaption>
 </figure>
-<figure>
-<img alt="Lasso (L1): coefficients are driven to exactly zero, yielding sparsity." id="fig:lasso_paths" src="img/lecture7/lasso_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Lasso (L1): coefficients are driven to exactly zero, yielding sparsity.</figcaption>
+<figure id="fig:lasso_paths">
+<img src="img/lecture7/lasso_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Lasso (L1): coefficients are driven to exactly zero,
+yielding sparsity.</figcaption>
 </figure>
-<p>The different shapes of the paths reflect the geometry of the regularization penalty. Ridge regression uses an <span class="math inline">\(L_2\)</span> penalty, which penalizes large coefficients quadratically. This leads to smooth, continuous shrinkage of all parameters toward zero without eliminating any entirely. In contrast, the <span class="math inline">\(L_1\)</span> penalty used in Lasso creates sharp corners in the optimization landscape, which causes some coefficients to become exactly zero as <span class="math inline">\(\lambda\)</span> increases. This is why Lasso performs automatic feature selection, while Ridge primarily performs coefficient stabilization.</p>
+<figcaption>Regularization coefficient paths (standardized features).
+Ridge shrinks all coefficients continuously, while Lasso performs
+shrinkage plus feature selection by setting some coefficients exactly to
+zero.</figcaption>
+</figure>
+<p>The different shapes of the paths reflect the geometry of the
+regularization penalty. Ridge regression uses an <span class="math inline">\(L_2\)</span> penalty, which penalizes large
+coefficients quadratically. This leads to smooth, continuous shrinkage
+of all parameters toward zero without eliminating any entirely. In
+contrast, the <span class="math inline">\(L_1\)</span> penalty used in
+Lasso creates sharp corners in the optimization landscape, which causes
+some coefficients to become exactly zero as <span class="math inline">\(\lambda\)</span> increases. This is why Lasso
+performs automatic feature selection, while Ridge primarily performs
+coefficient stabilization.</p>
 <h2 class="unnumbered" id="summary">Summary</h2>
-<p>Ridge regression primarily performs coefficient shrinkage and works well when many features contribute to the prediction and multicollinearity is present. Lasso regression performs both shrinkage and feature selection, making it suitable when interpretability and sparsity are important. Elastic Net provides a balance between the two, combining stability and sparsity, and is often preferred in high-dimensional or highly correlated feature spaces. In practice, the regularization parameters are selected using cross-validation to achieve the best trade-off between bias and variance.</p>
+<p>Ridge regression primarily performs coefficient shrinkage and works
+well when many features contribute to the prediction and
+multicollinearity is present. Lasso regression performs both shrinkage
+and feature selection, making it suitable when interpretability and
+sparsity are important. Elastic Net provides a balance between the two,
+combining stability and sparsity, and is often preferred in
+high-dimensional or highly correlated feature spaces. In practice, the
+regularization parameters are selected using cross-validation to achieve
+the best trade-off between bias and variance.</p>
 
 </main>
 </body>

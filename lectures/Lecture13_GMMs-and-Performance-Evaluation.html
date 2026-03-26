@@ -16,305 +16,602 @@
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In the previous lecture we introduced k-means clustering and its variants as <strong>hard-clustering</strong> methods. In this lecture, we extend clustering to a probabilistic setting by introducing <strong>Gaussian Mixture Models (GMMs)</strong>, which perform <strong>soft clustering</strong> by modeling data as a mixture of multivariate Gaussians and inferring posterior responsibilities. We then study how GMM parameters are estimated using the <strong>Expectation–Maximization (EM)</strong> algorithm (and why EM is needed in latent-variable models compared to direct MLE), and we evaluate clustering quality using both <strong>internal</strong> metrics (e.g., Davies–Bouldin, Dunn, Silhouette) and <strong>external</strong> metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth is available. Finally, we briefly discuss extensions and applications of clustering, including <strong>mean shift</strong>, <strong>Adjusted Rand Index (ARI)</strong>, and <strong>image segmentation</strong>.</p>
+<p>In the previous lecture we introduced k-means clustering and its
+variants as <strong>hard-clustering</strong> methods. In this lecture,
+we extend clustering to a probabilistic setting by introducing
+<strong>Gaussian Mixture Models (GMMs)</strong>, which perform
+<strong>soft clustering</strong> by modeling data as a mixture of
+multivariate Gaussians and inferring posterior responsibilities. We then
+study how GMM parameters are estimated using the
+<strong>Expectation–Maximization (EM)</strong> algorithm (and why EM is
+needed in latent-variable models compared to direct MLE), and we
+evaluate clustering quality using both <strong>internal</strong> metrics
+(e.g., Davies–Bouldin, Dunn, Silhouette) and <strong>external</strong>
+metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth
+is available. Finally, we briefly discuss extensions and applications of
+clustering, including <strong>mean shift</strong>, <strong>Adjusted Rand
+Index (ARI)</strong>, and <strong>image segmentation</strong>.</p>
 <h1 data-number="2" id="gmm-clustering"><span class="header-section-number">2.</span> GMM Clustering</h1>
-<h2 data-number="2.1" id="definition-of-gmm-clustering"><span class="header-section-number">2.1</span> Definition of GMM Clustering</h2>
-<p>Assume the data <span class="math inline">\(x_1,x_2,...x_N \in \mathbb{R}^{p}\)</span> are random variables drawn independent and identically from an unknown distribution with probabilistic density <span class="math inline">\(Q(x)\)</span>. GMM estimates the likelihood of <span class="math inline">\(Q(x)\)</span> with a <strong>linear superposition</strong> of <span class="math inline">\(k\)</span> <strong>multivariate Gaussian distributions</strong> can be denoted by:<span class="math display">\[Q(x) = \sum_{j=1}^{k}\pi_{j}q_{j}(x)=\sum_{j=1}^{k}\pi_{j}\mathcal{N}   (x|\mu_{j},\Sigma_{j})\]</span> Where <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span> is the <strong>Gaussian Distribution</strong> denoted by:<span class="math display">\[\mathcal{N}(x|\mu_{j}\Sigma_{j})=\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu_{j})^{T}\Sigma_{j}^{-1}(x-\mu_{j})}\]</span> in which, the parameters<br/>
-<span class="math inline">\(\mu = \{\mu_1,...\mu_k\}, \: \mu_{j} \in \mathbb{R}^{p}\)</span> is the <strong>cluster means</strong>;<br/>
-<span class="math inline">\(\Sigma = \{\Sigma_1,...,\Sigma_k\}, \: \Sigma_{j} \in \mathbb{R}^{p\times p}\)</span> is the <strong>cluster covariance matrices</strong> (Multi-variant equivalent of standard deviation);<br/>
-<span class="math inline">\(\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in \mathbb{R}\)</span> is the <strong>cluster coefficients</strong> (Multi-variant equivalent of prior/likelihood) selecting <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span>, satisfying <span class="math inline">\(\Sigma_{j}\pi_{j} = 1\)</span><br/>
+<h2 data-number="2.1" id="definition-of-gmm-clustering"><span class="header-section-number">2.1</span> Definition of GMM
+Clustering</h2>
+<p>Assume the data <span class="math inline">\(x_1,x_2,...x_N \in
+\mathbb{R}^{p}\)</span> are random variables drawn independent and
+identically from an unknown distribution with probabilistic density
+<span class="math inline">\(Q(x)\)</span>. GMM estimates the likelihood
+of <span class="math inline">\(Q(x)\)</span> with a <strong>linear
+superposition</strong> of <span class="math inline">\(k\)</span>
+<strong>multivariate Gaussian distributions</strong> can be denoted
+by:<span class="math display">\[Q(x) =
+\sum_{j=1}^{k}\pi_{j}q_{j}(x)=\sum_{j=1}^{k}\pi_{j}\mathcal{N}   (x|\mu_{j},\Sigma_{j})\]</span>
+Where <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span> is the
+<strong>Gaussian Distribution</strong> denoted by:<span class="math display">\[\mathcal{N}(x|\mu_{j}\Sigma_{j})=\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu_{j})^{T}\Sigma_{j}^{-1}(x-\mu_{j})}\]</span>
+in which, the parameters<br/>
+<span class="math inline">\(\mu = \{\mu_1,...\mu_k\}, \: \mu_{j} \in
+\mathbb{R}^{p}\)</span> is the <strong>cluster means</strong>;<br/>
+<span class="math inline">\(\Sigma = \{\Sigma_1,...,\Sigma_k\}, \:
+\Sigma_{j} \in \mathbb{R}^{p\times p}\)</span> is the <strong>cluster
+covariance matrices</strong> (Multi-variant equivalent of standard
+deviation);<br/>
+<span class="math inline">\(\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in
+\mathbb{R}\)</span> is the <strong>cluster coefficients</strong>
+(Multi-variant equivalent of prior/likelihood) selecting <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span>,
+satisfying <span class="math inline">\(\Sigma_{j}\pi_{j} =
+1\)</span><br/>
 </p>
-<h4 data-number="2.1.0.1" id="gmm-as-a-generative-model."><span class="header-section-number">2.1.0.1</span> GMM as a generative model.</h4>
-<p>A Gaussian Mixture Model (GMM) is a <em>generative</em> model: it describes a probabilistic mechanism by which the observed data are produced. Concretely, it introduces a latent (unobserved) cluster indicator variable <span class="math inline">\(z_i \in \{1,\dots,k\}\)</span> for each sample <span class="math inline">\(x_i\)</span>. The model specifies (i) a prior distribution over components, <span class="math inline">\(p(z_i=j)=\pi_j\)</span> with <span class="math inline">\(\pi_j \ge 0\)</span> and <span class="math inline">\(\sum_{j=1}^k \pi_j = 1\)</span>, and (ii) a class-conditional distribution for the data given the component, <span class="math inline">\(p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j, \Sigma_j)\)</span>. Marginalizing out the latent variable <span class="math inline">\(z_i\)</span> yields the mixture density <span class="math inline">\(Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j, \Sigma_j)\)</span>.</p>
-<h4 data-number="2.1.0.2" id="soft-clustering-interpretation."><span class="header-section-number">2.1.0.2</span> Soft clustering interpretation.</h4>
-<p>Unlike hard clustering methods (e.g., k-means) that assign each point to exactly one cluster, GMMs provide a <em>soft</em> assignment. For each sample <span class="math inline">\(x_i\)</span>, the model computes a posterior probability of belonging to each component, <span class="math inline">\(\gamma_i^j = p(z_i=j \mid x_i)\)</span>, often called the <em>responsibility</em> of component <span class="math inline">\(j\)</span> for explaining <span class="math inline">\(x_i\)</span>. These responsibilities quantify uncertainty: if <span class="math inline">\(x_i\)</span> lies in an overlap region between clusters, then multiple <span class="math inline">\(\gamma_i^j\)</span> values may be non-negligible. In practice, one may still obtain a hard label by taking <span class="math inline">\(\arg\max_j \gamma_i^j\)</span>, but the probabilistic assignments contain richer information than a single label.</p>
-<h4 data-number="2.1.0.3" id="approximating-arbitrary-densities."><span class="header-section-number">2.1.0.3</span> Approximating arbitrary densities.</h4>
-<p>GMMs are flexible density estimators. Intuitively, each Gaussian component can model a “local” region of the distribution, and the weighted sum of many such components can represent complex, multimodal, and non-spherical shapes. With a sufficiently large number of mixture components (and appropriate parameters), mixtures of Gaussians can approximate a wide class of smooth probability densities on <span class="math inline">\(\mathbb{R}^p\)</span> to arbitrary accuracy. This is one reason GMMs are widely used as a general-purpose probabilistic model for clustering and density estimation.</p>
-<h4 data-number="2.1.0.4" id="connection-to-naive-bayes-and-k-means."><span class="header-section-number">2.1.0.4</span> Connection to Naive Bayes and k-means.</h4>
-<p>A helpful way to view GMM clustering is as combining ideas from probabilistic classification and centroid-based assignment. The posterior responsibility <span class="math inline">\(\gamma_i^j\)</span> follows directly from Bayes’ rule, similar in spirit to a Naive Bayes classifier: it compares how likely <span class="math inline">\(x_i\)</span> is under each component, weighted by the prior <span class="math inline">\(\pi_j\)</span>, and then normalizes across <span class="math inline">\(j\)</span>. At the same time, the iterative EM updates resemble k-means: in the E-step, points are “assigned” (softly) to components via responsibilities; in the M-step, the component parameters are updated using these assignments (with responsibilities acting as weights). In the special case where all covariances are equal and spherical, the EM procedure recovers behavior closely related to k-means, but the full GMM allows elliptical clusters and overlapping components.</p>
-<h2 data-number="2.2" id="estimation-with-gmm-clustering"><span class="header-section-number">2.2</span> Estimation with GMM Clustering</h2>
-<p>Similar as other methods, we could also implement MLE estimation for GMM clustering, and write the likelihood function and log likelihood function as follows:<span class="math display">\[L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\]</span> <span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span> However, since the existing of clustering structure (log of sum), there is <strong>no close-form maxima</strong> for the likelihood function except for <span class="math inline">\(k=1\)</span> (<span class="math inline">\(\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i\)</span>, <span class="math inline">\(\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}\)</span>).<br/>
-Therefore, we could utilize the <strong>Expectation Maximization (EM) Algorithm</strong>, which iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the posterior.<br/>
-The posterior <span class="math inline">\(\gamma_i^{j}\)</span>, which is also known as the <strong>responsibility</strong> of cluster j for sample <span class="math inline">\(x_i\)</span>, can be derived using Bayes Rule:<span class="math display">\[\gamma_i^{j}=p(z_i=j|x_i)=\frac{\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}{\sum_{j=1}^{k}\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}\]</span><br/>
+<h4 data-number="2.1.0.1" id="gmm-as-a-generative-model."><span class="header-section-number">2.1.0.1</span> GMM as a generative
+model.</h4>
+<p>A Gaussian Mixture Model (GMM) is a <em>generative</em> model: it
+describes a probabilistic mechanism by which the observed data are
+produced. Concretely, it introduces a latent (unobserved) cluster
+indicator variable <span class="math inline">\(z_i \in
+\{1,\dots,k\}\)</span> for each sample <span class="math inline">\(x_i\)</span>. The model specifies (i) a prior
+distribution over components, <span class="math inline">\(p(z_i=j)=\pi_j\)</span> with <span class="math inline">\(\pi_j \ge 0\)</span> and <span class="math inline">\(\sum_{j=1}^k \pi_j = 1\)</span>, and (ii) a
+class-conditional distribution for the data given the component, <span class="math inline">\(p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j,
+\Sigma_j)\)</span>. Marginalizing out the latent variable <span class="math inline">\(z_i\)</span> yields the mixture density <span class="math inline">\(Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j,
+\Sigma_j)\)</span>.</p>
+<h4 data-number="2.1.0.2" id="soft-clustering-interpretation."><span class="header-section-number">2.1.0.2</span> Soft clustering
+interpretation.</h4>
+<p>Unlike hard clustering methods (e.g., k-means) that assign each point
+to exactly one cluster, GMMs provide a <em>soft</em> assignment. For
+each sample <span class="math inline">\(x_i\)</span>, the model computes
+a posterior probability of belonging to each component, <span class="math inline">\(\gamma_i^j = p(z_i=j \mid x_i)\)</span>, often
+called the <em>responsibility</em> of component <span class="math inline">\(j\)</span> for explaining <span class="math inline">\(x_i\)</span>. These responsibilities quantify
+uncertainty: if <span class="math inline">\(x_i\)</span> lies in an
+overlap region between clusters, then multiple <span class="math inline">\(\gamma_i^j\)</span> values may be non-negligible.
+In practice, one may still obtain a hard label by taking <span class="math inline">\(\arg\max_j \gamma_i^j\)</span>, but the
+probabilistic assignments contain richer information than a single
+label.</p>
+<h4 data-number="2.1.0.3" id="approximating-arbitrary-densities."><span class="header-section-number">2.1.0.3</span> Approximating arbitrary
+densities.</h4>
+<p>GMMs are flexible density estimators. Intuitively, each Gaussian
+component can model a “local” region of the distribution, and the
+weighted sum of many such components can represent complex, multimodal,
+and non-spherical shapes. With a sufficiently large number of mixture
+components (and appropriate parameters), mixtures of Gaussians can
+approximate a wide class of smooth probability densities on <span class="math inline">\(\mathbb{R}^p\)</span> to arbitrary accuracy. This
+is one reason GMMs are widely used as a general-purpose probabilistic
+model for clustering and density estimation.</p>
+<h4 data-number="2.1.0.4" id="connection-to-naive-bayes-and-k-means."><span class="header-section-number">2.1.0.4</span> Connection to Naive Bayes
+and k-means.</h4>
+<p>A helpful way to view GMM clustering is as combining ideas from
+probabilistic classification and centroid-based assignment. The
+posterior responsibility <span class="math inline">\(\gamma_i^j\)</span>
+follows directly from Bayes’ rule, similar in spirit to a Naive Bayes
+classifier: it compares how likely <span class="math inline">\(x_i\)</span> is under each component, weighted by
+the prior <span class="math inline">\(\pi_j\)</span>, and then
+normalizes across <span class="math inline">\(j\)</span>. At the same
+time, the iterative EM updates resemble k-means: in the E-step, points
+are “assigned” (softly) to components via responsibilities; in the
+M-step, the component parameters are updated using these assignments
+(with responsibilities acting as weights). In the special case where all
+covariances are equal and spherical, the EM procedure recovers behavior
+closely related to k-means, but the full GMM allows elliptical clusters
+and overlapping components.</p>
+<h2 data-number="2.2" id="estimation-with-gmm-clustering"><span class="header-section-number">2.2</span> Estimation with GMM
+Clustering</h2>
+<p>Similar as other methods, we could also implement MLE estimation for
+GMM clustering, and write the likelihood function and log likelihood
+function as follows:<span class="math display">\[L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\]</span>
+<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span>
+However, since the existing of clustering structure (log of sum), there
+is <strong>no close-form maxima</strong> for the likelihood function
+except for <span class="math inline">\(k=1\)</span> (<span class="math inline">\(\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i\)</span>,
+<span class="math inline">\(\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}\)</span>).<br/>
+Therefore, we could utilize the <strong>Expectation Maximization (EM)
+Algorithm</strong>, which iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the
+posterior.<br/>
+The posterior <span class="math inline">\(\gamma_i^{j}\)</span>, which
+is also known as the <strong>responsibility</strong> of cluster j for
+sample <span class="math inline">\(x_i\)</span>, can be derived using
+Bayes Rule:<span class="math display">\[\gamma_i^{j}=p(z_i=j|x_i)=\frac{\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}{\sum_{j=1}^{k}\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}\]</span><br/>
 The specific steps are as following:</p>
 <ol>
-<li><p><strong>Initialization</strong>: Initialize the mean <span class="math inline">\(\mu_j^{(0)}\)</span>, covariance <span class="math inline">\(\Sigma_j^{(0)}\)</span> and mixing coefficient <span class="math inline">\(\pi_j^{(0)}\)</span>.<br/>
-(A good initialization is <span class="math inline">\(\mu_j^{(0)} =\)</span>random sample <span class="math inline">\(x_i\)</span>; <span class="math inline">\(\Sigma_j^(t)=\)</span>sample covariance; <span class="math inline">\(\pi_j^{(0)}=\frac{1}{k}\)</span>)</p></li>
-<li><p><strong>Expectation</strong>: compute the responsibility with current parameters<span class="math display">\[(\gamma_i^j)^{(t)}=\frac{\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}{\sum_{j=1}^{k}\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}\]</span></p></li>
-<li><p><strong>Maximization</strong>: Re-estimate the parameters using the current responsibilities<span class="math display">\[\mu_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}x_i}{\sum_{i=1}^{N}(\gamma_{i}^{j})^{(t)}}\]</span> <span class="math display">\[\Sigma_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}(x_i-\mu_j^{(t+1)})(x_i-\mu_j^{(t+1)})^{T}}{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}}\]</span> <span class="math display">\[\pi_j^{(t+1)}=\frac{1}{N}\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}\]</span></p></li>
-<li><p><strong>Convergence Check</strong>: Evaluate the log likelihood<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span> to see if there’s convergence, given by<span class="math display">\[|(LL(x,\pi,\mu,\Sigma))^{(t+1)} - (LL(x,\pi,\mu,\Sigma))^{(t)}| \leq \epsilon\]</span>if not, go back to step 2.</p></li>
+<li><p><strong>Initialization</strong>: Initialize the mean <span class="math inline">\(\mu_j^{(0)}\)</span>, covariance <span class="math inline">\(\Sigma_j^{(0)}\)</span> and mixing coefficient
+<span class="math inline">\(\pi_j^{(0)}\)</span>.<br/>
+(A good initialization is <span class="math inline">\(\mu_j^{(0)}
+=\)</span>random sample <span class="math inline">\(x_i\)</span>; <span class="math inline">\(\Sigma_j^(t)=\)</span>sample covariance; <span class="math inline">\(\pi_j^{(0)}=\frac{1}{k}\)</span>)</p></li>
+<li><p><strong>Expectation</strong>: compute the responsibility with
+current parameters<span class="math display">\[(\gamma_i^j)^{(t)}=\frac{\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}{\sum_{j=1}^{k}\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}\]</span></p></li>
+<li><p><strong>Maximization</strong>: Re-estimate the parameters using
+the current responsibilities<span class="math display">\[\mu_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}x_i}{\sum_{i=1}^{N}(\gamma_{i}^{j})^{(t)}}\]</span>
+<span class="math display">\[\Sigma_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}(x_i-\mu_j^{(t+1)})(x_i-\mu_j^{(t+1)})^{T}}{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}}\]</span>
+<span class="math display">\[\pi_j^{(t+1)}=\frac{1}{N}\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}\]</span></p></li>
+<li><p><strong>Convergence Check</strong>: Evaluate the log
+likelihood<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span>
+to see if there’s convergence, given by<span class="math display">\[|(LL(x,\pi,\mu,\Sigma))^{(t+1)} -
+(LL(x,\pi,\mu,\Sigma))^{(t)}| \leq \epsilon\]</span>if not, go back to
+step 2.</p></li>
 </ol>
 <h2 data-number="2.3" id="aside-em-vs-mle"><span class="header-section-number">2.3</span> Aside: EM vs MLE</h2>
-<p>It is important to distinguish between Maximum Likelihood Estimation (MLE) and the Expectation–Maximization (EM) algorithm introduced above. In classical MLE, we directly maximize the likelihood function with respect to the model parameters. This is feasible when the likelihood has a tractable analytical form or when gradients can be computed directly. However, in many realistic models—including Gaussian Mixture Models—there exist hidden (<strong>latent</strong>) variables that are not observed in the data. The presence of these latent variables makes the likelihood involve a logarithm of a sum, which prevents a closed-form maximization and makes direct MLE (or even MAP estimation) difficult.</p>
-<p>The EM algorithm provides an iterative strategy for obtaining MLE or MAP estimates in such latent-variable models. Rather than optimizing the incomplete-data likelihood directly, EM alternates between estimating the missing latent information and optimizing the parameters given those estimates. Importantly, EM is a general optimization framework and is not limited to GMMs; it is widely used in many probabilistic models that involve hidden variables.</p>
-<p>In the <strong>Expectation step (E-step)</strong>, the algorithm computes the expected value of the complete-data log-likelihood with respect to the current distribution of the latent variables. Intuitively, this step “fills in” the missing information by estimating how likely each latent configuration is under the current parameter values. In the case of GMMs, this corresponds to computing the responsibilities <span class="math inline">\(\gamma_i^j\)</span>, which represent the probability that each data point was generated by each mixture component.</p>
-<p>In the <strong>Maximization step (M-step)</strong>, the algorithm updates the model parameters by maximizing this expected log-likelihood. Using the responsibilities as soft assignments, the parameters are re-estimated to better explain the data. The E-step and M-step are repeated until the log-likelihood converges, guaranteeing a monotonic increase in the likelihood at each iteration.</p>
+<p>It is important to distinguish between Maximum Likelihood Estimation
+(MLE) and the Expectation–Maximization (EM) algorithm introduced above.
+In classical MLE, we directly maximize the likelihood function with
+respect to the model parameters. This is feasible when the likelihood
+has a tractable analytical form or when gradients can be computed
+directly. However, in many realistic models—including Gaussian Mixture
+Models—there exist hidden (<strong>latent</strong>) variables that are
+not observed in the data. The presence of these latent variables makes
+the likelihood involve a logarithm of a sum, which prevents a
+closed-form maximization and makes direct MLE (or even MAP estimation)
+difficult.</p>
+<p>The EM algorithm provides an iterative strategy for obtaining MLE or
+MAP estimates in such latent-variable models. Rather than optimizing the
+incomplete-data likelihood directly, EM alternates between estimating
+the missing latent information and optimizing the parameters given those
+estimates. Importantly, EM is a general optimization framework and is
+not limited to GMMs; it is widely used in many probabilistic models that
+involve hidden variables.</p>
+<p>In the <strong>Expectation step (E-step)</strong>, the algorithm
+computes the expected value of the complete-data log-likelihood with
+respect to the current distribution of the latent variables.
+Intuitively, this step “fills in” the missing information by estimating
+how likely each latent configuration is under the current parameter
+values. In the case of GMMs, this corresponds to computing the
+responsibilities <span class="math inline">\(\gamma_i^j\)</span>, which
+represent the probability that each data point was generated by each
+mixture component.</p>
+<p>In the <strong>Maximization step (M-step)</strong>, the algorithm
+updates the model parameters by maximizing this expected log-likelihood.
+Using the responsibilities as soft assignments, the parameters are
+re-estimated to better explain the data. The E-step and M-step are
+repeated until the log-likelihood converges, guaranteeing a monotonic
+increase in the likelihood at each iteration.</p>
 <h2 data-number="2.4" id="example-of-gmm-clustering"><span class="header-section-number">2.4</span> Example of GMM Clustering</h2>
-<p>We are going to implement EM Algorithm for a Gaussian mixture of 2 models.</p>
+<p>We are going to implement EM Algorithm for a Gaussian mixture of 2
+models.</p>
 <h3 data-number="2.4.1" id="initialization"><span class="header-section-number">2.4.1</span> Initialization</h3>
 <p>We can initialize the EM Algorithm as follows:</p>
-<figure>
-<img alt="Initialization of EM Algorithm" src="img/lecture12/GMM%20clustering%20Examples/Initialization%20of%20EM%20algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Initialization of EM Algorithm</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/GMM%20clustering%20Examples/Initialization%20of%20EM%20algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Initialization of EM Algorithm</figcaption>
 </figure>
 <h3 data-number="2.4.2" id="iteration-0"><span class="header-section-number">2.4.2</span> Iteration 0</h3>
 <p>We can calculate the parameters for iteration <span class="math inline">\(0^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
-\end{bmatrix}\]</span> Cluster Means: <span class="math display">\[\mu_1 = 
+\end{bmatrix}\]</span> Cluster Means: <span class="math display">\[\mu_1
+=
 \begin{bmatrix}
 1.1000 \\
 2.1000
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 2.9000 \\
 3.9000
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 1.1052 &amp; 0.0000 \\
 0.0000 &amp; 2.2103
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 3.3155 &amp; 0.0000 \\
 0.0000 &amp; 4.4207
 \end{bmatrix}\]</span></p>
-<figure>
-<img alt="Iteration 0 of EM Algorithm" src="img/lecture12/GMM%20clustering%20Examples/Iteration%200%20of%20EM%20algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Iteration 0 of EM Algorithm</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/GMM%20clustering%20Examples/Iteration%200%20of%20EM%20algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Iteration 0 of EM Algorithm</figcaption>
 </figure>
 <h3 data-number="2.4.3" id="iteration-50"><span class="header-section-number">2.4.3</span> Iteration 50</h3>
 <p>We can calculate the new parameters for iteration <span class="math inline">\(50^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 2.0690 \\
 3.0228
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 2.7500 \\
 2.2505
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.5456 &amp; 0.0000 \\
 0.0000 &amp; 7.5187
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 9.9789 &amp; 0.0000 \\
 0.0000 &amp; 7.4052
 \end{bmatrix}\]</span></p>
-<figure>
-<img alt="Iteration 50 of EM Algorithm" src="img/lecture12/GMM%20clustering%20Examples/Iteration%2050%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Iteration 50 of EM Algorithm</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/GMM%20clustering%20Examples/Iteration%2050%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Iteration 50 of EM Algorithm</figcaption>
 </figure>
 <h3 data-number="2.4.4" id="iteration-100"><span class="header-section-number">2.4.4</span> Iteration 100</h3>
 <p>We can calculate the parameters for iteration <span class="math inline">\(100^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
 \end{bmatrix}\]</span></p>
-<figure>
-<img alt="Iteration 100 of EM Algorithm" src="img/lecture12/GMM%20clustering%20Examples/Iteration%20100%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Iteration 100 of EM Algorithm</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/GMM%20clustering%20Examples/Iteration%20100%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Iteration 100 of EM Algorithm</figcaption>
 </figure>
 <h3 data-number="2.4.5" id="iteration-150"><span class="header-section-number">2.4.5</span> Iteration 150</h3>
 <p>We can calculate the parameters for the <span class="math inline">\(150^{th}\)</span> iteration as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
 \end{bmatrix}\]</span></p>
-<figure>
-<img alt="Iteration 150 of EM Algorithm" src="img/lecture12/GMM%20clustering%20Examples/Iteration%20150%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Iteration 150 of EM Algorithm</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/GMM%20clustering%20Examples/Iteration%20150%20of%20EM%20Algorithm.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Iteration 150 of EM Algorithm</figcaption>
 </figure>
 <p>Keep iterating until the log likelihood converges. Note:</p>
 <ul>
-<li><p>The diagonals of the cluster covariances are standard deviations and measure the length of the cluster shape on an axis.</p></li>
+<li><p>The diagonals of the cluster covariances are standard deviations
+and measure the length of the cluster shape on an axis.</p></li>
 </ul>
-<h1 data-number="3" id="clustering-performance-evaluation"><span class="header-section-number">3.</span> Clustering Performance Evaluation</h1>
-<p>To assess the quality of a clustering algorithm, we use evaluation metrics that quantify how well the resulting clusters represent meaningful structure in the data. Broadly, clustering evaluation can be divided into two categories. <strong>External evaluation</strong> measures how closely the computed clusters match a known ground truth set of classes. In contrast, <strong>internal evaluation</strong> assesses the clustering structure using only the data itself, typically by measuring how compact clusters are and how well-separated they are from one another.</p>
-<p>An important requirement of clustering evaluation metrics is that they must be <strong>independent of the absolute label values</strong>. Since cluster labels are arbitrary identifiers, permuting the label values should not change the evaluation score. In other words, clustering metrics must be permutation-invariant.</p>
+<h1 data-number="3" id="clustering-performance-evaluation"><span class="header-section-number">3.</span> Clustering Performance
+Evaluation</h1>
+<p>To assess the quality of a clustering algorithm, we use evaluation
+metrics that quantify how well the resulting clusters represent
+meaningful structure in the data. Broadly, clustering evaluation can be
+divided into two categories. <strong>External evaluation</strong>
+measures how closely the computed clusters match a known ground truth
+set of classes. In contrast, <strong>internal evaluation</strong>
+assesses the clustering structure using only the data itself, typically
+by measuring how compact clusters are and how well-separated they are
+from one another.</p>
+<p>An important requirement of clustering evaluation metrics is that
+they must be <strong>independent of the absolute label values</strong>.
+Since cluster labels are arbitrary identifiers, permuting the label
+values should not change the evaluation score. In other words,
+clustering metrics must be permutation-invariant.</p>
 <h2 data-number="3.1" id="internal-evaluation"><span class="header-section-number">3.1</span> Internal Evaluation</h2>
-<p>In internal evaluation, the clustering result is assessed using only the data that was clustered. These metrics are based on the principle that good clusters should exhibit <em>high similarity within clusters</em> (compactness) and <em>low similarity between clusters</em> (separation). Algorithms that produce tightly grouped clusters that are well separated from one another will typically achieve higher internal evaluation scores.</p>
-<p>However, it is important to note that a high internal score does not necessarily imply good performance in downstream applications such as information retrieval. Additionally, internal metrics may be biased toward algorithms that assume the same cluster structure as the metric itself (for example, centroid-based measures favoring centroid-based clustering methods).</p>
-<p>The most commonly used internal clustering metrics are described below.</p>
+<p>In internal evaluation, the clustering result is assessed using only
+the data that was clustered. These metrics are based on the principle
+that good clusters should exhibit <em>high similarity within
+clusters</em> (compactness) and <em>low similarity between clusters</em>
+(separation). Algorithms that produce tightly grouped clusters that are
+well separated from one another will typically achieve higher internal
+evaluation scores.</p>
+<p>However, it is important to note that a high internal score does not
+necessarily imply good performance in downstream applications such as
+information retrieval. Additionally, internal metrics may be biased
+toward algorithms that assume the same cluster structure as the metric
+itself (for example, centroid-based measures favoring centroid-based
+clustering methods).</p>
+<p>The most commonly used internal clustering metrics are described
+below.</p>
 <h3 data-number="3.1.1" id="daviesbouldin-index"><span class="header-section-number">3.1.1</span> Davies–Bouldin Index</h3>
-<p>The Davies–Bouldin (DB) Index evaluates clustering quality by comparing intra-cluster compactness with inter-cluster separation. It is defined as:</p>
-<p><span class="math display">\[DB = \frac{1}{k}\sum_{r=1}^{k}\max_{r \neq s}\left(\frac{\sigma_r + \sigma_s}{d(m_r,m_s)}\right)\]</span></p>
-<p>For each cluster <span class="math inline">\(r\)</span>, the DB index computes the worst-case ratio between the sum of within-cluster dispersions and the distance between cluster centroids. The terms in the formula are defined as follows:</p>
-<p>Cluster <span class="math inline">\(r\)</span> has centroid <span class="math inline">\(m_r\)</span>, and <span class="math inline">\(\sigma_r\)</span> denotes the average distance of all samples in cluster <span class="math inline">\(r\)</span> to its centroid: <span class="math display">\[\sigma_r = \frac{1}{|C_r|} \sum_{x_i \in C_r} d(x_i, m_r).\]</span> The quantity <span class="math inline">\(d(m_r,m_s)\)</span> represents the distance between the centroids of clusters <span class="math inline">\(r\)</span> and <span class="math inline">\(s\)</span>.</p>
-<p>Intuitively, the DB index measures how similar each cluster is to its most similar neighboring cluster. A smaller DB index indicates better clustering performance, as it reflects compact clusters that are well separated from each other. Therefore, when the goal is to compare cluster separation and compactness, algorithms producing clusters with a <strong>smaller</strong> DB index are preferred.</p>
+<p>The Davies–Bouldin (DB) Index evaluates clustering quality by
+comparing intra-cluster compactness with inter-cluster separation. It is
+defined as:</p>
+<p><span class="math display">\[DB = \frac{1}{k}\sum_{r=1}^{k}\max_{r
+\neq s}\left(\frac{\sigma_r + \sigma_s}{d(m_r,m_s)}\right)\]</span></p>
+<p>For each cluster <span class="math inline">\(r\)</span>, the DB index
+computes the worst-case ratio between the sum of within-cluster
+dispersions and the distance between cluster centroids. The terms in the
+formula are defined as follows:</p>
+<p>Cluster <span class="math inline">\(r\)</span> has centroid <span class="math inline">\(m_r\)</span>, and <span class="math inline">\(\sigma_r\)</span> denotes the average distance of
+all samples in cluster <span class="math inline">\(r\)</span> to its
+centroid: <span class="math display">\[\sigma_r = \frac{1}{|C_r|}
+\sum_{x_i \in C_r} d(x_i, m_r).\]</span> The quantity <span class="math inline">\(d(m_r,m_s)\)</span> represents the distance
+between the centroids of clusters <span class="math inline">\(r\)</span>
+and <span class="math inline">\(s\)</span>.</p>
+<p>Intuitively, the DB index measures how similar each cluster is to its
+most similar neighboring cluster. A smaller DB index indicates better
+clustering performance, as it reflects compact clusters that are well
+separated from each other. Therefore, when the goal is to compare
+cluster separation and compactness, algorithms producing clusters with a
+<strong>smaller</strong> DB index are preferred.</p>
 <h3 data-number="3.1.2" id="dunn-index"><span class="header-section-number">3.1.2</span> Dunn Index</h3>
-<p>The Dunn Index is denoted by the following formula:<span class="math display">\[D = \frac{\displaystyle \min_{1\leq r\leq s\leq k}d(m_r,m_s)}{\displaystyle \max_{1\leq z\leq k}d'(z)}\]</span></p>
-<p>The main part is the ratio between the <strong>minimal inter-cluster distance to maximal intra-cluster distance.</strong><br/>
-Calculation of <span class="math inline">\(d(m_r,m_s)\)</span> is similar to the one in Davis-Bouldin Index, while <span class="math inline">\(d'(z)\)</span> can also be calculated in a variety of ways(e.g. the maximal distance between any pair of element in cluster <span class="math inline">\(z\)</span>)<br/>
-DB Index is used when <strong>the goal is to identify well-separated, compact clusters</strong>.<br/>
-Algorithms producing clusters with <strong>bigger</strong> Dunn Index is ideal.</p>
+<p>The Dunn Index is denoted by the following formula:<span class="math display">\[D = \frac{\displaystyle \min_{1\leq r\leq s\leq
+k}d(m_r,m_s)}{\displaystyle \max_{1\leq z\leq k}d'(z)}\]</span></p>
+<p>The main part is the ratio between the <strong>minimal inter-cluster
+distance to maximal intra-cluster distance.</strong><br/>
+Calculation of <span class="math inline">\(d(m_r,m_s)\)</span> is
+similar to the one in Davis-Bouldin Index, while <span class="math inline">\(d'(z)\)</span> can also be calculated in a
+variety of ways(e.g. the maximal distance between any pair of element in
+cluster <span class="math inline">\(z\)</span>)<br/>
+DB Index is used when <strong>the goal is to identify well-separated,
+compact clusters</strong>.<br/>
+Algorithms producing clusters with <strong>bigger</strong> Dunn Index is
+ideal.</p>
 <h3 data-number="3.1.3" id="silhouette-coefficient"><span class="header-section-number">3.1.3</span> Silhouette Coefficient</h3>
-<p>The <strong>Silhouette Coefficient</strong> is an internal clustering metric that evaluates how well each data point fits within its assigned cluster compared to neighboring clusters. It captures both <em>cluster cohesion</em> (how close a point is to its own cluster) and <em>cluster separation</em> (how far it is from the nearest alternative cluster).</p>
-<p>The silhouette value for a sample <span class="math inline">\(x_i\)</span> is computed using the following steps:</p>
+<p>The <strong>Silhouette Coefficient</strong> is an internal clustering
+metric that evaluates how well each data point fits within its assigned
+cluster compared to neighboring clusters. It captures both <em>cluster
+cohesion</em> (how close a point is to its own cluster) and <em>cluster
+separation</em> (how far it is from the nearest alternative
+cluster).</p>
+<p>The silhouette value for a sample <span class="math inline">\(x_i\)</span> is computed using the following
+steps:</p>
 <ol>
-<li><p>Calculate the average <strong>intra-cluster dissimilarity</strong> <span class="math inline">\(a_i\)</span> between <span class="math inline">\(x_i \in C_r\)</span> and all other samples in its cluster: <span class="math display">\[a_i = \frac{1}{|C_r|-1}\sum_{x_j\in C_r,\, j\neq i} d(x_i,x_j)\]</span></p></li>
-<li><p>Calculate the average <strong>nearest-cluster dissimilarity</strong> <span class="math inline">\(b_i\)</span>, defined as the smallest average distance from <span class="math inline">\(x_i\)</span> to all samples in any other cluster <span class="math inline">\(C_s\)</span>: <span class="math display">\[b_i = \min_{s\neq r}\frac{1}{|C_s|}\sum_{x_j \in C_s} d(x_i, x_j)\]</span></p></li>
+<li><p>Calculate the average <strong>intra-cluster
+dissimilarity</strong> <span class="math inline">\(a_i\)</span> between
+<span class="math inline">\(x_i \in C_r\)</span> and all other samples
+in its cluster: <span class="math display">\[a_i =
+\frac{1}{|C_r|-1}\sum_{x_j\in C_r,\, j\neq i}
+d(x_i,x_j)\]</span></p></li>
+<li><p>Calculate the average <strong>nearest-cluster
+dissimilarity</strong> <span class="math inline">\(b_i\)</span>, defined
+as the smallest average distance from <span class="math inline">\(x_i\)</span> to all samples in any other cluster
+<span class="math inline">\(C_s\)</span>: <span class="math display">\[b_i = \min_{s\neq r}\frac{1}{|C_s|}\sum_{x_j \in
+C_s} d(x_i, x_j)\]</span></p></li>
 <li><p>Compute the silhouette coefficient: <span class="math display">\[s(x_i)=\begin{cases}
             1-\frac{a_i}{b_i} &amp; \text{if } a_i &lt; b_i \\[6pt]
             0 &amp; \text{if } a_i=b_i \\[6pt]
             \frac{b_i}{a_i}-1 &amp; \text{if } a_i &gt; b_i
             \end{cases}\]</span></p></li>
 </ol>
-<figure>
-<img alt="Demonstration of Silhouette Coefficient" src="img/lecture12/Clustering%20Performance%20Evaluation/Silhouette%20Coefficient.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Demonstration of Silhouette Coefficient</figcaption>
+<figure data-latex-placement="ht">
+<img src="img/lecture12/Clustering%20Performance%20Evaluation/Silhouette%20Coefficient.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Demonstration of Silhouette Coefficient</figcaption>
 </figure>
-<p>The silhouette value lies in the range <span class="math inline">\(-1 \le s(x_i) \le 1\)</span>. Values close to <span class="math inline">\(1\)</span> indicate that the sample is well matched to its own cluster and far from neighboring clusters, values near <span class="math inline">\(0\)</span> indicate overlapping clusters, and negative values suggest that the sample may be misclassified or represent an outlier. In general, clustering algorithms that produce <strong>larger average silhouette coefficients</strong> are preferred.</p>
-<p>From the silhouette values, we can also construct a <strong>Cluster Silhouette Plot</strong> by sorting the coefficients in descending order and plotting them vertically for each cluster.</p>
-<figure>
-<img alt="Cluster Silhouette Plot of k-means and GMMs" src="img/lecture12/Clustering%20Performance%20Evaluation/Cluster%20Silhouette%20Plot.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Cluster Silhouette Plot of k-means and GMMs</figcaption>
+<p>The silhouette value lies in the range <span class="math inline">\(-1
+\le s(x_i) \le 1\)</span>. Values close to <span class="math inline">\(1\)</span> indicate that the sample is well
+matched to its own cluster and far from neighboring clusters, values
+near <span class="math inline">\(0\)</span> indicate overlapping
+clusters, and negative values suggest that the sample may be
+misclassified or represent an outlier. In general, clustering algorithms
+that produce <strong>larger average silhouette coefficients</strong> are
+preferred.</p>
+<p>From the silhouette values, we can also construct a <strong>Cluster
+Silhouette Plot</strong> by sorting the coefficients in descending order
+and plotting them vertically for each cluster.</p>
+<figure data-latex-placement="ht">
+<img src="img/lecture12/Clustering%20Performance%20Evaluation/Cluster%20Silhouette%20Plot.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Cluster Silhouette Plot of k-means and GMMs</figcaption>
 </figure>
-<p>The silhouette plot provides a visual summary of clustering quality. Negative coefficients typically correspond to outliers or poorly assigned samples. The thickness of each silhouette region reflects the size of the corresponding cluster, while the mean silhouette coefficient provides a single measure of overall clustering performance. This visualization is therefore useful for assessing and comparing clustering results across different methods.<br/>
+<p>The silhouette plot provides a visual summary of clustering quality.
+Negative coefficients typically correspond to outliers or poorly
+assigned samples. The thickness of each silhouette region reflects the
+size of the corresponding cluster, while the mean silhouette coefficient
+provides a single measure of overall clustering performance. This
+visualization is therefore useful for assessing and comparing clustering
+results across different methods.<br/>
 </p>
 <h2 data-number="3.2" id="external-evaluations"><span class="header-section-number">3.2</span> External Evaluations</h2>
-<p>In <strong>external evaluation</strong>, clustering performance is assessed using information that was <em>not</em> used during the clustering process, such as known class labels or established benchmark datasets. These reference datasets are commonly referred to as the <strong>gold standard</strong> or <strong>ground truth</strong>, and they are typically created and validated by human experts. External metrics therefore measure how closely the computed clustering agrees with a known, correct partition of the data.</p>
+<p>In <strong>external evaluation</strong>, clustering performance is
+assessed using information that was <em>not</em> used during the
+clustering process, such as known class labels or established benchmark
+datasets. These reference datasets are commonly referred to as the
+<strong>gold standard</strong> or <strong>ground truth</strong>, and
+they are typically created and validated by human experts. External
+metrics therefore measure how closely the computed clustering agrees
+with a known, correct partition of the data.</p>
 <p>Throughout this section, we assume the following:</p>
 <ul>
-<li><p>There exists a ground-truth clustering <span class="math inline">\(R = \{R_1, \ldots, R_u\}\)</span> consisting of <span class="math inline">\(u\)</span> clusters.</p></li>
-<li><p>There exists a computed clustering <span class="math inline">\(Q = \{Q_1, \ldots, Q_v\}\)</span> consisting of <span class="math inline">\(v\)</span> clusters.</p></li>
+<li><p>There exists a ground-truth clustering <span class="math inline">\(R = \{R_1, \ldots, R_u\}\)</span> consisting of
+<span class="math inline">\(u\)</span> clusters.</p></li>
+<li><p>There exists a computed clustering <span class="math inline">\(Q
+= \{Q_1, \ldots, Q_v\}\)</span> consisting of <span class="math inline">\(v\)</span> clusters.</p></li>
 </ul>
 <h3 data-number="3.2.1" id="rand-index"><span class="header-section-number">3.2.1</span> Rand Index</h3>
-<p>The calculation of Rand Index requires measurement of the following 4 number of pairs:</p>
+<p>The calculation of Rand Index requires measurement of the following 4
+number of pairs:</p>
 <ol>
-<li><p><span class="math inline">\(a\)</span>: in the same class for both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)</span></p></li>
-<li><p><span class="math inline">\(b\)</span>: in the same class for <span class="math inline">\(R\)</span>, but different for <span class="math inline">\(Q\)</span></p></li>
-<li><p><span class="math inline">\(c\)</span>: in the same class for <span class="math inline">\(Q\)</span>, but different for <span class="math inline">\(R\)</span></p></li>
-<li><p><span class="math inline">\(d\)</span>: in the different class for both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)</span></p></li>
+<li><p><span class="math inline">\(a\)</span>: in the same class for
+both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)</span></p></li>
+<li><p><span class="math inline">\(b\)</span>: in the same class for
+<span class="math inline">\(R\)</span>, but different for <span class="math inline">\(Q\)</span></p></li>
+<li><p><span class="math inline">\(c\)</span>: in the same class for
+<span class="math inline">\(Q\)</span>, but different for <span class="math inline">\(R\)</span></p></li>
+<li><p><span class="math inline">\(d\)</span>: in the different class
+for both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)</span></p></li>
 </ol>
-<figure>
-<img alt="Rand Index Parameters Demonstration" src="img/lecture12/Clustering%20Performance%20Evaluation/Rand%20Index.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Rand Index Parameters Demonstration</figcaption>
+<figure data-latex-placement="H">
+<img src="img/lecture12/Clustering%20Performance%20Evaluation/Rand%20Index.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Rand Index Parameters Demonstration</figcaption>
 </figure>
-<p>With the four measurements, Rand Index can be denoted as:<span class="math display">\[RI(R,Q)=\frac{a+d}{a+b+c+d}\]</span> Rand index can be used to evaluate generated clustering against a ground truth clustering.<br/>
-Algorithms producing clusters with <strong>bigger</strong> rand index is ideal.</p>
+<p>With the four measurements, Rand Index can be denoted as:<span class="math display">\[RI(R,Q)=\frac{a+d}{a+b+c+d}\]</span> Rand index
+can be used to evaluate generated clustering against a ground truth
+clustering.<br/>
+Algorithms producing clusters with <strong>bigger</strong> rand index is
+ideal.</p>
 <h3 data-number="3.2.2" id="mutual-information"><span class="header-section-number">3.2.2</span> Mutual Information</h3>
-<p>Mutual Information measures the overlap between computed an ground-truth cluster on basis of information theory. The formula for Mutual information score is given as following:<span class="math display">\[MI(R, Q) = \sum_{i=1}^{|R|} \sum_{j=1}^{|Q|} \frac{|R_i \cap Q_j|}{N} \log \frac{N |R_i \cap Q_j|}{|R_i| |Q_j|}\]</span> in which,<br/>
+<p>Mutual Information measures the overlap between computed an
+ground-truth cluster on basis of information theory. The formula for
+Mutual information score is given as following:<span class="math display">\[MI(R, Q) = \sum_{i=1}^{|R|} \sum_{j=1}^{|Q|}
+\frac{|R_i \cap Q_j|}{N} \log \frac{N |R_i \cap Q_j|}{|R_i|
+|Q_j|}\]</span> in which,<br/>
 </p>
 <ul>
-<li><p><span class="math inline">\(|R_i|\)</span> is the number of the samples in cluster <span class="math inline">\(R_i\)</span>;</p></li>
-<li><p><span class="math inline">\(|Q_j|\)</span> is the number of the samples in cluster <span class="math inline">\(Q_j\)</span>.</p></li>
+<li><p><span class="math inline">\(|R_i|\)</span> is the number of the
+samples in cluster <span class="math inline">\(R_i\)</span>;</p></li>
+<li><p><span class="math inline">\(|Q_j|\)</span> is the number of the
+samples in cluster <span class="math inline">\(Q_j\)</span>.</p></li>
 </ul>
-<p>Algorithms producing clusters with <strong>bigger</strong> Mutual Information score is ideal.</p>
+<p>Algorithms producing clusters with <strong>bigger</strong> Mutual
+Information score is ideal.</p>
 <h3 data-number="3.2.3" id="cluster-purity"><span class="header-section-number">3.2.3</span> Cluster Purity</h3>
-<p>Purity is the measure of the extent to which clusters contain <strong>a single class</strong>.<br/>
-Purity is defined as how much the <strong>ground truth</strong> clustering <strong>matches</strong> the <strong>computed clustering</strong>, i.e. for a set of <span class="math inline">\(N\)</span> data points the formula is:<span class="math display">\[\frac{1}{N} \sum_{j=1}^{v} \max_{1 \leq i \leq u} |Q_j \cap R_i|\]</span></p>
-<p>In simplistic terms, add the number of matches for each most matched computed clusters and divide that by the number of data points - that is the purity score. The closer to 1 the purity score is, the better the computed cluster is.<br/>
-The purity score fails to accuracy measure a clustering algorithm if the data is imbalanced between the ground truth clusters.<br/>
+<p>Purity is the measure of the extent to which clusters contain
+<strong>a single class</strong>.<br/>
+Purity is defined as how much the <strong>ground truth</strong>
+clustering <strong>matches</strong> the <strong>computed
+clustering</strong>, i.e. for a set of <span class="math inline">\(N\)</span> data points the formula is:<span class="math display">\[\frac{1}{N} \sum_{j=1}^{v} \max_{1 \leq i \leq u}
+|Q_j \cap R_i|\]</span></p>
+<p>In simplistic terms, add the number of matches for each most matched
+computed clusters and divide that by the number of data points - that is
+the purity score. The closer to 1 the purity score is, the better the
+computed cluster is.<br/>
+The purity score fails to accuracy measure a clustering algorithm if the
+data is imbalanced between the ground truth clusters.<br/>
 </p>
 <h2 data-number="3.3" id="summary-of-metrics"><span class="header-section-number">3.3</span> Summary of Metrics</h2>
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"><strong>Internal</strong> (Best)</th>
 <th style="text-align: center;"><strong>External</strong> (Best)</th>
 <th style="text-align: center;"></th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td style="text-align: center;">Davies-Boudlin - Distinctness (Smallest)</td>
+<tr>
+<td style="text-align: center;">Davies-Boudlin - Distinctness
+(Smallest)</td>
 <td style="text-align: center;">Rand-Index - Correctness (Biggest)</td>
 <td style="text-align: center;"></td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">Dunn - Density (Biggest)</td>
-<td style="text-align: center;">Mutual Information Score - Overlap (Biggest)</td>
+<td style="text-align: center;">Mutual Information Score - Overlap
+(Biggest)</td>
 <td style="text-align: center;"></td>
 </tr>
-<tr class="odd">
-<td style="text-align: center;">Silhouette - Separability (Biggest of 1)</td>
-<td style="text-align: center;">Cluster Purity - Accuracy (Biggest of 1)</td>
+<tr>
+<td style="text-align: center;">Silhouette - Separability (Biggest of
+1)</td>
+<td style="text-align: center;">Cluster Purity - Accuracy (Biggest of
+1)</td>
 <td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
 </div>
-<h1 data-number="4" id="extensions-and-applications-of-clustering"><span class="header-section-number">4.</span> Extensions and Applications of Clustering</h1>
-<p>The clustering methods discussed so far form the core toolkit for unsupervised learning. In this section, we introduce several important extensions, evaluation measures, and applications that build on these ideas.</p>
+<h1 data-number="4" id="extensions-and-applications-of-clustering"><span class="header-section-number">4.</span> Extensions and Applications of
+Clustering</h1>
+<p>The clustering methods discussed so far form the core toolkit for
+unsupervised learning. In this section, we introduce several important
+extensions, evaluation measures, and applications that build on these
+ideas.</p>
 <h2 data-number="4.1" id="mean-shift-clustering"><span class="header-section-number">4.1</span> Mean Shift Clustering</h2>
-<p>The <strong>Mean Shift</strong> algorithm is a non-parametric clustering method that seeks <strong>modes (local maxima) of a data density function</strong>. Unlike k-means or GMMs, mean shift does <strong>not require prior knowledge of the number of clusters</strong>. Instead, clusters naturally emerge as groups of points that converge to the same density mode.</p>
-<p>Intuitively, each data point iteratively moves toward regions of higher density. This is achieved by repeatedly shifting a local window toward the weighted mean of the data within that window. The kernel function <span class="math inline">\(K(x_i - x)\)</span> determines how strongly each neighboring sample influences the update.</p>
+<p>The <strong>Mean Shift</strong> algorithm is a non-parametric
+clustering method that seeks <strong>modes (local maxima) of a data
+density function</strong>. Unlike k-means or GMMs, mean shift does
+<strong>not require prior knowledge of the number of clusters</strong>.
+Instead, clusters naturally emerge as groups of points that converge to
+the same density mode.</p>
+<p>Intuitively, each data point iteratively moves toward regions of
+higher density. This is achieved by repeatedly shifting a local window
+toward the weighted mean of the data within that window. The kernel
+function <span class="math inline">\(K(x_i - x)\)</span> determines how
+strongly each neighboring sample influences the update.</p>
 <p>The algorithm proceeds as follows:</p>
 <ol>
-<li><p>Place a <strong>window</strong> <span class="math inline">\(W(x)\)</span> around each data point, determined by a user-defined <strong>bandwidth</strong> (window size).</p></li>
-<li><p>Compute the weighted mean of the samples inside the window: <span class="math display">\[m(x)=\frac{\sum_{x_i\in W(x)} K(x_i-x)x_i}{\sum_{x_i\in W(x)} K(x_i-x)}.\]</span></p></li>
-<li><p><strong>Shift the window</strong> toward the mean. The vector <span class="math inline">\(m(x)-x\)</span> is called the <strong>mean shift</strong>.</p></li>
-<li><p>Repeat until convergence. The final location <span class="math inline">\(m(x)\)</span> corresponds to a density mode representing a cluster.</p></li>
-<li><p>Merge nearby modes and assign each data point to the mode its window converges to.</p></li>
+<li><p>Place a <strong>window</strong> <span class="math inline">\(W(x)\)</span> around each data point, determined
+by a user-defined <strong>bandwidth</strong> (window size).</p></li>
+<li><p>Compute the weighted mean of the samples inside the window: <span class="math display">\[m(x)=\frac{\sum_{x_i\in W(x)}
+K(x_i-x)x_i}{\sum_{x_i\in W(x)} K(x_i-x)}.\]</span></p></li>
+<li><p><strong>Shift the window</strong> toward the mean. The vector
+<span class="math inline">\(m(x)-x\)</span> is called the <strong>mean
+shift</strong>.</p></li>
+<li><p>Repeat until convergence. The final location <span class="math inline">\(m(x)\)</span> corresponds to a density mode
+representing a cluster.</p></li>
+<li><p>Merge nearby modes and assign each data point to the mode its
+window converges to.</p></li>
 </ol>
-<h4 data-number="4.1.0.1" id="computational-considerations."><span class="header-section-number">4.1.0.1</span> Computational considerations.</h4>
-<p>Mean shift can be computationally expensive because a window is shifted for each data sample and many trajectories overlap, leading to redundant computations.</p>
+<h4 data-number="4.1.0.1" id="computational-considerations."><span class="header-section-number">4.1.0.1</span> Computational
+considerations.</h4>
+<p>Mean shift can be computationally expensive because a window is
+shifted for each data sample and many trajectories overlap, leading to
+redundant computations.</p>
 <h4 data-number="4.1.0.2" id="common-speedups."><span class="header-section-number">4.1.0.2</span> Common speedups.</h4>
 <ol>
-<li><p>Assign all points within radius <span class="math inline">\(r\)</span> of a converged mode directly to that mode.</p></li>
-<li><p>Assign points within radius <span class="math inline">\(r/c\)</span> of the search trajectory to the same mode.</p></li>
+<li><p>Assign all points within radius <span class="math inline">\(r\)</span> of a converged mode directly to that
+mode.</p></li>
+<li><p>Assign points within radius <span class="math inline">\(r/c\)</span> of the search trajectory to the same
+mode.</p></li>
 </ol>
-<h4 data-number="4.1.0.3" id="advantages-and-limitations."><span class="header-section-number">4.1.0.3</span> Advantages and limitations.</h4>
-<p>Mean shift is appealing because it is <em>model-free</em> and makes no assumptions about cluster shape. It uses a single parameter (the bandwidth), which has a clear physical interpretation as the neighborhood size. The method can automatically discover the number of clusters and is generally robust to outliers.</p>
-<p>However, the quality of the clustering depends heavily on the choice of bandwidth, which can be difficult to tune. The algorithm is also computationally expensive and does not scale well to high-dimensional data.</p>
+<h4 data-number="4.1.0.3" id="advantages-and-limitations."><span class="header-section-number">4.1.0.3</span> Advantages and
+limitations.</h4>
+<p>Mean shift is appealing because it is <em>model-free</em> and makes
+no assumptions about cluster shape. It uses a single parameter (the
+bandwidth), which has a clear physical interpretation as the
+neighborhood size. The method can automatically discover the number of
+clusters and is generally robust to outliers.</p>
+<p>However, the quality of the clustering depends heavily on the choice
+of bandwidth, which can be difficult to tune. The algorithm is also
+computationally expensive and does not scale well to high-dimensional
+data.</p>
 <h2 data-number="4.2" id="adjusted-rand-index-ari"><span class="header-section-number">4.2</span> Adjusted Rand Index (ARI)</h2>
-<p>When ground-truth labels are available, clustering results can be evaluated using external metrics. One widely used metric is the <strong>Adjusted Rand Index (ARI)</strong>, which measures agreement between two partitions while correcting for chance.</p>
-<p>The original Rand Index can vary significantly for random clusterings. The Adjusted Rand Index addresses this by modeling the random case using a generalized hypergeometric distribution. Consequently, the ARI has a maximum value of 1, an expected value of 0 for random cluster assignments, and remains meaningful even when the compared partitions contain different numbers of clusters.</p>
-<p>Assume the dataset contains <span class="math inline">\(N\)</span> samples. Using ground-truth clusters <span class="math inline">\(R\)</span> and computed clusters <span class="math inline">\(Q\)</span>, we define a <strong>contingency table</strong> <span class="math inline">\([n_{ij}]\)</span> where:</p>
+<p>When ground-truth labels are available, clustering results can be
+evaluated using external metrics. One widely used metric is the
+<strong>Adjusted Rand Index (ARI)</strong>, which measures agreement
+between two partitions while correcting for chance.</p>
+<p>The original Rand Index can vary significantly for random
+clusterings. The Adjusted Rand Index addresses this by modeling the
+random case using a generalized hypergeometric distribution.
+Consequently, the ARI has a maximum value of 1, an expected value of 0
+for random cluster assignments, and remains meaningful even when the
+compared partitions contain different numbers of clusters.</p>
+<p>Assume the dataset contains <span class="math inline">\(N\)</span>
+samples. Using ground-truth clusters <span class="math inline">\(R\)</span> and computed clusters <span class="math inline">\(Q\)</span>, we define a <strong>contingency
+table</strong> <span class="math inline">\([n_{ij}]\)</span> where:</p>
 <ul>
-<li><p><span class="math inline">\(n_{ij}=|R_i \cap Q_j|\)</span></p></li>
-<li><p><span class="math inline">\(n_{i,}=\sum_j n_{ij}\)</span> and <span class="math inline">\(n_{,j}=\sum_i n_{ij}\)</span></p></li>
+<li><p><span class="math inline">\(n_{ij}=|R_i \cap
+Q_j|\)</span></p></li>
+<li><p><span class="math inline">\(n_{i,}=\sum_j n_{ij}\)</span> and
+<span class="math inline">\(n_{,j}=\sum_i n_{ij}\)</span></p></li>
 </ul>
-<p>From this table we compute the pair-count quantities of the Rand Index:</p>
+<p>From this table we compute the pair-count quantities of the Rand
+Index:</p>
 <ul>
 <li><p><span class="math inline">\(a=\displaystyle\sum_{i,j}\binom{n_{ij}}{2}\)</span></p></li>
 <li><p><span class="math inline">\(b=\displaystyle\sum_i\binom{n_{i,}}{2}-a\)</span></p></li>
@@ -325,11 +622,28 @@ The purity score fails to accuracy measure a clustering algorithm if the data is
 {\frac{1}{2}\left[\sum_i\binom{n_{i,}}{2}+\sum_j\binom{n_{,j}}{2}\right]
 -\left[\sum_i\binom{n_{i,}}{2}\sum_j\binom{n_{,j}}{2}\right]/\binom{N}{2}}.\]</span></p>
 <h4 data-number="4.2.0.1" id="interpretation."><span class="header-section-number">4.2.0.1</span> Interpretation.</h4>
-<p>The numerator represents how much the clustering agreement exceeds chance, while the denominator normalizes the score by the maximum possible agreement. As a result, ARI provides a robust measure of clustering similarity.</p>
-<h2 data-number="4.3" id="application-image-segmentation"><span class="header-section-number">4.3</span> Application: Image Segmentation</h2>
-<p>An important application of clustering is <strong>image segmentation</strong>, where the goal is to divide an image into coherent regions. Clustering algorithms treat pixel feature vectors as samples and group them into meaningful regions based on spatial proximity, color similarity, and texture similarity.</p>
-<p>Each pixel can be represented by feature vectors such as RGB color values <span class="math inline">\(x_i \in \mathbb{R}^3\)</span>, or by perceptual color spaces such as <span class="math inline">\(L^*\)</span> (luminance), <span class="math inline">\(a^*\)</span> (red–green), and <span class="math inline">\(b^*\)</span> (blue–yellow). Because different color spaces separate visual information differently, clustering performance depends strongly on the chosen feature representation.</p>
-<p>In practice, feature engineering—such as selecting an appropriate color space—plays a key role in producing meaningful segmentation results.</p>
+<p>The numerator represents how much the clustering agreement exceeds
+chance, while the denominator normalizes the score by the maximum
+possible agreement. As a result, ARI provides a robust measure of
+clustering similarity.</p>
+<h2 data-number="4.3" id="application-image-segmentation"><span class="header-section-number">4.3</span> Application: Image
+Segmentation</h2>
+<p>An important application of clustering is <strong>image
+segmentation</strong>, where the goal is to divide an image into
+coherent regions. Clustering algorithms treat pixel feature vectors as
+samples and group them into meaningful regions based on spatial
+proximity, color similarity, and texture similarity.</p>
+<p>Each pixel can be represented by feature vectors such as RGB color
+values <span class="math inline">\(x_i \in \mathbb{R}^3\)</span>, or by
+perceptual color spaces such as <span class="math inline">\(L^*\)</span>
+(luminance), <span class="math inline">\(a^*\)</span> (red–green), and
+<span class="math inline">\(b^*\)</span> (blue–yellow). Because
+different color spaces separate visual information differently,
+clustering performance depends strongly on the chosen feature
+representation.</p>
+<p>In practice, feature engineering—such as selecting an appropriate
+color space—plays a key role in producing meaningful segmentation
+results.</p>
 
 </main>
 </body>

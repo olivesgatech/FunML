@@ -10,7 +10,10 @@
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Given the following softmax output matrix for 5 inputs and 3 possible classes, where each row represents the softmax probabilities for the corresponding input across the 3 classes:</p>
+<li><p><strong>Question:</strong><br/>
+Given the following softmax output matrix for 5 inputs and 3 possible
+classes, where each row represents the softmax probabilities for the
+corresponding input across the 3 classes:</p>
 <p><span class="math display">\[\begin{bmatrix}
     0.2 &amp; 0.5 &amp; 0.3 \\
     0.1 &amp; 0.7 &amp; 0.2 \\
@@ -22,37 +25,42 @@
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;">Input</th>
 <th style="text-align: center;">True Label</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">2</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">1</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">3</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">1</td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Find the predicted labels, calculate the number of incorrect predictions, and construct the confusion matrix based on the predicted and true labels.</p>
-<p><strong>Solution:</strong> The predicted class for each input is obtained by taking the <em>argmax</em> of each row of the softmax matrix. We assume class labels are indexed as <span class="math inline">\(\{1,2,3\}\)</span>.</p>
+<p>Find the predicted labels, calculate the number of incorrect
+predictions, and construct the confusion matrix based on the predicted
+and true labels.</p>
+<p><strong>Solution:</strong><br/>
+The predicted class for each input is obtained by taking the
+<em>argmax</em> of each row of the softmax matrix. We assume class
+labels are indexed as <span class="math inline">\(\{1,2,3\}\)</span>.</p>
 <p><span class="math display">\[\begin{aligned}
 \text{Input 1: } &amp; [0.2,\,0.5,\,0.3] \rightarrow \hat{y}_1 = 2 \\
 \text{Input 2: } &amp; [0.1,\,0.7,\,0.2] \rightarrow \hat{y}_2 = 2 \\
@@ -61,18 +69,24 @@
 \text{Input 5: } &amp; [0.5,\,0.2,\,0.3] \rightarrow \hat{y}_5 = 1
 \end{aligned}\]</span></p>
 <p>Thus, the predicted labels are:</p>
-<p><span class="math display">\[\{\hat{y}_i\} = \{2, 2, 1, 3, 1\}\]</span></p>
+<p><span class="math display">\[\{\hat{y}_i\} = \{2, 2, 1, 3,
+1\}\]</span></p>
 <p>The true labels are:</p>
 <p><span class="math display">\[\{y_i\} = \{2, 1, 1, 3, 1\}\]</span></p>
-<p>Comparing predictions with true labels, only Input 2 is misclassified (true label <span class="math inline">\(1\)</span>, predicted <span class="math inline">\(2\)</span>). Therefore, there is <strong>1 incorrect prediction</strong>.</p>
+<p>Comparing predictions with true labels, only Input 2 is misclassified
+(true label <span class="math inline">\(1\)</span>, predicted <span class="math inline">\(2\)</span>). Therefore, there is <strong>1
+incorrect prediction</strong>.</p>
 <p>To construct the confusion matrix, we use a <span class="math inline">\(3\times3\)</span> matrix where:</p>
 <p><span class="math display">\[\text{rows} = \text{true classes}, \quad
 \text{columns} = \text{predicted classes}.\]</span></p>
 <p>We count occurrences of each <span class="math inline">\((\text{true},\text{predicted})\)</span> pair:</p>
 <p><span class="math display">\[\begin{aligned}
-\text{True class 1: } &amp; \text{predicted as }1 \text{ twice (inputs 3,5)}, \\
-                      &amp; \text{predicted as }2 \text{ once (input 2)} \\[2mm]
-\text{True class 2: } &amp; \text{predicted as }2 \text{ once (input 1)} \\[2mm]
+\text{True class 1: } &amp; \text{predicted as }1 \text{ twice (inputs
+3,5)}, \\
+                      &amp; \text{predicted as }2 \text{ once (input 2)}
+\\[2mm]
+\text{True class 2: } &amp; \text{predicted as }2 \text{ once (input 1)}
+\\[2mm]
 \text{True class 3: } &amp; \text{predicted as }3 \text{ once (input 4)}
 \end{aligned}\]</span></p>
 <p>Hence, the confusion matrix is:</p>
@@ -81,8 +95,14 @@
 0 &amp; 1 &amp; 0 \\
 0 &amp; 0 &amp; 1
 \end{bmatrix}\]</span></p>
-<p>Row <span class="math inline">\(i\)</span> corresponds to true class <span class="math inline">\(i\)</span>, and column <span class="math inline">\(j\)</span> corresponds to predicted class <span class="math inline">\(j\)</span>. For example, entry <span class="math inline">\((1,2)=1\)</span> indicates one sample from class 1 was predicted as class 2.</p></li>
-<li><p><strong>Question:</strong> You are given a <em>balanced</em> dataset for a binary classification task where the number of positive and negative samples is equal (in general, balanced is to say that they are roughly equal). After training your model, you receive the following confusion matrix:</p>
+<p>Row <span class="math inline">\(i\)</span> corresponds to true class
+<span class="math inline">\(i\)</span>, and column <span class="math inline">\(j\)</span> corresponds to predicted class <span class="math inline">\(j\)</span>. For example, entry <span class="math inline">\((1,2)=1\)</span> indicates one sample from class 1
+was predicted as class 2.</p></li>
+<li><p><strong>Question:</strong><br/>
+You are given a <em>balanced</em> dataset for a binary classification
+task where the number of positive and negative samples is equal (in
+general, balanced is to say that they are roughly equal). After training
+your model, you receive the following confusion matrix:</p>
 <p><span class="math display">\[\begin{bmatrix}
     40 &amp; 10 \\
     10 &amp; 40
@@ -94,15 +114,32 @@
 <li><p>Accuracy = 0.90, F1 Score = 0.89</p></li>
 <li><p>Accuracy = 0.95, F1 Score = 0.94</p></li>
 </ol>
-<p><strong>Solution:</strong> In this balanced dataset, the number of positive and negative samples is equal, so both accuracy and F1 score should give a good representation of model performance. To calculate accuracy, we use the formula:</p>
-<p><span class="math display">\[\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}} = \frac{40 + 40}{40 + 40 + 10 + 10} = 0.80\]</span></p>
+<p><strong>Solution:</strong><br/>
+In this balanced dataset, the number of positive and negative samples is
+equal, so both accuracy and F1 score should give a good representation
+of model performance. To calculate accuracy, we use the formula:</p>
+<p><span class="math display">\[\text{Accuracy} = \frac{\text{TP} +
+\text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}} = \frac{40 +
+40}{40 + 40 + 10 + 10} = 0.80\]</span></p>
 <p>Next, for the F1 score, we calculate precision and recall:</p>
-<p><span class="math display">\[\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{40}{40 + 10} = 0.80\]</span></p>
-<p><span class="math display">\[\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{40}{40 + 10} = 0.80\]</span></p>
+<p><span class="math display">\[\text{Precision} =
+\frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{40}{40 + 10} =
+0.80\]</span></p>
+<p><span class="math display">\[\text{Recall} =
+\frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{40}{40 + 10} =
+0.80\]</span></p>
 <p>Then, the F1 score is:</p>
-<p><span class="math display">\[\text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = 2 \times \frac{0.80 \times 0.80}{0.80 + 0.80} = 0.80\]</span></p>
-<p>Thus, the correct answer is: <strong>(a) Accuracy = 0.80, F1 Score = 0.80</strong>.</p></li>
-<li><p><strong>Question:</strong> Now suppose you are given an <em>imbalanced</em> dataset for a binary classification task where 90% of the samples are negative, and only 10% are positive. After training your model, you receive the following confusion matrix:</p>
+<p><span class="math display">\[\text{F1 Score} = 2 \times
+\frac{\text{Precision} \times \text{Recall}}{\text{Precision} +
+\text{Recall}} = 2 \times \frac{0.80 \times 0.80}{0.80 + 0.80} =
+0.80\]</span></p>
+<p>Thus, the correct answer is: <strong>(a) Accuracy = 0.80, F1 Score =
+0.80</strong>.</p></li>
+<li><p><strong>Question:</strong><br/>
+Now suppose you are given an <em>imbalanced</em> dataset for a binary
+classification task where 90% of the samples are negative, and only 10%
+are positive. After training your model, you receive the following
+confusion matrix:</p>
 <p><span class="math display">\[\begin{bmatrix}
     85 &amp; 5 \\
     10 &amp; 0
@@ -114,34 +151,62 @@
 <li><p>Accuracy = 0.85, F1 Score = 0.91</p></li>
 <li><p>Accuracy = 0.90, F1 Score = 0.25</p></li>
 </ol>
-<p><strong>Solution:</strong> In this imbalanced dataset, accuracy can be misleading because the model may perform well on the majority class (negative samples) while failing completely on the minority positive class.</p>
+<p><strong>Solution:</strong><br/>
+In this imbalanced dataset, accuracy can be misleading because the model
+may perform well on the majority class (negative samples) while failing
+completely on the minority positive class.</p>
 <p>From the confusion matrix</p>
 <p><span class="math display">\[\begin{bmatrix}
 85 &amp; 5 \\
 10 &amp; 0
 \end{bmatrix}\]</span></p>
-<p>using the standard layout (rows = true class, columns = predicted class):</p>
+<p>using the standard layout (rows = true class, columns = predicted
+class):</p>
 <p><span class="math display">\[\text{TN} = 85, \quad
 \text{FP} = 5, \quad
 \text{FN} = 10, \quad
 \text{TP} = 0\]</span></p>
-<p><span class="math display">\[\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+<p><span class="math display">\[\text{Accuracy} = \frac{TP + TN}{TP + TN
++ FP + FN}
 = \frac{0 + 85}{0 + 85 + 5 + 10}
 = 0.85\]</span></p>
-<p>Although accuracy appears high, the model completely fails to detect the positive class.</p>
-<p><span class="math display">\[\text{Precision} = \frac{TP}{TP + FP} = \frac{0}{0 + 5} = 0\]</span></p>
-<p><span class="math display">\[\text{Recall} = \frac{TP}{TP + FN} = \frac{0}{0 + 10} = 0\]</span></p>
-<p><span class="math display">\[\text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = 0\]</span></p>
+<p>Although accuracy appears high, the model completely fails to detect
+the positive class.</p>
+<p><span class="math display">\[\text{Precision} = \frac{TP}{TP + FP} =
+\frac{0}{0 + 5} = 0\]</span></p>
+<p><span class="math display">\[\text{Recall} = \frac{TP}{TP + FN} =
+\frac{0}{0 + 10} = 0\]</span></p>
+<p><span class="math display">\[\text{F1 Score} = 2 \times
+\frac{\text{Precision} \times \text{Recall}}{\text{Precision} +
+\text{Recall}} = 0\]</span></p>
 <p>Therefore, the correct answer is:</p>
-<p><span class="math display">\[\boxed{\textbf{(a) Accuracy = 0.85, F1 Score = 0.00}}\]</span></p>
-<p>In this imbalanced setting, accuracy is misleading because the model can score high by predicting the majority (negative) class. In contrast, the F1 score for the positive class is 0, correctly reflecting that the model completely fails to identify positive examples. Notice that if the positive and negative classes were flipped, we would see the following calculations instead: <span class="math display">\[\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{0}{0 + 10} = 0\]</span></p>
-<p><span class="math display">\[\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{0}{0 + 5} = 0\]</span></p>
-<p><span class="math display">\[\text{F1 Score} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = 0\]</span></p>
-<p>This again reflects poorly on the performance of the negative class, which is now the original positive class (fairly good accuracy). From this exercise, we can see that we must be careful on how we report on the performance of a classifier using these different metrics, especially in class imbalanced settings.</p></li>
-<li><p>Consider the table below, which shows model predictions and ground truth for a binary classification task.</p>
+<p><span class="math display">\[\boxed{\textbf{(a) Accuracy = 0.85, F1
+Score = 0.00}}\]</span></p>
+<p>In this imbalanced setting, accuracy is misleading because the model
+can score high by predicting the majority (negative) class. In contrast,
+the F1 score for the positive class is 0, correctly reflecting that the
+model completely fails to identify positive examples. Notice that if the
+positive and negative classes were flipped, we would see the following
+calculations instead: <span class="math display">\[\text{Precision} =
+\frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{0}{0 + 10} =
+0\]</span></p>
+<p><span class="math display">\[\text{Recall} =
+\frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{0}{0 + 5} =
+0\]</span></p>
+<p><span class="math display">\[\text{F1 Score} = 2 \times
+\frac{\text{Precision} \times \text{Recall}}{\text{Precision} +
+\text{Recall}} = 0\]</span></p>
+<p>This again reflects poorly on the performance of the negative class,
+which is now the original positive class (fairly good accuracy). From
+this exercise, we can see that we must be careful on how we report on
+the performance of a classifier using these different metrics,
+especially in class imbalanced settings.</p></li>
+<li><p>Consider the table below, which shows model predictions and
+ground truth for a binary classification task.</p>
 <p><span class="math display">\[\begin{tabular}{|c|c|c|}
 \hline
-\textbf{Sample} &amp; \textbf{Ground Truth} &amp; \textbf{Model Prediction} \\
+\textbf{Sample} &amp; \textbf{Ground Truth} &amp; \textbf{Model
+Prediction} \\
 \hline
 1 &amp; 1 &amp; 1 \\
 2 &amp; 1 &amp; 0 \\
@@ -166,7 +231,7 @@
 <div class="center">
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th style="text-align: center;"><strong>Sample</strong></th>
 <th style="text-align: center;"><strong>Ground Truth</strong></th>
 <th style="text-align: center;"><strong>Prediction</strong></th>
@@ -174,49 +239,49 @@
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">TP</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">FN</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">FP</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">TP</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">TN</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">6</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">TN</td>
 </tr>
-<tr class="odd">
+<tr>
 <td style="text-align: center;">7</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">TN</td>
 </tr>
-<tr class="even">
+<tr>
 <td style="text-align: center;">8</td>
 <td style="text-align: center;">0</td>
 <td style="text-align: center;">1</td>
@@ -229,26 +294,32 @@
 <ul>
 <li><p><strong>True Positives (TP)</strong> = 2 (samples 1, 4)</p></li>
 <li><p><strong>False Positives (FP)</strong> = 2 (samples 3, 8)</p></li>
-<li><p><strong>True Negatives (TN)</strong> = 3 (samples 5, 6, 7)</p></li>
+<li><p><strong>True Negatives (TN)</strong> = 3 (samples 5, 6,
+7)</p></li>
 <li><p><strong>False Negatives (FN)</strong> = 1 (sample 2)</p></li>
 </ul>
 <p><strong>Step 3: Compute evaluation metrics</strong></p>
 <p><span class="math display">\[\begin{aligned}
-R=\text{True Positive Rate (TPR)} &amp;= \frac{TP}{TP + FN} = \frac{2}{2 + 1} = \frac{2}{3} \\[6pt]
-\text{False Positive Rate (FPR)} &amp;= \frac{FP}{FP + TN} = \frac{2}{2 + 3} = \frac{2}{5} \\[6pt]
-P=\text{Precision} &amp;= \frac{TP}{TP + FP} = \frac{2}{2 + 2} = \frac{1}{2} \\[6pt]
-\text{Specificity} &amp;= \frac{TN}{TN + FP} = \frac{3}{3 + 2} = \frac{3}{5} \\[6pt]
-\text{F1 Score} &amp;= 2\times\frac{P\times R}{P + R} 
+R=\text{True Positive Rate (TPR)} &amp;= \frac{TP}{TP + FN} = \frac{2}{2
++ 1} = \frac{2}{3} \\[6pt]
+\text{False Positive Rate (FPR)} &amp;= \frac{FP}{FP + TN} = \frac{2}{2
++ 3} = \frac{2}{5} \\[6pt]
+P=\text{Precision} &amp;= \frac{TP}{TP + FP} = \frac{2}{2 + 2} =
+\frac{1}{2} \\[6pt]
+\text{Specificity} &amp;= \frac{TN}{TN + FP} = \frac{3}{3 + 2} =
+\frac{3}{5} \\[6pt]
+\text{F1 Score} &amp;= 2\times\frac{P\times R}{P + R}
 = 2\times\frac{(1/2)(2/3)}{1/2 + 2/3}
 = \frac{4}{7}
 \end{aligned}\]</span></p>
 <p>Notice that</p>
-<p><span class="math display">\[1-\text{Specificity} = 1-\frac{3}{5} = \frac{2}{5} = \text{FPR}.\]</span></p></li>
+<p><span class="math display">\[1-\text{Specificity} = 1-\frac{3}{5} =
+\frac{2}{5} = \text{FPR}.\]</span></p></li>
 </ol>
-<section class="footnotes" role="doc-endnotes">
+<section class="footnotes footnotes-end-of-document" id="footnotes" role="doc-endnotes">
 <hr/>
 <ol>
-<li id="fn1" role="doc-endnote"><p><a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html">Source</a><a class="footnote-back" href="#fnref1" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p><a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html" rel="noopener noreferrer" target="_blank">Source</a><a class="footnote-back" href="#fnref1" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section></section>
 </main>

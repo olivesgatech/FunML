@@ -1275,9 +1275,7 @@ def sync_portal_index(index_path: Path, lecture_pages):
     if media_key.lower() == "lecture0":
       a["data-disable-slides"] = "true"
       a["data-hide-viewer-actions"] = "true"
-    a["href"] = f"lectures/{filename}"
-    a["target"] = "_blank"
-    a["rel"] = "noopener noreferrer"
+    a["href"] = "#"
     a["role"] = "listitem"
 
     if idx is not None:
@@ -1365,6 +1363,16 @@ def clean_lecture_body(
     href = tag.get("href", "")
     if href:
       tag["href"] = port_asset_path(href, source_dir, src_root, lecture_out_dir)
+  for tag in soup.find_all("a", href=True):
+    href = (tag.get("href", "") or "").strip()
+    if not href or href.startswith("#"):
+      continue
+    tag["target"] = "_blank"
+    existing_rel = tag.get("rel", [])
+    if isinstance(existing_rel, str):
+      existing_rel = existing_rel.split()
+    rel_tokens = list(dict.fromkeys([*existing_rel, "noopener", "noreferrer"]))
+    tag["rel"] = rel_tokens
 
   # Apply width from source LaTeX includegraphics options when available.
   for img in soup.find_all("img", src=True):
