@@ -47,12 +47,7 @@ opposed to a discrete classification. These regressions can be linear or
 polynomial, though this lecture will focus on linear regressions.</p>
 <h2 data-number="2.2" id="better-life-index-oecd-example"><span class="header-section-number">2.2</span> Better Life Index (OECD)
 Example</h2>
-<figure data-latex-placement="H" id="fig:bli_scatter_fit">
-<img src="img/lecture7/bli_scatter_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Better Life Index example: GDP per capita vs. life
-satisfaction with a linear fit. Training points are used to fit the
-line; test points illustrate generalization.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>It is clear from the inspection of the graph that there is a positive
 linear correlation between the GDP per capita of the country and its
 life satisfaction score. This can be modeled with a simple linear
@@ -71,14 +66,8 @@ Set)</h2>
 and whether there are obvious patterns that suggest model mismatch
 (e.g., nonlinearity or heteroscedasticity).</p>
 <figure data-latex-placement="H" id="fig:bli_residual_diagnostics">
-<figure id="fig:bli_residuals_hist">
-<img src="img/lecture7/bli_residuals_hist.png" style="width:60.00%; max-width:60.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Residual histogram (train).</figcaption>
-</figure>
-<figure id="fig:bli_residuals_scatter">
-<img src="img/lecture7/bli_residuals_scatter.png" style="width:60.00%; max-width:60.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Residuals vs. predictions (train).</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Residual diagnostics for the Better Life Index linear
 regression model on the training set. Ideally, residuals are roughly
 centered around zero with no systematic trend versus <span class="math inline">\(\hat{y}\)</span>.</figcaption>
@@ -140,12 +129,7 @@ y_i)^2
 \tilde{\mathbf{x}}_i^\top\tilde{\boldsymbol{\theta}}.\]</span></p>
 <p>The loss surface for the two-parameter case <span class="math inline">\((\theta_0,\theta_1)\)</span> is illustrated below,
 showing its convex quadratic structure:</p>
-<figure data-latex-placement="H" id="fig:mse_contours">
-<img src="img/lecture7/mse_contour_theta0_theta1.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Contours of the least squares loss <span class="math inline">\(L(\theta_0,\theta_1)\)</span> for the Better Life
-Index example (training set). The marked point indicates the minimizer
-obtained by the normal equation.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The Least Squares loss function computes the average squared error
 between model predictions and targets. We want to find the optimal
 parameter vector: <span class="math display">\[\hat{\tilde{\boldsymbol{\theta}}} =
@@ -436,15 +420,8 @@ illustrates the transition from a data-fitting regime (low bias, higher
 variance) to a more constrained regime (higher bias, lower
 variance).</p>
 <figure data-latex-placement="H" id="fig:coef_paths">
-<figure id="fig:ridge_paths">
-<img src="img/lecture7/ridge_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Ridge (L2): coefficients shrink smoothly as <span class="math inline">\(\lambda\)</span> increases.</figcaption>
-</figure>
-<figure id="fig:lasso_paths">
-<img src="img/lecture7/lasso_paths.png" style="width:60.00%; max-width:60.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Lasso (L1): coefficients are driven to exactly zero,
-yielding sparsity.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 7: Regression Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_FunML_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 7: Regression Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_FunML_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Regularization coefficient paths (standardized features).
 Ridge shrinks all coefficients continuously, while Lasso performs
 shrinkage plus feature selection by setting some coefficients exactly to

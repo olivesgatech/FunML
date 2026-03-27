@@ -206,11 +206,7 @@ Lecture 10 (slide 27):</p>
 </tr>
 </tbody>
 </table>
-<figure data-latex-placement="H" id="fig:running-example">
-<img src="img/lecture10/running_example.png" style="width:36.00%; max-width:36.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 11: k-means Visual Demo Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/kmeans_visual_demo_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 11: k-means Visual Demo Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fkmeans_visual_demo.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Visualization of the running example points used throughout
-Section 10.2.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 11: k-means Visual Demo Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/kmeans_visual_demo_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 11: k-means Visual Demo Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fkmeans_visual_demo.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>We will compute pairwise distances using different metrics and
 observe how the notion of “closeness” changes depending on the chosen
 measure.</p>
@@ -619,11 +615,7 @@ distance reduces to Euclidean distance.</p>
 <li><p>Detecting outliers</p></li>
 <li><p>Modeling elliptical or correlated clusters</p></li>
 </ul>
-<figure data-latex-placement="H">
-<img src="img/lecture10/mahalanobisdistance.png"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Mahalanobis distance adapts to the covariance structure of
-the data.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Intuitively, Mahalanobis distance measures how many <em>multivariate
 standard deviations</em> apart two samples are.</p>
 <h2 class="unnumbered" id="running-demonstration-same-euclidean-distance-different-mahalanobis-distance">Running
@@ -651,11 +643,7 @@ covariance matrices and compute the Mahalanobis distance between the
 \quad\Rightarrow\quad
 d_M=2.\]</span></p>
 <p><em>Mahalanobis equals Euclidean when the data is spherical.</em></p>
-<figure data-latex-placement="H">
-<img src="img/lecture10/case1_isotropic.png" style="width:28.80%; max-width:28.80%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_1)\)</span>. The
-highlighted markers denote the fixed points <span class="math inline">\(\mathbf{x}_a=(0,0)\)</span> and <span class="math inline">\(\mathbf{x}_b=(2,0)\)</span>. </figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p><strong>Case 2 — Large Variance in <span class="math inline">\(x\)</span>-direction</strong></p>
 <p><span class="math display">\[\Sigma_2=
 \begin{bmatrix}
@@ -676,12 +664,7 @@ distance shrinks.</em></p>
 <p>Geometrically, the data ellipse is stretched along the <span class="math inline">\(x\)</span>-axis. Displacement along this direction
 lies inside a wider ellipse, so it corresponds to fewer standard
 deviations.</p>
-<figure data-latex-placement="H">
-<img src="img/lecture10/case2_large_var_x.png" style="width:28.80%; max-width:28.80%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_2)\)</span>. High
-variance along the <span class="math inline">\(x\)</span>-direction
-stretches the data horizontally.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p><strong>Case 3 — Small Variance in <span class="math inline">\(x\)</span>-direction</strong></p>
 <p><span class="math display">\[\Sigma_3=
 \begin{bmatrix}
@@ -699,12 +682,7 @@ stretches the data horizontally.</figcaption>
 d_M=4.\]</span></p>
 <p><em>Movement along low-variance directions is very surprising, so
 distance grows.</em></p>
-<figure data-latex-placement="H">
-<img src="img/lecture10/case3_small_var_x.png" style="width:28.80%; max-width:28.80%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_3)\)</span>. Low
-variance along the <span class="math inline">\(x\)</span>-direction
-compresses the data horizontally.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Here the ellipse is compressed along the <span class="math inline">\(x\)</span>-axis. A horizontal displacement quickly
 exits the high-density region, so it corresponds to many standard
 deviations.</p>
@@ -723,11 +701,7 @@ deviations.</p>
 <p><span class="math display">\[d_M \approx 3.33.\]</span></p>
 <p><em>Correlation rotates the principal axes of the data
 ellipse.</em></p>
-<figure data-latex-placement="H">
-<img src="img/lecture10/case4_correlated.png" style="width:28.80%; max-width:28.80%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_4)\)</span>.
-Correlation rotates the principal axes of the distribution.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The displacement vector <span class="math inline">\((2,0)\)</span> is
 no longer aligned with a principal direction of variance, so the
 effective distance increases.</p>
@@ -746,11 +720,7 @@ effective distance increases.</p>
 <p><span class="math display">\[d_M \approx 2.06.\]</span></p>
 <p><em>Distance depends on alignment with principal axes rather than the
 coordinate axes.</em></p>
-<figure data-latex-placement="H">
-<img src="img/lecture10/case5_rotated.png" style="width:28.80%; max-width:28.80%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_5)\)</span>.
-Distance depends on alignment with the principal axes.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Mahalanobis distance depends on alignment with eigenvectors of <span class="math inline">\(\Sigma\)</span>, not with the coordinate axes.</p>
 <p>These figures visually illustrate how the same Euclidean displacement
 can correspond to very different standardized distances under different

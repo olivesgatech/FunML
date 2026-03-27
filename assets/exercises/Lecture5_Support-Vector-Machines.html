@@ -33,7 +33,6 @@ window.MathJax = {
 <ol>
 <li><p>Consider the two figures below:</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-soft-hard.png"/></p>
 </div>
 <p>The left figure shows a dataset with a hard margin SVM classifier,
 while the right figure shows the same dataset with a soft margin SVM
@@ -41,7 +40,6 @@ classifier.</p>
 <p>Now, imagine introducing an outlier close to the decision boundary
 but on the incorrect side of it.</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
 </div>
 <p>Which classifier will better handle the outlier, and why?</p>
 <ol>
@@ -81,12 +79,10 @@ the decision boundary to perfectly classify all points, including the
 outlier. This can lead to significant changes in the decision boundary,
 potentially resulting in overfitting and poor generalization.</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
 </div></li>
 <li><p>For the next few questions, we’ll be looking at the kernel trick.
 Let’s consider the following dataset:</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-2d.png"/></p>
 </div>
 <p>Notice that the data is not linearly separable. Now we can either use
 a nonlinear classifier, or we could introduce nonlinearity into the data
@@ -96,7 +92,6 @@ example,</p>
 <p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow
 \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
 </div>
 <p>Now we can fit a linear boundary (a plane) to separate the data.
 Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>

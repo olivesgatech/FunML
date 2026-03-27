@@ -672,11 +672,7 @@ standard plots.</p>
 binary classifier, which makes the types of errors explicit (false
 positives vs. false negatives) and enables computation of accuracy,
 precision, recall, and F1 score.</p>
-<figure data-latex-placement="H" id="fig:cm_binary">
-<img src="img/lecture6/confusion_matrix_binary.png" style="width:37.20%; max-width:37.20%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Confusion matrix for a binary classifier. Rows correspond to
-true labels and columns to predicted labels.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Figure <a data-reference="fig:lc" data-reference-type="ref" href="#fig:lc">2</a> shows a learning curve (training
 vs. validation accuracy vs. training set size). A persistent gap between
 the training and validation curves suggests overfitting, whereas both
@@ -691,38 +687,22 @@ function of training set size.</figcaption>
 <p>Figure <a data-reference="fig:roc_binary" data-reference-type="ref" href="#fig:roc_binary">3</a> shows the ROC curve (TPR vs. FPR)
 across all thresholds, with AUC summarizing ranking quality. ROC is
 often most informative when classes are relatively balanced.</p>
-<figure data-latex-placement="H" id="fig:roc_binary">
-<img src="img/lecture6/roc_curve_2.png" style="width:42.00%; max-width:42.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>ROC curve for binary classification (true positive rate
-vs. false positive rate).</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Figure <a data-reference="fig:pr_binary" data-reference-type="ref" href="#fig:pr_binary">4</a> shows the precision–recall (PR)
 curve, which is typically more informative than ROC under class
 imbalance, since it focuses on performance on the positive class
 (precision) while increasing coverage (recall).</p>
-<figure data-latex-placement="H" id="fig:pr_binary">
-<img src="img/lecture6/pr_curve.png" style="width:42.00%; max-width:42.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Precision–recall curve for binary
-classification.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Figure <a data-reference="fig:thresh_tradeoff" data-reference-type="ref" href="#fig:thresh_tradeoff">5</a> shows how precision and
 recall vary with the decision threshold. This plot is useful for
 selecting an operating point that matches application costs (e.g., favor
 recall when false negatives are costly).</p>
-<figure data-latex-placement="H" id="fig:thresh_tradeoff">
-<img src="img/lecture6/threshold_tradeoff.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Precision and recall as functions of the decision
-threshold.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Finally, Figure <a data-reference="fig:roc_multiclass" data-reference-type="ref" href="#fig:roc_multiclass">6</a>
 shows a multi-class ROC plot using a One-vs-Rest (OvR) strategy.
 Micro-averaging weights classes by frequency, while macro-averaging
 treats all classes equally.</p>
-<figure data-latex-placement="H" id="fig:roc_multiclass">
-<img src="img/lecture6/multiclass_roc_ovr.png" style="width:48.00%; max-width:48.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Multi-class ROC curves using a One-vs-Rest strategy with
-micro and macro averages.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FFunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>(Details on multi-class ROC construction are discussed in Section <a data-reference="sec:multiroc" data-reference-type="ref" href="#sec:multiroc">6.1</a>.)</p>
 <h1 data-number="6" id="additional-details"><span class="header-section-number">6.</span> Additional Details</h1>
 <h2 data-number="6.1" id="sec:multiroc"><span class="header-section-number">6.1</span> Multi-Class ROC Curves</h2>

@@ -343,7 +343,6 @@ x_{i2}) &gt; 0 \\
 <ol>
 <li><p>Consider the two figures below:</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-soft-hard.png"/></p>
 </div>
 <p>The left figure shows a dataset with a hard margin SVM classifier,
 while the right figure shows the same dataset with a soft margin SVM
@@ -351,7 +350,6 @@ classifier.</p>
 <p>Now, imagine introducing an outlier close to the decision boundary
 but on the incorrect side of it.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
 </div>
 <p>Which classifier will better handle the outlier, and why?</p>
 <ol>
@@ -391,12 +389,10 @@ the decision boundary to perfectly classify all points, including the
 outlier. This can lead to significant changes in the decision boundary,
 potentially resulting in overfitting and poor generalization.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
 </div></li>
 <li><p>For the next few questions, we’ll be looking at the kernel trick.
 Let’s consider the following dataset:</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa2-nonlinear-2d.png"/></p>
 </div>
 <p>Notice that the data is not linearly separable. Now we can either use
 a nonlinear classifier, or we could introduce nonlinearity into the data
@@ -406,7 +402,6 @@ example,</p>
 <p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow
 \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
 </div>
 <p>Now we can fit a linear boundary (a plane) to separate the data.
 Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>
@@ -1104,13 +1099,11 @@ iterations.}\]</span></p></li>
 <p>Consider the following contour plot for MSE loss of a 2D linear
 model, as well as the contour plot for the <span class="math inline">\(L_1\)</span>-norm of the parameters.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture8/qa-mse-contour.png"/></p>
 </div>
 <p>Which of the following contour plots most likely represents the
 contour plot for the <span class="math inline">\(L_1\)</span>-regularized MSE loss on the same
 model?</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture8/qa-mse-l1-options.png"/></p>
 </div>
 <p><strong>Answer:</strong> The correct answer is
 <strong>A)</strong>.</p>
@@ -1158,11 +1151,7 @@ Squared Error (MSE).</p>
 <p>We sample training inputs and noisy targets: <span class="math display">\[x_i \sim \text{Uniform}(0,1), \qquad
 y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 <p>This produces a clearly <strong>nonlinear</strong> dataset.</p>
-<figure data-latex-placement="H">
-<img src="../lectures/img/lecture8/qa_q5_linear_vs_poly_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Q5_linear_vs_polynomial_regression_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FQ5_linear_vs_polynomial_regression.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Linear vs Polynomial Regression fit on nonlinear
-data</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Q5_linear_vs_polynomial_regression_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FQ5_linear_vs_polynomial_regression.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p><strong>Step 2: Fit linear regression</strong></p>
 <p>Design matrix: <span class="math display">\[\mathbf{X}_{\text{lin}} =
 \begin{bmatrix}
@@ -1197,10 +1186,7 @@ simulation)</strong></p>
 <p><span class="math display">\[\mathrm{MSE}_{\text{linear}} =
 0.1691\]</span> <span class="math display">\[\mathrm{MSE}_{\text{poly}}
 = 0.0052\]</span></p>
-<figure data-latex-placement="H">
-<img src="../lectures/img/lecture8/qa_q5_mse_comparison.png" style="width:33.00%; max-width:33.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Q5_linear_vs_polynomial_regression_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FQ5_linear_vs_polynomial_regression.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<figcaption>Training MSE comparison</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Q5_linear_vs_polynomial_regression_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FQ5_linear_vs_polynomial_regression.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Polynomial regression achieves a dramatically lower training
 error.</p>
 <p><strong>Key Insight</strong></p>
@@ -1375,7 +1361,7 @@ generalization error.</p></li>
 <li><p><strong>Question 11:</strong></p>
 <p>Consider the model complexity vs. prediction error curve below.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture9/qa_bias_variance_curve.png" style="width:36.00%; max-width:36.00%; height:auto;"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9: Bias-Variance Curve Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/qa_bias_variance_curve_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 9: Bias-Variance Curve Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2Fqa_bias_variance_curve.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9: Bias-Variance Curve Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/qa_bias_variance_curve_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 9: Bias-Variance Curve Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2Fqa_bias_variance_curve.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>Which region corresponds to an <strong>underfitting</strong>
 model?</p>

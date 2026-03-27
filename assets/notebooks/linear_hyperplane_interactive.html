@@ -121,7 +121,7 @@
 <body>
   <div class="wrap">
     <h1>Interactive Linear Separating Hyperplane</h1>
-    <p>Adjust the components of <code>w</code> and the bias <code>b</code> to see how the hyperplane <code>w^T x + b = 0</code> moves and how the normal vector changes.</p>
+    <p>Adjust the components of <code>w</code> and the bias <code>b</code> to see how the hyperplane <code>w^T x + b = 0</code> moves.</p>
 
     <div class="controls">
       <div class="control">
@@ -149,7 +149,6 @@
 
     <div class="actions">
       <button id="resetButton" type="button">Reset figure</button>
-      <button id="unitButton" type="button">Use unit-normal style</button>
     </div>
 
     <div class="plot-card"><div class="plot" id="hyperplanePlot"></div></div>
@@ -165,7 +164,6 @@
     const w2Value = document.getElementById("w2Value");
     const bValue = document.getElementById("bValue");
     const resetButton = document.getElementById("resetButton");
-    const unitButton = document.getElementById("unitButton");
     const status = document.getElementById("status");
 
     let initialized = false;
@@ -238,16 +236,6 @@
       }
 
       const [p1, p2] = boundaryPoints(w1, w2, b, limit);
-      const norm = Math.sqrt(w1 * w1 + w2 * w2);
-      const center = { x: 1.6, y: -1.3 };
-      const arrowEnd = clipPoint({
-        x: center.x + (w1 / norm) * 1.5,
-        y: center.y + (w2 / norm) * 1.5
-      }.x, {
-        x: center.x + (w1 / norm) * 1.5,
-        y: center.y + (w2 / norm) * 1.5
-      }.y, limit);
-
       const data = [
         {
           x: xs,
@@ -277,18 +265,7 @@
           mode: "lines",
           type: "scatter",
           name: "w^T x + b = 0",
-          line: { color: "#111827", width: 2 }
-        },
-        {
-          x: [center.x, arrowEnd.x],
-          y: [center.y, arrowEnd.y],
-          mode: "lines+text",
-          type: "scatter",
-          text: ["", "<b>w</b>"],
-          textposition: "top right",
-          name: "Normal vector",
-          line: { color: "#8b7d5f", width: 2 },
-          marker: { size: 1 }
+          line: { color: "#111827", width: 4 }
         }
       ];
 
@@ -319,8 +296,8 @@
             text: "<b>w<sup>T</sup>x + b = 0</b>",
             showarrow: false,
             textangle: Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI,
-            font: { size: 20, color: "#0f2747" },
-            bgcolor: "rgba(255,255,255,0.0)"
+            font: { size: 20, color: "#0f172a" },
+            bgcolor: "rgba(255,255,255,0.7)"
           }
         ]
       };
@@ -334,20 +311,13 @@
 
       status.innerHTML =
         `Current hyperplane: <code>${format(w1)} x1 + ${format(w2)} x2 + ${format(b)} = 0</code>. ` +
-        `The vector <code>w = [${format(w1)}, ${format(w2)}]</code> is normal to the boundary, so it points in the perpendicular direction.`;
+        `Changing <code>w = [${format(w1)}, ${format(w2)}]</code> rotates the boundary, while changing <code>b</code> shifts it.`;
     }
 
     resetButton.addEventListener("click", () => {
       w1Range.value = "0.9";
       w2Range.value = "-0.3";
       bRange.value = "0";
-      updatePlot();
-    });
-
-    unitButton.addEventListener("click", () => {
-      w1Range.value = "1.0";
-      w2Range.value = "-0.4";
-      bRange.value = "0.0";
       updatePlot();
     });
 
