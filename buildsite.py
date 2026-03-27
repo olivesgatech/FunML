@@ -383,6 +383,21 @@ def normalize_fquote_blocks(tex_text: str):
   return pattern.sub(repl, tex_text)
 
 
+def normalize_shortstack_blocks(tex_text: str):
+  # Pandoc may misinterpret \shortstack line breaks inside tabular cells and
+  # emit extra HTML table rows. Flatten stacked cell content into plain text
+  # so each LaTeX table cell stays a single HTML cell.
+  pattern = re.compile(r"\\shortstack\{([^{}]*)\}")
+
+  def repl(match):
+    content = match.group(1)
+    content = content.replace("\\\\", " ")
+    content = re.sub(r"\s+", " ", content).strip()
+    return content
+
+  return pattern.sub(repl, tex_text)
+
+
 def extract_includegraphics_widths(tex_text: str):
   # Extract width intents from LaTeX includegraphics commands so generated HTML
   # can respect source sizing.
@@ -665,6 +680,7 @@ def build_single_html(
   tex_text, inline_bib_entries = extract_inline_bib_entries(tex_text)
   tex_text = sanitize_tex_for_citeproc(tex_text)
   tex_text = normalize_fquote_blocks(tex_text)
+  tex_text = normalize_shortstack_blocks(tex_text)
   has_citations = bool(re.search(r"\\cite[a-zA-Z*]*\{", tex_text))
   if has_citations and not bibliography_files and not inline_bib_entries:
     print(f"Warning: {tex.name} contains citations but no .bib source was found.")

@@ -264,8 +264,17 @@
           y: [p1.y, p2.y],
           mode: "lines",
           type: "scatter",
+          hoverinfo: "skip",
+          showlegend: false,
+          line: { color: "rgba(255,255,255,0.92)", width: 12 }
+        },
+        {
+          x: [p1.x, p2.x],
+          y: [p1.y, p2.y],
+          mode: "lines",
+          type: "scatter",
           name: "w^T x + b = 0",
-          line: { color: "#111827", width: 4 }
+          line: { color: "#0f172a", width: 6 }
         }
       ];
 
@@ -291,13 +300,13 @@
             font: { size: 24, color: "#0f2747" }
           },
           {
-            x: (p1.x + p2.x) / 2,
-            y: (p1.y + p2.y) / 2 + 0.45,
+            x: (p1.x + p2.x) / 2 - 0.28,
+            y: (p1.y + p2.y) / 2 + 0.7,
             text: "<b>w<sup>T</sup>x + b = 0</b>",
             showarrow: false,
             textangle: Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI,
             font: { size: 20, color: "#0f172a" },
-            bgcolor: "rgba(255,255,255,0.7)"
+            bgcolor: "rgba(255,255,255,0.88)"
           }
         ]
       };
