@@ -20,5 +20,56 @@
     </div>
     <iframe src="../jupyterlite/lab/index.html?path=notebooks/Lecture3_LinearBoundaries.ipynb&amp;reset=1" title="Interactive Notebook Launcher: Lecture3_LinearBoundaries" loading="lazy"></iframe>
   </div>
+<script>
+(function () {
+  const iframe = document.querySelector('iframe');
+  if (!iframe) return;
+
+  const CSS = `
+    .jp-TopBar, .jp-MenuBar, .jp-SideBar, .jp-Activity, .jp-StatusBar,
+    .jp-NotebookPanel-toolbar, .lm-TabBar, .jp-FileBrowser,
+    .jp-DirListing, .jp-BreadCrumbs, .jp-RunningSessions,
+    .jp-Launcher, .jp-Dialog, .jp-mod-commandMode .jp-Cell-inputCollapser,
+    .jp-Cell .jp-InputPrompt { display: none !important; }
+
+    .jp-Notebook .jp-CodeCell .jp-InputArea,
+    .jp-Notebook .jp-MarkdownCell .jp-InputArea,
+    .jp-Notebook .jp-RawCell .jp-InputArea,
+    .jp-Cell .jp-InputArea,
+    .jp-Cell-inputWrapper { display: none !important; }
+
+    .jp-LabShell { grid-template-columns: 0px 1fr 0px !important; }
+    .jp-main-content-panel, .jp-NotebookPanel, .jp-Notebook { width: 100% !important; }
+    .jp-Notebook { padding: 8px 16px !important; }
+    .lm-DockPanel-tabBar, .lm-TabBar { display: none !important; }
+  `;
+
+  function inject() {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      if (!doc || !doc.head) return;
+      let style = doc.getElementById('output-only-style');
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = 'output-only-style';
+        style.textContent = CSS;
+        doc.head.appendChild(style);
+      }
+    } catch (e) {
+      // same-origin expected; ignore transient load errors
+    }
+  }
+
+  iframe.addEventListener('load', () => {
+    inject();
+    let tries = 0;
+    const id = setInterval(() => {
+      inject();
+      tries += 1;
+      if (tries > 50) clearInterval(id);
+    }, 400);
+  });
+})();
+</script>
 </body>
 </html>
