@@ -61,7 +61,7 @@ estimates the <strong>posterior</strong> <span class="math inline">\(P(y
 horizontal position of the sigmoid function by learning the weight
 vector <span class="math inline">\(\mathbf{w}\)</span> and bias <span class="math inline">\(b\)</span>.</p>
 <figure data-latex-placement="h" id="fig:sigmoid">
-<img src="img/lecture4/sigmoid.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<img src="img/lecture4/sigmoid.png" style="width:24.00%; max-width:24.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Sigmoid Function Plots showing the effect of weight (left)
 and bias (right).</figcaption>
 </figure></li>
@@ -277,7 +277,7 @@ not. Based on that information, you can create a decision tree.<br/>
 <figure data-latex-placement="h!" id="tab:decisiontree2">
 <div class="minipage">
 <img src="img/lecture4/tree_outlook.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-</div>
+</div><section class="interactive-notebook"><h3>Interactive Notebook: Outlook Decision Tree</h3><p>Choose weather features and trace the path through the decision tree used in this lecture example.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture4_DecisionTree_Outlook_interactive.html" style="height:820px;" title="Interactive Outlook Decision Tree Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_DecisionTree_Outlook.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <div class="minipage">
 <table>
 <thead>
@@ -507,7 +507,7 @@ result, no training samples are allowed to lie within this margin
 region, and the distance between the two supporting hyperplanes becomes
 directly tied to the magnitude of the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
 <figure data-latex-placement="h" id="fig:marginwidth">
-<img src="img/lecture4/marginwidth.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<img src="img/lecture4/marginwidth.png" style="width:24.00%; max-width:24.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Margin Width Geometry</h3><p>Adjust the separating hyperplane and see how the support margins and width 2/||w|| change.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture4_MarginWidth_interactive.html" style="height:840px;" title="Interactive Margin Width Geometry Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_MarginWidth.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Maximal margin classifier with margin width
 shown</figcaption>
 </figure>
@@ -662,7 +662,7 @@ data (narrower margin, fewer violations), while small <span class="math inline">
 tolerant of outliers/noisy labels.</p>
 </div>
 <figure id="fig:enter-label">
-<img src="img/lecture4/Soft%20Margin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<img src="img/lecture4/Soft%20Margin.png" style="width:30.00%; max-width:30.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Soft Margin Tradeoff</h3><p>Vary C to see the conceptual tradeoff between a wider margin and stricter classification of outliers.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture4_SoftMargin_interactive.html" style="height:820px;" title="Interactive Soft Margin Tradeoff Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_SoftMargin.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Varying values of <span class="math inline">\(C\)</span>
 result in different margin widths</figcaption>
 </figure>
@@ -689,7 +689,7 @@ kernel function <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) =
 \phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j),\]</span> which computes inner
 products in the transformed feature space.</p>
 <figure data-latex-placement="h" id="fig:enter-label">
-<img src="img/lecture4/nonlinearsoftmargin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<img src="img/lecture4/nonlinearsoftmargin.png" style="width:30.00%; max-width:30.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Kernel Lift for Nonlinear Separation</h3><p>Lift a nonlinear dataset into a higher-dimensional feature space and move the separating threshold.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture4_KernelLift_interactive.html" style="height:860px;" title="Interactive Kernel Lift Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_KernelLift.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Adding a new dimension allows a nonlinear dataset to become
 linearly separable</figcaption>
 </figure>

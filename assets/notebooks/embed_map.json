@@ -28,6 +28,15 @@
       "iframe_height": 760
     },
     {
+      "image_match": "sigmoid.png",
+      "notebook_html": "generalized_sigmoid_interactive.html",
+      "notebook_ipynb": "generalized_sigmoid_interactive.ipynb",
+      "section_title": "Interactive Notebook: Generalized Sigmoid Function",
+      "description": "Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.",
+      "iframe_title": "Interactive Generalized Sigmoid Function Notebook",
+      "iframe_height": 760
+    },
+    {
       "image_match": "nll-landscape.png",
       "notebook_html": "logistic_nll_interactive.html",
       "notebook_ipynb": "logistic_nll_interactive.ipynb",
@@ -55,6 +64,24 @@
       "iframe_height": 780
     },
     {
+      "image_match": "tree_outlook.png",
+      "notebook_html": "Lecture4_DecisionTree_Outlook_interactive.html",
+      "notebook_ipynb": "Lecture4_DecisionTree_Outlook.ipynb",
+      "section_title": "Interactive Notebook: Outlook Decision Tree",
+      "description": "Choose weather features and trace the path through the decision tree used in this lecture example.",
+      "iframe_title": "Interactive Outlook Decision Tree Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "marginwidth.png",
+      "notebook_html": "Lecture4_MarginWidth_interactive.html",
+      "notebook_ipynb": "Lecture4_MarginWidth.ipynb",
+      "section_title": "Interactive Notebook: Margin Width Geometry",
+      "description": "Adjust the separating hyperplane and see how the support margins and width 2/||w|| change.",
+      "iframe_title": "Interactive Margin Width Geometry Notebook",
+      "iframe_height": 840
+    },
+    {
       "image_match": "multiplehyperplanes.png",
       "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
       "notebook_ipynb": "Lecture3_LinearBoundaries.ipynb",
@@ -62,6 +89,24 @@
       "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
       "iframe_title": "Interactive Notebook - Lecture 3: Linear Boundaries Notebook",
       "iframe_height": 780
+    },
+    {
+      "image_match": "Soft Margin.png",
+      "notebook_html": "Lecture4_SoftMargin_interactive.html",
+      "notebook_ipynb": "Lecture4_SoftMargin.ipynb",
+      "section_title": "Interactive Notebook: Soft Margin Tradeoff",
+      "description": "Vary C to see the conceptual tradeoff between a wider margin and stricter classification of outliers.",
+      "iframe_title": "Interactive Soft Margin Tradeoff Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "nonlinearsoftmargin.png",
+      "notebook_html": "Lecture4_KernelLift_interactive.html",
+      "notebook_ipynb": "Lecture4_KernelLift.ipynb",
+      "section_title": "Interactive Notebook: Kernel Lift for Nonlinear Separation",
+      "description": "Lift a nonlinear dataset into a higher-dimensional feature space and move the separating threshold.",
+      "iframe_title": "Interactive Kernel Lift Notebook",
+      "iframe_height": 860
     },
     {
       "image_match": "mmh.png",
