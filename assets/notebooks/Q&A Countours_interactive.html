@@ -1,18 +1,30 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Q&A Countours interactive</title>
-  <style>
-    html, body { margin: 0; height: 100%; background: #fff; }
-    .top { padding: 8px 12px; font: 16px/1.4 -apple-system,Segoe UI,Arial,sans-serif; border-bottom: 1px solid #e5e7eb; }
-    .top a { color: #1d4ed8; text-decoration: none; }
-    iframe { border: 0; width: 100%; height: calc(100% - 42px); }
-  </style>
-</head>
-<body>
-  <div class="top">Open directly in JupyterLite: <a href="../jupyterlite/lab/index.html?path=notebooks/Q&A Countours.ipynb&reset=1" target="_blank" rel="noopener noreferrer">Q&A Countours.ipynb</a></div>
-  <iframe src="../jupyterlite/lab/index.html?path=notebooks/Q&A Countours.ipynb&reset=1" title="Q&A Countours interactive"></iframe>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Polynomial and Optimization Demo (Lecture 8)</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
+:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
+button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
+@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
+.plots{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:980px){.plots{grid-template-columns:1fr}}</style></head><body><div class="wrap"><h1>Interactive Polynomial and Optimization Demo (Lecture 8)</h1><p>Linear-to-polynomial transition, contour behavior, and optimization controls.</p><div class="controls"><div class="control"><label>Polynomial degree</label><div class="row"><input id="deg" type="range" min="1" max="10" step="1" value="2"><span class="value" id="degv">2</span></div></div><div class="control"><label>Noise</label><div class="row"><input id="noise" type="range" min="0.05" max="1.0" step="0.05" value="0.25"><span class="value" id="noisev">0.25</span></div></div><div class="control"><label>alpha</label><div class="row"><input id="alpha" type="range" min="0.001" max="0.3" step="0.001" value="0.05"><span class="value" id="alphav">0.05</span></div></div><div class="control"><label>max iter</label><div class="row"><input id="iter" type="range" min="10" max="400" step="10" value="120"><span class="value" id="iterv">120</span></div></div></div><div class="plots" style="grid-template-columns:repeat(3,minmax(0,1fr));"><div class="plot-card"><div id="pfit" class="plot"></div></div><div class="plot-card"><div id="cont" class="plot"></div></div><div class="plot-card"><div id="prog" class="plot"></div></div></div><div class="status" id="status"></div></div><script>function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function polyFit(x,y,d){const n=x.length; const X=x.map(v=>[...Array(d+1)].map((_,k)=>v**k));
+// normal eq via pseudo-gaussian elimination on XtX
+const m=d+1; let A=Array.from({length:m},()=>Array(m).fill(0)); let b=Array(m).fill(0);
+for(let i=0;i<n;i++){for(let r=0;r<m;r++){b[r]+=X[i][r]*y[i]; for(let c=0;c<m;c++)A[r][c]+=X[i][r]*X[i][c];}}
+for(let i=0;i<m;i++){let piv=i; for(let r=i+1;r<m;r++) if(Math.abs(A[r][i])>Math.abs(A[piv][i]))piv=r; [A[i],A[piv]]=[A[piv],A[i]]; [b[i],b[piv]]=[b[piv],b[i]]; const div=A[i][i]||1e-9; for(let c=i;c<m;c++)A[i][c]/=div; b[i]/=div; for(let r=0;r<m;r++){if(r===i)continue; const f=A[r][i]; for(let c=i;c<m;c++)A[r][c]-=f*A[i][c]; b[r]-=f*b[i];}}
+return b}
+function pred(theta,x){return theta.reduce((s,t,k)=>s+t*(x**k),0)}
+function render(){const d=+deg.value,noise=+noiseEl.value,alpha=+alphaEl.value,maxi=+iter.value; degv.textContent=d;noisev.textContent=noise.toFixed(2);alphav.textContent=alpha.toFixed(3);iterv.textContent=maxi;
+const N=40; const x=[...Array(N)].map((_,i)=>-2.3+4.6*i/(N-1)); const y=x.map(v=>1.2+0.8*v-0.6*v*v+noise*randn());
+const th=polyFit(x,y,d); const xg=[...Array(300)].map((_,i)=>-2.3+4.6*i/299); const yg=xg.map(v=>pred(th,v));
+Plotly.newPlot('pfit',[{x,y,mode:'markers',name:'data'},{x:xg,y:yg,mode:'lines',name:'poly fit',line:{color:'#dc2626'}}],{title:`Linear to polynomial (degree=${d})`},{displayModeBar:false});
+// linear contour + GD path
+const t0=[...Array(70)].map((_,i)=>-1.5+4*i/69), t1=[...Array(70)].map((_,i)=>-2.5+5*i/69); const z=[]; for(const b0 of t1){const row=[]; for(const a0 of t0){let s=0; for(let i=0;i<N;i++){const e=(a0+b0*x[i])-y[i]; s+=e*e} row.push(s/N)} z.push(row)}
+let a=0,b=0,pathx=[a],pathy=[b],mses=[]; for(let it=0;it<maxi;it++){let ga=0,gb=0,mse=0; for(let i=0;i<N;i++){const e=(a+b*x[i])-y[i]; ga+=2*e/N; gb+=2*e*x[i]/N; mse+=e*e/N} mses.push(mse); a-=alpha*ga; b-=alpha*gb; pathx.push(a); pathy.push(b)}
+Plotly.newPlot('cont',[{z,x:t0,y:t1,type:'contour',showscale:false,colorscale:'Viridis'},{x:pathx,y:pathy,mode:'lines+markers',marker:{size:4},line:{color:'#ef4444'}}],{title:'Contour + GD path',xaxis:{title:'theta0'},yaxis:{title:'theta1'}},{displayModeBar:false});
+Plotly.newPlot('prog',[{x:[...Array(mses.length)].map((_,i)=>i),y:mses,mode:'lines',line:{color:'#111'}}],{title:'Optimization progress',xaxis:{title:'iteration'},yaxis:{title:'MSE'}},{displayModeBar:false});
+status.textContent=`degree=${d}, alpha=${alpha.toFixed(3)}, max_iter=${maxi}`; }
+const noiseEl=document.getElementById('noise'), alphaEl=document.getElementById('alpha'); ['deg','noise','alpha','iter'].forEach(id=>document.getElementById(id).addEventListener('input',render)); render();</script></body></html>
