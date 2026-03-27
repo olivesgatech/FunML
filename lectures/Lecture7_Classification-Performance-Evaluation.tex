@@ -336,16 +336,16 @@ If you have imbalanced classes, accuracy is less useful since it gives equal wei
 \hline
 \rowcolor[HTML]{D4AF37} % Header row color
 \textbf{Q\#} & \textbf{Answer Key} & \textbf{Your Answer} & \textbf{Grading} & \textbf{?} \\ \hline
-1 & F & T & \XSolid & FP \\ \hline
-2 & F & F & \checkmark & TN \\ \hline
-3 & T & T & \checkmark & TP \\ \hline
-4 & F & F & \checkmark & TN \\ \hline
-5 & T & T & \checkmark & TP \\ \hline
-6 & T & F & \XSolid & FN \\ \hline
-7 & T & T & \checkmark & TP \\ \hline
-8 & F & F & \checkmark & TN \\ \hline
-9 & F & T & \XSolid & FP \\ \hline
-10 & F & F & \checkmark & TN \\ \hline
+1 & F & T & $\times$ & FP \\ \hline
+2 & F & F & $\checkmark$ & TN \\ \hline
+3 & T & T & $\checkmark$ & TP \\ \hline
+4 & F & F & $\checkmark$ & TN \\ \hline
+5 & T & T & $\checkmark$ & TP \\ \hline
+6 & T & F & $\times$ & FN \\ \hline
+7 & T & T & $\checkmark$ & TP \\ \hline
+8 & F & F & $\checkmark$ & TN \\ \hline
+9 & F & T & $\times$ & FP \\ \hline
+10 & F & F & $\checkmark$ & TN \\ \hline
 \end{tabular}
 \caption{Grading Table with True/False Positive/Negative Labels}
 
@@ -361,16 +361,13 @@ A better way to analyze the accuracy of your model is by evaluating the \textbf{
 \end{itemize}
 This can be better visualized in a confusion matrix, which allows you to evaluate the precision and recall of your model.
 \begin{center}
-
-\noindent
-\renewcommand\arraystretch{1.5}
-\setlength\tabcolsep{0pt}
-\begin{tabular}{c >{\bfseries}r @{\hspace{0.7em}}c @{\hspace{0.4em}}c @{\hspace{0.7em}}l}
-  \multirow{10}{*}{\parbox{1.1cm}{\bfseries\raggedleft Actual\\ Value}} & 
-    & \multicolumn{2}{c}{\bfseries Prediction outcome} & \\
-  & & \bfseries P & \bfseries N & \bfseries  \\
-  & P & \MyBox{True}{Positive} & \MyBox{False}{Negative}  \\[2.4em]
-  & N & \MyBox{False}{Positive} & \MyBox{True}{Negative}  
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{10pt}
+\begin{tabular}{c|c|c}
+& \multicolumn{2}{c}{\textbf{Prediction outcome}} \\
+\textbf{Actual Value} & \textbf{P} & \textbf{N} \\ \hline
+\textbf{P} & \shortstack{True\\Positive\\(TP)} & \shortstack{False\\Negative\\(FN)} \\ \hline
+\textbf{N} & \shortstack{False\\Positive\\(FP)} & \shortstack{True\\Negative\\(TN)}
 \end{tabular}
 \end{center}
 

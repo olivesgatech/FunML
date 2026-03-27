@@ -363,70 +363,70 @@ Labels</caption>
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">T</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\times\)</span></td>
 <td style="text-align: center;">FP</td>
 </tr>
 <tr>
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">F</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TN</td>
 </tr>
 <tr>
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">T</td>
 <td style="text-align: center;">T</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TP</td>
 </tr>
 <tr>
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">F</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TN</td>
 </tr>
 <tr>
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">T</td>
 <td style="text-align: center;">T</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TP</td>
 </tr>
 <tr>
 <td style="text-align: center;">6</td>
 <td style="text-align: center;">T</td>
 <td style="text-align: center;">F</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\times\)</span></td>
 <td style="text-align: center;">FN</td>
 </tr>
 <tr>
 <td style="text-align: center;">7</td>
 <td style="text-align: center;">T</td>
 <td style="text-align: center;">T</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TP</td>
 </tr>
 <tr>
 <td style="text-align: center;">8</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">F</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TN</td>
 </tr>
 <tr>
 <td style="text-align: center;">9</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">T</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\times\)</span></td>
 <td style="text-align: center;">FP</td>
 </tr>
 <tr>
 <td style="text-align: center;">10</td>
 <td style="text-align: center;">F</td>
 <td style="text-align: center;">F</td>
-<td style="text-align: center;"></td>
+<td style="text-align: center;"><span class="math inline">\(\checkmark\)</span></td>
 <td style="text-align: center;">TN</td>
 </tr>
 </tbody>
@@ -446,30 +446,64 @@ to evaluate the precision and recall of your model.</p>
 <table>
 <tbody>
 <tr>
-<td rowspan="4" style="text-align: center;"><strong>Actual<br/>
-Value</strong></td>
-<td style="text-align: right;"><strong></strong></td>
+<td style="text-align: center;"></td>
 <td colspan="2" style="text-align: center;"><strong>Prediction
 outcome</strong></td>
-<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: right;"><strong></strong></td>
+<td style="text-align: center;"><strong>Actual Value</strong></td>
 <td style="text-align: center;"><strong>P</strong></td>
 <td style="text-align: center;"><strong>N</strong></td>
-<td style="text-align: left;"><strong></strong></td>
 </tr>
 <tr>
-<td style="text-align: right;"><strong>P</strong></td>
+<td style="text-align: center;"><strong>P</strong></td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
 </tr>
 <tr>
-<td style="text-align: right;"><strong>N</strong></td>
+<td style="text-align: center;">Positive</td>
 <td style="text-align: center;"></td>
 <td style="text-align: center;"></td>
-<td style="text-align: left;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">(TP)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">Negative</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">(FN)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>N</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">Positive</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">(FP)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">Negative</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">(TN)</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>

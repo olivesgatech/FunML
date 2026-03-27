@@ -343,7 +343,7 @@ should have these properties</p>
         \end{cases}\)</span></p></li>
 </ul>
 <div class="center">
-<p><img alt="image" src="img/lecture3/loss-behav.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: NLL Behavior Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_NLL_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 3: NLL Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_NLL.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/loss-behav.png"/></p>
 </div>
 <p>What this suggests is that the cost function should grow tremendously
 as the prediction <span class="math inline">\(z(\textbf{x})\)</span>
@@ -360,7 +360,7 @@ can be rewritten as: <span class="math display">\[\mathcal{L}(y,\textbf{z}) =
     -\log(1-z(\textbf{x})), &amp; y=0
 \end{cases}\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/log-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Log Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LogLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Log Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_LogLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/log-loss.png"/></p>
 </div>
 <p>This cost function can in fact be derived naturally if we assume the
 <span class="math inline">\(y\)</span> are drawn iid from a Bernoulli
@@ -470,7 +470,7 @@ using the sign function: <span class="math display">\[\text{sign}(x)=\begin{case
     -1 &amp; x &lt; 0
 \end{cases}\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/sign.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Sign Function Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_SignFunc_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Sign Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_SignFunc.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/sign.png"/></p>
 </div>
 <p>Note here that we’re assuming <span class="math inline">\(y_i\in\{-1,1\}\)</span> here instead of <span class="math inline">\(\{0,1\}\)</span> as in the logistic model. Hence
 if we attempt to model the decision boundary with a linear model <span class="math inline">\(\theta^T\textbf{x}\)</span>, then we can model the
@@ -490,7 +490,7 @@ to penalize it more the more incorrect it is. On the other hand, if it’s
 correct, we’d like to remain “with 0 doubt” and report <span class="math inline">\(0\)</span> cost. This can be summarized in the
 following cost function: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)=\max(0,-y\theta^T\textbf{x})\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/hinge-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Hinge Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_HingeLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Hinge Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_HingeLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/hinge-loss.png"/></p>
 </div>
 <p>This is called the <strong>hinge loss</strong>, and it’s conveniently
 convex as well. Over a dataset <span class="math inline">\(\{\textbf{x}_i,y_i\}_{i=1}^N\)</span>, we can

@@ -630,6 +630,13 @@ def pick_main_tex(tex_files, lecture_number: str):
   return sorted(tex_files, key=lambda p: (-score(p), p.name.lower()))[0]
 
 
+def pick_preferred_lecture_tex(tex_files, lecture_number: str):
+  webpage_tex_files = [tex for tex in tex_files if "webpage" in tex.stem.lower()]
+  if webpage_tex_files:
+    return pick_main_tex(webpage_tex_files, lecture_number)
+  return pick_main_tex(tex_files, lecture_number)
+
+
 def ensure_landing_page_assets(out_root: Path):
   # If output is a fresh directory, seed it with the portal landing files.
   for filename in ("index.html", "styles.css", "script.js"):
@@ -1525,7 +1532,7 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
       continue
 
     lecture_number = lecture_number_from_dir(lec_dir)
-    tex = pick_main_tex(tex_files, lecture_number)
+    tex = pick_preferred_lecture_tex(tex_files, lecture_number)
     title = extract_title(tex)
     display_idx = len(lecture_pages) + 1
     lecture_slug = slugify_lecture_title(title)
