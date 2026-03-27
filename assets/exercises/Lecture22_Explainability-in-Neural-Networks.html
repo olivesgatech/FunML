@@ -26,51 +26,18 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Compare occlusion-based saliency and
-gradient-based saliency in terms of faithfulness and computational
-cost.</p>
-<p><strong>Solution:</strong> Occlusion-based saliency measures
-importance by directly perturbing the input and observing changes in the
-prediction, making it causally grounded but computationally expensive
-due to many forward passes. Gradient-based saliency is efficient (single
-forward/backward pass) but provides only a local linear approximation of
-importance.</p></li>
-<li><p><strong>Question:</strong> Explain why early convolutional layers
-and fully connected layers are both unsuitable for producing meaningful
-localization maps in Grad-CAM.</p>
-<p><strong>Solution:</strong> Early layers retain spatial resolution but
-encode only low-level features (edges/textures), lacking semantic
-meaning. Fully connected layers capture high-level semantics but discard
-spatial structure. Grad-CAM therefore uses the last convolutional layer
-as a compromise.</p></li>
-<li><p><strong>Question:</strong> How do Vanilla Backpropagation,
-Deconvnet, and Guided Backpropagation differ in how they handle
-gradients through ReLU?</p>
-<p><strong>Solution:</strong> Vanilla BP blocks gradients where forward
-activations were negative. Deconvnet blocks negative gradients during
-the backward pass. Guided BP blocks gradients unless both the forward
-activation and backward gradient are positive, producing sharper
-maps.</p></li>
-<li><p><strong>Question:</strong> Why does Guided Backpropagation lack
-class discriminativity?</p>
-<p><strong>Solution:</strong> It primarily highlights generic edges and
-textures based on gradient flow, rather than weighting feature maps by
-class-specific importance. As a result, maps for different classes often
-appear similar.</p></li>
-<li><p><strong>Question:</strong> In Grad-CAM, what is the
-interpretation of the weight <span class="math display">\[\alpha_k^c =
-\frac{1}{Z} \sum_{i,j} \frac{\partial y^c}{\partial A_{ij}^k}
-?\]</span></p>
-<p><strong>Solution:</strong> It measures how strongly feature map <span class="math inline">\(k\)</span> influences the target class score <span class="math inline">\(y^c\)</span> on average across spatial locations.
-These weights determine how much each feature map contributes to the
-final class activation map.</p></li>
-<li><p><strong>Question:</strong> Why is a ReLU applied after computing
-<span class="math display">\[L_{\text{Grad-CAM}}^c = \sum_k \alpha_k^c
-A^k ?\]</span></p>
-<p><strong>Solution:</strong> ReLU removes negative contributions,
-retaining only features that positively support the target class. This
-improves interpretability by focusing the heatmap on regions that
-provide evidence <em>for</em> the class rather than against it.</p></li>
+<li><p><strong>Question:</strong> Compare occlusion-based saliency and gradient-based saliency in terms of faithfulness and computational cost.</p>
+<p><strong>Solution:</strong> Occlusion-based saliency measures importance by directly perturbing the input and observing changes in the prediction, making it causally grounded but computationally expensive due to many forward passes. Gradient-based saliency is efficient (single forward/backward pass) but provides only a local linear approximation of importance.</p></li>
+<li><p><strong>Question:</strong> Explain why early convolutional layers and fully connected layers are both unsuitable for producing meaningful localization maps in Grad-CAM.</p>
+<p><strong>Solution:</strong> Early layers retain spatial resolution but encode only low-level features (edges/textures), lacking semantic meaning. Fully connected layers capture high-level semantics but discard spatial structure. Grad-CAM therefore uses the last convolutional layer as a compromise.</p></li>
+<li><p><strong>Question:</strong> How do Vanilla Backpropagation, Deconvnet, and Guided Backpropagation differ in how they handle gradients through ReLU?</p>
+<p><strong>Solution:</strong> Vanilla BP blocks gradients where forward activations were negative. Deconvnet blocks negative gradients during the backward pass. Guided BP blocks gradients unless both the forward activation and backward gradient are positive, producing sharper maps.</p></li>
+<li><p><strong>Question:</strong> Why does Guided Backpropagation lack class discriminativity?</p>
+<p><strong>Solution:</strong> It primarily highlights generic edges and textures based on gradient flow, rather than weighting feature maps by class-specific importance. As a result, maps for different classes often appear similar.</p></li>
+<li><p><strong>Question:</strong> In Grad-CAM, what is the interpretation of the weight <span class="math display">\[\alpha_k^c = \frac{1}{Z} \sum_{i,j} \frac{\partial y^c}{\partial A_{ij}^k} ?\]</span></p>
+<p><strong>Solution:</strong> It measures how strongly feature map <span class="math inline">\(k\)</span> influences the target class score <span class="math inline">\(y^c\)</span> on average across spatial locations. These weights determine how much each feature map contributes to the final class activation map.</p></li>
+<li><p><strong>Question:</strong> Why is a ReLU applied after computing <span class="math display">\[L_{\text{Grad-CAM}}^c = \sum_k \alpha_k^c A^k ?\]</span></p>
+<p><strong>Solution:</strong> ReLU removes negative contributions, retaining only features that positively support the target class. This improves interpretability by focusing the heatmap on regions that provide evidence <em>for</em> the class rather than against it.</p></li>
 </ol></section>
 </main>
 </body>

@@ -26,75 +26,18 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> What is the main difference between
-<strong>supervised</strong>, <strong>unsupervised</strong>, and
-<strong>self-supervised</strong> learning in terms of where the
-supervision comes from?</p>
-<p><strong>Solution:</strong> In <strong>supervised learning</strong>,
-the supervision is provided by humans in the form of ground-truth labels
-<span class="math inline">\(y\)</span>. The model learns a mapping from
-<span class="math inline">\(x\)</span> to <span class="math inline">\(y\)</span> by minimizing a loss between
-predictions and labels. In <strong>unsupervised learning</strong>, there
-are no labels at all — the model tries to discover structure directly
-from the data (for example, reconstruction or clustering). In
-<strong>self-supervised learning</strong>, the supervision is generated
-automatically from the data itself. A pre-text task creates
-<strong>pseudo-labels</strong> <span class="math inline">\(z\)</span>
-from the raw inputs <span class="math inline">\(x\)</span>, and the
-model is trained to predict those pseudo-labels before being fine-tuned
-on a real task.</p></li>
-<li><p><strong>Question:</strong> Describe the three main stages of the
-self-supervised learning pipeline.</p>
-<p><strong>Solution:</strong> The pipeline has three steps. First, we
-<strong>generate pseudo-labels</strong> by applying a pre-text task to
-large amounts of unlabeled data. This turns raw data into a
-pseudo-labeled dataset. Second, we perform <strong>self-supervised
-pre-training</strong>, where a neural network learns to predict those
-pseudo-labels and becomes a strong feature extractor. Finally, we
-<strong>fine-tune</strong> the model on a downstream task using a
-smaller labeled dataset, adapting the learned representation to the
-final objective.</p></li>
-<li><p><strong>Question:</strong> How do <strong>masked
-prediction</strong> and <strong>transformation prediction</strong>
-differ in what they teach the model?</p>
-<p><strong>Solution:</strong> <strong>Masked prediction</strong> forces
-the model to fill in missing parts of the input, so it learns contextual
-relationships and global structure. The model has to understand how
-different parts of the data relate to each other. <strong>Transformation
-prediction</strong> asks the model to identify a known transformation
-(such as rotation). This encourages the model to learn semantic
-information like object orientation and shape. In short, masked
-prediction focuses on <em>context</em>, while transformation prediction
-focuses on <em>semantics and structure</em>.</p></li>
-<li><p><strong>Question:</strong> What are <strong>positive
-pairs</strong> and <strong>negative pairs</strong> in contrastive
-learning, and what is the goal of the contrastive objective?</p>
-<p><strong>Solution:</strong> Positive pairs are two different views of
-the <em>same</em> sample (for example, two augmentations of the same
-image). Negative pairs come from <em>different</em> samples. The goal is
-to learn representations where positive pairs are close together in the
-embedding space and negative pairs are far apart. This makes the
-representation both invariant to augmentations and discriminative across
-different inputs.</p></li>
-<li><p><strong>Question:</strong> Why does SimCLR use a
-<strong>projection head</strong> during training, and what part of the
-model is used later?</p>
-<p><strong>Solution:</strong> SimCLR first encodes images into
-representations and then maps them into a separate embedding space using
-a projection head. The contrastive loss works better in this projection
-space. After training, the projection head is removed, and the
-<strong>encoder</strong> is kept as the feature extractor for downstream
-tasks.</p></li>
-<li><p><strong>Question:</strong> What are <strong>foundation
-models</strong>, and why does <strong>scale</strong> matter so much for
-them?</p>
-<p><strong>Solution:</strong> Foundation models are large models trained
-on massive and diverse datasets so they can learn general-purpose
-representations. These models can then be adapted to many different
-tasks. Scale is critical because training on huge datasets with large
-models allows useful features and capabilities to <em>emerge</em>. As a
-result, the model can transfer knowledge across tasks even with limited
-labeled data.</p></li>
+<li><p><strong>Question:</strong> What is the main difference between <strong>supervised</strong>, <strong>unsupervised</strong>, and <strong>self-supervised</strong> learning in terms of where the supervision comes from?</p>
+<p><strong>Solution:</strong> In <strong>supervised learning</strong>, the supervision is provided by humans in the form of ground-truth labels <span class="math inline">\(y\)</span>. The model learns a mapping from <span class="math inline">\(x\)</span> to <span class="math inline">\(y\)</span> by minimizing a loss between predictions and labels. In <strong>unsupervised learning</strong>, there are no labels at all — the model tries to discover structure directly from the data (for example, reconstruction or clustering). In <strong>self-supervised learning</strong>, the supervision is generated automatically from the data itself. A pre-text task creates <strong>pseudo-labels</strong> <span class="math inline">\(z\)</span> from the raw inputs <span class="math inline">\(x\)</span>, and the model is trained to predict those pseudo-labels before being fine-tuned on a real task.</p></li>
+<li><p><strong>Question:</strong> Describe the three main stages of the self-supervised learning pipeline.</p>
+<p><strong>Solution:</strong> The pipeline has three steps. First, we <strong>generate pseudo-labels</strong> by applying a pre-text task to large amounts of unlabeled data. This turns raw data into a pseudo-labeled dataset. Second, we perform <strong>self-supervised pre-training</strong>, where a neural network learns to predict those pseudo-labels and becomes a strong feature extractor. Finally, we <strong>fine-tune</strong> the model on a downstream task using a smaller labeled dataset, adapting the learned representation to the final objective.</p></li>
+<li><p><strong>Question:</strong> How do <strong>masked prediction</strong> and <strong>transformation prediction</strong> differ in what they teach the model?</p>
+<p><strong>Solution:</strong> <strong>Masked prediction</strong> forces the model to fill in missing parts of the input, so it learns contextual relationships and global structure. The model has to understand how different parts of the data relate to each other. <strong>Transformation prediction</strong> asks the model to identify a known transformation (such as rotation). This encourages the model to learn semantic information like object orientation and shape. In short, masked prediction focuses on <em>context</em>, while transformation prediction focuses on <em>semantics and structure</em>.</p></li>
+<li><p><strong>Question:</strong> What are <strong>positive pairs</strong> and <strong>negative pairs</strong> in contrastive learning, and what is the goal of the contrastive objective?</p>
+<p><strong>Solution:</strong> Positive pairs are two different views of the <em>same</em> sample (for example, two augmentations of the same image). Negative pairs come from <em>different</em> samples. The goal is to learn representations where positive pairs are close together in the embedding space and negative pairs are far apart. This makes the representation both invariant to augmentations and discriminative across different inputs.</p></li>
+<li><p><strong>Question:</strong> Why does SimCLR use a <strong>projection head</strong> during training, and what part of the model is used later?</p>
+<p><strong>Solution:</strong> SimCLR first encodes images into representations and then maps them into a separate embedding space using a projection head. The contrastive loss works better in this projection space. After training, the projection head is removed, and the <strong>encoder</strong> is kept as the feature extractor for downstream tasks.</p></li>
+<li><p><strong>Question:</strong> What are <strong>foundation models</strong>, and why does <strong>scale</strong> matter so much for them?</p>
+<p><strong>Solution:</strong> Foundation models are large models trained on massive and diverse datasets so they can learn general-purpose representations. These models can then be adapted to many different tasks. Scale is critical because training on huge datasets with large models allows useful features and capabilities to <em>emerge</em>. As a result, the model can transfer knowledge across tasks even with limited labeled data.</p></li>
 </ol></section>
 </main>
 </body>

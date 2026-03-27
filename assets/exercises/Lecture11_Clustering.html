@@ -25,15 +25,11 @@ window.MathJax = {
 <body>
 <main>
   <section><h1>Exercises</h1>
-<p>The following table shows the regression outputs from three different
-models on five samples, along with the ground-truth (GT) values. We will
-use this table to build intuition about bias, variance, and
-underfitting.</p>
+<p>The following table shows the regression outputs from three different models on five samples, along with the ground-truth (GT) values. We will use this table to build intuition about bias, variance, and underfitting.</p>
 <table>
-<caption>Regression outputs of three models along with ground truth
-values.</caption>
+<caption>Regression outputs of three models along with ground truth values.</caption>
 <thead>
-<tr>
+<tr class="header">
 <th style="text-align: center;">Sample</th>
 <th style="text-align: center;">GT</th>
 <th style="text-align: center;">Model 1</th>
@@ -42,35 +38,35 @@ values.</caption>
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr class="odd">
 <td style="text-align: center;">1</td>
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">4.8</td>
 <td style="text-align: center;">5.2</td>
 <td style="text-align: center;">5.0</td>
 </tr>
-<tr>
+<tr class="even">
 <td style="text-align: center;">2</td>
 <td style="text-align: center;">6</td>
 <td style="text-align: center;">4.7</td>
 <td style="text-align: center;">5.3</td>
 <td style="text-align: center;">6.0</td>
 </tr>
-<tr>
+<tr class="odd">
 <td style="text-align: center;">3</td>
 <td style="text-align: center;">7</td>
 <td style="text-align: center;">4.9</td>
 <td style="text-align: center;">5.5</td>
 <td style="text-align: center;">7.2</td>
 </tr>
-<tr>
+<tr class="even">
 <td style="text-align: center;">4</td>
 <td style="text-align: center;">8</td>
 <td style="text-align: center;">5.0</td>
 <td style="text-align: center;">5.7</td>
 <td style="text-align: center;">8.0</td>
 </tr>
-<tr>
+<tr class="odd">
 <td style="text-align: center;">5</td>
 <td style="text-align: center;">9</td>
 <td style="text-align: center;">5.2</td>
@@ -79,85 +75,38 @@ values.</caption>
 </tr>
 </tbody>
 </table>
-<p><strong>Important note.</strong> In the formal bias–variance
-decomposition, bias and variance are defined with respect to many
-possible training datasets. Since we only have one dataset here, we will
-use a <strong>simplified empirical proxy</strong>: we treat the model
-predictions across samples as if they were repeated predictions. This
-lets us build intuition about bias and variance without requiring
-multiple datasets.</p>
+<p><strong>Important note.</strong> In the formal bias–variance decomposition, bias and variance are defined with respect to many possible training datasets. Since we only have one dataset here, we will use a <strong>simplified empirical proxy</strong>: we treat the model predictions across samples as if they were repeated predictions. This lets us build intuition about bias and variance without requiring multiple datasets.</p>
 <ol>
-<li><p><strong>Question:</strong><br/>
-What is the average <strong>empirical bias proxy</strong> for each model
-across the five samples?<br/>
-<br/>
-<strong>Options:</strong></p>
+<li><p><strong>Question:</strong> What is the average <strong>empirical bias proxy</strong> for each model across the five samples? <strong>Options:</strong></p>
 <ol>
 <li><p>Model 1: 2.92, Model 2: 0.44, Model 3: 0.08</p></li>
 <li><p>Model 1: 6.33, Model 2: 4.19, Model 3: 2.01</p></li>
 <li><p>Model 1: 2.92, Model 2: 1.44, Model 3: 0.08</p></li>
 <li><p>Model 1: 1.92, Model 2: 4.19, Model 3: 2.01</p></li>
 </ol>
-<p><strong>Solution:</strong><br/>
-We approximate bias using the squared difference between the model’s
-mean prediction and the ground truth values for each sample.<br/>
-</p>
-<p><strong>Model 1</strong>: <span class="math display">\[\text{Mean of
-Model 1's predictions} = \frac{4.8 + 4.7 + 4.9 + 5.0 + 5.2}{5} =
-4.92\]</span> <span class="math display">\[\text{Avg Bias for Model 1} =
-\frac{(4.92 - 5)^2 + (4.92 - 6)^2 + (4.92 - 7)^2 + (4.92 - 8)^2 + (4.92
-- 9)^2}{5} = 6.33\]</span></p>
-<p><strong>Model 2</strong>: <span class="math display">\[\text{Mean of
-Model 2's predictions} = \frac{5.2 + 5.3 + 5.5 + 5.7 + 5.9}{5} =
-5.52\]</span> <span class="math display">\[\text{Avg Bias for Model 2} =
-\frac{(5.52 - 5)^2 + (5.52 - 6)^2 + (5.52 - 7)^2 + (5.52 - 8)^2 + (5.52
-- 9)^2}{5} = 4.19\]</span></p>
-<p><strong>Model 3</strong>: <span class="math display">\[\text{Mean of
-Model 3's predictions} = \frac{5.0 + 6.0 + 7.2 + 8.0 + 9.3}{5} =
-7.1\]</span> <span class="math display">\[\text{Avg Bias for Model 3} =
-\frac{(7.1 - 5)^2 + (7.1 - 6)^2 + (7.1 - 7)^2 + (7.1 - 8)^2 + (7.1 -
-9)^2}{5} = 2.01\]</span> The correct answer is <strong>(b) Model 1:
-6.33, Model 2: 4.19, Model 3: 2.01</strong>.</p></li>
-<li><p><strong>Question:</strong><br/>
-What is the average <strong>empirical variance proxy</strong> for each
-model?<br/>
-<br/>
-<strong>Options:</strong></p>
+<p><strong>Solution:</strong> We approximate bias using the squared difference between the model’s mean prediction and the ground truth values for each sample.</p>
+<p><strong>Model 1</strong>: <span class="math display">\[\text{Mean of Model 1's predictions} = \frac{4.8 + 4.7 + 4.9 + 5.0 + 5.2}{5} = 4.92\]</span> <span class="math display">\[\text{Avg Bias for Model 1} = \frac{(4.92 - 5)^2 + (4.92 - 6)^2 + (4.92 - 7)^2 + (4.92 - 8)^2 + (4.92 - 9)^2}{5} = 6.33\]</span></p>
+<p><strong>Model 2</strong>: <span class="math display">\[\text{Mean of Model 2's predictions} = \frac{5.2 + 5.3 + 5.5 + 5.7 + 5.9}{5} = 5.52\]</span> <span class="math display">\[\text{Avg Bias for Model 2} = \frac{(5.52 - 5)^2 + (5.52 - 6)^2 + (5.52 - 7)^2 + (5.52 - 8)^2 + (5.52 - 9)^2}{5} = 4.19\]</span></p>
+<p><strong>Model 3</strong>: <span class="math display">\[\text{Mean of Model 3's predictions} = \frac{5.0 + 6.0 + 7.2 + 8.0 + 9.3}{5} = 7.1\]</span> <span class="math display">\[\text{Avg Bias for Model 3} = \frac{(7.1 - 5)^2 + (7.1 - 6)^2 + (7.1 - 7)^2 + (7.1 - 8)^2 + (7.1 - 9)^2}{5} = 2.01\]</span> The correct answer is <strong>(b) Model 1: 6.33, Model 2: 4.19, Model 3: 2.01</strong>.</p></li>
+<li><p><strong>Question:</strong> What is the average <strong>empirical variance proxy</strong> for each model? <strong>Options:</strong></p>
 <ol>
 <li><p>Model 1: 0.03, Model 2: 0.08, Model 3: 0.13</p></li>
 <li><p>Model 1: 0.05, Model 2: 0.12, Model 3: 0.15</p></li>
 <li><p>Model 1: 0.04, Model 2: 0.08, Model 3: 0.12</p></li>
 <li><p>Model 1: 0.03, Model 2: 0.07, Model 3: 2.26</p></li>
 </ol>
-<p><strong>Solution:</strong><br/>
-We approximate variance as the variance of the model’s predictions.</p>
-<p>Variance is calculated as the average of the squared differences
-between each model’s predictions and its mean prediction.</p>
-<p><strong>Model 1</strong>: <span class="math display">\[\text{Variance
-for Model 1} = \frac{(4.8 - 4.92)^2 + (4.7 - 4.92)^2 + (4.9 - 4.92)^2 +
-(5.0 - 4.92)^2 + (5.2 - 4.92)^2}{5} = 0.03\]</span></p>
-<p><strong>Model 2</strong>: <span class="math display">\[\text{Variance
-for Model 2} = \frac{(5.2 - 5.52)^2 + (5.3 - 5.52)^2 + (5.5 - 5.52)^2 +
-(5.7 - 5.52)^2 + (5.9 - 5.52)^2}{5} = 0.07\]</span></p>
-<p><strong>Model 3</strong>: <span class="math display">\[\text{Variance
-for Model 3} = \frac{(5.0 - 7.1)^2 + (6.0 - 7.1)^2 + (7.2 - 7.1)^2 +
-(8.0 - 7.1)^2 + (9.3 - 7.1)^2}{5} = 2.26\]</span></p>
-<p>The correct answer is <strong>(d) Model 1: 0.03, Model 2: 0.07, Model
-3: 2.26</strong>.</p></li>
-<li><p><strong>Question:</strong><br/>
-If the differences in bias/variance values are significant enough, would
-we expect model 1 is more likely to have overfit or underfit?<br/>
-<br/>
-<strong>Options:</strong></p>
+<p><strong>Solution:</strong> We approximate variance as the variance of the model’s predictions.</p>
+<p>Variance is calculated as the average of the squared differences between each model’s predictions and its mean prediction.</p>
+<p><strong>Model 1</strong>: <span class="math display">\[\text{Variance for Model 1} = \frac{(4.8 - 4.92)^2 + (4.7 - 4.92)^2 + (4.9 - 4.92)^2 + (5.0 - 4.92)^2 + (5.2 - 4.92)^2}{5} = 0.03\]</span></p>
+<p><strong>Model 2</strong>: <span class="math display">\[\text{Variance for Model 2} = \frac{(5.2 - 5.52)^2 + (5.3 - 5.52)^2 + (5.5 - 5.52)^2 + (5.7 - 5.52)^2 + (5.9 - 5.52)^2}{5} = 0.07\]</span></p>
+<p><strong>Model 3</strong>: <span class="math display">\[\text{Variance for Model 3} = \frac{(5.0 - 7.1)^2 + (6.0 - 7.1)^2 + (7.2 - 7.1)^2 + (8.0 - 7.1)^2 + (9.3 - 7.1)^2}{5} = 2.26\]</span></p>
+<p>The correct answer is <strong>(d) Model 1: 0.03, Model 2: 0.07, Model 3: 2.26</strong>.</p></li>
+<li><p><strong>Question:</strong> If the differences in bias/variance values are significant enough, would we expect model 1 is more likely to have overfit or underfit? <strong>Options:</strong></p>
 <ol>
 <li><p>Underfit</p></li>
 <li><p>Overfit</p></li>
 </ol>
-<p><strong>Solution:</strong><br/>
-Model 1 exhibits <strong>underfitting</strong> because it has high bias
-and low variance, meaning it is too simple and fails to capture the
-complexity of the data. Hence, the correct answer is <strong>(a)
-Underfit</strong>.</p></li>
+<p><strong>Solution:</strong> Model 1 exhibits <strong>underfitting</strong> because it has high bias and low variance, meaning it is too simple and fails to capture the complexity of the data. Hence, the correct answer is <strong>(a) Underfit</strong>.</p></li>
 </ol></section>
 </main>
 </body>

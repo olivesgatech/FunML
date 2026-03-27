@@ -32,575 +32,198 @@ window.MathJax = {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture surveys representative CNN architectures—LeNet, AlexNet,
-VGG, GoogLeNet (Inception), and ResNet—and highlights the key design
-choices that enabled deeper and more accurate models (e.g., ReLU,
-dropout, normalization, inception modules, and residual connections). By
-the end, you should be able to compare these architectures at a high
-level and explain how their building blocks support efficient feature
-learning for image recognition.</p>
+<p>This lecture surveys representative CNN architectures—LeNet, AlexNet, VGG, GoogLeNet (Inception), and ResNet—and highlights the key design choices that enabled deeper and more accurate models (e.g., ReLU, dropout, normalization, inception modules, and residual connections). By the end, you should be able to compare these architectures at a high level and explain how their building blocks support efficient feature learning for image recognition.</p>
 <h1 data-number="2" id="overview"><span class="header-section-number">2.</span> Overview</h1>
-<p>Convolutional Neural Networks (CNNs) have evolved through several key
-breakthroughs in data, compute, and architecture design. Early work such
-as LeNet-5 (1998) demonstrated that neural networks could learn directly
-from raw pixel data, reducing reliance on hand-engineered features. The
-modern resurgence of CNNs began with AlexNet in 2012, which leveraged
-large-scale datasets (ImageNet), GPU acceleration, and the ReLU
-activation function to overcome optimization challenges such as
-vanishing gradients. This success sparked rapid progress, leading to
-deeper and more sophisticated architectures such as VGG, GoogLeNet
-(Inception), and ResNet. These models introduced ideas including very
-deep networks, multi-branch modules, normalization, and residual
-connections, dramatically improving accuracy and efficiency on
-large-scale image recognition tasks <span class="citation" data-cites="726791 NIPS2012_c399862d simonyan2015deepconvolutionalnetworkslargescale szegedy2014goingdeeperconvolutions he2015deepresiduallearningimage alregib2024neural">(Lecun
-et al. 1998; Krizhevsky et al. 2012; Simonyan and Zisserman 2015;
-Szegedy et al. 2014; He et al. 2015; AlRegib and Prabhushankar
-2024)</span>.</p>
-<figure data-latex-placement="H" id="fig:Evolution of CNNs">
-<img src="img/lecture15/HIstory%20of%20CNN.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Timeline of major CNN architecture milestones.</figcaption>
+<p>Convolutional Neural Networks (CNNs) have evolved through several key breakthroughs in data, compute, and architecture design. Early work such as LeNet-5 (1998) demonstrated that neural networks could learn directly from raw pixel data, reducing reliance on hand-engineered features. The modern resurgence of CNNs began with AlexNet in 2012, which leveraged large-scale datasets (ImageNet), GPU acceleration, and the ReLU activation function to overcome optimization challenges such as vanishing gradients. This success sparked rapid progress, leading to deeper and more sophisticated architectures such as VGG, GoogLeNet (Inception), and ResNet. These models introduced ideas including very deep networks, multi-branch modules, normalization, and residual connections, dramatically improving accuracy and efficiency on large-scale image recognition tasks <span class="citation" data-cites="726791 NIPS2012_c399862d simonyan2015deepconvolutionalnetworkslargescale szegedy2014goingdeeperconvolutions he2015deepresiduallearningimage alregib2024neural">(Lecun et al. 1998; Krizhevsky, Sutskever, and Hinton 2012; Simonyan and Zisserman 2015; Szegedy et al. 2014; He et al. 2015; AlRegib and Prabhushankar 2024)</span>.</p>
+<figure>
+<img alt="Timeline of major CNN architecture milestones." id="fig:Evolution of CNNs" src="img/lecture15/HIstory%20of%20CNN.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Timeline of major CNN architecture milestones.</figcaption>
 </figure>
 <h1 data-number="3" id="architecture-diagram-legend"><span class="header-section-number">3.</span> Architecture Diagram Legend</h1>
-<p>Before examining individual CNN architectures, we first introduce the
-notation and symbols that will be used consistently throughout the
-lecture diagrams.</p>
-<figure data-latex-placement="H" id="fig:Evolution of CNNs">
-<img src="img/lecture15/Legend.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Notation and symbols used in CNN architecture diagrams
-throughout this lecture.</figcaption>
+<p>Before examining individual CNN architectures, we first introduce the notation and symbols that will be used consistently throughout the lecture diagrams.</p>
+<figure>
+<img alt="Notation and symbols used in CNN architecture diagrams throughout this lecture." id="fig:Evolution of CNNs" src="img/lecture15/Legend.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Notation and symbols used in CNN architecture diagrams throughout this lecture.</figcaption>
 </figure>
 <h3 class="unnumbered" id="layers">Layers</h3>
 <ul>
 <li><p><code>conv 3x3</code>: Convolution layer with a <span class="math inline">\(3 \times 3\)</span> kernel.</p></li>
 <li><p><code>avg-pool 2x2</code>: Average pooling with a <span class="math inline">\(2 \times 2\)</span> window.</p></li>
-<li><p><code>concat</code>: Merge operation (concatenation of feature
-maps).</p></li>
+<li><p><code>concat</code>: Merge operation (concatenation of feature maps).</p></li>
 <li><p>Dense layer: Fully connected layer.</p></li>
 </ul>
 <h3 class="unnumbered" id="modules-blocks">Modules / Blocks</h3>
 <ul>
-<li><p>Module A: <code>conv 3x3</code> followed by
-<code>avg-pool 2x2</code>.</p></li>
-<li><p>Module B: <code>conv 1x1</code> followed by global average
-pooling.</p></li>
-<li><p>Module C: <code>conv 1x1</code> followed by
-<code>max-pool 5x5</code>.</p></li>
+<li><p>Module A: <code>conv 3x3</code> followed by <code>avg-pool 2x2</code>.</p></li>
+<li><p>Module B: <code>conv 1x1</code> followed by global average pooling.</p></li>
+<li><p>Module C: <code>conv 1x1</code> followed by <code>max-pool 5x5</code>.</p></li>
 </ul>
-<h3 class="unnumbered" id="activation-functions">Activation
-Functions</h3>
+<h3 class="unnumbered" id="activation-functions">Activation Functions</h3>
 <ul>
-<li><p>T (Tanh) and R (ReLU): Common nonlinear activation functions in
-CNNs.</p></li>
+<li><p>T (Tanh) and R (ReLU): Common nonlinear activation functions in CNNs.</p></li>
 </ul>
 <h3 class="unnumbered" id="other-functions">Other Functions</h3>
 <ul>
-<li><p>B (Batch Normalization): Normalizes activations to stabilize and
-accelerate training.</p></li>
-<li><p>S (Softmax): Converts final outputs into class
-probabilities.</p></li>
+<li><p>B (Batch Normalization): Normalizes activations to stabilize and accelerate training.</p></li>
+<li><p>S (Softmax): Converts final outputs into class probabilities.</p></li>
 </ul>
 <h1 data-number="4" id="lenet"><span class="header-section-number">4.</span> LeNet</h1>
-<figure data-latex-placement="H" id="fig:lenet-architecture">
-<img src="img/lecture15/Lenet_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>LeNet-5 architecture, based on the original
-paper.</figcaption>
+<figure>
+<img alt="LeNet-5 architecture, based on the original paper." id="fig:lenet-architecture" src="img/lecture15/Lenet_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">LeNet-5 architecture, based on the original paper.</figcaption>
 </figure>
-<h2 class="unnumbered" id="architecture-and-novelty">Architecture and
-Novelty</h2>
-<p>LeNet-5, introduced in 1998, is one of the earliest successful
-convolutional neural networks and became the foundation for many modern
-CNN architectures. The model demonstrated that neural networks could
-learn directly from raw pixel data, reducing the need for
-hand-engineered features. Its architecture consists of a sequence of
-convolutional layers, nonlinear activations, and pooling layers,
-followed by fully connected layers for classification. Despite its
-simplicity by modern standards, LeNet achieved strong performance on
-handwritten digit recognition, reaching an error rate of approximately
-0.95% on the MNIST dataset <span class="citation" data-cites="726791">(Lecun et al. 1998)</span>.</p>
+<h2 class="unnumbered" id="architecture-and-novelty">Architecture and Novelty</h2>
+<p>LeNet-5, introduced in 1998, is one of the earliest successful convolutional neural networks and became the foundation for many modern CNN architectures. The model demonstrated that neural networks could learn directly from raw pixel data, reducing the need for hand-engineered features. Its architecture consists of a sequence of convolutional layers, nonlinear activations, and pooling layers, followed by fully connected layers for classification. Despite its simplicity by modern standards, LeNet achieved strong performance on handwritten digit recognition, reaching an error rate of approximately 0.95% on the MNIST dataset <span class="citation" data-cites="726791">(Lecun et al. 1998)</span>.</p>
 <h2 class="unnumbered" id="pros-and-cons">Pros and Cons</h2>
-<p>LeNet achieved state-of-the-art performance on handwritten digit
-recognition and proved that CNNs could handle small distortions,
-translations, and scale variations in grayscale images. The architecture
-also generalized well to other small datasets and established the basic
-CNN design pattern still used today. However, LeNet struggled with more
-complex image datasets, particularly color images, and its performance
-was constrained by the limited computational resources and dataset sizes
-available at the time.</p>
+<p>LeNet achieved state-of-the-art performance on handwritten digit recognition and proved that CNNs could handle small distortions, translations, and scale variations in grayscale images. The architecture also generalized well to other small datasets and established the basic CNN design pattern still used today. However, LeNet struggled with more complex image datasets, particularly color images, and its performance was constrained by the limited computational resources and dataset sizes available at the time.</p>
 <h1 class="unnumbered" id="long-gap-19982012">Long Gap (1998–2012)</h1>
-<p>Between the success of LeNet in the late 1990s and the resurgence of
-CNNs in 2012, progress in deep convolutional models slowed
-significantly. The primary limitation was computational power: hardware
-accelerators were not yet capable of efficiently training deep,
-multi-layer CNNs with millions of parameters. At the same time, large
-labeled datasets were scarce, as storage capacity and data collection
-technologies were still limited. In addition, many of the training
-techniques that make modern deep learning possible—such as improved
-parameter initialization, effective variants of stochastic gradient
-descent, and strong regularization methods—were not yet well
-established. These challenges prevented CNNs from scaling to complex
-real-world image recognition tasks until the combination of GPUs, large
-datasets, and improved training methods became available <span class="citation" data-cites="alregib2024neural">(AlRegib and
-Prabhushankar 2024)</span>.</p>
+<p>Between the success of LeNet in the late 1990s and the resurgence of CNNs in 2012, progress in deep convolutional models slowed significantly. The primary limitation was computational power: hardware accelerators were not yet capable of efficiently training deep, multi-layer CNNs with millions of parameters. At the same time, large labeled datasets were scarce, as storage capacity and data collection technologies were still limited. In addition, many of the training techniques that make modern deep learning possible—such as improved parameter initialization, effective variants of stochastic gradient descent, and strong regularization methods—were not yet well established. These challenges prevented CNNs from scaling to complex real-world image recognition tasks until the combination of GPUs, large datasets, and improved training methods became available <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar 2024)</span>.</p>
 <h1 data-number="5" id="vanishing-gradient-problem"><span class="header-section-number">5.</span> Vanishing Gradient Problem</h1>
-<figure data-latex-placement="H" id="fig:vanishing-gradient">
-<img src="img/lecture15/Vanishing%20Gradient%20Problem.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Illustration of the vanishing gradient problem and its
-architectural solutions.</figcaption>
+<figure>
+<img alt="Illustration of the vanishing gradient problem and its architectural solutions." id="fig:vanishing-gradient" src="img/lecture15/Vanishing%20Gradient%20Problem.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Illustration of the vanishing gradient problem and its architectural solutions.</figcaption>
 </figure>
-<p>Training very deep neural networks was historically difficult due to
-the <em>vanishing gradient problem</em>. When activation functions such
-as sigmoid or tanh are used, their derivatives are bounded between 0 and
-1. During backpropagation, gradients are repeatedly multiplied across
-many layers, causing them to shrink exponentially as depth increases. As
-a result, early layers receive extremely small gradient updates, making
-learning slow or ineffective.</p>
-<p>Several key innovations helped address this challenge. The ReLU
-(Rectified Linear Unit) activation function maintains stronger gradients
-and significantly improves optimization in deep networks. Residual
-connections, introduced in ResNet, allow gradients to flow directly
-through shortcut paths, enabling the successful training of much deeper
-architectures. In addition, normalization techniques such as batch
-normalization stabilize the distribution of activations during training,
-further improving convergence and performance <span class="citation" data-cites="NIPS2012_c399862d he2015deepresiduallearningimage he2015deepresiduallearningimage alregib2024neural">(Krizhevsky
-et al. 2012; He et al. 2015, 2015; AlRegib and Prabhushankar
-2024)</span>.</p>
+<p>Training very deep neural networks was historically difficult due to the <em>vanishing gradient problem</em>. When activation functions such as sigmoid or tanh are used, their derivatives are bounded between 0 and 1. During backpropagation, gradients are repeatedly multiplied across many layers, causing them to shrink exponentially as depth increases. As a result, early layers receive extremely small gradient updates, making learning slow or ineffective.</p>
+<p>Several key innovations helped address this challenge. The ReLU (Rectified Linear Unit) activation function maintains stronger gradients and significantly improves optimization in deep networks. Residual connections, introduced in ResNet, allow gradients to flow directly through shortcut paths, enabling the successful training of much deeper architectures. In addition, normalization techniques such as batch normalization stabilize the distribution of activations during training, further improving convergence and performance <span class="citation" data-cites="NIPS2012_c399862d he2015deepresiduallearningimage he2015deepresiduallearningimage alregib2024neural">(Krizhevsky, Sutskever, and Hinton 2012; He et al. 2015, 2015; AlRegib and Prabhushankar 2024)</span>.</p>
 <h1 data-number="6" id="alexnet"><span class="header-section-number">6.</span> AlexNet</h1>
-<figure data-latex-placement="H" id="fig:AlexNet Architecure">
-<img src="img/lecture15/AlexNet1.jpg" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>AlexNet Architecture</figcaption>
+<figure>
+<img alt="AlexNet Architecture" id="fig:AlexNet Architecure" src="img/lecture15/AlexNet1.jpg" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">AlexNet Architecture</figcaption>
 </figure>
 <h2 data-number="6.1" id="novel-features"><span class="header-section-number">6.1</span> Novel Features</h2>
-<p>AlexNet marked a major breakthrough in deep learning and computer
-vision, winning the <strong>ImageNet Large Scale Visual Recognition
-Challenge (ILSVRC)</strong> in 2012 by a large margin. The architecture
-popularized the use of the <strong>ReLU (Rectified Linear Unit)</strong>
-activation function, which significantly improved training speed and
-helped mitigate the vanishing gradient problem. To reduce overfitting in
-its large fully connected layers, AlexNet introduced <strong>dropout
-regularization</strong>, while <strong>Local Response Normalization
-(LRN)</strong> was used to stabilize training. The model was designed
-specifically for <strong>GPU computation</strong>, enabling efficient
-training of a much deeper and wider network than earlier CNNs such as
-LeNet. In addition, extensive <strong>data augmentation</strong> was
-employed to improve generalization on large-scale image datasets.
-Together, these innovations demonstrated that deep CNNs could achieve
-state-of-the-art performance on large visual recognition tasks <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al.
-2012)</span>.</p>
+<p>AlexNet marked a major breakthrough in deep learning and computer vision, winning the <strong>ImageNet Large Scale Visual Recognition Challenge (ILSVRC)</strong> in 2012 by a large margin. The architecture popularized the use of the <strong>ReLU (Rectified Linear Unit)</strong> activation function, which significantly improved training speed and helped mitigate the vanishing gradient problem. To reduce overfitting in its large fully connected layers, AlexNet introduced <strong>dropout regularization</strong>, while <strong>Local Response Normalization (LRN)</strong> was used to stabilize training. The model was designed specifically for <strong>GPU computation</strong>, enabling efficient training of a much deeper and wider network than earlier CNNs such as LeNet. In addition, extensive <strong>data augmentation</strong> was employed to improve generalization on large-scale image datasets. Together, these innovations demonstrated that deep CNNs could achieve state-of-the-art performance on large visual recognition tasks <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>.</p>
 <h2 data-number="6.2" id="detailed-architecture"><span class="header-section-number">6.2</span> Detailed Architecture</h2>
-<figure data-latex-placement="H" id="fig:alexnet-detailed">
-<img src="img/lecture15/AlexNet2.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>AlexNet Architecture</figcaption>
+<figure>
+<img alt="AlexNet Architecture" id="fig:alexnet-detailed" src="img/lecture15/AlexNet2.png" style="width:42.00%; max-width:42.00%; height:auto;"/><figcaption aria-hidden="true">AlexNet Architecture</figcaption>
 </figure>
-<p>AlexNet consists of five convolutional layers followed by three fully
-connected layers. The first layer, <strong>CONV1</strong>, extracts
-low-level features such as edges and textures, followed by <strong>MAX
-POOL1</strong> to reduce spatial resolution and computational cost. A
-<strong>Local Response Normalization (NORM1)</strong> layer is applied
-to encourage generalization. Subsequent layers <strong>CONV2</strong>
-through <strong>CONV5</strong> capture increasingly complex visual
-patterns, with additional pooling layers (<strong>MAX POOL2</strong> and
-<strong>MAX POOL3</strong>) further reducing dimensionality. Finally,
-three fully connected layers (<strong>FC6</strong>,
-<strong>FC7</strong>, and <strong>FC8</strong>) perform high-level
-reasoning and output class probabilities.</p>
-<p>In addition to its depth, AlexNet introduced several key innovations.
-It popularized the use of the <strong>ReLU activation function</strong>,
-which alleviated vanishing gradients and significantly accelerated
-training. To combat overfitting, <strong>dropout regularization</strong>
-was applied to the fully connected layers. The model also utilized
-<strong>Local Response Normalization (LRN)</strong> to stabilize
-learning and was explicitly designed for <strong>GPU
-computation</strong>, enabling large-scale training on ImageNet <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al.
-2012)</span>.</p>
-<h2 data-number="6.3" id="dropout-as-a-regularization-technique"><span class="header-section-number">6.3</span> Dropout as a Regularization
-Technique</h2>
-<p><strong>Dropout</strong> is a powerful regularization technique
-introduced in AlexNet to reduce overfitting in large neural networks.
-During training, individual neurons are randomly deactivated (“dropped
-out”) with a fixed probability, which prevents any single neuron from
-becoming overly specialized. As a result, the network is forced to learn
-distributed and redundant feature representations that generalize better
-to unseen data.</p>
-<p>At a conceptual level, dropout can be interpreted as training an
-ensemble of many smaller subnetworks that share parameters. At test
-time, the full network is used, producing predictions that approximate
-averaging over this large ensemble.</p>
-<figure data-latex-placement="H" id="fig:dropout-train-test">
-<img src="img/lecture15/AlexNet3_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Training and testing performance with and without dropout
-(CIFAR-10).</figcaption>
+<p>AlexNet consists of five convolutional layers followed by three fully connected layers. The first layer, <strong>CONV1</strong>, extracts low-level features such as edges and textures, followed by <strong>MAX POOL1</strong> to reduce spatial resolution and computational cost. A <strong>Local Response Normalization (NORM1)</strong> layer is applied to encourage generalization. Subsequent layers <strong>CONV2</strong> through <strong>CONV5</strong> capture increasingly complex visual patterns, with additional pooling layers (<strong>MAX POOL2</strong> and <strong>MAX POOL3</strong>) further reducing dimensionality. Finally, three fully connected layers (<strong>FC6</strong>, <strong>FC7</strong>, and <strong>FC8</strong>) perform high-level reasoning and output class probabilities.</p>
+<p>In addition to its depth, AlexNet introduced several key innovations. It popularized the use of the <strong>ReLU activation function</strong>, which alleviated vanishing gradients and significantly accelerated training. To combat overfitting, <strong>dropout regularization</strong> was applied to the fully connected layers. The model also utilized <strong>Local Response Normalization (LRN)</strong> to stabilize learning and was explicitly designed for <strong>GPU computation</strong>, enabling large-scale training on ImageNet <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>.</p>
+<h2 data-number="6.3" id="dropout-as-a-regularization-technique"><span class="header-section-number">6.3</span> Dropout as a Regularization Technique</h2>
+<p><strong>Dropout</strong> is a powerful regularization technique introduced in AlexNet to reduce overfitting in large neural networks. During training, individual neurons are randomly deactivated (“dropped out”) with a fixed probability, which prevents any single neuron from becoming overly specialized. As a result, the network is forced to learn distributed and redundant feature representations that generalize better to unseen data.</p>
+<p>At a conceptual level, dropout can be interpreted as training an ensemble of many smaller subnetworks that share parameters. At test time, the full network is used, producing predictions that approximate averaging over this large ensemble.</p>
+<figure>
+<img alt="Training and testing performance with and without dropout (CIFAR-10)." id="fig:dropout-train-test" src="img/lecture15/AlexNet3_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Training and testing performance with and without dropout (CIFAR-10).</figcaption>
 </figure>
-<figure data-latex-placement="H" id="fig:dropout-network">
-<img src="img/lecture15/AlexNet3_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Illustration of a neural network with randomly dropped units
-during training.</figcaption>
+<figure>
+<img alt="Illustration of a neural network with randomly dropped units during training." id="fig:dropout-network" src="img/lecture15/AlexNet3_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Illustration of a neural network with randomly dropped units during training.</figcaption>
 </figure>
-<p>In AlexNet, dropout was applied primarily to the fully connected
-layers, which contain the majority of the model parameters and are most
-prone to overfitting. This regularization strategy played a major role
-in AlexNet’s strong performance on large-scale image recognition tasks
-<span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al.
-2012)</span>.</p>
+<p>In AlexNet, dropout was applied primarily to the fully connected layers, which contain the majority of the model parameters and are most prone to overfitting. This regularization strategy played a major role in AlexNet’s strong performance on large-scale image recognition tasks <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>.</p>
 <h2 data-number="6.4" id="relu-activation-function"><span class="header-section-number">6.4</span> ReLU Activation Function</h2>
-<p><strong>ReLU (Rectified Linear Unit)</strong> represents a major
-shift in activation function design for deep neural networks and was
-popularized at large scale by AlexNet. ReLU addresses the
-<strong>vanishing gradient problem</strong> that commonly occurs with
-sigmoid and tanh activations in deep architectures, enabling faster and
-more stable training <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky et al.
-2012; AlRegib and Prabhushankar 2024)</span>.</p>
+<p><strong>ReLU (Rectified Linear Unit)</strong> represents a major shift in activation function design for deep neural networks and was popularized at large scale by AlexNet. ReLU addresses the <strong>vanishing gradient problem</strong> that commonly occurs with sigmoid and tanh activations in deep architectures, enabling faster and more stable training <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky, Sutskever, and Hinton 2012; AlRegib and Prabhushankar 2024)</span>.</p>
 <h3 data-number="6.4.1" id="advantages-of-relu"><span class="header-section-number">6.4.1</span> Advantages of ReLU</h3>
-<p><strong>ReLU</strong> is a <strong>non-saturating activation
-function</strong>, meaning its gradient does not shrink toward zero for
-positive inputs. This property significantly accelerates optimization
-compared to traditional sigmoid and tanh activations and allows
-gradients to propagate more effectively through deep networks.</p>
+<p><strong>ReLU</strong> is a <strong>non-saturating activation function</strong>, meaning its gradient does not shrink toward zero for positive inputs. This property significantly accelerates optimization compared to traditional sigmoid and tanh activations and allows gradients to propagate more effectively through deep networks.</p>
 <h3 data-number="6.4.2" id="performance-comparison"><span class="header-section-number">6.4.2</span> Performance Comparison</h3>
-<p>Empirically, training with ReLU has been shown to be up to
-<strong>six times faster</strong> on datasets such as CIFAR-10 compared
-to networks using tanh activations <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar 2024)</span>.
-This improvement arises from its <strong>piecewise-linear,
-non-saturating form</strong>, which promotes efficient gradient flow
-during backpropagation.</p>
-<figure data-latex-placement="H" id="fig:relu-comparison">
-<img src="img/lecture15/AlexNet4_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of training dynamics using ReLU vs. tanh
-activation functions</figcaption>
+<p>Empirically, training with ReLU has been shown to be up to <strong>six times faster</strong> on datasets such as CIFAR-10 compared to networks using tanh activations <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar 2024)</span>. This improvement arises from its <strong>piecewise-linear, non-saturating form</strong>, which promotes efficient gradient flow during backpropagation.</p>
+<figure>
+<img alt="Comparison of training dynamics using ReLU vs. tanh activation functions" id="fig:relu-comparison" src="img/lecture15/AlexNet4_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Comparison of training dynamics using ReLU vs. tanh activation functions</figcaption>
 </figure>
 <h3 data-number="6.4.3" id="sigmoid-function"><span class="header-section-number">6.4.3</span> Sigmoid Function</h3>
-<figure data-latex-placement="H" id="fig:Sigmoid">
-<img src="img/lecture15/AlexNet4_2.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Sigmoid</figcaption>
+<figure>
+<img alt="Sigmoid" id="fig:Sigmoid" src="img/lecture15/AlexNet4_2.png" style="width:18.00%; max-width:18.00%; height:auto;"/><figcaption aria-hidden="true">Sigmoid</figcaption>
 </figure>
-<p><strong>The sigmoid function</strong> is a classical activation
-function widely used in neural networks, particularly in the
-<strong>output layer of binary classification models</strong>. It maps
-real-valued inputs to probabilities in the range <span class="math inline">\((0,1)\)</span> and is defined as <span class="math display">\[\sigma(x) = \frac{1}{1 + e^{-x}}.\]</span>
-Although useful for probabilistic outputs, sigmoid activations suffer
-from <strong>saturation</strong>, which can lead to vanishing gradients
-in deep networks.</p>
+<p><strong>The sigmoid function</strong> is a classical activation function widely used in neural networks, particularly in the <strong>output layer of binary classification models</strong>. It maps real-valued inputs to probabilities in the range <span class="math inline">\((0,1)\)</span> and is defined as <span class="math display">\[\sigma(x) = \frac{1}{1 + e^{-x}}.\]</span> Although useful for probabilistic outputs, sigmoid activations suffer from <strong>saturation</strong>, which can lead to vanishing gradients in deep networks.</p>
 <h3 data-number="6.4.4" id="tanh-function"><span class="header-section-number">6.4.4</span> Tanh Function</h3>
-<figure data-latex-placement="H" id="fig:Tanh">
-<img src="img/lecture15/AlexNet4_3.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Tanh</figcaption>
+<figure>
+<img alt="Tanh" id="fig:Tanh" src="img/lecture15/AlexNet4_3.png" style="width:18.00%; max-width:18.00%; height:auto;"/><figcaption aria-hidden="true">Tanh</figcaption>
 </figure>
-<p><strong>The hyperbolic tangent function (tanh)</strong> is another
-commonly used activation function. Similar to sigmoid, it is smooth and
-differentiable, but it outputs values in the range <span class="math inline">\((-1,1)\)</span> and is defined as <span class="math display">\[\tanh(x) = \frac{e^x - e^{-x}}{e^x +
-e^{-x}}.\]</span> Because tanh is <strong>zero-centered</strong>, it
-often performs better than sigmoid in hidden layers; however, it still
-suffers from gradient saturation in deep networks.</p>
+<p><strong>The hyperbolic tangent function (tanh)</strong> is another commonly used activation function. Similar to sigmoid, it is smooth and differentiable, but it outputs values in the range <span class="math inline">\((-1,1)\)</span> and is defined as <span class="math display">\[\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}.\]</span> Because tanh is <strong>zero-centered</strong>, it often performs better than sigmoid in hidden layers; however, it still suffers from gradient saturation in deep networks.</p>
 <h3 data-number="6.4.5" id="relu-function"><span class="header-section-number">6.4.5</span> ReLU Function</h3>
-<figure data-latex-placement="H" id="fig:ReLU">
-<img src="img/lecture15/AlexNet4_4.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>ReLU</figcaption>
+<figure>
+<img alt="ReLU" id="fig:ReLU" src="img/lecture15/AlexNet4_4.png" style="width:18.00%; max-width:18.00%; height:auto;"/><figcaption aria-hidden="true">ReLU</figcaption>
 </figure>
-<p><strong>The Rectified Linear Unit (ReLU)</strong> has become the
-<strong>default activation function</strong> for modern deep neural
-networks due to its simplicity and computational efficiency. It is
-defined as <span class="math display">\[\text{ReLU}(x) = \max(0,
-x).\]</span> ReLU mitigates the vanishing gradient problem, enables
-faster convergence, and typically leads to improved performance in deep
-architectures because it remains non-saturating for positive inputs.</p>
-<h2 data-number="6.5" id="local-response-normalization-lrn"><span class="header-section-number">6.5</span> Local Response Normalization
-(LRN)</h2>
-<p>Local Response Normalization (LRN) is a normalization technique
-introduced in AlexNet to stabilize training and improve generalization
-by normalizing neuron responses across nearby feature maps. Although LRN
-has largely been replaced by Batch Normalization in modern
-architectures, it played an important role in the early success of deep
-convolutional networks <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al. 2012)</span>.</p>
-<p>LRN is inspired by the concept of <strong>lateral inhibition</strong>
-in biological neurons, where strongly activated neurons suppress the
-activity of their neighbors. In CNNs, this encourages competition
-between feature maps and helps the network learn more discriminative and
-robust features.</p>
-<p>In convolutional networks, each feature map can be interpreted as a
-detector for a specific visual pattern (e.g., edges, textures, or object
-parts). When multiple feature maps respond strongly at the same spatial
-location, it may indicate redundant or competing representations. LRN
-introduces competition across channels so that only the most strongly
-activated features are emphasized, encouraging specialization among
-filters and improving the diversity of learned representations.</p>
+<p><strong>The Rectified Linear Unit (ReLU)</strong> has become the <strong>default activation function</strong> for modern deep neural networks due to its simplicity and computational efficiency. It is defined as <span class="math display">\[\text{ReLU}(x) = \max(0, x).\]</span> ReLU mitigates the vanishing gradient problem, enables faster convergence, and typically leads to improved performance in deep architectures because it remains non-saturating for positive inputs.</p>
+<h2 data-number="6.5" id="local-response-normalization-lrn"><span class="header-section-number">6.5</span> Local Response Normalization (LRN)</h2>
+<p>Local Response Normalization (LRN) is a normalization technique introduced in AlexNet to stabilize training and improve generalization by normalizing neuron responses across nearby feature maps. Although LRN has largely been replaced by Batch Normalization in modern architectures, it played an important role in the early success of deep convolutional networks <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>.</p>
+<p>LRN is inspired by the concept of <strong>lateral inhibition</strong> in biological neurons, where strongly activated neurons suppress the activity of their neighbors. In CNNs, this encourages competition between feature maps and helps the network learn more discriminative and robust features.</p>
+<p>In convolutional networks, each feature map can be interpreted as a detector for a specific visual pattern (e.g., edges, textures, or object parts). When multiple feature maps respond strongly at the same spatial location, it may indicate redundant or competing representations. LRN introduces competition across channels so that only the most strongly activated features are emphasized, encouraging specialization among filters and improving the diversity of learned representations.</p>
 <h3 data-number="6.5.1" id="lrn-mechanism"><span class="header-section-number">6.5.1</span> LRN Mechanism</h3>
-<p>LRN operates across channels at each spatial location <span class="math inline">\((x,y)\)</span> by normalizing the activation of a
-neuron using the squared responses of neighboring feature maps. The
-normalized response is computed as:</p>
-<p><span class="math display">\[b_{x,y}^i =
+<p>LRN operates across channels at each spatial location <span class="math inline">\((x,y)\)</span> by normalizing the activation of a neuron using the squared responses of neighboring feature maps. The normalized response is computed as:</p>
+<p><span class="math display">\[b_{x,y}^i = 
 \frac{a_{x,y}^i}
 {\left(
-k + \alpha
+k + \alpha 
 \sum_{j=\max(0,i-\frac{n}{2})}^{\min(N-1,i+\frac{n}{2})}
 \left(a_{x,y}^j\right)^2
 \right)^\beta}\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(a_{x,y}^i\)</span> is the activation
-produced by the <span class="math inline">\(i\)</span>-th kernel at
-position <span class="math inline">\((x,y)\)</span> after the ReLU
-nonlinearity.</p></li>
-<li><p><span class="math inline">\(b_{x,y}^i\)</span> is the normalized
-activation.</p></li>
-<li><p><span class="math inline">\(N\)</span> is the total number of
-feature maps in the layer.</p></li>
-<li><p><span class="math inline">\(n\)</span> is the number of
-neighboring channels used for normalization.</p></li>
-<li><p><span class="math inline">\(k\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span> are hyperparameters controlling the
-strength of normalization.</p></li>
+<li><p><span class="math inline">\(a_{x,y}^i\)</span> is the activation produced by the <span class="math inline">\(i\)</span>-th kernel at position <span class="math inline">\((x,y)\)</span> after the ReLU nonlinearity.</p></li>
+<li><p><span class="math inline">\(b_{x,y}^i\)</span> is the normalized activation.</p></li>
+<li><p><span class="math inline">\(N\)</span> is the total number of feature maps in the layer.</p></li>
+<li><p><span class="math inline">\(n\)</span> is the number of neighboring channels used for normalization.</p></li>
+<li><p><span class="math inline">\(k\)</span>, <span class="math inline">\(\alpha\)</span>, and <span class="math inline">\(\beta\)</span> are hyperparameters controlling the strength of normalization.</p></li>
 </ul>
-<p>This formulation is commonly referred to as <strong>inter-channel
-LRN</strong>, which was the version used in AlexNet <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al.
-2012)</span>.</p>
+<p>This formulation is commonly referred to as <strong>inter-channel LRN</strong>, which was the version used in AlexNet <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>.</p>
 <h3 data-number="6.5.2" id="intuition-and-purpose"><span class="header-section-number">6.5.2</span> Intuition and Purpose</h3>
-<p>LRN encourages neurons with large activations to stand out relative
-to their neighbors while suppressing uniformly strong responses. This
-behavior improves generalization and leads to more stable training
-dynamics.</p>
-<p>In practice, LRN enhances strong activations that are significantly
-larger than nearby responses, making the network more sensitive to
-distinctive and high-level features. At the same time, it suppresses
-uniformly large activations that may not carry meaningful information,
-reducing redundant feature responses. These effects collectively improve
-model robustness, and in AlexNet they contributed to reduced top-1 and
-top-5 classification error.</p>
-<h3 data-number="6.5.3" id="visualization-of-lrn-in-cnns"><span class="header-section-number">6.5.3</span> Visualization of LRN in
-CNNs</h3>
-<figure data-latex-placement="H" id="fig:lrn-diagram">
-<img src="img/lecture15/AlexNet5.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Local Response Normalization in AlexNet</figcaption>
+<p>LRN encourages neurons with large activations to stand out relative to their neighbors while suppressing uniformly strong responses. This behavior improves generalization and leads to more stable training dynamics.</p>
+<p>In practice, LRN enhances strong activations that are significantly larger than nearby responses, making the network more sensitive to distinctive and high-level features. At the same time, it suppresses uniformly large activations that may not carry meaningful information, reducing redundant feature responses. These effects collectively improve model robustness, and in AlexNet they contributed to reduced top-1 and top-5 classification error.</p>
+<h3 data-number="6.5.3" id="visualization-of-lrn-in-cnns"><span class="header-section-number">6.5.3</span> Visualization of LRN in CNNs</h3>
+<figure>
+<img alt="Local Response Normalization in AlexNet" id="fig:lrn-diagram" src="img/lecture15/AlexNet5.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Local Response Normalization in AlexNet</figcaption>
 </figure>
-<p>The figure illustrates how activations from neighboring feature maps
-are combined and normalized at each spatial location.</p>
-<h3 data-number="6.5.4" id="toy-example-of-inter-channel-normalization"><span class="header-section-number">6.5.4</span> Toy Example of Inter-Channel
-Normalization</h3>
-<p>To better understand LRN, consider a toy example using parameters
-<span class="math inline">\(k = 0\)</span>, <span class="math inline">\(\alpha = \beta = 1\)</span>, <span class="math inline">\(n = 2\)</span>, and <span class="math inline">\(N
-= 4\)</span> channels. Each activation is normalized using the squared
-responses of its neighboring channels.</p>
-<figure data-latex-placement="H" id="fig:lrn-example">
-<img src="img/lecture15/AlexNet6_1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Inter-channel LRN vs. intra-channel
-normalization</figcaption>
+<p>The figure illustrates how activations from neighboring feature maps are combined and normalized at each spatial location.</p>
+<h3 data-number="6.5.4" id="toy-example-of-inter-channel-normalization"><span class="header-section-number">6.5.4</span> Toy Example of Inter-Channel Normalization</h3>
+<p>To better understand LRN, consider a toy example using parameters <span class="math inline">\(k = 0\)</span>, <span class="math inline">\(\alpha = \beta = 1\)</span>, <span class="math inline">\(n = 2\)</span>, and <span class="math inline">\(N = 4\)</span> channels. Each activation is normalized using the squared responses of its neighboring channels.</p>
+<figure>
+<img alt="Inter-channel LRN vs. intra-channel normalization" id="fig:lrn-example" src="img/lecture15/AlexNet6_1.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Inter-channel LRN vs. intra-channel normalization</figcaption>
 </figure>
-<figure data-latex-placement="H" id="fig:lrn-normalization">
-<img src="img/lecture15/AlexNet6_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Activations before and after applying LRN</figcaption>
+<figure>
+<img alt="Activations before and after applying LRN" id="fig:lrn-normalization" src="img/lecture15/AlexNet6_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Activations before and after applying LRN</figcaption>
 </figure>
-<p>Before normalization, neuron activations may vary widely across
-channels. After applying LRN, activations are scaled to a more balanced
-range, particularly reducing extremely large responses. This helps
-prevent any single feature map from dominating the representation and
-encourages distributed feature learning.</p>
+<p>Before normalization, neuron activations may vary widely across channels. After applying LRN, activations are scaled to a more balanced range, particularly reducing extremely large responses. This helps prevent any single feature map from dominating the representation and encourages distributed feature learning.</p>
 <h3 data-number="6.5.5" id="historical-perspective"><span class="header-section-number">6.5.5</span> Historical Perspective</h3>
-<p>Although LRN was an important component of AlexNet, later work showed
-that <strong>Batch Normalization</strong> provides stronger and more
-stable normalization. As a result, LRN is rarely used in modern CNN
-architectures, but it remains historically significant as an early
-normalization method that enabled deeper networks to train
-successfully.</p>
-<h2 data-number="6.6" id="overview-of-alexnet-achievements"><span class="header-section-number">6.6</span> Overview of AlexNet
-Achievements</h2>
-<p>AlexNet marked a turning point in the history of deep learning by
-winning the ImageNet Large Scale Visual Recognition Challenge (ILSVRC)
-in 2012 by a wide margin <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky et al. 2012)</span>. Its
-success demonstrated that deep convolutional neural networks could
-dramatically outperform traditional computer vision methods when trained
-at large scale with modern hardware.</p>
-<h3 data-number="6.6.1" id="imagenet-classification-error-rate"><span class="header-section-number">6.6.1</span> ImageNet Classification Error
-Rate</h3>
-<p>One of AlexNet’s most striking achievements was its dramatic
-reduction of the top-5 classification error on ImageNet. In the 2012
-ILSVRC competition, AlexNet achieved a top-5 error rate of
-<strong>16.4%</strong>, compared to approximately <strong>26%</strong>
-from the best performing method the year before. This nearly <strong>10%
-absolute improvement</strong> shocked the computer vision community and
-is widely considered the moment that sparked the modern deep learning
-revolution <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky et al.
-2012; AlRegib and Prabhushankar 2024)</span>.</p>
-<figure data-latex-placement="H" id="fig:imagenet-error">
-<img src="img/lecture15/AlexNet7_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet classification error rates
-showing the dramatic improvement achieved by AlexNet.</figcaption>
+<p>Although LRN was an important component of AlexNet, later work showed that <strong>Batch Normalization</strong> provides stronger and more stable normalization. As a result, LRN is rarely used in modern CNN architectures, but it remains historically significant as an early normalization method that enabled deeper networks to train successfully.</p>
+<h2 data-number="6.6" id="overview-of-alexnet-achievements"><span class="header-section-number">6.6</span> Overview of AlexNet Achievements</h2>
+<p>AlexNet marked a turning point in the history of deep learning by winning the ImageNet Large Scale Visual Recognition Challenge (ILSVRC) in 2012 by a wide margin <span class="citation" data-cites="NIPS2012_c399862d">(Krizhevsky, Sutskever, and Hinton 2012)</span>. Its success demonstrated that deep convolutional neural networks could dramatically outperform traditional computer vision methods when trained at large scale with modern hardware.</p>
+<h3 data-number="6.6.1" id="imagenet-classification-error-rate"><span class="header-section-number">6.6.1</span> ImageNet Classification Error Rate</h3>
+<p>One of AlexNet’s most striking achievements was its dramatic reduction of the top-5 classification error on ImageNet. In the 2012 ILSVRC competition, AlexNet achieved a top-5 error rate of <strong>16.4%</strong>, compared to approximately <strong>26%</strong> from the best performing method the year before. This nearly <strong>10% absolute improvement</strong> shocked the computer vision community and is widely considered the moment that sparked the modern deep learning revolution <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky, Sutskever, and Hinton 2012; AlRegib and Prabhushankar 2024)</span>.</p>
+<figure>
+<img alt="Yearly progress in ImageNet classification error rates showing the dramatic improvement achieved by AlexNet." id="fig:imagenet-error" src="img/lecture15/AlexNet7_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Yearly progress in ImageNet classification error rates showing the dramatic improvement achieved by AlexNet.</figcaption>
 </figure>
-<h3 data-number="6.6.2" id="key-innovations-behind-alexnet"><span class="header-section-number">6.6.2</span> Key Innovations Behind
-AlexNet</h3>
-<p>AlexNet’s success was not due to a single breakthrough, but rather
-the combination of several innovations working together. First, the use
-of a <strong>deep convolutional architecture</strong> enabled
-hierarchical feature learning, allowing the network to automatically
-discover increasingly complex visual representations across layers. The
-introduction of <strong>ReLU activations</strong> significantly
-accelerated training by mitigating the vanishing gradient problem,
-making it feasible to train deeper networks efficiently.</p>
-<p>To improve generalization, AlexNet incorporated <strong>dropout
-regularization</strong>, which reduced overfitting in the large fully
-connected layers by preventing co-adaptation of neurons. In addition,
-extensive <strong>data augmentation</strong> — including image
-translations, horizontal flips, and color jittering — expanded the
-effective training dataset and improved robustness to visual variations.
-Finally, <strong>GPU-based training</strong> enabled the massive
-computational speedups required to train such a deep network on the
-large-scale ImageNet dataset.</p>
-<p>Together, these ideas established the blueprint for modern
-convolutional neural networks and reshaped the direction of deep
-learning research.</p>
+<h3 data-number="6.6.2" id="key-innovations-behind-alexnet"><span class="header-section-number">6.6.2</span> Key Innovations Behind AlexNet</h3>
+<p>AlexNet’s success was not due to a single breakthrough, but rather the combination of several innovations working together. First, the use of a <strong>deep convolutional architecture</strong> enabled hierarchical feature learning, allowing the network to automatically discover increasingly complex visual representations across layers. The introduction of <strong>ReLU activations</strong> significantly accelerated training by mitigating the vanishing gradient problem, making it feasible to train deeper networks efficiently.</p>
+<p>To improve generalization, AlexNet incorporated <strong>dropout regularization</strong>, which reduced overfitting in the large fully connected layers by preventing co-adaptation of neurons. In addition, extensive <strong>data augmentation</strong> — including image translations, horizontal flips, and color jittering — expanded the effective training dataset and improved robustness to visual variations. Finally, <strong>GPU-based training</strong> enabled the massive computational speedups required to train such a deep network on the large-scale ImageNet dataset.</p>
+<p>Together, these ideas established the blueprint for modern convolutional neural networks and reshaped the direction of deep learning research.</p>
 <h3 data-number="6.6.3" id="the-imagenet-challenge"><span class="header-section-number">6.6.3</span> The ImageNet Challenge</h3>
-<p>The ImageNet dataset was a key enabler of AlexNet’s success. It
-contains over <strong>1.2 million training images</strong> across
-<strong>1000 object categories</strong>, along with large validation and
-test sets <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky et al.
-2012; AlRegib and Prabhushankar 2024)</span>. The scale and diversity of
-this dataset made it one of the most challenging benchmarks in computer
-vision and provided the data necessary to train deep neural networks
-effectively.</p>
-<figure data-latex-placement="H" id="fig:imagenet-dataset">
-<img src="img/lecture15/AlexNet7_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Examples from the ImageNet dataset used in the ILSVRC
-challenge.</figcaption>
+<p>The ImageNet dataset was a key enabler of AlexNet’s success. It contains over <strong>1.2 million training images</strong> across <strong>1000 object categories</strong>, along with large validation and test sets <span class="citation" data-cites="NIPS2012_c399862d alregib2024neural">(Krizhevsky, Sutskever, and Hinton 2012; AlRegib and Prabhushankar 2024)</span>. The scale and diversity of this dataset made it one of the most challenging benchmarks in computer vision and provided the data necessary to train deep neural networks effectively.</p>
+<figure>
+<img alt="Examples from the ImageNet dataset used in the ILSVRC challenge." id="fig:imagenet-dataset" src="img/lecture15/AlexNet7_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Examples from the ImageNet dataset used in the ILSVRC challenge.</figcaption>
 </figure>
-<h2 data-number="6.7" id="alexnets-advantages-and-disadvantages"><span class="header-section-number">6.7</span> AlexNet’s Advantages and
-Disadvantages</h2>
-<h3 data-number="6.7.1" id="advantages-and-disadvantages-of-alexnet"><span class="header-section-number">6.7.1</span> Advantages and Disadvantages
-of AlexNet</h3>
+<h2 data-number="6.7" id="alexnets-advantages-and-disadvantages"><span class="header-section-number">6.7</span> AlexNet’s Advantages and Disadvantages</h2>
+<h3 data-number="6.7.1" id="advantages-and-disadvantages-of-alexnet"><span class="header-section-number">6.7.1</span> Advantages and Disadvantages of AlexNet</h3>
 <h4 data-number="6.7.1.1" id="pros."><span class="header-section-number">6.7.1.1</span> Pros.</h4>
-<p>AlexNet achieved <strong>breakthrough performance</strong> by
-dramatically reducing ImageNet error rates and demonstrating the
-practical power of deep convolutional neural networks. It was among the
-first large-scale models to leverage <strong>GPU parallelism</strong>,
-making training deep CNNs feasible at ImageNet scale. The architecture
-introduced several influential innovations, including deep convolutional
-stacks, <strong>ReLU activations</strong>, <strong>dropout
-regularization</strong>, and <strong>data augmentation</strong>, which
-together improved learning and generalization. As a result, AlexNet
-established a <strong>modern CNN blueprint</strong> that shaped nearly
-all subsequent convolutional architectures.</p>
+<p>AlexNet achieved <strong>breakthrough performance</strong> by dramatically reducing ImageNet error rates and demonstrating the practical power of deep convolutional neural networks. It was among the first large-scale models to leverage <strong>GPU parallelism</strong>, making training deep CNNs feasible at ImageNet scale. The architecture introduced several influential innovations, including deep convolutional stacks, <strong>ReLU activations</strong>, <strong>dropout regularization</strong>, and <strong>data augmentation</strong>, which together improved learning and generalization. As a result, AlexNet established a <strong>modern CNN blueprint</strong> that shaped nearly all subsequent convolutional architectures.</p>
 <h4 data-number="6.7.1.2" id="cons."><span class="header-section-number">6.7.1.2</span> Cons.</h4>
-<p>Despite its success, AlexNet contains a <strong>large number of
-parameters</strong> (around 60 million), making it computationally
-expensive and memory-intensive. The heavy use of <strong>fully connected
-layers</strong> significantly increased parameter count and risk of
-overfitting. While deep for its time, AlexNet has <strong>limited depth
-by modern standards</strong> compared to architectures such as VGG,
-ResNet, and Transformers. Consequently, it is now considered
-<strong>inefficient by today’s standards</strong>, as later models
-achieve better accuracy with fewer parameters and improved training
-stability.</p>
+<p>Despite its success, AlexNet contains a <strong>large number of parameters</strong> (around 60 million), making it computationally expensive and memory-intensive. The heavy use of <strong>fully connected layers</strong> significantly increased parameter count and risk of overfitting. While deep for its time, AlexNet has <strong>limited depth by modern standards</strong> compared to architectures such as VGG, ResNet, and Transformers. Consequently, it is now considered <strong>inefficient by today’s standards</strong>, as later models achieve better accuracy with fewer parameters and improved training stability.</p>
 <h2 data-number="6.8" id="impact-and-legacy"><span class="header-section-number">6.8</span> Impact and Legacy</h2>
-<p>The success of AlexNet marked a turning point in the history of
-computer vision and deep learning. Its performance in the 2012 ImageNet
-Large Scale Visual Recognition Challenge demonstrated, for the first
-time at scale, that deep convolutional neural networks could
-dramatically outperform traditional computer vision pipelines based on
-handcrafted features.</p>
-<p>AlexNet helped shift the field away from manually designed feature
-extraction methods toward end-to-end learning from raw data. Following
-its success, deep learning rapidly became the dominant paradigm in
-computer vision and began expanding into speech recognition, natural
-language processing, robotics, and many other domains.</p>
-<p>The architectural ideas introduced in AlexNet—deep convolutional
-networks, ReLU activations, dropout regularization, data augmentation,
-and large-scale GPU training—became foundational components of modern
-neural network design. Subsequent architectures such as VGG, GoogLeNet,
-and ResNet built directly upon these ideas, leading to the deep learning
-era that continues to shape artificial intelligence today.</p>
+<p>The success of AlexNet marked a turning point in the history of computer vision and deep learning. Its performance in the 2012 ImageNet Large Scale Visual Recognition Challenge demonstrated, for the first time at scale, that deep convolutional neural networks could dramatically outperform traditional computer vision pipelines based on handcrafted features.</p>
+<p>AlexNet helped shift the field away from manually designed feature extraction methods toward end-to-end learning from raw data. Following its success, deep learning rapidly became the dominant paradigm in computer vision and began expanding into speech recognition, natural language processing, robotics, and many other domains.</p>
+<p>The architectural ideas introduced in AlexNet—deep convolutional networks, ReLU activations, dropout regularization, data augmentation, and large-scale GPU training—became foundational components of modern neural network design. Subsequent architectures such as VGG, GoogLeNet, and ResNet built directly upon these ideas, leading to the deep learning era that continues to shape artificial intelligence today.</p>
 <h1 data-number="7" id="vgg"><span class="header-section-number">7.</span> VGG</h1>
-<p>VGG stands for the <strong>Visual Geometry Group</strong> at the
-University of Oxford. VGGNet is a deep Convolutional Neural Network
-(CNN) architecture that emphasized the importance of network depth and
-architectural simplicity. The most well-known variants,
-<strong>VGG-16</strong> and <strong>VGG-19</strong>, contain 16 and 19
-<em>learnable weight layers</em> (convolutional and fully connected
-layers).</p>
-<p>Unlike AlexNet, which introduced several innovations simultaneously,
-VGG focused on understanding how increasing depth alone affects
-performance. The model demonstrated that significantly deeper networks
-could achieve higher accuracy on large-scale image recognition tasks
-such as ImageNet. Despite being computationally expensive, VGG remains
-highly influential and is still widely used as a backbone for many
-modern computer vision models <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale">(Simonyan
-and Zisserman 2015)</span>.</p>
-<figure data-latex-placement="H" id="fig:VGG Architecture">
-<img src="img/lecture15/VGG1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>VGG Architecture</figcaption>
+<p>VGG stands for the <strong>Visual Geometry Group</strong> at the University of Oxford. VGGNet is a deep Convolutional Neural Network (CNN) architecture that emphasized the importance of network depth and architectural simplicity. The most well-known variants, <strong>VGG-16</strong> and <strong>VGG-19</strong>, contain 16 and 19 <em>learnable weight layers</em> (convolutional and fully connected layers).</p>
+<p>Unlike AlexNet, which introduced several innovations simultaneously, VGG focused on understanding how increasing depth alone affects performance. The model demonstrated that significantly deeper networks could achieve higher accuracy on large-scale image recognition tasks such as ImageNet. Despite being computationally expensive, VGG remains highly influential and is still widely used as a backbone for many modern computer vision models <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale">(Simonyan and Zisserman 2015)</span>.</p>
+<figure>
+<img alt="VGG Architecture" id="fig:VGG Architecture" src="img/lecture15/VGG1.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">VGG Architecture</figcaption>
 </figure>
-<h2 data-number="7.1" id="key-ideas-and-novelty-of-vgg"><span class="header-section-number">7.1</span> Key Ideas and Novelty of
-VGG</h2>
-<p>VGG systematically investigated the effect of <strong>network
-depth</strong> on recognition accuracy. While AlexNet contained 8
-learnable layers, VGG introduced significantly deeper architectures
-ranging from 11 to 19 layers. This work demonstrated that increasing
-depth leads to stronger hierarchical feature representations and
-improved performance on large-scale image recognition tasks.</p>
-<p>A key design choice in VGG is the consistent use of <strong>small
-<span class="math inline">\(3\times3\)</span> convolution
-filters</strong> instead of large kernels (such as <span class="math inline">\(7\times7\)</span> or <span class="math inline">\(11\times11\)</span>). Rather than using one large
-convolution, VGG stacks multiple small convolutions. This strategy
-achieves the same effective receptive field while using fewer parameters
-and adding additional nonlinearities, which improves representation
-power and learning capacity.</p>
-<p>For example, stacking two <span class="math inline">\(3\times3\)</span> convolution layers has the same
-receptive field as a single <span class="math inline">\(5\times5\)</span> convolution, but requires fewer
-parameters and introduces an extra nonlinearity, leading to more
-expressive models <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale">(Simonyan
-and Zisserman 2015)</span>.</p>
-<h2 data-number="7.2" id="imagenet-classification-error-vgg"><span class="header-section-number">7.2</span> ImageNet Classification Error
-(VGG)</h2>
-<figure data-latex-placement="H" id="fig:VGG Error">
-<img src="img/lecture15/VGG2.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet top-5 classification error
-rates.</figcaption>
+<h2 data-number="7.1" id="key-ideas-and-novelty-of-vgg"><span class="header-section-number">7.1</span> Key Ideas and Novelty of VGG</h2>
+<p>VGG systematically investigated the effect of <strong>network depth</strong> on recognition accuracy. While AlexNet contained 8 learnable layers, VGG introduced significantly deeper architectures ranging from 11 to 19 layers. This work demonstrated that increasing depth leads to stronger hierarchical feature representations and improved performance on large-scale image recognition tasks.</p>
+<p>A key design choice in VGG is the consistent use of <strong>small <span class="math inline">\(3\times3\)</span> convolution filters</strong> instead of large kernels (such as <span class="math inline">\(7\times7\)</span> or <span class="math inline">\(11\times11\)</span>). Rather than using one large convolution, VGG stacks multiple small convolutions. This strategy achieves the same effective receptive field while using fewer parameters and adding additional nonlinearities, which improves representation power and learning capacity.</p>
+<p>For example, stacking two <span class="math inline">\(3\times3\)</span> convolution layers has the same receptive field as a single <span class="math inline">\(5\times5\)</span> convolution, but requires fewer parameters and introduces an extra nonlinearity, leading to more expressive models <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale">(Simonyan and Zisserman 2015)</span>.</p>
+<h2 data-number="7.2" id="imagenet-classification-error-vgg"><span class="header-section-number">7.2</span> ImageNet Classification Error (VGG)</h2>
+<figure>
+<img alt="Yearly progress in ImageNet top-5 classification error rates." id="fig:VGG Error" src="img/lecture15/VGG2.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Yearly progress in ImageNet top-5 classification error rates.</figcaption>
 </figure>
-<p>VGG, introduced in 2014, achieved a significant reduction in top-5
-error to <strong>7.3%</strong>, improving upon the previous year’s 11.7%
-achieved by the ZF (Zeiler &amp; Fergus) model <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale alregib2024neural">(Simonyan
-and Zisserman 2015; AlRegib and Prabhushankar 2024)</span>. This
-substantial drop demonstrated that <strong>increasing depth alone—when
-carefully designed—can lead to meaningful performance
-gains</strong>.</p>
-<p>The results validated the hypothesis that deeper architectures
-produce stronger hierarchical representations and set the stage for even
-deeper networks such as GoogLeNet and ResNet.</p>
+<p>VGG, introduced in 2014, achieved a significant reduction in top-5 error to <strong>7.3%</strong>, improving upon the previous year’s 11.7% achieved by the ZF (Zeiler &amp; Fergus) model <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale alregib2024neural">(Simonyan and Zisserman 2015; AlRegib and Prabhushankar 2024)</span>. This substantial drop demonstrated that <strong>increasing depth alone—when carefully designed—can lead to meaningful performance gains</strong>.</p>
+<p>The results validated the hypothesis that deeper architectures produce stronger hierarchical representations and set the stage for even deeper networks such as GoogLeNet and ResNet.</p>
 <h2 data-number="7.3" id="vgg-network-2014"><span class="header-section-number">7.3</span> VGG Network (2014)</h2>
 <h3 data-number="7.3.1" id="introduction-to-vgg"><span class="header-section-number">7.3.1</span> Introduction to VGG</h3>
-<p>The VGG (Visual Geometry Group) network, introduced in 2014, is known
-for its <strong>simple and uniform design</strong> and for demonstrating
-the power of depth in convolutional neural networks. VGG uses stacks of
-small <span class="math inline">\(3\times3\)</span> convolution filters
-to increase network depth while keeping the number of parameters
-manageable.</p>
+<p>The VGG (Visual Geometry Group) network, introduced in 2014, is known for its <strong>simple and uniform design</strong> and for demonstrating the power of depth in convolutional neural networks. VGG uses stacks of small <span class="math inline">\(3\times3\)</span> convolution filters to increase network depth while keeping the number of parameters manageable.</p>
 <h3 data-number="7.3.2" id="architecture-details"><span class="header-section-number">7.3.2</span> Architecture Details</h3>
 <ul>
-<li><p><strong>Convolution Blocks:</strong> VGG is built from repeated
-blocks of multiple <span class="math inline">\(3\times3\)</span>
-convolution layers followed by a pooling layer. All convolutions use
-stride <span class="math inline">\(1\)</span> and padding to preserve
-spatial resolution.</p></li>
-<li><p><strong>Max Pooling:</strong> After each convolution block, a
-<span class="math inline">\(2\times2\)</span> max-pooling layer with
-stride <span class="math inline">\(2\)</span> halves the spatial
-resolution, gradually reducing feature map size.</p></li>
-<li><p><strong>Increasing Depth:</strong> VGG networks range from
-<strong>VGG-16</strong> to <strong>VGG-19</strong>, where deeper
-versions simply add more convolution layers within each block.</p></li>
-<li><p><strong>Classifier:</strong> The convolutional feature extractor
-is followed by three fully connected layers (4096–4096–1000) used for
-ImageNet classification.</p></li>
+<li><p><strong>Convolution Blocks:</strong> VGG is built from repeated blocks of multiple <span class="math inline">\(3\times3\)</span> convolution layers followed by a pooling layer. All convolutions use stride <span class="math inline">\(1\)</span> and padding to preserve spatial resolution.</p></li>
+<li><p><strong>Max Pooling:</strong> After each convolution block, a <span class="math inline">\(2\times2\)</span> max-pooling layer with stride <span class="math inline">\(2\)</span> halves the spatial resolution, gradually reducing feature map size.</p></li>
+<li><p><strong>Increasing Depth:</strong> VGG networks range from <strong>VGG-16</strong> to <strong>VGG-19</strong>, where deeper versions simply add more convolution layers within each block.</p></li>
+<li><p><strong>Classifier:</strong> The convolutional feature extractor is followed by three fully connected layers (4096–4096–1000) used for ImageNet classification.</p></li>
 </ul>
-<h3 data-number="7.3.3" id="stacking-convolution-layers"><span class="header-section-number">7.3.3</span> Stacking Convolution
-Layers</h3>
-<p>One of the most important design choices in VGG is the use of
-<strong>stacked <span class="math inline">\(3\times3\)</span>
-convolution layers</strong> instead of a single large convolution
-filter. VGG showed that stacking multiple small filters can achieve the
-same effective receptive field as a larger filter while providing
-several important advantages.</p>
-<p>For example, stacking three <span class="math inline">\(3\times3\)</span> convolutions produces the same
-receptive field as a single <span class="math inline">\(7\times7\)</span> convolution. However, the
-stacked design requires significantly fewer parameters and introduces
-additional nonlinearities between layers.</p>
-<p>For a layer with <span class="math inline">\(C\)</span> input and
-output channels: <span class="math display">\[\text{Stacked
-}3\times3\text{ filters: } 3 \times (3^2 C^2)
+<h3 data-number="7.3.3" id="stacking-convolution-layers"><span class="header-section-number">7.3.3</span> Stacking Convolution Layers</h3>
+<p>One of the most important design choices in VGG is the use of <strong>stacked <span class="math inline">\(3\times3\)</span> convolution layers</strong> instead of a single large convolution filter. VGG showed that stacking multiple small filters can achieve the same effective receptive field as a larger filter while providing several important advantages.</p>
+<p>For example, stacking three <span class="math inline">\(3\times3\)</span> convolutions produces the same receptive field as a single <span class="math inline">\(7\times7\)</span> convolution. However, the stacked design requires significantly fewer parameters and introduces additional nonlinearities between layers.</p>
+<p>For a layer with <span class="math inline">\(C\)</span> input and output channels: <span class="math display">\[\text{Stacked }3\times3\text{ filters: } 3 \times (3^2 C^2) 
 \qquad \text{vs.} \qquad
 \text{Single }7\times7\text{ filter: } 7^2 C^2\]</span></p>
 <p>This results in:</p>
@@ -609,366 +232,127 @@ output channels: <span class="math display">\[\text{Stacked
 <li><p>More nonlinear activation functions</p></li>
 <li><p>Greater representational power</p></li>
 </ul>
-<p>By increasing depth while controlling parameter growth, VGG
-demonstrated that deeper networks can learn more complex and
-hierarchical visual features without dramatically increasing
-computational cost.</p>
-<h3 data-number="7.3.4" id="comparison-with-other-models"><span class="header-section-number">7.3.4</span> Comparison with Other
-Models</h3>
-<p>VGG was among the first architectures to demonstrate the strong
-benefits of depth in convolutional neural networks. Its success
-influenced many later architectures, including GoogLeNet and ResNet,
-which introduced new strategies for improving training stability and
-computational efficiency in even deeper networks.</p>
-<p>VGG therefore represents an important milestone in the evolution of
-modern CNN design.</p>
+<p>By increasing depth while controlling parameter growth, VGG demonstrated that deeper networks can learn more complex and hierarchical visual features without dramatically increasing computational cost.</p>
+<h3 data-number="7.3.4" id="comparison-with-other-models"><span class="header-section-number">7.3.4</span> Comparison with Other Models</h3>
+<p>VGG was among the first architectures to demonstrate the strong benefits of depth in convolutional neural networks. Its success influenced many later architectures, including GoogLeNet and ResNet, which introduced new strategies for improving training stability and computational efficiency in even deeper networks.</p>
+<p>VGG therefore represents an important milestone in the evolution of modern CNN design.</p>
 <h3 data-number="7.3.5" id="visual-representation"><span class="header-section-number">7.3.5</span> Visual Representation</h3>
-<figure data-latex-placement="H" id="fig:vgg-architecture">
-<img src="img/lecture15/VGG3.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of CNN architectures showing the progression from
-AlexNet to VGG and deeper residual networks.</figcaption>
+<figure>
+<img alt="Comparison of CNN architectures showing the progression from AlexNet to VGG and deeper residual networks." id="fig:vgg-architecture" src="img/lecture15/VGG3.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Comparison of CNN architectures showing the progression from AlexNet to VGG and deeper residual networks.</figcaption>
 </figure>
-<h2 data-number="7.4" id="advantages-and-disadvantages-of-vgg"><span class="header-section-number">7.4</span> Advantages and Disadvantages of
-VGG</h2>
+<h2 data-number="7.4" id="advantages-and-disadvantages-of-vgg"><span class="header-section-number">7.4</span> Advantages and Disadvantages of VGG</h2>
 <h4 data-number="7.4.0.1" id="pros.-1"><span class="header-section-number">7.4.0.1</span> Pros.</h4>
-<p>VGG is known for its <strong>simple and uniform design</strong>,
-built from repeated stacks of <span class="math inline">\(3\times3\)</span> convolutional layers. This
-consistent structure makes the network easy to understand, modify, and
-extend. Increasing depth allows VGG to learn rich hierarchical feature
-representations, which significantly improved image recognition accuracy
-compared to earlier CNN architectures. Furthermore, stacking multiple
-small kernels introduces additional nonlinearities through repeated ReLU
-activations, improving the network’s ability to model complex patterns.
-Using small kernels also provides better <strong>parameter
-efficiency</strong> than large kernels, achieving the same receptive
-field while using fewer parameters than <span class="math inline">\(7\times7\)</span> or <span class="math inline">\(11\times11\)</span> convolutions.</p>
+<p>VGG is known for its <strong>simple and uniform design</strong>, built from repeated stacks of <span class="math inline">\(3\times3\)</span> convolutional layers. This consistent structure makes the network easy to understand, modify, and extend. Increasing depth allows VGG to learn rich hierarchical feature representations, which significantly improved image recognition accuracy compared to earlier CNN architectures. Furthermore, stacking multiple small kernels introduces additional nonlinearities through repeated ReLU activations, improving the network’s ability to model complex patterns. Using small kernels also provides better <strong>parameter efficiency</strong> than large kernels, achieving the same receptive field while using fewer parameters than <span class="math inline">\(7\times7\)</span> or <span class="math inline">\(11\times11\)</span> convolutions.</p>
 <h4 data-number="7.4.0.2" id="cons.-1"><span class="header-section-number">7.4.0.2</span> Cons.</h4>
-<p>Despite its conceptual simplicity, VGG contains a <strong>very large
-number of parameters</strong> (approximately 138 million), largely due
-to its fully connected layers, making it memory-intensive and difficult
-to deploy on resource-limited systems <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale alregib2024neural">(Simonyan
-and Zisserman 2015; AlRegib and Prabhushankar 2024)</span>. The large
-depth also results in <strong>high computational cost</strong>, leading
-to slower training and inference compared to modern architectures.
-Training very deep VGG networks can suffer from <strong>vanishing
-gradient challenges</strong>, which later architectures addressed using
-residual connections. As a result, more recent models such as ResNet
-achieve faster training and better performance with more efficient
-designs.</p>
+<p>Despite its conceptual simplicity, VGG contains a <strong>very large number of parameters</strong> (approximately 138 million), largely due to its fully connected layers, making it memory-intensive and difficult to deploy on resource-limited systems <span class="citation" data-cites="simonyan2015deepconvolutionalnetworkslargescale alregib2024neural">(Simonyan and Zisserman 2015; AlRegib and Prabhushankar 2024)</span>. The large depth also results in <strong>high computational cost</strong>, leading to slower training and inference compared to modern architectures. Training very deep VGG networks can suffer from <strong>vanishing gradient challenges</strong>, which later architectures addressed using residual connections. As a result, more recent models such as ResNet achieve faster training and better performance with more efficient designs.</p>
 <h1 data-number="8" id="googlenet-inception-v1"><span class="header-section-number">8.</span> GoogLeNet (Inception V1)</h1>
-<p>GoogLeNet, also known as Inception V1, was introduced by researchers
-at Google in the 2014 paper “Going Deeper with Convolutions.” The model
-won the ILSVRC 2014 image classification challenge and represented a
-major shift from earlier architectures such as AlexNet and ZF-Net.
-Instead of simply increasing depth and parameter count, GoogLeNet
-focused on improving computational efficiency while enabling
-significantly deeper networks. The architecture introduced several new
-design ideas, including <span class="math inline">\(1\times1\)</span>
-convolutions, Inception modules, and global average pooling <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al.
-2014)</span>.</p>
-<figure data-latex-placement="H" id="fig:GoogleNet Architecture">
-<img src="img/lecture15/Garc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>GoogLeNet (Inception V1) architecture.</figcaption>
+<p>GoogLeNet, also known as Inception V1, was introduced by researchers at Google in the 2014 paper “Going Deeper with Convolutions.” The model won the ILSVRC 2014 image classification challenge and represented a major shift from earlier architectures such as AlexNet and ZF-Net. Instead of simply increasing depth and parameter count, GoogLeNet focused on improving computational efficiency while enabling significantly deeper networks. The architecture introduced several new design ideas, including <span class="math inline">\(1\times1\)</span> convolutions, Inception modules, and global average pooling <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al. 2014)</span>.</p>
+<figure>
+<img alt="GoogLeNet (Inception V1) architecture." id="fig:GoogleNet Architecture" src="img/lecture15/Garc.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">GoogLeNet (Inception V1) architecture.</figcaption>
 </figure>
-<h2 data-number="8.1" id="key-innovations-of-googlenet"><span class="header-section-number">8.1</span> Key Innovations of
-GoogLeNet</h2>
-<p>One of the most important contributions of GoogLeNet is the
-<strong>Network-in-Network</strong> idea, implemented through the
-<strong>Inception module</strong>. Instead of applying a single
-convolution at each layer, the Inception module performs multiple
-convolutions in parallel using different kernel sizes (such as <span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, and <span class="math inline">\(5\times5\)</span>), along with pooling operations.
-The outputs of these parallel operations are concatenated, allowing the
-network to capture features at multiple spatial scales
-simultaneously.</p>
-<p>A key component that enables this design is the use of <strong><span class="math inline">\(1\times1\)</span> convolutions</strong>. These
-layers act as bottleneck layers that reduce the number of channels
-before applying larger convolutions. This dramatically lowers
-computational cost and memory usage while preserving representational
-power.</p>
-<p>GoogLeNet also improves training efficiency through the use of
-<strong>Batch Normalization</strong>, which stabilizes gradient flow and
-accelerates convergence. Additionally, the network replaces traditional
-fully connected layers with <strong>global average pooling</strong> at
-the final stage. This design reduces the number of parameters, decreases
-overfitting, and makes the architecture more computationally
-efficient.</p>
-<p>Another notable feature is the introduction of <strong>auxiliary
-classifiers</strong>. These are small intermediate classifiers attached
-to earlier layers of the network. They provide additional gradient
-signals during training, helping to mitigate the vanishing gradient
-problem and improving optimization in very deep networks <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al.
-2014)</span>.</p>
+<h2 data-number="8.1" id="key-innovations-of-googlenet"><span class="header-section-number">8.1</span> Key Innovations of GoogLeNet</h2>
+<p>One of the most important contributions of GoogLeNet is the <strong>Network-in-Network</strong> idea, implemented through the <strong>Inception module</strong>. Instead of applying a single convolution at each layer, the Inception module performs multiple convolutions in parallel using different kernel sizes (such as <span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, and <span class="math inline">\(5\times5\)</span>), along with pooling operations. The outputs of these parallel operations are concatenated, allowing the network to capture features at multiple spatial scales simultaneously.</p>
+<p>A key component that enables this design is the use of <strong><span class="math inline">\(1\times1\)</span> convolutions</strong>. These layers act as bottleneck layers that reduce the number of channels before applying larger convolutions. This dramatically lowers computational cost and memory usage while preserving representational power.</p>
+<p>GoogLeNet also improves training efficiency through the use of <strong>Batch Normalization</strong>, which stabilizes gradient flow and accelerates convergence. Additionally, the network replaces traditional fully connected layers with <strong>global average pooling</strong> at the final stage. This design reduces the number of parameters, decreases overfitting, and makes the architecture more computationally efficient.</p>
+<p>Another notable feature is the introduction of <strong>auxiliary classifiers</strong>. These are small intermediate classifiers attached to earlier layers of the network. They provide additional gradient signals during training, helping to mitigate the vanishing gradient problem and improving optimization in very deep networks <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al. 2014)</span>.</p>
 <h2 data-number="8.2" id="inception-module"><span class="header-section-number">8.2</span> Inception Module</h2>
-<figure data-latex-placement="H" id="fig:Inception Module Struc">
-<img src="img/lecture15/Inceptionarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Structure of an Inception Module in GoogLeNet.</figcaption>
+<figure>
+<img alt="Structure of an Inception Module in GoogLeNet." id="fig:Inception Module Struc" src="img/lecture15/Inceptionarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Structure of an Inception Module in GoogLeNet.</figcaption>
 </figure>
-<p>The <strong>Inception module</strong> is the fundamental building
-block of GoogLeNet. The full network is constructed by stacking multiple
-Inception modules, each designed to capture visual features at multiple
-spatial scales while maintaining computational efficiency.</p>
-<p>Unlike traditional convolutional layers that apply a single filter
-size, the Inception module performs multiple operations in parallel,
-including <span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, and <span class="math inline">\(5\times5\)</span> convolutions, along with
-pooling. The outputs of these parallel branches are then concatenated
-along the channel dimension. This design enables <strong>multi-scale
-feature extraction</strong>, allowing the network to capture both local
-and global patterns simultaneously.</p>
-<p>A key innovation that makes this architecture computationally
-feasible is the use of <strong><span class="math inline">\(1\times1\)</span> convolutional bottleneck
-layers</strong>. These layers are applied before larger convolutions to
-reduce the number of input channels, dramatically lowering the number of
-parameters and computations required. As a result, the model can
-increase depth and width without excessive computational cost.</p>
-<p>Overall, the Inception module provides several advantages over
-traditional CNN designs. By combining filters of different sizes within
-a single layer, it improves representational power while remaining
-parameter-efficient. The use of bottleneck layers and global pooling
-further reduces overfitting and model complexity. Empirically, networks
-built with Inception modules achieved strong performance on large-scale
-image classification benchmarks <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al.
-2014)</span>.</p>
+<p>The <strong>Inception module</strong> is the fundamental building block of GoogLeNet. The full network is constructed by stacking multiple Inception modules, each designed to capture visual features at multiple spatial scales while maintaining computational efficiency.</p>
+<p>Unlike traditional convolutional layers that apply a single filter size, the Inception module performs multiple operations in parallel, including <span class="math inline">\(1\times1\)</span>, <span class="math inline">\(3\times3\)</span>, and <span class="math inline">\(5\times5\)</span> convolutions, along with pooling. The outputs of these parallel branches are then concatenated along the channel dimension. This design enables <strong>multi-scale feature extraction</strong>, allowing the network to capture both local and global patterns simultaneously.</p>
+<p>A key innovation that makes this architecture computationally feasible is the use of <strong><span class="math inline">\(1\times1\)</span> convolutional bottleneck layers</strong>. These layers are applied before larger convolutions to reduce the number of input channels, dramatically lowering the number of parameters and computations required. As a result, the model can increase depth and width without excessive computational cost.</p>
+<p>Overall, the Inception module provides several advantages over traditional CNN designs. By combining filters of different sizes within a single layer, it improves representational power while remaining parameter-efficient. The use of bottleneck layers and global pooling further reduces overfitting and model complexity. Empirically, networks built with Inception modules achieved strong performance on large-scale image classification benchmarks <span class="citation" data-cites="szegedy2014goingdeeperconvolutions">(Szegedy et al. 2014)</span>.</p>
 <h2 data-number="8.3" id="batch-normalization"><span class="header-section-number">8.3</span> Batch Normalization</h2>
-<p>Batch Normalization (BN) is a technique for stabilizing and
-accelerating the training of deep neural networks. It operates by
-normalizing the inputs to a layer across each mini-batch, thereby
-reducing the variation in intermediate activations during training. This
-improves gradient flow, enables the use of larger learning rates, and
-typically reduces the number of training epochs required for convergence
-<span class="citation" data-cites="alregib2024neural">(AlRegib and
-Prabhushankar 2024)</span>.</p>
-<p>Given a mini-batch <span class="math inline">\(B = \{x_1, \dots,
-x_m\}\)</span> of activations for a particular neuron or feature
-channel, Batch Normalization performs the following transformation.</p>
-<h4 data-number="8.3.0.1" id="batch-normalizing-transform"><span class="header-section-number">8.3.0.1</span> Batch Normalizing
-Transform</h4>
+<p>Batch Normalization (BN) is a technique for stabilizing and accelerating the training of deep neural networks. It operates by normalizing the inputs to a layer across each mini-batch, thereby reducing the variation in intermediate activations during training. This improves gradient flow, enables the use of larger learning rates, and typically reduces the number of training epochs required for convergence <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar 2024)</span>.</p>
+<p>Given a mini-batch <span class="math inline">\(B = \{x_1, \dots, x_m\}\)</span> of activations for a particular neuron or feature channel, Batch Normalization performs the following transformation.</p>
+<h4 data-number="8.3.0.1" id="batch-normalizing-transform"><span class="header-section-number">8.3.0.1</span> Batch Normalizing Transform</h4>
 <p><br/>
 <strong>Step 1: Compute mini-batch statistics</strong> <span class="math display">\[\mu_B = \frac{1}{m} \sum_{i=1}^{m} x_i,
 \qquad
 \sigma_B^2 = \frac{1}{m} \sum_{i=1}^{m} (x_i - \mu_B)^2.\]</span></p>
-<p><strong>Step 2: Normalize</strong> <span class="math display">\[\hat{x}_i = \frac{x_i - \mu_B}{\sqrt{\sigma_B^2 +
-\epsilon}},\]</span> where <span class="math inline">\(\epsilon\)</span>
-is a small constant added for numerical stability.<br/>
+<p><strong>Step 2: Normalize</strong> <span class="math display">\[\hat{x}_i = \frac{x_i - \mu_B}{\sqrt{\sigma_B^2 + \epsilon}},\]</span> where <span class="math inline">\(\epsilon\)</span> is a small constant added for numerical stability.<br/>
 <strong>Step 3: Scale and shift</strong> <span class="math display">\[y_i = \gamma \hat{x}_i + \beta.\]</span></p>
-<p>Here, <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\beta\)</span> are learnable parameters that allow
-the network to adjust the normalized representation. In particular, they
-enable the model to recover the original distribution if normalization
-is not beneficial for a given layer.</p>
-<p>The Batch Normalization transformation is applied before the
-activation function, ensuring that normalized inputs are passed into the
-nonlinearity.</p>
-<figure data-latex-placement="H" id="fig:Batch Normalization Process">
-<img src="img/lecture15/BatchNormalization.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Illustration of the Batch Normalization process applied to
-activations within a mini-batch.</figcaption>
+<p>Here, <span class="math inline">\(\gamma\)</span> and <span class="math inline">\(\beta\)</span> are learnable parameters that allow the network to adjust the normalized representation. In particular, they enable the model to recover the original distribution if normalization is not beneficial for a given layer.</p>
+<p>The Batch Normalization transformation is applied before the activation function, ensuring that normalized inputs are passed into the nonlinearity.</p>
+<figure>
+<img alt="Illustration of the Batch Normalization process applied to activations within a mini-batch." id="fig:Batch Normalization Process" src="img/lecture15/BatchNormalization.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Illustration of the Batch Normalization process applied to activations within a mini-batch.</figcaption>
 </figure>
-<h4 data-number="8.3.0.2" id="local-response-normalization-vs.-batch-normalization"><span class="header-section-number">8.3.0.2</span> Local Response
-Normalization vs. Batch Normalization</h4>
+<h4 data-number="8.3.0.2" id="local-response-normalization-vs.-batch-normalization"><span class="header-section-number">8.3.0.2</span> Local Response Normalization vs. Batch Normalization</h4>
 <p><br/>
-Local Response Normalization (LRN), used in early architectures such as
-AlexNet, normalizes activations across neighboring feature channels. It
-is a fixed, non-trainable operation designed to encourage competition
-between adjacent filters.</p>
-<p>Batch Normalization differs fundamentally in both mechanism and
-purpose. Rather than normalizing across channels, BN normalizes across
-examples within a mini-batch. It introduces trainable parameters (<span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\beta\)</span>), allowing the network to learn the
-appropriate scaling and shifting of activations. Originally motivated by
-reducing internal covariate shift, Batch Normalization is now understood
-to improve optimization dynamics and smooth the loss landscape. Due to
-its effectiveness, BN has largely replaced LRN in modern deep
-architectures <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar
-2024)</span>.</p>
-<h2 data-number="8.4" id="advantages-and-disadvantages-of-googlenet"><span class="header-section-number">8.4</span> Advantages and Disadvantages of
-GoogleNet</h2>
+Local Response Normalization (LRN), used in early architectures such as AlexNet, normalizes activations across neighboring feature channels. It is a fixed, non-trainable operation designed to encourage competition between adjacent filters.</p>
+<p>Batch Normalization differs fundamentally in both mechanism and purpose. Rather than normalizing across channels, BN normalizes across examples within a mini-batch. It introduces trainable parameters (<span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\beta\)</span>), allowing the network to learn the appropriate scaling and shifting of activations. Originally motivated by reducing internal covariate shift, Batch Normalization is now understood to improve optimization dynamics and smooth the loss landscape. Due to its effectiveness, BN has largely replaced LRN in modern deep architectures <span class="citation" data-cites="alregib2024neural">(AlRegib and Prabhushankar 2024)</span>.</p>
+<h2 data-number="8.4" id="advantages-and-disadvantages-of-googlenet"><span class="header-section-number">8.4</span> Advantages and Disadvantages of GoogleNet</h2>
 <h4 data-number="8.4.0.1" id="pros.-2"><span class="header-section-number">8.4.0.1</span> Pros.</h4>
-<p>A major advantage of GoogLeNet is its <strong>reduced computational
-cost</strong>. Through the use of Inception modules, <span class="math inline">\(1\times1\)</span> bottleneck convolutions, and
-global average pooling, the architecture dramatically reduces the number
-of parameters from roughly 138 million (as in VGG) to about 4 million
-while still achieving strong performance <span class="citation" data-cites="szegedy2014goingdeeperconvolutions alregib2024neural">(Szegedy
-et al. 2014; AlRegib and Prabhushankar 2024)</span>.</p>
+<p>A major advantage of GoogLeNet is its <strong>reduced computational cost</strong>. Through the use of Inception modules, <span class="math inline">\(1\times1\)</span> bottleneck convolutions, and global average pooling, the architecture dramatically reduces the number of parameters from roughly 138 million (as in VGG) to about 4 million while still achieving strong performance <span class="citation" data-cites="szegedy2014goingdeeperconvolutions alregib2024neural">(Szegedy et al. 2014; AlRegib and Prabhushankar 2024)</span>.</p>
 <h4 data-number="8.4.0.2" id="cons.-2"><span class="header-section-number">8.4.0.2</span> Cons.</h4>
-<p>Despite its efficiency, GoogLeNet introduces a more
-<strong>heterogeneous topology</strong>, where each module may require
-careful customization. This makes the architecture less uniform and more
-complex to implement and optimize. Additionally, the use of aggressive
-dimensionality reduction through <span class="math inline">\(1\times1\)</span> convolutions can create a
-<strong>representation bottleneck</strong>, potentially discarding
-useful feature information if the compression is too strong.</p>
+<p>Despite its efficiency, GoogLeNet introduces a more <strong>heterogeneous topology</strong>, where each module may require careful customization. This makes the architecture less uniform and more complex to implement and optimize. Additionally, the use of aggressive dimensionality reduction through <span class="math inline">\(1\times1\)</span> convolutions can create a <strong>representation bottleneck</strong>, potentially discarding useful feature information if the compression is too strong.</p>
 <h1 data-number="9" id="resnet"><span class="header-section-number">9.</span> ResNet</h1>
-<p>A <strong>Residual Neural Network (ResNet)</strong> is a deep
-learning architecture in which layers are designed to learn <em>residual
-functions</em> with respect to their inputs. ResNet was introduced in
-2015 and won the ILSVRC image classification challenge, demonstrating
-that extremely deep neural networks can be trained effectively.</p>
-<p>One of the key challenges in training very deep networks is the
-<strong>vanishing and exploding gradient problem</strong>. As networks
-become deeper, gradients may shrink or grow uncontrollably, making
-optimization difficult. ResNet addresses this issue by introducing
-<strong>residual blocks</strong> with <strong>skip (shortcut)
-connections</strong>. These connections allow information and gradients
-to flow directly across multiple layers, enabling stable training of
-very deep architectures <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al.
-2015)</span>.</p>
-<figure data-latex-placement="H" id="fig:ResNet Architecture">
-<img src="img/lecture15/ResNetarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>ResNet Architecture</figcaption>
+<p>A <strong>Residual Neural Network (ResNet)</strong> is a deep learning architecture in which layers are designed to learn <em>residual functions</em> with respect to their inputs. ResNet was introduced in 2015 and won the ILSVRC image classification challenge, demonstrating that extremely deep neural networks can be trained effectively.</p>
+<p>One of the key challenges in training very deep networks is the <strong>vanishing and exploding gradient problem</strong>. As networks become deeper, gradients may shrink or grow uncontrollably, making optimization difficult. ResNet addresses this issue by introducing <strong>residual blocks</strong> with <strong>skip (shortcut) connections</strong>. These connections allow information and gradients to flow directly across multiple layers, enabling stable training of very deep architectures <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>.</p>
+<figure>
+<img alt="ResNet Architecture" id="fig:ResNet Architecture" src="img/lecture15/ResNetarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">ResNet Architecture</figcaption>
 </figure>
-<p>Within a residual block, the input <span class="math inline">\(x\)</span> is passed through a sequence of weight
-layers to produce a transformation <span class="math inline">\(F(x)\)</span>. Instead of learning a direct
-mapping <span class="math inline">\(H(x)\)</span>, the network learns a
-residual mapping such that the block outputs</p>
+<p>Within a residual block, the input <span class="math inline">\(x\)</span> is passed through a sequence of weight layers to produce a transformation <span class="math inline">\(F(x)\)</span>. Instead of learning a direct mapping <span class="math inline">\(H(x)\)</span>, the network learns a residual mapping such that the block outputs</p>
 <p><span class="math display">\[y = F(x) + x .\]</span></p>
-<p>The shortcut connection adds the original input directly to the
-transformed output. This identity mapping enables gradients to propagate
-through the network without vanishing, allowing much deeper models to be
-trained successfully <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al.
-2015)</span>.</p>
-<figure data-latex-placement="H" id="Residual Block Struc">
-<img src="img/lecture15/ResBlock.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Structure of a Residual Block</figcaption>
+<p>The shortcut connection adds the original input directly to the transformed output. This identity mapping enables gradients to propagate through the network without vanishing, allowing much deeper models to be trained successfully <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>.</p>
+<figure>
+<img alt="Structure of a Residual Block" id="Residual Block Struc" src="img/lecture15/ResBlock.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Structure of a Residual Block</figcaption>
 </figure>
 <h2 data-number="9.1" id="novelty-of-resnet"><span class="header-section-number">9.1</span> Novelty of ResNet</h2>
 <h4 data-number="9.1.0.1" id="residual-learning."><span class="header-section-number">9.1.0.1</span> Residual Learning.</h4>
-<p>ResNet introduces residual blocks that learn identity mappings
-through shortcut connections. Instead of forcing stacked layers to
-directly learn a desired transformation, the network learns the residual
-<span class="math inline">\(F(x)\)</span> that must be added to the
-input. This design greatly improves gradient flow and makes the
-optimization of very deep networks significantly easier.</p>
-<h4 data-number="9.1.0.2" id="enabling-extremely-deep-networks."><span class="header-section-number">9.1.0.2</span> Enabling Extremely Deep
-Networks.</h4>
-<p>ResNet demonstrated that neural networks can be trained at
-unprecedented depth (50, 101, and even 152 layers) while maintaining
-strong generalization <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>.
-Compared to earlier architectures such as AlexNet and VGG, ResNet
-achieves greater depth with improved computational efficiency and
-superior performance on large-scale visual recognition tasks.</p>
-<h2 data-number="9.2" id="imagenet-classification-error-resnet"><span class="header-section-number">9.2</span> ImageNet Classification Error
-(ResNet)</h2>
-<p>ResNet marked a major milestone in the ImageNet Large Scale Visual
-Recognition Challenge (ILSVRC). Introduced in 2015, the architecture
-achieved a top-5 classification error of approximately
-<strong>3.6%</strong>, surpassing the estimated human-level performance
-of about <strong>5%</strong> <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>.
-This result demonstrated that very deep neural networks could achieve
-unprecedented accuracy when the optimization challenges of depth are
-properly addressed.</p>
-<figure data-latex-placement="H" id="fig:ResNet Error">
-<img src="img/lecture15/ResNetError.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet top-5 classification error
-rates, highlighting the impact of ResNet.</figcaption>
+<p>ResNet introduces residual blocks that learn identity mappings through shortcut connections. Instead of forcing stacked layers to directly learn a desired transformation, the network learns the residual <span class="math inline">\(F(x)\)</span> that must be added to the input. This design greatly improves gradient flow and makes the optimization of very deep networks significantly easier.</p>
+<h4 data-number="9.1.0.2" id="enabling-extremely-deep-networks."><span class="header-section-number">9.1.0.2</span> Enabling Extremely Deep Networks.</h4>
+<p>ResNet demonstrated that neural networks can be trained at unprecedented depth (50, 101, and even 152 layers) while maintaining strong generalization <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>. Compared to earlier architectures such as AlexNet and VGG, ResNet achieves greater depth with improved computational efficiency and superior performance on large-scale visual recognition tasks.</p>
+<h2 data-number="9.2" id="imagenet-classification-error-resnet"><span class="header-section-number">9.2</span> ImageNet Classification Error (ResNet)</h2>
+<p>ResNet marked a major milestone in the ImageNet Large Scale Visual Recognition Challenge (ILSVRC). Introduced in 2015, the architecture achieved a top-5 classification error of approximately <strong>3.6%</strong>, surpassing the estimated human-level performance of about <strong>5%</strong> <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>. This result demonstrated that very deep neural networks could achieve unprecedented accuracy when the optimization challenges of depth are properly addressed.</p>
+<figure>
+<img alt="Yearly progress in ImageNet top-5 classification error rates, highlighting the impact of ResNet." id="fig:ResNet Error" src="img/lecture15/ResNetError.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Yearly progress in ImageNet top-5 classification error rates, highlighting the impact of ResNet.</figcaption>
 </figure>
-<p>The figure illustrates the rapid reduction in classification error
-across successive CNN architectures. Starting from early shallow
-networks, performance improved steadily with the introduction of
-AlexNet, VGG, and GoogleNet. However, the introduction of residual
-learning produced a particularly sharp improvement, pushing performance
-beyond the previously assumed limits of very deep networks.</p>
-<p>A key factor behind this progress is the ability of ResNet to
-successfully train <strong>extremely deep architectures</strong>. While
-earlier models typically contained fewer than 20 layers, ResNet
-demonstrated stable training with over <strong>150 layers</strong> <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al.
-2015)</span>. This enabled the network to learn significantly richer
-hierarchical feature representations.</p>
-<figure data-latex-placement="H" id="fig:ResNet Depth">
-<img src="img/lecture15/ResNetDepth.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>ResNet enabled dramatically deeper CNNs while reducing
-classification error.</figcaption>
+<p>The figure illustrates the rapid reduction in classification error across successive CNN architectures. Starting from early shallow networks, performance improved steadily with the introduction of AlexNet, VGG, and GoogleNet. However, the introduction of residual learning produced a particularly sharp improvement, pushing performance beyond the previously assumed limits of very deep networks.</p>
+<p>A key factor behind this progress is the ability of ResNet to successfully train <strong>extremely deep architectures</strong>. While earlier models typically contained fewer than 20 layers, ResNet demonstrated stable training with over <strong>150 layers</strong> <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al. 2015)</span>. This enabled the network to learn significantly richer hierarchical feature representations.</p>
+<figure>
+<img alt="ResNet enabled dramatically deeper CNNs while reducing classification error." id="fig:ResNet Depth" src="img/lecture15/ResNetDepth.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">ResNet enabled dramatically deeper CNNs while reducing classification error.</figcaption>
 </figure>
-<p>Together, these results highlight a turning point in deep learning:
-depth alone was not the limiting factor—rather, the key challenge was
-optimization. By enabling effective training of very deep networks,
-ResNet established a new benchmark and influenced nearly all modern
-computer vision architectures.</p>
-<h2 data-number="9.3" id="comparison-with-other-network-architectures-for-imagenet"><span class="header-section-number">9.3</span> Comparison with Other Network
-Architectures for ImageNet</h2>
-<p>Figure <a data-reference="fig:ResNet Comparison" data-reference-type="ref" href="#fig:ResNet Comparison">28</a> compares the VGG-19
-architecture, a plain 34-layer convolutional network, and a 34-layer
-residual network. The residual network is obtained by inserting shortcut
-(skip) connections into the plain network, allowing the model to learn
-residual mappings instead of directly learning the desired underlying
-transformation.</p>
-<p>When the input and output feature maps have the same spatial and
-channel dimensions, an <strong>identity shortcut</strong> can be used.
-In this case, the input is added directly to the output of the stacked
-convolutional layers without introducing additional parameters (solid
-shortcuts in the figure).</p>
-<p>When the feature map dimensions increase, the shortcut connection
-must be modified to match dimensions (dotted shortcuts in the figure).
-Two common strategies are used:</p>
+<p>Together, these results highlight a turning point in deep learning: depth alone was not the limiting factor—rather, the key challenge was optimization. By enabling effective training of very deep networks, ResNet established a new benchmark and influenced nearly all modern computer vision architectures.</p>
+<h2 data-number="9.3" id="comparison-with-other-network-architectures-for-imagenet"><span class="header-section-number">9.3</span> Comparison with Other Network Architectures for ImageNet</h2>
+<p>Figure <a data-reference="fig:ResNet Comparison" data-reference-type="ref" href="#fig:ResNet Comparison">28</a> compares the VGG-19 architecture, a plain 34-layer convolutional network, and a 34-layer residual network. The residual network is obtained by inserting shortcut (skip) connections into the plain network, allowing the model to learn residual mappings instead of directly learning the desired underlying transformation.</p>
+<p>When the input and output feature maps have the same spatial and channel dimensions, an <strong>identity shortcut</strong> can be used. In this case, the input is added directly to the output of the stacked convolutional layers without introducing additional parameters (solid shortcuts in the figure).</p>
+<p>When the feature map dimensions increase, the shortcut connection must be modified to match dimensions (dotted shortcuts in the figure). Two common strategies are used:</p>
 <ul>
-<li><p><strong>Option A: Zero-padding identity shortcut.</strong> The
-shortcut still performs identity mapping, but extra zero entries are
-padded along the channel dimension to match the increased feature size.
-This introduces no additional learnable parameters.</p></li>
-<li><p><strong>Option B: Projection shortcut.</strong> A <span class="math inline">\(1\times1\)</span> convolution is applied to the
-shortcut path to match the spatial resolution and number of channels.
-This introduces additional parameters but improves flexibility and
-performance.</p></li>
+<li><p><strong>Option A: Zero-padding identity shortcut.</strong> The shortcut still performs identity mapping, but extra zero entries are padded along the channel dimension to match the increased feature size. This introduces no additional learnable parameters.</p></li>
+<li><p><strong>Option B: Projection shortcut.</strong> A <span class="math inline">\(1\times1\)</span> convolution is applied to the shortcut path to match the spatial resolution and number of channels. This introduces additional parameters but improves flexibility and performance.</p></li>
 </ul>
-<p>In both cases, when shortcuts connect feature maps of different
-spatial resolution, they typically use a stride of 2 to perform
-downsampling.</p>
-<figure data-latex-placement="H" id="fig:ResNet Comparison">
-<img src="img/lecture15/ResNetCompare.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Example network architectures for ImageNet. Left: VGG-19.
-Middle: a plain 34-layer network. Right: a 34-layer residual network.
-Dotted shortcuts indicate dimension-matching connections.</figcaption>
+<p>In both cases, when shortcuts connect feature maps of different spatial resolution, they typically use a stride of 2 to perform downsampling.</p>
+<figure>
+<img alt="Example network architectures for ImageNet. Left: VGG-19. Middle: a plain 34-layer network. Right: a 34-layer residual network. Dotted shortcuts indicate dimension-matching connections." id="fig:ResNet Comparison" src="img/lecture15/ResNetCompare.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Example network architectures for ImageNet. Left: VGG-19. Middle: a plain 34-layer network. Right: a 34-layer residual network. Dotted shortcuts indicate dimension-matching connections.</figcaption>
 </figure>
-<h2 data-number="9.4" id="advantages-and-disadvantages-of-resnet"><span class="header-section-number">9.4</span> Advantages and Disadvantages of
-ResNet</h2>
+<h2 data-number="9.4" id="advantages-and-disadvantages-of-resnet"><span class="header-section-number">9.4</span> Advantages and Disadvantages of ResNet</h2>
 <h4 data-number="9.4.0.1" id="pros.-3"><span class="header-section-number">9.4.0.1</span> Pros.</h4>
-<p>A major advantage of ResNet is its <strong>training efficiency and
-scalability</strong>. By introducing residual connections, the network
-can learn residual mappings instead of full transformations, which
-simplifies optimization and enables the successful training of extremely
-deep architectures. This allows models to converge faster and achieve
-higher accuracy compared to earlier deep CNNs.</p>
-<p>ResNet also provides an effective <strong>solution to the vanishing
-gradient problem</strong>. The shortcut connections allow gradients to
-flow directly through the network during backpropagation, preventing
-degradation in very deep models and enabling networks with hundreds of
-layers to be trained reliably.</p>
+<p>A major advantage of ResNet is its <strong>training efficiency and scalability</strong>. By introducing residual connections, the network can learn residual mappings instead of full transformations, which simplifies optimization and enables the successful training of extremely deep architectures. This allows models to converge faster and achieve higher accuracy compared to earlier deep CNNs.</p>
+<p>ResNet also provides an effective <strong>solution to the vanishing gradient problem</strong>. The shortcut connections allow gradients to flow directly through the network during backpropagation, preventing degradation in very deep models and enabling networks with hundreds of layers to be trained reliably.</p>
 <h4 data-number="9.4.0.2" id="cons.-3"><span class="header-section-number">9.4.0.2</span> Cons.</h4>
-<p>Despite its strong performance, ResNet introduces <strong>increased
-architectural complexity</strong> compared to earlier CNNs such as
-AlexNet or VGG. The use of residual blocks and multiple shortcut paths
-makes the network harder to design, debug, and interpret.</p>
-<p>Additionally, very deep ResNet models can still be
-<strong>computationally expensive</strong> in terms of memory usage and
-training time, particularly for large-scale datasets. While more
-efficient than plain deep networks, they still require substantial
-computational resources.</p>
+<p>Despite its strong performance, ResNet introduces <strong>increased architectural complexity</strong> compared to earlier CNNs such as AlexNet or VGG. The use of residual blocks and multiple shortcut paths makes the network harder to design, debug, and interpret.</p>
+<p>Additionally, very deep ResNet models can still be <strong>computationally expensive</strong> in terms of memory usage and training time, particularly for large-scale datasets. While more efficient than plain deep networks, they still require substantial computational resources.</p>
 <h1 class="unnumbered" id="bibliography">References</h1>
-<div class="references csl-bib-body hanging-indent" id="refs" role="list">
-<div class="csl-entry" id="ref-alregib2024neural" role="listitem">
-AlRegib, Ghassan, and Mohit Prabhushankar. 2024. <em>Lecture 15: CNN
-Architectures</em>.
+<div class="references csl-bib-body hanging-indent" id="refs" role="doc-bibliography">
+<div class="csl-entry" id="ref-alregib2024neural" role="doc-biblioentry">
+AlRegib, Ghassan, and Mohit Prabhushankar. 2024. <span>“Lecture 15: CNN Architectures.”</span>
 </div>
-<div class="csl-entry" id="ref-he2015deepresiduallearningimage" role="listitem">
-He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015. <em>Deep
-Residual Learning for Image Recognition</em>. <a href="https://arxiv.org/abs/1512.03385" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1512.03385</a>.
+<div class="csl-entry" id="ref-he2015deepresiduallearningimage" role="doc-biblioentry">
+He, Kaiming, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. 2015. <span>“Deep Residual Learning for Image Recognition.”</span> <a href="https://arxiv.org/abs/1512.03385" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1512.03385</a>.
 </div>
-<div class="csl-entry" id="ref-NIPS2012_c399862d" role="listitem">
-Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012.
-<span>“ImageNet Classification with Deep Convolutional Neural
-Networks.”</span> In <em>Advances in Neural Information Processing
-Systems</em>, edited by F. Pereira, C. J. Burges, L. Bottou, and K. Q.
-Weinberger, vol. 25. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf" rel="noopener noreferrer" target="_blank">https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf</a>.
+<div class="csl-entry" id="ref-NIPS2012_c399862d" role="doc-biblioentry">
+Krizhevsky, Alex, Ilya Sutskever, and Geoffrey E Hinton. 2012. <span>“ImageNet Classification with Deep Convolutional Neural Networks.”</span> In <em>Advances in Neural Information Processing Systems</em>, edited by F. Pereira, C. J. Burges, L. Bottou, and K. Q. Weinberger. Vol. 25. Curran Associates, Inc. <a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf" rel="noopener noreferrer" target="_blank">https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf</a>.
 </div>
-<div class="csl-entry" id="ref-726791" role="listitem">
-Lecun, Y., L. Bottou, Y. Bengio, and P. Haffner. 1998.
-<span>“Gradient-Based Learning Applied to Document Recognition.”</span>
-<em>Proceedings of the IEEE</em> 86 (11): 2278–324. <a href="https://doi.org/10.1109/5.726791" rel="noopener noreferrer" target="_blank">https://doi.org/10.1109/5.726791</a>.
+<div class="csl-entry" id="ref-726791" role="doc-biblioentry">
+Lecun, Y., L. Bottou, Y. Bengio, and P. Haffner. 1998. <span>“Gradient-Based Learning Applied to Document Recognition.”</span> <em>Proceedings of the IEEE</em> 86 (11): 2278–2324. <a href="https://doi.org/10.1109/5.726791" rel="noopener noreferrer" target="_blank">https://doi.org/10.1109/5.726791</a>.
 </div>
-<div class="csl-entry" id="ref-simonyan2015deepconvolutionalnetworkslargescale" role="listitem">
-Simonyan, Karen, and Andrew Zisserman. 2015. <em>Very Deep Convolutional
-Networks for Large-Scale Image Recognition</em>. <a href="https://arxiv.org/abs/1409.1556" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1409.1556</a>.
+<div class="csl-entry" id="ref-simonyan2015deepconvolutionalnetworkslargescale" role="doc-biblioentry">
+Simonyan, Karen, and Andrew Zisserman. 2015. <span>“Very Deep Convolutional Networks for Large-Scale Image Recognition.”</span> <a href="https://arxiv.org/abs/1409.1556" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1409.1556</a>.
 </div>
-<div class="csl-entry" id="ref-szegedy2014goingdeeperconvolutions" role="listitem">
-Szegedy, Christian, Wei Liu, Yangqing Jia, et al. 2014. <em>Going Deeper
-with Convolutions</em>. <a href="https://arxiv.org/abs/1409.4842" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1409.4842</a>.
+<div class="csl-entry" id="ref-szegedy2014goingdeeperconvolutions" role="doc-biblioentry">
+Szegedy, Christian, Wei Liu, Yangqing Jia, Pierre Sermanet, Scott Reed, Dragomir Anguelov, Dumitru Erhan, Vincent Vanhoucke, and Andrew Rabinovich. 2014. <span>“Going Deeper with Convolutions.”</span> <a href="https://arxiv.org/abs/1409.4842" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1409.4842</a>.
 </div>
 </div>
 
