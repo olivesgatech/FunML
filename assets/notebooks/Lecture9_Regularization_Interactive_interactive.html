@@ -1,18 +1,25 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lecture9 Regularization Interactive</title>
-  <style>
-    html, body { margin: 0; height: 100%; background: #fff; }
-    .top { padding: 8px 12px; font: 16px/1.4 -apple-system,Segoe UI,Arial,sans-serif; border-bottom: 1px solid #e5e7eb; }
-    .top a { color: #1d4ed8; text-decoration: none; }
-    iframe { border: 0; width: 100%; height: calc(100% - 42px); }
-  </style>
-</head>
-<body>
-  <div class="top">Open directly in JupyterLite: <a href="../jupyterlite/lab/index.html?path=notebooks/Lecture9_Regularization_Interactive.ipynb&reset=1" target="_blank" rel="noopener noreferrer">Lecture9_Regularization_Interactive.ipynb</a></div>
-  <iframe src="../jupyterlite/lab/index.html?path=notebooks/Lecture9_Regularization_Interactive.ipynb&reset=1" title="Lecture9 Regularization Interactive"></iframe>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Regularization Controls (Lecture 9)</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
+:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
+button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
+@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
+</style></head><body><div class="wrap"><h1>Interactive Regularization Controls (Lecture 9)</h1><p>Adjust noise, sample count, lambda, complexity, and GT noise.</p><div class="controls"><div class="control"><label>n points</label><div class="row"><input id="n" type="range" min="20" max="200" step="5" value="40"><span class="value" id="nv">40</span></div></div><div class="control"><label>Noise</label><div class="row"><input id="noise" type="range" min="0.05" max="1.2" step="0.05" value="0.3"><span class="value" id="noisev">0.30</span></div></div><div class="control"><label>lambda</label><div class="row"><input id="lam" type="range" min="0.001" max="50" step="0.001" value="0.5"><span class="value" id="lamv">0.5</span></div></div><div class="control"><label>Complexity</label><div class="row"><input id="deg" type="range" min="1" max="12" step="1" value="5"><span class="value" id="degv">5</span></div></div><div class="control"><label>GT noise</label><div class="row"><input id="gtn" type="range" min="0" max="0.8" step="0.05" value="0"><span class="value" id="gtnv">0.00</span></div></div></div><div class="plots"><div class="plot-card"><div id="fit" class="plot"></div></div><div class="plot-card"><div id="coef" class="plot"></div></div></div><div class="status" id="status"></div></div><script>function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function ridge(x,y,d,lam){const m=d+1, n=x.length; const X=x.map(v=>[...Array(m)].map((_,k)=>v**k)); let A=Array.from({length:m},()=>Array(m).fill(0)), b=Array(m).fill(0);
+for(let i=0;i<n;i++){for(let r=0;r<m;r++){b[r]+=X[i][r]*y[i]; for(let c=0;c<m;c++)A[r][c]+=X[i][r]*X[i][c];}}
+for(let i=1;i<m;i++)A[i][i]+=lam;
+for(let i=0;i<m;i++){let piv=i; for(let r=i+1;r<m;r++) if(Math.abs(A[r][i])>Math.abs(A[piv][i]))piv=r; [A[i],A[piv]]=[A[piv],A[i]]; [b[i],b[piv]]=[b[piv],b[i]]; const div=A[i][i]||1e-9; for(let c=i;c<m;c++)A[i][c]/=div; b[i]/=div; for(let r=0;r<m;r++){if(r===i)continue; const f=A[r][i]; for(let c=i;c<m;c++)A[r][c]-=f*A[i][c]; b[r]-=f*b[i];}}
+return b}
+function pred(th,x){return th.reduce((s,t,k)=>s+t*(x**k),0)}
+function render(){const N=+n.value,noise=+noiseEl.value,lam=+lamEl.value,d=+deg.value,gtn=+gtnEl.value; nv.textContent=N;noisev.textContent=noise.toFixed(2);lamv.textContent=lam.toFixed(3);degv.textContent=d;gtnv.textContent=gtn.toFixed(2);
+const x=[...Array(N)].map((_,i)=>-3+6*i/(N-1)); const yStar=x.map(v=>1+0.7*v-0.35*v*v+0.06*v*v*v+gtn*randn()); const y=yStar.map(v=>v+noise*randn()); const th=ridge(x,y,d,lam); const xg=[...Array(300)].map((_,i)=>-3+6*i/299); const yg=xg.map(v=>pred(th,v));
+Plotly.newPlot('fit',[{x,y,mode:'markers',name:'observed'},{x,y:yStar,mode:'lines',name:'GT',line:{color:'#64748b'}},{x:xg,y:yg,mode:'lines',name:'ridge fit',line:{color:'#dc2626'}}],{title:'Regularization under noise / complexity'},{displayModeBar:false});
+Plotly.newPlot('coef',[{x:[...Array(th.length)].map((_,i)=>i),y:th,type:'bar',marker:{color:'#2563eb'}}],{title:'Coefficients'},{displayModeBar:false});
+const mse=y.reduce((s,v,i)=>{const e=pred(th,x[i])-v; return s+e*e},0)/N; const norm=Math.hypot(...th.slice(1)); status.textContent=`Train MSE=${mse.toFixed(3)}
+||w||=${norm.toFixed(3)}`; }
+const noiseEl=document.getElementById('noise'),lamEl=document.getElementById('lam'),gtnEl=document.getElementById('gtn'); ['n','noise','lam','deg','gtn'].forEach(id=>document.getElementById(id).addEventListener('input',render)); render();</script></body></html>

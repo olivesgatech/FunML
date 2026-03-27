@@ -1,18 +1,21 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lecture7 Fig735 Interactive</title>
-  <style>
-    html, body { margin: 0; height: 100%; background: #fff; }
-    .top { padding: 8px 12px; font: 16px/1.4 -apple-system,Segoe UI,Arial,sans-serif; border-bottom: 1px solid #e5e7eb; }
-    .top a { color: #1d4ed8; text-decoration: none; }
-    iframe { border: 0; width: 100%; height: calc(100% - 42px); }
-  </style>
-</head>
-<body>
-  <div class="top">Open directly in JupyterLite: <a href="../jupyterlite/lab/index.html?path=notebooks/Lecture7_Fig735_Interactive.ipynb&reset=1" target="_blank" rel="noopener noreferrer">Lecture7_Fig735_Interactive.ipynb</a></div>
-  <iframe src="../jupyterlite/lab/index.html?path=notebooks/Lecture7_Fig735_Interactive.ipynb&reset=1" title="Lecture7 Fig735 Interactive"></iframe>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Regression Diagnostics (Figures 7.3, 7.4, 7.5)</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
+:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
+.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
+button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
+@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
+.plots{grid-template-columns:repeat(3,minmax(0,1fr))}@media(max-width:980px){.plots{grid-template-columns:1fr}}</style></head><body><div class="wrap"><h1>Interactive Regression Diagnostics (Figures 7.3, 7.4, 7.5)</h1><p>Control data and inspect fit with residual diagnostics.</p><div class="controls"><div class="control"><label>n points</label><div class="row"><input id="n" type="range" min="20" max="200" step="5" value="80"><span class="value" id="nv">80</span></div></div><div class="control"><label>Noise</label><div class="row"><input id="noise" type="range" min="0.1" max="2.5" step="0.1" value="0.8"><span class="value" id="noisev">0.8</span></div></div><div class="control"><label>Slope</label><div class="row"><input id="slope" type="range" min="-3" max="3" step="0.1" value="1.5"><span class="value" id="slopev">1.5</span></div></div><div class="control"><label>Intercept</label><div class="row"><input id="ic" type="range" min="-3" max="3" step="0.1" value="0.5"><span class="value" id="icv">0.5</span></div></div></div><div class="plots" style="grid-template-columns:repeat(3,minmax(0,1fr));"><div class="plot-card"><div id="fit" class="plot"></div></div><div class="plot-card"><div id="hist" class="plot"></div></div><div class="plot-card"><div id="res" class="plot"></div></div></div><div class="status" id="status"></div></div><script>function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function linfit(x,y){const n=x.length; let sx=0,sy=0,sxx=0,sxy=0; for(let i=0;i<n;i++){sx+=x[i];sy+=y[i];sxx+=x[i]*x[i];sxy+=x[i]*y[i]} const a=(n*sxy-sx*sy)/(n*sxx-sx*sx); const b=(sy-a*sx)/n; return [a,b]}
+function render(){const N=Number(n.value),noisev=Number(noise.value),m=Number(slope.value),c=Number(ic.value); nv.textContent=N;noisev_el.textContent=noisev.toFixed(1);slopev.textContent=m.toFixed(1);icv.textContent=c.toFixed(1);
+const x=[...Array(N)].map((_,i)=>-3+6*i/(N-1)); const y=x.map(v=>m*v+c+noisev*randn()); const [a,b]=linfit(x,y); const yhat=x.map(v=>a*v+b); const r=y.map((v,i)=>v-yhat[i]);
+Plotly.newPlot('fit',[{x,y,mode:'markers',name:'Data'},{x,y:yhat,mode:'lines',name:`Fit y=${a.toFixed(2)}x+${b.toFixed(2)}`,line:{color:'#dc2626'}}],{title:'Figure 7.3: scatter + fit'},{displayModeBar:false});
+Plotly.newPlot('hist',[{x:r,type:'histogram',nbinsx:16,marker:{color:'#5b8'}}],{title:'Figure 7.4: residual histogram'},{displayModeBar:false});
+Plotly.newPlot('res',[{x:yhat,y:r,mode:'markers',marker:{size:7}}],{title:'Figure 7.5: residual scatter',shapes:[{type:'line',x0:Math.min(...yhat),x1:Math.max(...yhat),y0:0,y1:0,line:{dash:'dash',color:'black'}}]},{displayModeBar:false});
+const mse=r.reduce((s,v)=>s+v*v,0)/r.length; status.textContent=`Estimated slope=${a.toFixed(3)}, intercept=${b.toFixed(3)}
+MSE=${mse.toFixed(3)}` }
+const noisev_el=document.getElementById('noisev'); ['n','noise','slope','ic'].forEach(id=>document.getElementById(id).addEventListener('input',render)); render();</script></body></html>
