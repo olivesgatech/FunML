@@ -335,9 +335,6 @@ Logistic regression is a type of classifier that models the probability of a two
 \[
 \sigma(x)=\frac{1}{1+e^{-x}}
 \]
-\begin{center}
-    \includegraphics[scale=0.45]{img/lecture3/logis.png}
-\end{center}
 Notice that this function has horizontal asymptotes that bound the $y$-values 0 and 1, has an $S$-shape in the sense that there is an inflection point in the horizontal center, and it is symmetric around the inflection point. The logistic function can be generalized by parameterizing different properties of the curve, e.g. growth rates, $y$-intercept, or even the horizontal asymptotes that define the range. These parameterizations are given by the so-called Richard's curve, although there are several variations (e.g. there is one that doesn't even require symmetry around the inflection point). We consider a few examples of a basic parameterization here, that varies the location of the inflection point ($x_0$) and growth rate around it ($k$).
 \begin{center}
     \includegraphics[scale=0.4]{img/lecture3/gen-logis.png}
@@ -487,9 +484,6 @@ $$\text{sign}(x)=\begin{cases}
     +1 & x > 0 \\ 
     -1 & x < 0
 \end{cases}$$
-\begin{center}
-    \includegraphics[scale=0.5]{img/lecture3/sign.png}
-\end{center}
 Note here that we're assuming $y_i\in\{-1,1\}$ here instead of $\{0,1\}$ as in the logistic model. Hence if we attempt to model the decision boundary with a linear model $\theta^T\textbf{x}$, then we can model the data using:
 $$\text{sign}(\theta^T\textbf{x})=\begin{cases}
     +1 & \theta^T\textbf{x} > 0 \\ 

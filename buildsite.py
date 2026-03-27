@@ -1265,6 +1265,9 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       elif img.parent and img.parent.name == "p":
         replacement_target = img.parent
 
+    if replacement_target.parent is None:
+      continue
+
     replacement_target.replace_with(block)
 
 

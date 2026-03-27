@@ -182,16 +182,19 @@ The hinge loss function is not differentiable at <span class="math inline">\(- y
     \begin{bmatrix} 0 \\ 0 \end{bmatrix}, &amp; \text{otherwise}
 \end{cases}\]</span></p></li>
 </ol></section></section>
-<section><h2>Lecture5 - Support Vector Machines</h2><section><h1>Exercises</h1>
+<section><h2>Lecture5 - Support Vector Machines</h2><section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q2_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q2.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q2_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q2.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section><h1>Exercises</h1>
 <ol>
 <li><p>Consider the two figures below:</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-soft-hard.png"/></p>
 </div>
 <p>The left figure shows a dataset with a hard margin SVM classifier, while the right figure shows the same dataset with a soft margin SVM classifier.</p>
 <p>Now, imagine introducing an outlier close to the decision boundary but on the incorrect side of it.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
 </div>
 <p>Which classifier will better handle the outlier, and why?</p>
 <ol>
@@ -204,16 +207,13 @@ The hinge loss function is not differentiable at <span class="math inline">\(- y
 <p>The soft margin SVM is designed to allow some misclassification or margin violations, which makes it more robust in the presence of outliers. When an outlier is introduced near the decision boundary but on the incorrect side, the soft margin SVM can tolerate this outlier without significantly altering the decision boundary. This is due to the introduction of slack variables <span class="math inline">\(\xi_i\)</span> in the optimization problem, allowing some points to fall within the margin or even be misclassified: <span class="math display">\[\min_{\mathbf{w}, b, \xi} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{N} \xi_i\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i\]</span> The term <span class="math inline">\(C \sum_{i=1}^{N} \xi_i\)</span> penalizes the slack variables, balancing the margin width and the tolerance for misclassified points. A smaller <span class="math inline">\(C\)</span> allows for a wider margin and more tolerance for outliers, resulting in a more stable model in the presence of noise or misclassified points.</p>
 <p>In contrast, the hard margin SVM does not allow any misclassification, so introducing an outlier forces the SVM to adjust the decision boundary to perfectly classify all points, including the outlier. This can lead to significant changes in the decision boundary, potentially resulting in overfitting and poor generalization.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
 </div></li>
 <li><p>For the next few questions, we’ll be looking at the kernel trick. Let’s consider the following dataset:</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa2-nonlinear-2d.png"/></p>
 </div>
 <p>Notice that the data is not linearly separable. Now we can either use a nonlinear classifier, or we could introduce nonlinearity into the data input itself. What if we transform the inputs into a higher dimension space, where some of the dimensions introduce nonlinearity? For example,</p>
 <p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
 </div>
 <p>Now we can fit a linear boundary (a plane) to separate the data. Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>
 <p>Given a <span class="math inline">\(d\)</span>-dimensional input, how many possible nonlinear interaction terms can be introduced in the transformation?</p>
@@ -605,7 +605,8 @@ P=\text{Precision} &amp;= \frac{TP}{TP + FP} = \frac{2}{2 + 2} = \frac{1}{2} \\[
 = \frac{1}{N}\mathbf{X}^T\mathbf{y}.\]</span> Thus, <span class="math display">\[\hat{\boldsymbol{\theta}}_{\mathrm{ridge}}
 = \left(\mathbf{X}^T\mathbf{X}+N\lambda \mathbf{I}\right)^{-1}\mathbf{X}^T\mathbf{y}.\]</span> (Equivalently, if the <span class="math inline">\(1/N\)</span> scaling is omitted in the loss definition, the solution becomes <span class="math inline">\(\hat{\boldsymbol{\theta}}_{\mathrm{ridge}}=(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})^{-1}\mathbf{X}^T\mathbf{y}\)</span>.)</p></li>
 </ol></section></section>
-<section><h2>Lecture9 - Polynomial Regression</h2><section><h1>Exercises</h1>
+<section><h2>Lecture9 - Polynomial Regression</h2><section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Q%26A%20Countours_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 8: Q&amp;A Contours Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FQ%26A+Countours.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question 1:</strong></p>
 <p>Suppose you are training a machine learning model using Gradient Descent (GD) on a dataset with <span class="math inline">\(N = 1{,}000{,}000\)</span> training examples and <span class="math inline">\(P = 100\)</span> features. You consider the following options:</p>
@@ -653,11 +654,10 @@ P=\text{Precision} &amp;= \frac{TP}{TP + FP} = \frac{2}{2 + 2} = \frac{1}{2} \\[
 <li><p><strong>Question 4:</strong></p>
 <p>Consider the following contour plot for MSE loss of a 2D linear model, as well as the contour plot for the <span class="math inline">\(L_1\)</span>-norm of the parameters.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture8/qa-mse-contour.png"/></p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8 Polynomial and Optimization</h3><p>Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture8_Polynomial_Interactive_interactive.html" style="height:920px;" title="Interactive Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Polynomial_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>Which of the following contour plots most likely represents the contour plot for the <span class="math inline">\(L_1\)</span>-regularized MSE loss on the same model?</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture8/qa-mse-l1-options.png"/></p>
 </div>
 <p><strong>Answer:</strong> The correct answer is <strong>A)</strong>.</p>
 <p><strong>Solution:</strong></p>
@@ -686,9 +686,7 @@ P=\text{Precision} &amp;= \frac{TP}{TP + FP} = \frac{2}{2 + 2} = \frac{1}{2} \\[
 <p>We sample training inputs and noisy targets: <span class="math display">\[x_i \sim \text{Uniform}(0,1), \qquad 
 y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 <p>This produces a clearly <strong>nonlinear</strong> dataset.</p>
-<figure>
-<img alt="Linear vs Polynomial Regression fit on nonlinear data" src="../lectures/img/lecture8/qa_q5_linear_vs_poly_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Linear vs Polynomial Regression fit on nonlinear data</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8 Polynomial and Optimization</h3><p>Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture8_Polynomial_Interactive_interactive.html" style="height:920px;" title="Interactive Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Polynomial_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p><strong>Step 2: Fit linear regression</strong></p>
 <p>Design matrix: <span class="math display">\[\mathbf{X}_{\text{lin}} =
 \begin{bmatrix}
@@ -713,9 +711,7 @@ y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 <p><strong>Step 4: Numerical comparison (reproducible simulation)</strong></p>
 <p>For the generated dataset (<span class="math inline">\(N=50\)</span>):</p>
 <p><span class="math display">\[\mathrm{MSE}_{\text{linear}} = 0.1691\]</span> <span class="math display">\[\mathrm{MSE}_{\text{poly}} = 0.0052\]</span></p>
-<figure>
-<img alt="Training MSE comparison" src="../lectures/img/lecture8/qa_q5_mse_comparison.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Training MSE comparison</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8 Polynomial and Optimization</h3><p>Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture8_Polynomial_Interactive_interactive.html" style="height:920px;" title="Interactive Polynomial Regression Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Polynomial_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Polynomial regression achieves a dramatically lower training error.</p>
 <p><strong>Key Insight</strong></p>
 <ul>
@@ -844,7 +840,7 @@ y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 <li><p><strong>Question 11:</strong></p>
 <p>Consider the model complexity vs. prediction error curve below.</p>
 <div class="center">
-<p><img alt="image" src="../lectures/img/lecture9/qa_bias_variance_curve.png" style="width:36.00%; max-width:36.00%; height:auto;"/></p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9 Regularization Controls</h3><p>Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture9_Regularization_Interactive_interactive.html" style="height:900px;" title="Interactive Regularization Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Regularization_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>Which region corresponds to an <strong>underfitting</strong> model?</p>
 <ol>

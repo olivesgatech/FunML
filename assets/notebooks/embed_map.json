@@ -28,7 +28,7 @@
       "iframe_height": 760
     },
     {
-      "image_match": "sigmoid.png",
+      "image_match": "img/lecture4/sigmoid.png",
       "notebook_html": "generalized_sigmoid_interactive.html",
       "notebook_ipynb": "generalized_sigmoid_interactive.ipynb",
       "section_title": "Interactive Notebook: Generalized Sigmoid Function",
@@ -64,7 +64,7 @@
       "iframe_height": 780
     },
     {
-      "image_match": "hinge-loss.png",
+      "image_match": "img/lecture3/hinge-loss.png",
       "notebook_html": "hinge_loss_interactive.html",
       "notebook_ipynb": "hinge_loss_interactive.ipynb",
       "section_title": "Interactive Notebook: Hinge Loss Family",
@@ -73,7 +73,7 @@
       "iframe_height": 820
     },
     {
-      "image_match": "softplus.png",
+      "image_match": "img/lecture3/softplus.png",
       "notebook_html": "hinge_loss_interactive.html",
       "notebook_ipynb": "hinge_loss_interactive.ipynb",
       "section_title": "Interactive Notebook: Hinge Loss Family",
@@ -82,7 +82,7 @@
       "iframe_height": 820
     },
     {
-      "image_match": "subgrad.png",
+      "image_match": "img/lecture3/subgrad.png",
       "notebook_html": "hinge_loss_interactive.html",
       "notebook_ipynb": "hinge_loss_interactive.ipynb",
       "section_title": "Interactive Notebook: Hinge Loss Family",
@@ -190,15 +190,6 @@
       "iframe_height": 800
     },
     {
-      "image_match": "confusion_matrix_binary.png",
-      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
-      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
-    },
-    {
       "image_match": "roc_curve_2.png",
       "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
       "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
@@ -217,48 +208,12 @@
       "iframe_height": 900
     },
     {
-      "image_match": "threshold_tradeoff.png",
-      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
-      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
-    },
-    {
       "image_match": "multiclass_roc_ovr.png",
       "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
       "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
       "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
       "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
       "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "bli_scatter_fit.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "bli_residuals_hist.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "bli_residuals_scatter.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
       "iframe_height": 900
     },
     {
@@ -289,24 +244,6 @@
       "iframe_height": 900
     },
     {
-      "image_match": "contour-plot.png",
-      "notebook_html": "Contour_interactive.html",
-      "notebook_ipynb": "Contour.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8: Contour Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 8: Contour Notebook",
-      "iframe_height": 760
-    },
-    {
-      "image_match": "qa-mse-contour.png",
-      "notebook_html": "Q&A Countours_interactive.html",
-      "notebook_ipynb": "Q&A Countours.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8: Q&A Contours Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 8: Q&A Contours Notebook",
-      "iframe_height": 820
-    },
-    {
       "image_match": "qa-mse-l1-options.png",
       "notebook_html": "Q&A Countours_interactive.html",
       "notebook_ipynb": "Q&A Countours.ipynb",
@@ -314,33 +251,6 @@
       "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
       "iframe_title": "Interactive Notebook - Lecture 8: Q&A Contours Notebook",
       "iframe_height": 820
-    },
-    {
-      "image_match": "qa_q5_linear_vs_poly_fit.png",
-      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
-      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook",
-      "iframe_height": 860
-    },
-    {
-      "image_match": "qa_q5_mse_comparison.png",
-      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
-      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook",
-      "iframe_height": 860
-    },
-    {
-      "image_match": "qa_bias_variance_curve.png",
-      "notebook_html": "qa_bias_variance_curve_interactive.html",
-      "notebook_ipynb": "qa_bias_variance_curve.ipynb",
-      "section_title": "Interactive Notebook: Lecture 9: Bias-Variance Curve Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 9: Bias-Variance Curve Notebook",
-      "iframe_height": 760
     },
     {
       "image_match": "p15.png",
@@ -424,13 +334,625 @@
       "iframe_height": 920
     },
     {
-      "image_match": "running_example.png",
-      "notebook_html": "kmeans_visual_demo_interactive.html",
-      "notebook_ipynb": "kmeans_visual_demo.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11: k-means Visual Demo Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 11: k-means Visual Demo Notebook",
+      "image_match": "img/lecture6/confusion_matrix_binary.png",
+      "notebook_html": "Lecture6_ThresholdEffect_interactive.html",
+      "notebook_ipynb": "Lecture6_ThresholdEffect.ipynb",
+      "section_title": "Interactive Notebook: Threshold Effect and Confusion Matrix",
+      "description": "Move the decision threshold and observe precision/recall together with TP/FP/TN/FN updates.",
+      "iframe_title": "Interactive Threshold Effect Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture6/threshold_tradeoff.png",
+      "notebook_html": "Lecture6_ThresholdEffect_interactive.html",
+      "notebook_ipynb": "Lecture6_ThresholdEffect.ipynb",
+      "section_title": "Interactive Notebook: Threshold Effect and Confusion Matrix",
+      "description": "Move the decision threshold and observe precision/recall together with TP/FP/TN/FN updates.",
+      "iframe_title": "Interactive Threshold Effect Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture7/bli_scatter_fit.png",
+      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
+      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
+      "iframe_title": "Interactive Regression Diagnostics Notebook",
       "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture7/bli_residuals_hist.png",
+      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
+      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
+      "iframe_title": "Interactive Regression Diagnostics Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture7/bli_residuals_scatter.png",
+      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
+      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
+      "iframe_title": "Interactive Regression Diagnostics Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture8/non-linear regression.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/nonlinear data generated via quadratic equation and polynomial regression model prediction fitted to data.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/contour-plot.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/loss-landscape.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/convergence path of batch gd.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/convergence path of stochastic gd.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/convergence path of mini-batch gd.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/convergence (all).png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/qa-mse-contour.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/qa-mse-l1-options.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/qa_q5_linear_vs_poly_fit.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture8/qa_q5_mse_comparison.png",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Polynomial and Optimization",
+      "description": "Transition from linear to polynomial fits and explore contour/loss behavior with alpha and stopping controls.",
+      "iframe_title": "Interactive Polynomial Regression Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture9/p9.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p10.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p11.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p12.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p13.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p15.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p16.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/p17.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture9/qa_bias_variance_curve.png",
+      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9 Regularization Controls",
+      "description": "Adjust noise, sample count, lambda, and model complexity to study bias-variance and regularization effects.",
+      "iframe_title": "Interactive Regularization Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/running_example.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/mahalanobisdistance.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/case1_isotropic.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/case2_large_var_x.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/case3_small_var_x.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/case4_correlated.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture10/case5_rotated.png",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture10_Sigma_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10 Distance Metrics and Sigma",
+      "description": "Edit points and covariance Sigma to compare Euclidean and Mahalanobis behavior.",
+      "iframe_title": "Interactive Sigma Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 10.43.43\u202fam.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.12.16\u202fam.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.14.26\u202fam.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.31.47\u202fam.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.07.38\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.10.20\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.18.27\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.38.32\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.41.59\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.01.26\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.21.34\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.23.47\u202fpm.png",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/dataset.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/undesirable_clustering.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/ideal_clustering.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/mini_batch_comp.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/mini-batch-k-means-diff.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/k_medoids_data.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/k-med-init-assign.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_1_a_table.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_1_a_split.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/k-med-update-1-b-table.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_1_b_split.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/k-med-reassign.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_2_a_table.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/udpate_2_a_graph.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_2_b_table.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture11/images/update_2_b_graph.jpg",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
+      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
+      "iframe_title": "Interactive K-Means Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/gmm clustering examples/initialization of em algorithm.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/gmm clustering examples/iteration 0 of em algorithm.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/gmm clustering examples/iteration 50 of em algorithm.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/gmm clustering examples/iteration 100 of em algorithm.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/gmm clustering examples/iteration 150 of em algorithm.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/clustering performance evaluation/silhouette coefficient.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/clustering performance evaluation/cluster silhouette plot.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture12/clustering performance evaluation/rand index.png",
+      "notebook_html": "Lecture12_Metrics_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture12_Metrics_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
+      "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
+      "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
     }
   ]
 }
