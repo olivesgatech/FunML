@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>Logistic Regression &amp; Support Vector Machines</title>
-<link href="../assets/style.css" rel="stylesheet"/>
-<script>
+  <meta charset="utf-8"/>
+  <title>Logistic Regression & Support Vector Machines</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script>
 window.MathJax = {
   tex: {
     macros: {
@@ -21,12 +20,17 @@ window.MathJax = {
   }
 };
 </script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 <main>
-<div class="center">
+  <div class="center">
 </div>
+
+
+
+
+
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
 <p>Last lecture, we reviewed Naïve Bayes before covering Linear
 Classifiers and Logistic Regression. In this lecture we will summarize
@@ -448,7 +452,7 @@ boundary along the orthogonal direction. Finally, note that <span class="math in
 normal vector to the hyperplane; for simplicity in geometric
 interpretations, we sometimes assume that <span class="math inline">\(\mathbf{w}\)</span> has unit norm.</p>
 <figure data-latex-placement="h" id="fig:linearhyperplane">
-<section class="interactive-notebook"><h3>Interactive Notebook: Linear Separating Hyperplane</h3><p>Adjust the weight vector and bias to see how the hyperplane and its normal vector change in two dimensions.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/linear_hyperplane_interactive.html" style="height:780px;" title="Interactive Linear Separating Hyperplane Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flinear_hyperplane_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<img src="img/lecture4/linearhyperplane.png" style="width:18.00%; max-width:18.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Linear Separating Hyperplane</h3><p>Adjust the weight vector and bias to see how the hyperplane and its normal vector change in two dimensions.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/linear_hyperplane_interactive.html" style="height:780px;" title="Interactive Linear Separating Hyperplane Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flinear_hyperplane_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Separation of two-dimensional feature space by a
 hyperplane</figcaption>
 </figure>
@@ -471,7 +475,7 @@ apparent in <a data-reference="fig:multiplehyperplanes" data-reference-type="ref
 hyperplanes satisfy these conditions. In this case, how do we determine
 the “best” one?</p>
 <figure data-latex-placement="h" id="fig:multiplehyperplanes">
-<img src="img/lecture4/multiplehyperplanes.png" style="width:18.00%; max-width:18.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Linear Boundaries Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LinearBoundaries_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Linear Boundaries Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_LinearBoundaries.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<img src="img/lecture4/multiplehyperplanes.png" style="width:18.00%; max-width:18.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Linear Boundaries Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LinearBoundaries_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Linear Boundaries Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_LinearBoundaries.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Multiple separating hyperplanes</figcaption>
 </figure>
 <p>The <strong>maximal margin hyperplane</strong> (MMH) is the
@@ -483,7 +487,7 @@ x_B\)</span> and <span class="math inline">\(x_C\)</span>, a.k.a
 that can produce the best MMH. (Best being the highest width and highest
 accuracy).</p>
 <figure data-latex-placement="h" id="fig:mmh">
-<img src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Linear Boundaries Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LinearBoundaries_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Linear Boundaries Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_LinearBoundaries.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<img src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Linear Boundaries Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LinearBoundaries_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Linear Boundaries Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_LinearBoundaries.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Maximal margin hyperplane along with its support
 vectors</figcaption>
 </figure>
@@ -794,6 +798,7 @@ ResearchGate. For more details, visit: <a class="uri" href="https://www.research
 <br/>
 All other images sourced from the lecture video (Lecture 4: Classifiers
 (Logistic Regression &amp; SVM) in Canvas.</p>
+
 </main>
 </body>
 </html>

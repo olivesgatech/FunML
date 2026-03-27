@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<title>Logistic Regression</title>
-<link href="../assets/style.css" rel="stylesheet"/>
-<script>
+  <meta charset="utf-8"/>
+  <title>Logistic Regression</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script>
 window.MathJax = {
   tex: {
     macros: {
@@ -21,12 +20,17 @@ window.MathJax = {
   }
 };
 </script>
-<script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 <main>
-<div class="center">
+  <div class="center">
 </div>
+
+
+
+
+
 <h1 data-number="1" id="recap"><span class="header-section-number">1.</span> Recap</h1>
 <p>In the previous lecture, we began discussing classification
 algorithms. We began by defining classification algorithms in terms of
@@ -248,7 +252,7 @@ function. Sigmoid functions, in general, describe <span class="math inline">\(S\
 them in the range from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>. In ML, sigmoid functions are usually
 synonymous with the logistic function: <span class="math display">\[\sigma(x)=\frac{1}{1+e^{-x}}\]</span></p>
 <div class="center">
-
+<p><img alt="image" src="img/lecture3/logis.png"/></p>
 </div>
 <p>Notice that this function has horizontal asymptotes that bound the
 <span class="math inline">\(y\)</span>-values 0 and 1, has an <span class="math inline">\(S\)</span>-shape in the sense that there is an
@@ -264,7 +268,7 @@ parameterization here, that varies the location of the inflection point
 (<span class="math inline">\(x_0\)</span>) and growth rate around it
 (<span class="math inline">\(k\)</span>).</p>
 <div class="center">
-<section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/gen-logis.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>While a model of a binary classifier simply displays plotted points
 from a binary dataset and estimates the decision boundary, a sigmoid
@@ -339,7 +343,7 @@ should have these properties</p>
         \end{cases}\)</span></p></li>
 </ul>
 <div class="center">
-<p><img alt="image" src="img/lecture3/loss-behav.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: NLL Behavior Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_NLL_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 3: NLL Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_NLL.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/loss-behav.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: NLL Behavior Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_NLL_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 3: NLL Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_NLL.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>What this suggests is that the cost function should grow tremendously
 as the prediction <span class="math inline">\(z(\textbf{x})\)</span>
@@ -356,7 +360,7 @@ can be rewritten as: <span class="math display">\[\mathcal{L}(y,\textbf{z}) =
     -\log(1-z(\textbf{x})), &amp; y=0
 \end{cases}\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/log-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Log Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LogLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Log Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_LogLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/log-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Log Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_LogLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Log Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_LogLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>This cost function can in fact be derived naturally if we assume the
 <span class="math inline">\(y\)</span> are drawn iid from a Bernoulli
@@ -397,7 +401,7 @@ logistic regression. In binary classification, it’s also called the
 properties, e.g. convexity, which implies that there will only be a
 single global minimum that we must optimize for.</p>
 <div class="center">
-<section class="interactive-notebook"><h3>Interactive Notebook: Logistic Models and NLL Landscape</h3><p>Tune the logistic model parameters and dataset settings, then compare the current model against the minimum-NLL solution.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/logistic_nll_interactive.html" style="height:900px;" title="Interactive Logistic Regression and NLL Landscape Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flogistic_nll_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/nll-landscape.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Logistic Models and NLL Landscape</h3><p>Tune the logistic model parameters and dataset settings, then compare the current model against the minimum-NLL solution.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/logistic_nll_interactive.html" style="height:900px;" title="Interactive Logistic Regression and NLL Landscape Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flogistic_nll_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <h2 data-number="4.4" id="gradient-descent"><span class="header-section-number">4.4</span> Gradient Descent</h2>
 <p>To better predict desired values, we want to find an optimal set of
@@ -466,7 +470,7 @@ using the sign function: <span class="math display">\[\text{sign}(x)=\begin{case
     -1 &amp; x &lt; 0
 \end{cases}\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/sign.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Sign Function Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_SignFunc_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Sign Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_SignFunc.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/sign.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Sign Function Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_SignFunc_interactive.html" style="height:780px;" title="Interactive Notebook - Lecture 3: Sign Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_SignFunc.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>Note here that we’re assuming <span class="math inline">\(y_i\in\{-1,1\}\)</span> here instead of <span class="math inline">\(\{0,1\}\)</span> as in the logistic model. Hence
 if we attempt to model the decision boundary with a linear model <span class="math inline">\(\theta^T\textbf{x}\)</span>, then we can model the
@@ -475,7 +479,7 @@ data using: <span class="math display">\[\text{sign}(\theta^T\textbf{x})=\begin{
     -1 &amp; \theta^T\textbf{x} &lt; 0
 \end{cases}\]</span></p>
 <div class="center">
-<section class="interactive-notebook"><h3>Interactive Notebook: Sign Function for Classification</h3><p>Explore the sign-based binary classifier with adjustable class centers, spread, and decision boundary.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/sign_classification_interactive.html" style="height:860px;" title="Interactive Sign Function Classification Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fsign_classification_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/sign-reg.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Sign Function for Classification</h3><p>Explore the sign-based binary classifier with adjustable class centers, spread, and decision boundary.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/sign_classification_interactive.html" style="height:860px;" title="Interactive Sign Function Classification Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fsign_classification_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>Given a point <span class="math inline">\((\textbf{x},y)\)</span>,
 the prediction will be correct if <span class="math inline">\(\theta^T\textbf{x}&gt;0\)</span> for <span class="math inline">\(y=+1\)</span>, or <span class="math inline">\(\theta^T\textbf{x}&lt;0\)</span> for <span class="math inline">\(y=-1\)</span>. This can be expressed succinctly by
@@ -486,7 +490,7 @@ to penalize it more the more incorrect it is. On the other hand, if it’s
 correct, we’d like to remain “with 0 doubt” and report <span class="math inline">\(0\)</span> cost. This can be summarized in the
 following cost function: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)=\max(0,-y\theta^T\textbf{x})\]</span></p>
 <div class="center">
-<p><img alt="image" src="img/lecture3/hinge-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Hinge Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_HingeLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Hinge Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/Lecture3_HingeLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/hinge-loss.png"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 3: Hinge Loss Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture3_HingeLoss_interactive.html" style="height:760px;" title="Interactive Notebook - Lecture 3: Hinge Loss Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture3_HingeLoss.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>This is called the <strong>hinge loss</strong>, and it’s conveniently
 convex as well. Over a dataset <span class="math inline">\(\{\textbf{x}_i,y_i\}_{i=1}^N\)</span>, we can
@@ -527,6 +531,7 @@ functions the subgradients may not be expressed this simply (or they may
 not have subgradients at all). Using the subgradient, the GD steps can
 proceed as normal.</p></li>
 </ol>
+
 </main>
 </body>
 </html>

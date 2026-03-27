@@ -1,6 +1,6 @@
 {
   "name": "@lckr/jupyterlab_variableinspector",
-  "version": "3.2.4",
+  "version": "3.1.0",
   "description": "Variable inspector extension for JupyterLab",
   "keywords": [
     "jupyter",
@@ -51,9 +51,7 @@
     "watch:labextension": "jupyter labextension watch .",
     "watch:src": "tsc -w --sourceMap"
   },
-  "packageManager": "yarn@3.5.0",
   "dependencies": {
-    "@jupyter/web-components": "^0.16.0",
     "@jupyterlab/application": "^4.0.0",
     "@jupyterlab/apputils": "^4.0.0",
     "@jupyterlab/console": "^4.0.0",
@@ -68,8 +66,7 @@
     "@lumino/disposable": "^2.0.0",
     "@lumino/signaling": "^2.0.0",
     "@lumino/widgets": "^2.0.0",
-    "react": "^18.2.0",
-    "wildcard-match": "^5.1.2"
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0",
@@ -96,29 +93,10 @@
     "yjs": "^13.5.40"
   },
   "jupyterlab": {
-    "schemaDir": "schema",
     "extension": true,
     "outputDir": "lckr_jupyterlab_variableinspector/labextension",
-    "sharedPackages": {
-      "@jupyter/web-components": {
-        "bundled": true,
-        "singleton": true
-      },
-      "@microsoft/fast-components": {
-        "bundled": true,
-        "singleton": true
-      },
-      "@microsoft/fast-element": {
-        "bundled": true,
-        "singleton": true
-      },
-      "@microsoft/fast-foundation": {
-        "bundled": true,
-        "singleton": true
-      }
-    },
     "_build": {
-      "load": "static/remoteEntry.f4a64e687ab347206c17.js",
+      "load": "static/remoteEntry.cfbccb113f4c7c1d65fe.js",
       "extension": "./extension",
       "style": "./style"
     }
