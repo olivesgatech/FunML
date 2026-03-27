@@ -53,6 +53,366 @@
       "description": "Adjust the weight vector and bias to see how the hyperplane and its normal vector change in two dimensions.",
       "iframe_title": "Interactive Linear Separating Hyperplane Notebook",
       "iframe_height": 780
+    },
+    {
+      "image_match": "hinge-loss.png",
+      "notebook_html": "Lecture3_HingeLoss_interactive.html",
+      "notebook_ipynb": "Lecture3_HingeLoss.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Hinge Loss Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Hinge Loss Notebook",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "multiplehyperplanes.png",
+      "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
+      "notebook_ipynb": "Lecture3_LinearBoundaries.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Linear Boundaries Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Linear Boundaries Notebook",
+      "iframe_height": 780
+    },
+    {
+      "image_match": "mmh.png",
+      "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
+      "notebook_ipynb": "Lecture3_LinearBoundaries.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Linear Boundaries Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Linear Boundaries Notebook",
+      "iframe_height": 780
+    },
+    {
+      "image_match": "log-loss.png",
+      "notebook_html": "Lecture3_LogLoss_interactive.html",
+      "notebook_ipynb": "Lecture3_LogLoss.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Log Loss Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Log Loss Notebook",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "loss-behav.png",
+      "notebook_html": "Lecture3_NLL_interactive.html",
+      "notebook_ipynb": "Lecture3_NLL.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: NLL Behavior Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: NLL Behavior Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "logis.png",
+      "notebook_html": "Lecture3_Sigmoid_interactive.html",
+      "notebook_ipynb": "Lecture3_Sigmoid.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Sigmoid Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Sigmoid Notebook",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "sign.png",
+      "notebook_html": "Lecture3_SignFunc_interactive.html",
+      "notebook_ipynb": "Lecture3_SignFunc.ipynb",
+      "section_title": "Interactive Notebook: Lecture 3: Sign Function Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 3: Sign Function Notebook",
+      "iframe_height": 780
+    },
+    {
+      "image_match": "qa1-soft-hard.png",
+      "notebook_html": "Lecture4_Q&A-Q1_interactive.html",
+      "notebook_ipynb": "Lecture4_Q&A-Q1.ipynb",
+      "section_title": "Interactive Notebook: Lecture 4 Q&A 1 Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 4 Q&A 1 Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa1-outlier-scatter.png",
+      "notebook_html": "Lecture4_Q&A-Q1_interactive.html",
+      "notebook_ipynb": "Lecture4_Q&A-Q1.ipynb",
+      "section_title": "Interactive Notebook: Lecture 4 Q&A 1 Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 4 Q&A 1 Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa1-svms-outlier.png",
+      "notebook_html": "Lecture4_Q&A-Q1_interactive.html",
+      "notebook_ipynb": "Lecture4_Q&A-Q1.ipynb",
+      "section_title": "Interactive Notebook: Lecture 4 Q&A 1 Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 4 Q&A 1 Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa2-nonlinear-2d.png",
+      "notebook_html": "Lecture4_Q&A-Q2_interactive.html",
+      "notebook_ipynb": "Lecture4_Q&A-Q2.ipynb",
+      "section_title": "Interactive Notebook: Lecture 4 Q&A 2 Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 4 Q&A 2 Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa2-nonlinear-3d.png",
+      "notebook_html": "Lecture4_Q&A-Q2_interactive.html",
+      "notebook_ipynb": "Lecture4_Q&A-Q2.ipynb",
+      "section_title": "Interactive Notebook: Lecture 4 Q&A 2 Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 4 Q&A 2 Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "slpex-data.png",
+      "notebook_html": "Lecture5_SLP-Example_interactive.html",
+      "notebook_ipynb": "Lecture5_SLP-Example.ipynb",
+      "section_title": "Interactive Notebook: Lecture 5: SLP Example Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 5: SLP Example Notebook",
+      "iframe_height": 800
+    },
+    {
+      "image_match": "confusion_matrix_binary.png",
+      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
+      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "roc_curve_2.png",
+      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
+      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "pr_curve.png",
+      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
+      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "threshold_tradeoff.png",
+      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
+      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "multiclass_roc_ovr.png",
+      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
+      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "bli_scatter_fit.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "bli_residuals_hist.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "bli_residuals_scatter.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "mse_contour_theta0_theta1.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "ridge_paths.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "lasso_paths.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "contour-plot.png",
+      "notebook_html": "Contour_interactive.html",
+      "notebook_ipynb": "Contour.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8: Contour Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 8: Contour Notebook",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "qa-mse-contour.png",
+      "notebook_html": "Q&A Countours_interactive.html",
+      "notebook_ipynb": "Q&A Countours.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8: Q&A Contours Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 8: Q&A Contours Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa-mse-l1-options.png",
+      "notebook_html": "Q&A Countours_interactive.html",
+      "notebook_ipynb": "Q&A Countours.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8: Q&A Contours Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 8: Q&A Contours Notebook",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "qa_q5_linear_vs_poly_fit.png",
+      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
+      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "qa_q5_mse_comparison.png",
+      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
+      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8: Linear vs Polynomial Regression Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 8: Linear vs Polynomial Regression Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "qa_bias_variance_curve.png",
+      "notebook_html": "qa_bias_variance_curve_interactive.html",
+      "notebook_ipynb": "qa_bias_variance_curve.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9: Bias-Variance Curve Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 9: Bias-Variance Curve Notebook",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "p15.png",
+      "notebook_html": "regularization_interactive.html",
+      "notebook_ipynb": "regularization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9: Regularization Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 9: Regularization Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "p16.png",
+      "notebook_html": "regularization_interactive.html",
+      "notebook_ipynb": "regularization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9: Regularization Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 9: Regularization Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "p17.png",
+      "notebook_html": "regularization_interactive.html",
+      "notebook_ipynb": "regularization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 9: Regularization Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 9: Regularization Notebook",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "mahalanobisdistance.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "case1_isotropic.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "case2_large_var_x.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "case3_small_var_x.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "case4_correlated.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "case5_rotated.png",
+      "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
+      "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
+      "section_title": "Interactive Notebook: Lecture 10: Mahalanobis Distance Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 10: Mahalanobis Distance Notebook",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "running_example.png",
+      "notebook_html": "kmeans_visual_demo_interactive.html",
+      "notebook_ipynb": "kmeans_visual_demo.ipynb",
+      "section_title": "Interactive Notebook: Lecture 11: k-means Visual Demo Notebook",
+      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
+      "iframe_title": "Interactive Notebook - Lecture 11: k-means Visual Demo Notebook",
+      "iframe_height": 860
     }
   ]
 }

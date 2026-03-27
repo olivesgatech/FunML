@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <title>Classification Performance Evaluation</title>
-  <link rel="stylesheet" href="../assets/style.css"/>
-  <script>
+<meta charset="utf-8"/>
+<title>Classification Performance Evaluation</title>
+<link href="../assets/style.css" rel="stylesheet"/>
+<script>
 window.MathJax = {
   tex: {
     macros: {
@@ -20,17 +21,12 @@ window.MathJax = {
   }
 };
 </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 <main>
-  <div class="center">
+<div class="center">
 </div>
-
-
-
-
-
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
 <p>In the previous lecture, we discussed Artificial Neural Networks.
 This lecture summarizes Back propagation in Artificial Neural Networks
@@ -639,7 +635,7 @@ binary classifier, which makes the types of errors explicit (false
 positives vs. false negatives) and enables computation of accuracy,
 precision, recall, and F1 score.</p>
 <figure data-latex-placement="H" id="fig:cm_binary">
-<img src="img/lecture6/confusion_matrix_binary.png" style="width:37.20%; max-width:37.20%; height:auto;"/>
+<img src="img/lecture6/confusion_matrix_binary.png" style="width:37.20%; max-width:37.20%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/FunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Confusion matrix for a binary classifier. Rows correspond to
 true labels and columns to predicted labels.</figcaption>
 </figure>
@@ -658,7 +654,7 @@ function of training set size.</figcaption>
 across all thresholds, with AUC summarizing ranking quality. ROC is
 often most informative when classes are relatively balanced.</p>
 <figure data-latex-placement="H" id="fig:roc_binary">
-<img src="img/lecture6/roc_curve_2.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
+<img src="img/lecture6/roc_curve_2.png" style="width:42.00%; max-width:42.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/FunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>ROC curve for binary classification (true positive rate
 vs. false positive rate).</figcaption>
 </figure>
@@ -667,7 +663,7 @@ curve, which is typically more informative than ROC under class
 imbalance, since it focuses on performance on the positive class
 (precision) while increasing coverage (recall).</p>
 <figure data-latex-placement="H" id="fig:pr_binary">
-<img src="img/lecture6/pr_curve.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
+<img src="img/lecture6/pr_curve.png" style="width:42.00%; max-width:42.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/FunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Precision–recall curve for binary
 classification.</figcaption>
 </figure>
@@ -676,7 +672,7 @@ recall vary with the decision threshold. This plot is useful for
 selecting an operating point that matches application costs (e.g., favor
 recall when false negatives are costly).</p>
 <figure data-latex-placement="H" id="fig:thresh_tradeoff">
-<img src="img/lecture6/threshold_tradeoff.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<img src="img/lecture6/threshold_tradeoff.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/FunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Precision and recall as functions of the decision
 threshold.</figcaption>
 </figure>
@@ -685,7 +681,7 @@ shows a multi-class ROC plot using a One-vs-Rest (OvR) strategy.
 Micro-averaging weights classes by frequency, while macro-averaging
 treats all classes equally.</p>
 <figure data-latex-placement="H" id="fig:roc_multiclass">
-<img src="img/lecture6/multiclass_roc_ovr.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<img src="img/lecture6/multiclass_roc_ovr.png" style="width:48.00%; max-width:48.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 6: Evaluation Plots Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/FunML_Lec06_Evaluation_Plots_interactive.html" style="height:900px;" title="Interactive Notebook - Lecture 6: Evaluation Plots Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/FunML_Lec06_Evaluation_Plots.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Multi-class ROC curves using a One-vs-Rest strategy with
 micro and macro averages.</figcaption>
 </figure>
@@ -728,7 +724,6 @@ resulting in <span class="math inline">\(\frac{k(k-1)}{2}\)</span> total
 ROC curves. This constitutes the <strong>One-vs-One (OvO)</strong>
 approach, and micro/macro-averaging can similarly used to aggregate the
 results.</p>
-
 </main>
 </body>
 </html>

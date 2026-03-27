@@ -1167,11 +1167,6 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
   if not notebook_rules:
     return
 
-  injected_iframes = {
-    iframe.get("src", "")
-    for iframe in soup.find_all("iframe", src=True)
-  }
-
   for img in soup.find_all("img", src=True):
     src = unquote(img.get("src", "")).replace("\\", "/").lower()
     if not src:
@@ -1194,9 +1189,6 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
     # Keep the lecture-page embed on the standalone interactive HTML demo.
     # The notebook itself is exposed separately via the "View notebook" link.
     iframe_src = normalize_web_path(f"../assets/notebooks/{matched_rule['notebook_html']}")
-    if iframe_src in injected_iframes:
-      continue
-
     insert_after = img
     if img.parent and img.parent.name == "p":
       insert_after = img.parent
@@ -1206,8 +1198,6 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       and "minipage" in (insert_after.parent.get("class") or [])
     ):
       insert_after = insert_after.parent
-    source_visual = insert_after
-
     section_title = matched_rule["section_title"] or "Interactive Notebook"
     description = matched_rule["description"] or (
       "Click inside the interactive plot to move the new point. "
@@ -1253,8 +1243,6 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       block.append(actions)
 
     insert_after.insert_after(block)
-    source_visual.decompose()
-    injected_iframes.add(iframe_src)
 
 
 def sync_portal_index(index_path: Path, lecture_pages):

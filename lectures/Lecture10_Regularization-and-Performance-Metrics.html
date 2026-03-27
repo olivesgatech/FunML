@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html>
 <head>
-  <meta charset="utf-8"/>
-  <title>Regularization and Performance Metrics</title>
-  <link rel="stylesheet" href="../assets/style.css"/>
-  <script>
+<meta charset="utf-8"/>
+<title>Regularization and Performance Metrics</title>
+<link href="../assets/style.css" rel="stylesheet"/>
+<script>
 window.MathJax = {
   tex: {
     macros: {
@@ -20,17 +21,12 @@ window.MathJax = {
   }
 };
 </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 <main>
-  <div class="center">
+<div class="center">
 </div>
-
-
-
-
-
 <h1 data-number="1" id="recap-and-lecture-objectives"><span class="header-section-number">1.</span> Recap and Lecture Objectives</h1>
 <p>In the previous lecture, we continued our study of regression models
 and the key tools used to train and evaluate them. We covered
@@ -694,7 +690,7 @@ Ridge</h2>
 separately? To highlight their differences, we consider a fixed MSE loss
 with the following contour plot:</p>
 <figure data-latex-placement="H" id="fig:P15.png">
-<img src="img/lecture9/P15.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<img src="img/lecture9/P15.png" style="width:51.00%; max-width:51.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9: Regularization Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/regularization_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 9: Regularization Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/regularization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption>Geometric intuition of L1 vs L2 regularization. L1
 regularization (Lasso) tends to produce sparse solutions by driving some
 coefficients exactly to zero, while L2 regularization (Ridge) shrinks
@@ -1099,7 +1095,7 @@ performance is much higher. In practice, label noise creates uncertainty
 about how measured accuracy relates to the model’s true accuracy <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086 Quesada2025Largescale">(Joshua
 C. Peterson et al. 2019b; Quesada et al. 2025)</span>.</p>
 <figure data-latex-placement="H" id="fig:label_noise_accuracy">
-<img src="img/lecture9/P16.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<img src="img/lecture9/P16.png" style="width:45.00%; max-width:45.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9: Regularization Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/regularization_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 9: Regularization Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/regularization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption><strong>Measured vs. true accuracy under label
 noise.</strong> The diagonal line represents perfect labels. When labels
 contain noise, the measured accuracy lies within a band around this
@@ -1125,7 +1121,7 @@ look like both a 3 and an 8.</p>
 <strong>distributions of human labels</strong> instead of single “hard”
 labels can improve generalization and robustness <span class="citation" data-cites="cifar10h">(Joshua C. Peterson et al. 2019a)</span>.</p>
 <figure data-latex-placement="H" id="fig:human_cnn_uncertainty">
-<img src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<img src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/><section class="interactive-notebook"><h3>Interactive Notebook: Lecture 9: Regularization Notebook</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/regularization_interactive.html" style="height:860px;" title="Interactive Notebook - Lecture 9: Regularization Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks/regularization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figcaption><strong>Humans and neural networks disagree in their
 uncertainty.</strong> Top: examples where humans are confident but CNN
 predictions are uncertain. Middle: examples where humans are uncertain
@@ -1178,7 +1174,6 @@ Dynamics, Generalizability, Evaluation and Inferential Behavior.”</span>
 <em>IEEE Access</em>.
 </div>
 </div>
-
 </main>
 </body>
 </html>
