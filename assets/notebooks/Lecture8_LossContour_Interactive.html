@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Loss Landscape and Contour Explorer</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    body{margin:0;padding:14px;font-family:"Segoe UI",Arial,sans-serif;background:#fff;color:#0f172a}
+    .wrap{max-width:1200px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:24px}
+    p{margin:0 0 12px;color:#475569}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px 16px;margin:12px 0 16px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid #cbd5e1;border-radius:12px;background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)}
+    .row{display:flex;align-items:center;gap:10px}
+    .row input[type=range]{flex:1}
+    .value{min-width:56px;text-align:right;font-weight:700}
+    .plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .card{border:1px solid #cbd5e1;border-radius:14px;overflow:hidden}
+    .plot{height:470px}
+    .status{margin-top:12px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc}
+    @media(max-width:980px){.controls{grid-template-columns:1fr}.plots{grid-template-columns:1fr}.plot{height:380px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Loss Landscape and Contour Explorer</h1>
+    <p>Move the horizontal plane and see the corresponding contour level update. Gradient-descent path is shown on both views.</p>
+
+    <div class="controls">
+      <div class="control">
+        <label>Plane level</label>
+        <div class="row"><input id="plane" type="range" min="-1.0" max="6.0" step="0.05" value="1.2" /><span class="value" id="planev">1.20</span></div>
+      </div>
+      <div class="control">
+        <label>alpha</label>
+        <div class="row"><input id="alpha" type="range" min="0.005" max="0.20" step="0.005" value="0.05" /><span class="value" id="alphav">0.050</span></div>
+      </div>
+      <div class="control">
+        <label>max iter</label>
+        <div class="row"><input id="iter" type="range" min="1" max="200" step="1" value="40" /><span class="value" id="iterv">40</span></div>
+      </div>
+    </div>
+
+    <div class="plots">
+      <div class="card"><div id="surface" class="plot"></div></div>
+      <div class="card"><div id="contour" class="plot"></div></div>
+    </div>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const plane = document.getElementById('plane');
+    const alpha = document.getElementById('alpha');
+    const iter = document.getElementById('iter');
+    const planev = document.getElementById('planev');
+    const alphav = document.getElementById('alphav');
+    const iterv = document.getElementById('iterv');
+    const status = document.getElementById('status');
+
+    function L(t0,t1){
+      return 0.15*(t0*t0+t1*t1) + 0.7*Math.sin(t0)*Math.cos(t1) + 0.25*Math.sin(1.5*t0+0.3*t1);
+    }
+    function grad(t0,t1){
+      const g0 = 0.3*t0 + 0.7*Math.cos(t0)*Math.cos(t1) + 0.375*Math.cos(1.5*t0+0.3*t1);
+      const g1 = 0.3*t1 - 0.7*Math.sin(t0)*Math.sin(t1) + 0.075*Math.cos(1.5*t0+0.3*t1);
+      return [g0,g1];
+    }
+
+    const n=70, lo=-5, hi=5;
+    const xs=[...Array(n)].map((_,i)=>lo+(hi-lo)*i/(n-1));
+    const ys=[...Array(n)].map((_,i)=>lo+(hi-lo)*i/(n-1));
+    const Z=ys.map(y=>xs.map(x=>L(x,y)));
+
+    function gdPath(a, steps){
+      let t0=3.2, t1=-3.2;
+      const px=[t0], py=[t1], pz=[L(t0,t1)];
+      for(let k=0;k<steps;k++){
+        const [g0,g1]=grad(t0,t1);
+        t0-=a*g0; t1-=a*g1;
+        px.push(t0); py.push(t1); pz.push(L(t0,t1));
+      }
+      return {px,py,pz,t0,t1,last:pz[pz.length-1]};
+    }
+
+    function render(){
+      const pl=+plane.value, a=+alpha.value, m=+iter.value;
+      planev.textContent=pl.toFixed(2);
+      alphav.textContent=a.toFixed(3);
+      iterv.textContent=String(m);
+      const path=gdPath(a,m);
+
+      const planeZ = ys.map(()=>xs.map(()=>pl));
+
+      Plotly.newPlot('surface',[
+        {type:'surface',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,opacity:0.95,name:'loss'},
+        {type:'surface',x:xs,y:ys,z:planeZ,showscale:false,opacity:0.35,colorscale:[[0,'#ef4444'],[1,'#ef4444']],name:'selected plane'},
+        {type:'scatter3d',mode:'lines+markers',x:path.px,y:path.py,z:path.pz,line:{color:'#111',width:4},marker:{size:3,color:'#111'},name:'GD trajectory'}
+      ],{
+        title:'Loss landscape',
+        scene:{xaxis:{title:'θ0',range:[lo,hi]},yaxis:{title:'θ1',range:[lo,hi]},zaxis:{title:'L(θ)',range:[-1,6]}},
+        margin:{l:0,r:0,t:40,b:0}
+      },{displayModeBar:false});
+
+      Plotly.newPlot('contour',[
+        {type:'contour',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,contours:{coloring:'lines'}},
+        {type:'contour',x:xs,y:ys,z:Z,showscale:false,line:{color:'#ef4444',width:3},contours:{start:pl,end:pl,size:1,coloring:'lines'},name:'plane contour'},
+        {type:'scatter',x:path.px,y:path.py,mode:'lines+markers',line:{color:'#111',width:2},marker:{size:4,color:'#111'},name:'GD path'}
+      ],{
+        title:'Contour plot with selected level',
+        xaxis:{title:'θ0',range:[lo,hi]},
+        yaxis:{title:'θ1',range:[lo,hi],scaleanchor:'x'}
+      },{displayModeBar:false});
+
+      status.textContent = `Selected level=${pl.toFixed(2)} | alpha=${a.toFixed(3)} | iter=${m} | final θ=(${path.t0.toFixed(3)}, ${path.t1.toFixed(3)}) | final loss=${path.last.toFixed(3)}`;
+    }
+
+    ['plane','alpha','iter'].forEach(id=>document.getElementById(id).addEventListener('input',render));
+    render();
+  </script>
+</body>
+</html>
