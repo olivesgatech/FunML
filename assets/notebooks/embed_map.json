@@ -145,33 +145,6 @@
       "iframe_height": 800
     },
     {
-      "image_match": "mse_contour_theta0_theta1.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "ridge_paths.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "lasso_paths.png",
-      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
-      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7: Regression Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 7: Regression Plots Notebook",
-      "iframe_height": 900
-    },
-    {
       "image_match": "qa-mse-l1-options.png",
       "notebook_html": "Q&A Countours_interactive.html",
       "notebook_ipynb": "Q&A Countours.ipynb",
@@ -269,33 +242,6 @@
       "description": "Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).",
       "iframe_title": "Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold",
       "iframe_height": 900
-    },
-    {
-      "image_match": "img/lecture7/bli_scatter_fit.png",
-      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
-      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
-      "iframe_title": "Interactive Regression Diagnostics Notebook",
-      "iframe_height": 860
-    },
-    {
-      "image_match": "img/lecture7/bli_residuals_hist.png",
-      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
-      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
-      "iframe_title": "Interactive Regression Diagnostics Notebook",
-      "iframe_height": 860
-    },
-    {
-      "image_match": "img/lecture7/bli_residuals_scatter.png",
-      "notebook_html": "Lecture7_Fig735_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture7_Fig735_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 7 Figures 7.3-7.5",
-      "description": "Control data/noise and inspect the fitted line, residual histogram, and residual scatter together.",
-      "iframe_title": "Interactive Regression Diagnostics Notebook",
-      "iframe_height": 860
     },
     {
       "image_match": "img/lecture8/non-linear regression.png",
@@ -871,6 +817,33 @@
       "section_title": "Interactive Notebook: Lecture 12.3 Clustering Metrics",
       "description": "Compute internal and external clustering metrics on the same data and compare outcomes.",
       "iframe_title": "Interactive Clustering Metrics Notebook",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture7/mse_contour_theta0_theta1.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Figure 7.3 Least Squares Loss Contours",
+      "description": "Explore how changing theta0 and theta1 moves the solution on the least-squares contour surface.",
+      "iframe_title": "Interactive Notebook - Figure 7.3 Least Squares Loss Contours",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture7/image.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Figure 7.4 Linear Subspace Geometry",
+      "description": "Interact with the 2D subspace spanned by basis vectors and inspect geometric relationships.",
+      "iframe_title": "Interactive Notebook - Figure 7.4 Linear Subspace Geometry",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture7/projectionmatrix.png",
+      "notebook_html": "Lecture7_FunML_Plots_interactive.html",
+      "notebook_ipynb": "Lecture7_FunML_Plots.ipynb",
+      "section_title": "Interactive Notebook: Projection and Residual Orthogonality",
+      "description": "Adjust vectors and observe projection of y onto the subspace with orthogonal residual y-hat.",
+      "iframe_title": "Interactive Notebook - Projection and Residual Orthogonality",
       "iframe_height": 900
     }
   ]
