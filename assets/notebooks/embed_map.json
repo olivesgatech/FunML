@@ -845,6 +845,15 @@
       "description": "Adjust vectors and observe projection of y onto the subspace with orthogonal residual y-hat.",
       "iframe_title": "Interactive Notebook - Projection and Residual Orthogonality",
       "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture6/cur.png",
+      "notebook_html": "Lecture6_ThresholdEffect_interactive.html",
+      "notebook_ipynb": "Lecture6_ThresholdEffect.ipynb",
+      "section_title": "Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold",
+      "description": "Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).",
+      "iframe_title": "Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold",
+      "iframe_height": 900
     }
   ]
 }
