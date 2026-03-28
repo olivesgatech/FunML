@@ -1,18 +1,52 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Figure 7.5 Interactive</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    html, body { margin: 0; height: 100%; background: #fff; }
-    .top { padding: 8px 12px; font: 16px/1.4 -apple-system,Segoe UI,Arial,sans-serif; border-bottom: 1px solid #e5e7eb; }
-    .top a { color: #1d4ed8; text-decoration: none; }
-    iframe { border: 0; width: 100%; height: calc(100% - 42px); }
+    body{margin:0;padding:10px 12px;font-family:Segoe UI,Arial,sans-serif}
+    .wrap{max-width:980px;margin:0 auto} h3{margin:0 0 8px}
+    .controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:8px 0 10px}
+    .control{border:1px solid #cfd7e3;border-radius:10px;padding:10px}
+    .row{display:flex;gap:10px;align-items:center}.row input{flex:1}.v{min-width:56px;text-align:right;font-weight:700}
+    #plot{width:100%;height:520px;border:1px solid #cfd7e3;border-radius:10px}
+    #msg{margin-top:8px;color:#334155;font-size:13px}
   </style>
 </head>
 <body>
-  <div class="top">Open directly in JupyterLite: <a href="../jupyterlite/lab/index.html?path=notebooks/Lecture7_Figure75.ipynb&reset=1" target="_blank" rel="noopener noreferrer">Lecture7_Figure75.ipynb</a></div>
-  <iframe src="../jupyterlite/lab/index.html?path=notebooks/Lecture7_Figure75.ipynb&reset=1" title="Figure 7.5 interactive"></iframe>
+<div class="wrap">
+  <h3>Figure 7.5: Projection and Residual Orthogonality</h3>
+  <div class="controls">
+    <div class="control"><b>y1</b><div class="row"><input id="y1" type="range" min="-1.0" max="1.2" step="0.02" value="0.7"><span id="y1v" class="v">0.70</span></div></div>
+    <div class="control"><b>y2</b><div class="row"><input id="y2" type="range" min="-1.0" max="1.2" step="0.02" value="0.2"><span id="y2v" class="v">0.20</span></div></div>
+    <div class="control"><b>y3</b><div class="row"><input id="y3" type="range" min="0.0" max="1.2" step="0.02" value="0.5"><span id="y3v" class="v">0.50</span></div></div>
+  </div>
+  <div id="plot"></div>
+  <div id="msg"></div>
+</div>
+<script>
+function dot(a,b){return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]}
+function mul(v,c){return [v[0]*c,v[1]*c,v[2]*c]}
+function add(a,b){return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]}
+function sub(a,b){return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]}
+function solve2(a,b,c,d,e,f){const det=a*d-b*c; if(Math.abs(det)<1e-9) return [0,0]; return [(e*d-b*f)/det,(a*f-e*c)/det];}
+function render(){
+  const y=[Number(y1.value),Number(y2.value),Number(y3.value)]; y1v.textContent=y[0].toFixed(2); y2v.textContent=y[1].toFixed(2); y3v.textContent=y[2].toFixed(2);
+  const v1=[1,1,1], v2=[1,-1,1];
+  const a=dot(v1,v1), b=dot(v1,v2), c=dot(v2,v1), d=dot(v2,v2), e=dot(v1,y), f=dot(v2,y);
+  const [u,v]=solve2(a,b,c,d,e,f);
+  const yhat=add(mul(v1,u),mul(v2,v)), r=sub(y,yhat);
+  const p1=[-2,0,-2], p2=[0,-2,0], p3=[2,0,2], p4=[0,2,0];
+  Plotly.newPlot('plot',[
+    {type:'mesh3d',x:[p1[0],p2[0],p3[0],p4[0]],y:[p1[1],p2[1],p3[1],p4[1]],z:[p1[2],p2[2],p3[2],p4[2]],i:[0,0],j:[1,2],k:[2,3],opacity:0.30,color:'#9fd6b4',name:'subspace'},
+    {type:'scatter3d',mode:'lines',x:[0,y[0]],y:[0,y[1]],z:[0,y[2]],line:{color:'#1f3b8f',width:7},name:'y'},
+    {type:'scatter3d',mode:'lines',x:[0,yhat[0]],y:[0,yhat[1]],z:[0,yhat[2]],line:{color:'#10b981',width:7},name:'y-hat'},
+    {type:'scatter3d',mode:'lines',x:[yhat[0],y[0]],y:[yhat[1],y[1]],z:[yhat[2],y[2]],line:{color:'#ef4444',width:7},name:'y - y-hat'}
+  ],{scene:{xaxis:{title:'x1',range:[-1.2,1.6]},yaxis:{title:'x2',range:[-1.2,1.6]},zaxis:{title:'x3',range:[-0.2,1.6]}},margin:{l:0,r:0,t:30,b:0}}, {displayModeBar:false,responsive:true});
+  const norm=Math.sqrt(dot(r,r)); msg.textContent=`||y - y-hat|| = ${norm.toFixed(4)} (residual)`;
+}
+['y1','y2','y3'].forEach(id=>document.getElementById(id).oninput=render); render();
+</script>
 </body>
 </html>
