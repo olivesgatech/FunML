@@ -91,51 +91,6 @@
       "iframe_height": 820
     },
     {
-      "image_match": "marginwidth.png",
-      "notebook_html": "Lecture4_MarginWidth_interactive.html",
-      "notebook_ipynb": "Lecture4_MarginWidth.ipynb",
-      "section_title": "Interactive Notebook: Margin Width Geometry",
-      "description": "Adjust the separating hyperplane and see how the support margins and width 2/||w|| change.",
-      "iframe_title": "Interactive Margin Width Geometry Notebook",
-      "iframe_height": 840
-    },
-    {
-      "image_match": "multiplehyperplanes.png",
-      "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
-      "notebook_ipynb": "Lecture3_LinearBoundaries.ipynb",
-      "section_title": "Interactive Notebook: Lecture 3: Linear Boundaries Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 3: Linear Boundaries Notebook",
-      "iframe_height": 780
-    },
-    {
-      "image_match": "Soft Margin.png",
-      "notebook_html": "Lecture4_SoftMargin_interactive.html",
-      "notebook_ipynb": "Lecture4_SoftMargin.ipynb",
-      "section_title": "Interactive Notebook: Soft Margin Tradeoff",
-      "description": "Vary C to see the conceptual tradeoff between a wider margin and stricter classification of outliers.",
-      "iframe_title": "Interactive Soft Margin Tradeoff Notebook",
-      "iframe_height": 820
-    },
-    {
-      "image_match": "nonlinearsoftmargin.png",
-      "notebook_html": "Lecture4_KernelLift_interactive.html",
-      "notebook_ipynb": "Lecture4_KernelLift.ipynb",
-      "section_title": "Interactive Notebook: Kernel Lift for Nonlinear Separation",
-      "description": "Lift a nonlinear dataset into a higher-dimensional feature space and move the separating threshold.",
-      "iframe_title": "Interactive Kernel Lift Notebook",
-      "iframe_height": 860
-    },
-    {
-      "image_match": "mmh.png",
-      "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
-      "notebook_ipynb": "Lecture3_LinearBoundaries.ipynb",
-      "section_title": "Interactive Notebook: Lecture 3: Linear Boundaries Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 3: Linear Boundaries Notebook",
-      "iframe_height": 780
-    },
-    {
       "image_match": "qa1-soft-hard.png",
       "notebook_html": "Lecture4_Q&A-Q1_interactive.html",
       "notebook_ipynb": "Lecture4_Q&A-Q1.ipynb",
@@ -188,33 +143,6 @@
       "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
       "iframe_title": "Interactive Notebook - Lecture 5: SLP Example Notebook",
       "iframe_height": 800
-    },
-    {
-      "image_match": "roc_curve_2.png",
-      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
-      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "pr_curve.png",
-      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
-      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "multiclass_roc_ovr.png",
-      "notebook_html": "FunML_Lec06_Evaluation_Plots_interactive.html",
-      "notebook_ipynb": "FunML_Lec06_Evaluation_Plots.ipynb",
-      "section_title": "Interactive Notebook: Lecture 6: Evaluation Plots Notebook",
-      "description": "Run and edit this notebook interactively in JupyterLite directly from this lecture section.",
-      "iframe_title": "Interactive Notebook - Lecture 6: Evaluation Plots Notebook",
-      "iframe_height": 900
     },
     {
       "image_match": "mse_contour_theta0_theta1.png",
@@ -334,21 +262,12 @@
       "iframe_height": 920
     },
     {
-      "image_match": "img/lecture6/confusion_matrix_binary.png",
-      "notebook_html": "Lecture6_ThresholdEffect_interactive.html",
-      "notebook_ipynb": "Lecture6_ThresholdEffect.ipynb",
-      "section_title": "Interactive Notebook: Threshold Effect and Confusion Matrix",
-      "description": "Move the decision threshold and observe precision/recall together with TP/FP/TN/FN updates.",
-      "iframe_title": "Interactive Threshold Effect Notebook",
-      "iframe_height": 900
-    },
-    {
       "image_match": "img/lecture6/threshold_tradeoff.png",
       "notebook_html": "Lecture6_ThresholdEffect_interactive.html",
       "notebook_ipynb": "Lecture6_ThresholdEffect.ipynb",
-      "section_title": "Interactive Notebook: Threshold Effect and Confusion Matrix",
-      "description": "Move the decision threshold and observe precision/recall together with TP/FP/TN/FN updates.",
-      "iframe_title": "Interactive Threshold Effect Notebook",
+      "section_title": "Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold",
+      "description": "Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).",
+      "iframe_title": "Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold",
       "iframe_height": 900
     },
     {

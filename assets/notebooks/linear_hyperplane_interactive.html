@@ -1,34 +1,110 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Linear Separating Hyperplane</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
-:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
-html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
-body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
-.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
-.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
-.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
-button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
-@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
-</style></head><body><div class="wrap"><h1>Interactive Linear Separating Hyperplane</h1><p>Adjust w1, w2, and b to move the boundary and inspect decision contours.</p><div class="controls"><div class="control"><label>w1</label><div class="row"><input id="w1" type="range" min="-3" max="3" step="0.1" value="1.0"><span class="value" id="w1v">1.0</span></div></div><div class="control"><label>w2</label><div class="row"><input id="w2" type="range" min="-3" max="3" step="0.1" value="-1.0"><span class="value" id="w2v">-1.0</span></div></div><div class="control"><label>bias b</label><div class="row"><input id="b" type="range" min="-3" max="3" step="0.1" value="0.0"><span class="value" id="bv">0.0</span></div></div></div><div class="actions"><button id="reset">Reset</button></div><div class="plots"><div class="plot-card"><div id="p1" class="plot"></div></div><div class="plot-card"><div id="p2" class="plot"></div></div></div><div class="status" id="status"></div></div><script>const ids=['w1','w2','b']; const xs=[...Array(121)].map((_,i)=>-4+i*(8/120));
-function val(id){return Number(document.getElementById(id).value)}
-function render(){const w1=val('w1'),w2=val('w2'),b=val('b'); document.getElementById('w1v').textContent=w1.toFixed(1);document.getElementById('w2v').textContent=w2.toFixed(1);document.getElementById('bv').textContent=b.toFixed(1);
-let y=[]; for(const x of xs){y.push(Math.abs(w2)<1e-8?NaN:-(w1*x+b)/w2)}
-const z=xs.map(yy=>xs.map(xx=>w1*xx+w2*yy+b));
-const zSign=z.map(row=>row.map(v=>v>=0?1:-1));
-Plotly.newPlot('p1',[
-{z:zSign,x:xs,y:xs,type:'heatmap',showscale:false,hoverinfo:'skip',opacity:0.92,
- colorscale:[[0.0,'#f4dfc2'],[0.499,'#f4dfc2'],[0.501,'#d8e6f4'],[1.0,'#d8e6f4']]},
-{x:xs,y:y,mode:'lines',line:{color:'black',width:3.2},name:'w^Tx+b=0'}
-],{
-title:'Linear Separating Hyperplane',
-xaxis:{range:[-4,4],showgrid:true,gridcolor:'#d1d5db'},
-yaxis:{range:[-4,4],scaleanchor:'x',showgrid:true,gridcolor:'#d1d5db'},
-annotations:[
-{x:-2.9,y:3.0,text:'w^Tx+b>0',showarrow:false,font:{size:16,color:'#334155'}},
-{x:2.9,y:-2.9,text:'w^Tx+b<0',showarrow:false,font:{size:16,color:'#334155'}}
-]
-},{displayModeBar:false});
-Plotly.newPlot('p2',[{z:z,x:xs,y:xs,type:'contour',contours:{start:0,end:0,size:1,coloring:'lines'},line:{width:3,color:'#e38a4b'},showscale:false}],{title:'Decision function contour (0-level)',xaxis:{range:[-4,4]},yaxis:{range:[-4,4],scaleanchor:'x'}},{displayModeBar:false});
-const margin=(Math.hypot(w1,w2)>1e-8)?(2/Math.hypot(w1,w2)):Infinity; document.getElementById('status').textContent=`Boundary: w^T x + b = 0
-Margin width (for ±1 planes): ${margin.toFixed(3)}`;}
-ids.forEach(i=>document.getElementById(i).addEventListener('input',render)); document.getElementById('reset').onclick=()=>{w1.value=1.0;w2.value=-1.0;b.value=0;render()}; render();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Linear Separating Hyperplane</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root { --line:#cbd5e1; --bg:#f8fafc; }
+    html, body { margin:0; padding:0; font-family:"Segoe UI", Arial, sans-serif; }
+    body { padding:14px; }
+    .wrap { max-width:1100px; margin:0 auto; }
+    .controls { display:grid; grid-template-columns:repeat(3,minmax(180px,1fr)); gap:12px; margin:12px 0; }
+    .control { border:1px solid var(--line); border-radius:12px; padding:10px; background:linear-gradient(180deg,#fff,var(--bg)); }
+    .row { display:flex; align-items:center; gap:10px; }
+    .row input { flex:1; }
+    .val { min-width:52px; text-align:right; font-weight:700; }
+    .plot-card { border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    #plot { height:560px; }
+    .status { margin-top:12px; border:1px solid var(--line); border-radius:12px; padding:10px; background:var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Linear Separating Hyperplane</h2>
+    <div class="controls">
+      <div class="control"><label>w1</label><div class="row"><input id="w1" type="range" min="-3" max="3" step="0.1" value="1"><span class="val" id="w1v">1.0</span></div></div>
+      <div class="control"><label>w2</label><div class="row"><input id="w2" type="range" min="-3" max="3" step="0.1" value="-1"><span class="val" id="w2v">-1.0</span></div></div>
+      <div class="control"><label>bias b</label><div class="row"><input id="b" type="range" min="-3" max="3" step="0.1" value="0"><span class="val" id="bv">0.0</span></div></div>
+    </div>
+    <div class="plot-card"><div id="plot"></div></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const xs = Array.from({length: 161}, (_, i) => -4 + (8 * i) / 160);
+    const w1El = document.getElementById('w1');
+    const w2El = document.getElementById('w2');
+    const bEl = document.getElementById('b');
+
+    function render() {
+      const w1 = Number(w1El.value);
+      const w2 = Number(w2El.value);
+      const b = Number(bEl.value);
+      document.getElementById('w1v').textContent = w1.toFixed(1);
+      document.getElementById('w2v').textContent = w2.toFixed(1);
+      document.getElementById('bv').textContent = b.toFixed(1);
+
+      const z = xs.map(y => xs.map(x => w1 * x + w2 * y + b));
+      const yLine = xs.map(x => Math.abs(w2) < 1e-8 ? NaN : -(w1 * x + b) / w2);
+
+      const nrm = Math.hypot(w1, w2) || 1e-8;
+      const nx = w1 / nrm;
+      const ny = w2 / nrm;
+      const p0x = -b * w1 / (nrm * nrm);
+      const p0y = -b * w2 / (nrm * nrm);
+      const posX = p0x + 1.3 * nx;
+      const posY = p0y + 1.3 * ny;
+      const negX = p0x - 1.3 * nx;
+      const negY = p0y - 1.3 * ny;
+
+      Plotly.newPlot('plot', [
+        {
+          type: 'heatmap',
+          x: xs,
+          y: xs,
+          z: z.map(row => row.map(v => (v >= 0 ? 1 : -1))),
+          hoverinfo: 'skip',
+          showscale: false,
+          opacity: 0.94,
+          colorscale: [
+            [0.0, '#f4dfc2'], [0.499, '#f4dfc2'], [0.501, '#d8e6f4'], [1.0, '#d8e6f4']
+          ]
+        },
+        {
+          type: 'scatter',
+          mode: 'lines',
+          x: xs,
+          y: yLine,
+          line: { color: 'black', width: 3 },
+          name: 'w^T x + b = 0'
+        }
+      ], {
+        title: 'Linear Separating Hyperplane',
+        xaxis: { range: [-4, 4], showgrid: true, gridcolor: '#d1d5db' },
+        yaxis: { range: [-4, 4], scaleanchor: 'x', showgrid: true, gridcolor: '#d1d5db' },
+        annotations: [
+          {
+            x: posX, y: posY, text: 'w^T x + b > 0', showarrow: true,
+            arrowhead: 2, arrowsize: 1, arrowwidth: 1.5, ax: 40, ay: -30,
+            bgcolor: 'rgba(255,255,255,0.8)'
+          },
+          {
+            x: negX, y: negY, text: 'w^T x + b < 0', showarrow: true,
+            arrowhead: 2, arrowsize: 1, arrowwidth: 1.5, ax: -40, ay: 30,
+            bgcolor: 'rgba(255,255,255,0.8)'
+          }
+        ],
+        margin: { l: 50, r: 20, t: 50, b: 40 }
+      }, { displayModeBar: false });
+
+      const margin = 2 / nrm;
+      document.getElementById('status').textContent = `Boundary: w^T x + b = 0 | Margin width (±1 planes): ${margin.toFixed(3)}`;
+    }
+
+    [w1El, w2El, bEl].forEach(el => el.addEventListener('input', render));
+    render();
+  </script>
+</body>
+</html>

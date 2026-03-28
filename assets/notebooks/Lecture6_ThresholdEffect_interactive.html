@@ -1,22 +1,134 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Threshold Effect and Confusion Matrix</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
-:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
-html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
-body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
-.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
-.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
-.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
-button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
-@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
-</style></head><body><div class="wrap"><h1>Interactive Threshold Effect and Confusion Matrix</h1><p>Move threshold and observe precision-recall and confusion counts.</p><div class="controls"><div class="control"><label>Threshold</label><div class="row"><input id="t" type="range" min="0" max="1" step="0.01" value="0.5"><span class="value" id="tv">0.50</span></div></div><div class="control"><label>Noise</label><div class="row"><input id="n" type="range" min="0.05" max="0.25" step="0.01" value="0.12"><span class="value" id="nv">0.12</span></div></div></div><div class="actions"><button id="regen">Regenerate data</button></div><div class="plots"><div class="plot-card"><div id="scores" class="plot"></div></div><div class="plot-card"><div id="trade" class="plot"></div></div></div><div class="status" id="status"></div></div><script>let scores=[], y=[]; function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
-function clip(x,a,b){return Math.max(a,Math.min(b,x))}
-function gen(){const noise=Number(n.value);scores=[];y=[];for(let i=0;i<12;i++){scores.push(clip(0.75+noise*randn(),0,1));y.push(1)} for(let i=0;i<12;i++){scores.push(clip(0.35+noise*randn(),0,1));y.push(0)}}
-function metrics(th){let tp=0,fp=0,tn=0,fn=0;for(let i=0;i<scores.length;i++){const p=scores[i]>=th?1:0; if(y[i]===1&&p===1)tp++; else if(y[i]===0&&p===1)fp++; else if(y[i]===0&&p===0)tn++; else fn++;}const pr=tp+fp?tp/(tp+fp):0;const rc=tp+fn?tp/(tp+fn):0;return {tp,fp,tn,fn,pr,rc}}
-function render(){const th=Number(t.value);tv.textContent=th.toFixed(2);nv.textContent=Number(n.value).toFixed(2); const ord=[...scores.keys()].sort((a,b)=>scores[a]-scores[b]);
-Plotly.newPlot('scores',[{x:ord.map((_,i)=>i),y:ord.map(i=>scores[i]),mode:'markers',marker:{color:ord.map(i=>y[i]),colorscale:'RdBu',showscale:false,size:9}}],{title:'Scores and threshold',shapes:[{type:'line',x0:0,x1:scores.length-1,y0:th,y1:th,line:{dash:'dash',color:'black'}}],yaxis:{range:[0,1]}},{displayModeBar:false});
-const ths=[...Array(99)].map((_,i)=>(i+1)/100); const prs=[],rcs=[]; for(const z of ths){const m=metrics(z); prs.push(m.pr); rcs.push(m.rc)}
-Plotly.newPlot('trade',[{x:ths,y:prs,name:'Precision',mode:'lines',line:{dash:'dash',color:'#2563eb'}},{x:ths,y:rcs,name:'Recall',mode:'lines',line:{color:'#16a34a'}}],{title:'Threshold trade-off',xaxis:{title:'Threshold'},yaxis:{range:[0,1]}},{displayModeBar:false});
-const m=metrics(th); status.textContent=`TP=${m.tp}, FP=${m.fp}, TN=${m.tn}, FN=${m.fn}
-Precision=${m.pr.toFixed(3)}  Recall=${m.rc.toFixed(3)}`}
-regen.onclick=()=>{gen();render()}; t.oninput=render; n.oninput=()=>{gen();render()}; gen(); render();</script></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interactive Precision and Recall vs Decision Threshold</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#ffffff;--blue:#2563eb;--green:#16a34a}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1000px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:24px}
+    p{margin:0 0 12px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:12px 16px;margin:12px 0 14px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:14px;font-weight:600}
+    .row{display:flex;align-items:center;gap:10px}
+    .row input[type=range]{flex:1}
+    .value{min-width:74px;text-align:right;font-weight:700}
+    .plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+    .plot{width:100%;height:500px}
+    .status{margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
+    @media(max-width:860px){.controls{grid-template-columns:1fr}.plot{height:420px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Interactive Precision and Recall vs Decision Threshold</h1>
+    <p>Figure 6.5: move the decision threshold and observe how precision increases while recall decreases.</p>
+
+    <div class="controls">
+      <div class="control">
+        <label>Decision threshold</label>
+        <div class="row">
+          <input id="thr" type="range" min="-700000" max="700000" step="5000" value="0">
+          <span class="value" id="thrVal">0</span>
+        </div>
+      </div>
+      <div class="control">
+        <label>Class overlap (noise scale)</label>
+        <div class="row">
+          <input id="noise" type="range" min="60000" max="300000" step="5000" value="150000">
+          <span class="value" id="noiseVal">150000</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="plot-card"><div id="curve" class="plot"></div></div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    let scores = [], labels = [];
+
+    function randn(){
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+    }
+
+    function generateData(){
+      const sigma = Number(noise.value);
+      const n = 600;
+      const muPos = 180000;
+      const muNeg = -180000;
+      scores = [];
+      labels = [];
+      for (let i=0;i<n;i++){ scores.push(muPos + sigma*randn()); labels.push(1); }
+      for (let i=0;i<n;i++){ scores.push(muNeg + sigma*randn()); labels.push(0); }
+    }
+
+    function metricsAtThreshold(t){
+      let tp=0, fp=0, fn=0;
+      for (let i=0;i<scores.length;i++){
+        const pred = scores[i] >= t ? 1 : 0;
+        if (labels[i] === 1 && pred === 1) tp++;
+        else if (labels[i] === 0 && pred === 1) fp++;
+        else if (labels[i] === 1 && pred === 0) fn++;
+      }
+      const precision = (tp + fp) ? tp/(tp+fp) : 1;
+      const recall = (tp + fn) ? tp/(tp+fn) : 0;
+      return {precision, recall, tp, fp, fn};
+    }
+
+    function render(){
+      const tNow = Number(thr.value);
+      const sigma = Number(noise.value);
+      thrVal.textContent = tNow.toLocaleString();
+      noiseVal.textContent = sigma.toLocaleString();
+
+      const tMin = -700000, tMax = 700000, steps = 220;
+      const ths = [], prs = [], rcs = [];
+      for (let i=0;i<=steps;i++){
+        const t = tMin + (tMax - tMin)*i/steps;
+        const m = metricsAtThreshold(t);
+        ths.push(t);
+        prs.push(m.precision);
+        rcs.push(m.recall);
+      }
+
+      Plotly.newPlot('curve', [
+        {x: ths, y: prs, name: 'Precision', mode: 'lines', line: {color: '#2563eb', dash: 'dash', width: 3}},
+        {x: ths, y: rcs, name: 'Recall', mode: 'lines', line: {color: '#16a34a', width: 3}}
+      ], {
+        title: 'Precision and Recall as Functions of the Decision Threshold',
+        xaxis: {title: 'Threshold'},
+        yaxis: {title: 'Metric value', range: [0, 1]},
+        shapes: [{type:'line', x0:tNow, x1:tNow, y0:0, y1:1, line:{color:'#111827', width:2, dash:'dot'}}],
+        margin: {l:70, r:20, t:60, b:65},
+        legend: {x: 0.03, y: 0.98}
+      }, {displayModeBar:false, responsive:true});
+
+      const mNow = metricsAtThreshold(tNow);
+      status.textContent =
+        `Threshold = ${tNow.toLocaleString()}\n` +
+        `Precision = ${mNow.precision.toFixed(3)}\n` +
+        `Recall = ${mNow.recall.toFixed(3)}\n` +
+        `TP = ${mNow.tp}, FP = ${mNow.fp}, FN = ${mNow.fn}`;
+    }
+
+    function rebuildAndRender(){
+      generateData();
+      render();
+    }
+
+    thr.oninput = render;
+    noise.oninput = rebuildAndRender;
+
+    rebuildAndRender();
+  </script>
+</body>
+</html>
