@@ -104,19 +104,19 @@ pre, code {
 }
 
 .interactive-notebook {
-  margin: 20px 0 28px;
-  padding: 18px;
+  margin: 14px 0 18px;
+  padding: 12px;
   border: 1px solid #d7dfeb;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(180deg, #f9fbff 0%, #f4f7fb 100%);
 }
 
 .interactive-notebook h3 {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .interactive-notebook p {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   color: #334155;
 }
 
@@ -132,7 +132,7 @@ pre, code {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 10px;
 }
 
 .interactive-notebook-link {
@@ -1220,6 +1220,7 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       iframe_height = int(matched_rule["iframe_height"])
     except (TypeError, ValueError):
       iframe_height = 680
+    iframe_height = max(420, min(iframe_height, 700))
     block = soup.new_tag("section")
     block["class"] = ["interactive-notebook"]
     h = soup.new_tag("h3")
