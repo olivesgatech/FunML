@@ -13,9 +13,22 @@ button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repe
 function val(id){return Number(document.getElementById(id).value)}
 function render(){const w1=val('w1'),w2=val('w2'),b=val('b'); document.getElementById('w1v').textContent=w1.toFixed(1);document.getElementById('w2v').textContent=w2.toFixed(1);document.getElementById('bv').textContent=b.toFixed(1);
 let y=[]; for(const x of xs){y.push(Math.abs(w2)<1e-8?NaN:-(w1*x+b)/w2)}
-const regionTop=xs.map(x=>4), regionBottom=xs.map(x=>-4);
-Plotly.newPlot('p1',[{x:xs,y:regionTop,mode:'lines',line:{width:0},showlegend:false},{x:xs,y:y,mode:'lines',line:{color:'black',width:3},name:'w^Tx+b=0'},{x:[-3,3],y:[3,3],mode:'text',text:['w^Tx+b>0',''],showlegend:false}],{title:'Linear Separating Hyperplane',xaxis:{range:[-4,4]},yaxis:{range:[-4,4],scaleanchor:'x'}} ,{displayModeBar:false});
-const z=xs.map(yy=>xs.map(xx=>w1*xx+w2*yy+b)); Plotly.newPlot('p2',[{z:z,x:xs,y:xs,type:'contour',contours:{start:0,end:0,size:1,coloring:'lines'},line:{width:3,color:'black'},showscale:false}],{title:'Decision function contour (0-level)',xaxis:{range:[-4,4]},yaxis:{range:[-4,4],scaleanchor:'x'}},{displayModeBar:false});
+const z=xs.map(yy=>xs.map(xx=>w1*xx+w2*yy+b));
+const zSign=z.map(row=>row.map(v=>v>=0?1:-1));
+Plotly.newPlot('p1',[
+{z:zSign,x:xs,y:xs,type:'heatmap',showscale:false,hoverinfo:'skip',opacity:0.92,
+ colorscale:[[0.0,'#f4dfc2'],[0.499,'#f4dfc2'],[0.501,'#d8e6f4'],[1.0,'#d8e6f4']]},
+{x:xs,y:y,mode:'lines',line:{color:'black',width:3.2},name:'w^Tx+b=0'}
+],{
+title:'Linear Separating Hyperplane',
+xaxis:{range:[-4,4],showgrid:true,gridcolor:'#d1d5db'},
+yaxis:{range:[-4,4],scaleanchor:'x',showgrid:true,gridcolor:'#d1d5db'},
+annotations:[
+{x:-2.9,y:3.0,text:'w^Tx+b>0',showarrow:false,font:{size:16,color:'#334155'}},
+{x:2.9,y:-2.9,text:'w^Tx+b<0',showarrow:false,font:{size:16,color:'#334155'}}
+]
+},{displayModeBar:false});
+Plotly.newPlot('p2',[{z:z,x:xs,y:xs,type:'contour',contours:{start:0,end:0,size:1,coloring:'lines'},line:{width:3,color:'#e38a4b'},showscale:false}],{title:'Decision function contour (0-level)',xaxis:{range:[-4,4]},yaxis:{range:[-4,4],scaleanchor:'x'}},{displayModeBar:false});
 const margin=(Math.hypot(w1,w2)>1e-8)?(2/Math.hypot(w1,w2)):Infinity; document.getElementById('status').textContent=`Boundary: w^T x + b = 0
 Margin width (for ±1 planes): ${margin.toFixed(3)}`;}
 ids.forEach(i=>document.getElementById(i).addEventListener('input',render)); document.getElementById('reset').onclick=()=>{w1.value=1.0;w2.value=-1.0;b.value=0;render()}; render();</script></body></html>
