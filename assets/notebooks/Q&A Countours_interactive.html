@@ -20,7 +20,7 @@ function pred(theta,x){return theta.reduce((s,t,k)=>s+t*(x**k),0)}
 function render(){const d=+deg.value,noise=+noiseEl.value,alpha=+alphaEl.value,maxi=+iter.value; degv.textContent=d;noisev.textContent=noise.toFixed(2);alphav.textContent=alpha.toFixed(3);iterv.textContent=maxi;
 const N=40; const x=[...Array(N)].map((_,i)=>-2.3+4.6*i/(N-1)); const y=x.map(v=>1.2+0.8*v-0.6*v*v+noise*randn());
 const th=polyFit(x,y,d); const xg=[...Array(300)].map((_,i)=>-2.3+4.6*i/299); const yg=xg.map(v=>pred(th,v));
-Plotly.newPlot('pfit',[{x,y,mode:'markers',name:'data'},{x:xg,y:yg,mode:'lines',name:'poly fit',line:{color:'#dc2626'}}],{title:`Linear to polynomial (degree=${d})`},{displayModeBar:false});
+Plotly.newPlot('pfit',[{x,y,mode:'markers',name:'data'},{x:xg,y:yg,mode:'lines',name:'poly fit',line:{color:'#dc2626'}}],{title:`Linear to polynomial (degree=${d})`,xaxis:{title:'x',range:[-2.5,2.5],autorange:false},yaxis:{title:'y',range:[-4.5,3.5],autorange:false}},{displayModeBar:false});
 // linear contour + GD path
 const t0=[...Array(70)].map((_,i)=>-1.5+4*i/69), t1=[...Array(70)].map((_,i)=>-2.5+5*i/69); const z=[]; for(const b0 of t1){const row=[]; for(const a0 of t0){let s=0; for(let i=0;i<N;i++){const e=(a0+b0*x[i])-y[i]; s+=e*e} row.push(s/N)} z.push(row)}
 let a=0,b=0,pathx=[a],pathy=[b],mses=[]; for(let it=0;it<maxi;it++){let ga=0,gb=0,mse=0; for(let i=0;i<N;i++){const e=(a+b*x[i])-y[i]; ga+=2*e/N; gb+=2*e*x[i]/N; mse+=e*e/N} mses.push(mse); a-=alpha*ga; b-=alpha*gb; pathx.push(a); pathy.push(b)}
