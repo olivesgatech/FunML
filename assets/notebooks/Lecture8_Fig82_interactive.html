@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Figure 8.2 Polynomial Fit</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #0f172a; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 14px; }
+    h1 { margin: 0 0 10px; font-size: 28px; }
+    p { margin: 0 0 12px; color: #475569; }
+    .controls { display: grid; grid-template-columns: repeat(2, minmax(220px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    .control { background: #e5e7eb; border: 1px solid #b6c2d5; border-radius: 12px; padding: 10px 12px; }
+    .control label { display: block; font-weight: 700; margin-bottom: 6px; }
+    .row { display: flex; align-items: center; gap: 10px; }
+    input[type="range"] { flex: 1; }
+    .val { width: 44px; text-align: right; font-weight: 700; }
+    .card { background: #e5e7eb; border: 1px solid #b6c2d5; border-radius: 12px; padding: 10px; }
+    #plot { height: 520px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Figure 8.2: Linear to Polynomial Fit</h1>
+    <p>Only the fit view is shown here (contour and optimization-MSE are intentionally removed).</p>
+    <div class="controls">
+      <div class="control">
+        <label for="deg">Polynomial degree</label>
+        <div class="row"><input id="deg" type="range" min="1" max="10" step="1" value="2" /><span id="degv" class="val">2</span></div>
+      </div>
+      <div class="control">
+        <label for="noise">Noise</label>
+        <div class="row"><input id="noise" type="range" min="0.05" max="1.00" step="0.05" value="0.25" /><span id="noisev" class="val">0.25</span></div>
+      </div>
+    </div>
+    <div class="card"><div id="plot"></div></div>
+  </div>
+
+  <script>
+    function solveLinearSystem(A, b) {
+      const n = A.length;
+      const M = A.map((row, i) => row.slice().concat([b[i]]));
+      for (let col = 0; col < n; col++) {
+        let pivot = col;
+        for (let r = col + 1; r < n; r++) {
+          if (Math.abs(M[r][col]) > Math.abs(M[pivot][col])) pivot = r;
+        }
+        const tmp = M[col]; M[col] = M[pivot]; M[pivot] = tmp;
+        const div = M[col][col] || 1e-10;
+        for (let j = col; j <= n; j++) M[col][j] /= div;
+        for (let r = 0; r < n; r++) {
+          if (r === col) continue;
+          const f = M[r][col];
+          for (let j = col; j <= n; j++) M[r][j] -= f * M[col][j];
+        }
+      }
+      return M.map(row => row[n]);
+    }
+
+    function fitPoly(x, y, degree) {
+      const p = degree + 1;
+      const XtX = Array.from({ length: p }, () => Array(p).fill(0));
+      const Xty = Array(p).fill(0);
+      for (let i = 0; i < x.length; i++) {
+        const v = Array(p).fill(1);
+        for (let j = 1; j < p; j++) v[j] = v[j - 1] * x[i];
+        for (let r = 0; r < p; r++) {
+          Xty[r] += v[r] * y[i];
+          for (let c = 0; c < p; c++) XtX[r][c] += v[r] * v[c];
+        }
+      }
+      for (let i = 0; i < p; i++) XtX[i][i] += 1e-8;
+      return solveLinearSystem(XtX, Xty);
+    }
+
+    function evalPoly(theta, x) {
+      let y = 0;
+      let p = 1;
+      for (let i = 0; i < theta.length; i++) {
+        y += theta[i] * p;
+        p *= x;
+      }
+      return y;
+    }
+
+    const N = 36;
+    const x = Array.from({ length: N }, (_, i) => -2.2 + 4.4 * i / (N - 1));
+    const baseNoise = x.map((_, i) => {
+      const t = i + 1;
+      return 0.8 * Math.sin(7.123 * t) + 0.25 * Math.cos(3.337 * t);
+    });
+    function yTrue(v) {
+      return 0.5 * v + 1.2 * Math.sin(1.1 * v) + 0.2 * v * v;
+    }
+
+    const deg = document.getElementById('deg');
+    const noise = document.getElementById('noise');
+    const degv = document.getElementById('degv');
+    const noisev = document.getElementById('noisev');
+
+    function render() {
+      const d = Number(deg.value);
+      const nz = Number(noise.value);
+      degv.textContent = String(d);
+      noisev.textContent = nz.toFixed(2);
+
+      const y = x.map((xi, i) => yTrue(xi) + nz * baseNoise[i]);
+      const theta = fitPoly(x, y, d);
+      const xg = Array.from({ length: 240 }, (_, i) => -2.5 + 5.0 * i / 239);
+      const yg = xg.map(v => evalPoly(theta, v));
+
+      Plotly.newPlot('plot', [
+        { x, y, mode: 'markers', name: 'data', marker: { color: '#1f77b4', size: 7 } },
+        { x: xg, y: yg, mode: 'lines', name: 'poly fit', line: { color: '#dc2626', width: 3 } }
+      ], {
+        title: `Linear to polynomial (degree=${d})`,
+        xaxis: { title: 'x', range: [-2.5, 2.5], autorange: false },
+        yaxis: { title: 'y', range: [-4.5, 3.5], autorange: false },
+        margin: { l: 70, r: 20, t: 50, b: 60 },
+        paper_bgcolor: '#e5e7eb',
+        plot_bgcolor: '#e5e7eb'
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    deg.addEventListener('input', render);
+    noise.addEventListener('input', render);
+    render();
+  </script>
+</body>
+</html>
