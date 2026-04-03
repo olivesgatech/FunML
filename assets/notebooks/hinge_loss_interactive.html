@@ -12,7 +12,7 @@
     .wrap{max-width:1100px;margin:0 auto}
     h1{margin:0 0 8px;font-size:24px}
     p{margin:0 0 12px;color:var(--muted)}
-    .controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:10px;margin:10px 0 14px}
+    .controls{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin:10px 0 14px}
     .control{border:1px solid var(--line);border-radius:12px;padding:10px;background:linear-gradient(180deg,#fff,var(--bg))}
     .control label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
     .row{display:flex;align-items:center;gap:8px}
@@ -37,10 +37,6 @@
         </select>
       </div>
       <div class="control">
-        <label for="y">Label y</label>
-        <select id="y"><option value="1">+1</option><option value="-1">-1</option></select>
-      </div>
-      <div class="control">
         <label for="b">Bias b</label>
         <div class="row"><input id="b" type="range" min="-2" max="2" step="0.1" value="0"><span class="value" id="bVal">0.0</span></div>
       </div>
@@ -59,7 +55,6 @@
 
   <script>
     const viewEl = document.getElementById('view');
-    const yEl = document.getElementById('y');
     const bEl = document.getElementById('b');
     const mEl = document.getElementById('m');
     const tEl = document.getElementById('t');
@@ -84,7 +79,6 @@
 
     function draw() {
       const view = viewEl.value;
-      const y = Number(yEl.value);
       const b = Number(bEl.value);
       const margin = Number(mEl.value);
       const tau = Number(tEl.value);
@@ -93,39 +87,63 @@
       tVal.textContent = tau.toFixed(2);
 
       const score = x.map(v => v - b);
-      const kink = b + margin / y;
-
+      const labels = [1, -1];
+      const colors = {1: '#2563eb', '-1': '#dc2626'};
       const traces = [];
+      const curveValues = [];
       let title = '';
       let yaxis = 'loss';
 
       if (view === 'Hinge loss') {
-        traces.push({x, y: hinge(score, y, margin), mode:'lines', name:`Hinge loss (y=${y})`, line:{color:'#2563eb', width:3}});
+        labels.forEach(y => {
+          const curve = hinge(score, y, margin);
+          curveValues.push(...curve);
+          traces.push({x, y: curve, mode:'lines', name:`Hinge y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], width:3}});
+        });
         title = 'Hinge Loss with Bias: s = θᵀx - b';
       } else if (view === 'Hinge vs Softplus') {
-        traces.push({x, y: hinge(score, y, margin), mode:'lines', name:'Hinge', line:{color:'#2563eb', width:3}});
-        traces.push({x, y: softplus(score, y, margin, tau), mode:'lines', name:`Softplus (τ=${tau.toFixed(2)})`, line:{color:'#059669', width:3, dash:'dash'}});
+        labels.forEach(y => {
+          const h = hinge(score, y, margin);
+          const sp = softplus(score, y, margin, tau);
+          curveValues.push(...h, ...sp);
+          traces.push({x, y: h, mode:'lines', name:`Hinge y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], width:3}});
+          traces.push({x, y: sp, mode:'lines', name:`Softplus y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], width:3, dash:'dash'}});
+        });
         title = 'Hinge vs Softplus with Bias: s = θᵀx - b';
       } else {
-        traces.push({x, y: hinge(score, y, margin), mode:'lines', name:'Hinge', line:{color:'#2563eb', width:3, dash:'dash'}});
-        traces.push({x, y: subgrad(score, y, margin), mode:'lines', name:'Subgradient', line:{color:'#dc2626', width:3}});
+        labels.forEach(y => {
+          const h = hinge(score, y, margin);
+          const sg = subgrad(score, y, margin);
+          curveValues.push(...h, ...sg);
+          traces.push({x, y: h, mode:'lines', name:`Hinge y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], width:3, dash:'dash'}});
+          traces.push({x, y: sg, mode:'lines', name:`Subgrad y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], width:3}});
+        });
         yaxis = 'hinge / subgradient';
         title = 'Hinge Subgradient with Bias: s = θᵀx - b';
       }
 
-      traces.push({x:[b,b], y:[-2,3], mode:'lines', name:'θᵀx = b', line:{color:'#64748b', dash:'dot'}});
-      traces.push({x:[kink,kink], y:[-2,3], mode:'lines', name:'margin kink', line:{color:'#111827', dash:'dash'}});
+      const yMin = Math.min(...curveValues);
+      const yMax = Math.max(...curveValues);
+      const pad = Math.max(0.2, 0.08 * Math.max(yMax - yMin, 1));
+      const guideMin = yMin - pad;
+      const guideMax = yMax + pad;
+
+      traces.push({x:[b,b], y:[guideMin,guideMax], mode:'lines', name:'θᵀx = b', line:{color:'#64748b', dash:'dot'}});
+      labels.forEach(y => {
+        const kink = b + margin / y;
+        traces.push({x:[kink,kink], y:[guideMin,guideMax], mode:'lines', name:`kink y=${y > 0 ? '+1' : '-1'}`, line:{color:colors[y], dash:'dot'}});
+      });
 
       Plotly.newPlot('plot', traces, {
         margin:{l:60,r:20,t:50,b:55},
         title,
         xaxis:{title:'θᵀx'},
         yaxis:{title:yaxis},
-        legend:{orientation:'h', y:1.12}
+        legend:{orientation:'h', y:1.12, font:{size:11}}
       }, {displayModeBar:false, responsive:true});
     }
 
-    [viewEl,yEl,bEl,mEl,tEl].forEach(el => el.addEventListener('input', draw));
+    [viewEl,bEl,mEl,tEl].forEach(el => el.addEventListener('input', draw));
     draw();
   </script>
 </body>

@@ -25,7 +25,7 @@
 <body>
   <div class="wrap">
     <h1>Loss Landscape and Contour Explorer</h1>
-    <p>Move the horizontal plane and see the corresponding contour level update. Gradient-descent path is shown on both views.</p>
+    <p>Move the horizontal plane and see the corresponding contour level update on the same lecture-style loss surface and GD trajectory.</p>
 
     <div class="controls">
       <div class="control">
@@ -60,21 +60,21 @@
     const status = document.getElementById('status');
 
     function L(t0,t1){
-      return 0.15*(t0*t0+t1*t1) + 0.7*Math.sin(t0)*Math.cos(t1) + 0.25*Math.sin(1.5*t0+0.3*t1);
+      return Math.sin(t0) * Math.cos(t1) + 0.1 * (t0*t0 + t1*t1);
     }
     function grad(t0,t1){
-      const g0 = 0.3*t0 + 0.7*Math.cos(t0)*Math.cos(t1) + 0.375*Math.cos(1.5*t0+0.3*t1);
-      const g1 = 0.3*t1 - 0.7*Math.sin(t0)*Math.sin(t1) + 0.075*Math.cos(1.5*t0+0.3*t1);
+      const g0 = Math.cos(t0) * Math.cos(t1) + 0.2 * t0;
+      const g1 = -Math.sin(t0) * Math.sin(t1) + 0.2 * t1;
       return [g0,g1];
     }
 
-    const n=70, lo=-5, hi=5;
+    const n=100, lo=-5, hi=5;
     const xs=[...Array(n)].map((_,i)=>lo+(hi-lo)*i/(n-1));
     const ys=[...Array(n)].map((_,i)=>lo+(hi-lo)*i/(n-1));
     const Z=ys.map(y=>xs.map(x=>L(x,y)));
 
     function gdPath(a, steps){
-      let t0=3.2, t1=-3.2;
+      let t0=4.5, t1=-4.5;
       const px=[t0], py=[t1], pz=[L(t0,t1)];
       for(let k=0;k<steps;k++){
         const [g0,g1]=grad(t0,t1);
@@ -94,26 +94,39 @@
       const planeZ = ys.map(()=>xs.map(()=>pl));
 
       Plotly.newPlot('surface',[
-        {type:'surface',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,opacity:0.95,name:'loss'},
-        {type:'surface',x:xs,y:ys,z:planeZ,showscale:false,opacity:0.35,colorscale:[[0,'#ef4444'],[1,'#ef4444']],name:'selected plane'},
-        {type:'scatter3d',mode:'lines+markers',x:path.px,y:path.py,z:path.pz,line:{color:'#111',width:4},marker:{size:3,color:'#111'},name:'GD trajectory'}
+        {type:'surface',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,opacity:0.85,name:'loss'},
+        {type:'surface',x:xs,y:ys,z:planeZ,showscale:false,opacity:0.28,colorscale:[[0,'#f97316'],[1,'#f97316']],name:'selected plane'},
+        {type:'scatter3d',mode:'lines',x:path.px,y:path.py,z:path.pz,line:{color:'#dc2626',width:6},name:'GD trajectory'}
       ],{
-        title:'Loss landscape',
-        scene:{xaxis:{title:'θ0',range:[lo,hi]},yaxis:{title:'θ1',range:[lo,hi]},zaxis:{title:'L(θ)',range:[-1,6]}},
+        title:'Loss Landscape',
+        scene:{
+          xaxis:{title:'θ0',range:[lo,hi]},
+          yaxis:{title:'θ1',range:[lo,hi]},
+          zaxis:{title:'L(θ)',range:[-1.2,5.5]},
+          camera:{eye:{x:1.45,y:-1.8,z:1.1}}
+        },
         margin:{l:0,r:0,t:40,b:0}
       },{displayModeBar:false});
 
       Plotly.newPlot('contour',[
-        {type:'contour',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,contours:{coloring:'lines'}},
-        {type:'contour',x:xs,y:ys,z:Z,showscale:false,line:{color:'#ef4444',width:3},contours:{start:pl,end:pl,size:1,coloring:'lines'},name:'plane contour'},
-        {type:'scatter',x:path.px,y:path.py,mode:'lines+markers',line:{color:'#111',width:2},marker:{size:4,color:'#111'},name:'GD path'}
+        {
+          type:'contour',x:xs,y:ys,z:Z,colorscale:'Viridis',showscale:false,
+          contours:{coloring:'lines',showlabels:true,labelfont:{size:10,color:'#334155'}},
+          line:{width:1}
+        },
+        {
+          type:'contour',x:xs,y:ys,z:Z,showscale:false,line:{color:'#f97316',width:3},
+          contours:{start:pl,end:pl,size:1,coloring:'lines'},
+          name:'plane contour'
+        },
+        {type:'scatter',x:path.px,y:path.py,mode:'lines',line:{color:'#dc2626',width:3},name:'GD path'}
       ],{
-        title:'Contour plot with selected level',
+        title:'Contour Plot with Gradient Descent Trajectory',
         xaxis:{title:'θ0',range:[lo,hi]},
         yaxis:{title:'θ1',range:[lo,hi],scaleanchor:'x'}
       },{displayModeBar:false});
 
-      status.textContent = `Selected level=${pl.toFixed(2)} | alpha=${a.toFixed(3)} | iter=${m} | final θ=(${path.t0.toFixed(3)}, ${path.t1.toFixed(3)}) | final loss=${path.last.toFixed(3)}`;
+      status.textContent = `Selected level=${pl.toFixed(2)} | alpha=${a.toFixed(3)} | iter=${m} | start θ=(4.500, -4.500) | final θ=(${path.t0.toFixed(3)}, ${path.t1.toFixed(3)}) | final loss=${path.last.toFixed(3)}`;
     }
 
     ['plane','alpha','iter'].forEach(id=>document.getElementById(id).addEventListener('input',render));

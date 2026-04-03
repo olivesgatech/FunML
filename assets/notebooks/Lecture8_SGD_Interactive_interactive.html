@@ -28,10 +28,9 @@
 <body>
   <div class="wrap">
     <h1>Interactive Stochastic Gradient Descent (Lecture 8)</h1>
-    <p>Linear-to-polynomial transition, contour behavior, and optimization controls (Stochastic GD).</p>
+    <p>Lecture-consistent SGD for linear regression with a matching fit, contour trajectory, and full-batch MSE trace.</p>
 
     <div class="controls">
-      <div class="control"><label>Polynomial degree</label><div class="row"><input id="deg" type="range" min="1" max="10" step="1" value="3" /><span class="value" id="degv">3</span></div></div>
       <div class="control"><label>Noise</label><div class="row"><input id="noise" type="range" min="0.05" max="1.0" step="0.05" value="0.25" /><span class="value" id="noisev">0.25</span></div></div>
       <div class="control"><label>alpha</label><div class="row"><input id="alpha" type="range" min="0.001" max="0.3" step="0.001" value="0.05" /><span class="value" id="alphav">0.050</span></div></div>
       <div class="control"><label>max iter</label><div class="row"><input id="iter" type="range" min="1" max="200" step="1" value="10" /><span class="value" id="iterv">10</span></div></div>
@@ -48,132 +47,166 @@
 
   <script>
     const METHOD = 'sgd';
-    const MINI_BATCH = 8;
+    const METHOD_LABEL = 'SGD';
 
-    function polyFit(x, y, d) {
-      const n = x.length;
-      const m = d + 1;
-      const A = Array.from({ length: m }, () => Array(m).fill(0));
-      const b = Array(m).fill(0);
-      for (let i = 0; i < n; i++) {
-        const row = Array(m).fill(1);
-        for (let k = 1; k < m; k++) row[k] = row[k - 1] * x[i];
-        for (let r = 0; r < m; r++) {
-          b[r] += row[r] * y[i];
-          for (let c = 0; c < m; c++) A[r][c] += row[r] * row[c];
-        }
-      }
-      for (let i = 0; i < m; i++) {
-        let piv = i;
-        for (let r = i + 1; r < m; r++) if (Math.abs(A[r][i]) > Math.abs(A[piv][i])) piv = r;
-        [A[i], A[piv]] = [A[piv], A[i]];
-        [b[i], b[piv]] = [b[piv], b[i]];
-        const div = A[i][i] || 1e-9;
-        for (let c = i; c < m; c++) A[i][c] /= div;
-        b[i] /= div;
-        for (let r = 0; r < m; r++) {
-          if (r === i) continue;
-          const f = A[r][i];
-          for (let c = i; c < m; c++) A[r][c] -= f * A[i][c];
-          b[r] -= f * b[i];
-        }
-      }
-      return b;
+    function makeRng(seed) {
+      let state = seed >>> 0;
+      return function rand() {
+        state = (1664525 * state + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
     }
 
-    function pred(theta, x) {
-      let y = 0, p = 1;
-      for (let k = 0; k < theta.length; k++) { y += theta[k] * p; p *= x; }
-      return y;
+    function shuffledIndices(n, rand) {
+      const idx = Array.from({ length: n }, (_, i) => i);
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [idx[i], idx[j]] = [idx[j], idx[i]];
+      }
+      return idx;
+    }
+
+    function solveLinearFit(x, y) {
+      const n = x.length;
+      let sx = 0, sy = 0, sxx = 0, sxy = 0;
+      for (let i = 0; i < n; i++) {
+        sx += x[i];
+        sy += y[i];
+        sxx += x[i] * x[i];
+        sxy += x[i] * y[i];
+      }
+      const det = n * sxx - sx * sx;
+      if (Math.abs(det) < 1e-12) return [0, 0];
+      return [(sxx * sy - sx * sxy) / det, (n * sxy - sx * sy) / det];
+    }
+
+    function predictLine(theta, xs) {
+      return xs.map(v => theta[0] + theta[1] * v);
+    }
+
+    function mse(theta, x, y) {
+      let total = 0;
+      for (let i = 0; i < x.length; i++) {
+        const e = theta[0] + theta[1] * x[i] - y[i];
+        total += e * e;
+      }
+      return total / x.length;
+    }
+
+    function gradient(theta, idx, x, y) {
+      let g0 = 0, g1 = 0;
+      for (const i of idx) {
+        const e = theta[0] + theta[1] * x[i] - y[i];
+        g0 += 2 * e;
+        g1 += 2 * e * x[i];
+      }
+      const scale = 1 / Math.max(1, idx.length);
+      return [g0 * scale, g1 * scale];
+    }
+
+    function optimize(method, x, y, alpha, steps) {
+      const theta = [-1.8, 2.4];
+      const pathx = [theta[0]];
+      const pathy = [theta[1]];
+      const mses = [];
+      const rand = makeRng(7);
+      let order = [];
+      let ptr = 0;
+
+      const refill = () => {
+        order = shuffledIndices(x.length, rand);
+        ptr = 0;
+      };
+
+      if (method !== 'batch') refill();
+
+      for (let step = 0; step < steps; step++) {
+        let idx;
+        if (method === 'batch') {
+          idx = Array.from({ length: x.length }, (_, i) => i);
+        } else {
+          if (ptr >= order.length) refill();
+          idx = [order[ptr]];
+          ptr += 1;
+        }
+        const [g0, g1] = gradient(theta, idx, x, y);
+        theta[0] -= alpha * g0;
+        theta[1] -= alpha * g1;
+        pathx.push(theta[0]);
+        pathy.push(theta[1]);
+        mses.push(mse(theta, x, y));
+      }
+
+      return { theta, pathx, pathy, mses };
     }
 
     const N = 40;
     const x = [...Array(N)].map((_, i) => -2.3 + 4.6 * i / (N - 1));
     const noiseBase = x.map((_, i) => Math.sin((i + 1) * 2.137) + 0.3 * Math.cos((i + 1) * 0.917));
 
-    const deg = document.getElementById('deg');
     const noiseEl = document.getElementById('noise');
     const alphaEl = document.getElementById('alpha');
     const iterEl = document.getElementById('iter');
-    const degv = document.getElementById('degv');
     const noisev = document.getElementById('noisev');
     const alphav = document.getElementById('alphav');
     const iterv = document.getElementById('iterv');
     const status = document.getElementById('status');
 
     function render() {
-      const d = +deg.value, noise = +noiseEl.value, alpha = +alphaEl.value, maxi = +iterEl.value;
-      degv.textContent = String(d); noisev.textContent = noise.toFixed(2); alphav.textContent = alpha.toFixed(3); iterv.textContent = String(maxi);
-
+      const noise = +noiseEl.value, alpha = +alphaEl.value, maxi = +iterEl.value;
+      noisev.textContent = noise.toFixed(2); alphav.textContent = alpha.toFixed(3); iterv.textContent = String(maxi);
       const y = x.map((v, i) => 1.2 + 0.8 * v - 0.6 * v * v + noise * noiseBase[i]);
-      const th = polyFit(x, y, d);
+      const thetaStar = solveLinearFit(x, y);
+      const result = optimize(METHOD, x, y, alpha, maxi);
       const xg = [...Array(300)].map((_, i) => -2.3 + 4.6 * i / 299);
-      const yg = xg.map(v => pred(th, v));
+      const yStar = predictLine(thetaStar, xg);
+      const yFit = predictLine(result.theta, xg);
 
       Plotly.newPlot('pfit', [
-        { x, y, mode: 'markers', name: 'data' },
-        { x: xg, y: yg, mode: 'lines', name: 'poly fit', line: { color: '#dc2626' } }
+        { x, y, mode: 'markers', name: 'data', marker: { color: '#1f77b4', size: 7 } },
+        { x: xg, y: yStar, mode: 'lines', name: 'least-squares line', line: { color: '#0f766e', dash: 'dash' } },
+        { x: xg, y: yFit, mode: 'lines', name: `${METHOD_LABEL} fit`, line: { color: '#dc2626', width: 3 } }
       ], {
-        title: `Linear to polynomial (degree=${d})`,
+        title: `${METHOD_LABEL}: linear regression fit`,
         xaxis: { title: 'x', range: [-2.5, 2.5], autorange: false },
         yaxis: { title: 'y', range: [-4.5, 3.5], autorange: false }
       }, { displayModeBar: false });
 
-      const t0 = [...Array(70)].map((_, i) => -1.5 + 4 * i / 69);
-      const t1 = [...Array(70)].map((_, i) => -2.5 + 5 * i / 69);
+      const theta0Vals = result.pathx.concat([thetaStar[0]]);
+      const theta1Vals = result.pathy.concat([thetaStar[1]]);
+      const t0Min = Math.min(...theta0Vals) - 1.0;
+      const t0Max = Math.max(...theta0Vals) + 1.0;
+      const t1Min = Math.min(...theta1Vals) - 1.0;
+      const t1Max = Math.max(...theta1Vals) + 1.0;
+      const t0 = [...Array(70)].map((_, i) => t0Min + (t0Max - t0Min) * i / 69);
+      const t1 = [...Array(70)].map((_, i) => t1Min + (t1Max - t1Min) * i / 69);
       const z = [];
-      for (const b0 of t1) {
+      for (const theta1 of t1) {
         const row = [];
-        for (const a0 of t0) {
-          let s = 0;
-          for (let i = 0; i < N; i++) { const e = (a0 + b0 * x[i]) - y[i]; s += e * e; }
-          row.push(s / N);
+        for (const theta0 of t0) {
+          row.push(mse([theta0, theta1], x, y));
         }
         z.push(row);
       }
 
-      let a = -1.8, b = 2.4;
-      const pathx = [a], pathy = [b], mses = [];
-      for (let it = 0; it < maxi; it++) {
-        let ga = 0, gb = 0;
-        if (METHOD === 'batch') {
-          for (let i = 0; i < N; i++) { const e = (a + b * x[i]) - y[i]; ga += (2 * e) / N; gb += (2 * e * x[i]) / N; }
-        } else if (METHOD === 'sgd') {
-          const i = it % N;
-          const e = (a + b * x[i]) - y[i];
-          ga = 2 * e; gb = 2 * e * x[i];
-        } else {
-          let cnt = 0;
-          for (let k = 0; k < MINI_BATCH; k++) {
-            const i = (it * MINI_BATCH + k) % N;
-            const e = (a + b * x[i]) - y[i];
-            ga += 2 * e; gb += 2 * e * x[i]; cnt += 1;
-          }
-          ga /= Math.max(1, cnt); gb /= Math.max(1, cnt);
-        }
-
-        // track full-batch objective for comparison across methods
-        let mse = 0;
-        for (let i = 0; i < N; i++) { const e = (a + b * x[i]) - y[i]; mse += (e * e) / N; }
-        mses.push(mse);
-
-        a -= alpha * ga; b -= alpha * gb;
-        pathx.push(a); pathy.push(b);
-      }
-
       Plotly.newPlot('cont', [
         { z, x: t0, y: t1, type: 'contour', showscale: false, colorscale: 'Viridis' },
-        { x: pathx, y: pathy, mode: 'lines+markers', marker: { size: 4 }, line: { color: '#ef4444' }, name: 'trajectory' }
-      ], { title: 'Contour + trajectory', xaxis: { title: 'theta0' }, yaxis: { title: 'theta1' } }, { displayModeBar: false });
+        { x: result.pathx, y: result.pathy, mode: 'lines+markers', marker: { size: 4 }, line: { color: '#ef4444' }, name: 'trajectory' },
+        { x: [thetaStar[0]], y: [thetaStar[1]], mode: 'markers', marker: { color: '#111827', size: 10, symbol: 'x' }, name: 'least-squares solution' }
+      ], { title: 'MSE contour + trajectory', xaxis: { title: 'theta0' }, yaxis: { title: 'theta1' } }, { displayModeBar: false });
 
       Plotly.newPlot('prog', [
-        { x: [...Array(mses.length)].map((_, i) => i + 1), y: mses, mode: 'lines', line: { color: '#111' }, name: 'MSE' }
+        { x: [...Array(result.mses.length)].map((_, i) => i + 1), y: result.mses, mode: 'lines', line: { color: '#111' }, name: 'MSE' }
       ], { title: 'Optimization progress (full-batch MSE)', xaxis: { title: 'iteration' }, yaxis: { title: 'MSE' } }, { displayModeBar: false });
 
-      status.textContent = `method=${METHOD} | degree=${d} | alpha=${alpha.toFixed(3)} | max_iter=${maxi}\nfinal theta=( ${a.toFixed(3)}, ${b.toFixed(3)} )`;
+      status.textContent =
+        `method=${METHOD} | alpha=${alpha.toFixed(3)} | max_iter=${maxi}\n` +
+        `final theta=(${result.theta[0].toFixed(3)}, ${result.theta[1].toFixed(3)})\n` +
+        `least-squares theta=(${thetaStar[0].toFixed(3)}, ${thetaStar[1].toFixed(3)})\n` +
+        `final full-batch MSE=${mse(result.theta, x, y).toFixed(3)}`;
     }
 
-    ['deg', 'noise', 'alpha', 'iter'].forEach(id => document.getElementById(id).addEventListener('input', render));
+    ['noise', 'alpha', 'iter'].forEach(id => document.getElementById(id).addEventListener('input', render));
     render();
   </script>
 </body>

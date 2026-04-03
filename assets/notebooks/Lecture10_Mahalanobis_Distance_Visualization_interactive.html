@@ -1,21 +1,341 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Interactive Sigma Control (Lecture 10)</title><script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><style>
-:root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--a:#2563eb;--b:#dc2626;--c:#059669}
-html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
-body{padding:14px}.wrap{max-width:1200px;margin:0 auto}h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
-.controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
-.control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
-.control label{font-size:14px;font-weight:600}.row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:56px;text-align:right;font-weight:700}
-.actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
-button:hover{background:var(--bg)}.plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-.plot{width:100%;height:460px}.status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
-@media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:380px}}
-.controls{grid-template-columns:1fr 1fr 1fr}</style></head><body><div class="wrap"><h1>Interactive Sigma Control (Lecture 10)</h1><p>Edit points and vary covariance Sigma for Euclidean vs Mahalanobis comparison.</p><div class="controls" style="grid-template-columns:1fr 1fr 1fr;"><div class="control" style="grid-column:1 / span 3"><label>Points (x,y; x,y; ...)</label><div class="row"><input id="pts" type="text" value="0,0; 1,1; 2,0.5; -1,1.6; -2,-0.8" style="width:100%"></div></div><div class="control"><label>sigma_x</label><div class="row"><input id="sx" type="range" min="0.2" max="3" step="0.1" value="1"><span class="value" id="sxv">1.0</span></div></div><div class="control"><label>sigma_y</label><div class="row"><input id="sy" type="range" min="0.2" max="3" step="0.1" value="1"><span class="value" id="syv">1.0</span></div></div><div class="control"><label>rho</label><div class="row"><input id="rho" type="range" min="-0.95" max="0.95" step="0.05" value="0"><span class="value" id="rhov">0.00</span></div></div></div><div class="plots"><div class="plot-card"><div id="p" class="plot"></div></div><div class="plot-card"><div id="tbl" class="plot"></div></div></div><div class="status" id="status"></div></div><script>function parsePts(s){return s.split(';').map(v=>v.trim()).filter(Boolean).map(v=>v.split(',').map(Number)).filter(a=>a.length===2&&!Number.isNaN(a[0])&&!Number.isNaN(a[1]))}
-function eig2(a,b,c){const tr=a+c,det=a*c-b*b,disc=Math.sqrt(Math.max(tr*tr-4*det,0)); return [(tr+disc)/2,(tr-disc)/2]}
-function render(){const pts=parsePts(ptsEl.value); if(!pts.length){status.textContent='Invalid points format.'; return;} const q=[0,0]; const sx=+sxEl.value, sy=+syEl.value, rho=+rhoEl.value; sxv.textContent=sx.toFixed(1);syv.textContent=sy.toFixed(1);rhov.textContent=rho.toFixed(2);
-const cov=[[sx*sx,rho*sx*sy],[rho*sx*sy,sy*sy]]; const det=cov[0][0]*cov[1][1]-cov[0][1]*cov[1][0] || 1e-9; const inv=[[cov[1][1]/det,-cov[0][1]/det],[-cov[1][0]/det,cov[0][0]/det]];
-const de=[],dm=[]; for(const p of pts){const dx=p[0]-q[0], dy=p[1]-q[1]; de.push(Math.hypot(dx,dy)); dm.push(Math.sqrt(dx*(inv[0][0]*dx+inv[0][1]*dy)+dy*(inv[1][0]*dx+inv[1][1]*dy)));}
-const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]); const t=[...Array(240)].map((_,i)=>2*Math.PI*i/239); const [l1,l2]=eig2(cov[0][0],cov[0][1],cov[1][1]); const ang=0.5*Math.atan2(2*cov[0][1],cov[0][0]-cov[1][1]); const ex=t.map(tt=>Math.sqrt(Math.max(l1,1e-9))*Math.cos(tt)); const ey=t.map(tt=>Math.sqrt(Math.max(l2,1e-9))*Math.sin(tt)); const elx=ex.map((u,i)=>u*Math.cos(ang)-ey[i]*Math.sin(ang)); const ely=ex.map((u,i)=>u*Math.sin(ang)+ey[i]*Math.cos(ang));
-Plotly.newPlot('p',[{x:xs,y:ys,mode:'markers+text',text:pts.map((_,i)=>String(i+1)),textposition:'top center',marker:{size:10,color:'#2563eb'},name:'points'},{x:[0],y:[0],mode:'markers',marker:{size:14,color:'#dc2626',symbol:'x'},name:'query'},{x:elx,y:ely,mode:'lines',line:{dash:'dash',color:'black'},name:'1-sigma'}],{title:'Sigma effect on distances',xaxis:{scaleanchor:'y'}},{displayModeBar:false});
-Plotly.newPlot('tbl',[{type:'table',header:{values:['Point','Euclidean','Mahalanobis']},cells:{values:[pts.map((_,i)=>i+1),de.map(v=>v.toFixed(3)),dm.map(v=>v.toFixed(3))]}}],{title:'Distance table'},{displayModeBar:false});
-status.textContent='Query point fixed at (0,0). Adjust Sigma to see anisotropic distance changes.'}
-const ptsEl=pts,sxEl=sx,syEl=sy,rhoEl=rho; [pts,sx,sy,rho].forEach(el=>el.addEventListener('input',render)); render();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Table 10.1 Data-Point Editor</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{
+      --bg:#f8fafc;
+      --ink:#0f172a;
+      --muted:#475569;
+      --line:#cbd5e1;
+      --panel:#ffffff;
+      --accent:#2563eb;
+      --accent-soft:#dbeafe;
+    }
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1280px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:24px}
+    p{margin:0 0 14px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+    .control,.card{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);
+    }
+    .control{padding:12px}
+    .control h2{margin:0 0 10px;font-size:15px}
+    .field-grid{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px;align-items:center}
+    .field-grid label{font-size:13px;color:var(--muted)}
+    .field-grid input{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid var(--line);
+      border-radius:8px;
+      padding:7px 8px;
+      font-size:14px;
+      background:#fff;
+      color:var(--ink);
+    }
+    .actions{display:flex;gap:10px;align-items:end}
+    button{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:9px 14px;
+      background:#fff;
+      color:var(--ink);
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+    }
+    button:hover{background:var(--bg)}
+    .plot-card{margin-bottom:16px}
+    .plot{height:470px}
+    .tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .card{padding:14px}
+    .card h3{margin:0 0 10px;font-size:16px}
+    .caption{margin-top:8px;font-size:13px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{border:1px solid var(--line);padding:7px 8px;text-align:center}
+    th{background:var(--accent-soft);font-weight:700}
+    .status{
+      margin-top:16px;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--bg);
+      color:var(--ink);
+      font-size:14px;
+      line-height:1.55;
+      white-space:pre-wrap;
+    }
+    .error{
+      margin-bottom:12px;
+      padding:10px 12px;
+      border:1px solid #fecaca;
+      border-radius:12px;
+      background:#fef2f2;
+      color:#991b1b;
+      display:none;
+    }
+    @media (max-width: 1100px){
+      .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .tables{grid-template-columns:1fr}
+    }
+    @media (max-width: 720px){
+      .controls{grid-template-columns:1fr}
+      .field-grid{grid-template-columns:auto 1fr}
+      .actions{align-items:center}
+      .plot{height:380px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Interactive Table 10.1 Data-Point Editor</h1>
+    <p>Edit the four running-example samples and the derived running-example figure plus Tables 10.2 to 10.5 update automatically.</p>
+
+    <div id="error" class="error"></div>
+
+    <div class="controls">
+      <div class="control">
+        <h2>x1</h2>
+        <div class="field-grid">
+          <label for="x1x">x</label><input id="x1x" type="number" step="0.1" value="0">
+          <label for="x1y">y</label><input id="x1y" type="number" step="0.1" value="2">
+        </div>
+      </div>
+      <div class="control">
+        <h2>x2</h2>
+        <div class="field-grid">
+          <label for="x2x">x</label><input id="x2x" type="number" step="0.1" value="2">
+          <label for="x2y">y</label><input id="x2y" type="number" step="0.1" value="0">
+        </div>
+      </div>
+      <div class="control">
+        <h2>x3</h2>
+        <div class="field-grid">
+          <label for="x3x">x</label><input id="x3x" type="number" step="0.1" value="3">
+          <label for="x3y">y</label><input id="x3y" type="number" step="0.1" value="1">
+        </div>
+      </div>
+      <div class="control">
+        <h2>x4</h2>
+        <div class="field-grid">
+          <label for="x4x">x</label><input id="x4x" type="number" step="0.1" value="5">
+          <label for="x4y">y</label><input id="x4y" type="number" step="0.1" value="1">
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="reset" type="button">Reset default points</button>
+    </div>
+
+    <div class="card plot-card">
+      <div id="plot" class="plot"></div>
+      <div class="caption">Figure 10.2. Visualization of the running-example points used throughout Section 10.2.</div>
+    </div>
+
+    <div class="tables">
+      <div class="card">
+        <h3>Table 10.1</h3>
+        <div id="table-10-1"></div>
+        <div class="caption">Running example used to compare proximity measures.</div>
+      </div>
+      <div class="card">
+        <h3>Table 10.2</h3>
+        <div id="table-10-2"></div>
+        <div class="caption">Pairwise Euclidean distances for the running example.</div>
+      </div>
+      <div class="card">
+        <h3>Table 10.3</h3>
+        <div id="table-10-3"></div>
+        <div class="caption">Pairwise Manhattan distances for the running example.</div>
+      </div>
+      <div class="card">
+        <h3>Table 10.4</h3>
+        <div id="table-10-4"></div>
+        <div class="caption">L_infinity distances on the running example.</div>
+      </div>
+      <div class="card">
+        <h3>Table 10.5</h3>
+        <div id="table-10-5"></div>
+        <div class="caption">L_0 coordinate difference counts on the running example.</div>
+      </div>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    const ids = [
+      ['x1x', 'x1y'],
+      ['x2x', 'x2y'],
+      ['x3x', 'x3y'],
+      ['x4x', 'x4y']
+    ];
+    const defaults = [
+      [0, 2],
+      [2, 0],
+      [3, 1],
+      [5, 1]
+    ];
+
+    function getPoints() {
+      const pts = [];
+      for (const pair of ids) {
+        const x = Number(document.getElementById(pair[0]).value);
+        const y = Number(document.getElementById(pair[1]).value);
+        if (Number.isNaN(x) || Number.isNaN(y)) {
+          return null;
+        }
+        pts.push([x, y]);
+      }
+      return pts;
+    }
+
+    function fmt(v) {
+      const rounded = Math.round(v);
+      if (Math.abs(v - rounded) < 1e-9) {
+        return String(rounded);
+      }
+      return v.toFixed(3).replace(/\.?0+$/, match => match === '.000' ? '' : '');
+    }
+
+    function pairwise(points, metric) {
+      const n = points.length;
+      const out = Array.from({ length: n }, () => Array(n).fill(0));
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const dx = Math.abs(points[i][0] - points[j][0]);
+          const dy = Math.abs(points[i][1] - points[j][1]);
+          let value = 0;
+          if (metric === 'euclidean') value = Math.hypot(dx, dy);
+          if (metric === 'manhattan') value = dx + dy;
+          if (metric === 'linf') value = Math.max(dx, dy);
+          if (metric === 'l0') value = (dx !== 0 ? 1 : 0) + (dy !== 0 ? 1 : 0);
+          out[i][j] = value;
+          out[j][i] = value;
+        }
+      }
+      return out;
+    }
+
+    function closestPair(matrix) {
+      let best = Infinity;
+      let pair = [0, 1];
+      for (let i = 0; i < matrix.length; i++) {
+        for (let j = i + 1; j < matrix.length; j++) {
+          if (matrix[i][j] < best) {
+            best = matrix[i][j];
+            pair = [i, j];
+          }
+        }
+      }
+      return { pair, value: best };
+    }
+
+    function renderSampleTable(points) {
+      const rows = points.map((p, i) =>
+        `<tr><td><b>x${i + 1}</b></td><td>${fmt(p[0])}</td><td>${fmt(p[1])}</td></tr>`
+      ).join('');
+      return `<table>
+        <thead><tr><th>sample</th><th>x_{i,1}</th><th>x_{i,2}</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    }
+
+    function renderDistanceTable(matrix, titleLabel) {
+      const n = matrix.length;
+      const header = Array.from({ length: n }, (_, i) => `<th>x${i + 1}</th>`).join('');
+      const rows = Array.from({ length: n }, (_, i) => {
+        const cells = Array.from({ length: n }, (_, j) => `<td>${fmt(matrix[i][j])}</td>`).join('');
+        return `<tr><th>x${i + 1}</th>${cells}</tr>`;
+      }).join('');
+      return `<table>
+        <thead><tr><th>${titleLabel}</th>${header}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    }
+
+    function renderPlot(points) {
+      const xs = points.map(p => p[0]);
+      const ys = points.map(p => p[1]);
+      const labels = points.map((_, i) => `x${i + 1}`);
+      const margin = 1;
+      const xMin = Math.min(...xs) - margin;
+      const xMax = Math.max(...xs) + margin;
+      const yMin = Math.min(...ys) - margin;
+      const yMax = Math.max(...ys) + margin;
+
+      Plotly.newPlot('plot', [{
+        x: xs,
+        y: ys,
+        mode: 'markers+text',
+        text: labels,
+        textposition: 'top center',
+        marker: { size: 12, color: '#2563eb' },
+        hovertemplate: '%{text} = (%{x}, %{y})<extra></extra>'
+      }], {
+        title: 'Figure 10.2: Running example points',
+        margin: { l: 60, r: 20, t: 50, b: 55 },
+        xaxis: { title: 'x_1', range: [xMin, xMax], zeroline: true, gridcolor: '#e2e8f0' },
+        yaxis: { title: 'x_2', range: [yMin, yMax], scaleanchor: 'x', scaleratio: 1, zeroline: true, gridcolor: '#e2e8f0' },
+        paper_bgcolor: '#ffffff',
+        plot_bgcolor: '#ffffff'
+      }, { displayModeBar: false, responsive: true });
+    }
+
+    function render() {
+      const points = getPoints();
+      const error = document.getElementById('error');
+      if (!points) {
+        error.style.display = 'block';
+        error.textContent = 'Please enter valid numeric coordinates for all four points.';
+        return;
+      }
+      error.style.display = 'none';
+
+      const euclidean = pairwise(points, 'euclidean');
+      const manhattan = pairwise(points, 'manhattan');
+      const linf = pairwise(points, 'linf');
+      const l0 = pairwise(points, 'l0');
+
+      document.getElementById('table-10-1').innerHTML = renderSampleTable(points);
+      document.getElementById('table-10-2').innerHTML = renderDistanceTable(euclidean, 'r = 2');
+      document.getElementById('table-10-3').innerHTML = renderDistanceTable(manhattan, 'r = 1');
+      document.getElementById('table-10-4').innerHTML = renderDistanceTable(linf, 'r = infinity');
+      document.getElementById('table-10-5').innerHTML = renderDistanceTable(l0, 'r = 0');
+      renderPlot(points);
+
+      const e = closestPair(euclidean);
+      const m = closestPair(manhattan);
+      const inf = closestPair(linf);
+      const z = closestPair(l0);
+      document.getElementById('status').textContent =
+        `Closest pair under Euclidean: x${e.pair[0] + 1} and x${e.pair[1] + 1} (d = ${fmt(e.value)})\n` +
+        `Closest pair under Manhattan: x${m.pair[0] + 1} and x${m.pair[1] + 1} (d = ${fmt(m.value)})\n` +
+        `Closest pair under L_infinity: x${inf.pair[0] + 1} and x${inf.pair[1] + 1} (d = ${fmt(inf.value)})\n` +
+        `Closest pair under L_0: x${z.pair[0] + 1} and x${z.pair[1] + 1} (d = ${fmt(z.value)})`;
+    }
+
+    document.getElementById('reset').addEventListener('click', () => {
+      defaults.forEach((pair, idx) => {
+        document.getElementById(ids[idx][0]).value = pair[0];
+        document.getElementById(ids[idx][1]).value = pair[1];
+      });
+      render();
+    });
+
+    ids.flat().forEach(id => {
+      document.getElementById(id).addEventListener('input', render);
+    });
+
+    render();
+  </script>
+</body>
+</html>
