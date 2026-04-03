@@ -21,6 +21,83 @@ window.MathJax = {
 };
 </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
 </head>
 <body>
 <main>
@@ -77,47 +154,11 @@ window.MathJax = {
 <p>Clustering relies on a notion of similarity between data points. To group samples into clusters, we need a way to quantify how similar or dissimilar two samples <span class="math inline">\(\mathbf{x}_j\)</span> and <span class="math inline">\(\mathbf{x}_k\)</span> are.</p>
 <p>A <strong>similarity function</strong> <span class="math inline">\(s(\mathbf{x}_j,\mathbf{x}_k)\)</span> produces large values when samples are similar (for example between 0 and 1), while a <strong>distance (dissimilarity) function</strong> <span class="math inline">\(d(\mathbf{x}_j,\mathbf{x}_k)\)</span> produces large values when samples are far apart (ranging from 0 to <span class="math inline">\(+\infty\)</span>). In practice, clustering algorithms may use either similarity or distance measures depending on the application.</p>
 <p>In the following subsections, we introduce several commonly used proximity measures.</p>
-<h4 data-number="2.0.0.1" id="running-example-used-throughout-this-section"><span class="header-section-number">2.0.0.1</span> Running Example (used throughout this section)</h4>
-<p>To compare proximity measures, we use the same four 2-D samples from Lecture 10 (slide 27):</p>
-<p><span class="math display">\[\mathbf{x}_1=(0,2),\quad
-\mathbf{x}_2=(2,0),\quad
-\mathbf{x}_3=(3,1),\quad
-\mathbf{x}_4=(5,1).\]</span></p>
-<table>
-<caption>Running example used to compare proximity measures.</caption>
-<thead>
-<tr class="header">
-<th style="text-align: center;">sample</th>
-<th style="text-align: center;"><span class="math inline">\(x_{i,1}\)</span></th>
-<th style="text-align: center;"><span class="math inline">\(x_{i,2}\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(\mathbf{x}_1\)</span></td>
-<td style="text-align: center;">0</td>
-<td style="text-align: center;">2</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(\mathbf{x}_2\)</span></td>
-<td style="text-align: center;">2</td>
-<td style="text-align: center;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;"><span class="math inline">\(\mathbf{x}_3\)</span></td>
-<td style="text-align: center;">3</td>
-<td style="text-align: center;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: center;"><span class="math inline">\(\mathbf{x}_4\)</span></td>
-<td style="text-align: center;">5</td>
-<td style="text-align: center;">1</td>
-</tr>
-</tbody>
-</table>
-<figure>
-<img alt="Visualization of the running example points used throughout Section 10.2." id="fig:running-example" src="img/lecture10/running_example.png" style="width:36.00%; max-width:36.00%; height:auto;"/><figcaption aria-hidden="true">Visualization of the running example points used throughout Section 10.2.</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Table 10.1 Data-Point Editor</h3><p>Select a point, move it with sliders, and switch between the Table 10.2 to 10.5 metric views one at a time.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:1080px;" title="Interactive Table 10.1 Data-Point Editor Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+
+
+
+
+<section class="interactive-notebook"><h3>Interactive Notebook: Table 10.1 Data-Point Editor</h3><p>Select a point, move it with sliders, and switch between the Table 10.2 to 10.5 metric views one at a time.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" style="height:920px;" title="Interactive Table 10.1 Data-Point Editor Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Mahalanobis_Distance_Visualization.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>We will compute pairwise distances using different metrics and observe how the notion of “closeness” changes depending on the chosen measure.</p>
 <h2 data-number="2.1" id="euclidean-distance"><span class="header-section-number">2.1</span> Euclidean Distance</h2>
 <p>The most familiar distance is the <strong>Euclidean distance</strong>: <span class="math display">\[d(\mathbf{x}_j,\mathbf{x}_k)
@@ -494,7 +535,7 @@ d_M=4.\]</span></p>
 <p><em>Distance depends on alignment with principal axes rather than the coordinate axes.</em></p>
 <figure>
 <img alt="Samples from \mathcal{N}(\mathbf{0},\Sigma_5). Distance depends on alignment with the principal axes." src="img/lecture10/case5_rotated.png" style="width:28.80%; max-width:28.80%; height:auto;"/><figcaption aria-hidden="true">Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_5)\)</span>. Distance depends on alignment with the principal axes.</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 10.9 Sigma Control</h3><p>Adjust covariance matrix Sigma after Case 5 and observe Mahalanobis geometry changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Sigma_Interactive_interactive.html" style="height:900px;" title="Interactive Figure 10.9 Sigma Control Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Sigma_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 10.9 Sigma Control</h3><p>Adjust covariance matrix Sigma after Case 5 and observe Mahalanobis geometry changes.</p><iframe class="interactive-notebook-frame" data-default-height="1060" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture10_Sigma_Interactive_interactive.html" style="height:1060px;" title="Interactive Figure 10.9 Sigma Control Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture10_Sigma_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Mahalanobis distance depends on alignment with eigenvectors of <span class="math inline">\(\Sigma\)</span>, not with the coordinate axes.</p>
 <p>These figures visually illustrate how the same Euclidean displacement can correspond to very different standardized distances under different covariance structures.</p>
 <h4 data-number="4.0.0.1" id="important-interpretation."><span class="header-section-number">4.0.0.1</span> Important Interpretation.</h4>

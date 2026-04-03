@@ -21,6 +21,83 @@ window.MathJax = {
 };
 </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
 </head>
 <body>
 <main>
@@ -202,26 +279,26 @@ L(\boldsymbol{\theta})
 <p>Ridge regression addresses this issue by adding an <span class="math inline">\(L_2\)</span> penalty that discourages large coefficient values. By shrinking the parameters toward zero, the model becomes less sensitive to fluctuations in the data and produces more stable predictions. As shown in Figure <a data-reference="fig:P10.png" data-reference-type="ref" href="#fig:P10.png">9</a>, the fitted lines produced by ridge regression exhibit significantly less variation across noisy datasets. This reduction in variance highlights one of the key benefits of regularization: improved robustness to noise and better generalization to unseen data.</p>
 <figure>
 <img alt="Large variance of slope (coefficients) of linear regression models (gray lines) with induced noise samples (gray dots)" id="fig:P9.png" src="img/lecture9/P9.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Large variance of slope (coefficients) of linear regression models (gray lines) with induced noise samples (gray dots)</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.8 Noise Sensitivity (OLS)</h3><p>Control noise and compare coefficient variability under OLS.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.8 Noise Sensitivity (OLS) Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig98_OLS_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.8 Noise Sensitivity (OLS)</h3><p>Control noise and compare coefficient variability under OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.8 Noise Sensitivity (OLS) Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig98_OLS_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img alt="Reduced variance of ridge regression models (gray lines) with induced noise samples (gray dots)" id="fig:P10.png" src="img/lecture9/P10.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Reduced variance of ridge regression models (gray lines) with induced noise samples (gray dots)</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.9 Ridge Under Noise</h3><p>Control noise and compare ridge robustness to OLS.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.9 Ridge Under Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig99_Ridge_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.9 Ridge Under Noise</h3><p>Control noise and compare ridge robustness to OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.9 Ridge Under Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig99_Ridge_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="6.3" id="reduce-overfitting-to-limited-training-data"><span class="header-section-number">6.3</span> Reduce Overfitting to Limited Training Data</h2>
 <p>Overfitting becomes particularly severe when only a small amount of training data is available. In such cases, standard linear regression tends to fit the training points too closely, capturing random fluctuations rather than the underlying trend. This behavior is illustrated in Figure <a data-reference="fig:P11.png" data-reference-type="ref" href="#fig:P11.png">10</a>, where the linear regression model (red line) fits the limited training samples almost perfectly but fails to generalize well to new data.</p>
 <p>Ridge regression mitigates this problem by constraining the magnitude of the coefficients. The resulting model (blue line) does not pass exactly through the training points but instead captures a smoother and more general trend. As a result, it performs better on unseen test samples (green dots). This example demonstrates how regularization introduces a small amount of bias in exchange for a large reduction in variance, ultimately improving predictive performance.</p>
 <figure>
 <img alt="Ridge Regression vs. Linear Regression" id="fig:P11.png" src="img/lecture9/P11.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Ridge Regression vs. Linear Regression</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.10 Sample Count Effect</h3><p>Control number of data points and inspect fit stability.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig910_SampleCount_interactive.html" style="height:900px;" title="Interactive Figure 9.10 Sample Count Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig910_SampleCount.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.10 Sample Count Effect</h3><p>Control number of data points and inspect fit stability.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig910_SampleCount_interactive.html" style="height:680px;" title="Interactive Figure 9.10 Sample Count Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig910_SampleCount.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="6.4" id="effect-of-lambda-on-boldsymboltheta-magnitudes"><span class="header-section-number">6.4</span> Effect of <span class="math inline">\(\lambda\)</span> on <span class="math inline">\(\boldsymbol{\theta}\)</span> Magnitudes</h2>
 <p>The regularization strength in ridge regression is controlled by the hyperparameter <span class="math inline">\(\lambda\)</span>, which determines how strongly large coefficients are penalized. When <span class="math inline">\(\lambda\)</span> is very small, the penalty term has little influence, and the model behaves similarly to standard linear regression. In this regime, the coefficients can take on larger values, allowing the model to closely fit the training data.</p>
 <p>As <span class="math inline">\(\lambda\)</span> increases, the penalty becomes stronger and the coefficients are increasingly shrunk toward zero. This shrinkage reduces model complexity and helps prevent overfitting. When <span class="math inline">\(\lambda\)</span> becomes very large, the coefficients approach zero and the model converges toward a nearly flat line that approximates the mean of the target variable. Figures <a data-reference="fig:P12.png" data-reference-type="ref" href="#fig:P12.png">11</a> and <a data-reference="fig:P13.png" data-reference-type="ref" href="#fig:P13.png">12</a> illustrate how increasing <span class="math inline">\(\lambda\)</span> progressively reduces coefficient magnitudes and simplifies model behavior.</p>
 <p>This trade-off between model flexibility and regularization strength highlights the bias–variance trade-off: small <span class="math inline">\(\lambda\)</span> values yield low bias but high variance, while large <span class="math inline">\(\lambda\)</span> values produce higher bias but lower variance.</p>
 <figure>
 <img alt="Impact of \lambda on Ridge Regression Coefficients" id="fig:P12.png" src="img/lecture9/P12.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Impact of <span class="math inline">\(\lambda\)</span> on Ridge Regression Coefficients</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.11 Lambda Effect</h3><p>Adjust λ and observe coefficient shrinkage behavior.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" style="height:760px;" title="Interactive Figure 9.11 Lambda Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig911_LambdaEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.11 Lambda Effect</h3><p>Adjust λ and observe coefficient shrinkage behavior.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" style="height:760px;" title="Interactive Figure 9.11 Lambda Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig911_LambdaEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img alt="Impact of \lambda on Model Behavior" id="fig:P13.png" src="img/lecture9/P13.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Impact of <span class="math inline">\(\lambda\)</span> on Model Behavior</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.12 Lambda vs Model Behavior</h3><p>Adjust λ and inspect resulting model complexity.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" style="height:900px;" title="Interactive Figure 9.12 Lambda vs Model Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig912_LambdaBehavior.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.12 Lambda vs Model Behavior</h3><p>Adjust λ and inspect resulting model complexity.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" style="height:680px;" title="Interactive Figure 9.12 Lambda vs Model Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig912_LambdaBehavior.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="6.5" id="normal-equation"><span class="header-section-number">6.5</span> Normal Equation</h2>
 <p>The optimal parameter vector for ridge regression can be derived analytically using the <strong>normal equation</strong>. Recall that ridge regression augments the standard least-squares objective with an <span class="math inline">\(L_2\)</span> penalty on the parameter vector. In matrix form, the ridge loss function is written as</p>
 <p><span class="math display">\[L(\boldsymbol{\theta})
@@ -264,7 +341,7 @@ L(\boldsymbol{\theta})
 <p>The hyperparameter <span class="math inline">\(\lambda\)</span> controls the trade-off between accurately fitting the training data and keeping the parameter magnitudes small. A small <span class="math inline">\(\lambda\)</span> produces behavior similar to standard linear regression, while a large <span class="math inline">\(\lambda\)</span> increases regularization and produces a smoother, lower-variance model.</p>
 <figure>
 <img alt="Gradient Descent Path to Optimal Weights: Minimizing Loss in Ridge Regression" id="fig:P14.png" src="img/lecture9/P14.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Gradient Descent Path to Optimal Weights: Minimizing Loss in Ridge Regression</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.15 Optimization Path (If Possible)</h3><p>Explore optimization path with step/stop controls.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" style="height:980px;" title="Interactive Figure 9.15 Optimization Path (If Possible) Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig915_OptimizationPath.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure>
 <h1 data-number="7" id="lasso-regression-formulation"><span class="header-section-number">7.</span> Lasso Regression: Formulation</h1>
 <h2 data-number="7.1" id="overview"><span class="header-section-number">7.1</span> Overview</h2>
 <p><strong>Lasso regression</strong> (Least Absolute Shrinkage and Selection Operator) is a linear regression technique that incorporates <strong>L1 regularization</strong>, which adds a penalty proportional to the absolute value of the regression coefficients.</p>
@@ -327,7 +404,7 @@ r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
 <p>How does Elastic Net compare to Lasso and Ridge regularization separately? To highlight their differences, we consider a fixed MSE loss with the following contour plot:</p>
 <figure>
 <img alt="Geometric intuition of L1 vs L2 regularization. L1 regularization (Lasso) tends to produce sparse solutions by driving some coefficients exactly to zero, while L2 regularization (Ridge) shrinks coefficients smoothly toward zero without fully eliminating them." id="fig:P15.png" src="img/lecture9/P15.png" style="width:51.00%; max-width:51.00%; height:auto;"/><figcaption aria-hidden="true">Geometric intuition of L1 vs L2 regularization. L1 regularization (Lasso) tends to produce sparse solutions by driving some coefficients exactly to zero, while L2 regularization (Ridge) shrinks coefficients smoothly toward zero without fully eliminating them.</figcaption>
-</figure>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net</h3><p>Explore the L1, L2, and Elastic Net constraint geometry together with their optimization paths.</p><iframe class="interactive-notebook-frame" data-default-height="980" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" style="height:980px;" title="Interactive Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig915_OptimizationPath.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The figure illustrates the geometric intuition behind L1 and L2 regularization and helps explain why Elastic Net combines the strengths of both approaches.</p>
 <p>The contour lines represent level sets of the Mean Squared Error (MSE) loss in parameter space. The goal of training is to move toward the minimum of this loss surface. The white dots illustrate the path taken by gradient descent starting from an initial point (red square) and moving toward the optimal solution.</p>
 <h4 data-number="10.2.0.1" id="top-left-ell_1-penalty-geometry."><span class="header-section-number">10.2.0.1</span> Top-left: <span class="math inline">\(\ell_1\)</span> penalty geometry.</h4>
@@ -444,7 +521,7 @@ r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
 <p>Model complexity in machine learning, often measured by degrees of freedom, refers to a model’s capacity to fit data, as seen in polynomial regression. As model complexity increases, training error typically decreases because the model can better fit the training data, potentially reaching a point where training error approaches zero, indicating it captures even the noise. Initially, testing error may also decrease as the model learns relevant patterns, but after a certain complexity level, testing error begins to rise due to overfitting—where the model learns noise instead of generalizable patterns. This highlights the bias-variance tradeoff: low-complexity models may have high bias, leading to oversimplified patterns, while high-complexity models can suffer from high variance, fitting training data well but failing on unseen data. Cross-validation helps identify the optimal level of complexity that minimizes generalization error, while regularization mitigates overfitting by penalizing excessive complexity.</p>
 <figure>
 <img alt="Diagram depicting the effects of model complexity as degrees of freedom increase" src="img/lecture9/Screenshot%202024-09-22%20at%206.22.40%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Diagram depicting the effects of model complexity as degrees of freedom increase</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.20 Model Complexity</h3><p>Adjust model complexity and observe error behavior.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" style="height:1080px;" title="Interactive Figure 9.20 Model Complexity Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig920_ModelComplexity.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.20 Model Complexity</h3><p>Adjust model complexity and observe error behavior.</p><iframe class="interactive-notebook-frame" data-default-height="1080" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" style="height:1080px;" title="Interactive Figure 9.20 Model Complexity Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig920_ModelComplexity.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img alt="Model complexity vs training and testing error." src="img/lecture10/modelcomplexity.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Model complexity vs training and testing error.</figcaption>
 </figure>
@@ -460,13 +537,13 @@ r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
 <p>This decomposition explains why increasing model complexity can reduce bias but increase variance, and motivates the search for an optimal tradeoff.</p>
 <figure>
 <img alt="A diagram depicting the relationship between model complexity and error" src="img/lecture9/Screenshot%202024-09-22%20at%206.28.08%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">A diagram depicting the relationship between model complexity and error</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.21 Model Complexity vs Error</h3><p>Adjust model complexity and inspect bias/variance trends.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" style="height:900px;" title="Interactive Figure 9.21 Model Complexity vs Error Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig921_ComplexityVsError.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.21 Model Complexity vs Error</h3><p>Adjust model complexity and inspect bias/variance trends.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" style="height:900px;" title="Interactive Figure 9.21 Model Complexity vs Error Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig921_ComplexityVsError.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img alt="Diagram depicting the bias-variance tradeoff" src="img/lecture9/Screenshot%202024-09-22%20at%206.30.13%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Diagram depicting the bias-variance tradeoff</figcaption>
 </figure>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.41.12%E2%80%AFPM.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.25 Noise in Ground Truth</h3><p>Control GT noise and inspect measured vs true performance.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig925_GTNoise_interactive.html" style="height:900px;" title="Interactive Figure 9.25 Noise in Ground Truth Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig925_GTNoise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure>
 <p>This decomposition motivates the bias–variance tradeoff: increasing model complexity typically reduces bias but increases variance.</p>
 <h1 data-number="13" id="additional-details"><span class="header-section-number">13.</span> Additional Details</h1>
 <p>In this final section, we briefly connect the practical ideas from this lecture to deeper theoretical concepts from statistical learning theory. The goal is not to develop full theory, but to build intuition for why model complexity, data size, and regularization are fundamentally linked.</p>
@@ -494,7 +571,7 @@ r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
 <p>This means a model might appear to plateau at <span class="math inline">\(90\%\)</span> accuracy even if its true performance is much higher. In practice, label noise creates uncertainty about how measured accuracy relates to the model’s true accuracy <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086 Quesada2025Largescale">(Joshua C. Peterson et al. 2019a; Quesada et al. 2025)</span>.</p>
 <figure>
 <img alt="Measured vs. true accuracy under label noise. The diagonal line represents perfect labels. When labels contain noise, the measured accuracy lies within a band around this line. The shaded region shows the range of possible true accuracies for a given measured accuracy when ground-truth labels are uncertain." id="fig:label_noise_accuracy" src="img/lecture9/P16.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true"><strong>Measured vs. true accuracy under label noise.</strong> The diagonal line represents perfect labels. When labels contain noise, the measured accuracy lies within a band around this line. The shaded region shows the range of possible true accuracies for a given measured accuracy when ground-truth labels are uncertain.</figcaption>
-</figure>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.25 Measured vs True Accuracy Under Label Noise</h3><p>Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig925_GTNoise_interactive.html" style="height:860px;" title="Interactive Figure 9.25 Measured vs True Accuracy Under Label Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig925_GTNoise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The shaded region illustrates an important takeaway:</p>
 <blockquote>
 <p>Measured accuracy is not a single number — it represents a <em>range of possible true performances</em>.</p>

@@ -258,6 +258,84 @@ window.MathJax = {
 };
 </script>"""
 
+INTERACTIVE_NOTEBOOK_RESIZE_SCRIPT = """<script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>"""
+
 
 def run(cmd):
   print(" ".join(cmd))
@@ -735,6 +813,7 @@ def build_single_html(
   <link rel="stylesheet" href="../assets/style.css"/>
   {MATHJAX_CONFIG}
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  {INTERACTIVE_NOTEBOOK_RESIZE_SCRIPT}
 </head>
 <body>
 <main>
@@ -893,6 +972,7 @@ def load_notebook_embed_rules(assets_dir: Path):
         "description": str(rule.get("description", "")).strip(),
         "iframe_title": str(rule.get("iframe_title", "")).strip(),
         "iframe_height": rule.get("iframe_height", 680),
+        "replace_start_id": str(rule.get("replace_start_id", "")).strip(),
       }
     )
   return rules
@@ -1237,6 +1317,7 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
     iframe["loading"] = "lazy"
     iframe["scrolling"] = "no"
     iframe["class"] = ["interactive-notebook-frame"]
+    iframe["data-default-height"] = str(iframe_height)
     iframe["style"] = f"height:{iframe_height}px;"
     block.append(iframe)
 
@@ -1268,6 +1349,21 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
 
     if replacement_target.parent is None:
       continue
+
+    replace_start_id = matched_rule.get("replace_start_id")
+    if replace_start_id:
+      start_node = soup.find(id=replace_start_id)
+      if start_node is not None:
+        replacement_target.insert_after(block)
+        current = start_node
+        nodes_to_remove = []
+        while current is not None and current != block:
+          nodes_to_remove.append(current)
+          current = current.find_next_sibling()
+        if current == block:
+          for node in nodes_to_remove:
+            node.decompose()
+          continue
 
     replacement_target.insert_after(block)
 

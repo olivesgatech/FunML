@@ -95,9 +95,35 @@ function render(){
     labels=Array(X.length).fill(-1); iterCount=0; lastAssigned=false; render();
   });
   const counts=clusterCounts();
-  Plotly.newPlot('sizes',[{x:counts.map((_,i)=>`C${i}`), y:counts, type:'bar', marker:{color:'#2563eb'}}],{title:'Cluster sizes',margin:{t:44,l:44,r:12,b:40},yaxis:{title:'count'}},{displayModeBar:false,responsive:true});
+  const hasAssignments = labels.some(v=>v >= 0);
+  const sizeLayout = {
+    title:'Cluster sizes',
+    margin:{t:44,l:44,r:12,b:40},
+    yaxis:{
+      title:'count',
+      range:[0, Math.max(1, X.length)],
+      rangemode:'tozero'
+    },
+    annotations: hasAssignments ? [] : [{
+      xref:'paper',
+      yref:'paper',
+      x:0.5,
+      y:0.6,
+      text:'Choose centroids, then run Assignment step',
+      showarrow:false,
+      font:{size:14,color:'#475569'}
+    }]
+  };
+  Plotly.newPlot('sizes',[
+    {
+      x:counts.map((_,i)=>`C${i}`),
+      y:counts,
+      type:'bar',
+      marker:{color: hasAssignments ? '#2563eb' : '#cbd5e1'}
+    }
+  ], sizeLayout, {displayModeBar:false,responsive:true});
   document.getElementById('status').textContent =
-    `Selected centroids: ${C.length}/${k.value}\nIterations completed: ${iterCount}\nClick points to set initial centroids. Use Assignment, then Update, to walk through the lecture steps.`;
+    `Selected centroids: ${C.length}/${k.value}\nIterations completed: ${iterCount}\nClick points to set initial centroids. Cluster sizes appear after the Assignment step. Use Assignment, then Update, to walk through the lecture steps.`;
 }
 const k=document.getElementById('k'), n=document.getElementById('n'), noise=document.getElementById('noise'), seed=document.getElementById('seed');
 ['k','n','noise','seed'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{makeData(); render();}));

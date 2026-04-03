@@ -99,7 +99,7 @@
 <body>
   <div class="wrap">
     <h1>Interactive Table 10.1 Data-Point Editor</h1>
-    <p>Click a point in Figure 10.2 or use the point buttons, then move it with sliders. Switch metric views to inspect the corresponding Table 10.2 to 10.5 more clearly.</p>
+    <p>Click a blue point in Figure 10.2 or use the point buttons, then move it with sliders. The heatmap on the right shows the currently selected proximity table.</p>
 
     <div class="controls">
       <div class="card">
@@ -131,15 +131,10 @@
 
     <div class="card plot-card">
       <div id="mainplot" class="plot"></div>
-      <div class="caption">Figure 10.2 at left, with the currently selected derived distance table visualized at right.</div>
+      <div class="caption">Figure 10.2 is shown at left. Click a plotted point to select it; the derived distance table is shown as a heatmap at right.</div>
     </div>
 
-    <div class="bottom">
-      <div class="card">
-        <h2>Table 10.1</h2>
-        <div id="table-10-1"></div>
-        <div class="caption">Running example used to compare proximity measures.</div>
-      </div>
+    <div class="bottom" style="grid-template-columns:1fr;">
       <div class="card">
         <div id="metric-badge" class="metric-badge"></div>
         <div id="status" class="status"></div>
@@ -216,17 +211,6 @@
         btn.addEventListener('click', () => onClick(item.value));
         el.appendChild(btn);
       });
-    }
-
-    function renderSampleTable(points) {
-      const rows = points.map((p, i) => {
-        const cls = i === state.selected ? ' class="selected-row"' : '';
-        return `<tr${cls}><td><b>x${i + 1}</b></td><td>${fmt(p[0])}</td><td>${fmt(p[1])}</td></tr>`;
-      }).join('');
-      return `<table>
-        <thead><tr><th>sample</th><th>x_{i,1}</th><th>x_{i,2}</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
     }
 
     function heatmapAnnotations(labels, matrix) {
@@ -318,6 +302,9 @@
         margin: { l: 60, r: 30, t: 80, b: 55 },
         paper_bgcolor: '#ffffff',
         plot_bgcolor: '#ffffff',
+        hovermode: 'closest',
+        clickmode: 'event+select',
+        dragmode: false,
         annotations: heatmapAnnotations(labels, matrix),
         xaxis: {
           title: 'x_1',
@@ -345,17 +332,17 @@
           autorange: 'reversed',
           gridcolor: '#e2e8f0'
         }
-      }, { displayModeBar: false, responsive: true });
-
-      const plotEl = document.getElementById('mainplot');
-      plotEl.on('plotly_click', ev => {
-        const pt = ev.points && ev.points[0];
-        if (!pt) return;
-        if (pt.curveNumber === 1 && typeof pt.pointIndex === 'number') {
+      }, { displayModeBar: false, responsive: true }).then(plotEl => {
+        if (plotEl._selectionBound) return;
+        plotEl._selectionBound = true;
+        plotEl.on('plotly_click', ev => {
+          if (!ev.points) return;
+          const pt = ev.points.find(p => p.curveNumber === 1 && typeof p.pointIndex === 'number');
+          if (!pt) return;
           state.selected = pt.pointIndex;
           syncControls();
           render();
-        }
+        });
       });
     }
 
@@ -378,7 +365,6 @@
     }
 
     function render() {
-      document.getElementById('table-10-1').innerHTML = renderSampleTable(state.points);
       const matrix = pairwise(state.points, state.metric);
       const nearest = closestPair(matrix);
       renderPlot(state.points, matrix, nearest);

@@ -5,110 +5,111 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
-    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff}
     html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
     body{padding:14px}
-    .wrap{max-width:1240px;margin:0 auto}
+    .wrap{max-width:1100px;margin:0 auto}
     h1{margin:0 0 6px;font-size:24px}
     p{margin:0 0 12px;color:var(--muted)}
-    .controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+    .controls{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:12px 16px;margin:14px 0 16px}
     .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
     .control label{font-size:14px;font-weight:600}
     .row{display:flex;align-items:center;gap:10px}
     .row input[type=range]{flex:1}
-    .value{min-width:56px;text-align:right;font-weight:700}
-    .plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .plots.wide{grid-template-columns:1fr}
-    .plots.quad{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .value{min-width:64px;text-align:right;font-weight:700}
     .plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
-    .plot{width:100%;height:430px}
-    .plot.short{height:300px}
+    .plot{width:100%;height:560px}
     .status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
     @media(max-width:980px){
-      .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .plots,.plots.quad{grid-template-columns:1fr}
-      .plot{height:360px}
+      .controls{grid-template-columns:1fr}
+      .plot{height:420px}
     }
   </style>
 </head>
 <body>
-<div class="wrap"><h1>Figure 9.25: Ground-Truth Noise and Performance Metrics</h1><p>Noisy labels can make a model look worse even when its error relative to the latent clean trend stays stable.</p><div class="controls"><div class="control"><label>GT noise</label><div class="row"><input id="gtn" type="range" min="0.00" max="0.80" step="0.05" value="0.25"><span class="value" id="gtnv">0.25</span></div></div><div class="control"><label>Obs noise</label><div class="row"><input id="obs" type="range" min="0.00" max="0.60" step="0.05" value="0.20"><span class="value" id="obsv">0.20</span></div></div><div class="control"><label>Degree</label><div class="row"><input id="deg" type="range" min="1" max="10" step="1" value="5"><span class="value" id="degv">5</span></div></div><div class="control"><label>lambda</label><div class="row"><input id="lam" type="range" min="0.00" max="20.00" step="0.50" value="2.00"><span class="value" id="lamv">2.00</span></div></div></div><div class="plots"><div class="plot-card"><div id="fit" class="plot"></div></div><div class="plot-card"><div id="score" class="plot"></div></div></div><div class="status" id="status"></div></div><script>
-function mulberry32(seed){return function(){let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-function randn(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+<div class="wrap"><h1>Figure 9.25: Measured vs True Accuracy Under Label Noise</h1><p>Observed accuracy can underestimate true model performance when labels are noisy.</p><div class="controls"><div class="control"><label>Label noise ε</label><div class="row"><input id="eps" type="range" min="0.00" max="0.45" step="0.01" value="0.10"><span class="value" id="epsv">0.10</span></div></div><div class="control"><label>Observed accuracy A_model</label><div class="row"><input id="obs" type="range" min="0.00" max="1.00" step="0.01" value="0.90"><span class="value" id="obsv">0.90</span></div></div></div><div class="plot-card"><div id="main" class="plot"></div></div><div class="status" id="status"></div></div><script>
 function linspace(a,b,n){if(n===1)return[a];const step=(b-a)/(n-1);return Array.from({length:n},(_,i)=>a+i*step)}
-function polyval(theta,x){let s=0,p=1;for(let i=0;i<theta.length;i++){s+=theta[i]*p;p*=x}return s}
-function designRow(x,deg){const row=new Array(deg+1);let p=1;for(let i=0;i<=deg;i++){row[i]=p;p*=x}return row}
-function solve(A,b){
-  const n=A.length, M=A.map(r=>r.slice()), y=b.slice();
-  for(let i=0;i<n;i++){
-    let piv=i;
-    for(let r=i+1;r<n;r++) if(Math.abs(M[r][i])>Math.abs(M[piv][i])) piv=r;
-    if(piv!==i){[M[i],M[piv]]=[M[piv],M[i]];[y[i],y[piv]]=[y[piv],y[i]]}
-    const div=Math.abs(M[i][i])<1e-10?(M[i][i] < 0 ? -1e-10 : 1e-10):M[i][i];
-    for(let c=i;c<n;c++) M[i][c]/=div;
-    y[i]/=div;
-    for(let r=0;r<n;r++){
-      if(r===i) continue;
-      const f=M[r][i];
-      for(let c=i;c<n;c++) M[r][c]-=f*M[i][c];
-      y[r]-=f*y[i];
-    }
-  }
-  return y;
-}
-function ridgeFit(x,y,deg,lam){
-  const m=deg+1, A=Array.from({length:m},()=>Array(m).fill(0)), b=Array(m).fill(0);
-  for(let i=0;i<x.length;i++){
-    const row=designRow(x[i],deg);
-    for(let r=0;r<m;r++){
-      b[r]+=row[r]*y[i];
-      for(let c=0;c<m;c++) A[r][c]+=row[r]*row[c];
-    }
-  }
-  for(let i=1;i<m;i++) A[i][i]+=lam;
-  return solve(A,b);
-}
-function mseFromTheta(theta,x,y){let s=0;for(let i=0;i<x.length;i++){const e=polyval(theta,x[i])-y[i];s+=e*e}return s/x.length}
-function baseCurve(x){return 1 + 0.7*x - 0.35*x*x + 0.06*x*x*x}
-function makePolyData(seed,n,obsNoise,gtNoise){
-  const rng=mulberry32(seed), x=linspace(-3,3,n);
-  const yTrue=x.map(v=>baseCurve(v));
-  const yStar=yTrue.map(v=>v + gtNoise*randn(rng));
-  const y=yStar.map(v=>v + obsNoise*randn(rng));
-  return {x,y,yTrue,yStar};
-}
-function ordinaryLeastSquaresLine(x,y){
-  const n=x.length, mx=x.reduce((a,b)=>a+b,0)/n, my=y.reduce((a,b)=>a+b,0)/n;
-  let num=0, den=0;
-  for(let i=0;i<n;i++){num+=(x[i]-mx)*(y[i]-my);den+=(x[i]-mx)*(x[i]-mx)}
-  const slope=den===0?0:num/den, intercept=my-slope*mx;
-  return [intercept,slope];
-}
+function clip01(v){return Math.max(0,Math.min(1,v))}
 function setValue(id, text){document.getElementById(id).textContent=text}
-
-
-function render(){
-  const gtNoise=+gtnEl.value, obsNoise=+obsEl.value, deg=+degEl.value, lam=+lamEl.value;
-  setValue('gtnv', gtNoise.toFixed(2)); setValue('obsv', obsNoise.toFixed(2)); setValue('degv', deg); setValue('lamv', lam.toFixed(2));
-  const train=makePolyData(31,50,obsNoise,gtNoise), test=makePolyData(37,80,obsNoise,gtNoise), th=ridgeFit(train.x,train.y,deg,lam);
-  const xg=linspace(-3,3,260), yhat=xg.map(v=>polyval(th,v)), clean=xg.map(baseCurve);
-  Plotly.newPlot('fit',[
-    {x:train.x,y:train.y,mode:'markers',name:'observed labels',marker:{color:'#334155',size:7}},
-    {x:xg,y:train.x.length?clean:clean,mode:'lines',name:'latent clean trend',line:{color:'#2563eb',dash:'dash'}},
-    {x:xg,y:xg.map(v=>baseCurve(v)+0.0),mode:'lines',showlegend:false,line:{color:'#2563eb',dash:'dash'}},
-    {x:xg,y:yhat,mode:'lines',name:'ridge fit',line:{color:'#dc2626',width:3}}
-  ], {title:'Latent trend vs noisy labels', margin:{t:44,l:48,r:12,b:44}, xaxis:{title:'x'}, yaxis:{title:'y'}}, {displayModeBar:false,responsive:true});
-  const predNoisy=test.x.map(v=>polyval(th,v));
-  const noisyMse=predNoisy.reduce((s,v,i)=>s+(v-test.y[i])*(v-test.y[i]),0)/test.x.length;
-  const cleanMse=predNoisy.reduce((s,v,i)=>{const c=baseCurve(test.x[i]); return s+(v-c)*(v-c)},0)/test.x.length;
-  const labelNoiseMse=test.y.reduce((s,v,i)=>{const c=baseCurve(test.x[i]); return s+(v-c)*(v-c)},0)/test.x.length;
-  Plotly.newPlot('score',[
-    {x:['error to noisy labels','error to clean truth','label noise floor'],y:[noisyMse,cleanMse,labelNoiseMse],type:'bar',marker:{color:['#475569','#2563eb','#d97706']}}
-  ], {title:'Which target are we evaluating against?', margin:{t:44,l:48,r:12,b:64}, yaxis:{title:'MSE'}}, {displayModeBar:false,responsive:true});
-  document.getElementById('status').textContent=`Measured against noisy labels: ${noisyMse.toFixed(3)}\nMeasured against latent clean function: ${cleanMse.toFixed(3)}\nThe label-noise floor rises directly with ground-truth noise.`;
+function uncorrelatedTrue(obs, eps){
+  if(eps >= 0.5) return NaN;
+  return clip01((obs - eps) / (1 - 2*eps));
 }
-const gtnEl=document.getElementById('gtn'), obsEl=document.getElementById('obs'), degEl=document.getElementById('deg'), lamEl=document.getElementById('lam');
-['gtn','obs','deg','lam'].forEach(id=>document.getElementById(id).addEventListener('input', render));
+function render(){
+  const eps=+epsEl.value, obs=+obsEl.value;
+  setValue('epsv', eps.toFixed(2));
+  setValue('obsv', obs.toFixed(2));
+  const x=linspace(0,1,401);
+  const lower=x.map(v=>clip01(v-eps));
+  const upper=x.map(v=>clip01(v+eps));
+  const uncorr=x.map(v=>uncorrelatedTrue(v, eps));
+  const lowerObs=clip01(obs-eps);
+  const upperObs=clip01(obs+eps);
+  const pointUncorr=uncorrelatedTrue(obs, eps);
+  const traces=[
+    {
+      x:x.concat([...x].reverse()),
+      y:upper.concat([...lower].reverse()),
+      type:'scatter',
+      fill:'toself',
+      fillcolor:'rgba(156,163,175,0.55)',
+      line:{color:'rgba(0,0,0,0)'},
+      name:'A_true range',
+      hoverinfo:'skip'
+    },
+    {
+      x:x,
+      y:x,
+      mode:'lines',
+      name:'1:1 line',
+      line:{color:'#6b7280',dash:'dash',width:1.5}
+    },
+    {
+      x:x,
+      y:uncorr,
+      mode:'lines',
+      name:'A_true (uncorrelated errors)',
+      line:{color:'#111827',width:2}
+    },
+    {
+      x:[obs, obs],
+      y:[lowerObs, upperObs],
+      mode:'lines',
+      name:'current range',
+      line:{color:'#dc2626',width:4}
+    },
+    {
+      x:[obs],
+      y:[obs],
+      mode:'markers',
+      name:'observed accuracy',
+      marker:{color:'#2563eb',size:9}
+    }
+  ];
+  if(Number.isFinite(pointUncorr)){
+    traces.push({
+      x:[obs],
+      y:[pointUncorr],
+      mode:'markers',
+      name:'uncorrelated estimate',
+      marker:{color:'#111827',size:9,symbol:'diamond'}
+    });
+  }
+  Plotly.newPlot('main', traces, {
+    title:'Measured vs true accuracy under label noise',
+    margin:{t:48,l:58,r:18,b:52},
+    xaxis:{title:'A_model',range:[0,1]},
+    yaxis:{title:'A_true',range:[0,1]},
+    legend:{x:0.02,y:0.02,xanchor:'left',yanchor:'bottom'},
+    paper_bgcolor:'#ffffff',
+    plot_bgcolor:'#ffffff'
+  }, {displayModeBar:false,responsive:true});
+  const ceiling=(1-eps).toFixed(3);
+  const rangeText=`[${lowerObs.toFixed(3)}, ${upperObs.toFixed(3)}]`;
+  const uncorrText=Number.isFinite(pointUncorr) ? pointUncorr.toFixed(3) : 'undefined';
+  document.getElementById('status').textContent=`Observed accuracy ceiling for a perfect model: ${ceiling}\nFor observed accuracy ${obs.toFixed(3)}, plausible true accuracy range: ${rangeText}\nIf label errors are random and uncorrelated, implied true accuracy: ${uncorrText}`;
+}
+const epsEl=document.getElementById('eps'), obsEl=document.getElementById('obs');
+['eps','obs'].forEach(id=>document.getElementById(id).addEventListener('input', render));
 render();
-
 </script></body></html>

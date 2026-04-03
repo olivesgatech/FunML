@@ -21,6 +21,83 @@ window.MathJax = {
 };
 </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
 </head>
 <body>
 <main>
@@ -48,7 +125,7 @@ Definition:</p>
     \end{aligned}\]</span> Based on the data, we adjust the shape and horizontal position of the sigmoid function by learning the weight vector <span class="math inline">\(\mathbf{w}\)</span> and bias <span class="math inline">\(b\)</span>.</p>
 <figure>
 <img alt="Sigmoid Function Plots showing the effect of weight (left) and bias (right)." id="fig:sigmoid" src="img/lecture4/sigmoid.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Sigmoid Function Plots showing the effect of weight (left) and bias (right).</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
 <li><p>Ultimately, the decision boundary of logistic regression corresponds to the <strong>hyperplane</strong> <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>, which separates the data in feature space.</p></li>
 <li><p>Simple Classification Rule: <span class="math display">\[y =
       \begin{cases}
@@ -304,7 +381,7 @@ SVM Topics:</p>
 <p>Geometrically, the vector <span class="math inline">\(\mathbf{w}\)</span> is <strong>perpendicular (normal)</strong> to the hyperplane, meaning it points in the direction orthogonal to the decision boundary. The dot product <span class="math display">\[\mathbf{w}^T \mathbf{x} = \|\mathbf{w}\| \, \|\mathbf{x}\| \cos(\theta)\]</span> depends on the angle <span class="math inline">\(\theta\)</span> between <span class="math inline">\(\mathbf{w}\)</span> and <span class="math inline">\(\mathbf{x}\)</span>, and therefore measures how much the feature vector <span class="math inline">\(\mathbf{x}\)</span> aligns with the normal direction <span class="math inline">\(\mathbf{w}\)</span>. In this sense, <span class="math inline">\(\mathbf{w}^T \mathbf{x}\)</span> captures the signed projection of <span class="math inline">\(\mathbf{x}\)</span> onto the normal vector, which is directly related to how far <span class="math inline">\(\mathbf{x}\)</span> lies from the decision boundary along the orthogonal direction. Finally, note that <span class="math inline">\(\mathbf{w}\)</span> can be <em>any</em> nonzero normal vector to the hyperplane; for simplicity in geometric interpretations, we sometimes assume that <span class="math inline">\(\mathbf{w}\)</span> has unit norm.</p>
 <figure>
 <img alt="Separation of two-dimensional feature space by a hyperplane" id="fig:linearhyperplane" src="img/lecture4/linearhyperplane.png" style="width:18.00%; max-width:18.00%; height:auto;"/><figcaption aria-hidden="true">Separation of two-dimensional feature space by a hyperplane</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Linear Separating Hyperplane</h3><p>Adjust the weight vector and bias to see how the hyperplane changes in two dimensions.</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/linear_hyperplane_interactive.html" style="height:780px;" title="Interactive Linear Separating Hyperplane Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flinear_hyperplane_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Linear Separating Hyperplane</h3><p>Adjust the weight vector and bias to see how the hyperplane changes in two dimensions.</p><iframe class="interactive-notebook-frame" data-default-height="780" loading="lazy" scrolling="no" src="../assets/notebooks/linear_hyperplane_interactive.html" style="height:780px;" title="Interactive Linear Separating Hyperplane Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flinear_hyperplane_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <div class="intuitionbox">
 <p><strong>Key intuition.</strong> For SVMs, <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> is still a score, but SVMs care about how <em>confidently</em> points are separated. The margin is the empty “buffer zone” around the decision boundary. A larger margin typically improves robustness: small perturbations to <span class="math inline">\(\mathbf{x}\)</span> are less likely to flip the label.</p>
 </div>

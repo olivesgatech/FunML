@@ -21,6 +21,83 @@ window.MathJax = {
 };
 </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
 </head>
 <body>
 <main>
@@ -317,7 +394,7 @@ R = \frac{TP}{TP+FN} = \frac{3}{4} = 0.75,\]</span> and the F1 score is <span cl
 </div>
 <p>The diagram above shows how moving the threshold changes which samples are labeled positive, thereby changing the counts of FP and FN. As the threshold increases, precision often improves (fewer FP) while recall often decreases (more FN).</p>
 <div class="center">
-<p><img alt="image" src="img/lecture6/cur.png" style="width:42.00%; max-width:42.00%; height:auto;"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold</h3><p>Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture6_ThresholdEffect_interactive.html" style="height:900px;" title="Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture6_ThresholdEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture6/cur.png" style="width:42.00%; max-width:42.00%; height:auto;"/></p><section class="interactive-notebook"><h3>Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold</h3><p>Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture6_ThresholdEffect_interactive.html" style="height:900px;" title="Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture6_ThresholdEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
 <p>The curve above visualizes this relationship continuously across thresholds: low thresholds tend to yield <em>high recall / lower precision</em>, while high thresholds tend to yield <em>higher precision / lower recall</em>. Selecting a threshold means choosing an operating point along this trade-off.</p>
 <h2 data-number="5.6" id="roc-curve"><span class="header-section-number">5.6</span> ROC Curve</h2>
@@ -364,7 +441,7 @@ R = \frac{TP}{TP+FN} = \frac{3}{4} = 0.75,\]</span> and the F1 score is <span cl
 <p>Figure <a data-reference="fig:thresh_tradeoff" data-reference-type="ref" href="#fig:thresh_tradeoff">5</a> shows how precision and recall vary with the decision threshold. This plot is useful for selecting an operating point that matches application costs (e.g., favor recall when false negatives are costly).</p>
 <figure>
 <img alt="Precision and recall as functions of the decision threshold." id="fig:thresh_tradeoff" src="img/lecture6/threshold_tradeoff.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Precision and recall as functions of the decision threshold.</figcaption>
-</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold</h3><p>Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).</p><iframe class="interactive-notebook-frame" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture6_ThresholdEffect_interactive.html" style="height:900px;" title="Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture6_ThresholdEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+</figure><section class="interactive-notebook"><h3>Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold</h3><p>Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture6_ThresholdEffect_interactive.html" style="height:680px;" title="Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture6_ThresholdEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Finally, Figure <a data-reference="fig:roc_multiclass" data-reference-type="ref" href="#fig:roc_multiclass">6</a> shows a multi-class ROC plot using a One-vs-Rest (OvR) strategy. Micro-averaging weights classes by frequency, while macro-averaging treats all classes equally.</p>
 <figure>
 <img alt="Multi-class ROC curves using a One-vs-Rest strategy with micro and macro averages." id="fig:roc_multiclass" src="img/lecture6/multiclass_roc_ovr.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Multi-class ROC curves using a One-vs-Rest strategy with micro and macro averages.</figcaption>
