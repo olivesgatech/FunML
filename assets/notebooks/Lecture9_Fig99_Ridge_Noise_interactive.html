@@ -84,6 +84,9 @@ function ordinaryLeastSquaresLine(x,y){
   const slope=den===0?0:num/den, intercept=my-slope*mx;
   return [intercept,slope];
 }
+function sampleSortedX(rng,n,a,b){
+  return Array.from({length:n},()=>a + (b-a)*rng()).sort((u,v)=>u-v);
+}
 function setValue(id, text){document.getElementById(id).textContent=text}
 
 
@@ -91,16 +94,17 @@ const ids=['noise','lam','trials','seed'];
 function render(){
   const noise=+noiseEl.value, lam=+lamEl.value, trials=+trialsEl.value, seed=+seedEl.value;
   setValue('noisev', noise.toFixed(2)); setValue('lamv', lam.toFixed(2)); setValue('trialsv', trials); setValue('seedv', seed);
-  const n=14, xBase=linspace(0,2,n), yBase=xBase.map(v=>0.25 + 0.7*v), xg=linspace(0,2,120), trueLine=xg.map(v=>0.25 + 0.7*v);
+  const n=14, xg=linspace(0,2,120), trueLine=xg.map(v=>0.25 + 0.7*v);
   const traces=[{x:xg,y:trueLine,mode:'lines',name:'true line',line:{color:'#2563eb',width:3}}];
   const slopes=[];
   for(let t=0;t<trials;t++){
     const rng=mulberry32(seed*100+t+1);
-    const yNoisy=yBase.map(v=>v + noise*randn(rng));
-    const th=ridgeFit(xBase,yNoisy,1,lam);
+    const xSample=sampleSortedX(rng,n,0,2);
+    const yNoisy=xSample.map(v=>0.25 + 0.7*v + noise*randn(rng));
+    const th=ridgeFit(xSample,yNoisy,1,lam);
     slopes.push(th[1]);
     traces.push({x:xg,y:xg.map(v=>th[0]+th[1]*v),mode:'lines',showlegend:t===0,name:'ridge fits',line:{color:'rgba(90,90,90,0.42)',width:2}});
-    traces.push({x:xBase,y:yNoisy,mode:'markers',showlegend:t===0,name:'noisy samples',marker:{color:'rgba(120,120,120,0.45)',size:6}});
+    traces.push({x:xSample,y:yNoisy,mode:'markers',showlegend:t===0,name:'noisy samples',marker:{color:'rgba(120,120,120,0.45)',size:6}});
   }
   Plotly.newPlot('main', traces, {title:'Ridge regression', margin:{t:44,l:48,r:12,b:44}, xaxis:{title:'x'}, yaxis:{title:'y'}}, {displayModeBar:false,responsive:true});
   const mean=slopes.reduce((a,b)=>a+b,0)/slopes.length;
