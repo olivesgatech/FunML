@@ -1220,7 +1220,7 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       iframe_height = int(matched_rule["iframe_height"])
     except (TypeError, ValueError):
       iframe_height = 680
-    iframe_height = max(420, min(iframe_height, 700))
+    iframe_height = max(420, min(iframe_height, 1800))
     block = soup.new_tag("section")
     block["class"] = ["interactive-notebook"]
     h = soup.new_tag("h3")
