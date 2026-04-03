@@ -1269,7 +1269,7 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
     if replacement_target.parent is None:
       continue
 
-    replacement_target.replace_with(block)
+    replacement_target.insert_after(block)
 
 
 def sync_portal_index(index_path: Path, lecture_pages):

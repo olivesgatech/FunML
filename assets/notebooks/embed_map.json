@@ -227,26 +227,26 @@
     },
     {
       "image_match": "img/lecture9/p9.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig98_OLS_Noise_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig98_OLS_Noise.ipynb",
       "section_title": "Interactive Notebook: Figure 9.8 Noise Sensitivity (OLS)",
       "description": "Control noise and compare coefficient variability under OLS.",
       "iframe_title": "Interactive Figure 9.8 Noise Sensitivity (OLS) Notebook",
-      "iframe_height": 900
+      "iframe_height": 760
     },
     {
       "image_match": "img/lecture9/p10.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig99_Ridge_Noise_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig99_Ridge_Noise.ipynb",
       "section_title": "Interactive Notebook: Figure 9.9 Ridge Under Noise",
       "description": "Control noise and compare ridge robustness to OLS.",
       "iframe_title": "Interactive Figure 9.9 Ridge Under Noise Notebook",
-      "iframe_height": 900
+      "iframe_height": 760
     },
     {
       "image_match": "img/lecture9/p11.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig910_SampleCount_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig910_SampleCount.ipynb",
       "section_title": "Interactive Notebook: Figure 9.10 Sample Count Effect",
       "description": "Control number of data points and inspect fit stability.",
       "iframe_title": "Interactive Figure 9.10 Sample Count Effect Notebook",
@@ -254,17 +254,17 @@
     },
     {
       "image_match": "img/lecture9/p12.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig911_LambdaEffect_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig911_LambdaEffect.ipynb",
       "section_title": "Interactive Notebook: Figure 9.11 Lambda Effect",
       "description": "Adjust \u03bb and observe coefficient shrinkage behavior.",
       "iframe_title": "Interactive Figure 9.11 Lambda Effect Notebook",
-      "iframe_height": 900
+      "iframe_height": 760
     },
     {
       "image_match": "img/lecture9/p13.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig912_LambdaBehavior_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig912_LambdaBehavior.ipynb",
       "section_title": "Interactive Notebook: Figure 9.12 Lambda vs Model Behavior",
       "description": "Adjust \u03bb and inspect resulting model complexity.",
       "iframe_title": "Interactive Figure 9.12 Lambda vs Model Behavior Notebook",
@@ -275,9 +275,9 @@
       "notebook_html": "Lecture10_Mahalanobis_Distance_Visualization_interactive.html",
       "notebook_ipynb": "Lecture10_Mahalanobis_Distance_Visualization.ipynb",
       "section_title": "Interactive Notebook: Table 10.1 Data-Point Editor",
-      "description": "Edit data points and see updates reflected across Table 10.1, Figure 10.2, and Tables 10.2 to 10.5.",
+      "description": "Select a point, move it with sliders, and switch between the Table 10.2 to 10.5 metric views one at a time.",
       "iframe_title": "Interactive Table 10.1 Data-Point Editor Notebook",
-      "iframe_height": 1700
+      "iframe_height": 1080
     },
     {
       "image_match": "img/lecture10/case5_rotated.png",
@@ -292,15 +292,15 @@
       "image_match": "img/lecture11/screenshot 2024-09-29 at 10.43.43\u202fam.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "section_title": "Interactive Notebook: Figure 11.1 K-Means Steps",
+      "description": "Choose initial centroids directly on the plot and walk through assignment and update steps.",
+      "iframe_title": "Interactive Figure 11.1 K-Means Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 11.12.16\u202fam.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -308,8 +308,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 11.14.26\u202fam.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -317,8 +317,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 11.31.47\u202fam.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -326,8 +326,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 12.07.38\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -335,8 +335,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 12.10.20\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -344,8 +344,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 12.18.27\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -353,8 +353,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 1.38.32\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -362,8 +362,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 1.41.59\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -371,8 +371,8 @@
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 2.01.26\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -382,15 +382,15 @@
       "image_match": "img/lecture11/screenshot 2024-09-29 at 2.21.34\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "section_title": "Interactive Notebook: Figure 11.11 Choosing k",
+      "description": "Vary the number of clusters k and see how the assignment pattern changes.",
+      "iframe_title": "Interactive Figure 11.11 Choosing k Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/screenshot 2024-09-29 at 2.23.47\u202fpm.png",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -398,8 +398,8 @@
     },
     {
       "image_match": "img/lecture11/images/dataset.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -407,8 +407,8 @@
     },
     {
       "image_match": "img/lecture11/images/undesirable_clustering.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -416,8 +416,8 @@
     },
     {
       "image_match": "img/lecture11/images/ideal_clustering.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -425,17 +425,17 @@
     },
     {
       "image_match": "img/lecture11/images/mini_batch_comp.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_MiniBatch_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_MiniBatch_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figure 11.14 Mini-batch Optimization",
+      "description": "Compare standard and mini-batch k-means under the same initialization and inspect the optimization tradeoff.",
+      "iframe_title": "Interactive Figure 11.14 Mini-batch Optimization Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/mini-batch-k-means-diff.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
+      "notebook_html": "",
+      "notebook_ipynb": "",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
       "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
       "iframe_title": "Interactive K-Means Notebook",
@@ -443,102 +443,102 @@
     },
     {
       "image_match": "img/lecture11/images/k_medoids_data.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/k-med-init-assign.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_1_a_table.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_1_a_split.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/k-med-update-1-b-table.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_1_b_split.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/k-med-reassign.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_2_a_table.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/udpate_2_a_graph.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_2_b_table.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture11/images/update_2_b_graph.jpg",
-      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
-      "description": "Choose initial centroids, run k-means one step at a time, and vary k.",
-      "iframe_title": "Interactive K-Means Notebook",
-      "iframe_height": 900
+      "notebook_html": "Lecture11_KMedoids_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture11_KMedoids_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough",
+      "description": "Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.",
+      "iframe_title": "Interactive Figures 11.16 to 11.26 k-Medoids Notebook",
+      "iframe_height": 920
     },
     {
       "image_match": "img/lecture12/gmm clustering examples/initialization of em algorithm.png",
@@ -650,26 +650,26 @@
     },
     {
       "image_match": "img/lecture9/p14.png",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig915_OptimizationPath_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig915_OptimizationPath.ipynb",
       "section_title": "Interactive Notebook: Figure 9.15 Optimization Path (If Possible)",
       "description": "Explore optimization path with step/stop controls.",
       "iframe_title": "Interactive Figure 9.15 Optimization Path (If Possible) Notebook",
-      "iframe_height": 900
+      "iframe_height": 980
     },
     {
       "image_match": "img/lecture9/screenshot*6.22.40*",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig920_ModelComplexity_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig920_ModelComplexity.ipynb",
       "section_title": "Interactive Notebook: Figure 9.20 Model Complexity",
       "description": "Adjust model complexity and observe error behavior.",
       "iframe_title": "Interactive Figure 9.20 Model Complexity Notebook",
-      "iframe_height": 900
+      "iframe_height": 1080
     },
     {
       "image_match": "img/lecture9/screenshot*6.28.08*",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig921_ComplexityVsError_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig921_ComplexityVsError.ipynb",
       "section_title": "Interactive Notebook: Figure 9.21 Model Complexity vs Error",
       "description": "Adjust model complexity and inspect bias/variance trends.",
       "iframe_title": "Interactive Figure 9.21 Model Complexity vs Error Notebook",
@@ -677,8 +677,8 @@
     },
     {
       "image_match": "img/lecture9/screenshot*6.41.12*",
-      "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
+      "notebook_html": "Lecture9_Fig925_GTNoise_interactive.html",
+      "notebook_ipynb": "Lecture9_Fig925_GTNoise.ipynb",
       "section_title": "Interactive Notebook: Figure 9.25 Noise in Ground Truth",
       "description": "Control GT noise and inspect measured vs true performance.",
       "iframe_title": "Interactive Figure 9.25 Noise in Ground Truth Notebook",

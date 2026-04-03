@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:24px}
+    p{margin:0 0 12px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:14px;font-weight:600}
+    .row{display:flex;align-items:center;gap:10px}
+    .row input[type=range], .row select{flex:1}
+    .value{min-width:56px;text-align:right;font-weight:700}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 16px}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button:hover{background:var(--bg)}
+    .plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .plots.wide{grid-template-columns:1fr}
+    .plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+    .plot{width:100%;height:420px}
+    .status{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.5;white-space:pre-wrap}
+    table.meta{width:100%;border-collapse:collapse;font-size:14px}
+    table.meta th, table.meta td{border:1px solid var(--line);padding:6px 8px;text-align:center}
+    @media(max-width:980px){.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plots{grid-template-columns:1fr}.plot{height:360px}}
+  </style>
+</head>
+<body>
+<div class="wrap"><h1>Interactive k-Medoids Walkthrough (Lecture 11)</h1><p>Step through a small Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><div class="controls"><div class="control"><label>Initial medoid m1</label><div class="row"><select id="m1"></select><span class="value" id="m1v"></span></div></div><div class="control"><label>Initial medoid m2</label><div class="row"><select id="m2"></select><span class="value" id="m2v"></span></div></div><div class="control"><label>Stage</label><div class="row"><input id="stage" type="range" min="0" max="5" step="1" value="0"><span class="value" id="stagev">0</span></div></div><div class="control"><label>Metric</label><div class="row"><select id="metric"><option selected>L1 / Manhattan</option></select><span class="value">fixed</span></div></div></div><div class="actions"><button id="reset">Reset</button><button id="next">Next stage</button></div><div class="plots"><div class="plot-card"><div id="scatter" class="plot"></div></div><div class="plot-card"><div id="table" class="plot"></div></div></div><div class="status" id="status"></div></div><script>
+function mulberry32(seed){return function(){let t=seed+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function randn(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function linspace(a,b,n){if(n===1)return[a];const h=(b-a)/(n-1);return Array.from({length:n},(_,i)=>a+i*h)}
+function setText(id,text){document.getElementById(id).textContent=text}
+function argmin(arr){let bi=0,bv=arr[0];for(let i=1;i<arr.length;i++)if(arr[i]<bv){bv=arr[i];bi=i}return bi}
+
+
+const DATA=[[1,8],[2,7],[3,8],[4,7],[5,6],[6,5],[7,3],[8,4],[8,2]];
+function l1(a,b){return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])}
+function assign(X,M){return X.map(p=>argmin(M.map(m=>l1(p,m))))}
+function clusterCost(X, labels, M, j){let s=0; for(let i=0;i<X.length;i++) if(labels[i]===j) s += l1(X[i], M[j]); return s}
+function bestMedoid(X, labels, M, j){
+  const idx=[...Array(X.length).keys()].filter(i=>labels[i]===j), cand=[];
+  for(const i of idx){
+    const med=DATA[i], cost=idx.reduce((s,t)=>s+l1(DATA[t], med),0);
+    cand.push({idx:i, point:med, cost});
+  }
+  cand.sort((a,b)=>a.cost-b.cost);
+  return cand;
+}
+function populate(){for(let i=0;i<DATA.length;i++){const o1=document.createElement('option'), o2=document.createElement('option'); o1.value=i; o2.value=i; o1.textContent=`x${i+1}`; o2.textContent=`x${i+1}`; m1.appendChild(o1); m2.appendChild(o2)} m1.value='3'; m2.value='8';}
+function stageState(){
+  let M=[DATA[+m1.value], DATA[+m2.value]];
+  let labels=assign(DATA,M), detail='Initial assignment with the chosen medoids.';
+  let candidates=bestMedoid(DATA, labels, M, 0);
+  const st=+stage.value;
+  if(st>=1){detail='Evaluate alternate medoids for cluster 1.';}
+  if(st>=2){const c2=bestMedoid(DATA, labels, M, 1); M=[candidates[0].point, c2[0].point]; labels=assign(DATA,M); candidates=c2; detail='After updating the second medoid, reassign all points.';}
+  if(st>=3){candidates=bestMedoid(DATA, labels, M, 0); detail='Second pass: evaluate alternate medoids for cluster 1.';}
+  if(st>=4){const c2=bestMedoid(DATA, labels, M, 1); M=[bestMedoid(DATA, labels, M, 0)[0].point, c2[0].point]; labels=assign(DATA,M); candidates=c2; detail='Second pass: evaluate alternate medoids for cluster 2.';}
+  if(st>=5){detail='No lower-cost swap remains. The k-medoids solution has converged.';}
+  return {M,labels,detail,candidates};
+}
+function render(){
+  setText('m1v', `x${+m1.value+1}`); setText('m2v', `x${+m2.value+1}`); setText('stagev', stage.value);
+  const st=stageState();
+  Plotly.newPlot('scatter',[
+    {x:DATA.map(p=>p[0]), y:DATA.map(p=>p[1]), mode:'markers+text', text:DATA.map((_,i)=>`x${i+1}`), textposition:'top center', marker:{size:12,color:st.labels,colorscale:'Turbo'}, name:'points'},
+    {x:st.M.map(p=>p[0]), y:st.M.map(p=>p[1]), mode:'markers', marker:{size:18,color:'black',symbol:'diamond'}, name:'medoids'}
+  ], {title:'k-medoids step walkthrough', margin:{t:44,l:44,r:12,b:40}, xaxis:{dtick:1}, yaxis:{dtick:1,scaleanchor:'x'}}, {displayModeBar:false,responsive:true});
+  const rows=st.candidates.slice(0,5);
+  Plotly.newPlot('table',[{
+    type:'table',
+    header:{values:['candidate','coordinates','L1 cost'],fill:{color:'#e2e8f0'}},
+    cells:{values:[rows.map(r=>`x${r.idx+1}`), rows.map(r=>`(${r.point[0]}, ${r.point[1]})`), rows.map(r=>r.cost)], fill:{color:'#fff'}}
+  }], {title:'Candidate medoid costs for the active cluster', margin:{t:44,l:12,r:12,b:12}}, {displayModeBar:false,responsive:true});
+  document.getElementById('status').textContent =
+    `${st.detail}\nCurrent medoids: (${st.M[0][0]}, ${st.M[0][1]}) and (${st.M[1][0]}, ${st.M[1][1]})\nUse the stage slider to move through the same kind of sequence shown across Figures 11.16 to 11.26.`;
+}
+populate();
+['m1','m2','stage'].forEach(id=>document.getElementById(id).addEventListener('input', render));
+reset.onclick=()=>{m1.value='3'; m2.value='8'; stage.value='0'; render();};
+next.onclick=()=>{stage.value=Math.min(+stage.value+1, 5); render();};
+render();
+
+</script></body></html>

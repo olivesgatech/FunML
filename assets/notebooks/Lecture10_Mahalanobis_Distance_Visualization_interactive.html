@@ -13,34 +13,45 @@
       --line:#cbd5e1;
       --panel:#ffffff;
       --accent:#2563eb;
+      --accent-2:#f59e0b;
       --accent-soft:#dbeafe;
     }
     html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
     body{padding:14px}
-    .wrap{max-width:1280px;margin:0 auto}
+    .wrap{max-width:1240px;margin:0 auto}
     h1{margin:0 0 8px;font-size:24px}
     p{margin:0 0 14px;color:var(--muted)}
-    .controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
-    .control,.card{
+    .controls{display:grid;grid-template-columns:1.2fr 1fr 0.8fr;gap:12px;margin-bottom:16px}
+    .card{
       border:1px solid var(--line);
       border-radius:14px;
       background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);
+      padding:14px;
     }
-    .control{padding:12px}
-    .control h2{margin:0 0 10px;font-size:15px}
-    .field-grid{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:8px;align-items:center}
-    .field-grid label{font-size:13px;color:var(--muted)}
-    .field-grid input{
-      width:100%;
-      box-sizing:border-box;
+    .card h2{margin:0 0 10px;font-size:15px}
+    .hint{font-size:13px;color:var(--muted);margin-bottom:10px}
+    .button-row{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{
       border:1px solid var(--line);
-      border-radius:8px;
-      padding:7px 8px;
-      font-size:14px;
+      border-radius:999px;
       background:#fff;
       color:var(--ink);
+      cursor:pointer;
+      padding:8px 12px;
+      font-size:13px;
+      font-weight:600;
     }
-    .actions{display:flex;gap:10px;align-items:end}
+    .pill.active{
+      border-color:var(--accent);
+      background:var(--accent-soft);
+      color:#1d4ed8;
+    }
+    .slider{display:grid;gap:6px;margin-bottom:10px}
+    .slider label{font-size:13px;color:var(--muted)}
+    .row{display:flex;align-items:center;gap:10px}
+    .row input[type=range]{flex:1}
+    .value{min-width:52px;text-align:right;font-weight:700}
+    .actions{display:flex;gap:10px;justify-content:flex-start}
     button{
       border:1px solid var(--line);
       border-radius:999px;
@@ -51,158 +62,113 @@
       font-size:13px;
       font-weight:600;
     }
-    button:hover{background:var(--bg)}
+    button:hover,.pill:hover{background:var(--bg)}
     .plot-card{margin-bottom:16px}
-    .plot{height:470px}
-    .tables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-    .card{padding:14px}
-    .card h3{margin:0 0 10px;font-size:16px}
+    .plot{height:520px}
+    .bottom{display:grid;grid-template-columns:0.9fr 1.1fr;gap:16px}
     .caption{margin-top:8px;font-size:13px;color:var(--muted)}
     table{width:100%;border-collapse:collapse;font-size:14px}
     th,td{border:1px solid var(--line);padding:7px 8px;text-align:center}
     th{background:var(--accent-soft);font-weight:700}
+    tr.selected-row td{background:#eff6ff}
     .status{
-      margin-top:16px;
-      padding:12px 14px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:var(--bg);
-      color:var(--ink);
       font-size:14px;
-      line-height:1.55;
+      line-height:1.6;
       white-space:pre-wrap;
+      color:var(--ink);
     }
-    .error{
-      margin-bottom:12px;
-      padding:10px 12px;
-      border:1px solid #fecaca;
-      border-radius:12px;
-      background:#fef2f2;
-      color:#991b1b;
-      display:none;
+    .metric-badge{
+      display:inline-block;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#eef2ff;
+      color:#3730a3;
+      font-size:12px;
+      font-weight:700;
+      margin-bottom:8px;
     }
     @media (max-width: 1100px){
-      .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .tables{grid-template-columns:1fr}
+      .controls{grid-template-columns:1fr}
+      .bottom{grid-template-columns:1fr}
     }
     @media (max-width: 720px){
-      .controls{grid-template-columns:1fr}
-      .field-grid{grid-template-columns:auto 1fr}
-      .actions{align-items:center}
-      .plot{height:380px}
+      .plot{height:420px}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Interactive Table 10.1 Data-Point Editor</h1>
-    <p>Edit the four running-example samples and the derived running-example figure plus Tables 10.2 to 10.5 update automatically.</p>
-
-    <div id="error" class="error"></div>
+    <p>Click a point in Figure 10.2 or use the point buttons, then move it with sliders. Switch metric views to inspect the corresponding Table 10.2 to 10.5 more clearly.</p>
 
     <div class="controls">
-      <div class="control">
-        <h2>x1</h2>
-        <div class="field-grid">
-          <label for="x1x">x</label><input id="x1x" type="number" step="0.1" value="0">
-          <label for="x1y">y</label><input id="x1y" type="number" step="0.1" value="2">
+      <div class="card">
+        <h2>Select Point</h2>
+        <div class="hint">Click a point in the plot or choose it here.</div>
+        <div id="point-buttons" class="button-row"></div>
+      </div>
+      <div class="card">
+        <h2>Move Selected Point</h2>
+        <div class="hint">Adjust the coordinates of the currently selected sample.</div>
+        <div class="slider">
+          <label>x-coordinate</label>
+          <div class="row"><input id="x-slider" type="range" min="-2" max="7" step="0.1" value="0"><span id="x-slider-v" class="value">0.0</span></div>
+        </div>
+        <div class="slider">
+          <label>y-coordinate</label>
+          <div class="row"><input id="y-slider" type="range" min="-2" max="4" step="0.1" value="2"><span id="y-slider-v" class="value">2.0</span></div>
         </div>
       </div>
-      <div class="control">
-        <h2>x2</h2>
-        <div class="field-grid">
-          <label for="x2x">x</label><input id="x2x" type="number" step="0.1" value="2">
-          <label for="x2y">y</label><input id="x2y" type="number" step="0.1" value="0">
+      <div class="card">
+        <h2>Metric View</h2>
+        <div class="hint">Show one derived running-example table at a time.</div>
+        <div id="metric-buttons" class="button-row"></div>
+        <div class="actions" style="margin-top:14px;">
+          <button id="reset" type="button">Reset default points</button>
         </div>
       </div>
-      <div class="control">
-        <h2>x3</h2>
-        <div class="field-grid">
-          <label for="x3x">x</label><input id="x3x" type="number" step="0.1" value="3">
-          <label for="x3y">y</label><input id="x3y" type="number" step="0.1" value="1">
-        </div>
-      </div>
-      <div class="control">
-        <h2>x4</h2>
-        <div class="field-grid">
-          <label for="x4x">x</label><input id="x4x" type="number" step="0.1" value="5">
-          <label for="x4y">y</label><input id="x4y" type="number" step="0.1" value="1">
-        </div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="reset" type="button">Reset default points</button>
     </div>
 
     <div class="card plot-card">
-      <div id="plot" class="plot"></div>
-      <div class="caption">Figure 10.2. Visualization of the running-example points used throughout Section 10.2.</div>
+      <div id="mainplot" class="plot"></div>
+      <div class="caption">Figure 10.2 at left, with the currently selected derived distance table visualized at right.</div>
     </div>
 
-    <div class="tables">
+    <div class="bottom">
       <div class="card">
-        <h3>Table 10.1</h3>
+        <h2>Table 10.1</h2>
         <div id="table-10-1"></div>
         <div class="caption">Running example used to compare proximity measures.</div>
       </div>
       <div class="card">
-        <h3>Table 10.2</h3>
-        <div id="table-10-2"></div>
-        <div class="caption">Pairwise Euclidean distances for the running example.</div>
-      </div>
-      <div class="card">
-        <h3>Table 10.3</h3>
-        <div id="table-10-3"></div>
-        <div class="caption">Pairwise Manhattan distances for the running example.</div>
-      </div>
-      <div class="card">
-        <h3>Table 10.4</h3>
-        <div id="table-10-4"></div>
-        <div class="caption">L_infinity distances on the running example.</div>
-      </div>
-      <div class="card">
-        <h3>Table 10.5</h3>
-        <div id="table-10-5"></div>
-        <div class="caption">L_0 coordinate difference counts on the running example.</div>
+        <div id="metric-badge" class="metric-badge"></div>
+        <div id="status" class="status"></div>
       </div>
     </div>
-
-    <div id="status" class="status"></div>
   </div>
 
   <script>
-    const ids = [
-      ['x1x', 'x1y'],
-      ['x2x', 'x2y'],
-      ['x3x', 'x3y'],
-      ['x4x', 'x4y']
-    ];
     const defaults = [
       [0, 2],
       [2, 0],
       [3, 1],
       [5, 1]
     ];
-
-    function getPoints() {
-      const pts = [];
-      for (const pair of ids) {
-        const x = Number(document.getElementById(pair[0]).value);
-        const y = Number(document.getElementById(pair[1]).value);
-        if (Number.isNaN(x) || Number.isNaN(y)) {
-          return null;
-        }
-        pts.push([x, y]);
-      }
-      return pts;
-    }
+    const state = {
+      points: defaults.map(p => p.slice()),
+      selected: 0,
+      metric: 'euclidean'
+    };
+    const metricInfo = {
+      euclidean: { key: 'euclidean', table: 'Table 10.2', label: 'Euclidean', short: 'r = 2', formula: 'sqrt((Δx)^2 + (Δy)^2)' },
+      manhattan: { key: 'manhattan', table: 'Table 10.3', label: 'Manhattan', short: 'r = 1', formula: '|Δx| + |Δy|' },
+      linf: { key: 'linf', table: 'Table 10.4', label: 'L_infinity', short: 'r = infinity', formula: 'max(|Δx|, |Δy|)' },
+      l0: { key: 'l0', table: 'Table 10.5', label: 'L_0', short: 'r = 0', formula: 'count of differing coordinates' }
+    };
 
     function fmt(v) {
       const rounded = Math.round(v);
-      if (Math.abs(v - rounded) < 1e-9) {
-        return String(rounded);
-      }
+      if (Math.abs(v - rounded) < 1e-9) return String(rounded);
       return v.toFixed(3).replace(/\.?0+$/, match => match === '.000' ? '' : '');
     }
 
@@ -239,102 +205,220 @@
       return { pair, value: best };
     }
 
+    function buildButtons(containerId, items, current, onClick) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = '';
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pill' + (item.value === current ? ' active' : '');
+        btn.textContent = item.label;
+        btn.addEventListener('click', () => onClick(item.value));
+        el.appendChild(btn);
+      });
+    }
+
     function renderSampleTable(points) {
-      const rows = points.map((p, i) =>
-        `<tr><td><b>x${i + 1}</b></td><td>${fmt(p[0])}</td><td>${fmt(p[1])}</td></tr>`
-      ).join('');
+      const rows = points.map((p, i) => {
+        const cls = i === state.selected ? ' class="selected-row"' : '';
+        return `<tr${cls}><td><b>x${i + 1}</b></td><td>${fmt(p[0])}</td><td>${fmt(p[1])}</td></tr>`;
+      }).join('');
       return `<table>
         <thead><tr><th>sample</th><th>x_{i,1}</th><th>x_{i,2}</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
     }
 
-    function renderDistanceTable(matrix, titleLabel) {
-      const n = matrix.length;
-      const header = Array.from({ length: n }, (_, i) => `<th>x${i + 1}</th>`).join('');
-      const rows = Array.from({ length: n }, (_, i) => {
-        const cells = Array.from({ length: n }, (_, j) => `<td>${fmt(matrix[i][j])}</td>`).join('');
-        return `<tr><th>x${i + 1}</th>${cells}</tr>`;
-      }).join('');
-      return `<table>
-        <thead><tr><th>${titleLabel}</th>${header}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>`;
+    function heatmapAnnotations(labels, matrix) {
+      const ann = [];
+      for (let i = 0; i < matrix.length; i++) {
+        for (let j = 0; j < matrix.length; j++) {
+          ann.push({
+            xref: 'x2',
+            yref: 'y2',
+            x: labels[j],
+            y: labels[i],
+            text: fmt(matrix[i][j]),
+            showarrow: false,
+            font: { size: 12, color: '#0f172a' }
+          });
+        }
+      }
+      ann.push({
+        xref: 'paper', yref: 'paper', x: 0.18, y: 1.08,
+        text: 'Figure 10.2: Running example points',
+        showarrow: false, font: { size: 15, color: '#0f172a' }
+      });
+      ann.push({
+        xref: 'paper', yref: 'paper', x: 0.82, y: 1.08,
+        text: `${metricInfo[state.metric].table}: ${metricInfo[state.metric].label} view`,
+        showarrow: false, font: { size: 15, color: '#0f172a' }
+      });
+      return ann;
     }
 
-    function renderPlot(points) {
+    function renderPlot(points, matrix, nearest) {
+      const labels = points.map((_, i) => `x${i + 1}`);
       const xs = points.map(p => p[0]);
       const ys = points.map(p => p[1]);
-      const labels = points.map((_, i) => `x${i + 1}`);
-      const margin = 1;
-      const xMin = Math.min(...xs) - margin;
-      const xMax = Math.max(...xs) + margin;
-      const yMin = Math.min(...ys) - margin;
-      const yMax = Math.max(...ys) + margin;
+      const margin = 1.0;
+      const selected = points[state.selected];
+      const pairPts = nearest.pair.map(i => points[i]);
 
-      Plotly.newPlot('plot', [{
-        x: xs,
-        y: ys,
-        mode: 'markers+text',
-        text: labels,
-        textposition: 'top center',
-        marker: { size: 12, color: '#2563eb' },
-        hovertemplate: '%{text} = (%{x}, %{y})<extra></extra>'
-      }], {
-        title: 'Figure 10.2: Running example points',
-        margin: { l: 60, r: 20, t: 50, b: 55 },
-        xaxis: { title: 'x_1', range: [xMin, xMax], zeroline: true, gridcolor: '#e2e8f0' },
-        yaxis: { title: 'x_2', range: [yMin, yMax], scaleanchor: 'x', scaleratio: 1, zeroline: true, gridcolor: '#e2e8f0' },
+      const plotData = [
+        {
+          x: pairPts.map(p => p[0]),
+          y: pairPts.map(p => p[1]),
+          mode: 'lines',
+          line: { color: '#f59e0b', width: 3, dash: 'dash' },
+          hoverinfo: 'skip',
+          xaxis: 'x',
+          yaxis: 'y',
+          showlegend: false
+        },
+        {
+          x: xs,
+          y: ys,
+          mode: 'markers+text',
+          text: labels,
+          textposition: 'top center',
+          marker: { size: 12, color: '#2563eb' },
+          hovertemplate: '%{text} = (%{x}, %{y})<extra></extra>',
+          xaxis: 'x',
+          yaxis: 'y',
+          name: 'points'
+        },
+        {
+          x: [selected[0]],
+          y: [selected[1]],
+          mode: 'markers',
+          marker: { size: 17, color: '#f59e0b', line: { color: '#92400e', width: 2 } },
+          hovertemplate: `selected: x${state.selected + 1}<extra></extra>`,
+          xaxis: 'x',
+          yaxis: 'y',
+          showlegend: false
+        },
+        {
+          type: 'heatmap',
+          x: labels,
+          y: labels,
+          z: matrix,
+          colorscale: 'Blues',
+          zmin: 0,
+          zmax: Math.max(...matrix.flat(), 1),
+          showscale: false,
+          xaxis: 'x2',
+          yaxis: 'y2',
+          hovertemplate: '%{y} to %{x}: %{z:.3f}<extra></extra>'
+        }
+      ];
+
+      Plotly.newPlot('mainplot', plotData, {
+        grid: { rows: 1, columns: 2, pattern: 'independent' },
+        margin: { l: 60, r: 30, t: 80, b: 55 },
         paper_bgcolor: '#ffffff',
-        plot_bgcolor: '#ffffff'
+        plot_bgcolor: '#ffffff',
+        annotations: heatmapAnnotations(labels, matrix),
+        xaxis: {
+          title: 'x_1',
+          range: [Math.min(...xs) - margin, Math.max(...xs) + margin],
+          zeroline: true,
+          gridcolor: '#e2e8f0'
+        },
+        yaxis: {
+          title: 'x_2',
+          range: [Math.min(...ys) - margin, Math.max(...ys) + margin],
+          scaleanchor: 'x',
+          scaleratio: 1,
+          zeroline: true,
+          gridcolor: '#e2e8f0'
+        },
+        xaxis2: {
+          title: '',
+          side: 'top',
+          type: 'category',
+          gridcolor: '#e2e8f0'
+        },
+        yaxis2: {
+          title: '',
+          type: 'category',
+          autorange: 'reversed',
+          gridcolor: '#e2e8f0'
+        }
       }, { displayModeBar: false, responsive: true });
+
+      const plotEl = document.getElementById('mainplot');
+      plotEl.on('plotly_click', ev => {
+        const pt = ev.points && ev.points[0];
+        if (!pt) return;
+        if (pt.curveNumber === 1 && typeof pt.pointIndex === 'number') {
+          state.selected = pt.pointIndex;
+          syncControls();
+          render();
+        }
+      });
+    }
+
+    function syncControls() {
+      const pt = state.points[state.selected];
+      document.getElementById('x-slider').value = pt[0];
+      document.getElementById('y-slider').value = pt[1];
+      document.getElementById('x-slider-v').textContent = Number(pt[0]).toFixed(1);
+      document.getElementById('y-slider-v').textContent = Number(pt[1]).toFixed(1);
+      buildButtons('point-buttons',
+        state.points.map((_, i) => ({ value: i, label: `x${i + 1}` })),
+        state.selected,
+        value => { state.selected = value; syncControls(); render(); }
+      );
+      buildButtons('metric-buttons',
+        Object.values(metricInfo).map(info => ({ value: info.key, label: info.label })),
+        state.metric,
+        value => { state.metric = value; render(); }
+      );
     }
 
     function render() {
-      const points = getPoints();
-      const error = document.getElementById('error');
-      if (!points) {
-        error.style.display = 'block';
-        error.textContent = 'Please enter valid numeric coordinates for all four points.';
-        return;
-      }
-      error.style.display = 'none';
+      document.getElementById('table-10-1').innerHTML = renderSampleTable(state.points);
+      const matrix = pairwise(state.points, state.metric);
+      const nearest = closestPair(matrix);
+      renderPlot(state.points, matrix, nearest);
 
-      const euclidean = pairwise(points, 'euclidean');
-      const manhattan = pairwise(points, 'manhattan');
-      const linf = pairwise(points, 'linf');
-      const l0 = pairwise(points, 'l0');
+      const current = metricInfo[state.metric];
+      const nearestText =
+        `Current view: ${current.table} (${current.label})\n` +
+        `Formula: ${current.formula}\n` +
+        `Closest pair: x${nearest.pair[0] + 1} and x${nearest.pair[1] + 1} with value ${fmt(nearest.value)}\n` +
+        `Selected point: x${state.selected + 1} = (${fmt(state.points[state.selected][0])}, ${fmt(state.points[state.selected][1])})\n\n`;
 
-      document.getElementById('table-10-1').innerHTML = renderSampleTable(points);
-      document.getElementById('table-10-2').innerHTML = renderDistanceTable(euclidean, 'r = 2');
-      document.getElementById('table-10-3').innerHTML = renderDistanceTable(manhattan, 'r = 1');
-      document.getElementById('table-10-4').innerHTML = renderDistanceTable(linf, 'r = infinity');
-      document.getElementById('table-10-5').innerHTML = renderDistanceTable(l0, 'r = 0');
-      renderPlot(points);
+      const allSummaries = Object.values(metricInfo).map(info => {
+        const mat = pairwise(state.points, info.key);
+        const best = closestPair(mat);
+        return `${info.table}: nearest pair is x${best.pair[0] + 1} and x${best.pair[1] + 1} (${fmt(best.value)})`;
+      }).join('\n');
 
-      const e = closestPair(euclidean);
-      const m = closestPair(manhattan);
-      const inf = closestPair(linf);
-      const z = closestPair(l0);
-      document.getElementById('status').textContent =
-        `Closest pair under Euclidean: x${e.pair[0] + 1} and x${e.pair[1] + 1} (d = ${fmt(e.value)})\n` +
-        `Closest pair under Manhattan: x${m.pair[0] + 1} and x${m.pair[1] + 1} (d = ${fmt(m.value)})\n` +
-        `Closest pair under L_infinity: x${inf.pair[0] + 1} and x${inf.pair[1] + 1} (d = ${fmt(inf.value)})\n` +
-        `Closest pair under L_0: x${z.pair[0] + 1} and x${z.pair[1] + 1} (d = ${fmt(z.value)})`;
+      document.getElementById('metric-badge').textContent = `${current.table} • ${current.label}`;
+      document.getElementById('status').textContent = nearestText + allSummaries;
     }
 
+    document.getElementById('x-slider').addEventListener('input', ev => {
+      state.points[state.selected][0] = Number(ev.target.value);
+      document.getElementById('x-slider-v').textContent = Number(ev.target.value).toFixed(1);
+      render();
+    });
+    document.getElementById('y-slider').addEventListener('input', ev => {
+      state.points[state.selected][1] = Number(ev.target.value);
+      document.getElementById('y-slider-v').textContent = Number(ev.target.value).toFixed(1);
+      render();
+    });
     document.getElementById('reset').addEventListener('click', () => {
-      defaults.forEach((pair, idx) => {
-        document.getElementById(ids[idx][0]).value = pair[0];
-        document.getElementById(ids[idx][1]).value = pair[1];
-      });
+      state.points = defaults.map(p => p.slice());
+      state.selected = 0;
+      state.metric = 'euclidean';
+      syncControls();
       render();
     });
 
-    ids.flat().forEach(id => {
-      document.getElementById(id).addEventListener('input', render);
-    });
-
+    syncControls();
     render();
   </script>
 </body>
