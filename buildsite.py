@@ -1353,19 +1353,21 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
     replace_start_id = matched_rule.get("replace_start_id")
     if replace_start_id:
       start_node = soup.find(id=replace_start_id)
-      if start_node is not None:
-        replacement_target.insert_after(block)
+      if start_node is not None and start_node.parent is not None:
         current = start_node
         nodes_to_remove = []
-        while current is not None and current != block:
+        while current is not None:
           nodes_to_remove.append(current)
+          if current == replacement_target:
+            break
           current = current.find_next_sibling()
-        if current == block:
+        if nodes_to_remove and nodes_to_remove[-1] == replacement_target:
+          start_node.insert_before(block)
           for node in nodes_to_remove:
             node.decompose()
           continue
 
-    replacement_target.insert_after(block)
+    replacement_target.replace_with(block)
 
 
 def sync_portal_index(index_path: Path, lecture_pages):

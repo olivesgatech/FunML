@@ -33,12 +33,10 @@ window.MathJax = {
 <ol>
 <li><p>Consider the two figures below:</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-soft-hard.png"/></p>
 </div>
 <p>The left figure shows a dataset with a hard margin SVM classifier, while the right figure shows the same dataset with a soft margin SVM classifier.</p>
 <p>Now, imagine introducing an outlier close to the decision boundary but on the incorrect side of it.</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
 </div>
 <p>Which classifier will better handle the outlier, and why?</p>
 <ol>
@@ -51,16 +49,13 @@ window.MathJax = {
 <p>The soft margin SVM is designed to allow some misclassification or margin violations, which makes it more robust in the presence of outliers. When an outlier is introduced near the decision boundary but on the incorrect side, the soft margin SVM can tolerate this outlier without significantly altering the decision boundary. This is due to the introduction of slack variables <span class="math inline">\(\xi_i\)</span> in the optimization problem, allowing some points to fall within the margin or even be misclassified: <span class="math display">\[\min_{\mathbf{w}, b, \xi} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{N} \xi_i\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i\]</span> The term <span class="math inline">\(C \sum_{i=1}^{N} \xi_i\)</span> penalizes the slack variables, balancing the margin width and the tolerance for misclassified points. A smaller <span class="math inline">\(C\)</span> allows for a wider margin and more tolerance for outliers, resulting in a more stable model in the presence of noise or misclassified points.</p>
 <p>In contrast, the hard margin SVM does not allow any misclassification, so introducing an outlier forces the SVM to adjust the decision boundary to perfectly classify all points, including the outlier. This can lead to significant changes in the decision boundary, potentially resulting in overfitting and poor generalization.</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
 </div></li>
 <li><p>For the next few questions, we’ll be looking at the kernel trick. Let’s consider the following dataset:</p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-2d.png"/></p>
 </div>
 <p>Notice that the data is not linearly separable. Now we can either use a nonlinear classifier, or we could introduce nonlinearity into the data input itself. What if we transform the inputs into a higher dimension space, where some of the dimensions introduce nonlinearity? For example,</p>
 <p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
 <div class="center">
-<p><img alt="image" src="../../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
 </div>
 <p>Now we can fit a linear boundary (a plane) to separate the data. Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>
 <p>Given a <span class="math inline">\(d\)</span>-dimensional input, how many possible nonlinear interaction terms can be introduced in the transformation?</p>
