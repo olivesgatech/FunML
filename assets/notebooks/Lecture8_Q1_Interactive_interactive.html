@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lecture 8 Q1 Interactive</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}.wrap{max-width:980px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:70px;text-align:right;font-weight:700}
+    table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    th{background:#eef2ff}
+    .ok{font-weight:700;color:#166534}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Interactive Q1: Iterations Per Epoch</h1>
+    <p>Compute iteration counts for Batch GD, SGD, and Mini-batch GD.</p>
+    <div class="controls">
+      <div class="control"><label>N (samples)</label><div class="row"><input id="n" type="range" min="10000" max="2000000" step="10000" value="1000000"/><span class="value" id="nv">1000000</span></div></div>
+      <div class="control"><label>mini-batch size b</label><div class="row"><input id="b" type="range" min="100" max="200000" step="100" value="10000"/><span class="value" id="bv">10000</span></div></div>
+      <div class="control"><label>epochs</label><div class="row"><input id="e" type="range" min="1" max="20" step="1" value="1"/><span class="value" id="ev">1</span></div></div>
+    </div>
+    <table>
+      <thead><tr><th>Method</th><th>Iterations / epoch</th><th>Total iterations</th></tr></thead>
+      <tbody>
+        <tr><td>Batch GD</td><td id="batch_ep"></td><td id="batch_total"></td></tr>
+        <tr><td>SGD</td><td id="sgd_ep"></td><td id="sgd_total"></td></tr>
+        <tr><td>Mini-batch GD</td><td id="mini_ep"></td><td id="mini_total"></td></tr>
+      </tbody>
+    </table>
+    <p id="hint" class="ok" style="margin-top:10px"></p>
+  </div>
+<script>
+function fmt(x){return x.toLocaleString('en-US')}
+function recalc(){
+  const N=+n.value, b=+b.value, E=+e.value;
+  nv.textContent=fmt(N); bv.textContent=fmt(b); ev.textContent=E;
+  const be=1, se=N, me=Math.ceil(N/b);
+  batch_ep.textContent=fmt(be); sgd_ep.textContent=fmt(se); mini_ep.textContent=fmt(me);
+  batch_total.textContent=fmt(be*E); sgd_total.textContent=fmt(se*E); mini_total.textContent=fmt(me*E);
+  const isCanonical = (N===1000000 && b===10000 && E===1);
+  hint.textContent = isCanonical ? 'Canonical answer for Lecture 8 Q1: Batch=1, SGD=1,000,000, Mini-batch=100 (Option A).' : 'Adjust N, b, and epochs to explore scaling.';
+}
+['n','b','e'].forEach(id=>document.getElementById(id).addEventListener('input',recalc));
+recalc();
+</script>
+</body>
+</html>

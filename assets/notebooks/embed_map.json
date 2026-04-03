@@ -156,7 +156,7 @@
     {
       "image_match": "img/lecture8/nonlinear data generated via quadratic equation and polynomial regression model prediction fitted to data.png",
       "notebook_html": "Lecture8_Fig82_interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_ipynb": "Lecture8_Fig82_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 8.2 Polynomial Fit",
       "description": "Interactivity from linear to polynomial fit only (contour and optimization-MSE panels removed).",
       "iframe_title": "Interactive Figure 8.2 Polynomial Fit Notebook",
@@ -165,7 +165,7 @@
     {
       "image_match": "img/lecture8/contour-plot.png",
       "notebook_html": "Lecture8_LossContour_Interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_ipynb": "Lecture8_LossContour_Interactive.ipynb",
       "section_title": "Interactive Notebook: Loss Landscape and Contour Explorer",
       "description": "Pick a horizontal plane and observe how the corresponding contour level changes.",
       "iframe_title": "Interactive Loss Landscape and Contour Explorer",
@@ -174,7 +174,7 @@
     {
       "image_match": "img/lecture8/loss-landscape.png",
       "notebook_html": "Lecture8_LossContour_Interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_ipynb": "Lecture8_LossContour_Interactive.ipynb",
       "section_title": "Interactive Notebook: Loss Landscape and Contour Explorer",
       "description": "Pick a horizontal plane and observe how the corresponding contour level changes.",
       "iframe_title": "Interactive Loss Landscape and Contour Explorer",
@@ -182,8 +182,8 @@
     },
     {
       "image_match": "img/lecture8/convergence path of batch gd.png",
-      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_html": "Lecture8_BatchGD_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_BatchGD_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 8.4 Batch GD",
       "description": "Explore convergence path with controllable alpha and stopping criteria.",
       "iframe_title": "Interactive Figure 8.4 Batch GD Notebook",
@@ -191,8 +191,8 @@
     },
     {
       "image_match": "img/lecture8/convergence path of stochastic gd.png",
-      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_html": "Lecture8_SGD_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_SGD_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 8.5 Stochastic GD",
       "description": "Explore convergence path with controllable alpha and stopping criteria.",
       "iframe_title": "Interactive Figure 8.5 Stochastic GD Notebook",
@@ -200,56 +200,29 @@
     },
     {
       "image_match": "img/lecture8/convergence path of mini-batch gd.png",
-      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
+      "notebook_html": "Lecture8_MiniBatchGD_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_MiniBatchGD_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 8.6 Mini-batch GD",
       "description": "Explore convergence path with controllable alpha and stopping criteria.",
       "iframe_title": "Interactive Figure 8.6 Mini-batch GD Notebook",
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture8/convergence (all).png",
-      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
-      "notebook_ipynb": "Lecture8_Polynomial_Interactive.ipynb",
-      "section_title": "Interactive Notebook: Figure 8.6 Optimization Comparison",
-      "description": "Compare Batch, Stochastic, and Mini-batch trajectories under shared settings.",
-      "iframe_title": "Interactive Figure 8.6 Optimization Comparison Notebook",
-      "iframe_height": 900
-    },
-    {
       "image_match": "img/lecture8/qa-mse-contour.png",
-      "notebook_html": "Q&A Countours_interactive.html",
-      "notebook_ipynb": "Q&A Countours.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8 Q4 MSE Contours",
-      "description": "Q4 demo: compare planes and contour-based MSE behavior.",
-      "iframe_title": "Interactive Lecture 8 Q4 MSE Contours Notebook",
+      "notebook_html": "Lecture8_Q1_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Q1_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Q1",
+      "description": "Interactive iteration counter for Batch GD, SGD, and Mini-batch GD.",
+      "iframe_title": "Interactive Lecture 8 Q1 Notebook",
       "iframe_height": 900
     },
     {
       "image_match": "img/lecture8/qa-mse-l1-options.png",
-      "notebook_html": "Q&A Countours_interactive.html",
-      "notebook_ipynb": "Q&A Countours.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8 Q4 MSE vs L1",
-      "description": "Q4 demo: examine MSE contour choices and L1 interpretation.",
-      "iframe_title": "Interactive Lecture 8 Q4 MSE vs L1 Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "img/lecture8/qa_q5_linear_vs_poly_fit.png",
-      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
-      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8 Q5 Linear vs Polynomial Fit",
-      "description": "Q5 demo: compare linear and polynomial fits on the same data.",
-      "iframe_title": "Interactive Lecture 8 Q5 Linear vs Polynomial Fit Notebook",
-      "iframe_height": 900
-    },
-    {
-      "image_match": "img/lecture8/qa_q5_mse_comparison.png",
-      "notebook_html": "Q5_linear_vs_polynomial_regression_interactive.html",
-      "notebook_ipynb": "Q5_linear_vs_polynomial_regression.ipynb",
-      "section_title": "Interactive Notebook: Lecture 8 Q5 MSE Comparison",
-      "description": "Q5 demo: compare train/test MSE across model choices.",
-      "iframe_title": "Interactive Lecture 8 Q5 MSE Comparison Notebook",
+      "notebook_html": "Lecture8_Q2_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture8_Q2_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Lecture 8 Q2",
+      "description": "Interactive memory-feasibility checker for Batch GD, SGD, and Mini-batch GD.",
+      "iframe_title": "Interactive Lecture 8 Q2 Notebook",
       "iframe_height": 900
     },
     {
@@ -284,7 +257,7 @@
       "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
       "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 9.11 Lambda Effect",
-      "description": "Adjust λ and observe coefficient shrinkage behavior.",
+      "description": "Adjust \u03bb and observe coefficient shrinkage behavior.",
       "iframe_title": "Interactive Figure 9.11 Lambda Effect Notebook",
       "iframe_height": 900
     },
@@ -293,7 +266,7 @@
       "notebook_html": "Lecture9_Regularization_Interactive_interactive.html",
       "notebook_ipynb": "Lecture9_Regularization_Interactive.ipynb",
       "section_title": "Interactive Notebook: Figure 9.12 Lambda vs Model Behavior",
-      "description": "Adjust λ and inspect resulting model complexity.",
+      "description": "Adjust \u03bb and inspect resulting model complexity.",
       "iframe_title": "Interactive Figure 9.12 Lambda vs Model Behavior Notebook",
       "iframe_height": 900
     },
@@ -316,7 +289,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 10.43.43 am.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 10.43.43\u202fam.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -325,7 +298,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.12.16 am.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.12.16\u202fam.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -334,7 +307,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.14.26 am.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.14.26\u202fam.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -343,7 +316,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.31.47 am.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 11.31.47\u202fam.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -352,7 +325,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.07.38 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.07.38\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -361,7 +334,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.10.20 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.10.20\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -370,7 +343,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.18.27 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 12.18.27\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -379,7 +352,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.38.32 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.38.32\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -388,7 +361,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.41.59 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 1.41.59\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -397,7 +370,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.01.26 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.01.26\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -406,7 +379,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.21.34 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.21.34\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",
@@ -415,7 +388,7 @@
       "iframe_height": 900
     },
     {
-      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.23.47 pm.png",
+      "image_match": "img/lecture11/screenshot 2024-09-29 at 2.23.47\u202fpm.png",
       "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
       "notebook_ipynb": "Lecture11_KMeans_Interactive.ipynb",
       "section_title": "Interactive Notebook: Lecture 11 K-Means Steps",

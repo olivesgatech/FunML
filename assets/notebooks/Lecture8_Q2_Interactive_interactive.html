@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lecture 8 Q2 Interactive</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}.wrap{max-width:980px;margin:0 auto}
+    h1{margin:0 0 8px;font-size:24px}p{margin:0 0 12px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .row{display:flex;align-items:center;gap:10px}.row input[type=range]{flex:1}.value{min-width:70px;text-align:right;font-weight:700}
+    table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}
+    th{background:#eef2ff}.yes{color:#166534;font-weight:700}.no{color:#991b1b;font-weight:700}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Interactive Q2: Memory Feasibility</h1>
+    <p>Check which optimization methods satisfy a memory limit.</p>
+    <div class="controls">
+      <div class="control"><label>N (samples)</label><div class="row"><input id="n" type="range" min="10000" max="2000000" step="10000" value="1000000"/><span class="value" id="nv">1000000</span></div></div>
+      <div class="control"><label>memory limit M (samples)</label><div class="row"><input id="m" type="range" min="1000" max="300000" step="1000" value="50000"/><span class="value" id="mv">50000</span></div></div>
+      <div class="control"><label>mini-batch size b</label><div class="row"><input id="b" type="range" min="100" max="200000" step="100" value="10000"/><span class="value" id="bv">10000</span></div></div>
+    </div>
+    <table>
+      <thead><tr><th>Method</th><th>Samples processed/iteration</th><th>Feasible under M?</th></tr></thead>
+      <tbody>
+        <tr><td>Batch GD</td><td id="batch_load"></td><td id="batch_ok"></td></tr>
+        <tr><td>SGD</td><td id="sgd_load"></td><td id="sgd_ok"></td></tr>
+        <tr><td>Mini-batch GD</td><td id="mini_load"></td><td id="mini_ok"></td></tr>
+      </tbody>
+    </table>
+    <p id="hint" style="margin-top:10px"></p>
+  </div>
+<script>
+function fmt(x){return x.toLocaleString('en-US')}
+function badge(ok){return ok?'<span class="yes">Yes</span>':'<span class="no">No</span>'}
+function recalc(){
+  const N=+n.value, M=+m.value, b=+b.value;
+  nv.textContent=fmt(N); mv.textContent=fmt(M); bv.textContent=fmt(b);
+  batch_load.textContent=fmt(N); sgd_load.textContent='1'; mini_load.textContent=fmt(b);
+  const batch=N<=M, sgd=1<=M, mini=b<=M;
+  batch_ok.innerHTML=badge(batch); sgd_ok.innerHTML=badge(sgd); mini_ok.innerHTML=badge(mini);
+  const canonical = (N===1000000 && M===50000 && b<=50000);
+  hint.textContent = canonical ? 'Canonical Q2 conclusion: SGD and Mini-batch GD are feasible; Batch GD is not.' : 'Feasibility depends on whether per-iteration sample load is <= M.';
+}
+['n','m','b'].forEach(id=>document.getElementById(id).addEventListener('input',recalc));
+recalc();
+</script>
+</body>
+</html>
