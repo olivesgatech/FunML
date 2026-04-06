@@ -26,60 +26,142 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Given the following centroids for a k-means clustering model: <span class="math display">\[M_1 = (2, 3), \quad M_2 = (7, 8), \quad M_3 = (5, 2)\]</span> and a new data point <span class="math inline">\(x_{\text{new}} = (4, 4)\)</span>, which cluster should <span class="math inline">\(x_{\text{new}}\)</span> be assigned to using the Euclidean distance metric? <strong>If there is a tie, choose the cluster with the smaller index.</strong> <strong>Options:</strong></p>
+<li><p><strong>Question:</strong> Given the following centroids for a
+k-means clustering model: <span class="math display">\[M_1 = (2, 3),
+\quad M_2 = (7, 8), \quad M_3 = (5, 2)\]</span> and a new data point
+<span class="math inline">\(x_{\text{new}} = (4, 4)\)</span>, which
+cluster should <span class="math inline">\(x_{\text{new}}\)</span> be
+assigned to using the Euclidean distance metric? <strong>If there is a
+tie, choose the cluster with the smaller index.</strong>
+<strong>Options:</strong></p>
 <ol>
 <li><p>Cluster 1</p></li>
 <li><p>Cluster 2</p></li>
 <li><p>Cluster 3</p></li>
 </ol>
-<p><strong>Solution:</strong> We compute the Euclidean distance from <span class="math inline">\(x_{\text{new}}=(4,4)\)</span> to each centroid: <span class="math display">\[d(x_{\text{new}}, M_1) = \sqrt{(4 - 2)^2 + (4 - 3)^2} = \sqrt{5} \approx 2.24\]</span> <span class="math display">\[d(x_{\text{new}}, M_2) = \sqrt{(4 - 7)^2 + (4 - 8)^2} = \sqrt{25} = 5\]</span> <span class="math display">\[d(x_{\text{new}}, M_3) = \sqrt{(4 - 5)^2 + (4 - 2)^2} = \sqrt{5} \approx 2.24\]</span> There is a tie between Cluster 1 and Cluster 3. By the tie-break rule (smaller index), we assign <span class="math inline">\(x_{\text{new}}\)</span> to <strong>Cluster 1</strong>. Therefore, the correct answer is <strong>(a) Cluster 1</strong>.</p></li>
-<li><p><strong>Question:</strong> In a k-Medoids clustering model, the following medoids were determined after training: <span class="math display">\[M_1 = (1, 5), \quad M_2 = (4, 5)\]</span> A new data point <span class="math inline">\(x_{\text{new}} = (3, 6)\)</span> arrives. Using the Chebyshev distance (L-infinity norm), which cluster does <span class="math inline">\(x_{\text{new}}\)</span> belong to? <strong>Options:</strong></p>
+<p><strong>Solution:</strong> We compute the Euclidean distance from
+<span class="math inline">\(x_{\text{new}}=(4,4)\)</span> to each
+centroid: <span class="math display">\[d(x_{\text{new}}, M_1) = \sqrt{(4
+- 2)^2 + (4 - 3)^2} = \sqrt{5} \approx 2.24\]</span> <span class="math display">\[d(x_{\text{new}}, M_2) = \sqrt{(4 - 7)^2 + (4 -
+8)^2} = \sqrt{25} = 5\]</span> <span class="math display">\[d(x_{\text{new}}, M_3) = \sqrt{(4 - 5)^2 + (4 -
+2)^2} = \sqrt{5} \approx 2.24\]</span> There is a tie between Cluster 1
+and Cluster 3. By the tie-break rule (smaller index), we assign <span class="math inline">\(x_{\text{new}}\)</span> to <strong>Cluster
+1</strong>. Therefore, the correct answer is <strong>(a) Cluster
+1</strong>.</p></li>
+<li><p><strong>Question:</strong> In a k-Medoids clustering model, the
+following medoids were determined after training: <span class="math display">\[M_1 = (1, 5), \quad M_2 = (4, 5)\]</span> A new
+data point <span class="math inline">\(x_{\text{new}} = (3, 6)\)</span>
+arrives. Using the Chebyshev distance (L-infinity norm), which cluster
+does <span class="math inline">\(x_{\text{new}}\)</span> belong to?
+<strong>Options:</strong></p>
 <ol>
 <li><p>Cluster 1</p></li>
 <li><p>Cluster 2</p></li>
 </ol>
-<p><strong>Solution:</strong> The Chebyshev distance between two points <span class="math inline">\((x_1, y_1)\)</span> and <span class="math inline">\((x_2, y_2)\)</span> is calculated as: <span class="math display">\[d(x_{\text{new}}, M_j) = \max\{|x_1 - x_2|, |y_1 - y_2|\}\]</span> We calculate the Chebyshev distance between <span class="math inline">\(x_{\text{new}} = (3, 6)\)</span> and each medoid: <span class="math display">\[d(x_{\text{new}}, M_1) = \max\{|3 - 1|, |6 - 5|\} = \max\{2, 1\} = 2\]</span> <span class="math display">\[d(x_{\text{new}}, M_2) = \max\{|3 - 4|, |6 - 5|\} = \max\{1, 1\} = 1\]</span> Since the distance to Cluster 2 is lower, we will assign <span class="math inline">\(x_{\text{new}}\)</span> to Cluster. The correct answer is <strong>(b) Cluster 2</strong>.</p></li>
-<li><p><strong>Question:</strong> In standard k-means, each iteration alternates between: (i) assigning each point to its nearest centroid, and (ii) updating each centroid to be the mean of its assigned points. Which statement is <strong>most correct</strong> about the SSD objective <span class="math display">\[\mathrm{SSD} = \sum_{j=1}^k \sum_{x_i \in C_j} \|x_i - m_j\|_2^2\]</span> during these steps? <strong>Options:</strong></p>
+<p><strong>Solution:</strong> The Chebyshev distance between two points
+<span class="math inline">\((x_1, y_1)\)</span> and <span class="math inline">\((x_2, y_2)\)</span> is calculated as: <span class="math display">\[d(x_{\text{new}}, M_j) = \max\{|x_1 - x_2|, |y_1
+- y_2|\}\]</span> We calculate the Chebyshev distance between <span class="math inline">\(x_{\text{new}} = (3, 6)\)</span> and each medoid:
+<span class="math display">\[d(x_{\text{new}}, M_1) = \max\{|3 - 1|, |6
+- 5|\} = \max\{2, 1\} = 2\]</span> <span class="math display">\[d(x_{\text{new}}, M_2) = \max\{|3 - 4|, |6 - 5|\}
+= \max\{1, 1\} = 1\]</span> Since the distance to Cluster 2 is lower, we
+will assign <span class="math inline">\(x_{\text{new}}\)</span> to
+Cluster. The correct answer is <strong>(b) Cluster 2</strong>.</p></li>
+<li><p><strong>Question:</strong> In standard k-means, each iteration
+alternates between: (i) assigning each point to its nearest centroid,
+and (ii) updating each centroid to be the mean of its assigned points.
+Which statement is <strong>most correct</strong> about the SSD objective
+<span class="math display">\[\mathrm{SSD} = \sum_{j=1}^k \sum_{x_i \in
+C_j} \|x_i - m_j\|_2^2\]</span> during these steps?
+<strong>Options:</strong></p>
 <ol>
-<li><p>The assignment step can increase SSD, but the update step always decreases it.</p></li>
-<li><p>The assignment step never increases SSD, and the update step never increases SSD.</p></li>
-<li><p>The assignment step always decreases SSD, but the update step can increase it.</p></li>
-<li><p>SSD can increase in both steps, but typically decreases in practice.</p></li>
+<li><p>The assignment step can increase SSD, but the update step always
+decreases it.</p></li>
+<li><p>The assignment step never increases SSD, and the update step
+never increases SSD.</p></li>
+<li><p>The assignment step always decreases SSD, but the update step can
+increase it.</p></li>
+<li><p>SSD can increase in both steps, but typically decreases in
+practice.</p></li>
 </ol>
-<p><strong>Solution:</strong> Fix the centroids <span class="math inline">\(\{m_j\}_{j=1}^k\)</span>. The assignment step chooses, for each <span class="math inline">\(x_i\)</span>, the cluster whose centroid is closest, which minimizes <span class="math inline">\(\|x_i - m_j\|_2^2\)</span> among all clusters. Therefore, reassigning points to their nearest centroids cannot increase the total SSD. Next, fix the assignments <span class="math inline">\(\{C_j\}_{j=1}^k\)</span>. For each cluster <span class="math inline">\(C_j\)</span>, the centroid update sets <span class="math display">\[m_j \leftarrow \frac{1}{|C_j|}\sum_{x_i \in C_j} x_i,\]</span> which is the minimizer of <span class="math inline">\(\sum_{x_i\in C_j}\|x_i - m\|_2^2\)</span> over <span class="math inline">\(m\)</span> (the mean minimizes squared Euclidean error). Thus the update step also cannot increase SSD. Hence SSD is non-increasing in both steps. The correct answer is <strong>(b)</strong>.</p></li>
-<li><p><strong>Question:</strong> In k-means++, after selecting some centroids, each remaining point <span class="math inline">\(x_i\)</span> is sampled as the next centroid with probability <span class="math display">\[p(x_i)=\frac{D(x_i)^2}{\sum_r D(x_r)^2},
-\quad\text{where } D(x_i)=\min_{1\le j\le t}\|x_i-m_j\|_2.\]</span> Which statement best captures the <strong>effect</strong> of this rule? <strong>Options:</strong></p>
+<p><strong>Solution:</strong> Fix the centroids <span class="math inline">\(\{m_j\}_{j=1}^k\)</span>. The assignment step
+chooses, for each <span class="math inline">\(x_i\)</span>, the cluster
+whose centroid is closest, which minimizes <span class="math inline">\(\|x_i - m_j\|_2^2\)</span> among all clusters.
+Therefore, reassigning points to their nearest centroids cannot increase
+the total SSD. Next, fix the assignments <span class="math inline">\(\{C_j\}_{j=1}^k\)</span>. For each cluster <span class="math inline">\(C_j\)</span>, the centroid update sets <span class="math display">\[m_j \leftarrow \frac{1}{|C_j|}\sum_{x_i \in C_j}
+x_i,\]</span> which is the minimizer of <span class="math inline">\(\sum_{x_i\in C_j}\|x_i - m\|_2^2\)</span> over
+<span class="math inline">\(m\)</span> (the mean minimizes squared
+Euclidean error). Thus the update step also cannot increase SSD. Hence
+SSD is non-increasing in both steps. The correct answer is
+<strong>(b)</strong>.</p></li>
+<li><p><strong>Question:</strong> In k-means++, after selecting some
+centroids, each remaining point <span class="math inline">\(x_i\)</span>
+is sampled as the next centroid with probability <span class="math display">\[p(x_i)=\frac{D(x_i)^2}{\sum_r D(x_r)^2},
+\quad\text{where } D(x_i)=\min_{1\le j\le t}\|x_i-m_j\|_2.\]</span>
+Which statement best captures the <strong>effect</strong> of this rule?
+<strong>Options:</strong></p>
 <ol>
-<li><p>Points closer to existing centroids are more likely to be selected next.</p></li>
-<li><p>Points farther from existing centroids are more likely to be selected next.</p></li>
-<li><p>All points are equally likely to be selected next (uniform sampling).</p></li>
-<li><p>The next centroid must be the single farthest point (deterministic).</p></li>
+<li><p>Points closer to existing centroids are more likely to be
+selected next.</p></li>
+<li><p>Points farther from existing centroids are more likely to be
+selected next.</p></li>
+<li><p>All points are equally likely to be selected next (uniform
+sampling).</p></li>
+<li><p>The next centroid must be the single farthest point
+(deterministic).</p></li>
 </ol>
-<p><strong>Solution:</strong> Because <span class="math inline">\(p(x_i)\)</span> is proportional to <span class="math inline">\(D(x_i)^2\)</span>, points with larger distance to their nearest already-chosen centroid receive larger probability mass. This encourages centroids to be well-separated and spread across the dataset. Therefore, the correct answer is <strong>(b)</strong>.</p></li>
-<li><p><strong>Question:</strong> Mini-batch k-means uses a running-average style centroid update rather than recomputing the exact mean over all points in a cluster each iteration. Which is the <strong>main reason</strong> for using a running average? <strong>Options:</strong></p>
+<p><strong>Solution:</strong> Because <span class="math inline">\(p(x_i)\)</span> is proportional to <span class="math inline">\(D(x_i)^2\)</span>, points with larger distance to
+their nearest already-chosen centroid receive larger probability mass.
+This encourages centroids to be well-separated and spread across the
+dataset. Therefore, the correct answer is <strong>(b)</strong>.</p></li>
+<li><p><strong>Question:</strong> Mini-batch k-means uses a
+running-average style centroid update rather than recomputing the exact
+mean over all points in a cluster each iteration. Which is the
+<strong>main reason</strong> for using a running average?
+<strong>Options:</strong></p>
 <ol>
 <li><p>It guarantees convergence to the global minimum of SSD.</p></li>
-<li><p>It reduces per-iteration computation by avoiding full passes over all <span class="math inline">\(N\)</span> points.</p></li>
-<li><p>It makes the method robust to outliers by replacing the mean with the median.</p></li>
+<li><p>It reduces per-iteration computation by avoiding full passes over
+all <span class="math inline">\(N\)</span> points.</p></li>
+<li><p>It makes the method robust to outliers by replacing the mean with
+the median.</p></li>
 <li><p>It eliminates the need to choose the number of clusters <span class="math inline">\(k\)</span>.</p></li>
 </ol>
-<p><strong>Solution:</strong> Mini-batch k-means processes only a small batch of size <span class="math inline">\(b\ll N\)</span> per iteration. Since each update sees only a subset of points, the algorithm cannot compute the true full-dataset cluster means every step. A running average incorporates past information across many mini-batches while keeping each iteration cheap. Thus the main motivation is computational scalability. The correct answer is <strong>(b)</strong>.</p></li>
-<li><p><strong>Question:</strong> You have a dataset with occasional extreme outliers. You want cluster centers to be less affected by these outliers. Which modification is <strong>most appropriate</strong>? <strong>Options:</strong></p>
+<p><strong>Solution:</strong> Mini-batch k-means processes only a small
+batch of size <span class="math inline">\(b\ll N\)</span> per iteration.
+Since each update sees only a subset of points, the algorithm cannot
+compute the true full-dataset cluster means every step. A running
+average incorporates past information across many mini-batches while
+keeping each iteration cheap. Thus the main motivation is computational
+scalability. The correct answer is <strong>(b)</strong>.</p></li>
+<li><p><strong>Question:</strong> You have a dataset with occasional
+extreme outliers. You want cluster centers to be less affected by these
+outliers. Which modification is <strong>most appropriate</strong>?
+<strong>Options:</strong></p>
 <ol>
-<li><p>Use k-means with Euclidean distance and means (standard k-means).</p></li>
+<li><p>Use k-means with Euclidean distance and means (standard
+k-means).</p></li>
 <li><p>Use k-medians with Manhattan (L1) distance and medians.</p></li>
-<li><p>Use k-means++ initialization; this alone makes k-means robust to outliers.</p></li>
-<li><p>Increase <span class="math inline">\(k\)</span>; more clusters always makes the solution robust to outliers.</p></li>
+<li><p>Use k-means++ initialization; this alone makes k-means robust to
+outliers.</p></li>
+<li><p>Increase <span class="math inline">\(k\)</span>; more clusters
+always makes the solution robust to outliers.</p></li>
 </ol>
-<p><strong>Solution:</strong> The mean is sensitive to extreme values, so standard k-means centroids can be pulled toward outliers. Replacing the mean with the median improves robustness, and pairing this with Manhattan (L1) distance aligns naturally with median-based updates. Therefore, the best choice is <strong>k-medians with L1 distance</strong>. The correct answer is <strong>(b)</strong>.</p></li>
+<p><strong>Solution:</strong> The mean is sensitive to extreme values,
+so standard k-means centroids can be pulled toward outliers. Replacing
+the mean with the median improves robustness, and pairing this with
+Manhattan (L1) distance aligns naturally with median-based updates.
+Therefore, the best choice is <strong>k-medians with L1
+distance</strong>. The correct answer is <strong>(b)</strong>.</p></li>
 </ol>
-<section class="footnotes" role="doc-endnotes">
+<aside class="footnotes footnotes-end-of-document" id="footnotes" role="doc-endnotes">
 <hr/>
 <ol>
-<li id="fn1" role="doc-endnote"><p><a href="https://arxiv.org/pdf/1602.08254" rel="noopener noreferrer" target="_blank">Theoretical Analysis of the k-Means Algorithm</a><a class="footnote-back" href="#fnref1" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2" role="doc-endnote"><p><a href="https://medium.com/analytics-vidhya/effect-of-outliers-on-k-means-algorithm-using-python-7ba85821ea23" rel="noopener noreferrer" target="_blank">Effect of outliers on K-Means algorithm using Python</a><a class="footnote-back" href="#fnref2" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p><a href="https://arxiv.org/pdf/1602.08254" rel="noopener noreferrer" target="_blank">Theoretical
+Analysis of the k-Means Algorithm</a><a class="footnote-back" href="#fnref1" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://medium.com/analytics-vidhya/effect-of-outliers-on-k-means-algorithm-using-python-7ba85821ea23" rel="noopener noreferrer" target="_blank">Effect
+of outliers on K-Means algorithm using Python</a><a class="footnote-back" href="#fnref2" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</section></section>
+</aside></section>
 </main>
 </body>
 </html>

@@ -104,102 +104,298 @@ window.addEventListener("DOMContentLoaded", () => {
   
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture introduces the <strong>Transformer architecture</strong>, which serves as the foundation of modern large language models and many recent advances in computer vision. Unlike earlier sequence models such as RNNs and LSTMs that process inputs sequentially, Transformers rely on attention mechanisms that allow the model to process all tokens simultaneously while still learning long-range dependencies.</p>
-<p>We begin by examining the overall structure of the Transformer, including the encoder and decoder blocks and how information flows through these components. Particular emphasis is placed on understanding the <strong>self-attention mechanism</strong>, which allows the model to determine which parts of a sequence are most relevant when constructing contextual representations. We also study <strong>multi-head attention</strong>, which improves model expressiveness by allowing multiple attention operations to be learned in parallel.</p>
-<p>Since Transformers do not inherently encode sequence order, we next introduce <strong>positional encodings</strong>, which provide information about token positions. We also examine important architectural components such as <strong>residual connections</strong> and <strong>layer normalization</strong>, which help stabilize training in deep networks.</p>
-<p>Finally, we discuss how Transformers generate outputs through the decoding process and how they are trained using standard loss functions. The lecture concludes with an introduction to <strong>Vision Transformers (ViT)</strong>, which extend the Transformer architecture to image data by treating image patches as tokens.</p>
-<p>By the end of this lecture, students should understand the key components of the Transformer architecture, how attention enables contextual representation learning, and why Transformers have become a dominant architecture in modern machine learning.</p>
+<p>This lecture introduces the <strong>Transformer
+architecture</strong>, which serves as the foundation of modern large
+language models and many recent advances in computer vision. Unlike
+earlier sequence models such as RNNs and LSTMs that process inputs
+sequentially, Transformers rely on attention mechanisms that allow the
+model to process all tokens simultaneously while still learning
+long-range dependencies.</p>
+<p>We begin by examining the overall structure of the Transformer,
+including the encoder and decoder blocks and how information flows
+through these components. Particular emphasis is placed on understanding
+the <strong>self-attention mechanism</strong>, which allows the model to
+determine which parts of a sequence are most relevant when constructing
+contextual representations. We also study <strong>multi-head
+attention</strong>, which improves model expressiveness by allowing
+multiple attention operations to be learned in parallel.</p>
+<p>Since Transformers do not inherently encode sequence order, we next
+introduce <strong>positional encodings</strong>, which provide
+information about token positions. We also examine important
+architectural components such as <strong>residual connections</strong>
+and <strong>layer normalization</strong>, which help stabilize training
+in deep networks.</p>
+<p>Finally, we discuss how Transformers generate outputs through the
+decoding process and how they are trained using standard loss functions.
+The lecture concludes with an introduction to <strong>Vision
+Transformers (ViT)</strong>, which extend the Transformer architecture
+to image data by treating image patches as tokens.</p>
+<p>By the end of this lecture, students should understand the key
+components of the Transformer architecture, how attention enables
+contextual representation learning, and why Transformers have become a
+dominant architecture in modern machine learning.</p>
 <h1 data-number="2" id="the-transformer-architecture"><span class="header-section-number">2.</span> The Transformer Architecture</h1>
 <h2 data-number="2.1" id="background-and-motivation"><span class="header-section-number">2.1</span> Background and Motivation</h2>
-<p>The Transformer architecture was introduced in the influential paper <em>“Attention Is All You Need”</em> by Vaswani et al. (2017), which fundamentally changed how sequence modeling problems are approached in machine learning. The original motivation behind the Transformer was the problem of <strong>machine translation</strong>, where the goal is to convert a sentence from one language into another while preserving meaning and grammatical structure.</p>
-<p>Before Transformers, most sequence modeling tasks relied on recurrent neural networks (RNNs) and LSTMs. While these models were effective at capturing sequential dependencies, they suffered from several important limitations. First, they process tokens sequentially, which prevents efficient parallel computation and leads to slow training. Second, learning long-range dependencies can be difficult due to vanishing gradient issues and information bottlenecks created by sequential state updates.</p>
-<p>Transformers address these limitations by removing recurrence entirely and instead relying on <strong>attention mechanisms</strong> to model relationships between tokens. Rather than processing tokens one at a time, the Transformer processes the entire sequence simultaneously and directly computes relationships between all token pairs. This allows the model to learn long-range dependencies more effectively while also enabling highly efficient parallel training on modern hardware such as GPUs.</p>
-<h3 data-number="2.1.1" id="why-attention-replaced-recurrence"><span class="header-section-number">2.1.1</span> Why Attention Replaced Recurrence</h3>
-<p>A key conceptual shift introduced by Transformers is the replacement of recurrence with attention. In recurrent models, information must pass sequentially through intermediate states, which can make it difficult to preserve information across long distances. In contrast, attention allows any token to directly access information from any other token in a single operation.</p>
-<p>This direct connectivity removes the information bottleneck present in RNNs and allows the model to better capture global relationships. Additionally, because attention relies on matrix operations rather than sequential computation, Transformers scale much more effectively to large datasets and model sizes.</p>
+<p>The Transformer architecture was introduced in the influential paper
+<em>“Attention Is All You Need”</em> by Vaswani et al. (2017), which
+fundamentally changed how sequence modeling problems are approached in
+machine learning. The original motivation behind the Transformer was the
+problem of <strong>machine translation</strong>, where the goal is to
+convert a sentence from one language into another while preserving
+meaning and grammatical structure.</p>
+<p>Before Transformers, most sequence modeling tasks relied on recurrent
+neural networks (RNNs) and LSTMs. While these models were effective at
+capturing sequential dependencies, they suffered from several important
+limitations. First, they process tokens sequentially, which prevents
+efficient parallel computation and leads to slow training. Second,
+learning long-range dependencies can be difficult due to vanishing
+gradient issues and information bottlenecks created by sequential state
+updates.</p>
+<p>Transformers address these limitations by removing recurrence
+entirely and instead relying on <strong>attention mechanisms</strong> to
+model relationships between tokens. Rather than processing tokens one at
+a time, the Transformer processes the entire sequence simultaneously and
+directly computes relationships between all token pairs. This allows the
+model to learn long-range dependencies more effectively while also
+enabling highly efficient parallel training on modern hardware such as
+GPUs.</p>
+<h3 data-number="2.1.1" id="why-attention-replaced-recurrence"><span class="header-section-number">2.1.1</span> Why Attention Replaced
+Recurrence</h3>
+<p>A key conceptual shift introduced by Transformers is the replacement
+of recurrence with attention. In recurrent models, information must pass
+sequentially through intermediate states, which can make it difficult to
+preserve information across long distances. In contrast, attention
+allows any token to directly access information from any other token in
+a single operation.</p>
+<p>This direct connectivity removes the information bottleneck present
+in RNNs and allows the model to better capture global relationships.
+Additionally, because attention relies on matrix operations rather than
+sequential computation, Transformers scale much more effectively to
+large datasets and model sizes.</p>
 <h2 data-number="2.2" id="encoderdecoder-structure"><span class="header-section-number">2.2</span> Encoder–Decoder Structure</h2>
-<p>The original Transformer follows an <strong>encoder–decoder architecture</strong>, which is commonly used in sequence-to-sequence learning problems. The encoder is responsible for transforming the input sequence into a contextual representation, while the decoder uses this representation to generate the output sequence.</p>
-<p>In the original design, the Transformer consists of multiple identical encoder layers stacked on top of each other, followed by multiple identical decoder layers. The original paper used six encoder layers and six decoder layers, although modern architectures often vary this number depending on the model size. Stacking multiple layers allows the model to progressively refine representations and learn increasingly abstract relationships between tokens.</p>
-<p>Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a> illustrates the full Transformer architecture. The encoder stack is shown on the left, while the decoder stack is shown on the right. The arrows indicate how information flows through the model during both training and inference.</p>
-<figure>
-<img alt="The Transformer encoder–decoder architecture. The encoder converts the input sequence into contextual representations, while the decoder generates the output sequence using both self-attention and cross-attention." id="fig:transformer_architecture" src="img/lecturexx/transformers_architecture.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">The Transformer encoder–decoder architecture. The encoder converts the input sequence into contextual representations, while the decoder generates the output sequence using both self-attention and cross-attention.</figcaption>
+<p>The original Transformer follows an <strong>encoder–decoder
+architecture</strong>, which is commonly used in sequence-to-sequence
+learning problems. The encoder is responsible for transforming the input
+sequence into a contextual representation, while the decoder uses this
+representation to generate the output sequence.</p>
+<p>In the original design, the Transformer consists of multiple
+identical encoder layers stacked on top of each other, followed by
+multiple identical decoder layers. The original paper used six encoder
+layers and six decoder layers, although modern architectures often vary
+this number depending on the model size. Stacking multiple layers allows
+the model to progressively refine representations and learn increasingly
+abstract relationships between tokens.</p>
+<p>Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a> illustrates the full
+Transformer architecture. The encoder stack is shown on the left, while
+the decoder stack is shown on the right. The arrows indicate how
+information flows through the model during both training and
+inference.</p>
+<figure id="fig:transformer_architecture">
+<img src="img/lecturexx/transformers_architecture.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>The Transformer encoder–decoder architecture. The encoder
+converts the input sequence into contextual representations, while the
+decoder generates the output sequence using both self-attention and
+cross-attention.</figcaption>
 </figure>
 <p>Conceptually, each encoder block performs three key operations:</p>
 <ul>
-<li><p><strong>Self-attention:</strong> determines how tokens influence each other</p></li>
-<li><p><strong>Feed-forward network:</strong> refines each token representation</p></li>
-<li><p><strong>Add &amp; Norm:</strong> stabilizes training through residual learning</p></li>
+<li><p><strong>Self-attention:</strong> determines how tokens influence
+each other</p></li>
+<li><p><strong>Feed-forward network:</strong> refines each token
+representation</p></li>
+<li><p><strong>Add &amp; Norm:</strong> stabilizes training through
+residual learning</p></li>
 </ul>
-<p>As shown in Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a>, the input tokens are first converted into embeddings and combined with positional encodings. These representations are then passed through repeated encoder blocks consisting of self-attention and feed-forward layers. The encoder output serves as a contextual representation of the entire input sequence.</p>
-<p>On the decoder side, the output sequence (shifted right during training) is also embedded and combined with positional encodings. The decoder first applies masked self-attention to model relationships between previously generated tokens. It then applies cross-attention to incorporate information from the encoder outputs. Finally, a linear layer followed by a softmax produces output probabilities over the vocabulary.</p>
-<p>One important observation from the figure is the repeated use of <strong>Add &amp; Norm</strong> blocks. These correspond to residual connections followed by layer normalization, which help stabilize training and allow gradients to propagate effectively through deep networks. The repeated stacked structure also highlights how Transformers build increasingly abstract representations as information flows upward through the network.</p>
-<p>When interpreting this diagram, it is helpful to read it from bottom to top, since data flows upward through the network, and from left to right, since the encoder produces representations that guide the decoder.</p>
-<h3 data-number="2.2.1" id="key-observations-from-the-architecture"><span class="header-section-number">2.2.1</span> Key Observations from the Architecture</h3>
-<p>Several important design principles can be observed from the Transformer architecture shown in Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a>.</p>
-<p>First, unlike RNN-based architectures, the Transformer allows all tokens to be processed in parallel within each layer. This is possible because attention replaces recurrence, allowing relationships between tokens to be computed through matrix operations rather than sequential state updates. This design greatly improves training efficiency and makes Transformers well suited for modern parallel hardware such as GPUs and TPUs.</p>
-<p>Second, the architecture clearly separates the roles of the encoder and decoder. The encoder focuses on building a rich contextual representation of the input sequence, while the decoder focuses on generating outputs conditioned on both previous outputs and the encoded input representation. This separation allows the model to specialize different components for representation learning versus sequence generation.</p>
-<p>Third, the stacked structure of the encoder and decoder highlights an important deep learning principle: deeper representations allow progressively more abstract features to be learned. Early layers may capture local or syntactic relationships, while deeper layers can capture more global or semantic relationships.</p>
-<p>Finally, the repeated use of residual connections indicates the importance of stable optimization in deep architectures. Without these connections, training deep attention networks would be significantly more difficult due to gradient degradation. The residual pathways effectively allow layers to learn refinements to representations rather than completely new transformations, which improves training stability.</p>
-<p>This parallel structure is also one of the main reasons Transformers scale effectively to very large datasets and models compared to recurrent architectures.</p>
-<h2 data-number="2.3" id="input-representation-tensors-and-embeddings"><span class="header-section-number">2.3</span> Input Representation: Tensors and Embeddings</h2>
-<p>Before data can be processed by a Transformer, it must be converted into numerical representations. In natural language processing tasks, this typically involves mapping words or tokens into vector representations known as embeddings. These embeddings may be learned jointly with the model or obtained from pretrained embedding methods.</p>
-<p>Once tokens are converted into embeddings, they are organized into a matrix representation where each row corresponds to a token and each column corresponds to a feature dimension. This matrix representation allows the Transformer to efficiently apply matrix operations that compute attention and transformations across the entire sequence simultaneously.</p>
-<p>The embeddings are then passed into the first encoder layer, where they are progressively transformed through attention and feed-forward operations. As representations move through the encoder stack, they become increasingly contextualized, meaning that each token representation gradually incorporates information from the rest of the sequence.</p>
+<p>As shown in Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a>, the input tokens
+are first converted into embeddings and combined with positional
+encodings. These representations are then passed through repeated
+encoder blocks consisting of self-attention and feed-forward layers. The
+encoder output serves as a contextual representation of the entire input
+sequence.</p>
+<p>On the decoder side, the output sequence (shifted right during
+training) is also embedded and combined with positional encodings. The
+decoder first applies masked self-attention to model relationships
+between previously generated tokens. It then applies cross-attention to
+incorporate information from the encoder outputs. Finally, a linear
+layer followed by a softmax produces output probabilities over the
+vocabulary.</p>
+<p>One important observation from the figure is the repeated use of
+<strong>Add &amp; Norm</strong> blocks. These correspond to residual
+connections followed by layer normalization, which help stabilize
+training and allow gradients to propagate effectively through deep
+networks. The repeated stacked structure also highlights how
+Transformers build increasingly abstract representations as information
+flows upward through the network.</p>
+<p>When interpreting this diagram, it is helpful to read it from bottom
+to top, since data flows upward through the network, and from left to
+right, since the encoder produces representations that guide the
+decoder.</p>
+<h3 data-number="2.2.1" id="key-observations-from-the-architecture"><span class="header-section-number">2.2.1</span> Key Observations from the
+Architecture</h3>
+<p>Several important design principles can be observed from the
+Transformer architecture shown in Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a>.</p>
+<p>First, unlike RNN-based architectures, the Transformer allows all
+tokens to be processed in parallel within each layer. This is possible
+because attention replaces recurrence, allowing relationships between
+tokens to be computed through matrix operations rather than sequential
+state updates. This design greatly improves training efficiency and
+makes Transformers well suited for modern parallel hardware such as GPUs
+and TPUs.</p>
+<p>Second, the architecture clearly separates the roles of the encoder
+and decoder. The encoder focuses on building a rich contextual
+representation of the input sequence, while the decoder focuses on
+generating outputs conditioned on both previous outputs and the encoded
+input representation. This separation allows the model to specialize
+different components for representation learning versus sequence
+generation.</p>
+<p>Third, the stacked structure of the encoder and decoder highlights an
+important deep learning principle: deeper representations allow
+progressively more abstract features to be learned. Early layers may
+capture local or syntactic relationships, while deeper layers can
+capture more global or semantic relationships.</p>
+<p>Finally, the repeated use of residual connections indicates the
+importance of stable optimization in deep architectures. Without these
+connections, training deep attention networks would be significantly
+more difficult due to gradient degradation. The residual pathways
+effectively allow layers to learn refinements to representations rather
+than completely new transformations, which improves training
+stability.</p>
+<p>This parallel structure is also one of the main reasons Transformers
+scale effectively to very large datasets and models compared to
+recurrent architectures.</p>
+<h2 data-number="2.3" id="input-representation-tensors-and-embeddings"><span class="header-section-number">2.3</span> Input Representation: Tensors
+and Embeddings</h2>
+<p>Before data can be processed by a Transformer, it must be converted
+into numerical representations. In natural language processing tasks,
+this typically involves mapping words or tokens into vector
+representations known as embeddings. These embeddings may be learned
+jointly with the model or obtained from pretrained embedding
+methods.</p>
+<p>Once tokens are converted into embeddings, they are organized into a
+matrix representation where each row corresponds to a token and each
+column corresponds to a feature dimension. This matrix representation
+allows the Transformer to efficiently apply matrix operations that
+compute attention and transformations across the entire sequence
+simultaneously.</p>
+<p>The embeddings are then passed into the first encoder layer, where
+they are progressively transformed through attention and feed-forward
+operations. As representations move through the encoder stack, they
+become increasingly contextualized, meaning that each token
+representation gradually incorporates information from the rest of the
+sequence.</p>
 <h3 data-number="2.3.1" id="encoder-block"><span class="header-section-number">2.3.1</span> Encoder Block</h3>
-<p>Each encoder layer consists of two main computational stages. First, the input representations are processed by a self-attention mechanism that allows each token to gather information from every other token in the sequence. This enables the model to build contextual representations where the meaning of each token depends on the entire input sequence rather than only nearby tokens.</p>
-<p>The output of the self-attention layer is then passed through a position-wise feed-forward neural network. This network is typically a small multilayer perceptron applied independently to each token representation. While the self-attention layer mixes information across tokens, the feed-forward network increases the representational power of each token individually by applying nonlinear transformations.</p>
-<p>Together, these two components allow each encoder layer to first aggregate contextual information and then refine the resulting representations through learned nonlinear transformations.</p>
+<p>Each encoder layer consists of two main computational stages. First,
+the input representations are processed by a self-attention mechanism
+that allows each token to gather information from every other token in
+the sequence. This enables the model to build contextual representations
+where the meaning of each token depends on the entire input sequence
+rather than only nearby tokens.</p>
+<p>The output of the self-attention layer is then passed through a
+position-wise feed-forward neural network. This network is typically a
+small multilayer perceptron applied independently to each token
+representation. While the self-attention layer mixes information across
+tokens, the feed-forward network increases the representational power of
+each token individually by applying nonlinear transformations.</p>
+<p>Together, these two components allow each encoder layer to first
+aggregate contextual information and then refine the resulting
+representations through learned nonlinear transformations.</p>
 <h3 data-number="2.3.2" id="decoder-block"><span class="header-section-number">2.3.2</span> Decoder Block</h3>
-<p>The decoder layer largely mirrors the encoder structure but includes an additional attention mechanism. In addition to its own self-attention layer, the decoder contains a <strong>cross-attention layer</strong> that allows it to attend to the encoder outputs. This enables the decoder to selectively focus on relevant parts of the input sequence when generating each output token.</p>
-<p>Another important difference is that the decoder uses masked self-attention during training to ensure that predictions at a given position only depend on previously generated tokens. This preserves the autoregressive nature of sequence generation tasks such as translation and text generation. Intuitively, masking prevents the model from using future tokens that would not be available at inference time.</p>
+<p>The decoder layer largely mirrors the encoder structure but includes
+an additional attention mechanism. In addition to its own self-attention
+layer, the decoder contains a <strong>cross-attention layer</strong>
+that allows it to attend to the encoder outputs. This enables the
+decoder to selectively focus on relevant parts of the input sequence
+when generating each output token.</p>
+<p>Another important difference is that the decoder uses masked
+self-attention during training to ensure that predictions at a given
+position only depend on previously generated tokens. This preserves the
+autoregressive nature of sequence generation tasks such as translation
+and text generation. Intuitively, masking prevents the model from using
+future tokens that would not be available at inference time.</p>
 <h1 data-number="3" id="self-attention"><span class="header-section-number">3.</span> Self-Attention</h1>
 <h2 data-number="3.1" id="motivation"><span class="header-section-number">3.1</span> Motivation</h2>
-<p>The goal of all language models is for a model to learn relevant associations between different parts of a sequence. Consider the sentence:</p>
+<p>The goal of all language models is for a model to learn relevant
+associations between different parts of a sequence. Consider the
+sentence:</p>
 <blockquote>
-<p>“The animal didn’t cross the street because <strong>it</strong> was too tired.”</p>
+<p>“The animal didn’t cross the street because <strong>it</strong> was
+too tired.”</p>
 </blockquote>
-<p>What does “it” refer to? Attention is about <strong>learning associations</strong> to better encode dependencies in data. Self-attention allows the model to relate different positions of a single sequence in order to compute a contextual representation of the sequence.</p>
-<p>Intuitively, self-attention allows each word to dynamically gather information from the most relevant words in the sentence rather than relying only on nearby context as in traditional sequential models.</p>
-<h2 data-number="3.2" id="sec:qkv"><span class="header-section-number">3.2</span> Query, Key, and Value Vectors</h2>
-<p>For each input vector, the self-attention mechanism creates three vectors:</p>
+<p>What does “it” refer to? Attention is about <strong>learning
+associations</strong> to better encode dependencies in data.
+Self-attention allows the model to relate different positions of a
+single sequence in order to compute a contextual representation of the
+sequence.</p>
+<p>Intuitively, self-attention allows each word to dynamically gather
+information from the most relevant words in the sentence rather than
+relying only on nearby context as in traditional sequential models.</p>
+<h2 data-number="3.2" id="sec:qkv"><span class="header-section-number">3.2</span> Query, Key, and Value
+Vectors</h2>
+<p>For each input vector, the self-attention mechanism creates three
+vectors:</p>
 <ul>
-<li><p><strong>Query (Q)</strong> — “What am I looking for?” Represents the current word’s question about which other words it should attend to.</p></li>
-<li><p><strong>Key (K)</strong> — “What do I contain?” Represents a word’s label or identity, used for matching against queries.</p></li>
-<li><p><strong>Value (V)</strong> — “What information do I carry?” The actual content that gets passed forward, weighted by the attention scores.</p></li>
+<li><p><strong>Query (Q)</strong> — “What am I looking for?” Represents
+the current word’s question about which other words it should attend
+to.</p></li>
+<li><p><strong>Key (K)</strong> — “What do I contain?” Represents a
+word’s label or identity, used for matching against queries.</p></li>
+<li><p><strong>Value (V)</strong> — “What information do I carry?” The
+actual content that gets passed forward, weighted by the attention
+scores.</p></li>
 </ul>
-<p>These vectors are computed by multiplying the input embedding by three learned weight matrices:</p>
+<p>These vectors are computed by multiplying the input embedding by
+three learned weight matrices:</p>
 <p><span class="math display">\[\begin{aligned}
-  Q &amp;= X \cdot W_Q, \qquad 
-  K = X \cdot W_K, \qquad 
-  V = X \cdot W_V\end{aligned}\]</span></p>
+  Q &amp;= X \cdot W_Q, \qquad
+  K = X \cdot W_K, \qquad
+  V = X \cdot W_V
+\end{aligned}\]</span></p>
 <div class="examplebox">
 <p>When processing the word “sat”:</p>
 <ul>
-<li><p><span class="math inline">\(Q\)</span>() asks: “Who performed this action?”</p></li>
-<li><p><span class="math inline">\(K\)</span>() answers: “I am a noun/subject.”</p></li>
-<li><p><span class="math inline">\(K\)</span>() answers: “I am a location noun.”</p></li>
-<li><p>The <span class="math inline">\(Q \cdot K\)</span> score is highest for “cat” <span class="math inline">\(\rightarrow\)</span> strong match</p></li>
-<li><p><span class="math inline">\(V\)</span>() provides the semantic features that update the representation of “sat”</p></li>
+<li><p><span class="math inline">\(Q\)</span>() asks: “Who performed
+this action?”</p></li>
+<li><p><span class="math inline">\(K\)</span>() answers: “I am a
+noun/subject.”</p></li>
+<li><p><span class="math inline">\(K\)</span>() answers: “I am a
+location noun.”</p></li>
+<li><p>The <span class="math inline">\(Q \cdot K\)</span> score is
+highest for “cat” <span class="math inline">\(\rightarrow\)</span>
+strong match</p></li>
+<li><p><span class="math inline">\(V\)</span>() provides the semantic
+features that update the representation of “sat”</p></li>
 </ul>
 </div>
 <h2 data-number="3.3" id="why-separate-q-k-and-v"><span class="header-section-number">3.3</span> Why Separate Q, K, and V?</h2>
-<p><strong>Why not use the same vector for both Q and K?</strong> If <span class="math inline">\(Q = K\)</span>, every word’s dot product with itself would always dominate, causing the model to mostly attend to itself. Separate projections allow the model to learn <strong>asymmetric relationships</strong>: “verbs look for subjects” is different from “subjects look for verbs.”</p>
+<p><strong>Why not use the same vector for both Q and K?</strong> If
+<span class="math inline">\(Q = K\)</span>, every word’s dot product
+with itself would always dominate, causing the model to mostly attend to
+itself. Separate projections allow the model to learn <strong>asymmetric
+relationships</strong>: “verbs look for subjects” is different from
+“subjects look for verbs.”</p>
 <p><strong>Key Insight — Asymmetric Attention:</strong></p>
-<p>Consider pronoun resolution: “it” should strongly attend to “animal,” but “animal” may not need to attend to “it.” Having separate <span class="math inline">\(W_Q\)</span> and <span class="math inline">\(W_K\)</span> matrices gives the model the freedom to learn these directional dependencies:</p>
-<p><span class="math display">\[\text{Attention}(Q_1, K_2) \neq \text{Attention}(Q_2, K_1)\]</span></p>
+<p>Consider pronoun resolution: “it” should strongly attend to “animal,”
+but “animal” may not need to attend to “it.” Having separate <span class="math inline">\(W_Q\)</span> and <span class="math inline">\(W_K\)</span> matrices gives the model the freedom
+to learn these directional dependencies:</p>
+<p><span class="math display">\[\text{Attention}(Q_1, K_2) \neq
+\text{Attention}(Q_2, K_1)\]</span></p>
 <p><strong>Why a Separate Value (V)?</strong></p>
 <p>This decouples:</p>
 <ul>
-<li><p>how to match (<span class="math inline">\(Q \cdot K\)</span>)</p></li>
+<li><p>how to match (<span class="math inline">\(Q \cdot
+K\)</span>)</p></li>
 <li><p>what to retrieve (<span class="math inline">\(V\)</span>)</p></li>
 </ul>
-<p>The information passed forward may differ from what is used for matching.</p>
+<p>The information passed forward may differ from what is used for
+matching.</p>
 <div class="examplebox">
 <ul>
-<li><p><strong>Query</strong> = Your search request: “I need a book about deep learning”</p></li>
+<li><p><strong>Query</strong> = Your search request: “I need a book
+about deep learning”</p></li>
 <li><p><strong>Key</strong> = The label on each book’s spine</p></li>
 <li><p><strong>Value</strong> = The actual book contents</p></li>
-<li><p>The label used to find the book is not the same as the information inside the book</p></li>
+<li><p>The label used to find the book is not the same as the
+information inside the book</p></li>
 </ul>
 </div>
 <h2 data-number="3.4" id="the-full-attention-formula"><span class="header-section-number">3.4</span> The Full Attention Formula</h2>
@@ -213,65 +409,124 @@ window.addEventListener("DOMContentLoaded", () => {
 \right)V
 }
 \label{eq:attention}\]</span></p>
-<p>Intuitively, this formula allows each token to compute a weighted combination of other tokens, where the weights reflect relevance.</p>
+<p>Intuitively, this formula allows each token to compute a weighted
+combination of other tokens, where the weights reflect relevance.</p>
 <p><strong>Step-by-step breakdown:</strong></p>
 <ol>
 <li><p><strong>Project inputs</strong></p>
 <p>Transform <span class="math inline">\(X\)</span> into <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> using learned matrices.</p></li>
 <li><p><strong>Compute compatibility scores</strong></p>
 <p><span class="math display">\[\text{Score} = QK^\top\]</span></p>
-<p>This computes the dot product between every query and key vector. (This is related to cosine similarity, but without normalization.)</p></li>
+<p>This computes the dot product between every query and key vector.
+(This is related to cosine similarity, but without
+normalization.)</p></li>
 <li><p><strong>Scale</strong></p>
-<p>Divide by <span class="math inline">\(\sqrt{d_k}\)</span> to control magnitude growth as dimensionality increases. Without this scaling, large dot products could push softmax into very sharp distributions, reducing gradient stability.</p></li>
+<p>Divide by <span class="math inline">\(\sqrt{d_k}\)</span> to control
+magnitude growth as dimensionality increases. Without this scaling,
+large dot products could push softmax into very sharp distributions,
+reducing gradient stability.</p></li>
 <li><p><strong>Apply softmax</strong></p>
 <p>Convert scores into attention weights that sum to 1.</p></li>
 <li><p><strong>Weighted sum</strong></p>
-<p>Multiply weights by <span class="math inline">\(V\)</span> to produce contextual representations.</p></li>
+<p>Multiply weights by <span class="math inline">\(V\)</span> to produce
+contextual representations.</p></li>
 </ol>
 <p><strong>Summary of roles:</strong></p>
 <ul>
-<li><p><span class="math inline">\(QK^\top\)</span> decides <em>where to look</em></p></li>
-<li><p><span class="math inline">\(V\)</span> decides <em>what to retrieve</em></p></li>
+<li><p><span class="math inline">\(QK^\top\)</span> decides <em>where to
+look</em></p></li>
+<li><p><span class="math inline">\(V\)</span> decides <em>what to
+retrieve</em></p></li>
 <li><p>Softmax decides <em>how much</em></p></li>
 </ul>
-<h2 data-number="3.5" id="self-attention-step-by-step"><span class="header-section-number">3.5</span> Self-Attention Step by Step</h2>
+<h2 data-number="3.5" id="self-attention-step-by-step"><span class="header-section-number">3.5</span> Self-Attention Step by
+Step</h2>
 <h3 data-number="3.5.1" id="step-1-compute-scores"><span class="header-section-number">3.5.1</span> Step 1: Compute Scores</h3>
-<p>We create scores between all word pairs by computing dot products between queries and keys. The score is typically highest when a word compares with itself, but may also be high for strongly related words.</p>
-<h3 data-number="3.5.2" id="step-2-scale-and-softmax"><span class="header-section-number">3.5.2</span> Step 2: Scale and Softmax</h3>
-<p>Divide scores by <span class="math inline">\(\sqrt{d_k}\)</span> and apply softmax. These normalized scores indicate how strongly each token should attend to every other token. Many such normalization operations in deep learning are designed to improve numerical stability and gradient flow.</p>
-<h3 data-number="3.5.3" id="step-3-weighted-sum-of-values"><span class="header-section-number">3.5.3</span> Step 3: Weighted Sum of Values</h3>
-<p>Multiply each value vector by its attention weight and sum the results. This produces a new representation where each token now contains information from the most relevant tokens in the sequence.</p>
+<p>We create scores between all word pairs by computing dot products
+between queries and keys. The score is typically highest when a word
+compares with itself, but may also be high for strongly related
+words.</p>
+<h3 data-number="3.5.2" id="step-2-scale-and-softmax"><span class="header-section-number">3.5.2</span> Step 2: Scale and
+Softmax</h3>
+<p>Divide scores by <span class="math inline">\(\sqrt{d_k}\)</span> and
+apply softmax. These normalized scores indicate how strongly each token
+should attend to every other token. Many such normalization operations
+in deep learning are designed to improve numerical stability and
+gradient flow.</p>
+<h3 data-number="3.5.3" id="step-3-weighted-sum-of-values"><span class="header-section-number">3.5.3</span> Step 3: Weighted Sum of
+Values</h3>
+<p>Multiply each value vector by its attention weight and sum the
+results. This produces a new representation where each token now
+contains information from the most relevant tokens in the sequence.</p>
 <h3 data-number="3.5.4" id="matrix-perspective"><span class="header-section-number">3.5.4</span> Matrix Perspective</h3>
-<p>In practice, all vectors are computed simultaneously using matrix operations:</p>
+<p>In practice, all vectors are computed simultaneously using matrix
+operations:</p>
 <p><span class="math display">\[\text{Attention}(Q,K,V)
 =
 \text{softmax}
 \left(
 \frac{QK^\top}{\sqrt{d_k}}
 \right)V\]</span></p>
-<p>This formulation allows efficient GPU implementation and parallel computation across all tokens.</p>
-<p>One tradeoff of this design is computational cost. Self-attention requires computing interactions between all token pairs, resulting in <span class="math inline">\(O(n^2)\)</span> complexity with respect to sequence length. This motivates many recent efforts to develop more efficient attention variants.</p>
-<h2 data-number="3.6" id="why-self-attention-works-well"><span class="header-section-number">3.6</span> Why Self-Attention Works Well</h2>
-<p>Self-attention works well because it provides three important advantages over traditional sequence models:</p>
+<p>This formulation allows efficient GPU implementation and parallel
+computation across all tokens.</p>
+<p>One tradeoff of this design is computational cost. Self-attention
+requires computing interactions between all token pairs, resulting in
+<span class="math inline">\(O(n^2)\)</span> complexity with respect to
+sequence length. This motivates many recent efforts to develop more
+efficient attention variants.</p>
+<h2 data-number="3.6" id="why-self-attention-works-well"><span class="header-section-number">3.6</span> Why Self-Attention Works
+Well</h2>
+<p>Self-attention works well because it provides three important
+advantages over traditional sequence models:</p>
 <ul>
-<li><p><strong>Global context:</strong> Every token can directly access information from every other token.</p></li>
-<li><p><strong>Parallel computation:</strong> All tokens can be processed simultaneously rather than sequentially.</p></li>
-<li><p><strong>Dynamic receptive field:</strong> The model learns which tokens matter instead of relying on fixed window sizes.</p></li>
+<li><p><strong>Global context:</strong> Every token can directly access
+information from every other token.</p></li>
+<li><p><strong>Parallel computation:</strong> All tokens can be
+processed simultaneously rather than sequentially.</p></li>
+<li><p><strong>Dynamic receptive field:</strong> The model learns which
+tokens matter instead of relying on fixed window sizes.</p></li>
 </ul>
-<p>These properties are key reasons Transformers outperform earlier sequence models on many tasks.</p>
+<p>These properties are key reasons Transformers outperform earlier
+sequence models on many tasks.</p>
 <h1 data-number="4" id="multi-head-attention"><span class="header-section-number">4.</span> Multi-Head Attention</h1>
 <h2 data-number="4.1" id="motivation-and-mechanism"><span class="header-section-number">4.1</span> Motivation and Mechanism</h2>
-<p>Instead of performing a single attention computation, multi-head attention uses <strong>multiple self-attention operations in parallel</strong> and combines their outputs. This expands the model’s ability to focus on different positions and different types of relationships simultaneously.</p>
-<p>Intuitively, a single attention head must compress all relationships into one attention map. Multi-head attention allows the model to learn multiple attention patterns at once, enabling it to simultaneously capture syntactic structure, semantic relationships, and positional dependencies.</p>
-<p>Each attention head creates a different <strong>representation subspace</strong> for the same input sequence. Different attention heads can therefore learn different weighting strategies. For example, one head may focus on subject–verb relationships, another may track positional structure, and another may capture semantic similarity.</p>
-<figure>
-<img alt="Comparison between single-head attention and multi-head attention. Multi-head attention applies several attention mechanisms in parallel, allowing the model to capture different relationships simultaneously before combining the results." id="fig:single_multi_head" src="img/lecturexx/single_vs_multi_head_attention.png" style="width:54.00%; max-width:54.00%; height:auto;"/><figcaption aria-hidden="true">Comparison between single-head attention and multi-head attention. Multi-head attention applies several attention mechanisms in parallel, allowing the model to capture different relationships simultaneously before combining the results.</figcaption>
+<p>Instead of performing a single attention computation, multi-head
+attention uses <strong>multiple self-attention operations in
+parallel</strong> and combines their outputs. This expands the model’s
+ability to focus on different positions and different types of
+relationships simultaneously.</p>
+<p>Intuitively, a single attention head must compress all relationships
+into one attention map. Multi-head attention allows the model to learn
+multiple attention patterns at once, enabling it to simultaneously
+capture syntactic structure, semantic relationships, and positional
+dependencies.</p>
+<p>Each attention head creates a different <strong>representation
+subspace</strong> for the same input sequence. Different attention heads
+can therefore learn different weighting strategies. For example, one
+head may focus on subject–verb relationships, another may track
+positional structure, and another may capture semantic similarity.</p>
+<figure id="fig:single_multi_head">
+<img src="img/lecturexx/single_vs_multi_head_attention.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
+<figcaption>Comparison between single-head attention and multi-head
+attention. Multi-head attention applies several attention mechanisms in
+parallel, allowing the model to capture different relationships
+simultaneously before combining the results.</figcaption>
 </figure>
-<p>As illustrated in Figure <a data-reference="fig:single_multi_head" data-reference-type="ref" href="#fig:single_multi_head">2</a>, single-head attention performs one attention computation over the full representation space. This forces the model to encode all relationships into a single attention map.</p>
-<p>Multi-head attention instead projects the inputs into multiple lower-dimensional subspaces and performs attention independently in each one. These parallel attention heads can focus on different types of relationships, after which their outputs are concatenated and combined.</p>
-<p>Conceptually, this allows the model to learn multiple similarity functions simultaneously rather than relying on a single notion of similarity.</p>
+<p>As illustrated in Figure <a data-reference="fig:single_multi_head" data-reference-type="ref" href="#fig:single_multi_head">2</a>,
+single-head attention performs one attention computation over the full
+representation space. This forces the model to encode all relationships
+into a single attention map.</p>
+<p>Multi-head attention instead projects the inputs into multiple
+lower-dimensional subspaces and performs attention independently in each
+one. These parallel attention heads can focus on different types of
+relationships, after which their outputs are concatenated and
+combined.</p>
+<p>Conceptually, this allows the model to learn multiple similarity
+functions simultaneously rather than relying on a single notion of
+similarity.</p>
 <h2 data-number="4.2" id="formal-definition"><span class="header-section-number">4.2</span> Formal Definition</h2>
-<p>Given <span class="math inline">\(h\)</span> attention heads, each head <span class="math inline">\(i\)</span> computes:</p>
+<p>Given <span class="math inline">\(h\)</span> attention heads, each
+head <span class="math inline">\(i\)</span> computes:</p>
 <p><span class="math display">\[\text{head}_i =
 \text{Attention}
 (
@@ -280,17 +535,23 @@ KW_i^K,\;
 VW_i^V
 )\]</span></p>
 <p>where:</p>
-<p><span class="math display">\[W_i^Q \in \mathbb{R}^{d_{\text{model}}\times d_k},
+<p><span class="math display">\[W_i^Q \in
+\mathbb{R}^{d_{\text{model}}\times d_k},
 \quad
 W_i^K \in \mathbb{R}^{d_{\text{model}}\times d_k},
 \quad
 W_i^V \in \mathbb{R}^{d_{\text{model}}\times d_v}\]</span></p>
 <p>are learned projection matrices for head <span class="math inline">\(i\)</span>.</p>
-<p>Each head operates on lower-dimensional projections of the input. Typically:</p>
-<p><span class="math display">\[d_k = d_v = \frac{d_{\text{model}}}{h}\]</span></p>
-<p>This keeps the total computational cost similar to single-head attention while increasing representational flexibility.</p>
-<h3 data-number="4.2.1" id="dimension-flow-in-multi-head-attention"><span class="header-section-number">4.2.1</span> Dimension Flow in Multi-Head Attention</h3>
-<p>It is helpful to understand how dimensions change through multi-head attention:</p>
+<p>Each head operates on lower-dimensional projections of the input.
+Typically:</p>
+<p><span class="math display">\[d_k = d_v =
+\frac{d_{\text{model}}}{h}\]</span></p>
+<p>This keeps the total computational cost similar to single-head
+attention while increasing representational flexibility.</p>
+<h3 data-number="4.2.1" id="dimension-flow-in-multi-head-attention"><span class="header-section-number">4.2.1</span> Dimension Flow in Multi-Head
+Attention</h3>
+<p>It is helpful to understand how dimensions change through multi-head
+attention:</p>
 <p><span class="math display">\[d_{\text{model}}
 \;\rightarrow\;
 h \text{ heads each of size } d_{\text{model}}/h
@@ -298,7 +559,9 @@ h \text{ heads each of size } d_{\text{model}}/h
 \text{concatenate}
 \;\rightarrow\;
 d_{\text{model}}\]</span></p>
-<p>Thus, instead of one large attention computation, the model performs several smaller attention computations whose outputs are later recombined.</p>
+<p>Thus, instead of one large attention computation, the model performs
+several smaller attention computations whose outputs are later
+recombined.</p>
 <p>The outputs of all heads are concatenated and linearly projected:</p>
 <p><span class="math display">\[\text{MultiHead}(Q,K,V)
 =
@@ -310,41 +573,76 @@ d_{\text{model}}\]</span></p>
 )
 W^O\]</span></p>
 <p>where:</p>
-<p><span class="math display">\[W^O \in \mathbb{R}^{h d_v \times d_{\text{model}}}\]</span></p>
+<p><span class="math display">\[W^O \in \mathbb{R}^{h d_v \times
+d_{\text{model}}}\]</span></p>
 <p>is a learned output projection matrix.</p>
-<h2 data-number="4.3" id="why-multi-head-attention-outperforms-single-head"><span class="header-section-number">4.3</span> Why Multi-Head Attention Outperforms Single Head</h2>
-<p>Multi-head attention improves performance for several important reasons.</p>
-<p>First, it increases expressivity. A single attention head must learn one attention pattern that captures all relationships. Multi-head attention allows different heads to specialize in different relationships, such as syntax, semantics, or positional structure.</p>
-<p>Second, it improves representation learning. By projecting into multiple lower-dimensional subspaces, the model can learn diverse feature transformations rather than relying on a single representation space.</p>
-<p>Third, it improves optimization stability. Multiple smaller attention heads often train more reliably than one large attention mechanism because each head learns a simpler subproblem.</p>
-<p>Finally, multi-head attention can be viewed as learning multiple similarity metrics in parallel. Instead of computing attention with a single similarity function, the model learns several distinct similarity measures and combines them.</p>
-<h2 data-number="4.4" id="why-multi-head-attention-works-well"><span class="header-section-number">4.4</span> Why Multi-Head Attention Works Well</h2>
+<h2 data-number="4.3" id="why-multi-head-attention-outperforms-single-head"><span class="header-section-number">4.3</span> Why Multi-Head Attention
+Outperforms Single Head</h2>
+<p>Multi-head attention improves performance for several important
+reasons.</p>
+<p>First, it increases expressivity. A single attention head must learn
+one attention pattern that captures all relationships. Multi-head
+attention allows different heads to specialize in different
+relationships, such as syntax, semantics, or positional structure.</p>
+<p>Second, it improves representation learning. By projecting into
+multiple lower-dimensional subspaces, the model can learn diverse
+feature transformations rather than relying on a single representation
+space.</p>
+<p>Third, it improves optimization stability. Multiple smaller attention
+heads often train more reliably than one large attention mechanism
+because each head learns a simpler subproblem.</p>
+<p>Finally, multi-head attention can be viewed as learning multiple
+similarity metrics in parallel. Instead of computing attention with a
+single similarity function, the model learns several distinct similarity
+measures and combines them.</p>
+<h2 data-number="4.4" id="why-multi-head-attention-works-well"><span class="header-section-number">4.4</span> Why Multi-Head Attention Works
+Well</h2>
 <p>Multi-head attention provides several advantages:</p>
 <ul>
-<li><p><strong>Multiple relationship modeling:</strong> Different heads can focus on different types of dependencies.</p></li>
-<li><p><strong>Improved representation power:</strong> Splitting attention into multiple subspaces allows richer feature extraction.</p></li>
-<li><p><strong>Stable learning:</strong> Multiple smaller attention heads often train more reliably than one large attention mechanism.</p></li>
+<li><p><strong>Multiple relationship modeling:</strong> Different heads
+can focus on different types of dependencies.</p></li>
+<li><p><strong>Improved representation power:</strong> Splitting
+attention into multiple subspaces allows richer feature
+extraction.</p></li>
+<li><p><strong>Stable learning:</strong> Multiple smaller attention
+heads often train more reliably than one large attention
+mechanism.</p></li>
 </ul>
-<p>Empirical studies of trained Transformers show that different heads often specialize in different linguistic or structural patterns, although this specialization emerges automatically during training.</p>
-<p>Conceptually, multi-head attention can be viewed as allowing the model to "look at the sequence from multiple perspectives" before forming a final representation.</p>
+<p>Empirical studies of trained Transformers show that different heads
+often specialize in different linguistic or structural patterns,
+although this specialization emerges automatically during training.</p>
+<p>Conceptually, multi-head attention can be viewed as allowing the
+model to "look at the sequence from multiple perspectives" before
+forming a final representation.</p>
 <h1 data-number="5" id="positional-encodings"><span class="header-section-number">5.</span> Positional Encodings</h1>
-<h2 data-number="5.1" id="why-positional-information-is-needed"><span class="header-section-number">5.1</span> Why Positional Information Is Needed</h2>
-<p>Unlike RNNs, Transformers process all tokens simultaneously and therefore have no inherent notion of sequence order. Self-attention alone treats the input as a set rather than a sequence unless positional information is explicitly provided.</p>
-<p>Therefore, positional information must be injected so the model can distinguish sequences such as:</p>
+<h2 data-number="5.1" id="why-positional-information-is-needed"><span class="header-section-number">5.1</span> Why Positional Information Is
+Needed</h2>
+<p>Unlike RNNs, Transformers process all tokens simultaneously and
+therefore have no inherent notion of sequence order. Self-attention
+alone treats the input as a set rather than a sequence unless positional
+information is explicitly provided.</p>
+<p>Therefore, positional information must be injected so the model can
+distinguish sequences such as:</p>
 <blockquote>
 <p>"dog bites man" vs "man bites dog"</p>
 </blockquote>
-<p>Although the same words appear, the ordering completely changes the meaning.</p>
-<p>To address this limitation, Transformers add a <strong>positional encoding vector</strong> to each token embedding. This provides information about where each token appears in the sequence while still preserving parallel computation.</p>
+<p>Although the same words appear, the ordering completely changes the
+meaning.</p>
+<p>To address this limitation, Transformers add a <strong>positional
+encoding vector</strong> to each token embedding. This provides
+information about where each token appears in the sequence while still
+preserving parallel computation.</p>
 <h2 data-number="5.2" id="design-principles"><span class="header-section-number">5.2</span> Design Principles</h2>
-<p>There are many possible ways to encode position. A good positional encoding should:</p>
+<p>There are many possible ways to encode position. A good positional
+encoding should:</p>
 <ul>
 <li><p>Allow the model to distinguish token order</p></li>
 <li><p>Allow the model to reason about relative distance</p></li>
 <li><p>Generalize to sequence lengths not seen during training</p></li>
 <li><p>Integrate smoothly with learned embeddings</p></li>
 </ul>
-<p>The original Transformer uses deterministic sinusoidal positional encodings:</p>
+<p>The original Transformer uses deterministic sinusoidal positional
+encodings:</p>
 <p><span class="math display">\[\begin{aligned}
 PE_{(\text{pos}, 2i)}
 &amp;=
@@ -358,35 +656,54 @@ PE_{(\text{pos}, 2i+1)}
 \cos
 \left(
 \frac{\text{pos}}{10000^{2i/d_{\text{model}}}}
-\right)\end{aligned}\]</span></p>
+\right)
+\end{aligned}\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(\text{pos}\)</span> = token position</p></li>
-<li><p><span class="math inline">\(i\)</span> = embedding dimension index</p></li>
-<li><p><span class="math inline">\(d_{\text{model}}\)</span> = embedding dimension</p></li>
+<li><p><span class="math inline">\(\text{pos}\)</span> = token
+position</p></li>
+<li><p><span class="math inline">\(i\)</span> = embedding dimension
+index</p></li>
+<li><p><span class="math inline">\(d_{\text{model}}\)</span> = embedding
+dimension</p></li>
 </ul>
-<p>These encodings are added element-wise to the token embeddings before entering the Transformer encoder.</p>
-<h2 data-number="5.3" id="how-positional-encodings-are-used"><span class="header-section-number">5.3</span> How Positional Encodings Are Used</h2>
-<p>Figure <a data-reference="fig:positional_encoding_pair" data-reference-type="ref" href="#fig:positional_encoding_pair">4</a> illustrates both how positional encodings are integrated into the Transformer architecture and how sinusoidal encodings are constructed mathematically.</p>
-<figure>
-<img alt="Positional encodings provide ordering information to Transformers. (a) shows how positional vectors are added to embeddings before entering the encoder stack. (b) shows how sinusoidal functions generate position-dependent feature values." id="fig:positional_encoding_pair" src="img/lecturexx/positional_encoding_a.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Positional encodings provide ordering information to Transformers. (a) shows how positional vectors are added to embeddings before entering the encoder stack. (b) shows how sinusoidal functions generate position-dependent feature values.</figcaption>
-</figure>
+<p>These encodings are added element-wise to the token embeddings before
+entering the Transformer encoder.</p>
+<h2 data-number="5.3" id="how-positional-encodings-are-used"><span class="header-section-number">5.3</span> How Positional Encodings Are
+Used</h2>
+<p>Figure <a data-reference="fig:positional_encoding_pair" data-reference-type="ref" href="#fig:positional_encoding_pair">3</a> illustrates both how
+positional encodings are integrated into the Transformer architecture
+and how sinusoidal encodings are constructed mathematically.</p>
+<figure id="fig:positional_encoding_pair">
+<img src="img/lecturexx/positional_encoding_a.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
 <p>(a) Positional encoding added to embeddings</p>
-<figure>
-<img alt="Positional encodings provide ordering information to Transformers. (a) shows how positional vectors are added to embeddings before entering the encoder stack. (b) shows how sinusoidal functions generate position-dependent feature values." id="fig:positional_encoding_pair" src="img/lecturexx/positional_encoding_b.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Positional encodings provide ordering information to Transformers. (a) shows how positional vectors are added to embeddings before entering the encoder stack. (b) shows how sinusoidal functions generate position-dependent feature values.</figcaption>
-</figure>
+<img src="img/lecturexx/positional_encoding_b.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
 <p>(b) Sinusoidal positional encoding construction</p>
-<h2 data-number="5.4" id="why-sinusoidal-encodings-work"><span class="header-section-number">5.4</span> Why Sinusoidal Encodings Work</h2>
-<p>Sinusoidal encodings were chosen because they provide smooth position representations across multiple frequency scales.</p>
-<p>Lower embedding dimensions encode coarse position information while higher dimensions encode finer positional differences.</p>
-<p>A key advantage is that relative position can be inferred from linear relationships:</p>
+<figcaption>Positional encodings provide ordering information to
+Transformers. (a) shows how positional vectors are added to embeddings
+before entering the encoder stack. (b) shows how sinusoidal functions
+generate position-dependent feature values.</figcaption>
+</figure>
+<h2 data-number="5.4" id="why-sinusoidal-encodings-work"><span class="header-section-number">5.4</span> Why Sinusoidal Encodings
+Work</h2>
+<p>Sinusoidal encodings were chosen because they provide smooth position
+representations across multiple frequency scales.</p>
+<p>Lower embedding dimensions encode coarse position information while
+higher dimensions encode finer positional differences.</p>
+<p>A key advantage is that relative position can be inferred from linear
+relationships:</p>
 <p><span class="math display">\[PE(\text{pos}+k)
 \text{ can be expressed as a linear function of }
 PE(\text{pos})\]</span></p>
-<p>This allows the model to learn relationships such as distance between tokens.</p>
-<p>Another advantage is that sinusoidal encodings generalize to sequence lengths longer than those seen during training because they are deterministic rather than learned parameters.</p>
-<h2 data-number="5.5" id="why-positional-encodings-are-added-instead-of-concatenated"><span class="header-section-number">5.5</span> Why Positional Encodings Are Added Instead of Concatenated</h2>
-<p>Transformers add positional encodings instead of concatenating them:</p>
+<p>This allows the model to learn relationships such as distance between
+tokens.</p>
+<p>Another advantage is that sinusoidal encodings generalize to sequence
+lengths longer than those seen during training because they are
+deterministic rather than learned parameters.</p>
+<h2 data-number="5.5" id="why-positional-encodings-are-added-instead-of-concatenated"><span class="header-section-number">5.5</span> Why Positional Encodings Are
+Added Instead of Concatenated</h2>
+<p>Transformers add positional encodings instead of concatenating
+them:</p>
 <p><span class="math display">\[\text{Input Representation}
 =
 \text{Token Embedding}
@@ -395,82 +712,153 @@ PE(\text{pos})\]</span></p>
 <p>This has two advantages:</p>
 <ul>
 <li><p>Keeps representation dimensionality fixed</p></li>
-<li><p>Allows semantic and positional information to interact naturally</p></li>
+<li><p>Allows semantic and positional information to interact
+naturally</p></li>
 </ul>
 <p>Conceptually, each embedding simultaneously represents:</p>
 <ul>
 <li><p>What the token means</p></li>
 <li><p>Where the token appears</p></li>
 </ul>
-<h2 data-number="5.6" id="alternative-positional-encoding-methods"><span class="header-section-number">5.6</span> Alternative Positional Encoding Methods</h2>
-<p>Modern Transformer variants sometimes use learned positional embeddings instead of sinusoidal encodings. Other approaches include relative positional encodings, which allow models to reason about distances between tokens instead of absolute positions.</p>
-<p>These alternatives often improve performance for long-context tasks.</p>
-<h1 data-number="6" id="training-regularization-residual-connections-and-layer-normalization"><span class="header-section-number">6.</span> Training Regularization: Residual Connections and Layer Normalization</h1>
-<p>Beyond attention mechanisms, Transformers rely on architectural design choices that stabilize training and improve optimization. Two of the most important components are residual connections and layer normalization.</p>
-<p>Together, these mechanisms allow very deep Transformer networks to train efficiently while maintaining stable feature representations.</p>
+<h2 data-number="5.6" id="alternative-positional-encoding-methods"><span class="header-section-number">5.6</span> Alternative Positional Encoding
+Methods</h2>
+<p>Modern Transformer variants sometimes use learned positional
+embeddings instead of sinusoidal encodings. Other approaches include
+relative positional encodings, which allow models to reason about
+distances between tokens instead of absolute positions.</p>
+<p>These alternatives often improve performance for long-context
+tasks.</p>
+<h1 data-number="6" id="training-regularization-residual-connections-and-layer-normalization"><span class="header-section-number">6.</span> Training Regularization: Residual
+Connections and Layer Normalization</h1>
+<p>Beyond attention mechanisms, Transformers rely on architectural
+design choices that stabilize training and improve optimization. Two of
+the most important components are residual connections and layer
+normalization.</p>
+<p>Together, these mechanisms allow very deep Transformer networks to
+train efficiently while maintaining stable feature representations.</p>
 <h2 data-number="6.1" id="residual-connections"><span class="header-section-number">6.1</span> Residual Connections</h2>
-<p>Deep neural networks often suffer from optimization difficulties such as vanishing gradients and representation degradation. Transformers address these issues using <strong>residual connections</strong> (also called skip connections), which allow information to flow directly across layers.</p>
-<p>A residual connection allows a layer to learn a correction to its input rather than a completely new transformation.</p>
-<figure>
-<img alt="Basic residual connection. The layer learns a residual mapping that is added to the original input." id="fig:residual_connection" src="img/lecturexx/residual_connection.png" style="width:21.00%; max-width:21.00%; height:auto;"/><figcaption aria-hidden="true">Basic residual connection. The layer learns a residual mapping that is added to the original input.</figcaption>
+<p>Deep neural networks often suffer from optimization difficulties such
+as vanishing gradients and representation degradation. Transformers
+address these issues using <strong>residual connections</strong> (also
+called skip connections), which allow information to flow directly
+across layers.</p>
+<p>A residual connection allows a layer to learn a correction to its
+input rather than a completely new transformation.</p>
+<figure id="fig:residual_connection">
+<img src="img/lecturexx/residual_connection.png" style="width:21.00%; max-width:21.00%; height:auto;"/>
+<figcaption>Basic residual connection. The layer learns a residual
+mapping that is added to the original input.</figcaption>
 </figure>
-<p>Instead of learning a full transformation, the network learns a residual correction:</p>
-<p><span class="math display">\[\text{SubLayer}(X) \approx F(X)\]</span></p>
+<p>Instead of learning a full transformation, the network learns a
+residual correction:</p>
+<p><span class="math display">\[\text{SubLayer}(X) \approx
+F(X)\]</span></p>
 <p>so the layer learns:</p>
 <p><span class="math display">\[X + F(X)\]</span></p>
-<p>This makes optimization easier because the model only needs to learn small refinements rather than entirely new representations. If the optimal mapping is close to the identity function, the network can simply learn a small residual correction instead of relearning the identity mapping.</p>
-<h2 data-number="6.2" id="residual-structure-in-the-transformer-block"><span class="header-section-number">6.2</span> Residual Structure in the Transformer Block</h2>
-<p>Transformers extend this idea by wrapping each sublayer with both a residual connection and normalization. For each Transformer sublayer (self-attention or feed-forward), the output is computed as:</p>
+<p>This makes optimization easier because the model only needs to learn
+small refinements rather than entirely new representations. If the
+optimal mapping is close to the identity function, the network can
+simply learn a small residual correction instead of relearning the
+identity mapping.</p>
+<h2 data-number="6.2" id="residual-structure-in-the-transformer-block"><span class="header-section-number">6.2</span> Residual Structure in the
+Transformer Block</h2>
+<p>Transformers extend this idea by wrapping each sublayer with both a
+residual connection and normalization. For each Transformer sublayer
+(self-attention or feed-forward), the output is computed as:</p>
 <p><span class="math display">\[\text{Output}
 =
 \text{LayerNorm}
 (
 X + \text{SubLayer}(X)
 )\]</span></p>
-<p>Each Transformer encoder block therefore contains two residual structures:</p>
+<p>Each Transformer encoder block therefore contains two residual
+structures:</p>
 <p><span class="math display">\[\begin{aligned}
 Z_1 &amp;= \text{LayerNorm}(X + \text{MultiHeadAttention}(X)) \\
-Z_2 &amp;= \text{LayerNorm}(Z_1 + \text{FeedForward}(Z_1))\end{aligned}\]</span></p>
-<p>This structure ensures that information can bypass both the attention and feed-forward components, allowing stable feature propagation even as networks become very deep.</p>
-<p>As illustrated in Figure <a data-reference="fig:add_norm_transformer" data-reference-type="ref" href="#fig:add_norm_transformer">6</a>, every Transformer sublayer is wrapped with an Add &amp; Norm structure consisting of a residual connection followed by layer normalization.</p>
-<figure>
-<img alt='Transformer encoder and decoder blocks showing residual connections and layer normalization ("Add &amp; Norm"). Each sublayer is wrapped with a residual connection followed by normalization to stabilize training.' id="fig:add_norm_transformer" src="img/lecturexx/add_and_norm.png" style="width:36.00%; max-width:36.00%; height:auto;"/><figcaption aria-hidden="true">Transformer encoder and decoder blocks showing residual connections and layer normalization ("Add &amp; Norm"). Each sublayer is wrapped with a residual connection followed by normalization to stabilize training.</figcaption>
+Z_2 &amp;= \text{LayerNorm}(Z_1 + \text{FeedForward}(Z_1))
+\end{aligned}\]</span></p>
+<p>This structure ensures that information can bypass both the attention
+and feed-forward components, allowing stable feature propagation even as
+networks become very deep.</p>
+<p>As illustrated in Figure <a data-reference="fig:add_norm_transformer" data-reference-type="ref" href="#fig:add_norm_transformer">5</a>, every Transformer
+sublayer is wrapped with an Add &amp; Norm structure consisting of a
+residual connection followed by layer normalization.</p>
+<figure id="fig:add_norm_transformer">
+<img src="img/lecturexx/add_and_norm.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Transformer encoder and decoder blocks showing residual
+connections and layer normalization ("Add &amp; Norm"). Each sublayer is
+wrapped with a residual connection followed by normalization to
+stabilize training.</figcaption>
 </figure>
-<h2 data-number="6.3" id="why-residual-connections-work"><span class="header-section-number">6.3</span> Why Residual Connections Work</h2>
+<h2 data-number="6.3" id="why-residual-connections-work"><span class="header-section-number">6.3</span> Why Residual Connections
+Work</h2>
 <p>Residual connections provide several important benefits:</p>
 <ul>
-<li><p><strong>Improved gradient propagation:</strong> Skip connections create shorter gradient paths, allowing gradients to flow directly across layers and reducing vanishing gradient effects.</p></li>
-<li><p><strong>Prevention of representation degradation:</strong> Without residual connections, deeper networks sometimes perform worse than shallower ones. Residual paths help preserve useful representations across layers.</p></li>
-<li><p><strong>Implicit identity mappings:</strong> If a deeper layer is unnecessary, the network can learn to output values close to zero so that the residual connection effectively passes the input forward unchanged.</p></li>
-<li><p><strong>More stable optimization:</strong> Learning residual refinements instead of full transformations simplifies the optimization landscape and improves convergence behavior.</p></li>
+<li><p><strong>Improved gradient propagation:</strong> Skip connections
+create shorter gradient paths, allowing gradients to flow directly
+across layers and reducing vanishing gradient effects.</p></li>
+<li><p><strong>Prevention of representation degradation:</strong>
+Without residual connections, deeper networks sometimes perform worse
+than shallower ones. Residual paths help preserve useful representations
+across layers.</p></li>
+<li><p><strong>Implicit identity mappings:</strong> If a deeper layer is
+unnecessary, the network can learn to output values close to zero so
+that the residual connection effectively passes the input forward
+unchanged.</p></li>
+<li><p><strong>More stable optimization:</strong> Learning residual
+refinements instead of full transformations simplifies the optimization
+landscape and improves convergence behavior.</p></li>
 </ul>
 <p>Conceptually, residual connections allow layers to answer:</p>
 <blockquote>
-<p>"What small improvement should I make to the current representation?"</p>
+<p>"What small improvement should I make to the current
+representation?"</p>
 </blockquote>
 <p>rather than:</p>
 <blockquote>
 <p>"What completely new representation should I construct?"</p>
 </blockquote>
 <p>This significantly improves training behavior and convergence.</p>
-<h2 data-number="6.4" id="pre-norm-vs-post-norm-architectures"><span class="header-section-number">6.4</span> Pre-Norm vs Post-Norm Architectures</h2>
-<p>The original Transformer uses <strong>post-normalization</strong>:</p>
-<p><span class="math display">\[\text{LayerNorm}(X + \text{SubLayer}(X))\]</span></p>
-<p>Many modern implementations instead use <strong>pre-normalization</strong>:</p>
-<p><span class="math display">\[X + \text{SubLayer}(\text{LayerNorm}(X))\]</span></p>
-<p>Pre-norm often improves stability for very deep Transformers because normalization occurs before nonlinear transformations, which helps maintain well-scaled activations throughout the network.</p>
-<p>Post-norm more closely follows the original architecture, while pre-norm is often preferred in modern large-scale models due to improved training stability.</p>
-<h2 data-number="6.5" id="why-add-comes-before-normalization"><span class="header-section-number">6.5</span> Why Add Comes Before Normalization</h2>
-<p>The residual addition is performed before normalization because normalization stabilizes the combined signal rather than the sublayer output alone.</p>
+<h2 data-number="6.4" id="pre-norm-vs-post-norm-architectures"><span class="header-section-number">6.4</span> Pre-Norm vs Post-Norm
+Architectures</h2>
+<p>The original Transformer uses
+<strong>post-normalization</strong>:</p>
+<p><span class="math display">\[\text{LayerNorm}(X +
+\text{SubLayer}(X))\]</span></p>
+<p>Many modern implementations instead use
+<strong>pre-normalization</strong>:</p>
+<p><span class="math display">\[X +
+\text{SubLayer}(\text{LayerNorm}(X))\]</span></p>
+<p>Pre-norm often improves stability for very deep Transformers because
+normalization occurs before nonlinear transformations, which helps
+maintain well-scaled activations throughout the network.</p>
+<p>Post-norm more closely follows the original architecture, while
+pre-norm is often preferred in modern large-scale models due to improved
+training stability.</p>
+<h2 data-number="6.5" id="why-add-comes-before-normalization"><span class="header-section-number">6.5</span> Why Add Comes Before
+Normalization</h2>
+<p>The residual addition is performed before normalization because
+normalization stabilizes the combined signal rather than the sublayer
+output alone.</p>
 <p>This ensures:</p>
 <ul>
-<li><p><strong>Stable feature magnitudes:</strong> Normalization keeps the combined residual signal within a consistent numerical range.</p></li>
-<li><p><strong>Consistent scaling across layers:</strong> Layer normalization prevents feature values from growing or shrinking excessively as depth increases.</p></li>
-<li><p><strong>Improved gradient behavior:</strong> Stable feature magnitudes improve gradient conditioning and make optimization easier.</p></li>
+<li><p><strong>Stable feature magnitudes:</strong> Normalization keeps
+the combined residual signal within a consistent numerical
+range.</p></li>
+<li><p><strong>Consistent scaling across layers:</strong> Layer
+normalization prevents feature values from growing or shrinking
+excessively as depth increases.</p></li>
+<li><p><strong>Improved gradient behavior:</strong> Stable feature
+magnitudes improve gradient conditioning and make optimization
+easier.</p></li>
 </ul>
-<p>Thus, the Add &amp; Norm structure acts as both a stabilization and regularization mechanism.</p>
+<p>Thus, the Add &amp; Norm structure acts as both a stabilization and
+regularization mechanism.</p>
 <h2 data-number="6.6" id="layer-normalization"><span class="header-section-number">6.6</span> Layer Normalization</h2>
-<p>Batch normalization is less suitable for sequence models because token statistics vary across positions and sequence lengths. Instead, Transformers use <strong>layer normalization</strong>, which normalizes across feature dimensions independently for each token.</p>
+<p>Batch normalization is less suitable for sequence models because
+token statistics vary across positions and sequence lengths. Instead,
+Transformers use <strong>layer normalization</strong>, which normalizes
+across feature dimensions independently for each token.</p>
 <p>Layer normalization computes:</p>
 <p><span class="math display">\[\text{LayerNorm}(x)
 =
@@ -480,63 +868,110 @@ Z_2 &amp;= \text{LayerNorm}(Z_1 + \text{FeedForward}(Z_1))\end{aligned}\]</span>
 \beta\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(\mu\)</span> = mean across feature dimensions</p></li>
-<li><p><span class="math inline">\(\sigma^2\)</span> = variance across feature dimensions</p></li>
-<li><p><span class="math inline">\(\gamma,\beta\)</span> = learned scale and shift parameters</p></li>
+<li><p><span class="math inline">\(\mu\)</span> = mean across feature
+dimensions</p></li>
+<li><p><span class="math inline">\(\sigma^2\)</span> = variance across
+feature dimensions</p></li>
+<li><p><span class="math inline">\(\gamma,\beta\)</span> = learned scale
+and shift parameters</p></li>
 </ul>
-<p>Unlike batch normalization, layer normalization does not depend on batch statistics and therefore behaves consistently during both training and inference.</p>
-<h2 data-number="6.7" id="layer-normalization-vs-batch-normalization"><span class="header-section-number">6.7</span> Layer Normalization vs Batch Normalization</h2>
+<p>Unlike batch normalization, layer normalization does not depend on
+batch statistics and therefore behaves consistently during both training
+and inference.</p>
+<h2 data-number="6.7" id="layer-normalization-vs-batch-normalization"><span class="header-section-number">6.7</span> Layer Normalization vs Batch
+Normalization</h2>
 <p>Key differences include:</p>
 <ul>
-<li><p><strong>Normalization axis:</strong> Batch normalization normalizes across the batch dimension, while layer normalization normalizes across feature dimensions.</p></li>
-<li><p><strong>Dependence on batch statistics:</strong> Batch normalization depends on batch statistics, which can introduce instability when batch sizes are small.</p></li>
-<li><p><strong>Small batch compatibility:</strong> Layer normalization works well even with batch size one, which is common in sequence modeling.</p></li>
-<li><p><strong>Inference behavior:</strong> Batch normalization requires stored running statistics, while layer normalization behaves identically during training and inference.</p></li>
+<li><p><strong>Normalization axis:</strong> Batch normalization
+normalizes across the batch dimension, while layer normalization
+normalizes across feature dimensions.</p></li>
+<li><p><strong>Dependence on batch statistics:</strong> Batch
+normalization depends on batch statistics, which can introduce
+instability when batch sizes are small.</p></li>
+<li><p><strong>Small batch compatibility:</strong> Layer normalization
+works well even with batch size one, which is common in sequence
+modeling.</p></li>
+<li><p><strong>Inference behavior:</strong> Batch normalization requires
+stored running statistics, while layer normalization behaves identically
+during training and inference.</p></li>
 </ul>
-<p>Because sequence models often use variable-length inputs and small batch sizes, layer normalization is typically preferred.</p>
-<h2 data-number="6.8" id="dropout-as-additional-regularization"><span class="header-section-number">6.8</span> Dropout as Additional Regularization</h2>
-<p>Transformers also use dropout as an additional regularization mechanism. Dropout is typically applied:</p>
+<p>Because sequence models often use variable-length inputs and small
+batch sizes, layer normalization is typically preferred.</p>
+<h2 data-number="6.8" id="dropout-as-additional-regularization"><span class="header-section-number">6.8</span> Dropout as Additional
+Regularization</h2>
+<p>Transformers also use dropout as an additional regularization
+mechanism. Dropout is typically applied:</p>
 <ul>
-<li><p><strong>After attention outputs:</strong> This prevents attention heads from over-specializing.</p></li>
-<li><p><strong>After feed-forward layers:</strong> This improves generalization of learned feature transformations.</p></li>
-<li><p><strong>After positional embeddings:</strong> This reduces overfitting to positional patterns.</p></li>
-<li><p><strong>Within residual paths:</strong> This improves robustness of the residual signal.</p></li>
+<li><p><strong>After attention outputs:</strong> This prevents attention
+heads from over-specializing.</p></li>
+<li><p><strong>After feed-forward layers:</strong> This improves
+generalization of learned feature transformations.</p></li>
+<li><p><strong>After positional embeddings:</strong> This reduces
+overfitting to positional patterns.</p></li>
+<li><p><strong>Within residual paths:</strong> This improves robustness
+of the residual signal.</p></li>
 </ul>
-<p>Dropout helps prevent overfitting by randomly disabling neurons during training and encouraging robust feature learning.</p>
-<h2 data-number="6.9" id="combined-effect-on-training-stability"><span class="header-section-number">6.9</span> Combined Effect on Training Stability</h2>
+<p>Dropout helps prevent overfitting by randomly disabling neurons
+during training and encouraging robust feature learning.</p>
+<h2 data-number="6.9" id="combined-effect-on-training-stability"><span class="header-section-number">6.9</span> Combined Effect on Training
+Stability</h2>
 <p>Together, residual connections, layer normalization, and dropout:</p>
 <ul>
-<li><p><strong>Stabilize feature magnitudes</strong> by controlling activation scale</p></li>
-<li><p><strong>Improve gradient flow</strong> through skip connections</p></li>
-<li><p><strong>Enable deep architectures</strong> without degradation</p></li>
-<li><p><strong>Improve convergence speed</strong> through better conditioning</p></li>
-<li><p><strong>Reduce optimization difficulty</strong> through residual learning</p></li>
-<li><p><strong>Improve generalization</strong> through dropout regularization</p></li>
+<li><p><strong>Stabilize feature magnitudes</strong> by controlling
+activation scale</p></li>
+<li><p><strong>Improve gradient flow</strong> through skip
+connections</p></li>
+<li><p><strong>Enable deep architectures</strong> without
+degradation</p></li>
+<li><p><strong>Improve convergence speed</strong> through better
+conditioning</p></li>
+<li><p><strong>Reduce optimization difficulty</strong> through residual
+learning</p></li>
+<li><p><strong>Improve generalization</strong> through dropout
+regularization</p></li>
 </ul>
-<p>These architectural design choices are essential for making modern Transformer models train reliably at scale.</p>
+<p>These architectural design choices are essential for making modern
+Transformer models train reliably at scale.</p>
 <h1 data-number="7" id="sec:cross-attention"><span class="header-section-number">7.</span> Cross-Attention</h1>
-<p><strong>Self-attention</strong> is used when the queries, keys, and values all originate from the same sequence. However, many tasks require modeling relationships between two different sequences. In these cases, Transformers use <strong>cross-attention</strong>.</p>
-<p>Cross-attention allows one sequence to attend to another sequence. This is particularly important in encoder–decoder architectures such as machine translation, where the decoder must selectively retrieve relevant information from the encoder output.</p>
+<p><strong>Self-attention</strong> is used when the queries, keys, and
+values all originate from the same sequence. However, many tasks require
+modeling relationships between two different sequences. In these cases,
+Transformers use <strong>cross-attention</strong>.</p>
+<p>Cross-attention allows one sequence to attend to another sequence.
+This is particularly important in encoder–decoder architectures such as
+machine translation, where the decoder must selectively retrieve
+relevant information from the encoder output.</p>
 <h2 data-number="7.1" id="motivation-1"><span class="header-section-number">7.1</span> Motivation</h2>
 <p>Cross-attention enables the model to answer the question:</p>
 <blockquote>
-<p>"Which parts of the input sequence are most relevant for producing the next output token?"</p>
+<p>"Which parts of the input sequence are most relevant for producing
+the next output token?"</p>
 </blockquote>
-<p>Instead of only reasoning within a single sequence (self-attention), cross-attention allows information to flow between sequences.</p>
+<p>Instead of only reasoning within a single sequence (self-attention),
+cross-attention allows information to flow between sequences.</p>
 <p>Common applications include:</p>
 <ul>
-<li><p>Machine translation, where the decoder attends to encoder representations</p></li>
-<li><p>Image captioning, where text tokens attend to visual features</p></li>
+<li><p>Machine translation, where the decoder attends to encoder
+representations</p></li>
+<li><p>Image captioning, where text tokens attend to visual
+features</p></li>
 <li><p>Multimodal models combining text, vision, and audio</p></li>
-<li><p>Retrieval-augmented generation, where queries attend to external documents</p></li>
+<li><p>Retrieval-augmented generation, where queries attend to external
+documents</p></li>
 </ul>
 <h2 data-number="7.2" id="cross-attention-mechanism"><span class="header-section-number">7.2</span> Cross-Attention Mechanism</h2>
-<p>Cross-attention uses the same attention formula (Eq. <a data-reference="eq:attention" data-reference-type="ref" href="#eq:attention">[eq:attention]</a>) as self-attention, but the inputs come from different sources:</p>
+<p>Cross-attention uses the same attention formula (Eq. <a data-reference="eq:attention" data-reference-type="ref" href="#eq:attention">[eq:attention]</a>) as self-attention, but
+the inputs come from different sources:</p>
 <ul>
-<li><p><strong>Key (K) and Value (V):</strong> These come from the encoder output and represent the contextual information extracted from the input sequence.</p></li>
-<li><p><strong>Query (Q):</strong> This comes from the decoder and represents what information the decoder currently needs in order to generate the next token.</p></li>
+<li><p><strong>Key (K) and Value (V):</strong> These come from the
+encoder output and represent the contextual information extracted from
+the input sequence.</p></li>
+<li><p><strong>Query (Q):</strong> This comes from the decoder and
+represents what information the decoder currently needs in order to
+generate the next token.</p></li>
 </ul>
-<p>Thus, the decoder effectively searches the encoder representations for relevant information.</p>
+<p>Thus, the decoder effectively searches the encoder representations
+for relevant information.</p>
 <p>Mathematically:</p>
 <p><span class="math display">\[\text{CrossAttention}(Q,K,V)
 =
@@ -546,21 +981,36 @@ Z_2 &amp;= \text{LayerNorm}(Z_1 + \text{FeedForward}(Z_1))\end{aligned}\]</span>
 \right)
 V\]</span></p>
 <p>The only difference from self-attention is the source of <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span>.</p>
-<h2 data-number="7.3" id="cross-attention-in-the-transformer-architecture"><span class="header-section-number">7.3</span> Cross-Attention in the Transformer Architecture</h2>
-<p>Cross-attention appears in the Transformer decoder between masked self-attention and the feed-forward network. The full decoder layer structure is therefore:</p>
+<h2 data-number="7.3" id="cross-attention-in-the-transformer-architecture"><span class="header-section-number">7.3</span> Cross-Attention in the
+Transformer Architecture</h2>
+<p>Cross-attention appears in the Transformer decoder between masked
+self-attention and the feed-forward network. The full decoder layer
+structure is therefore:</p>
 <div class="center">
 <p>Masked Self-Attention <span class="math inline">\(\rightarrow\)</span> Cross-Attention <span class="math inline">\(\rightarrow\)</span> Feed Forward</p>
 </div>
-<p>As shown in Figure <a data-reference="fig:cross_attention" data-reference-type="ref" href="#fig:cross_attention">7</a>, the decoder queries the encoder outputs through cross-attention. The encoder provides keys and values, while the decoder provides queries.</p>
-<figure>
-<img alt="Cross-attention in the Transformer decoder. Queries come from the decoder, while keys and values come from the encoder. This allows the decoder to retrieve relevant information from the encoded input sequence." id="fig:cross_attention" src="img/lecturexx/cross_attention.png" style="width:36.00%; max-width:36.00%; height:auto;"/><figcaption aria-hidden="true">Cross-attention in the Transformer decoder. Queries come from the decoder, while keys and values come from the encoder. This allows the decoder to retrieve relevant information from the encoded input sequence.</figcaption>
+<p>As shown in Figure <a data-reference="fig:cross_attention" data-reference-type="ref" href="#fig:cross_attention">6</a>,
+the decoder queries the encoder outputs through cross-attention. The
+encoder provides keys and values, while the decoder provides
+queries.</p>
+<figure id="fig:cross_attention">
+<img src="img/lecturexx/cross_attention.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Cross-attention in the Transformer decoder. Queries come
+from the decoder, while keys and values come from the encoder. This
+allows the decoder to retrieve relevant information from the encoded
+input sequence.</figcaption>
 </figure>
-<p>This structure allows the decoder to dynamically focus on different parts of the input sequence as each output token is generated.</p>
-<h2 data-number="7.4" id="self-attention-vs-cross-attention"><span class="header-section-number">7.4</span> Self-Attention vs Cross-Attention</h2>
+<p>This structure allows the decoder to dynamically focus on different
+parts of the input sequence as each output token is generated.</p>
+<h2 data-number="7.4" id="self-attention-vs-cross-attention"><span class="header-section-number">7.4</span> Self-Attention vs
+Cross-Attention</h2>
 <p>The main differences between the two attention types are:</p>
 <ul>
-<li><p><strong>Self-attention:</strong> <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> all come from the same sequence. This allows tokens to model internal relationships within the sequence.</p></li>
-<li><p><strong>Cross-attention:</strong> <span class="math inline">\(Q\)</span> comes from one sequence while <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> come from another. This allows one sequence to retrieve information from another sequence.</p></li>
+<li><p><strong>Self-attention:</strong> <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> all come from the same sequence. This
+allows tokens to model internal relationships within the
+sequence.</p></li>
+<li><p><strong>Cross-attention:</strong> <span class="math inline">\(Q\)</span> comes from one sequence while <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> come from another. This allows one
+sequence to retrieve information from another sequence.</p></li>
 </ul>
 <p>Conceptually:</p>
 <ul>
@@ -570,85 +1020,133 @@ V\]</span></p>
 </blockquote></li>
 <li><p>Cross-attention answers:</p>
 <blockquote>
-<p>"Which input information is most useful for generating this output token?"</p>
+<p>"Which input information is most useful for generating this output
+token?"</p>
 </blockquote></li>
 </ul>
-<h2 data-number="7.5" id="example-machine-translation"><span class="header-section-number">7.5</span> Example: Machine Translation</h2>
-<p>The following example illustrates how cross-attention operates during translation.</p>
+<h2 data-number="7.5" id="example-machine-translation"><span class="header-section-number">7.5</span> Example: Machine
+Translation</h2>
+<p>The following example illustrates how cross-attention operates during
+translation.</p>
 <div class="examplebox">
 <ul>
-<li><p><strong>Encoder source:</strong> “Je suis étudiant” (French)</p></li>
-<li><p><strong>Decoder target:</strong> “I am a _” (English, being generated)</p></li>
-<li><p><span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> are derived from the encoder’s output for the French sentence.</p></li>
-<li><p><span class="math inline">\(Q\)</span> is derived from the decoder’s current state for the English sentence.</p></li>
-<li><p>Cross-attention: <span class="math inline">\(\text{softmax}(Q \cdot K^\top / \sqrt{d_k}) \cdot V\)</span></p></li>
+<li><p><strong>Encoder source:</strong> “Je suis étudiant”
+(French)</p></li>
+<li><p><strong>Decoder target:</strong> “I am a _” (English, being
+generated)</p></li>
+<li><p><span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> are derived from the encoder’s output
+for the French sentence.</p></li>
+<li><p><span class="math inline">\(Q\)</span> is derived from the
+decoder’s current state for the English sentence.</p></li>
+<li><p>Cross-attention: <span class="math inline">\(\text{softmax}(Q
+\cdot K^\top / \sqrt{d_k}) \cdot V\)</span></p></li>
 </ul>
 </div>
-<p>During this process, the decoder query may place high attention weight on the encoder token “étudiant” when predicting the word “student”. This allows the model to learn alignment between input and output words automatically.</p>
-<h2 data-number="7.6" id="intuition-behind-cross-attention"><span class="header-section-number">7.6</span> Intuition Behind Cross-Attention</h2>
-<p>Cross-attention can be interpreted as a soft retrieval mechanism. The decoder forms a query representing its current informational need, and the encoder provides a searchable memory of the input sequence.</p>
+<p>During this process, the decoder query may place high attention
+weight on the encoder token “étudiant” when predicting the word
+“student”. This allows the model to learn alignment between input and
+output words automatically.</p>
+<h2 data-number="7.6" id="intuition-behind-cross-attention"><span class="header-section-number">7.6</span> Intuition Behind
+Cross-Attention</h2>
+<p>Cross-attention can be interpreted as a soft retrieval mechanism. The
+decoder forms a query representing its current informational need, and
+the encoder provides a searchable memory of the input sequence.</p>
 <p>Thus, cross-attention acts as:</p>
 <blockquote>
 <p>"A differentiable lookup operation over encoder representations."</p>
 </blockquote>
-<p>This mechanism allows the model to dynamically retrieve relevant information at each decoding step instead of compressing all information into a fixed vector.</p>
-<h2 data-number="7.7" id="why-cross-attention-is-important"><span class="header-section-number">7.7</span> Why Cross-Attention Is Important</h2>
+<p>This mechanism allows the model to dynamically retrieve relevant
+information at each decoding step instead of compressing all information
+into a fixed vector.</p>
+<h2 data-number="7.7" id="why-cross-attention-is-important"><span class="header-section-number">7.7</span> Why Cross-Attention Is
+Important</h2>
 <p>Cross-attention is essential because it:</p>
 <ul>
-<li><p>Enables interaction between encoder and decoder representations</p></li>
+<li><p>Enables interaction between encoder and decoder
+representations</p></li>
 <li><p>Allows conditional generation based on input sequences</p></li>
-<li><p>Supports multimodal reasoning across different data types</p></li>
+<li><p>Supports multimodal reasoning across different data
+types</p></li>
 <li><p>Enables dynamic retrieval of relevant context</p></li>
 <li><p>Improves alignment between input and output tokens</p></li>
 </ul>
-<p>Without cross-attention, the decoder would be forced to rely on a fixed representation of the input, which would significantly reduce performance on complex sequence tasks.</p>
+<p>Without cross-attention, the decoder would be forced to rely on a
+fixed representation of the input, which would significantly reduce
+performance on complex sequence tasks.</p>
 <h1 data-number="8" id="encoding"><span class="header-section-number">8.</span> Encoding</h1>
-<h2 data-number="8.1" id="encoder-structure-in-context-of-the-full-transformer"><span class="header-section-number">8.1</span> Encoder Structure in Context of the Full Transformer</h2>
-<p>Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a> shows the complete Transformer architecture. The encoder is the left stack of repeated blocks that process the input sequence into contextual representations.</p>
-<p>Each encoder layer transforms the input embeddings into higher-level representations by allowing tokens to exchange information through attention.</p>
+<h2 data-number="8.1" id="encoder-structure-in-context-of-the-full-transformer"><span class="header-section-number">8.1</span> Encoder Structure in Context of
+the Full Transformer</h2>
+<p>Figure <a data-reference="fig:transformer_architecture" data-reference-type="ref" href="#fig:transformer_architecture">1</a> shows the complete
+Transformer architecture. The encoder is the left stack of repeated
+blocks that process the input sequence into contextual
+representations.</p>
+<p>Each encoder layer transforms the input embeddings into higher-level
+representations by allowing tokens to exchange information through
+attention.</p>
 <p>The encoder performs three key functions:</p>
 <ul>
 <li><p>Learning contextual relationships between tokens</p></li>
 <li><p>Building hierarchical feature representations</p></li>
 <li><p>Producing representations usable by the decoder</p></li>
 </ul>
-<p>The encoder can therefore be viewed as a feature extractor for sequences.</p>
+<p>The encoder can therefore be viewed as a feature extractor for
+sequences.</p>
 <h2 data-number="8.2" id="architecture-components"><span class="header-section-number">8.2</span> Architecture Components</h2>
-<p>To better understand the encoder, we now zoom into a single encoder block, shown in Figure <a data-reference="fig:encoder_block" data-reference-type="ref" href="#fig:encoder_block">8</a>.</p>
-<figure>
-<img alt="Structure of a Transformer encoder block. Each layer consists of multi-head self-attention followed by a feed-forward network, with residual connections and layer normalization applied after each component. The block is repeated N times." id="fig:encoder_block" src="img/lecturexx/encoder.png" style="width:21.00%; max-width:21.00%; height:auto;"/><figcaption aria-hidden="true">Structure of a Transformer encoder block. Each layer consists of multi-head self-attention followed by a feed-forward network, with residual connections and layer normalization applied after each component. The block is repeated <span class="math inline">\(N\)</span> times.</figcaption>
+<p>To better understand the encoder, we now zoom into a single encoder
+block, shown in Figure <a data-reference="fig:encoder_block" data-reference-type="ref" href="#fig:encoder_block">7</a>.</p>
+<figure id="fig:encoder_block">
+<img src="img/lecturexx/encoder.png" style="width:21.00%; max-width:21.00%; height:auto;"/>
+<figcaption>Structure of a Transformer encoder block. Each layer
+consists of multi-head self-attention followed by a feed-forward
+network, with residual connections and layer normalization applied after
+each component. The block is repeated <span class="math inline">\(N\)</span> times.</figcaption>
 </figure>
-<p>As illustrated in Figure <a data-reference="fig:encoder_block" data-reference-type="ref" href="#fig:encoder_block">8</a>, each Transformer encoder block consists of the following components:</p>
+<p>As illustrated in Figure <a data-reference="fig:encoder_block" data-reference-type="ref" href="#fig:encoder_block">7</a>, each
+Transformer encoder block consists of the following components:</p>
 <ol>
 <li><p><strong>Multi-Head Self-Attention</strong></p>
-<p>This module allows each token to attend to all other tokens in the sequence. This enables modeling of long-range dependencies that would be difficult for RNNs.</p>
-<p>Instead of processing tokens sequentially, attention allows every token to directly exchange information with every other token.</p></li>
+<p>This module allows each token to attend to all other tokens in the
+sequence. This enables modeling of long-range dependencies that would be
+difficult for RNNs.</p>
+<p>Instead of processing tokens sequentially, attention allows every
+token to directly exchange information with every other token.</p></li>
 <li><p><strong>Residual Connection and Layer Normalization</strong></p>
-<p>The output of the attention block is added to the original input through a residual connection and normalized to stabilize training:</p>
-<p><span class="math display">\[\text{LayerNorm}(X + \text{Attention}(X))\]</span></p>
-<p>This improves gradient flow and prevents degradation in deep networks.</p></li>
+<p>The output of the attention block is added to the original input
+through a residual connection and normalized to stabilize training:</p>
+<p><span class="math display">\[\text{LayerNorm}(X +
+\text{Attention}(X))\]</span></p>
+<p>This improves gradient flow and prevents degradation in deep
+networks.</p></li>
 <li><p><strong>Feed-Forward Network (MLP)</strong></p>
-<p>A position-wise fully connected network transforms each token representation independently:</p>
+<p>A position-wise fully connected network transforms each token
+representation independently:</p>
 <p><span class="math display">\[\text{FFN}(x)
 =
 \max(0, xW_1 + b_1)W_2 + b_2\]</span></p>
 <p>This allows nonlinear transformation of token features.</p></li>
 <li><p><strong>Residual Connection and Layer Normalization</strong></p>
-<p>The feed-forward output is again combined with the input through another residual connection:</p>
-<p><span class="math display">\[\text{LayerNorm}(X + \text{FFN}(X))\]</span></p>
+<p>The feed-forward output is again combined with the input through
+another residual connection:</p>
+<p><span class="math display">\[\text{LayerNorm}(X +
+\text{FFN}(X))\]</span></p>
 <p>This second residual pathway further stabilizes training.</p></li>
 </ol>
-<p>These components form a single encoder block. Multiple such blocks are stacked to increase model capacity.</p>
+<p>These components form a single encoder block. Multiple such blocks
+are stacked to increase model capacity.</p>
 <h2 data-number="8.3" id="stacking-encoder-layers"><span class="header-section-number">8.3</span> Stacking Encoder Layers</h2>
-<p>The encoder consists of <span class="math inline">\(L\)</span> identical layers stacked sequentially:</p>
+<p>The encoder consists of <span class="math inline">\(L\)</span>
+identical layers stacked sequentially:</p>
 <p><span class="math display">\[H^{(l+1)} =
 \text{EncoderBlock}(H^{(l)})\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(H^{(0)}\)</span> = input embeddings</p></li>
-<li><p><span class="math inline">\(H^{(L)}\)</span> = final encoder output</p></li>
+<li><p><span class="math inline">\(H^{(0)}\)</span> = input
+embeddings</p></li>
+<li><p><span class="math inline">\(H^{(L)}\)</span> = final encoder
+output</p></li>
 </ul>
-<p>Stacking allows the model to progressively refine representations, similar to depth in CNNs.</p>
+<p>Stacking allows the model to progressively refine representations,
+similar to depth in CNNs.</p>
 <p>Lower layers often capture:</p>
 <ul>
 <li><p>Local relationships</p></li>
@@ -660,8 +1158,11 @@ V\]</span></p>
 <li><p>Long-range dependencies</p></li>
 <li><p>Global structure</p></li>
 </ul>
-<h2 data-number="8.4" id="comparison-rnns-vs-transformers"><span class="header-section-number">8.4</span> Comparison: RNNs vs Transformers</h2>
-<p>Traditional RNNs process sequences sequentially through hidden state updates, while Transformers process sequences in parallel using attention.</p>
+<h2 data-number="8.4" id="comparison-rnns-vs-transformers"><span class="header-section-number">8.4</span> Comparison: RNNs vs
+Transformers</h2>
+<p>Traditional RNNs process sequences sequentially through hidden state
+updates, while Transformers process sequences in parallel using
+attention.</p>
 <div class="center">
 <table>
 <thead>
@@ -698,13 +1199,18 @@ V\]</span></p>
 </tbody>
 </table>
 </div>
-<p>The key innovation of Transformers is replacing recurrence with attention, enabling both parallelization and better modeling of long-range dependencies.</p>
-<h2 data-number="8.5" id="self-attention-as-contextual-representation-learning"><span class="header-section-number">8.5</span> Self-Attention as Contextual Representation Learning</h2>
-<p>The self-attention mechanism allows each token to compute a weighted combination of all other tokens:</p>
+<p>The key innovation of Transformers is replacing recurrence with
+attention, enabling both parallelization and better modeling of
+long-range dependencies.</p>
+<h2 data-number="8.5" id="self-attention-as-contextual-representation-learning"><span class="header-section-number">8.5</span> Self-Attention as Contextual
+Representation Learning</h2>
+<p>The self-attention mechanism allows each token to compute a weighted
+combination of all other tokens:</p>
 <p><span class="math display">\[\text{Attention}(x_i)
 =
 \sum_j \alpha_{ij} x_j\]</span></p>
-<p>where attention weights <span class="math inline">\(\alpha_{ij}\)</span> measure relevance between tokens.</p>
+<p>where attention weights <span class="math inline">\(\alpha_{ij}\)</span> measure relevance between
+tokens.</p>
 <p>This enables:</p>
 <ul>
 <li><p>Context-aware representations</p></li>
@@ -712,7 +1218,9 @@ V\]</span></p>
 <li><p>Long-range interaction modeling</p></li>
 <li><p>Global context reasoning</p></li>
 </ul>
-<p>Multi-head attention extends this by allowing multiple attention patterns to be learned simultaneously. Each head can specialize in different relationships such as:</p>
+<p>Multi-head attention extends this by allowing multiple attention
+patterns to be learned simultaneously. Each head can specialize in
+different relationships such as:</p>
 <ul>
 <li><p>Syntax relationships</p></li>
 <li><p>Positional relationships</p></li>
@@ -720,7 +1228,8 @@ V\]</span></p>
 <li><p>Structural dependencies</p></li>
 </ul>
 <h2 data-number="8.6" id="why-the-encoder-matters"><span class="header-section-number">8.6</span> Why the Encoder Matters</h2>
-<p>The encoder is critical because it determines the quality of representations passed to the decoder or classification head.</p>
+<p>The encoder is critical because it determines the quality of
+representations passed to the decoder or classification head.</p>
 <p>Good encoder representations should:</p>
 <ul>
 <li><p>Capture relevant context</p></li>
@@ -728,76 +1237,119 @@ V\]</span></p>
 <li><p>Discard irrelevant noise</p></li>
 <li><p>Generalize across tasks</p></li>
 </ul>
-<p>Thus, much of the Transformer’s power comes from the strength of its encoder representations.</p>
-<h3 data-number="8.6.1" id="encoderdecoder-information-flow"><span class="header-section-number">8.6.1</span> Encoder–Decoder Information Flow</h3>
-<p>Conceptually, the encoder builds contextual representations of the input sequence, while the decoder consumes these representations to generate outputs conditioned on both prior outputs and encoded inputs.</p>
+<p>Thus, much of the Transformer’s power comes from the strength of its
+encoder representations.</p>
+<h3 data-number="8.6.1" id="encoderdecoder-information-flow"><span class="header-section-number">8.6.1</span> Encoder–Decoder Information
+Flow</h3>
+<p>Conceptually, the encoder builds contextual representations of the
+input sequence, while the decoder consumes these representations to
+generate outputs conditioned on both prior outputs and encoded
+inputs.</p>
 <h1 data-number="9" id="decoding"><span class="header-section-number">9.</span> Decoding</h1>
-<h2 data-number="9.1" id="decoder-architecture-overview"><span class="header-section-number">9.1</span> Decoder Architecture Overview</h2>
-<p>The Transformer decoder consists of a stack of identical layers. Each decoder layer contains three main components:</p>
+<h2 data-number="9.1" id="decoder-architecture-overview"><span class="header-section-number">9.1</span> Decoder Architecture
+Overview</h2>
+<p>The Transformer decoder consists of a stack of identical layers. Each
+decoder layer contains three main components:</p>
 <ol>
 <li><p>Masked multi-head self-attention</p></li>
 <li><p>Cross-attention with the encoder output</p></li>
 <li><p>Position-wise feed-forward network</p></li>
 </ol>
-<p>Each of these components is wrapped with residual connections and layer normalization (Add &amp; Norm), which stabilizes training and improves gradient flow.</p>
-<p>Figure <a data-reference="fig:decoder_block" data-reference-type="ref" href="#fig:decoder_block">9</a> shows the structure of a single decoder block.</p>
-<figure>
-<img alt="Structure of a Transformer decoder block. Each layer consists of masked self-attention, cross-attention, and a feed-forward network, each followed by residual connections and layer normalization. The block is repeated N times." id="fig:decoder_block" src="img/lecturexx/decoder.png" style="width:21.00%; max-width:21.00%; height:auto;"/><figcaption aria-hidden="true">Structure of a Transformer decoder block. Each layer consists of masked self-attention, cross-attention, and a feed-forward network, each followed by residual connections and layer normalization. The block is repeated <span class="math inline">\(N\)</span> times.</figcaption>
+<p>Each of these components is wrapped with residual connections and
+layer normalization (Add &amp; Norm), which stabilizes training and
+improves gradient flow.</p>
+<p>Figure <a data-reference="fig:decoder_block" data-reference-type="ref" href="#fig:decoder_block">8</a> shows the structure of a single
+decoder block.</p>
+<figure id="fig:decoder_block">
+<img src="img/lecturexx/decoder.png" style="width:21.00%; max-width:21.00%; height:auto;"/>
+<figcaption>Structure of a Transformer decoder block. Each layer
+consists of masked self-attention, cross-attention, and a feed-forward
+network, each followed by residual connections and layer normalization.
+The block is repeated <span class="math inline">\(N\)</span>
+times.</figcaption>
 </figure>
-<p>The masked self-attention ensures that predictions at position <span class="math inline">\(t\)</span> only depend on tokens before position <span class="math inline">\(t\)</span>, preserving the autoregressive property of sequence generation.</p>
+<p>The masked self-attention ensures that predictions at position <span class="math inline">\(t\)</span> only depend on tokens before position
+<span class="math inline">\(t\)</span>, preserving the autoregressive
+property of sequence generation.</p>
 <h2 data-number="9.2" id="decoder-input"><span class="header-section-number">9.2</span> Decoder Input</h2>
-<p>The output of the top encoder layer is transformed into attention vectors <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span>. These vectors provide contextual representations of the input sequence and are passed into each decoder block through the cross-attention mechanism.</p>
-<p>The decoder operates in an <strong>autoregressive</strong> manner, meaning that previously generated outputs are used as inputs for generating future tokens. At each time step, the decoder produces one token conditioned on all previously generated tokens.</p>
+<p>The output of the top encoder layer is transformed into attention
+vectors <span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span>. These vectors provide contextual
+representations of the input sequence and are passed into each decoder
+block through the cross-attention mechanism.</p>
+<p>The decoder operates in an <strong>autoregressive</strong> manner,
+meaning that previously generated outputs are used as inputs for
+generating future tokens. At each time step, the decoder produces one
+token conditioned on all previously generated tokens.</p>
 <p>The decoding process follows these steps:</p>
 <ol>
-<li><p>The decoder receives previously generated tokens (or ground-truth tokens during training).</p></li>
-<li><p>These tokens are converted into embeddings and passed through masked self-attention layers.</p></li>
-<li><p>Cross-attention allows the decoder to retrieve relevant information from the encoder output.</p></li>
+<li><p>The decoder receives previously generated tokens (or ground-truth
+tokens during training).</p></li>
+<li><p>These tokens are converted into embeddings and passed through
+masked self-attention layers.</p></li>
+<li><p>Cross-attention allows the decoder to retrieve relevant
+information from the encoder output.</p></li>
 <li><p>Feed-forward layers refine the representation.</p></li>
-<li><p>The decoder produces a representation used to predict the next token.</p></li>
-<li><p>The predicted token is then fed back into the decoder for the next step.</p></li>
-<li><p>This process continues until a special end-of-sequence (EOS) token is generated.</p></li>
+<li><p>The decoder produces a representation used to predict the next
+token.</p></li>
+<li><p>The predicted token is then fed back into the decoder for the
+next step.</p></li>
+<li><p>This process continues until a special end-of-sequence (EOS)
+token is generated.</p></li>
 </ol>
 <p>Thus, the decoder learns to model the conditional probability:</p>
 <p><span class="math display">\[P(y_1, y_2, \ldots, y_T \mid X)
 =
 \prod_{t=1}^{T}
 P(y_t \mid y_1,\ldots,y_{t-1},X)\]</span></p>
-<p>where <span class="math inline">\(X\)</span> is the encoder input sequence.</p>
-<h2 data-number="9.3" id="teacher-forcing-vs-inference-decoding"><span class="header-section-number">9.3</span> Teacher Forcing vs Inference Decoding</h2>
-<p>During training and inference, the decoder operates slightly differently.</p>
+<p>where <span class="math inline">\(X\)</span> is the encoder input
+sequence.</p>
+<h2 data-number="9.3" id="teacher-forcing-vs-inference-decoding"><span class="header-section-number">9.3</span> Teacher Forcing vs Inference
+Decoding</h2>
+<p>During training and inference, the decoder operates slightly
+differently.</p>
 <p><strong>During training (teacher forcing):</strong></p>
 <ul>
 <li><p>The decoder receives the ground-truth previous tokens.</p></li>
 <li><p>This allows parallel computation across the sequence.</p></li>
-<li><p>A masked attention matrix prevents access to future tokens.</p></li>
+<li><p>A masked attention matrix prevents access to future
+tokens.</p></li>
 </ul>
 <p><strong>During inference (generation):</strong></p>
 <ul>
-<li><p>The decoder receives its own previously generated outputs.</p></li>
+<li><p>The decoder receives its own previously generated
+outputs.</p></li>
 <li><p>Tokens are generated one step at a time.</p></li>
 <li><p>The process is inherently sequential.</p></li>
 </ul>
-<p>This distinction allows efficient training while still enabling sequential generation at inference time.</p>
+<p>This distinction allows efficient training while still enabling
+sequential generation at inference time.</p>
 <h2 data-number="9.4" id="final-layer-and-softmax"><span class="header-section-number">9.4</span> Final Layer and Softmax</h2>
-<p>The output of the decoder stack is passed through a <strong>linear projection layer</strong> (a fully connected layer) that maps the hidden representation into a vector with dimensionality equal to the vocabulary size.</p>
+<p>The output of the decoder stack is passed through a <strong>linear
+projection layer</strong> (a fully connected layer) that maps the hidden
+representation into a vector with dimensionality equal to the vocabulary
+size.</p>
 <p>Formally:</p>
 <p><span class="math display">\[z = W h + b\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(h\)</span> is the decoder output vector</p></li>
-<li><p><span class="math inline">\(W\)</span> is the projection matrix</p></li>
+<li><p><span class="math inline">\(h\)</span> is the decoder output
+vector</p></li>
+<li><p><span class="math inline">\(W\)</span> is the projection
+matrix</p></li>
 <li><p><span class="math inline">\(b\)</span> is a bias vector</p></li>
-<li><p><span class="math inline">\(z\)</span> are the vocabulary logits</p></li>
+<li><p><span class="math inline">\(z\)</span> are the vocabulary
+logits</p></li>
 </ul>
-<p>These logits are then converted into probabilities using the softmax function:</p>
+<p>These logits are then converted into probabilities using the softmax
+function:</p>
 <p><span class="math display">\[P(\text{word}_i)
 =
 \text{softmax}(z_i)
 =
 \frac{e^{z_i}}
 {\sum_{j=1}^{|V|} e^{z_j}}\]</span></p>
-<p>This produces a probability distribution across all vocabulary tokens.</p>
+<p>This produces a probability distribution across all vocabulary
+tokens.</p>
 <p>Each entry in this probability vector may represent:</p>
 <ul>
 <li><p>Words</p></li>
@@ -813,7 +1365,9 @@ P(y_t \mid y_1,\ldots,y_{t-1},X)\]</span></p>
 <li><p>Sampling strategies (top-k or nucleus sampling)</p></li>
 </ul>
 <h2 data-number="9.5" id="loss-function-for-training"><span class="header-section-number">9.5</span> Loss Function for Training</h2>
-<p>The Transformer is trained using <strong>cross-entropy loss</strong>, which measures how well the predicted probability distribution matches the ground-truth distribution.</p>
+<p>The Transformer is trained using <strong>cross-entropy loss</strong>,
+which measures how well the predicted probability distribution matches
+the ground-truth distribution.</p>
 <p>For one token:</p>
 <p><span class="math display">\[\mathcal{L}
 =
@@ -821,31 +1375,44 @@ P(y_t \mid y_1,\ldots,y_{t-1},X)\]</span></p>
 y_i \log \hat{y}_i\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(|V|\)</span> is the vocabulary size</p></li>
-<li><p><span class="math inline">\(y_i\)</span> is the one-hot encoded ground-truth token</p></li>
-<li><p><span class="math inline">\(\hat{y}_i\)</span> is the predicted probability</p></li>
+<li><p><span class="math inline">\(|V|\)</span> is the vocabulary
+size</p></li>
+<li><p><span class="math inline">\(y_i\)</span> is the one-hot encoded
+ground-truth token</p></li>
+<li><p><span class="math inline">\(\hat{y}_i\)</span> is the predicted
+probability</p></li>
 </ul>
-<p>Because <span class="math inline">\(y\)</span> is one-hot encoded, this simplifies to:</p>
+<p>Because <span class="math inline">\(y\)</span> is one-hot encoded,
+this simplifies to:</p>
 <p><span class="math display">\[\mathcal{L}
 =
 - \log \hat{y}_{\text{true}}\]</span></p>
-<p>meaning the loss only depends on the probability assigned to the correct token.</p>
+<p>meaning the loss only depends on the probability assigned to the
+correct token.</p>
 <p>For a full sequence:</p>
 <p><span class="math display">\[\mathcal{L}
 =
 -\sum_{t=1}^{T}
 \log
 P(y_t \mid y_1,\ldots,y_{t-1},X)\]</span></p>
-<p>This objective encourages the model to assign high probability to correct next tokens.</p>
-<h2 data-number="9.6" id="sequence-shifting-during-training"><span class="header-section-number">9.6</span> Sequence Shifting During Training</h2>
-<p>During training, the decoder input sequence is shifted relative to the target sequence.</p>
+<p>This objective encourages the model to assign high probability to
+correct next tokens.</p>
+<h2 data-number="9.6" id="sequence-shifting-during-training"><span class="header-section-number">9.6</span> Sequence Shifting During
+Training</h2>
+<p>During training, the decoder input sequence is shifted relative to
+the target sequence.</p>
 <p>Example:</p>
-<p>Target sequence: <span class="math display">\[\text{BOS I am a student EOS}\]</span></p>
-<p>Decoder input: <span class="math display">\[\text{BOS I am a student}\]</span></p>
-<p>Prediction targets: <span class="math display">\[\text{I am a student EOS}\]</span></p>
+<p>Target sequence: <span class="math display">\[\text{BOS I am a
+student EOS}\]</span></p>
+<p>Decoder input: <span class="math display">\[\text{BOS I am a
+student}\]</span></p>
+<p>Prediction targets: <span class="math display">\[\text{I am a student
+EOS}\]</span></p>
 <p>This shift ensures the model learns next-token prediction.</p>
-<h2 data-number="9.7" id="why-autoregressive-decoding-works"><span class="header-section-number">9.7</span> Why Autoregressive Decoding Works</h2>
-<p>Autoregressive decoding works because language naturally follows conditional structure:</p>
+<h2 data-number="9.7" id="why-autoregressive-decoding-works"><span class="header-section-number">9.7</span> Why Autoregressive Decoding
+Works</h2>
+<p>Autoregressive decoding works because language naturally follows
+conditional structure:</p>
 <p><span class="math display">\[P(sentence)
 =
 P(word_1)
@@ -859,7 +1426,8 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>Strong contextual modeling</p></li>
 <li><p>Alignment with probabilistic language modeling</p></li>
 </ul>
-<h2 data-number="9.8" id="summary-of-the-decoding-pipeline"><span class="header-section-number">9.8</span> Summary of the Decoding Pipeline</h2>
+<h2 data-number="9.8" id="summary-of-the-decoding-pipeline"><span class="header-section-number">9.8</span> Summary of the Decoding
+Pipeline</h2>
 <p>The complete decoding process can be summarized as:</p>
 <ol>
 <li><p>Encoder processes input sequence.</p></li>
@@ -873,42 +1441,62 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>Process repeats until EOS.</p></li>
 </ol>
 <h1 data-number="10" id="vision-transformers-vit"><span class="header-section-number">10.</span> Vision Transformers (ViT)</h1>
-<p>Vision Transformers (ViT) adapt the Transformer architecture for <strong>image processing by representing images as sequences</strong>. The central idea is to divide an image into small patches and treat these patches similarly to tokens in natural language processing.</p>
-<p>Instead of applying convolutional filters as in CNNs, ViT applies self-attention across image patches to learn global relationships between different regions of the image.</p>
-<p>Depending on the application, the final embedding may be passed into:</p>
+<p>Vision Transformers (ViT) adapt the Transformer architecture for
+<strong>image processing by representing images as sequences</strong>.
+The central idea is to divide an image into small patches and treat
+these patches similarly to tokens in natural language processing.</p>
+<p>Instead of applying convolutional filters as in CNNs, ViT applies
+self-attention across image patches to learn global relationships
+between different regions of the image.</p>
+<p>Depending on the application, the final embedding may be passed
+into:</p>
 <ul>
 <li><p>An MLP classifier (image classification)</p></li>
 <li><p>A decoder (segmentation)</p></li>
 <li><p>A detection head (object detection)</p></li>
 <li><p>A reconstruction module (self-supervised learning)</p></li>
 </ul>
-<p>Figure <a data-reference="fig:vit_architecture" data-reference-type="ref" href="#fig:vit_architecture">10</a> illustrates the overall Vision Transformer pipeline.</p>
-<figure>
-<img alt="Vision Transformer architecture. The image is divided into patches, projected into embeddings, combined with positional embeddings, and processed by a Transformer encoder. The CLS token is used for classification." id="fig:vit_architecture" src="img/lecturexx/vision_transformer.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Vision Transformer architecture. The image is divided into patches, projected into embeddings, combined with positional embeddings, and processed by a Transformer encoder. The CLS token is used for classification.</figcaption>
+<p>Figure <a data-reference="fig:vit_architecture" data-reference-type="ref" href="#fig:vit_architecture">9</a> illustrates the overall
+Vision Transformer pipeline.</p>
+<figure id="fig:vit_architecture">
+<img src="img/lecturexx/vision_transformer.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Vision Transformer architecture. The image is divided into
+patches, projected into embeddings, combined with positional embeddings,
+and processed by a Transformer encoder. The CLS token is used for
+classification.</figcaption>
 </figure>
 <h2 data-number="10.1" id="step-1-patchify"><span class="header-section-number">10.1</span> Step 1: Patchify</h2>
-<p>The first step is to divide the input image into fixed-size patches. Each patch acts as a token in the Transformer sequence.</p>
-<p>For example, a <span class="math inline">\(224 \times 224\)</span> image divided into <span class="math inline">\(16 \times 16\)</span> patches produces:</p>
+<p>The first step is to divide the input image into fixed-size patches.
+Each patch acts as a token in the Transformer sequence.</p>
+<p>For example, a <span class="math inline">\(224 \times 224\)</span>
+image divided into <span class="math inline">\(16 \times 16\)</span>
+patches produces:</p>
 <p><span class="math display">\[\frac{224}{16} \times \frac{224}{16}
 =
 14 \times 14
 =
 196 \text{ patches}\]</span></p>
-<p>In general, for an image of size <span class="math inline">\(H \times W\)</span> and patch size <span class="math inline">\(P\)</span>:</p>
+<p>In general, for an image of size <span class="math inline">\(H \times
+W\)</span> and patch size <span class="math inline">\(P\)</span>:</p>
 <p><span class="math display">\[N = \frac{H \times W}{P^2}\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(H,W\)</span> are image dimensions</p></li>
+<li><p><span class="math inline">\(H,W\)</span> are image
+dimensions</p></li>
 <li><p><span class="math inline">\(P\)</span> is patch size</p></li>
-<li><p><span class="math inline">\(N\)</span> is number of patches</p></li>
+<li><p><span class="math inline">\(N\)</span> is number of
+patches</p></li>
 </ul>
-<p>Each patch contains spatial information and local visual structure such as edges, textures, and color patterns.</p>
+<p>Each patch contains spatial information and local visual structure
+such as edges, textures, and color patterns.</p>
 <p>Conceptually:</p>
 <blockquote>
-<p>CNNs process pixels locally with convolution. ViT processes patches globally with attention.</p>
+<p>CNNs process pixels locally with convolution. ViT processes patches
+globally with attention.</p>
 </blockquote>
 <h2 data-number="10.2" id="step-2-linear-projection"><span class="header-section-number">10.2</span> Step 2: Linear Projection</h2>
-<p>Each patch is flattened into a vector and projected into an embedding space.</p>
+<p>Each patch is flattened into a vector and projected into an embedding
+space.</p>
 <p>If a patch has size:</p>
 <p><span class="math display">\[P \times P \times C\]</span></p>
 <p>then flattening produces a vector of dimension:</p>
@@ -916,23 +1504,34 @@ P(word_3|word_1,word_2)\]</span></p>
 <p>This vector is projected into a <span class="math inline">\(D\)</span>-dimensional embedding:</p>
 <p><span class="math display">\[z_i = x_i^{\text{patch}} E\]</span></p>
 <p>where:</p>
-<p><span class="math display">\[E \in \mathbb{R}^{P^2 C \times D}\]</span></p>
+<p><span class="math display">\[E \in \mathbb{R}^{P^2 C \times
+D}\]</span></p>
 <p>and:</p>
 <ul>
-<li><p><span class="math inline">\(C\)</span> = number of channels</p></li>
-<li><p><span class="math inline">\(D\)</span> = embedding dimension</p></li>
-<li><p><span class="math inline">\(E\)</span> = learned projection matrix</p></li>
+<li><p><span class="math inline">\(C\)</span> = number of
+channels</p></li>
+<li><p><span class="math inline">\(D\)</span> = embedding
+dimension</p></li>
+<li><p><span class="math inline">\(E\)</span> = learned projection
+matrix</p></li>
 </ul>
-<p>Although written as a matrix multiplication, this operation is often implemented as a convolution with kernel size <span class="math inline">\(P\)</span> and stride <span class="math inline">\(P\)</span> for computational efficiency.</p>
-<p>This step converts raw pixel patches into feature representations suitable for Transformer processing.</p>
-<h2 data-number="10.3" id="step-3-position-embeddings"><span class="header-section-number">10.3</span> Step 3: Position Embeddings</h2>
-<p>Because Transformers do not inherently encode spatial structure, positional information must be added manually.</p>
+<p>Although written as a matrix multiplication, this operation is often
+implemented as a convolution with kernel size <span class="math inline">\(P\)</span> and stride <span class="math inline">\(P\)</span> for computational efficiency.</p>
+<p>This step converts raw pixel patches into feature representations
+suitable for Transformer processing.</p>
+<h2 data-number="10.3" id="step-3-position-embeddings"><span class="header-section-number">10.3</span> Step 3: Position
+Embeddings</h2>
+<p>Because Transformers do not inherently encode spatial structure,
+positional information must be added manually.</p>
 <p>This is done by adding learned positional embeddings:</p>
-<p><span class="math display">\[z_i' = z_i + E_{\text{pos}}^{(i)}\]</span></p>
+<p><span class="math display">\[z_i' = z_i +
+E_{\text{pos}}^{(i)}\]</span></p>
 <p>where:</p>
 <ul>
-<li><p><span class="math inline">\(z_i\)</span> is the patch embedding</p></li>
-<li><p><span class="math inline">\(E_{\text{pos}}^{(i)}\)</span> is the position embedding</p></li>
+<li><p><span class="math inline">\(z_i\)</span> is the patch
+embedding</p></li>
+<li><p><span class="math inline">\(E_{\text{pos}}^{(i)}\)</span> is the
+position embedding</p></li>
 </ul>
 <p>This allows the model to distinguish:</p>
 <ul>
@@ -940,12 +1539,18 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>Left vs right regions</p></li>
 <li><p>Relative spatial structure</p></li>
 </ul>
-<p>A special learnable <code>[CLS]</code> token is also added to the beginning of the sequence. This token aggregates global information across all patches through attention.</p>
+<p>A special learnable <code>[CLS]</code> token is also added to the
+beginning of the sequence. This token aggregates global information
+across all patches through attention.</p>
 <p>Thus the input sequence becomes:</p>
-<p><span class="math display">\[[\texttt{CLS}, z_1, z_2, \ldots, z_N]\]</span></p>
-<p>The CLS token acts as a global summary representation of the image.</p>
-<h2 data-number="10.4" id="step-4-self-attention-in-vit"><span class="header-section-number">10.4</span> Step 4: Self-Attention in ViT</h2>
-<p>The patch embeddings are then processed using the standard Transformer encoder.</p>
+<p><span class="math display">\[[\texttt{CLS}, z_1, z_2, \ldots,
+z_N]\]</span></p>
+<p>The CLS token acts as a global summary representation of the
+image.</p>
+<h2 data-number="10.4" id="step-4-self-attention-in-vit"><span class="header-section-number">10.4</span> Step 4: Self-Attention in
+ViT</h2>
+<p>The patch embeddings are then processed using the standard
+Transformer encoder.</p>
 <p>Each encoder layer consists of:</p>
 <ul>
 <li><p>Multi-head self-attention</p></li>
@@ -960,7 +1565,8 @@ P(word_3|word_1,word_2)\]</span></p>
 \left(
 \frac{QK^\top}{\sqrt{d_k}}
 \right)V\]</span></p>
-<p>Unlike CNNs, where receptive fields grow gradually, self-attention allows every patch to immediately interact with every other patch.</p>
+<p>Unlike CNNs, where receptive fields grow gradually, self-attention
+allows every patch to immediately interact with every other patch.</p>
 <p>Advantages include:</p>
 <ul>
 <li><p>Global receptive field from the first layer</p></li>
@@ -968,12 +1574,15 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>Better modeling of long-range dependencies</p></li>
 <li><p>No locality bias from convolution</p></li>
 </ul>
-<p>For a <span class="math inline">\(224 \times 224\)</span> image with <span class="math inline">\(16 \times 16\)</span> patches:</p>
-<p><span class="math display">\[196 + 1 = 197 \text{ tokens}\]</span></p>
+<p>For a <span class="math inline">\(224 \times 224\)</span> image with
+<span class="math inline">\(16 \times 16\)</span> patches:</p>
+<p><span class="math display">\[196 + 1 = 197 \text{
+tokens}\]</span></p>
 <p>Each typically has dimension:</p>
 <p><span class="math display">\[D = 768\]</span></p>
 <h2 data-number="10.5" id="step-5-classification"><span class="header-section-number">10.5</span> Step 5: Classification</h2>
-<p>After passing through the encoder stack, the CLS token contains a global representation of the image.</p>
+<p>After passing through the encoder stack, the CLS token contains a
+global representation of the image.</p>
 <p>This representation is passed into an MLP classification head:</p>
 <p><span class="math display">\[y = \text{MLP}(z_{CLS})\]</span></p>
 <p>The MLP typically consists of:</p>
@@ -983,9 +1592,12 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>Optional dropout</p></li>
 <li><p>Final classification layer</p></li>
 </ul>
-<p>The output is then passed through softmax to produce class probabilities.</p>
-<p>The CLS token works because attention allows it to gather information from all patches during encoding.</p>
-<h2 data-number="10.6" id="why-vision-transformers-work"><span class="header-section-number">10.6</span> Why Vision Transformers Work</h2>
+<p>The output is then passed through softmax to produce class
+probabilities.</p>
+<p>The CLS token works because attention allows it to gather information
+from all patches during encoding.</p>
+<h2 data-number="10.6" id="why-vision-transformers-work"><span class="header-section-number">10.6</span> Why Vision Transformers
+Work</h2>
 <p>Vision Transformers succeed because they:</p>
 <ul>
 <li><p>Capture global image relationships</p></li>
@@ -1011,28 +1623,67 @@ P(word_3|word_1,word_2)\]</span></p>
 <li><p>ViT scales better with large data</p></li>
 </ul>
 <h1 data-number="11" id="summary"><span class="header-section-number">11.</span> Summary</h1>
-<p>This section summarizes the main architectural ideas behind Transformers and their extensions to vision tasks. The key theme across these components is replacing sequential processing with attention-based parallel computation.</p>
+<p>This section summarizes the main architectural ideas behind
+Transformers and their extensions to vision tasks. The key theme across
+these components is replacing sequential processing with attention-based
+parallel computation.</p>
 <div class="keytakeaway">
 <ul>
-<li><p>The Transformer architecture replaces recurrence with <strong>self-attention</strong>, enabling parallel processing of entire sequences and improved modeling of long-range dependencies.</p></li>
-<li><p><strong>Self-attention</strong> computes contextual representations by learning Query, Key, and Value projections from input embeddings, allowing tokens to dynamically exchange information.</p></li>
-<li><p>The attention formula <span class="math inline">\(\text{Attention}(Q,K,V) = \text{softmax}(QK^\top / \sqrt{d_k})V\)</span> serves as the fundamental computation that enables context-aware feature learning.</p></li>
-<li><p><strong>Multi-head attention</strong> performs multiple attention computations in parallel, allowing the model to capture different types of relationships such as syntactic, semantic, and positional dependencies.</p></li>
-<li><p><strong>Positional encodings</strong> provide sequence order information that would otherwise be absent in the permutation-invariant attention mechanism.</p></li>
-<li><p><strong>Cross-attention</strong> connects the encoder and decoder, enabling conditional generation by allowing the decoder to retrieve relevant contextual information from encoder representations.</p></li>
-<li><p><strong>Residual connections and layer normalization</strong> stabilize training, improve gradient flow, and enable deep Transformer architectures.</p></li>
-<li><p>The decoder operates <strong>autoregressively</strong>, generating tokens sequentially by predicting the next token conditioned on previous outputs and minimizing cross-entropy loss.</p></li>
-<li><p><strong>Vision Transformers (ViT)</strong> extend the Transformer encoder to images by converting images into patch sequences, projecting them into embeddings, and applying standard self-attention.</p></li>
-<li><p>ViT demonstrates that Transformers can match or surpass CNNs on vision tasks when trained on sufficiently large datasets and with appropriate regularization.</p></li>
+<li><p>The Transformer architecture replaces recurrence with
+<strong>self-attention</strong>, enabling parallel processing of entire
+sequences and improved modeling of long-range dependencies.</p></li>
+<li><p><strong>Self-attention</strong> computes contextual
+representations by learning Query, Key, and Value projections from input
+embeddings, allowing tokens to dynamically exchange
+information.</p></li>
+<li><p>The attention formula <span class="math inline">\(\text{Attention}(Q,K,V) = \text{softmax}(QK^\top /
+\sqrt{d_k})V\)</span> serves as the fundamental computation that enables
+context-aware feature learning.</p></li>
+<li><p><strong>Multi-head attention</strong> performs multiple attention
+computations in parallel, allowing the model to capture different types
+of relationships such as syntactic, semantic, and positional
+dependencies.</p></li>
+<li><p><strong>Positional encodings</strong> provide sequence order
+information that would otherwise be absent in the permutation-invariant
+attention mechanism.</p></li>
+<li><p><strong>Cross-attention</strong> connects the encoder and
+decoder, enabling conditional generation by allowing the decoder to
+retrieve relevant contextual information from encoder
+representations.</p></li>
+<li><p><strong>Residual connections and layer normalization</strong>
+stabilize training, improve gradient flow, and enable deep Transformer
+architectures.</p></li>
+<li><p>The decoder operates <strong>autoregressively</strong>,
+generating tokens sequentially by predicting the next token conditioned
+on previous outputs and minimizing cross-entropy loss.</p></li>
+<li><p><strong>Vision Transformers (ViT)</strong> extend the Transformer
+encoder to images by converting images into patch sequences, projecting
+them into embeddings, and applying standard self-attention.</p></li>
+<li><p>ViT demonstrates that Transformers can match or surpass CNNs on
+vision tasks when trained on sufficiently large datasets and with
+appropriate regularization.</p></li>
 </ul>
 </div>
-<p>Overall, Transformers demonstrate that attention mechanisms alone can serve as a powerful foundation for sequence modeling, replacing recurrence and convolution while enabling scalable and flexible architectures across language and vision domains.</p>
+<p>Overall, Transformers demonstrate that attention mechanisms alone can
+serve as a powerful foundation for sequence modeling, replacing
+recurrence and convolution while enabling scalable and flexible
+architectures across language and vision domains.</p>
 <h1 data-number="13" id="references"><span class="header-section-number">13.</span> References</h1>
 <ul>
-<li><p>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, <span>Ł</span>., &amp; Polosukhin, I. (2017). Attention is all you need. <em>Advances in Neural Information Processing Systems</em>, 30.</p></li>
-<li><p>Alammar, J., &amp; Grootendorst, M. (2024). <em>Hands-on Large Language Models: Language Understanding and Generation</em>. O’Reilly Media, Inc.</p></li>
-<li><p>Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J., &amp; Houlsby, N. (2020). An image is worth 16x16 words: Transformers for image recognition at scale. <em>arXiv preprint arXiv:2010.11929</em>.</p></li>
-<li><p>Ba, J. L., Kiros, J. R., &amp; Hinton, G. E. (2016). Layer normalization. <em>arXiv preprint arXiv:1607.06450</em>.</p></li>
+<li><p>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L.,
+Gomez, A. N., Kaiser, <span>Ł</span>., &amp; Polosukhin, I. (2017).
+Attention is all you need. <em>Advances in Neural Information Processing
+Systems</em>, 30.</p></li>
+<li><p>Alammar, J., &amp; Grootendorst, M. (2024). <em>Hands-on Large
+Language Models: Language Understanding and Generation</em>. O’Reilly
+Media, Inc.</p></li>
+<li><p>Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D.,
+Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G.,
+Gelly, S., Uszkoreit, J., &amp; Houlsby, N. (2020). An image is worth
+16x16 words: Transformers for image recognition at scale. <em>arXiv
+preprint arXiv:2010.11929</em>.</p></li>
+<li><p>Ba, J. L., Kiros, J. R., &amp; Hinton, G. E. (2016). Layer
+normalization. <em>arXiv preprint arXiv:1607.06450</em>.</p></li>
 </ul>
 
 </main>

@@ -27,21 +27,24 @@ window.MathJax = {
   <section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question 1:</strong></p>
-<p>Which optimization method uses Second-order curvature information of the loss function?</p>
+<p>Which optimization method uses Second-order curvature information of
+the loss function?</p>
 <ol>
 <li><p>Gradient Descent</p></li>
 <li><p>Coordinate Descent</p></li>
 <li><p>Newton’s Method</p></li>
 <li><p>Stochastic Gradient Descent</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>C)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>C)</strong>.</p>
 <p><strong>Solution:</strong></p>
 <p>Newton’s Method uses both the gradient and the Hessian matrix: <span class="math display">\[\boldsymbol{\theta}^{t+1}
 =
 \boldsymbol{\theta}^{t}
 -\alpha \mathbf{H}(\boldsymbol{\theta})^{-1}
 \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}).\]</span></p>
-<p>The Hessian contains second derivatives and captures curvature of the loss surface.</p></li>
+<p>The Hessian contains second derivatives and captures curvature of the
+loss surface.</p></li>
 <li><p><strong>Question 2:</strong></p>
 <p>Why is Newton’s Method rarely used for very large models?</p>
 <ol>
@@ -50,42 +53,60 @@ window.MathJax = {
 <li><p>It cannot minimize convex functions.</p></li>
 <li><p>It requires labeled data.</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>B)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>B)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>The Hessian has size <span class="math inline">\(P\times P\)</span>. Storing it costs <span class="math inline">\(O(P^2)\)</span> memory and inverting it costs <span class="math inline">\(O(P^3)\)</span> time, which becomes infeasible when <span class="math inline">\(P\)</span> is large.</p></li>
+<p>The Hessian has size <span class="math inline">\(P\times P\)</span>.
+Storing it costs <span class="math inline">\(O(P^2)\)</span> memory and
+inverting it costs <span class="math inline">\(O(P^3)\)</span> time,
+which becomes infeasible when <span class="math inline">\(P\)</span> is
+large.</p></li>
 <li><p><strong>Question 3:</strong></p>
-<p>Which optimization method can be used when gradients are unavailable?</p>
+<p>Which optimization method can be used when gradients are
+unavailable?</p>
 <ol>
 <li><p>Newton’s Method</p></li>
 <li><p>Gradient Descent</p></li>
 <li><p>Coordinate Search</p></li>
 <li><p>Ridge Regression</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>C)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>C)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>Coordinate Search is a derivative-free method. It explores directions <span class="math inline">\(\boldsymbol{\theta} \pm \alpha \mathbf{e}_j\)</span> and accepts moves that reduce the loss.</p></li>
+<p>Coordinate Search is a derivative-free method. It explores directions
+<span class="math inline">\(\boldsymbol{\theta} \pm \alpha
+\mathbf{e}_j\)</span> and accepts moves that reduce the loss.</p></li>
 <li><p><strong>Question 4:</strong></p>
-<p>What is the main effect of Ridge (<span class="math inline">\(\ell_2\)</span>) regularization on model coefficients?</p>
+<p>What is the main effect of Ridge (<span class="math inline">\(\ell_2\)</span>) regularization on model
+coefficients?</p>
 <ol>
 <li><p>Sets many coefficients exactly to zero</p></li>
 <li><p>Shrinks coefficients smoothly toward zero</p></li>
 <li><p>Increases model variance</p></li>
 <li><p>Removes correlated features automatically</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>B)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>B)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>Ridge adds the penalty <span class="math inline">\(\lambda\|\boldsymbol{\theta}\|_2^2\)</span>, which discourages large parameter values and reduces variance, but does not usually force coefficients to exactly zero.</p></li>
+<p>Ridge adds the penalty <span class="math inline">\(\lambda\|\boldsymbol{\theta}\|_2^2\)</span>, which
+discourages large parameter values and reduces variance, but does not
+usually force coefficients to exactly zero.</p></li>
 <li><p><strong>Question 5:</strong></p>
-<p>Which regularization technique performs automatic feature selection?</p>
+<p>Which regularization technique performs automatic feature
+selection?</p>
 <ol>
 <li><p>Ridge Regression</p></li>
 <li><p>Lasso Regression</p></li>
 <li><p>Elastic Net with <span class="math inline">\(r=0\)</span></p></li>
 <li><p>Mean Squared Error</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>B)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>B)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>Lasso uses the <span class="math inline">\(L_1\)</span> penalty applied to the parameter vector <span class="math inline">\(\boldsymbol{\theta}\)</span>: <span class="math inline">\(\sum |\theta_j|\)</span>, which creates sharp corners in the optimization landscape. Solutions often lie on these corners, causing some coefficients to become exactly zero.</p></li>
+<p>Lasso uses the <span class="math inline">\(L_1\)</span> penalty
+applied to the parameter vector <span class="math inline">\(\boldsymbol{\theta}\)</span>: <span class="math inline">\(\sum |\theta_j|\)</span>, which creates sharp
+corners in the optimization landscape. Solutions often lie on these
+corners, causing some coefficients to become exactly zero.</p></li>
 <li><p><strong>Question 6:</strong></p>
 <p>Which metric is most sensitive to large outliers?</p>
 <ol>
@@ -94,68 +115,94 @@ window.MathJax = {
 <li><p>Accuracy</p></li>
 <li><p><span class="math inline">\(R^2\)</span></p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>B)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>B)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>MSE squares the error: <span class="math display">\[(\hat{y}_i - y_i)^2,\]</span> which heavily penalizes large errors, making it sensitive to outliers.</p></li>
+<p>MSE squares the error: <span class="math display">\[(\hat{y}_i -
+y_i)^2,\]</span> which heavily penalizes large errors, making it
+sensitive to outliers.</p></li>
 <li><p><strong>Question 7:</strong></p>
-<p>A model achieves <span class="math inline">\(R^2 = -0.3\)</span> on a test set. What does this mean?</p>
+<p>A model achieves <span class="math inline">\(R^2 = -0.3\)</span> on a
+test set. What does this mean?</p>
 <ol>
 <li><p>Perfect predictions</p></li>
 <li><p>Better than predicting the mean</p></li>
 <li><p>Worse than predicting the mean</p></li>
 <li><p>Overfitting has been eliminated</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>C)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>C)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p><span class="math display">\[R^2 = 1 - \frac{SS_{res}}{SS_{tot}}.\]</span> If <span class="math inline">\(R^2 &lt; 0\)</span>, the model performs worse than simply predicting the mean of the data.</p></li>
+<p><span class="math display">\[R^2 = 1 -
+\frac{SS_{res}}{SS_{tot}}.\]</span> If <span class="math inline">\(R^2
+&lt; 0\)</span>, the model performs worse than simply predicting the
+mean of the data.</p></li>
 <li><p><strong>Question 8:</strong></p>
-<p>Why must the test set never be used during training or hyperparameter tuning?</p>
+<p>Why must the test set never be used during training or hyperparameter
+tuning?</p>
 <ol>
 <li><p>It increases computation time</p></li>
 <li><p>It causes underfitting</p></li>
 <li><p>It introduces evaluation bias</p></li>
 <li><p>It reduces training accuracy</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>C)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>C)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>Using the test set during model development leaks information and produces overly optimistic performance estimates.</p></li>
+<p>Using the test set during model development leaks information and
+produces overly optimistic performance estimates.</p></li>
 <li><p><strong>Question 9:</strong></p>
-<p>Suppose <span class="math inline">\(10\%\)</span> of dataset labels are incorrect. What is the maximum achievable measured accuracy of a perfect model?</p>
+<p>Suppose <span class="math inline">\(10\%\)</span> of dataset labels
+are incorrect. What is the maximum achievable measured accuracy of a
+perfect model?</p>
 <ol>
 <li><p>100%</p></li>
 <li><p>95%</p></li>
 <li><p>90%</p></li>
 <li><p>80%</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>C)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>C)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>With label noise <span class="math inline">\(\epsilon\)</span>: <span class="math display">\[\text{Observed Accuracy} \le 1-\epsilon.\]</span> If <span class="math inline">\(\epsilon=0.1\)</span>, the maximum observed accuracy is <span class="math inline">\(0.9\)</span>.</p></li>
+<p>With label noise <span class="math inline">\(\epsilon\)</span>: <span class="math display">\[\text{Observed Accuracy} \le 1-\epsilon.\]</span>
+If <span class="math inline">\(\epsilon=0.1\)</span>, the maximum
+observed accuracy is <span class="math inline">\(0.9\)</span>.</p></li>
 <li><p><strong>Question 10:</strong></p>
-<p>Which method helps estimate generalization performance while using all available data efficiently?</p>
+<p>Which method helps estimate generalization performance while using
+all available data efficiently?</p>
 <ol>
 <li><p>Cross-validation</p></li>
 <li><p>Gradient Descent</p></li>
 <li><p>Newton’s Method</p></li>
 <li><p>Coordinate Search</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>A)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>A)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>In <span class="math inline">\(k\)</span>-fold cross-validation, the model is trained <span class="math inline">\(k\)</span> times using different validation splits, and performance is averaged to estimate generalization error.</p></li>
+<p>In <span class="math inline">\(k\)</span>-fold cross-validation, the
+model is trained <span class="math inline">\(k\)</span> times using
+different validation splits, and performance is averaged to estimate
+generalization error.</p></li>
 <li><p><strong>Question 11:</strong></p>
 <p>Consider the model complexity vs. prediction error curve below.</p>
 <div class="center">
 <p><img alt="image" src="../../lectures/img/lecture9/qa_bias_variance_curve.png" style="width:36.00%; max-width:36.00%; height:auto;"/></p>
 </div>
-<p>Which region corresponds to an <strong>underfitting</strong> model?</p>
+<p>Which region corresponds to an <strong>underfitting</strong>
+model?</p>
 <ol>
 <li><p>Region A (left side)</p></li>
 <li><p>Region B (middle)</p></li>
 <li><p>Region C (right side)</p></li>
 <li><p>All regions equally</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>A)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>A)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>On the left side of the curve, the model has low complexity and high bias. It cannot capture patterns in the data, leading to high training and validation error. This is the definition of <strong>underfitting</strong>.</p></li>
+<p>On the left side of the curve, the model has low complexity and high
+bias. It cannot capture patterns in the data, leading to high training
+and validation error. This is the definition of
+<strong>underfitting</strong>.</p></li>
 </ol></section>
 </main>
 </body>

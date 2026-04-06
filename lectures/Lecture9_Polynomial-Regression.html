@@ -109,24 +109,78 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="overview"><span class="header-section-number">1.</span> Overview</h1>
-<p>This lecture extends <strong>linear regression</strong> to settings where the relationship between inputs and outputs is <strong>nonlinear</strong>. We will see that many nonlinear models can still be written in a form that is <strong>linear in the parameters</strong> by introducing a feature mapping <span class="math inline">\(\phi(\cdot)\)</span>. In particular, <strong>polynomial regression</strong> creates nonlinear behavior by expanding the original inputs into polynomial features, while keeping the prediction rule in the simple form <span class="math inline">\(\hat{y}=\boldsymbol{\theta^T}\phi(\boldsymbol{x})\)</span>.</p>
-<p>The first theme of the lecture is <strong>high-degree polynomial regression</strong>. We motivate why polynomial features are useful, how they capture curvature and interactions (cross terms) in multi-feature datasets, and why increasing the polynomial degree increases model capacity. We emphasize the core trade-off: higher degree can improve expressiveness, but it also increases the number of features rapidly and can lead to <strong>overfitting</strong>, where the model fits noise rather than the underlying signal.</p>
-<p>The second theme is <strong>training by gradient descent</strong>. While the Normal Equation provides a closed-form solution for least squares regression, it becomes computationally expensive and numerically fragile as the feature dimension grows (especially after polynomial expansion). This motivates iterative optimization. We review the gradient descent update rule <span class="math inline">\(\boldsymbol{\theta}^{(t+1)} = \boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})\)</span>, interpret the learning rate <span class="math inline">\(\alpha\)</span> as a step size, and compare Batch, Stochastic, and Mini-batch gradient descent as practical alternatives with different stability and computational trade-offs. We also preview common optimization considerations, including convergence behavior, learning rate selection, and the role of learning-rate schedules.</p>
-<p>The third theme is <strong>regularization</strong>. Polynomial regression can easily become a high-capacity model, so controlling complexity is essential for good generalization. We introduce regularization as adding a penalty term to the least squares objective, typically written as <span class="math display">\[\min_{\boldsymbol{\theta}}\ 
+<p>This lecture extends <strong>linear regression</strong> to settings
+where the relationship between inputs and outputs is
+<strong>nonlinear</strong>. We will see that many nonlinear models can
+still be written in a form that is <strong>linear in the
+parameters</strong> by introducing a feature mapping <span class="math inline">\(\phi(\cdot)\)</span>. In particular,
+<strong>polynomial regression</strong> creates nonlinear behavior by
+expanding the original inputs into polynomial features, while keeping
+the prediction rule in the simple form <span class="math inline">\(\hat{y}=\boldsymbol{\theta^T}\phi(\boldsymbol{x})\)</span>.</p>
+<p>The first theme of the lecture is <strong>high-degree polynomial
+regression</strong>. We motivate why polynomial features are useful, how
+they capture curvature and interactions (cross terms) in multi-feature
+datasets, and why increasing the polynomial degree increases model
+capacity. We emphasize the core trade-off: higher degree can improve
+expressiveness, but it also increases the number of features rapidly and
+can lead to <strong>overfitting</strong>, where the model fits noise
+rather than the underlying signal.</p>
+<p>The second theme is <strong>training by gradient descent</strong>.
+While the Normal Equation provides a closed-form solution for least
+squares regression, it becomes computationally expensive and numerically
+fragile as the feature dimension grows (especially after polynomial
+expansion). This motivates iterative optimization. We review the
+gradient descent update rule <span class="math inline">\(\boldsymbol{\theta}^{(t+1)} =
+\boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}^{(t)})\)</span>, interpret the learning rate <span class="math inline">\(\alpha\)</span> as a step size, and compare Batch,
+Stochastic, and Mini-batch gradient descent as practical alternatives
+with different stability and computational trade-offs. We also preview
+common optimization considerations, including convergence behavior,
+learning rate selection, and the role of learning-rate schedules.</p>
+<p>The third theme is <strong>regularization</strong>. Polynomial
+regression can easily become a high-capacity model, so controlling
+complexity is essential for good generalization. We introduce
+regularization as adding a penalty term to the least squares objective,
+typically written as <span class="math display">\[\min_{\boldsymbol{\theta}}\
 \frac{1}{N}\sum_{i=1}^{N}
-\left(\boldsymbol{\theta}^T \boldsymbol{\phi}(\mathbf{x}_i) - y_i\right)^2
-+ \lambda\,\Omega(\boldsymbol{\theta}).\]</span> We discuss how <span class="math inline">\(L_2\)</span> regularization (Ridge) tends to shrink weights smoothly and improve numerical stability, while <span class="math inline">\(L_1\)</span> regularization (Lasso) can encourage sparsity and act as a form of feature selection. Conceptually, regularization shifts the solution toward simpler models, reducing variance and improving test-time performance.</p>
-<p>Overall, the lecture proceeds from constructing nonlinear models via polynomial feature maps, to optimizing their parameters efficiently with gradient-based methods, and finally to preventing overfitting through regularization. By the end, you should be able to explain how polynomial regression is built, how it is trained in practice, and why regularization is often necessary when model capacity grows.</p>
+\left(\boldsymbol{\theta}^T \boldsymbol{\phi}(\mathbf{x}_i) -
+y_i\right)^2
++ \lambda\,\Omega(\boldsymbol{\theta}).\]</span> We discuss how <span class="math inline">\(L_2\)</span> regularization (Ridge) tends to
+shrink weights smoothly and improve numerical stability, while <span class="math inline">\(L_1\)</span> regularization (Lasso) can encourage
+sparsity and act as a form of feature selection. Conceptually,
+regularization shifts the solution toward simpler models, reducing
+variance and improving test-time performance.</p>
+<p>Overall, the lecture proceeds from constructing nonlinear models via
+polynomial feature maps, to optimizing their parameters efficiently with
+gradient-based methods, and finally to preventing overfitting through
+regularization. By the end, you should be able to explain how polynomial
+regression is built, how it is trained in practice, and why
+regularization is often necessary when model capacity grows.</p>
 <h1 data-number="2" id="nonlinear-regression"><span class="header-section-number">2.</span> Nonlinear Regression</h1>
-<p>When the relationship between the input and output variables is not linear, a standard linear regression model is insufficient. Instead, we introduce a nonlinear regression framework through a feature transformation.</p>
-<p>Rather than directly using the original feature matrix <span class="math inline">\(\mathbf{X}\)</span>, we map each input vector <span class="math inline">\(\mathbf{x}_i\)</span> into a higher-dimensional feature space using a nonlinear transformation <span class="math inline">\(\boldsymbol{\phi}(\mathbf{x}_i)\)</span>. The regression model then becomes</p>
-<p><span class="math display">\[y_i = \boldsymbol{\theta}^T \boldsymbol{\phi}(\mathbf{x}_i)\]</span></p>
-<p>Although this model can represent nonlinear relationships in the original input space, it remains <em>linear in the parameters</em> <span class="math inline">\(\theta\)</span>. This is an extension of the linear model in a transformed feature space, as illustrated in Figure 8.1.</p>
+<p>When the relationship between the input and output variables is not
+linear, a standard linear regression model is insufficient. Instead, we
+introduce a nonlinear regression framework through a feature
+transformation.</p>
+<p>Rather than directly using the original feature matrix <span class="math inline">\(\mathbf{X}\)</span>, we map each input vector
+<span class="math inline">\(\mathbf{x}_i\)</span> into a
+higher-dimensional feature space using a nonlinear transformation <span class="math inline">\(\boldsymbol{\phi}(\mathbf{x}_i)\)</span>. The
+regression model then becomes</p>
+<p><span class="math display">\[y_i = \boldsymbol{\theta}^T
+\boldsymbol{\phi}(\mathbf{x}_i)\]</span></p>
+<p>Although this model can represent nonlinear relationships in the
+original input space, it remains <em>linear in the parameters</em> <span class="math inline">\(\theta\)</span>. This is an extension of the
+linear model in a transformed feature space, as illustrated in Figure
+8.1.</p>
 <figure>
-<img alt="Linear model in transformed feature space capturing nonlinear relationships" src="img/lecture8/non-linear%20regression.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Linear model in transformed feature space capturing nonlinear relationships</figcaption>
+<img src="img/lecture8/non-linear%20regression.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Linear model in transformed feature space capturing
+nonlinear relationships</figcaption>
 </figure>
-<p>More expressive nonlinear regression models use multiple basis functions:</p>
-<p><span class="math display">\[y_i = \theta_0 + \theta_1\phi_1(\mathbf{x}_i) + \theta_2\phi_2(\mathbf{x}_i) + \dots + \theta_m\phi_m(\mathbf{x}_i), \quad i = 1,\dots,N\]</span></p>
+<p>More expressive nonlinear regression models use multiple basis
+functions:</p>
+<p><span class="math display">\[y_i = \theta_0 +
+\theta_1\phi_1(\mathbf{x}_i) + \theta_2\phi_2(\mathbf{x}_i) + \dots +
+\theta_m\phi_m(\mathbf{x}_i), \quad i = 1,\dots,N\]</span></p>
 <p>In matrix form, if we define the transformed design matrix</p>
 <p><span class="math display">\[\boldsymbol{\Phi} =
 \begin{bmatrix}
@@ -136,15 +190,30 @@ window.addEventListener("DOMContentLoaded", () => {
 \boldsymbol{\phi}(\mathbf{x}_N)^T
 \end{bmatrix}\]</span></p>
 <p>then the model becomes</p>
-<p><span class="math display">\[\boldsymbol{\hat{y}} = \boldsymbol{\Phi} \boldsymbol{\theta}\]</span></p>
-<p>This formulation allows us to reuse all tools from linear regression (least squares, gradient descent, regularization) while modeling nonlinear relationships through feature engineering.</p>
+<p><span class="math display">\[\boldsymbol{\hat{y}} = \boldsymbol{\Phi}
+\boldsymbol{\theta}\]</span></p>
+<p>This formulation allows us to reuse all tools from linear regression
+(least squares, gradient descent, regularization) while modeling
+nonlinear relationships through feature engineering.</p>
 <h1 data-number="3" id="polynomial-regression"><span class="header-section-number">3.</span> Polynomial Regression</h1>
-<p>A common and important special case of nonlinear regression is <strong>polynomial regression</strong>. This method is used when the relationship between the input and output exhibits curvature that cannot be captured by a linear function. Instead of assuming linear dependence on the original feature, we expand the input using polynomial basis functions.</p>
-<p>For a single input feature <span class="math inline">\(x\)</span>, the feature mapping is defined as</p>
-<p><span class="math display">\[\boldsymbol{\phi}(\boldsymbol{x_i}) = [1, x_i, x_i^2, x_i^3, \dots, x_i^m]^T\]</span></p>
-<p>where <span class="math inline">\(m\)</span> is the degree of the polynomial. The regression model becomes</p>
-<p><span class="math display">\[\hat{y}_i = \theta_0 + \theta_1 x_i + \theta_2 x_i^2 + \dots + \theta_m x_i^m\]</span></p>
-<p>Although the model is nonlinear in the input variable <span class="math inline">\(x\)</span>, it remains <strong>linear in the parameters</strong> <span class="math inline">\(\boldsymbol \theta\)</span>, which allows us to use all linear regression optimization techniques.</p>
+<p>A common and important special case of nonlinear regression is
+<strong>polynomial regression</strong>. This method is used when the
+relationship between the input and output exhibits curvature that cannot
+be captured by a linear function. Instead of assuming linear dependence
+on the original feature, we expand the input using polynomial basis
+functions.</p>
+<p>For a single input feature <span class="math inline">\(x\)</span>,
+the feature mapping is defined as</p>
+<p><span class="math display">\[\boldsymbol{\phi}(\boldsymbol{x_i}) =
+[1, x_i, x_i^2, x_i^3, \dots, x_i^m]^T\]</span></p>
+<p>where <span class="math inline">\(m\)</span> is the degree of the
+polynomial. The regression model becomes</p>
+<p><span class="math display">\[\hat{y}_i = \theta_0 + \theta_1 x_i +
+\theta_2 x_i^2 + \dots + \theta_m x_i^m\]</span></p>
+<p>Although the model is nonlinear in the input variable <span class="math inline">\(x\)</span>, it remains <strong>linear in the
+parameters</strong> <span class="math inline">\(\boldsymbol
+\theta\)</span>, which allows us to use all linear regression
+optimization techniques.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 8.2 Polynomial Fit</h3><p>Interactivity from linear to polynomial fit only (contour and optimization-MSE panels removed).</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_Fig82_interactive.html" style="height:680px;" title="Interactive Figure 8.2 Polynomial Fit Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Fig82_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>In matrix form, the transformed design matrix becomes</p>
 <p><span class="math display">\[\mathbf{\Phi} =
@@ -155,26 +224,43 @@ window.addEventListener("DOMContentLoaded", () => {
 1 &amp; x_N &amp; x_N^2 &amp; \dots &amp; x_N^m
 \end{bmatrix}\]</span></p>
 <p>so that</p>
-<p><span class="math display">\[\hat{\mathbf{y}} = \mathbf{\Phi}\boldsymbol{\theta}\]</span></p>
-<p>This framework naturally extends to multiple input features, where polynomial terms also include cross-products such as <span class="math inline">\(x_1 x_2\)</span>, <span class="math inline">\(x_1^2 x_2\)</span>, etc., leading to higher expressive power but also rapid growth in feature dimensionality.</p>
-<h2 data-number="3.1" id="high-degree-polynomial-regression"><span class="header-section-number">3.1</span> High-Degree Polynomial Regression</h2>
-<p>When the input vector has multiple features, polynomial regression extends the feature mapping to include powers and interactions between features. Suppose each data point has <span class="math inline">\(P\)</span> input features,</p>
-<p><span class="math display">\[\mathbf{x}_i = [x_{i,1}, x_{i,2}, \dots, x_{i,P}]^T.\]</span></p>
-<p>A polynomial feature mapping of degree <span class="math inline">\(m\)</span> includes all monomials whose total degree is less than or equal to <span class="math inline">\(m\)</span>. For example, with <span class="math inline">\(P = 2\)</span> features and polynomial degree <span class="math inline">\(m = 2\)</span>, the model becomes</p>
-<p><span class="math display">\[y_i = \theta_0 
-+ \theta_1 x_{i,1} 
-+ \theta_2 x_{i,2} 
-+ \theta_3 x_{i,1}^2 
-+ \theta_4 x_{i,2}^2 
-+ \theta_5 x_{i,1} x_{i,2} 
+<p><span class="math display">\[\hat{\mathbf{y}} =
+\mathbf{\Phi}\boldsymbol{\theta}\]</span></p>
+<p>This framework naturally extends to multiple input features, where
+polynomial terms also include cross-products such as <span class="math inline">\(x_1 x_2\)</span>, <span class="math inline">\(x_1^2 x_2\)</span>, etc., leading to higher
+expressive power but also rapid growth in feature dimensionality.</p>
+<h2 data-number="3.1" id="high-degree-polynomial-regression"><span class="header-section-number">3.1</span> High-Degree Polynomial
+Regression</h2>
+<p>When the input vector has multiple features, polynomial regression
+extends the feature mapping to include powers and interactions between
+features. Suppose each data point has <span class="math inline">\(P\)</span> input features,</p>
+<p><span class="math display">\[\mathbf{x}_i = [x_{i,1}, x_{i,2}, \dots,
+x_{i,P}]^T.\]</span></p>
+<p>A polynomial feature mapping of degree <span class="math inline">\(m\)</span> includes all monomials whose total
+degree is less than or equal to <span class="math inline">\(m\)</span>.
+For example, with <span class="math inline">\(P = 2\)</span> features
+and polynomial degree <span class="math inline">\(m = 2\)</span>, the
+model becomes</p>
+<p><span class="math display">\[y_i = \theta_0
++ \theta_1 x_{i,1}
++ \theta_2 x_{i,2}
++ \theta_3 x_{i,1}^2
++ \theta_4 x_{i,2}^2
++ \theta_5 x_{i,1} x_{i,2}
 + \epsilon_i.\]</span></p>
-<p>Here, the term <span class="math inline">\(x_{i,1}x_{i,2}\)</span> represents an interaction between features, allowing the model to capture more complex relationships.</p>
-<p>More generally, polynomial regression with multiple features constructs a feature vector</p>
-<p><span class="math display">\[\phi(\mathbf{x}_i) = 
-[1, x_{i,1}, \dots, x_{i,P}, x_{i,1}^2, x_{i,1}x_{i,2}, \dots, x_{i,P}^m]^T,\]</span></p>
+<p>Here, the term <span class="math inline">\(x_{i,1}x_{i,2}\)</span>
+represents an interaction between features, allowing the model to
+capture more complex relationships.</p>
+<p>More generally, polynomial regression with multiple features
+constructs a feature vector</p>
+<p><span class="math display">\[\phi(\mathbf{x}_i) =
+[1, x_{i,1}, \dots, x_{i,P}, x_{i,1}^2, x_{i,1}x_{i,2}, \dots,
+x_{i,P}^m]^T,\]</span></p>
 <p>leading again to a linear model in the parameters,</p>
-<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i).\]</span></p>
-<p>Stacking all transformed feature vectors produces the polynomial design matrix</p>
+<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T
+\phi(\mathbf{x}_i).\]</span></p>
+<p>Stacking all transformed feature vectors produces the polynomial
+design matrix</p>
 <p><span class="math display">\[\boldsymbol{\Phi} =
 \begin{bmatrix}
 \phi(\mathbf{x}_1)^T \\
@@ -184,173 +270,376 @@ window.addEventListener("DOMContentLoaded", () => {
 \end{bmatrix},
 \qquad
 \hat{\mathbf{y}} = \boldsymbol{\Phi}\boldsymbol{\theta}.\]</span></p>
-<p>However, the number of features grows rapidly with both <span class="math inline">\(P\)</span> and <span class="math inline">\(m\)</span>. The total number of polynomial terms (including interactions) is</p>
+<p>However, the number of features grows rapidly with both <span class="math inline">\(P\)</span> and <span class="math inline">\(m\)</span>. The total number of polynomial terms
+(including interactions) is</p>
 <p><span class="math display">\[\binom{P + m}{m},\]</span></p>
-<p>which can become very large even for moderate <span class="math inline">\(P\)</span> and <span class="math inline">\(m\)</span>. For example, a dataset like IRIS with <span class="math inline">\(P=4\)</span> features and degree <span class="math inline">\(m=4\)</span> already produces <span class="math inline">\(70\)</span> polynomial features. This rapid growth increases computational cost and the risk of overfitting, motivating the need for regularization and more efficient optimization methods.</p>
-<h2 data-number="3.2" id="least-squares-cost-function"><span class="header-section-number">3.2</span> Least Squares Cost Function</h2>
+<p>which can become very large even for moderate <span class="math inline">\(P\)</span> and <span class="math inline">\(m\)</span>. For example, a dataset like IRIS with
+<span class="math inline">\(P=4\)</span> features and degree <span class="math inline">\(m=4\)</span> already produces <span class="math inline">\(70\)</span> polynomial features. This rapid growth
+increases computational cost and the risk of overfitting, motivating the
+need for regularization and more efficient optimization methods.</p>
+<h2 data-number="3.2" id="least-squares-cost-function"><span class="header-section-number">3.2</span> Least Squares Cost
+Function</h2>
 <p>The least squares loss for polynomial regression is</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) 
-= \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)^2 
-= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2.\]</span></p>
-<p>Here, <span class="math inline">\(L(\boldsymbol{\theta})\)</span> is the loss function dependent on the model parameters <span class="math inline">\(\boldsymbol{\theta}\)</span>. The term <span class="math inline">\(\frac{1}{N}\sum_{i=1}^N\)</span> computes the mean squared error across all <span class="math inline">\(N\)</span> data points. The model prediction is</p>
-<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i),\]</span></p>
-<p>where <span class="math inline">\(\phi(\mathbf{x}_i)\)</span> denotes the nonlinear feature mapping applied to the input. Squaring the residual <span class="math inline">\((\hat{y}_i - y_i)\)</span> penalizes larger prediction errors more strongly.</p>
+<p><span class="math display">\[L(\boldsymbol{\theta})
+= \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i)^2
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) -
+y_i)^2.\]</span></p>
+<p>Here, <span class="math inline">\(L(\boldsymbol{\theta})\)</span> is
+the loss function dependent on the model parameters <span class="math inline">\(\boldsymbol{\theta}\)</span>. The term <span class="math inline">\(\frac{1}{N}\sum_{i=1}^N\)</span> computes the mean
+squared error across all <span class="math inline">\(N\)</span> data
+points. The model prediction is</p>
+<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T
+\phi(\mathbf{x}_i),\]</span></p>
+<p>where <span class="math inline">\(\phi(\mathbf{x}_i)\)</span> denotes
+the nonlinear feature mapping applied to the input. Squaring the
+residual <span class="math inline">\((\hat{y}_i - y_i)\)</span>
+penalizes larger prediction errors more strongly.</p>
 <p>In matrix form, the loss can be written compactly as</p>
 <p><span class="math display">\[L(\boldsymbol{\theta})
-= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.\]</span></p>
+= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y}\|_2^2.\]</span></p>
 <h2 data-number="3.3" id="finding-optimal-parameters"><span class="header-section-number">3.3</span> Finding Optimal Parameters</h2>
-<p>We seek model parameters <span class="math inline">\(\boldsymbol{\theta}\)</span> that minimize the least squares loss</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) 
-= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2
-= \frac{1}{N}\|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.\]</span></p>
-<p>This is an optimization problem over the parameter vector <span class="math inline">\(\boldsymbol{\theta}\)</span>. The optimal parameters <span class="math inline">\(\boldsymbol{\theta}^\ast\)</span> satisfy the first-order optimality condition</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}) = 0.\]</span></p>
+<p>We seek model parameters <span class="math inline">\(\boldsymbol{\theta}\)</span> that minimize the
+least squares loss</p>
+<p><span class="math display">\[L(\boldsymbol{\theta})
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) -
+y_i)^2
+= \frac{1}{N}\|\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y}\|_2^2.\]</span></p>
+<p>This is an optimization problem over the parameter vector <span class="math inline">\(\boldsymbol{\theta}\)</span>. The optimal
+parameters <span class="math inline">\(\boldsymbol{\theta}^\ast\)</span>
+satisfy the first-order optimality condition</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}) = 0.\]</span></p>
 <h4 data-number="3.3.0.1" id="gradient-of-the-loss."><span class="header-section-number">3.3.0.1</span> Gradient of the loss.</h4>
 <p>Taking the gradient of the matrix form gives</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
-= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}).\]</span></p>
-<p>Setting the gradient equal to zero yields the <strong>normal equations</strong></p>
-<p><span class="math display">\[\boldsymbol{\Phi}^T \boldsymbol{\Phi}\boldsymbol{\theta} 
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
+= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y}).\]</span></p>
+<p>Setting the gradient equal to zero yields the <strong>normal
+equations</strong></p>
+<p><span class="math display">\[\boldsymbol{\Phi}^T
+\boldsymbol{\Phi}\boldsymbol{\theta}
 = \boldsymbol{\Phi}^T \mathbf{y}.\]</span></p>
 <h4 data-number="3.3.0.2" id="closed-form-solution."><span class="header-section-number">3.3.0.2</span> Closed-form solution.</h4>
-<p>If <span class="math inline">\(\boldsymbol{\Phi}^T\boldsymbol{\Phi}\)</span> is invertible, the optimal parameters are</p>
+<p>If <span class="math inline">\(\boldsymbol{\Phi}^T\boldsymbol{\Phi}\)</span> is
+invertible, the optimal parameters are</p>
 <p><span class="math display">\[\boxed{
 \boldsymbol{\theta}^\ast
-= (\boldsymbol{\Phi}^T\boldsymbol{\Phi})^{-1}\boldsymbol{\Phi}^T\mathbf{y}
+=
+(\boldsymbol{\Phi}^T\boldsymbol{\Phi})^{-1}\boldsymbol{\Phi}^T\mathbf{y}
 }\]</span></p>
 <p>This provides a closed-form solution for polynomial regression.</p>
 <h2 data-number="3.4" id="the-normal-equation"><span class="header-section-number">3.4</span> The Normal Equation</h2>
-<p>For models that are linear in the parameters (including polynomial regression and other feature-mapped models), the least squares loss admits a closed-form solution. Let <span class="math inline">\(\boldsymbol{\Phi}\)</span> be the design matrix, where each row is <span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>, and let <span class="math inline">\(\mathbf{y}\)</span> be the vector of targets.</p>
+<p>For models that are linear in the parameters (including polynomial
+regression and other feature-mapped models), the least squares loss
+admits a closed-form solution. Let <span class="math inline">\(\boldsymbol{\Phi}\)</span> be the design matrix,
+where each row is <span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>, and let <span class="math inline">\(\mathbf{y}\)</span> be the vector of targets.</p>
 <p>The loss function is</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.\]</span></p>
-<p>Taking the gradient with respect to <span class="math inline">\(\boldsymbol{\theta}\)</span> and setting it to zero:</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
-= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}) = 0.\]</span></p>
+<p><span class="math display">\[L(\boldsymbol{\theta}) = \frac{1}{N}
+\|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2.\]</span></p>
+<p>Taking the gradient with respect to <span class="math inline">\(\boldsymbol{\theta}\)</span> and setting it to
+zero:</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
+= \frac{2}{N}\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y}) = 0.\]</span></p>
 <p>Rearranging gives</p>
-<p><span class="math display">\[\boldsymbol{\Phi}^T \boldsymbol{\Phi}\boldsymbol{\theta}
+<p><span class="math display">\[\boldsymbol{\Phi}^T
+\boldsymbol{\Phi}\boldsymbol{\theta}
 = \boldsymbol{\Phi}^T \mathbf{y},\]</span></p>
 <p>which leads to the <strong>Normal Equation</strong>:</p>
 <p><span class="math display">\[\boldsymbol{\theta}
-= (\boldsymbol{\Phi}^T \boldsymbol{\Phi})^{-1} \boldsymbol{\Phi}^T \mathbf{y}.\]</span></p>
-<p>This provides a direct solution without iterative optimization methods such as gradient descent, provided that <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span> is invertible.</p>
+= (\boldsymbol{\Phi}^T \boldsymbol{\Phi})^{-1} \boldsymbol{\Phi}^T
+\mathbf{y}.\]</span></p>
+<p>This provides a direct solution without iterative optimization
+methods such as gradient descent, provided that <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span> is
+invertible.</p>
 <h2 class="unnumbered" id="hypothesis-function">Hypothesis Function</h2>
-<p>For models that are linear in the parameters, the hypothesis function can be written in matrix form as</p>
-<p><span class="math display">\[\hat{\mathbf{y}} = \boldsymbol{\Phi}\boldsymbol{\theta}\]</span></p>
-<p>where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the design matrix whose <span class="math inline">\(i\)</span>-th row is <span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>, and <span class="math inline">\(\boldsymbol{\theta}\)</span> is the parameter vector. Each prediction is therefore</p>
-<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T \phi(\mathbf{x}_i).\]</span></p>
-<p>This formulation includes linear regression, polynomial regression, and other feature-mapped models.</p>
+<p>For models that are linear in the parameters, the hypothesis function
+can be written in matrix form as</p>
+<p><span class="math display">\[\hat{\mathbf{y}} =
+\boldsymbol{\Phi}\boldsymbol{\theta}\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the
+design matrix whose <span class="math inline">\(i\)</span>-th row is
+<span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>, and <span class="math inline">\(\boldsymbol{\theta}\)</span> is the parameter
+vector. Each prediction is therefore</p>
+<p><span class="math display">\[\hat{y}_i = \boldsymbol{\theta}^T
+\phi(\mathbf{x}_i).\]</span></p>
+<p>This formulation includes linear regression, polynomial regression,
+and other feature-mapped models.</p>
 <p>Linear regression is recovered as a special case when <span class="math inline">\(\phi(\mathbf{x}) = \mathbf{x}\)</span>.</p>
 <h2 class="unnumbered" id="cost-function">Cost Function</h2>
 <p>The mean squared error loss is defined as</p>
-<p><span class="math display">\[L(\boldsymbol{\theta}) 
+<p><span class="math display">\[L(\boldsymbol{\theta})
 = \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2
-= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i)^2\]</span></p>
-<p>where <span class="math inline">\(N\)</span> is the number of training examples.</p>
-<h2 data-number="3.5" id="computational-complexity-of-the-normal-equation"><span class="header-section-number">3.5</span> Computational Complexity of the Normal Equation</h2>
-<p>The computational cost of solving the Normal Equation is dominated by the linear algebra operations required to form and invert the matrix <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span>, where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the design matrix with <span class="math inline">\(N\)</span> training examples and <span class="math inline">\(P\)</span> features (including any feature mappings such as polynomial terms).</p>
-<p>Forming the matrix product <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span> requires <span class="math inline">\(\mathcal{O}(N P^2)\)</span> operations, since each of the <span class="math inline">\(P^2\)</span> entries involves a sum over <span class="math inline">\(N\)</span> training examples. The subsequent matrix inversion of the <span class="math inline">\(P \times P\)</span> matrix <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span> has a computational complexity of <span class="math inline">\(\mathcal{O}(P^3)\)</span>. Therefore, the overall computational complexity of computing the Normal Equation solution is</p>
+= \frac{1}{N} \sum_{i=1}^{N} (\boldsymbol{\theta}^T \phi(\mathbf{x}_i) -
+y_i)^2\]</span></p>
+<p>where <span class="math inline">\(N\)</span> is the number of
+training examples.</p>
+<h2 data-number="3.5" id="computational-complexity-of-the-normal-equation"><span class="header-section-number">3.5</span> Computational Complexity of the
+Normal Equation</h2>
+<p>The computational cost of solving the Normal Equation is dominated by
+the linear algebra operations required to form and invert the matrix
+<span class="math inline">\(\boldsymbol{\Phi}^T
+\boldsymbol{\Phi}\)</span>, where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the design matrix
+with <span class="math inline">\(N\)</span> training examples and <span class="math inline">\(P\)</span> features (including any feature
+mappings such as polynomial terms).</p>
+<p>Forming the matrix product <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span>
+requires <span class="math inline">\(\mathcal{O}(N P^2)\)</span>
+operations, since each of the <span class="math inline">\(P^2\)</span>
+entries involves a sum over <span class="math inline">\(N\)</span>
+training examples. The subsequent matrix inversion of the <span class="math inline">\(P \times P\)</span> matrix <span class="math inline">\(\boldsymbol{\Phi}^T \boldsymbol{\Phi}\)</span> has
+a computational complexity of <span class="math inline">\(\mathcal{O}(P^3)\)</span>. Therefore, the overall
+computational complexity of computing the Normal Equation solution
+is</p>
 <p><span class="math display">\[\mathcal{O}(N P^2 + P^3).\]</span></p>
-<p>When the number of features <span class="math inline">\(P\)</span> is small, this cost is manageable, and the Normal Equation provides an efficient direct solution. However, as <span class="math inline">\(P\)</span> increases, the cubic term <span class="math inline">\(\mathcal{O}(P^3)\)</span> quickly becomes the dominant factor. This makes the method computationally expensive for high-dimensional feature spaces, particularly when polynomial feature expansions are used.</p>
-<p>The Normal Equation is therefore most appropriate in settings where the number of training examples is much larger than the number of features (<span class="math inline">\(N \gg P\)</span>) and the feature dimension remains moderate. In high-dimensional problems, especially those arising from nonlinear feature mappings or large-scale datasets, iterative optimization methods such as gradient descent are preferred, since they avoid explicit matrix inversion and scale more favorably with dimensionality.</p>
+<p>When the number of features <span class="math inline">\(P\)</span> is
+small, this cost is manageable, and the Normal Equation provides an
+efficient direct solution. However, as <span class="math inline">\(P\)</span> increases, the cubic term <span class="math inline">\(\mathcal{O}(P^3)\)</span> quickly becomes the
+dominant factor. This makes the method computationally expensive for
+high-dimensional feature spaces, particularly when polynomial feature
+expansions are used.</p>
+<p>The Normal Equation is therefore most appropriate in settings where
+the number of training examples is much larger than the number of
+features (<span class="math inline">\(N \gg P\)</span>) and the feature
+dimension remains moderate. In high-dimensional problems, especially
+those arising from nonlinear feature mappings or large-scale datasets,
+iterative optimization methods such as gradient descent are preferred,
+since they avoid explicit matrix inversion and scale more favorably with
+dimensionality.</p>
 <h1 data-number="4" id="gradient-descent"><span class="header-section-number">4.</span> Gradient Descent</h1>
 <h2 data-number="4.1" id="overview-1"><span class="header-section-number">4.1</span> Overview</h2>
-<p>Gradient descent (GD) methods, including Batch GD, Stochastic GD, and Mini-batch GD, are commonly used for optimization in machine learning tasks. Each method shows different characteristics in terms of convergence behavior.</p>
-<h2 data-number="4.2" id="finding-optimal-parameters-gradient-descent"><span class="header-section-number">4.2</span> Finding Optimal Parameters (Gradient Descent)</h2>
-<p>The Gradient Descent algorithm is used to find model parameters that minimize the loss function. We start from an initial parameter vector <span class="math inline">\(\boldsymbol{\theta}\)</span>, which may produce a high loss. By iteratively moving in the direction of the <strong>negative gradient</strong> of the loss, the parameters are updated to reduce the error.</p>
-<p>There exists an optimal set of parameters <span class="math inline">\(\boldsymbol{\theta}^\ast\)</span> that minimizes the loss. Moving the parameters away from this point increases the loss.</p>
-<p>In practice, it is almost impossible to achieve zero loss on real data. While prediction accuracy can sometimes reach <span class="math inline">\(100\%\)</span>, we do not directly optimize accuracy. Instead, we minimize a continuous loss function measuring the difference between the true targets <span class="math inline">\(\mathbf{y}\)</span> and the predictions <span class="math inline">\(\hat{\mathbf{y}}\)</span>. Using a continuous loss produces a smooth, typically convex, optimization landscape that is easier to optimize.</p>
-<p>Understanding the idea of a <em>gradient</em> is therefore essential. In Figure 8.3, the horizontal axis represents <span class="math inline">\(\theta_1\)</span> in the single-feature case. With multiple features, additional axes correspond to parameters <span class="math inline">\(\theta_i\)</span>, producing a bowl-shaped loss surface in higher dimensions.</p>
-<figure>
-<img alt="The negative gradient (derivative) points to the direction of the greatest rate of decrease of the cost function. Its magnitude is the slope of the function in that direction" id="fig:enter-label" src="img/lecture8/The%20negative%20gradient%20(derivative)%20.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">The negative gradient (derivative) points to the direction of the greatest rate of decrease of the cost function. Its magnitude is the slope of the function in that direction</figcaption>
+<p>Gradient descent (GD) methods, including Batch GD, Stochastic GD, and
+Mini-batch GD, are commonly used for optimization in machine learning
+tasks. Each method shows different characteristics in terms of
+convergence behavior.</p>
+<h2 data-number="4.2" id="finding-optimal-parameters-gradient-descent"><span class="header-section-number">4.2</span> Finding Optimal Parameters
+(Gradient Descent)</h2>
+<p>The Gradient Descent algorithm is used to find model parameters that
+minimize the loss function. We start from an initial parameter vector
+<span class="math inline">\(\boldsymbol{\theta}\)</span>, which may
+produce a high loss. By iteratively moving in the direction of the
+<strong>negative gradient</strong> of the loss, the parameters are
+updated to reduce the error.</p>
+<p>There exists an optimal set of parameters <span class="math inline">\(\boldsymbol{\theta}^\ast\)</span> that minimizes
+the loss. Moving the parameters away from this point increases the
+loss.</p>
+<p>In practice, it is almost impossible to achieve zero loss on real
+data. While prediction accuracy can sometimes reach <span class="math inline">\(100\%\)</span>, we do not directly optimize
+accuracy. Instead, we minimize a continuous loss function measuring the
+difference between the true targets <span class="math inline">\(\mathbf{y}\)</span> and the predictions <span class="math inline">\(\hat{\mathbf{y}}\)</span>. Using a continuous loss
+produces a smooth, typically convex, optimization landscape that is
+easier to optimize.</p>
+<p>Understanding the idea of a <em>gradient</em> is therefore essential.
+In Figure 8.3, the horizontal axis represents <span class="math inline">\(\theta_1\)</span> in the single-feature case. With
+multiple features, additional axes correspond to parameters <span class="math inline">\(\theta_i\)</span>, producing a bowl-shaped loss
+surface in higher dimensions.</p>
+<figure id="fig:enter-label">
+<img src="img/lecture8/The%20negative%20gradient%20(derivative)%20.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>The negative gradient (derivative) points to the direction
+of the greatest rate of decrease of the cost function. Its magnitude is
+the slope of the function in that direction</figcaption>
 </figure>
-<p>The gradient is a tangent. We assume the shape and choose to travel along this gradient to pick our next point. Every path to the next point is a straight line. When we see a graph we visualize a continuous distribution, however, in a more practical setting, we move a certain distance in a straight line and the directionality of this point is given by the gradient. The learning rate is what gives you the distance you travel. Think of this as a vector with a scalar given by the learning rate and the direction given by the gradient.</p>
-<p>The algorithm is called a Gradient Descent since we are moving in the direction of descending toward the minimum of the loss function. By definition, a gradient is in the direction of steepest <em>ascent</em>. Hence, we use the negative of the gradient to indicate that we’d like to <em>descend</em> the loss surface.</p>
-<h2 data-number="4.3" id="gradients-of-the-least-squares-loss-function"><span class="header-section-number">4.3</span> Gradients of the Least Squares Loss Function</h2>
-<p>For models that are linear in the parameters with feature mapping <span class="math inline">\(\phi(\mathbf{x})\)</span>, the mean squared error loss is</p>
+<p>The gradient is a tangent. We assume the shape and choose to travel
+along this gradient to pick our next point. Every path to the next point
+is a straight line. When we see a graph we visualize a continuous
+distribution, however, in a more practical setting, we move a certain
+distance in a straight line and the directionality of this point is
+given by the gradient. The learning rate is what gives you the distance
+you travel. Think of this as a vector with a scalar given by the
+learning rate and the direction given by the gradient.</p>
+<p>The algorithm is called a Gradient Descent since we are moving in the
+direction of descending toward the minimum of the loss function. By
+definition, a gradient is in the direction of steepest <em>ascent</em>.
+Hence, we use the negative of the gradient to indicate that we’d like to
+<em>descend</em> the loss surface.</p>
+<h2 data-number="4.3" id="gradients-of-the-least-squares-loss-function"><span class="header-section-number">4.3</span> Gradients of the Least Squares
+Loss Function</h2>
+<p>For models that are linear in the parameters with feature mapping
+<span class="math inline">\(\phi(\mathbf{x})\)</span>, the mean squared
+error loss is</p>
 <p><span class="math display">\[L(\boldsymbol{\theta})
-= \frac{1}{N} \sum_{i=1}^{N} \big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)^2
-= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y}\|_2^2\]</span></p>
-<p>where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the design matrix whose <span class="math inline">\(i\)</span>-th row is <span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>.</p>
-<h3 class="unnumbered" id="gradient-component-form">Gradient (Component Form)</h3>
+= \frac{1}{N} \sum_{i=1}^{N} \big(\boldsymbol{\theta}^T
+\phi(\mathbf{x}_i) - y_i\big)^2
+= \frac{1}{N} \|\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y}\|_2^2\]</span></p>
+<p>where <span class="math inline">\(\boldsymbol{\Phi}\)</span> is the
+design matrix whose <span class="math inline">\(i\)</span>-th row is
+<span class="math inline">\(\phi(\mathbf{x}_i)^T\)</span>.</p>
+<h3 class="unnumbered" id="gradient-component-form">Gradient (Component
+Form)</h3>
 <p>The derivative with respect to parameter <span class="math inline">\(\theta_p\)</span> is</p>
-<p><span class="math display">\[\frac{\partial L(\boldsymbol{\theta})}{\partial \theta_p}
+<p><span class="math display">\[\frac{\partial
+L(\boldsymbol{\theta})}{\partial \theta_p}
 =
 \frac{2}{N} \sum_{i=1}^{N}
-\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)\,\phi_p(\mathbf{x}_i)\]</span></p>
-<p>where <span class="math inline">\(\phi_p(\mathbf{x}_i)\)</span> is the <span class="math inline">\(p\)</span>-th feature in the transformed vector <span class="math inline">\(\phi(\mathbf{x}_i)\)</span>.</p>
-<h3 class="unnumbered" id="gradient-matrix-form">Gradient (Matrix Form)</h3>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) -
+y_i\big)\,\phi_p(\mathbf{x}_i)\]</span></p>
+<p>where <span class="math inline">\(\phi_p(\mathbf{x}_i)\)</span> is
+the <span class="math inline">\(p\)</span>-th feature in the transformed
+vector <span class="math inline">\(\phi(\mathbf{x}_i)\)</span>.</p>
+<h3 class="unnumbered" id="gradient-matrix-form">Gradient (Matrix
+Form)</h3>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
 =
-\frac{2}{N}\,\boldsymbol{\Phi}^T (\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y})\]</span></p>
+\frac{2}{N}\,\boldsymbol{\Phi}^T (\boldsymbol{\Phi}\boldsymbol{\theta} -
+\mathbf{y})\]</span></p>
 <p>This is the form typically used in implementations.</p>
-<h3 class="unnumbered" id="gradient-descent-update-rule">Gradient Descent Update Rule</h3>
-<p><span class="math display">\[\boldsymbol{\theta}^{(t+1)} 
-= \boldsymbol{\theta}^{(t)} 
-- \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})\]</span></p>
-<p>where <span class="math inline">\(\alpha\)</span> is the learning rate and <span class="math inline">\(t\)</span> is the iteration index.</p>
-<h3 class="unnumbered" id="large-scale-training-considerations">Large-Scale Training Considerations</h3>
-<p>When the number of training examples <span class="math inline">\(N\)</span> is large, computing the full gradient <span class="math inline">\(\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta} - \mathbf{y})\)</span> at every step becomes computationally expensive. Instead, approximate gradients are used.</p>
-<p>Batch Gradient Descent computes the gradient using the entire dataset at each iteration. This approach is accurate but slow when <span class="math inline">\(N\)</span> is large.</p>
-<p>Stochastic Gradient Descent (SGD) updates parameters using a single randomly chosen training example at each step. This method is computationally cheap but introduces noise into the updates.</p>
-<p>Mini-batch Gradient Descent uses small subsets of the training data at each step. It balances stability and efficiency and is the most common approach in practice.</p>
-<p>Training proceeds iteratively until parameter updates become small or the loss stops decreasing.</p>
+<h3 class="unnumbered" id="gradient-descent-update-rule">Gradient
+Descent Update Rule</h3>
+<p><span class="math display">\[\boldsymbol{\theta}^{(t+1)}
+= \boldsymbol{\theta}^{(t)}
+- \alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}^{(t)})\]</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning
+rate and <span class="math inline">\(t\)</span> is the iteration
+index.</p>
+<h3 class="unnumbered" id="large-scale-training-considerations">Large-Scale Training
+Considerations</h3>
+<p>When the number of training examples <span class="math inline">\(N\)</span> is large, computing the full gradient
+<span class="math inline">\(\boldsymbol{\Phi}^T(\boldsymbol{\Phi}\boldsymbol{\theta}
+- \mathbf{y})\)</span> at every step becomes computationally expensive.
+Instead, approximate gradients are used.</p>
+<p>Batch Gradient Descent computes the gradient using the entire dataset
+at each iteration. This approach is accurate but slow when <span class="math inline">\(N\)</span> is large.</p>
+<p>Stochastic Gradient Descent (SGD) updates parameters using a single
+randomly chosen training example at each step. This method is
+computationally cheap but introduces noise into the updates.</p>
+<p>Mini-batch Gradient Descent uses small subsets of the training data
+at each step. It balances stability and efficiency and is the most
+common approach in practice.</p>
+<p>Training proceeds iteratively until parameter updates become small or
+the loss stops decreasing.</p>
 <h2 data-number="4.4" id="aside-contour-plots"><span class="header-section-number">4.4</span> Aside: Contour Plots</h2>
-<p>Before exploring the behavior of different Gradient Descent (GD) methods, we introduce the notion of <em>contour plots</em>. We consider an optimization setting where we aim to minimize a cost function <span class="math inline">\(L(\boldsymbol{\theta})\)</span> over two parameters, <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>. This produces a <em>loss landscape</em> over the parameter space, which GD navigates in order to find a minimum.</p>
-<p>Although we could visualize this optimization process using a 3D surface plot, it is often difficult to extract key insights from a static 3D view. Important features may be hidden depending on the viewing angle, making interpretation challenging.</p>
+<p>Before exploring the behavior of different Gradient Descent (GD)
+methods, we introduce the notion of <em>contour plots</em>. We consider
+an optimization setting where we aim to minimize a cost function <span class="math inline">\(L(\boldsymbol{\theta})\)</span> over two
+parameters, <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>. This produces a <em>loss
+landscape</em> over the parameter space, which GD navigates in order to
+find a minimum.</p>
+<p>Although we could visualize this optimization process using a 3D
+surface plot, it is often difficult to extract key insights from a
+static 3D view. Important features may be hidden depending on the
+viewing angle, making interpretation challenging.</p>
 <p>As an example, consider the following loss landscape:</p>
 <div class="center">
 <section class="interactive-notebook"><h3>Interactive Notebook: Loss Landscape and Contour Explorer</h3><p>Pick a horizontal plane and observe how the corresponding contour level changes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_LossContour_Interactive.html" style="height:680px;" title="Interactive Loss Landscape and Contour Explorer"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_LossContour_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
-<p>Instead, we use a contour plot to represent the same loss landscape in 2D. In a contour plot, each <em>contour line</em> represents points where the cost function <span class="math inline">\(L(\boldsymbol{\theta})\)</span> has the same value. Moving along a contour line does not change the value of the cost function.</p>
-<p>The goal of optimization is to find the minimum of the cost function, which corresponds to the lowest point on the surface. On a contour plot, this minimum is typically located at the center of the innermost contour. The trajectory traced by Gradient Descent on a contour plot shows how the parameters are updated step by step as we move toward this minimum.</p>
-<h4 data-number="4.4.0.1" id="steps-to-create-a-contour-plot"><span class="header-section-number">4.4.0.1</span> Steps to Create a Contour Plot</h4>
+<p>Instead, we use a contour plot to represent the same loss landscape
+in 2D. In a contour plot, each <em>contour line</em> represents points
+where the cost function <span class="math inline">\(L(\boldsymbol{\theta})\)</span> has the same
+value. Moving along a contour line does not change the value of the cost
+function.</p>
+<p>The goal of optimization is to find the minimum of the cost function,
+which corresponds to the lowest point on the surface. On a contour plot,
+this minimum is typically located at the center of the innermost
+contour. The trajectory traced by Gradient Descent on a contour plot
+shows how the parameters are updated step by step as we move toward this
+minimum.</p>
+<h4 data-number="4.4.0.1" id="steps-to-create-a-contour-plot"><span class="header-section-number">4.4.0.1</span> Steps to Create a Contour
+Plot</h4>
 <p>To construct a contour plot for a given cost function:</p>
 <ol>
 <li><p>Define a grid of values for <span class="math inline">\(\theta_0\)</span> and <span class="math inline">\(\theta_1\)</span>.</p></li>
-<li><p>Compute the value of the cost function at each grid point.</p></li>
-<li><p>Plot contour lines corresponding to different <em>levels</em> (constant values) of the cost function.</p></li>
-<li><p>Overlay the path taken by a GD algorithm to visualize how it traverses the contours toward the minimum.</p></li>
+<li><p>Compute the value of the cost function at each grid
+point.</p></li>
+<li><p>Plot contour lines corresponding to different <em>levels</em>
+(constant values) of the cost function.</p></li>
+<li><p>Overlay the path taken by a GD algorithm to visualize how it
+traverses the contours toward the minimum.</p></li>
 </ol>
 <p>For our example:</p>
 <div class="center">
 <section class="interactive-notebook"><h3>Interactive Notebook: Loss Landscape and Contour Explorer</h3><p>Pick a horizontal plane and observe how the corresponding contour level changes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_LossContour_Interactive.html" style="height:680px;" title="Interactive Loss Landscape and Contour Explorer"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_LossContour_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
-<h4 data-number="4.4.0.2" id="what-contour-plots-reveal"><span class="header-section-number">4.4.0.2</span> What Contour Plots Reveal</h4>
-<p>From a contour plot, we can infer several important properties of the loss landscape:</p>
+<h4 data-number="4.4.0.2" id="what-contour-plots-reveal"><span class="header-section-number">4.4.0.2</span> What Contour Plots
+Reveal</h4>
+<p>From a contour plot, we can infer several important properties of the
+loss landscape:</p>
 <ul>
-<li><p><strong>Curvature and gradient magnitude:</strong> Closely spaced contours indicate a steep region (large gradient magnitude), while widely spaced contours indicate a flatter region (small gradient magnitude).</p></li>
-<li><p><strong>Optimization efficiency:</strong> The paths taken by different GD variants show how efficiently each method reduces the cost.</p></li>
-<li><p><strong>Learning rate effects:</strong> A learning rate that is too large can cause overshooting across contours, while one that is too small leads to slow progress. Contour plots help visualize these different behaviors.</p></li>
+<li><p><strong>Curvature and gradient magnitude:</strong> Closely spaced
+contours indicate a steep region (large gradient magnitude), while
+widely spaced contours indicate a flatter region (small gradient
+magnitude).</p></li>
+<li><p><strong>Optimization efficiency:</strong> The paths taken by
+different GD variants show how efficiently each method reduces the
+cost.</p></li>
+<li><p><strong>Learning rate effects:</strong> A learning rate that is
+too large can cause overshooting across contours, while one that is too
+small leads to slow progress. Contour plots help visualize these
+different behaviors.</p></li>
 </ul>
 <h4 data-number="4.4.0.3" id="higher-dimensions"><span class="header-section-number">4.4.0.3</span> Higher Dimensions</h4>
-<p>In higher-dimensional settings (more than two parameters), direct visualization becomes difficult. Common strategies include visualizing 2D slices of the parameter space, or using color/time to encode additional dimensions. The choice of visualization depends on the problem.</p>
+<p>In higher-dimensional settings (more than two parameters), direct
+visualization becomes difficult. Common strategies include visualizing
+2D slices of the parameter space, or using color/time to encode
+additional dimensions. The choice of visualization depends on the
+problem.</p>
 <h2 data-number="4.5" id="batch-gradient-descent"><span class="header-section-number">4.5</span> Batch Gradient Descent</h2>
-<p>In <strong>Batch Gradient Descent</strong>, the gradient of the loss function is computed using the <em>entire training dataset</em> at every iteration. For the Mean Squared Error (MSE) loss, this means we evaluate</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}) 
-= \frac{2}{N} \mathbf{X}^T (\mathbf{X}\boldsymbol{\theta} - \mathbf{y})\]</span></p>
-<p>using all <span class="math inline">\(N\)</span> training examples before updating the parameters.</p>
+<p>In <strong>Batch Gradient Descent</strong>, the gradient of the loss
+function is computed using the <em>entire training dataset</em> at every
+iteration. For the Mean Squared Error (MSE) loss, this means we
+evaluate</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
+= \frac{2}{N} \mathbf{X}^T (\mathbf{X}\boldsymbol{\theta} -
+\mathbf{y})\]</span></p>
+<p>using all <span class="math inline">\(N\)</span> training examples
+before updating the parameters.</p>
 <p>The update rule is</p>
-<p><span class="math display">\[\boldsymbol{\theta}^{(t+1)} 
-= \boldsymbol{\theta}^{(t)} 
-- \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})\]</span></p>
-<p>where <span class="math inline">\(\alpha\)</span> is the learning rate. Because each update uses the full dataset, the direction of descent is accurate, leading to <strong>smooth and stable convergence</strong>. The loss surface often appears bowl-shaped for convex problems, and the algorithm steadily moves toward the minimum.</p>
-<p>However, the drawback is computational cost. Each step requires processing all <span class="math inline">\(N\)</span> samples, which becomes very expensive when <span class="math inline">\(N\)</span> is large. Therefore, Batch Gradient Descent is best suited for <strong>small to medium-sized datasets</strong> where stability is more important than speed.</p>
+<p><span class="math display">\[\boldsymbol{\theta}^{(t+1)}
+= \boldsymbol{\theta}^{(t)}
+- \alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})\]</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning
+rate. Because each update uses the full dataset, the direction of
+descent is accurate, leading to <strong>smooth and stable
+convergence</strong>. The loss surface often appears bowl-shaped for
+convex problems, and the algorithm steadily moves toward the
+minimum.</p>
+<p>However, the drawback is computational cost. Each step requires
+processing all <span class="math inline">\(N\)</span> samples, which
+becomes very expensive when <span class="math inline">\(N\)</span> is
+large. Therefore, Batch Gradient Descent is best suited for
+<strong>small to medium-sized datasets</strong> where stability is more
+important than speed.</p>
 <div class="algorithm">
 <div class="algorithmic">
-<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or small random values) <span class="math inline">\(\mathbf{g} \leftarrow \frac{2}{N}\sum_{i=1}^{N}\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)\)</span> <span class="math inline">\(\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
+<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or
+small random values) <span class="math inline">\(\mathbf{g} \leftarrow
+\frac{2}{N}\sum_{i=1}^{N}\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)\)</span>
+<span class="math inline">\(\boldsymbol{\theta} \leftarrow
+\boldsymbol{\theta} - \alpha \mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
 </div>
 </div>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 8.4 Batch GD</h3><p>Explore convergence path with controllable alpha and stopping criteria.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_BatchGD_Interactive_interactive.html" style="height:680px;" title="Interactive Figure 8.4 Batch GD Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_BatchGD_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<h2 data-number="4.6" id="stochastic-gradient-descent-sgd"><span class="header-section-number">4.6</span> Stochastic Gradient Descent (SGD)</h2>
-<p>In <strong>Stochastic Gradient Descent (SGD)</strong>, the model parameters are updated using <em>only one training example at a time</em>. Instead of computing the gradient over the entire dataset, we approximate it using a single randomly selected sample <span class="math inline">\((x_i, y_i)\)</span>:</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+<h2 data-number="4.6" id="stochastic-gradient-descent-sgd"><span class="header-section-number">4.6</span> Stochastic Gradient Descent
+(SGD)</h2>
+<p>In <strong>Stochastic Gradient Descent (SGD)</strong>, the model
+parameters are updated using <em>only one training example at a
+time</em>. Instead of computing the gradient over the entire dataset, we
+approximate it using a single randomly selected sample <span class="math inline">\((x_i, y_i)\)</span>:</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
 \approx
-2\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) - y_i\big)\phi(\mathbf{x}_i)\]</span></p>
+2\big(\boldsymbol{\theta}^T \phi(\mathbf{x}_i) -
+y_i\big)\phi(\mathbf{x}_i)\]</span></p>
 <p>The update becomes</p>
 <p><span class="math display">\[\boldsymbol{\theta}^{(t+1)} =
-\boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{(t)})\]</span></p>
-<p>Since each update is extremely fast, SGD can process very large datasets efficiently. However, because the gradient is based on only one sample, the updates are noisy. As a result, the convergence path is more erratic and may oscillate around the minimum rather than settling smoothly.</p>
-<p>Despite the noise, this randomness can help the algorithm escape shallow local minima and can act as a form of <strong>implicit regularization</strong>, often improving generalization performance. SGD is especially useful when:</p>
+\boldsymbol{\theta}^{(t)} - \alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}^{(t)})\]</span></p>
+<p>Since each update is extremely fast, SGD can process very large
+datasets efficiently. However, because the gradient is based on only one
+sample, the updates are noisy. As a result, the convergence path is more
+erratic and may oscillate around the minimum rather than settling
+smoothly.</p>
+<p>Despite the noise, this randomness can help the algorithm escape
+shallow local minima and can act as a form of <strong>implicit
+regularization</strong>, often improving generalization performance. SGD
+is especially useful when:</p>
 <ul>
 <li><p>The dataset is very large,</p></li>
 <li><p>The loss function is non-convex,</p></li>
@@ -358,14 +647,24 @@ window.addEventListener("DOMContentLoaded", () => {
 </ul>
 <div class="algorithm">
 <div class="algorithmic">
-<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or small random values) <span class="math inline">\(\mathbf{g} \leftarrow 2\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)\)</span> <span class="math inline">\(\boldsymbol{\theta} \leftarrow \boldsymbol{\theta} - \alpha \mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
+<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or
+small random values) <span class="math inline">\(\mathbf{g} \leftarrow
+2\big(\boldsymbol{\theta}^T\phi(\mathbf{x}_i)-y_i\big)\phi(\mathbf{x}_i)\)</span>
+<span class="math inline">\(\boldsymbol{\theta} \leftarrow
+\boldsymbol{\theta} - \alpha \mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
 </div>
 </div>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 8.5 Stochastic GD</h3><p>Explore convergence path with controllable alpha and stopping criteria.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_SGD_Interactive_interactive.html" style="height:680px;" title="Interactive Figure 8.5 Stochastic GD Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_SGD_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<h2 data-number="4.7" id="mini-batch-gradient-descent"><span class="header-section-number">4.7</span> Mini-batch Gradient Descent</h2>
-<p><strong>Mini-batch Gradient Descent</strong> combines ideas from Batch and Stochastic Gradient Descent. Instead of using all <span class="math inline">\(N\)</span> samples or just one sample, we use a small subset (mini-batch) of size <span class="math inline">\(b\)</span>.</p>
-<p>Let <span class="math inline">\(\Phi_b\)</span> be the design matrix formed from the mini-batch and <span class="math inline">\(\mathbf{y}_b\)</span> the corresponding targets. The gradient approximation becomes</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
+<h2 data-number="4.7" id="mini-batch-gradient-descent"><span class="header-section-number">4.7</span> Mini-batch Gradient
+Descent</h2>
+<p><strong>Mini-batch Gradient Descent</strong> combines ideas from
+Batch and Stochastic Gradient Descent. Instead of using all <span class="math inline">\(N\)</span> samples or just one sample, we use a
+small subset (mini-batch) of size <span class="math inline">\(b\)</span>.</p>
+<p>Let <span class="math inline">\(\Phi_b\)</span> be the design matrix
+formed from the mini-batch and <span class="math inline">\(\mathbf{y}_b\)</span> the corresponding targets.
+The gradient approximation becomes</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
 =
 \frac{2}{b}\,\Phi_b^T(\Phi_b\boldsymbol{\theta}-\mathbf{y}_b)\]</span></p>
 <p>The update rule remains</p>
@@ -376,26 +675,41 @@ window.addEventListener("DOMContentLoaded", () => {
 <ul>
 <li><p>More stable convergence than SGD,</p></li>
 <li><p>Faster updates than Batch GD,</p></li>
-<li><p>Efficient use of vectorized operations and parallel hardware (GPUs).</p></li>
+<li><p>Efficient use of vectorized operations and parallel hardware
+(GPUs).</p></li>
 </ul>
-<p>Each epoch processes <span class="math inline">\(N/b\)</span> mini-batches, allowing the model to explore the loss surface while maintaining computational efficiency. Mini-batch Gradient Descent is the <strong>standard method used in modern machine learning and deep learning systems</strong>.</p>
+<p>Each epoch processes <span class="math inline">\(N/b\)</span>
+mini-batches, allowing the model to explore the loss surface while
+maintaining computational efficiency. Mini-batch Gradient Descent is the
+<strong>standard method used in modern machine learning and deep
+learning systems</strong>.</p>
 <div class="algorithm">
 <div class="algorithmic">
-<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span>, batch size <span class="math inline">\(b\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or small random values) Shuffle training data Construct <span class="math inline">\(\Phi_b\)</span> and <span class="math inline">\(\mathbf{y}_b\)</span> from <span class="math inline">\(\mathcal{B}\)</span> <span class="math inline">\(\mathbf{g} \leftarrow \frac{2}{b}\,\Phi_b^T(\Phi_b\boldsymbol{\theta}-\mathbf{y}_b)\)</span> <span class="math inline">\(\boldsymbol{\theta} \leftarrow \boldsymbol{\theta}-\alpha\mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
+<p>Training data <span class="math inline">\(\{(x_i,y_i)\}_{i=1}^N\)</span>, feature map <span class="math inline">\(\phi(\cdot)\)</span>, learning rate <span class="math inline">\(\alpha\)</span>, epochs <span class="math inline">\(E\)</span>, batch size <span class="math inline">\(b\)</span> Initialize <span class="math inline">\(\boldsymbol{\theta} \leftarrow 0\)</span> (or
+small random values) Shuffle training data Construct <span class="math inline">\(\Phi_b\)</span> and <span class="math inline">\(\mathbf{y}_b\)</span> from <span class="math inline">\(\mathcal{B}\)</span> <span class="math inline">\(\mathbf{g} \leftarrow
+\frac{2}{b}\,\Phi_b^T(\Phi_b\boldsymbol{\theta}-\mathbf{y}_b)\)</span>
+<span class="math inline">\(\boldsymbol{\theta} \leftarrow
+\boldsymbol{\theta}-\alpha\mathbf{g}\)</span> <span class="math inline">\(\boldsymbol{\theta}\)</span></p>
 </div>
 </div>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 8.6 Mini-batch GD</h3><p>Explore convergence path with controllable alpha and stopping criteria.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture8_MiniBatchGD_Interactive_interactive.html" style="height:680px;" title="Interactive Figure 8.6 Mini-batch GD Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_MiniBatchGD_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="4.8" id="performance-comparisons"><span class="header-section-number">4.8</span> Performance Comparisons</h2>
-<p>Let <span class="math inline">\(N\)</span> be the number of training instances and <span class="math inline">\(P\)</span> be the number of features. The performance, memory requirements, and whether normalization is required are compared among methods mentioned previously.</p>
+<p>Let <span class="math inline">\(N\)</span> be the number of training
+instances and <span class="math inline">\(P\)</span> be the number of
+features. The performance, memory requirements, and whether
+normalization is required are compared among methods mentioned
+previously.</p>
 <table>
 <caption>Comparison of Gradient Descent Methods</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"><strong>Algorithm</strong></th>
 <th style="text-align: left;"><strong>Performance with Large <span class="math inline">\(N\)</span></strong></th>
-<th style="text-align: left;"><strong>Memory Space Requirements</strong></th>
+<th style="text-align: left;"><strong>Memory Space
+Requirements</strong></th>
 <th style="text-align: left;"><strong>Performance with Large <span class="math inline">\(P\)</span></strong></th>
-<th style="text-align: left;"><strong>Normalization Required?</strong></th>
+<th style="text-align: left;"><strong>Normalization
+Required?</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -429,14 +743,28 @@ window.addEventListener("DOMContentLoaded", () => {
 </tr>
 </tbody>
 </table>
-<p>Stochastic and Mini-batch GD perform fastest with large datasets due to incremental updates, while Normal Equation and Batch GD use more memory. The Normal Equation is slower when <span class="math inline">\(P\)</span> is large because of matrix inversion. Gradient Descent methods require normalization for faster convergence, but the Normal Equation does not.</p>
+<p>Stochastic and Mini-batch GD perform fastest with large datasets due
+to incremental updates, while Normal Equation and Batch GD use more
+memory. The Normal Equation is slower when <span class="math inline">\(P\)</span> is large because of matrix inversion.
+Gradient Descent methods require normalization for faster convergence,
+but the Normal Equation does not.</p>
 <h2 data-number="4.9" id="epoch-vs-iteration"><span class="header-section-number">4.9</span> Epoch vs Iteration</h2>
-<p>In training algorithms such as Gradient Descent, two commonly used terms are <strong>epoch</strong> and <strong>iteration</strong>. Although they are related, they describe different aspects of the learning process.</p>
-<p><strong>Epoch:</strong> An epoch refers to one complete pass through the <em>entire training dataset</em>. During one epoch, every training example has been used once for updating the model (either individually or as part of a batch).</p>
-<p><strong>Iteration:</strong> An iteration refers to a <em>single parameter update step</em>. The number of samples used in an iteration depends on the type of Gradient Descent being used.</p>
-<p>The relationship between epochs and iterations depends on whether Batch, Stochastic, or Mini-batch Gradient Descent is used.</p>
+<p>In training algorithms such as Gradient Descent, two commonly used
+terms are <strong>epoch</strong> and <strong>iteration</strong>.
+Although they are related, they describe different aspects of the
+learning process.</p>
+<p><strong>Epoch:</strong> An epoch refers to one complete pass through
+the <em>entire training dataset</em>. During one epoch, every training
+example has been used once for updating the model (either individually
+or as part of a batch).</p>
+<p><strong>Iteration:</strong> An iteration refers to a <em>single
+parameter update step</em>. The number of samples used in an iteration
+depends on the type of Gradient Descent being used.</p>
+<p>The relationship between epochs and iterations depends on whether
+Batch, Stochastic, or Mini-batch Gradient Descent is used.</p>
 <table>
-<caption>Relationship between Epochs and Iterations for different Gradient Descent methods</caption>
+<caption>Relationship between Epochs and Iterations for different
+Gradient Descent methods</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"></th>
@@ -448,62 +776,190 @@ window.addEventListener("DOMContentLoaded", () => {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><strong>In one iteration:</strong></td>
-<td style="text-align: left;">The gradient is computed using the entire dataset and one update step is performed.</td>
-<td style="text-align: left;">One randomly selected training sample is used to compute the gradient and update the parameters.</td>
-<td style="text-align: left;">A small subset (mini-batch) of size <span class="math inline">\(b\)</span> is used to compute the gradient and update the parameters.</td>
+<td style="text-align: left;">The gradient is computed using the entire
+dataset and one update step is performed.</td>
+<td style="text-align: left;">One randomly selected training sample is
+used to compute the gradient and update the parameters.</td>
+<td style="text-align: left;">A small subset (mini-batch) of size <span class="math inline">\(b\)</span> is used to compute the gradient and
+update the parameters.</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>An epoch completes:</strong></td>
-<td style="text-align: left;">After 1 iteration (since the full dataset is used each time).</td>
-<td style="text-align: left;">After <span class="math inline">\(N\)</span> iterations (when all <span class="math inline">\(N\)</span> samples have been used once on average).</td>
-<td style="text-align: left;">After <span class="math inline">\(\frac{N}{b}\)</span> iterations (when all mini-batches have been processed).</td>
+<td style="text-align: left;">After 1 iteration (since the full dataset
+is used each time).</td>
+<td style="text-align: left;">After <span class="math inline">\(N\)</span> iterations (when all <span class="math inline">\(N\)</span> samples have been used once on
+average).</td>
+<td style="text-align: left;">After <span class="math inline">\(\frac{N}{b}\)</span> iterations (when all
+mini-batches have been processed).</td>
 </tr>
 </tbody>
 </table>
 <h2 data-number="4.10" id="convergence"><span class="header-section-number">4.10</span> Convergence</h2>
-<p>Although Batch Gradient Descent (Batch GD), Stochastic Gradient Descent (SGD), and Mini-batch Gradient Descent differ in how they compute updates, they all aim to minimize the same loss function and typically move toward the same region of the parameter space. In practice, all three methods tend to end up <em>near</em> the minimum of the loss surface, meaning they reach a neighborhood where the loss is low and further improvements become small.</p>
-<p>However, their trajectories near the minimum look quite different. Batch GD computes the gradient using the <em>entire</em> training set at every step, so each update direction closely matches the true steepest descent direction. As a result, Batch GD usually follows a smooth, stable path and can settle at the minimum (or extremely close to it), with little to no oscillation once it arrives. The trade-off is that each step is computationally expensive: evaluating the full gradient requires processing all <span class="math inline">\(N\)</span> training examples, so Batch GD can be slow when the dataset is large.</p>
-<p>In contrast, SGD and Mini-batch GD use <em>approximate</em> gradients computed from one example (SGD) or a small batch (Mini-batch). This makes each update much cheaper and often allows faster progress early in training, especially for large datasets. The downside is that these gradient estimates contain noise, so the updates do not perfectly align with the true steepest descent direction. Consequently, instead of stopping cleanly at the minimum, SGD and Mini-batch GD typically continue to fluctuate or “jitter” around it. Importantly, this does not mean they fail to converge; with an appropriate learning rate schedule (for example, gradually decreasing the learning rate over time), the step sizes shrink, the oscillations become smaller, and both SGD and Mini-batch GD can converge to the minimum or very close to it.</p>
-<figure>
-<img alt="Visualization of Batch, Stochastic, and Mini-batch Gradient Descent convergence." id="fig:P1.png" src="img/lecture9/P1.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Visualization of Batch, Stochastic, and Mini-batch Gradient Descent convergence.</figcaption>
+<p>Although Batch Gradient Descent (Batch GD), Stochastic Gradient
+Descent (SGD), and Mini-batch Gradient Descent differ in how they
+compute updates, they all aim to minimize the same loss function and
+typically move toward the same region of the parameter space. In
+practice, all three methods tend to end up <em>near</em> the minimum of
+the loss surface, meaning they reach a neighborhood where the loss is
+low and further improvements become small.</p>
+<p>However, their trajectories near the minimum look quite different.
+Batch GD computes the gradient using the <em>entire</em> training set at
+every step, so each update direction closely matches the true steepest
+descent direction. As a result, Batch GD usually follows a smooth,
+stable path and can settle at the minimum (or extremely close to it),
+with little to no oscillation once it arrives. The trade-off is that
+each step is computationally expensive: evaluating the full gradient
+requires processing all <span class="math inline">\(N\)</span> training
+examples, so Batch GD can be slow when the dataset is large.</p>
+<p>In contrast, SGD and Mini-batch GD use <em>approximate</em> gradients
+computed from one example (SGD) or a small batch (Mini-batch). This
+makes each update much cheaper and often allows faster progress early in
+training, especially for large datasets. The downside is that these
+gradient estimates contain noise, so the updates do not perfectly align
+with the true steepest descent direction. Consequently, instead of
+stopping cleanly at the minimum, SGD and Mini-batch GD typically
+continue to fluctuate or “jitter” around it. Importantly, this does not
+mean they fail to converge; with an appropriate learning rate schedule
+(for example, gradually decreasing the learning rate over time), the
+step sizes shrink, the oscillations become smaller, and both SGD and
+Mini-batch GD can converge to the minimum or very close to it.</p>
+<figure id="fig:P1.png">
+<img src="img/lecture9/P1.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Visualization of Batch, Stochastic, and Mini-batch Gradient
+Descent convergence.</figcaption>
 </figure>
-<p>Convergence in Gradient Descent refers to the point at which further parameter updates produce negligible improvement in the objective function. In theory, one might say training stops when the loss becomes zero. In practice, this almost never occurs, especially in noisy or high-dimensional datasets.</p>
-<p>Instead, convergence is defined using a stopping criterion. A common approach is to monitor the magnitude of the gradient. When the gradient becomes sufficiently small,</p>
-<p><span class="math display">\[\|\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})\| &lt; \epsilon,\]</span></p>
-<p>we stop the optimization. The threshold <span class="math inline">\(\epsilon\)</span> is called the <strong>tolerance</strong>. It determines how close we require the solution to be to a stationary point.</p>
-<p>In machine learning, finding the exact minimizer of the training loss is not always desirable. Over-optimizing on the training data can reduce generalization performance. Therefore, stopping once the improvement becomes small often leads to better performance on unseen data (early stopping acts as a form of regularization).</p>
-<p>The behavior of convergence differs across Gradient Descent variants:</p>
-<p>Batch Gradient Descent follows the true gradient of the loss surface and, for convex problems, converges smoothly toward the minimum.</p>
-<p>Stochastic Gradient Descent (SGD) and Mini-batch Gradient Descent introduce noise into the gradient estimate. As a result, instead of settling exactly at the minimum, they typically oscillate around it. Learning rate schedules (decaying the learning rate over time) help reduce this oscillation and improve convergence.</p>
-<p>The learning rate <span class="math inline">\(\alpha\)</span> plays a critical role in convergence:</p>
+<p>Convergence in Gradient Descent refers to the point at which further
+parameter updates produce negligible improvement in the objective
+function. In theory, one might say training stops when the loss becomes
+zero. In practice, this almost never occurs, especially in noisy or
+high-dimensional datasets.</p>
+<p>Instead, convergence is defined using a stopping criterion. A common
+approach is to monitor the magnitude of the gradient. When the gradient
+becomes sufficiently small,</p>
+<p><span class="math display">\[\|\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})\| &lt; \epsilon,\]</span></p>
+<p>we stop the optimization. The threshold <span class="math inline">\(\epsilon\)</span> is called the
+<strong>tolerance</strong>. It determines how close we require the
+solution to be to a stationary point.</p>
+<p>In machine learning, finding the exact minimizer of the training loss
+is not always desirable. Over-optimizing on the training data can reduce
+generalization performance. Therefore, stopping once the improvement
+becomes small often leads to better performance on unseen data (early
+stopping acts as a form of regularization).</p>
+<p>The behavior of convergence differs across Gradient Descent
+variants:</p>
+<p>Batch Gradient Descent follows the true gradient of the loss surface
+and, for convex problems, converges smoothly toward the minimum.</p>
+<p>Stochastic Gradient Descent (SGD) and Mini-batch Gradient Descent
+introduce noise into the gradient estimate. As a result, instead of
+settling exactly at the minimum, they typically oscillate around it.
+Learning rate schedules (decaying the learning rate over time) help
+reduce this oscillation and improve convergence.</p>
+<p>The learning rate <span class="math inline">\(\alpha\)</span> plays a
+critical role in convergence:</p>
 <ul>
-<li><p>If <span class="math inline">\(\alpha\)</span> is too small, updates are tiny and convergence is very slow.</p></li>
-<li><p>If <span class="math inline">\(\alpha\)</span> is too large, the algorithm may overshoot the minimum, causing divergence or oscillation.</p></li>
+<li><p>If <span class="math inline">\(\alpha\)</span> is too small,
+updates are tiny and convergence is very slow.</p></li>
+<li><p>If <span class="math inline">\(\alpha\)</span> is too large, the
+algorithm may overshoot the minimum, causing divergence or
+oscillation.</p></li>
 </ul>
-<p>A properly chosen learning rate allows the algorithm to reach a neighborhood of the minimum efficiently.</p>
+<p>A properly chosen learning rate allows the algorithm to reach a
+neighborhood of the minimum efficiently.</p>
 <figure>
-<img alt="Different Gradient Descent methods converge toward the minimum but exhibit different trajectories" src="img/lecture8/Convergence%20(All).png" style="width:15.00%; max-width:15.00%; height:auto;"/><figcaption aria-hidden="true">Different Gradient Descent methods converge toward the minimum but exhibit different trajectories</figcaption>
+<img src="img/lecture8/Convergence%20(All).png" style="width:15.00%; max-width:15.00%; height:auto;"/>
+<figcaption>Different Gradient Descent methods converge toward the
+minimum but exhibit different trajectories</figcaption>
 </figure>
 <h2 data-number="4.11" id="pitfalls"><span class="header-section-number">4.11</span> Pitfalls</h2>
-<p>Gradient Descent methods work well in many settings, but several practical challenges can affect convergence and solution quality.</p>
-<p>First, the shape of the loss surface plays an important role. For linear regression, the loss is convex and contains a single global minimum. However, in many modern machine learning models (especially neural networks), the loss is non-convex and contains multiple local minima and saddle points. Depending on initialization, the algorithm may converge to different solutions.</p>
-<p>Second, optimization dynamics influence behavior. Batch Gradient Descent follows the exact gradient and can become trapped near flat regions or saddle points. Stochastic and Mini-batch Gradient Descent introduce noise into the updates, which can help the algorithm move away from saddle points and explore the loss surface more effectively. However, this noise also makes convergence more erratic.</p>
-<p>Third, the learning rate is critical. A very small learning rate leads to extremely slow convergence, while a very large learning rate can cause divergence or oscillations. Choosing an appropriate learning rate (or using adaptive learning rate methods) is essential.</p>
-<p>Another common issue is poor feature scaling. If features have very different magnitudes, the loss surface becomes elongated, causing Gradient Descent to zig-zag and converge slowly. Normalization or standardization significantly improves convergence.</p>
-<p>Finally, numerical issues can arise when features are highly correlated, making the problem ill-conditioned. This leads to unstable updates and slow progress.</p>
-<p>Understanding these pitfalls helps in selecting the right optimization strategy and preprocessing steps for reliable training.<br/>
+<p>Gradient Descent methods work well in many settings, but several
+practical challenges can affect convergence and solution quality.</p>
+<p>First, the shape of the loss surface plays an important role. For
+linear regression, the loss is convex and contains a single global
+minimum. However, in many modern machine learning models (especially
+neural networks), the loss is non-convex and contains multiple local
+minima and saddle points. Depending on initialization, the algorithm may
+converge to different solutions.</p>
+<p>Second, optimization dynamics influence behavior. Batch Gradient
+Descent follows the exact gradient and can become trapped near flat
+regions or saddle points. Stochastic and Mini-batch Gradient Descent
+introduce noise into the updates, which can help the algorithm move away
+from saddle points and explore the loss surface more effectively.
+However, this noise also makes convergence more erratic.</p>
+<p>Third, the learning rate is critical. A very small learning rate
+leads to extremely slow convergence, while a very large learning rate
+can cause divergence or oscillations. Choosing an appropriate learning
+rate (or using adaptive learning rate methods) is essential.</p>
+<p>Another common issue is poor feature scaling. If features have very
+different magnitudes, the loss surface becomes elongated, causing
+Gradient Descent to zig-zag and converge slowly. Normalization or
+standardization significantly improves convergence.</p>
+<p>Finally, numerical issues can arise when features are highly
+correlated, making the problem ill-conditioned. This leads to unstable
+updates and slow progress.</p>
+<p>Understanding these pitfalls helps in selecting the right
+optimization strategy and preprocessing steps for reliable
+training.<br/>
 </p>
 <h2 data-number="4.12" id="learning-rate-schedulers"><span class="header-section-number">4.12</span> Learning Rate Schedulers</h2>
-<p>Previously, we’ve emphasized the critical role of selecting a good learning rate in the success of Gradient Descent. The learning rate controls how large the step is that we take in the direction of the negative gradient. If the learning rate is too small, gradient descent may converge too slowly, while a large learning rate may cause the algorithm to overshoot the minimum or oscillate around it, potentially never converging.</p>
-<p>Hence, in practice, using a fixed learning rate may not always be the best approach. The optimal learning rate can vary over the course of the optimization process. Early in training, larger learning rates encourage exploration of the loss surface, while later smaller learning rates allow fine-grained convergence near minima. For this reason we rely on <em>learning rate schedulers</em>, which are strategies for generating dynamic learning rates. The following are some standard learning rate schedulers:</p>
+<p>Previously, we’ve emphasized the critical role of selecting a good
+learning rate in the success of Gradient Descent. The learning rate
+controls how large the step is that we take in the direction of the
+negative gradient. If the learning rate is too small, gradient descent
+may converge too slowly, while a large learning rate may cause the
+algorithm to overshoot the minimum or oscillate around it, potentially
+never converging.</p>
+<p>Hence, in practice, using a fixed learning rate may not always be the
+best approach. The optimal learning rate can vary over the course of the
+optimization process. Early in training, larger learning rates encourage
+exploration of the loss surface, while later smaller learning rates
+allow fine-grained convergence near minima. For this reason we rely on
+<em>learning rate schedulers</em>, which are strategies for generating
+dynamic learning rates. The following are some standard learning rate
+schedulers:</p>
 <h4 data-number="4.12.0.1" id="linear-decay"><span class="header-section-number">4.12.0.1</span> 1. Linear Decay:</h4>
-<p>In Linear Decay, the learning rate decreases by a fixed amount at each iteration: <span class="math display">\[\alpha(t) = \alpha_0 - \eta \cdot t\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate, and <span class="math inline">\(\eta\)</span> is the decay rate (e.g., <span class="math inline">\(0.01\)</span>). The learning rate decreases linearly with each iteration, making it a simple approach for controlling the learning rate. In practice, linear decay is often clipped to a minimum value to prevent the learning rate from becoming negative.</p>
+<p>In Linear Decay, the learning rate decreases by a fixed amount at
+each iteration: <span class="math display">\[\alpha(t) = \alpha_0 - \eta
+\cdot t\]</span> where <span class="math inline">\(\alpha_0\)</span> is
+the initial learning rate, and <span class="math inline">\(\eta\)</span>
+is the decay rate (e.g., <span class="math inline">\(0.01\)</span>). The
+learning rate decreases linearly with each iteration, making it a simple
+approach for controlling the learning rate. In practice, linear decay is
+often clipped to a minimum value to prevent the learning rate from
+becoming negative.</p>
 <h4 data-number="4.12.0.2" id="step-decay"><span class="header-section-number">4.12.0.2</span> 2. Step Decay:</h4>
-<p>In Step Decay, the learning rate decreases by a fixed factor at specific intervals, which are usually predefined based on the number of epochs or iterations. The learning rate remains constant for a certain number of iterations, and then suddenly drops: <span class="math display">\[\alpha(t) = \alpha_0 \cdot \gamma^{\left\lfloor \frac{t}{T} \right\rfloor}\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate, <span class="math inline">\(\gamma\)</span> is the decay factor (e.g. <span class="math inline">\(0.5\)</span>), and <span class="math inline">\(T\)</span> is the number of iterations between each step (e.g. <span class="math inline">\(10\)</span>). This scheduler is simple to implement and provides sudden reductions in learning rate, which can be helpful for escaping plateaus in the loss landscape.</p>
+<p>In Step Decay, the learning rate decreases by a fixed factor at
+specific intervals, which are usually predefined based on the number of
+epochs or iterations. The learning rate remains constant for a certain
+number of iterations, and then suddenly drops: <span class="math display">\[\alpha(t) = \alpha_0 \cdot \gamma^{\left\lfloor
+\frac{t}{T} \right\rfloor}\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate,
+<span class="math inline">\(\gamma\)</span> is the decay factor (e.g.
+<span class="math inline">\(0.5\)</span>), and <span class="math inline">\(T\)</span> is the number of iterations between
+each step (e.g. <span class="math inline">\(10\)</span>). This scheduler
+is simple to implement and provides sudden reductions in learning rate,
+which can be helpful for escaping plateaus in the loss landscape.</p>
 <h4 data-number="4.12.0.3" id="exponential-decay"><span class="header-section-number">4.12.0.3</span> 3. Exponential Decay:</h4>
-<p>In Exponential Decay, the learning rate decreases at every iteration according to an exponential function: <span class="math display">\[\alpha(t) = \alpha_0 \cdot e^{-\lambda t}\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate and <span class="math inline">\(\lambda\)</span> is the decay rate (e.g., <span class="math inline">\(0.01\)</span>), controlling how quickly the learning rate decreases. This scheduler provides a smooth and continuous reduction in the learning rate over time, making it a common choice when steady convergence is preferred.</p>
+<p>In Exponential Decay, the learning rate decreases at every iteration
+according to an exponential function: <span class="math display">\[\alpha(t) = \alpha_0 \cdot e^{-\lambda
+t}\]</span> where <span class="math inline">\(\alpha_0\)</span> is the
+initial learning rate and <span class="math inline">\(\lambda\)</span>
+is the decay rate (e.g., <span class="math inline">\(0.01\)</span>),
+controlling how quickly the learning rate decreases. This scheduler
+provides a smooth and continuous reduction in the learning rate over
+time, making it a common choice when steady convergence is
+preferred.</p>
 <h4 data-number="4.12.0.4" id="cosine-annealing"><span class="header-section-number">4.12.0.4</span> 4. Cosine Annealing:</h4>
-<p>In Cosine Annealing, the learning rate follows a cosine curve over time: <span class="math display">\[\alpha(t) = \frac{\alpha_0}{2} \left(1 + \cos\left(\frac{t \pi}{T}\right)\right)\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate and <span class="math inline">\(T\)</span> is the total number of iterations. Cosine Annealing gradually reduces the learning rate in a cosine pattern, allowing for larger learning rates early in the optimization and smaller rates as convergence approaches. The cosine schedule can also be extended with restarts to allow for periodic exploration, which can help the optimizer escape shallow local minima, saddle points, or flat plateaus, or be reformulated to allow for a nonzero minimum learning rate.</p>
+<p>In Cosine Annealing, the learning rate follows a cosine curve over
+time: <span class="math display">\[\alpha(t) = \frac{\alpha_0}{2}
+\left(1 + \cos\left(\frac{t \pi}{T}\right)\right)\]</span> where <span class="math inline">\(\alpha_0\)</span> is the initial learning rate and
+<span class="math inline">\(T\)</span> is the total number of
+iterations. Cosine Annealing gradually reduces the learning rate in a
+cosine pattern, allowing for larger learning rates early in the
+optimization and smaller rates as convergence approaches. The cosine
+schedule can also be extended with restarts to allow for periodic
+exploration, which can help the optimizer escape shallow local minima,
+saddle points, or flat plateaus, or be reformulated to allow for a
+nonzero minimum learning rate.</p>
 
 </main>
 </body>

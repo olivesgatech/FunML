@@ -109,49 +109,102 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>Last lecture, we reviewed Naïve Bayes before covering Linear Classifiers and Logistic Regression. In this lecture we will summarize and finish talking about Logistic Regression, briefly provide a high-level overview of Decision Trees, and talk about Support Vector Machines (SVMs). The main focus of this lecture will be on SVMs.</p>
+<p>Last lecture, we reviewed Naïve Bayes before covering Linear
+Classifiers and Logistic Regression. In this lecture we will summarize
+and finish talking about Logistic Regression, briefly provide a
+high-level overview of Decision Trees, and talk about Support Vector
+Machines (SVMs). The main focus of this lecture will be on SVMs.</p>
 <h1 data-number="2" id="logistic-regression"><span class="header-section-number">2.</span> Logistic Regression</h1>
 <h2 data-number="2.1" id="summary"><span class="header-section-number">2.1</span> Summary</h2>
-<p>Last time we covered Logistic Regression, which is a <strong>parametric model</strong>. The reason why it is a parametric model is because you have access to parameters w (weight) and b (bias). These are parameters that you have defined that you must learn with the help of a loss function.<br/>
+<p>Last time we covered Logistic Regression, which is a
+<strong>parametric model</strong>. The reason why it is a parametric
+model is because you have access to parameters w (weight) and b (bias).
+These are parameters that you have defined that you must learn with the
+help of a loss function.<br/>
 Definition:</p>
 <ul>
-<li><p>Given feature vector <span class="math inline">\(\mathbf{x} = [x_1, \dots, x_p]^T\)</span>, the logistic regression classifier estimates the <strong>posterior</strong> <span class="math inline">\(P(y \mid \mathbf{x})\)</span> with <strong>sigmoid function</strong> <span class="math inline">\(\sigma(\mathbf{z})\)</span>: <span class="math display">\[\begin{aligned}
+<li><p>Given feature vector <span class="math inline">\(\mathbf{x} =
+[x_1, \dots, x_p]^T\)</span>, the logistic regression classifier
+estimates the <strong>posterior</strong> <span class="math inline">\(P(y
+\mid \mathbf{x})\)</span> with <strong>sigmoid function</strong> <span class="math inline">\(\sigma(\mathbf{z})\)</span>: <span class="math display">\[\begin{aligned}
         \mathbf{z} = \mathbf{w}^T \mathbf{x} + b \\
         P(y = 1 \mid \mathbf{x}) &amp;= \sigma(\mathbf{z}) \\
-        P(y = 0 \mid \mathbf{x}) &amp;= 1 - \sigma(\mathbf{z}) 
-    \end{aligned}\]</span> where <span class="math inline">\(\mathbf{w} = [w_1, \dots, w_p]^T\)</span> is <strong>weight</strong>, and <span class="math inline">\(b\)</span> is <strong>bias</strong>.</p></li>
+        P(y = 0 \mid \mathbf{x}) &amp;= 1 - \sigma(\mathbf{z})
+    
+\end{aligned}\]</span> where <span class="math inline">\(\mathbf{w} =
+[w_1, \dots, w_p]^T\)</span> is <strong>weight</strong>, and <span class="math inline">\(b\)</span> is <strong>bias</strong>.</p></li>
 <li><p>Sigmoid function: <span class="math display">\[\begin{aligned}
         \sigma(z) &amp;= \frac{1}{1 + e^{-z}}.
-    \end{aligned}\]</span> Based on the data, we adjust the shape and horizontal position of the sigmoid function by learning the weight vector <span class="math inline">\(\mathbf{w}\)</span> and bias <span class="math inline">\(b\)</span>.</p>
+    
+\end{aligned}\]</span> Based on the data, we adjust the shape and
+horizontal position of the sigmoid function by learning the weight
+vector <span class="math inline">\(\mathbf{w}\)</span> and bias <span class="math inline">\(b\)</span>.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Generalized Sigmoid Function</h3><p>Adjust scale a, slope b, and shift x0 in a/(1+e^{-b(x-x0)}) to see how the sigmoid changes.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/generalized_sigmoid_interactive.html" style="height:760px;" title="Interactive Generalized Sigmoid Function Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fgeneralized_sigmoid_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
-<li><p>Ultimately, the decision boundary of logistic regression corresponds to the <strong>hyperplane</strong> <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>, which separates the data in feature space.</p></li>
+<li><p>Ultimately, the decision boundary of logistic regression
+corresponds to the <strong>hyperplane</strong> <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>, which
+separates the data in feature space.</p></li>
 <li><p>Simple Classification Rule: <span class="math display">\[y =
       \begin{cases}
         1     &amp; P(y = 1|x) &gt; 0.5, \\
         0 &amp; \textit{otherwise}.
-      \end{cases}\]</span> This is an example of a simple classification rule based on simple data grouped at <span class="math inline">\(y = 0\)</span> and <span class="math inline">\(y = 1\)</span>. In this case, thresholding at 0.5 corresponds to the hyperplane <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>.</p>
+      \end{cases}\]</span> This is an example of a simple classification
+rule based on simple data grouped at <span class="math inline">\(y =
+0\)</span> and <span class="math inline">\(y = 1\)</span>. In this case,
+thresholding at 0.5 corresponds to the hyperplane <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>.</p>
 <div class="intuitionbox">
-<p><strong>Key intuition.</strong> Logistic regression is a <em>linear classifier</em> in feature space: it predicts using the sign of <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> and then converts that score into a probability using the sigmoid. The value <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> is a <em>signed distance-like score</em>: it increases when <span class="math inline">\(\mathbf{x}\)</span> moves in the direction of <span class="math inline">\(\mathbf{w}\)</span>, and decreases when moving opposite to <span class="math inline">\(\mathbf{w}\)</span>. Feature normalization matters because rescaling one feature changes how much it contributes to this score.</p>
+<p><strong>Key intuition.</strong> Logistic regression is a <em>linear
+classifier</em> in feature space: it predicts using the sign of <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> and then
+converts that score into a probability using the sigmoid. The value
+<span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> is a
+<em>signed distance-like score</em>: it increases when <span class="math inline">\(\mathbf{x}\)</span> moves in the direction of
+<span class="math inline">\(\mathbf{w}\)</span>, and decreases when
+moving opposite to <span class="math inline">\(\mathbf{w}\)</span>.
+Feature normalization matters because rescaling one feature changes how
+much it contributes to this score.</p>
 </div></li>
-<li><p>The overall negative log-likelihood (NLL) cost function, also known as the <strong>cross-entropy loss</strong> for logistic regression, is given by: <span class="math display">\[LL(\mathbf{x}, y)
+<li><p>The overall negative log-likelihood (NLL) cost function, also
+known as the <strong>cross-entropy loss</strong> for logistic
+regression, is given by: <span class="math display">\[LL(\mathbf{x}, y)
     = -\frac{1}{N}\sum_{i=1}^{N}
     \Big[
     y_i \log \hat{p}_i
     + (1-y_i)\log(1-\hat{p}_i)
-    \Big],\]</span> where <span class="math display">\[\hat{p}_i = \sigma(\mathbf{w}^T\mathbf{x}_i + b)\]</span> is the model’s predicted probability that the <span class="math inline">\(i\)</span>-th sample belongs to class <span class="math inline">\(y=1\)</span>, <span class="math inline">\(N\)</span> is the number of training samples, and <span class="math inline">\(y_i\in\{0,1\}\)</span> is the true label.</p>
-<p>This loss function penalizes confident but incorrect predictions and is commonly referred to as the <strong>Binary Cross Entropy (BCE)</strong> loss in binary classification settings.</p></li>
-<li><p>We learned the loss function from a gradient descent algorithm: <span class="math display">\[\theta = \{w,b\}\]</span> <span class="math display">\[\theta(t + 1) = \theta(t) - \alpha\frac{\partial{LL(x,y,\theta)}}{\partial\theta}\]</span> With t representing time, at every instance we are able to move onto a new set of parameters by following a very simple rule: Some gradient of LL (personalized loss function) with respect to a parameter alpha. This parameter is defined as a step size or learning rate, which will be covered later in the course.</p></li>
+    \Big],\]</span> where <span class="math display">\[\hat{p}_i =
+\sigma(\mathbf{w}^T\mathbf{x}_i + b)\]</span> is the model’s predicted
+probability that the <span class="math inline">\(i\)</span>-th sample
+belongs to class <span class="math inline">\(y=1\)</span>, <span class="math inline">\(N\)</span> is the number of training samples, and
+<span class="math inline">\(y_i\in\{0,1\}\)</span> is the true
+label.</p>
+<p>This loss function penalizes confident but incorrect predictions and
+is commonly referred to as the <strong>Binary Cross Entropy
+(BCE)</strong> loss in binary classification settings.</p></li>
+<li><p>We learned the loss function from a gradient descent algorithm:
+<span class="math display">\[\theta = \{w,b\}\]</span> <span class="math display">\[\theta(t + 1) = \theta(t) -
+\alpha\frac{\partial{LL(x,y,\theta)}}{\partial\theta}\]</span> With t
+representing time, at every instance we are able to move onto a new set
+of parameters by following a very simple rule: Some gradient of LL
+(personalized loss function) with respect to a parameter alpha. This
+parameter is defined as a step size or learning rate, which will be
+covered later in the course.</p></li>
 </ul>
-<h2 data-number="2.2" id="example-sentiment-classification"><span class="header-section-number">2.2</span> Example: Sentiment Classification</h2>
-<p>Let’s assume we want to predict the binary sentiment for the following movie review:<br/>
+<h2 data-number="2.2" id="example-sentiment-classification"><span class="header-section-number">2.2</span> Example: Sentiment
+Classification</h2>
+<p>Let’s assume we want to predict the binary sentiment for the
+following movie review:<br/>
  <br/>
-<strong>Input:</strong> “It’s hokey. There are virtually no surprises, and the writing is second-rate. So why was it so enjoyable? For one thing, the cast is great. Another nice touch is the music. I was overcome with the urge to get off the couch and start dancing. It sucked me in, and it’ll do the same to you.”<br/>
+<strong>Input:</strong> “It’s hokey. There are virtually no surprises,
+and the writing is second-rate. So why was it so enjoyable? For one
+thing, the cast is great. Another nice touch is the music. I was
+overcome with the urge to get off the couch and start dancing. It sucked
+me in, and it’ll do the same to you.”<br/>
  <br/>
 <strong>Output:</strong> positive (1) or negative (0)<br/>
  <br/>
-The goal of a Machine Learning algorithm is to classify whether this person liked the movie or not.<br/>
+The goal of a Machine Learning algorithm is to classify whether this
+person liked the movie or not.<br/>
  <br/>
-Let’s start by assuming that the sentiment is represented by 6 features: <span class="math inline">\(\mathbf{x} = [x_1, \dots, x_6]\)</span></p>
+Let’s start by assuming that the sentiment is represented by 6 features:
+<span class="math inline">\(\mathbf{x} = [x_1, \dots, x_6]\)</span></p>
 <div class="center">
 <table>
 <thead>
@@ -203,48 +256,102 @@ Let’s start by assuming that the sentiment is represented by 6 features: <span
 </div>
 <p>These features are intuitive:</p>
 <ul>
-<li><p>reviews with lots of positive words are written by those who enjoy the movie, vice-versa for negative words</p></li>
+<li><p>reviews with lots of positive words are written by those who
+enjoy the movie, vice-versa for negative words</p></li>
 <li><p>the word "no" in a review might entail negativity</p></li>
-<li><p>reviews with lots of pronouns come from reviewers writing in first-person - which shows how much they liked the movie</p></li>
-<li><p>usage of exclamation marks also has a positive connotation</p></li>
+<li><p>reviews with lots of pronouns come from reviewers writing in
+first-person - which shows how much they liked the movie</p></li>
+<li><p>usage of exclamation marks also has a positive
+connotation</p></li>
 <li><p>lengthy reviews tend to be good<br/>
 </p></li>
 </ul>
-<p>Let’s assume the weights and bias are: <span class="math display">\[\mathbf{w} = [w_1, \dots, w_6]^T = [2.5,-5.0,-1.2,0.5,2.0,0.7]^T\]</span> <span class="math display">\[\mathbf{b} = 0.1\]</span> Thus,</p>
+<p>Let’s assume the weights and bias are: <span class="math display">\[\mathbf{w} = [w_1, \dots, w_6]^T =
+[2.5,-5.0,-1.2,0.5,2.0,0.7]^T\]</span> <span class="math display">\[\mathbf{b} = 0.1\]</span> Thus,</p>
 <div class="flalign*">
 <p>P( = 1|x) &amp;= (w^Tx + b)&amp;<br/>
 &amp;= ([2.5,-5.0,-1.2,0.5,2.0,0.7]^T[3,2,1,3,0,4.025]+0.1)&amp;<br/>
 &amp;= 0.67&amp;<br/>
 P( = 0|x) &amp;= 1 - (w^Tx + b) = 0.33&amp;</p>
 </div>
-<p>It’s important to note that the weights and biases are already given in this test scenario. Ideally these weights and bias values are learned during training over thousands of reviews. The polarity of a weight indicates for which class (1 or 0) this feature is important for.</p>
+<p>It’s important to note that the weights and biases are already given
+in this test scenario. Ideally these weights and bias values are learned
+during training over thousands of reviews. The polarity of a weight
+indicates for which class (1 or 0) this feature is important for.</p>
 <div class="examplebox">
-<p><strong>Example.</strong> Suppose we only keep two features: <span class="math inline">\(x_1=\)</span> “positive word count” and <span class="math inline">\(x_2=\)</span> “negative word count”. Let <span class="math inline">\(\mathbf{w}=[1,-2]^T\)</span> and <span class="math inline">\(b=0\)</span>. For a review with <span class="math inline">\((x_1,x_2)=(3,1)\)</span>, the logit is <span class="math inline">\(z=\mathbf{w}^T\mathbf{x}+b = 1\cdot 3 + (-2)\cdot 1 = 1\)</span>, so <span class="math inline">\(\sigma(z)\approx 0.73\)</span> and we predict a positive sentiment. If we instead scale <span class="math inline">\(x_2\)</span> by a factor of 10 (e.g., due to inconsistent units), then the same review becomes <span class="math inline">\((3,10)\)</span> and <span class="math inline">\(z=3-20=-17\)</span>, giving <span class="math inline">\(\sigma(z)\approx 0\)</span>. This illustrates why normalization/standardization can be critical.</p>
+<p><strong>Example.</strong> Suppose we only keep two features: <span class="math inline">\(x_1=\)</span> “positive word count” and <span class="math inline">\(x_2=\)</span> “negative word count”. Let <span class="math inline">\(\mathbf{w}=[1,-2]^T\)</span> and <span class="math inline">\(b=0\)</span>. For a review with <span class="math inline">\((x_1,x_2)=(3,1)\)</span>, the logit is <span class="math inline">\(z=\mathbf{w}^T\mathbf{x}+b = 1\cdot 3 + (-2)\cdot
+1 = 1\)</span>, so <span class="math inline">\(\sigma(z)\approx
+0.73\)</span> and we predict a positive sentiment. If we instead scale
+<span class="math inline">\(x_2\)</span> by a factor of 10 (e.g., due to
+inconsistent units), then the same review becomes <span class="math inline">\((3,10)\)</span> and <span class="math inline">\(z=3-20=-17\)</span>, giving <span class="math inline">\(\sigma(z)\approx 0\)</span>. This illustrates why
+normalization/standardization can be critical.</p>
 </div>
-<h2 data-number="2.3" id="classifier-comparison-table"><span class="header-section-number">2.3</span> Classifier Comparison Table</h2>
-<p>In the table above, there are several columns for each method we will cover in class:</p>
+<h2 data-number="2.3" id="classifier-comparison-table"><span class="header-section-number">2.3</span> Classifier Comparison
+Table</h2>
+<p>In the table above, there are several columns for each method we will
+cover in class:</p>
 <ul>
-<li><p><strong>Assumptions on Feature Distance:</strong> In most cases, we have not made any assumptions on the types of features except in Naïve Bayes. In Naïve Bayes, features are assumed to be conditionally independent in order to take the joint probability and marginalize it into two separate probabilities.</p></li>
-<li><p><strong>Feature Normalization:</strong> Required in most cases, with Decision Trees and Naïve Bayes being the main exceptions. In models like Logistic Regression and SVMs, feature scales directly affect the learned weights and the margin, so it is important to normalize the inputs. Common approaches include <em>z-score standardization</em> (subtract the mean and divide by the standard deviation) and <em>min–max scaling</em> (rescale features to a fixed range such as <span class="math inline">\([0,1]\)</span>). <em>Softmax</em>, in contrast, is typically applied to model scores (logits) to convert them into a probability distribution, rather than to normalize raw input features.</p></li>
-<li><p><strong>Cost Function:</strong> Also known as the loss function. Logistic Regression uses BCE (Binary Cross Entropy Loss).</p></li>
-<li><p><strong>Regularization:</strong> Not covered much in lecture, there will be a homework problem going over this topic in depth.</p></li>
-<li><p><strong>Linear Classifier:</strong> This will be more clear when we cover Non-linear classifiers in later lectures.</p></li>
-<li><p><strong>Probabilistic View of Prediction:</strong> This is present in Logistic Regression (<span class="math inline">\(P(y|x)\)</span>) as well as Naïve Bayes having a probabilistic distribution that we make assumptions on.</p></li>
-<li><p><strong>Generative/Discriminative:</strong> Almost everything that we will look at in classification will be discriminative, the exception being Naïve Bayes. The difference between discriminative and generative will be elaborated on later in the course. For now, discriminative can be thought of as having a goal to classify data, while generative seeks to understand the probability distribution of data coming in to create new data (e.g. ChatGPT, DALL-E).</p></li>
-<li><p><strong>Parametric/Non-parametric:</strong> If there is any kind of parameter involved with the framework (e.g. w, b) then it is parametric.</p></li>
-<li><p><strong>Overfitting:</strong> We will discuss this in detail when we cover Neural Networks.</p></li>
+<li><p><strong>Assumptions on Feature Distance:</strong> In most cases,
+we have not made any assumptions on the types of features except in
+Naïve Bayes. In Naïve Bayes, features are assumed to be conditionally
+independent in order to take the joint probability and marginalize it
+into two separate probabilities.</p></li>
+<li><p><strong>Feature Normalization:</strong> Required in most cases,
+with Decision Trees and Naïve Bayes being the main exceptions. In models
+like Logistic Regression and SVMs, feature scales directly affect the
+learned weights and the margin, so it is important to normalize the
+inputs. Common approaches include <em>z-score standardization</em>
+(subtract the mean and divide by the standard deviation) and <em>min–max
+scaling</em> (rescale features to a fixed range such as <span class="math inline">\([0,1]\)</span>). <em>Softmax</em>, in contrast, is
+typically applied to model scores (logits) to convert them into a
+probability distribution, rather than to normalize raw input
+features.</p></li>
+<li><p><strong>Cost Function:</strong> Also known as the loss function.
+Logistic Regression uses BCE (Binary Cross Entropy Loss).</p></li>
+<li><p><strong>Regularization:</strong> Not covered much in lecture,
+there will be a homework problem going over this topic in
+depth.</p></li>
+<li><p><strong>Linear Classifier:</strong> This will be more clear when
+we cover Non-linear classifiers in later lectures.</p></li>
+<li><p><strong>Probabilistic View of Prediction:</strong> This is
+present in Logistic Regression (<span class="math inline">\(P(y|x)\)</span>) as well as Naïve Bayes having a
+probabilistic distribution that we make assumptions on.</p></li>
+<li><p><strong>Generative/Discriminative:</strong> Almost everything
+that we will look at in classification will be discriminative, the
+exception being Naïve Bayes. The difference between discriminative and
+generative will be elaborated on later in the course. For now,
+discriminative can be thought of as having a goal to classify data,
+while generative seeks to understand the probability distribution of
+data coming in to create new data (e.g. ChatGPT, DALL-E).</p></li>
+<li><p><strong>Parametric/Non-parametric:</strong> If there is any kind
+of parameter involved with the framework (e.g. w, b) then it is
+parametric.</p></li>
+<li><p><strong>Overfitting:</strong> We will discuss this in detail when
+we cover Neural Networks.</p></li>
 </ul>
-<p>Logistic regression finds a separating hyperplane by maximizing likelihood (equivalently minimizing cross-entropy). While this often yields good accuracy, there can be many hyperplanes with similar training accuracy. SVMs introduce a different principle: among all separating hyperplanes, prefer the one with the <em>largest geometric margin</em>, which tends to improve robustness and generalization. We will discuss this further in section 4.4.</p>
+<p>Logistic regression finds a separating hyperplane by maximizing
+likelihood (equivalently minimizing cross-entropy). While this often
+yields good accuracy, there can be many hyperplanes with similar
+training accuracy. SVMs introduce a different principle: among all
+separating hyperplanes, prefer the one with the <em>largest geometric
+margin</em>, which tends to improve robustness and generalization. We
+will discuss this further in section 4.4.</p>
 <h1 data-number="3" id="decision-trees"><span class="header-section-number">3.</span> Decision Trees</h1>
 <h2 data-number="3.1" id="overview"><span class="header-section-number">3.1</span> Overview</h2>
-<p>We will not look at decision trees in this course, you just need to know it exists. Decision trees are essentially if-else statements. The classification model has a tree-like structure that mimics rule-based human reasoning, and they can be used for both classification and regression.</p>
-<h2 data-number="3.2" id="example-weather-condition-case-study-from-lecture-2"><span class="header-section-number">3.2</span> Example: Weather Condition Case Study from Lecture 2</h2>
-<p>Recall this example from Lecture 2 where given several weather features, we were able to decide on whether you were allowed to play or not. Based on that information, you can create a decision tree.<br/>
+<p>We will not look at decision trees in this course, you just need to
+know it exists. Decision trees are essentially if-else statements. The
+classification model has a tree-like structure that mimics rule-based
+human reasoning, and they can be used for both classification and
+regression.</p>
+<h2 data-number="3.2" id="example-weather-condition-case-study-from-lecture-2"><span class="header-section-number">3.2</span> Example: Weather Condition Case
+Study from Lecture 2</h2>
+<p>Recall this example from Lecture 2 where given several weather
+features, we were able to decide on whether you were allowed to play or
+not. Based on that information, you can create a decision tree.<br/>
  <br/>
 </p>
-<figure>
-<img alt="Final decision tree computed based on the dataset" id="tab:decisiontree2" src="img/lecture4/tree_outlook.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Final decision tree computed based on the dataset</figcaption>
-</figure>
+<figure id="tab:decisiontree2">
+<img src="img/lecture4/tree_outlook.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
 <table>
 <thead>
 <tr class="header">
@@ -356,12 +463,23 @@ P( = 0|x) &amp;= 1 - (w^Tx + b) = 0.33&amp;</p>
 </tr>
 </tbody>
 </table>
-<p><span id="tab:decisiontree2" label="tab:decisiontree2">[tab:decisiontree2]</span></p>
-<p>The main difficulty in creating decision trees is knowing which variables are independent or non-independent. In this example, you can see that humidity is dependent on if it is sunny, and windy is dependent on if it is rainy. You can also see how your end result is independent of both humidity and windy if outlook is overcast.<br/>
+<p><span id="tab:decisiontree2" label="tab:decisiontree2"></span></p>
+<figcaption>Final decision tree computed based on the
+dataset</figcaption>
+</figure>
+<p>The main difficulty in creating decision trees is knowing which
+variables are independent or non-independent. In this example, you can
+see that humidity is dependent on if it is sunny, and windy is dependent
+on if it is rainy. You can also see how your end result is independent
+of both humidity and windy if outlook is overcast.<br/>
 </p>
-<h1 data-number="4" id="support-vector-machines-svms"><span class="header-section-number">4.</span> Support Vector Machines (SVMs)</h1>
+<h1 data-number="4" id="support-vector-machines-svms"><span class="header-section-number">4.</span> Support Vector Machines
+(SVMs)</h1>
 <h2 data-number="4.1" id="overview-1"><span class="header-section-number">4.1</span> Overview</h2>
-<p>SVMs were one of the most researched topics back in the 1990’s and 2000’s due to the very nice mathematical theory behind it - it offers a good theoretical understanding of what the properties of classifiers are.<br/>
+<p>SVMs were one of the most researched topics back in the 1990’s and
+2000’s due to the very nice mathematical theory behind it - it offers a
+good theoretical understanding of what the properties of classifiers
+are.<br/>
  <br/>
 SVM Topics:</p>
 <ul>
@@ -371,88 +489,282 @@ SVM Topics:</p>
 <li><p>Support Vector Machines</p></li>
 <li><p>Advantages and Disadvantages</p></li>
 </ul>
-<h2 data-number="4.2" id="linear-separating-hyperplanes"><span class="header-section-number">4.2</span> Linear Separating Hyperplanes</h2>
-<p>If we have one-dimensional data, the simplest classifier is a single point (a threshold) on the real line. For two-dimensional data, the classifier is a line that separates points in the plane. For three-dimensional data, the classifier becomes a plane that separates points in space. This pattern continues in higher dimensions: for data in a <span class="math inline">\(P\)</span>-dimensional feature space, the decision boundary is a <span class="math inline">\((P-1)\)</span>-dimensional object called a <strong>hyperplane</strong>.</p>
-<p>Assume our feature space is <span class="math inline">\(P\)</span>-dimensional. A linear classifier in this space is represented by a <strong>hyperplane</strong>, which generalizes a line in 2D and a plane in 3D to higher dimensions. Given a feature vector <span class="math inline">\(\mathbf{x} = [x_1, x_2, \dots, x_P]^T \in \mathbb{R}^P\)</span>, we define a separating hyperplane by the equation <span class="math display">\[b + w_1x_1 + \cdots + w_Px_P = 0,
+<h2 data-number="4.2" id="linear-separating-hyperplanes"><span class="header-section-number">4.2</span> Linear Separating
+Hyperplanes</h2>
+<p>If we have one-dimensional data, the simplest classifier is a single
+point (a threshold) on the real line. For two-dimensional data, the
+classifier is a line that separates points in the plane. For
+three-dimensional data, the classifier becomes a plane that separates
+points in space. This pattern continues in higher dimensions: for data
+in a <span class="math inline">\(P\)</span>-dimensional feature space,
+the decision boundary is a <span class="math inline">\((P-1)\)</span>-dimensional object called a
+<strong>hyperplane</strong>.</p>
+<p>Assume our feature space is <span class="math inline">\(P\)</span>-dimensional. A linear classifier in
+this space is represented by a <strong>hyperplane</strong>, which
+generalizes a line in 2D and a plane in 3D to higher dimensions. Given a
+feature vector <span class="math inline">\(\mathbf{x} = [x_1, x_2,
+\dots, x_P]^T \in \mathbb{R}^P\)</span>, we define a separating
+hyperplane by the equation <span class="math display">\[b + w_1x_1 +
+\cdots + w_Px_P = 0,
 \qquad \text{or equivalently} \qquad
-\mathbf{w}^T\mathbf{x} + b = 0,\]</span> where <span class="math inline">\(\mathbf{w} = [w_1,\dots,w_P]^T\)</span> is the weight vector and <span class="math inline">\(b\)</span> is the bias term. Writing the boundary in this form is convenient because it cleanly expresses the decision rule in terms of an inner product <span class="math inline">\(\mathbf{w}^T\mathbf{x}\)</span>, which is a standard operation in linear algebra for relating two vectors.</p>
-<p>Geometrically, the vector <span class="math inline">\(\mathbf{w}\)</span> is <strong>perpendicular (normal)</strong> to the hyperplane, meaning it points in the direction orthogonal to the decision boundary. The dot product <span class="math display">\[\mathbf{w}^T \mathbf{x} = \|\mathbf{w}\| \, \|\mathbf{x}\| \cos(\theta)\]</span> depends on the angle <span class="math inline">\(\theta\)</span> between <span class="math inline">\(\mathbf{w}\)</span> and <span class="math inline">\(\mathbf{x}\)</span>, and therefore measures how much the feature vector <span class="math inline">\(\mathbf{x}\)</span> aligns with the normal direction <span class="math inline">\(\mathbf{w}\)</span>. In this sense, <span class="math inline">\(\mathbf{w}^T \mathbf{x}\)</span> captures the signed projection of <span class="math inline">\(\mathbf{x}\)</span> onto the normal vector, which is directly related to how far <span class="math inline">\(\mathbf{x}\)</span> lies from the decision boundary along the orthogonal direction. Finally, note that <span class="math inline">\(\mathbf{w}\)</span> can be <em>any</em> nonzero normal vector to the hyperplane; for simplicity in geometric interpretations, we sometimes assume that <span class="math inline">\(\mathbf{w}\)</span> has unit norm.</p>
+\mathbf{w}^T\mathbf{x} + b = 0,\]</span> where <span class="math inline">\(\mathbf{w} = [w_1,\dots,w_P]^T\)</span> is the
+weight vector and <span class="math inline">\(b\)</span> is the bias
+term. Writing the boundary in this form is convenient because it cleanly
+expresses the decision rule in terms of an inner product <span class="math inline">\(\mathbf{w}^T\mathbf{x}\)</span>, which is a
+standard operation in linear algebra for relating two vectors.</p>
+<p>Geometrically, the vector <span class="math inline">\(\mathbf{w}\)</span> is <strong>perpendicular
+(normal)</strong> to the hyperplane, meaning it points in the direction
+orthogonal to the decision boundary. The dot product <span class="math display">\[\mathbf{w}^T \mathbf{x} = \|\mathbf{w}\| \,
+\|\mathbf{x}\| \cos(\theta)\]</span> depends on the angle <span class="math inline">\(\theta\)</span> between <span class="math inline">\(\mathbf{w}\)</span> and <span class="math inline">\(\mathbf{x}\)</span>, and therefore measures how
+much the feature vector <span class="math inline">\(\mathbf{x}\)</span>
+aligns with the normal direction <span class="math inline">\(\mathbf{w}\)</span>. In this sense, <span class="math inline">\(\mathbf{w}^T \mathbf{x}\)</span> captures the
+signed projection of <span class="math inline">\(\mathbf{x}\)</span>
+onto the normal vector, which is directly related to how far <span class="math inline">\(\mathbf{x}\)</span> lies from the decision
+boundary along the orthogonal direction. Finally, note that <span class="math inline">\(\mathbf{w}\)</span> can be <em>any</em> nonzero
+normal vector to the hyperplane; for simplicity in geometric
+interpretations, we sometimes assume that <span class="math inline">\(\mathbf{w}\)</span> has unit norm.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Linear Separating Hyperplane</h3><p>Adjust the weight vector and bias to see how the hyperplane changes in two dimensions.</p><iframe class="interactive-notebook-frame" data-default-height="780" loading="lazy" scrolling="no" src="../assets/notebooks/linear_hyperplane_interactive.html" style="height:780px;" title="Interactive Linear Separating Hyperplane Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Flinear_hyperplane_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <div class="intuitionbox">
-<p><strong>Key intuition.</strong> For SVMs, <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> is still a score, but SVMs care about how <em>confidently</em> points are separated. The margin is the empty “buffer zone” around the decision boundary. A larger margin typically improves robustness: small perturbations to <span class="math inline">\(\mathbf{x}\)</span> are less likely to flip the label.</p>
+<p><strong>Key intuition.</strong> For SVMs, <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b\)</span> is still a
+score, but SVMs care about how <em>confidently</em> points are
+separated. The margin is the empty “buffer zone” around the decision
+boundary. A larger margin typically improves robustness: small
+perturbations to <span class="math inline">\(\mathbf{x}\)</span> are
+less likely to flip the label.</p>
 </div>
 <h2 data-number="4.3" id="maximal-margin-classifiers"><span class="header-section-number">4.3</span> Maximal Margin Classifiers</h2>
-<p>In logistic regression, we only wanted high accuracy in separating data into its groups. SVMs have another goal: the width of the margin between the classifier and the data.</p>
-<p>Suppose that our classifier is correctly able to classify test data given some kind of training data, and that the hyperplane can separate the training data perfectly according to their class labels. It is apparent in <a data-reference="fig:multiplehyperplanes" data-reference-type="ref" href="#fig:multiplehyperplanes">4</a> that multiple possible hyperplanes satisfy these conditions. In this case, how do we determine the “best” one?</p>
-<figure>
-<img alt="Multiple separating hyperplanes" id="fig:multiplehyperplanes" src="img/lecture4/multiplehyperplanes.png" style="width:18.00%; max-width:18.00%; height:auto;"/><figcaption aria-hidden="true">Multiple separating hyperplanes</figcaption>
+<p>In logistic regression, we only wanted high accuracy in separating
+data into its groups. SVMs have another goal: the width of the margin
+between the classifier and the data.</p>
+<p>Suppose that our classifier is correctly able to classify test data
+given some kind of training data, and that the hyperplane can separate
+the training data perfectly according to their class labels. It is
+apparent in <a data-reference="fig:multiplehyperplanes" data-reference-type="ref" href="#fig:multiplehyperplanes">4</a> that multiple possible
+hyperplanes satisfy these conditions. In this case, how do we determine
+the “best” one?</p>
+<figure id="fig:multiplehyperplanes">
+<img src="img/lecture4/multiplehyperplanes.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
+<figcaption>Multiple separating hyperplanes</figcaption>
 </figure>
-<p>The <strong>maximal margin hyperplane</strong> (MMH) is the separating hyperplane that is furthest from the training data. The location of the MMH is dependent only on training observations that lie directly on the margin boundary (<span class="math inline">\(x_A, x_B\)</span> and <span class="math inline">\(x_C\)</span>, a.k.a <strong>Support Vectors</strong>). The goal becomes finding an algorithm that can produce the best MMH. (Best being the highest width and highest accuracy).</p>
-<figure>
-<img alt="Maximal margin hyperplane along with its support vectors" id="fig:mmh" src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Maximal margin hyperplane along with its support vectors</figcaption>
+<p>The <strong>maximal margin hyperplane</strong> (MMH) is the
+separating hyperplane that is furthest from the training data. The
+location of the MMH is dependent only on training observations that lie
+directly on the margin boundary (<span class="math inline">\(x_A,
+x_B\)</span> and <span class="math inline">\(x_C\)</span>, a.k.a
+<strong>Support Vectors</strong>). The goal becomes finding an algorithm
+that can produce the best MMH. (Best being the highest width and highest
+accuracy).</p>
+<figure id="fig:mmh">
+<img src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Maximal margin hyperplane along with its support
+vectors</figcaption>
 </figure>
-<h2 data-number="4.4" id="width-of-maximal-margin-classifiers"><span class="header-section-number">4.4</span> Width of Maximal Margin Classifiers</h2>
-<p>Let’s try to write down the width of the margin as a function of something we know. We’ll change the equation as follows, to ensure no samples are within the margin M. To explicitly enforce a margin around the separating hyperplane, we modify the classification constraints. For a positive (class 1) example <span class="math inline">\(x^+\)</span>, we require <span class="math display">\[\mathbf{w}^T x^+ + b \geq 1,\]</span> while for a negative (class 2) example <span class="math inline">\(x^-\)</span>, we require <span class="math display">\[\mathbf{w}^T x^- + b \leq -1.\]</span> The appearance of <span class="math inline">\(+1\)</span> and <span class="math inline">\(-1\)</span> on the right-hand side, rather than <span class="math inline">\(0\)</span>, is intentional: it induces a margin of width 1 on each side of the decision boundary <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>. As a result, no training samples are allowed to lie within this margin region, and the distance between the two supporting hyperplanes becomes directly tied to the magnitude of the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
-<figure>
-<img alt="Maximal margin classifier with margin width shown" id="fig:marginwidth" src="img/lecture4/marginwidth.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Maximal margin classifier with margin width shown</figcaption>
+<h2 data-number="4.4" id="width-of-maximal-margin-classifiers"><span class="header-section-number">4.4</span> Width of Maximal Margin
+Classifiers</h2>
+<p>Let’s try to write down the width of the margin as a function of
+something we know. We’ll change the equation as follows, to ensure no
+samples are within the margin M. To explicitly enforce a margin around
+the separating hyperplane, we modify the classification constraints. For
+a positive (class 1) example <span class="math inline">\(x^+\)</span>,
+we require <span class="math display">\[\mathbf{w}^T x^+ + b \geq
+1,\]</span> while for a negative (class 2) example <span class="math inline">\(x^-\)</span>, we require <span class="math display">\[\mathbf{w}^T x^- + b \leq -1.\]</span> The
+appearance of <span class="math inline">\(+1\)</span> and <span class="math inline">\(-1\)</span> on the right-hand side, rather than
+<span class="math inline">\(0\)</span>, is intentional: it induces a
+margin of width 1 on each side of the decision boundary <span class="math inline">\(\mathbf{w}^T\mathbf{x} + b = 0\)</span>. As a
+result, no training samples are allowed to lie within this margin
+region, and the distance between the two supporting hyperplanes becomes
+directly tied to the magnitude of the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
+<figure id="fig:marginwidth">
+<img src="img/lecture4/marginwidth.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Maximal margin classifier with margin width
+shown</figcaption>
 </figure>
-<p>If <span class="math inline">\(x_A\)</span> and <span class="math inline">\(x_B\)</span> lie on the margin hyperplanes <span class="math inline">\(\mathbf{w}^T x + b = 1\)</span> and <span class="math inline">\(\mathbf{w}^T x + b = -1\)</span> respectively, then <span class="math inline">\(\mathbf{w}^T(x_A-x_B)=2\)</span>.<br/>
+<p>If <span class="math inline">\(x_A\)</span> and <span class="math inline">\(x_B\)</span> lie on the margin hyperplanes <span class="math inline">\(\mathbf{w}^T x + b = 1\)</span> and <span class="math inline">\(\mathbf{w}^T x + b = -1\)</span> respectively,
+then <span class="math inline">\(\mathbf{w}^T(x_A-x_B)=2\)</span>.<br/>
  <br/>
-The left-hand side is also an inner product, which can be written as <span class="math inline">\(\| x_A - x_B \|\| w \|cos(0) = 2\)</span><br/>
+The left-hand side is also an inner product, which can be written as
+<span class="math inline">\(\| x_A - x_B \|\| w \|cos(0) =
+2\)</span><br/>
  <br/>
-The two supporting hyperplanes are <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=1\)</span> and <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=-1\)</span>. The perpendicular distance between two parallel hyperplanes <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=c_1\)</span> and <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=c_2\)</span> is <span class="math display">\[\frac{|c_1-c_2|}{\|\mathbf{w}\|}.\]</span> Therefore, the (geometric) margin width is <span class="math display">\[M = \frac{|1-(-1)|}{\|\mathbf{w}\|} = \frac{2}{\|\mathbf{w}\|}.\]</span> If <span class="math inline">\(x_A\)</span> and <span class="math inline">\(x_B\)</span> are support vectors lying on the two margin hyperplanes, then <span class="math inline">\(\mathbf{w}^T(x_A-x_B)=2\)</span>. This implies that the projection of <span class="math inline">\(x_A-x_B\)</span> onto the normal direction <span class="math inline">\(\mathbf{w}\)</span> has length <span class="math inline">\(2/\|\mathbf{w}\|\)</span>, which equals the margin width.</p>
-<p>Therefore, maximizing the margin <span class="math inline">\(M\)</span> is equivalent to maximizing <span class="math inline">\(\frac{1}{\|\mathbf{w}\|}\)</span>, or, equivalently, minimizing <span class="math inline">\(\|\mathbf{w}\|\)</span>. Rather than directly minimizing the norm <span class="math inline">\(\|\mathbf{w}\|\)</span>, which leads to a non-smooth optimization problem, it is standard to instead minimize its squared norm <span class="math inline">\(\|\mathbf{w}\|^2\)</span>. This transformation does not change the location of the optimal solution, since the squared norm is a strictly increasing function of the norm, but it yields a smoother and more mathematically convenient objective. For further convenience, a factor of <span class="math inline">\(\frac{1}{2}\)</span> is introduced, resulting in the objective <span class="math inline">\(\frac{1}{2}\|\mathbf{w}\|^2\)</span>, whose gradient with respect to <span class="math inline">\(\mathbf{w}\)</span> is simply <span class="math inline">\(\mathbf{w}\)</span>. As a result, the problem of maximizing the margin reduces to minimizing <span class="math inline">\(\frac{1}{2}\|\mathbf{w}\|^2\)</span> subject to the margin constraints imposed by the training data.</p>
+The two supporting hyperplanes are <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=1\)</span> and <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=-1\)</span>. The
+perpendicular distance between two parallel hyperplanes <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=c_1\)</span> and <span class="math inline">\(\mathbf{w}^T\mathbf{x}+b=c_2\)</span> is <span class="math display">\[\frac{|c_1-c_2|}{\|\mathbf{w}\|}.\]</span>
+Therefore, the (geometric) margin width is <span class="math display">\[M = \frac{|1-(-1)|}{\|\mathbf{w}\|} =
+\frac{2}{\|\mathbf{w}\|}.\]</span> If <span class="math inline">\(x_A\)</span> and <span class="math inline">\(x_B\)</span> are support vectors lying on the two
+margin hyperplanes, then <span class="math inline">\(\mathbf{w}^T(x_A-x_B)=2\)</span>. This implies
+that the projection of <span class="math inline">\(x_A-x_B\)</span> onto
+the normal direction <span class="math inline">\(\mathbf{w}\)</span> has
+length <span class="math inline">\(2/\|\mathbf{w}\|\)</span>, which
+equals the margin width.</p>
+<p>Therefore, maximizing the margin <span class="math inline">\(M\)</span> is equivalent to maximizing <span class="math inline">\(\frac{1}{\|\mathbf{w}\|}\)</span>, or,
+equivalently, minimizing <span class="math inline">\(\|\mathbf{w}\|\)</span>. Rather than directly
+minimizing the norm <span class="math inline">\(\|\mathbf{w}\|\)</span>,
+which leads to a non-smooth optimization problem, it is standard to
+instead minimize its squared norm <span class="math inline">\(\|\mathbf{w}\|^2\)</span>. This transformation
+does not change the location of the optimal solution, since the squared
+norm is a strictly increasing function of the norm, but it yields a
+smoother and more mathematically convenient objective. For further
+convenience, a factor of <span class="math inline">\(\frac{1}{2}\)</span> is introduced, resulting in
+the objective <span class="math inline">\(\frac{1}{2}\|\mathbf{w}\|^2\)</span>, whose
+gradient with respect to <span class="math inline">\(\mathbf{w}\)</span>
+is simply <span class="math inline">\(\mathbf{w}\)</span>. As a result,
+the problem of maximizing the margin reduces to minimizing <span class="math inline">\(\frac{1}{2}\|\mathbf{w}\|^2\)</span> subject to
+the margin constraints imposed by the training data.</p>
 <div class="examplebox">
-<p><strong>Example.</strong> If <span class="math inline">\(\mathbf{w}=[3,4]^T\)</span>, then <span class="math inline">\(\|\mathbf{w}\|=5\)</span> and the margin width is <span class="math inline">\(M=\frac{2}{\|\mathbf{w}\|}=\frac{2}{5}=0.4\)</span>. If we instead found a separator with <span class="math inline">\(\mathbf{w}=[1,1]^T\)</span> (smaller norm), then <span class="math inline">\(\|\mathbf{w}\|=\sqrt{2}\)</span> and <span class="math inline">\(M=\frac{2}{\sqrt{2}}=\sqrt{2}\approx 1.41\)</span>, which is a much wider margin.</p>
+<p><strong>Example.</strong> If <span class="math inline">\(\mathbf{w}=[3,4]^T\)</span>, then <span class="math inline">\(\|\mathbf{w}\|=5\)</span> and the margin width is
+<span class="math inline">\(M=\frac{2}{\|\mathbf{w}\|}=\frac{2}{5}=0.4\)</span>.
+If we instead found a separator with <span class="math inline">\(\mathbf{w}=[1,1]^T\)</span> (smaller norm), then
+<span class="math inline">\(\|\mathbf{w}\|=\sqrt{2}\)</span> and <span class="math inline">\(M=\frac{2}{\sqrt{2}}=\sqrt{2}\approx
+1.41\)</span>, which is a much wider margin.</p>
 </div>
-<h2 data-number="4.5" id="accuracy-of-maximal-margin-classifiers"><span class="header-section-number">4.5</span> Accuracy of Maximal Margin Classifiers</h2>
-<p>We cannot minimize <span class="math inline">\(\|\mathbf{w}\|\)</span> without constraints, because the trivial solution <span class="math inline">\(\mathbf{w} = \mathbf{0}\)</span> gives no separating boundary. Let us define a linear boundary: <span class="math display">\[\begin{aligned}
-\mathbf{w}^T \mathbf{x} + b = 0\end{aligned}\]</span> That is: <span class="math display">\[\begin{aligned}
+<h2 data-number="4.5" id="accuracy-of-maximal-margin-classifiers"><span class="header-section-number">4.5</span> Accuracy of Maximal Margin
+Classifiers</h2>
+<p>We cannot minimize <span class="math inline">\(\|\mathbf{w}\|\)</span> without constraints,
+because the trivial solution <span class="math inline">\(\mathbf{w} =
+\mathbf{0}\)</span> gives no separating boundary. Let us define a linear
+boundary: <span class="math display">\[\begin{aligned}
+\mathbf{w}^T \mathbf{x} + b = 0
+\end{aligned}\]</span> That is: <span class="math display">\[\begin{aligned}
       \begin{cases}
         \mathbf{w}^T \mathbf{x} + b &gt; 0, \text{ if } y = 1\\
         \mathbf{w}^T \mathbf{x} + b &lt; 0, \text{ if } y = -1
-      \end{cases}\end{aligned}\]</span> And suppose that the samples can be separated further by a margin of 1 unit, so: <span class="math display">\[\begin{aligned}
+      \end{cases}
+\end{aligned}\]</span> And suppose that the samples can be separated
+further by a margin of 1 unit, so: <span class="math display">\[\begin{aligned}
       \begin{cases}
         \mathbf{w}^T \mathbf{x} + b \geq 1, \text{ if } y = 1\\
         \mathbf{w}^T \mathbf{x} + b \leq -1, \text{ if } y = -1
-      \end{cases}\end{aligned}\]</span> Which can be written in a single equation as: <span class="math display">\[y(\mathbf{w}^T \mathbf{x} + b) - 1 \geq 0\]</span> <span class="math display">\[\textbf{ or}\\
+      \end{cases}
+\end{aligned}\]</span> Which can be written in a single equation as:
+<span class="math display">\[y(\mathbf{w}^T \mathbf{x} + b) - 1 \geq
+0\]</span> <span class="math display">\[\textbf{ or}\\
 \]</span> <span class="math display">\[L(\mathbf{x}_i,y_i,\theta)
 = \max\big(0,\,1-y_i(\mathbf{w}^T\mathbf{x}_i+b)\big)\]</span><br/>
-The latter of which is known as <strong>Margin-Perceptron Cost</strong> (aka <strong>Hinge Loss</strong>), where the additional 1 prevents the trivial 0 solution. For the classifier to be correct we must satisfy the following two inequalities: <span class="math display">\[\mathbf{w}^T \mathbf{x^+} + b \geq 1\]</span> <span class="math display">\[\mathbf{w}^T \mathbf{x^-} + b \leq -1\]</span><br/>
-Combining both class constraints into a single condition yields: <span class="math display">\[y_i(\mathbf{w}^T\mathbf{x}_i + b) \ge 1,\quad \forall i.\]</span></p>
+The latter of which is known as <strong>Margin-Perceptron Cost</strong>
+(aka <strong>Hinge Loss</strong>), where the additional 1 prevents the
+trivial 0 solution. For the classifier to be correct we must satisfy the
+following two inequalities: <span class="math display">\[\mathbf{w}^T
+\mathbf{x^+} + b \geq 1\]</span> <span class="math display">\[\mathbf{w}^T \mathbf{x^-} + b \leq
+-1\]</span><br/>
+Combining both class constraints into a single condition yields: <span class="math display">\[y_i(\mathbf{w}^T\mathbf{x}_i + b) \ge 1,\quad
+\forall i.\]</span></p>
 <p>Or:</p>
-<p><span class="math display">\[y_i(\mathbf{w}^T \mathbf{x_i} + b) - 1 \geq 0,\quad \forall i.\]</span><br/>
-We now have a classifier that maximizes the margins subject to the fact that the accuracy is very high with these constraints: <span class="math display">\[\min_{\mathbf{w}, b} \quad \frac{1}{2} \|\mathbf{w}\|^2\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \mathbf{x}_i + b) - 1 \geq 0, \quad \forall i\]</span></p>
+<p><span class="math display">\[y_i(\mathbf{w}^T \mathbf{x_i} + b) - 1
+\geq 0,\quad \forall i.\]</span><br/>
+We now have a classifier that maximizes the margins subject to the fact
+that the accuracy is very high with these constraints: <span class="math display">\[\min_{\mathbf{w}, b} \quad \frac{1}{2}
+\|\mathbf{w}\|^2\]</span> <span class="math display">\[\text{subject to}
+\quad y_i (\mathbf{w}^T \mathbf{x}_i + b) - 1 \geq 0, \quad \forall
+i\]</span></p>
 <h2 data-number="4.6" id="lagrange-optimization-subsection"><span class="header-section-number">4.6</span> Optimization</h2>
-<p>We now have a constrained optimization objective, so we may use a Lagrange multiplier to find our cost function. The Lagrange multiplier will allow us to insert our constraint into our cost function as follows: <span class="math display">\[L = \frac{1}{2}||\mathbf{w}||^2 - \sum_{i=1}^{N} \alpha_i\left[ y_i(\mathbf{w}^T \mathbf{x_i} + b) - 1\right]\]</span><br/>
-We solve this by taking the gradient and setting it equal to 0 as follows: <span class="math display">\[\frac{\partial L}{\partial \mathbf{w}} = \mathbf{w} - \sum_{i=1}^{N} \alpha_i y_i \mathbf{x_i} = 0 \rightarrow \mathbf{w} = \sum_{i=1}^{N} \alpha_i y_i \mathbf{x_i}\]</span> <span class="math display">\[\frac{\partial L}{\partial b} = -\sum_{i=1}^{N} \alpha_i y_i = 0 \rightarrow \sum_{i=1}^{N} \alpha_i y_i = 0\]</span><br/>
-Plugging these values back into the equation and simplifying, we find: <span class="math display">\[L = -\frac{1}{2}\sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j \mathbf{x^T_i} \mathbf{x_j} + \sum_{i=1}^{N} \alpha_i\]</span><br/>
-At this point, it is helpful to clarify what this expression represents. The quantity <span class="math display">\[\max_{\alpha}\;\; \sum_{i=1}^{N}\alpha_i \;-\;\frac{1}{2}\sum_{i=1}^{N}\sum_{j=1}^{N}\alpha_i\alpha_j\,y_i y_j\,\mathbf{x}_i^T\mathbf{x}_j\]</span> is the <strong>dual objective</strong> for the hard-margin SVM (to be maximized over the Lagrange multipliers <span class="math inline">\(\alpha_i\)</span> subject to <span class="math inline">\(\alpha_i\ge 0\)</span> and <span class="math inline">\(\sum_i \alpha_i y_i=0\)</span>). In other words, we choose <span class="math inline">\(\alpha\)</span> to make the linear term <span class="math inline">\(\sum_i \alpha_i\)</span> large, while the quadratic term penalizes overly large values of <span class="math inline">\(\alpha\)</span> in a way that depends on:</p>
+<p>We now have a constrained optimization objective, so we may use a
+Lagrange multiplier to find our cost function. The Lagrange multiplier
+will allow us to insert our constraint into our cost function as
+follows: <span class="math display">\[L = \frac{1}{2}||\mathbf{w}||^2 -
+\sum_{i=1}^{N} \alpha_i\left[ y_i(\mathbf{w}^T \mathbf{x_i} + b) -
+1\right]\]</span><br/>
+We solve this by taking the gradient and setting it equal to 0 as
+follows: <span class="math display">\[\frac{\partial L}{\partial
+\mathbf{w}} = \mathbf{w} - \sum_{i=1}^{N} \alpha_i y_i \mathbf{x_i} = 0
+\rightarrow \mathbf{w} = \sum_{i=1}^{N} \alpha_i y_i
+\mathbf{x_i}\]</span> <span class="math display">\[\frac{\partial
+L}{\partial b} = -\sum_{i=1}^{N} \alpha_i y_i = 0 \rightarrow
+\sum_{i=1}^{N} \alpha_i y_i = 0\]</span><br/>
+Plugging these values back into the equation and simplifying, we find:
+<span class="math display">\[L = -\frac{1}{2}\sum_{i=1}^{N}
+\sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j \mathbf{x^T_i} \mathbf{x_j} +
+\sum_{i=1}^{N} \alpha_i\]</span><br/>
+At this point, it is helpful to clarify what this expression represents.
+The quantity <span class="math display">\[\max_{\alpha}\;\;
+\sum_{i=1}^{N}\alpha_i
+\;-\;\frac{1}{2}\sum_{i=1}^{N}\sum_{j=1}^{N}\alpha_i\alpha_j\,y_i
+y_j\,\mathbf{x}_i^T\mathbf{x}_j\]</span> is the <strong>dual
+objective</strong> for the hard-margin SVM (to be maximized over the
+Lagrange multipliers <span class="math inline">\(\alpha_i\)</span>
+subject to <span class="math inline">\(\alpha_i\ge 0\)</span> and <span class="math inline">\(\sum_i \alpha_i y_i=0\)</span>). In other words,
+we choose <span class="math inline">\(\alpha\)</span> to make the linear
+term <span class="math inline">\(\sum_i \alpha_i\)</span> large, while
+the quadratic term penalizes overly large values of <span class="math inline">\(\alpha\)</span> in a way that depends on:</p>
 <ul>
 <li><p>the <strong>similarity</strong> between samples via <span class="math inline">\(\mathbf{x}_i^T\mathbf{x}_j\)</span>, and</p></li>
 <li><p>the <strong>label agreement</strong> via <span class="math inline">\(y_i y_j\)</span> (same label gives <span class="math inline">\(+1\)</span>, different labels gives <span class="math inline">\(-1\)</span>).</p></li>
 </ul>
-<p>Intuitively, the quadratic term discourages putting large weight (large <span class="math inline">\(\alpha\)</span>) on many points that are highly similar in feature space, because this would increase the penalty. As a result, at the optimum, only a subset of training points typically receive nonzero <span class="math inline">\(\alpha_i\)</span> values; these are the <strong>support vectors</strong>, and they are the only points that directly determine the separating hyperplane.</p>
-<p>Once the optimal multipliers are found, the weight vector can be recovered as <span class="math display">\[\mathbf{w} = \sum_{i=1}^{N} \alpha_i y_i \mathbf{x}_i.\]</span> To classify a new unseen sample <span class="math inline">\(\mathbf{u}\)</span>, we compute the decision function <span class="math display">\[\mathbf{w}^T\mathbf{u} + b,\]</span> and predict class <span class="math inline">\(+1\)</span> if it is positive and class <span class="math inline">\(-1\)</span> if it is negative.</p>
+<p>Intuitively, the quadratic term discourages putting large weight
+(large <span class="math inline">\(\alpha\)</span>) on many points that
+are highly similar in feature space, because this would increase the
+penalty. As a result, at the optimum, only a subset of training points
+typically receive nonzero <span class="math inline">\(\alpha_i\)</span>
+values; these are the <strong>support vectors</strong>, and they are the
+only points that directly determine the separating hyperplane.</p>
+<p>Once the optimal multipliers are found, the weight vector can be
+recovered as <span class="math display">\[\mathbf{w} = \sum_{i=1}^{N}
+\alpha_i y_i \mathbf{x}_i.\]</span> To classify a new unseen sample
+<span class="math inline">\(\mathbf{u}\)</span>, we compute the decision
+function <span class="math display">\[\mathbf{w}^T\mathbf{u} +
+b,\]</span> and predict class <span class="math inline">\(+1\)</span> if
+it is positive and class <span class="math inline">\(-1\)</span> if it
+is negative.</p>
 <h2 data-number="4.7" id="soft-margin-classifiers"><span class="header-section-number">4.7</span> Soft Margin Classifiers</h2>
-<p>One issue with maximum margin classifiers is that a single data point can dramatically shift the boundary between classes. In most real-world scenarios, a perfect separation is not possible, so we can relax the constraints with a soft margin: <span class="math display">\[\min_{\mathbf{w}, b, \xi} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^{N} \xi_i\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T \mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall i\]</span><br/>
-Here, <span class="math inline">\(C &gt; 0\)</span> is the <strong>regularization (penalty) parameter</strong>, which controls the trade-off between maximizing the margin and penalizing margin violations through the slack variables <span class="math inline">\(\{\xi_i\}_{i=1}^N\)</span>. The term <span class="math inline">\(\sum_{i=1}^N \xi_i\)</span> measures the total amount of margin violation across all training samples.</p>
-<p>A larger value of <span class="math inline">\(C\)</span> places a higher penalty on misclassification and margin violations, encouraging a smaller margin that more tightly fits the training data. Conversely, a smaller <span class="math inline">\(C\)</span> allows more violations of the margin, resulting in a wider margin that may misclassify some training points but typically improves generalization to unseen data.</p>
+<p>One issue with maximum margin classifiers is that a single data point
+can dramatically shift the boundary between classes. In most real-world
+scenarios, a perfect separation is not possible, so we can relax the
+constraints with a soft margin: <span class="math display">\[\min_{\mathbf{w}, b, \xi} \quad \frac{1}{2}
+\|\mathbf{w}\|^2 + C \sum_{i=1}^{N} \xi_i\]</span> <span class="math display">\[\text{subject to} \quad y_i (\mathbf{w}^T
+\mathbf{x}_i + b) \geq 1 - \xi_i, \quad \xi_i \geq 0, \quad \forall
+i\]</span><br/>
+Here, <span class="math inline">\(C &gt; 0\)</span> is the
+<strong>regularization (penalty) parameter</strong>, which controls the
+trade-off between maximizing the margin and penalizing margin violations
+through the slack variables <span class="math inline">\(\{\xi_i\}_{i=1}^N\)</span>. The term <span class="math inline">\(\sum_{i=1}^N \xi_i\)</span> measures the total
+amount of margin violation across all training samples.</p>
+<p>A larger value of <span class="math inline">\(C\)</span> places a
+higher penalty on misclassification and margin violations, encouraging a
+smaller margin that more tightly fits the training data. Conversely, a
+smaller <span class="math inline">\(C\)</span> allows more violations of
+the margin, resulting in a wider margin that may misclassify some
+training points but typically improves generalization to unseen
+data.</p>
 <div class="intuitionbox">
-<p><strong>Key intuition.</strong> Think of <span class="math inline">\(C\)</span> as “how expensive mistakes are.” Large <span class="math inline">\(C\)</span> tries hard to fit the training data (narrower margin, fewer violations), while small <span class="math inline">\(C\)</span> prefers a wider margin and is more tolerant of outliers/noisy labels.</p>
+<p><strong>Key intuition.</strong> Think of <span class="math inline">\(C\)</span> as “how expensive mistakes are.” Large
+<span class="math inline">\(C\)</span> tries hard to fit the training
+data (narrower margin, fewer violations), while small <span class="math inline">\(C\)</span> prefers a wider margin and is more
+tolerant of outliers/noisy labels.</p>
 </div>
-<figure>
-<img alt="Varying values of C result in different margin widths" id="fig:enter-label" src="img/lecture4/Soft%20Margin.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Varying values of <span class="math inline">\(C\)</span> result in different margin widths</figcaption>
+<figure id="fig:enter-label">
+<img src="img/lecture4/Soft%20Margin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Varying values of <span class="math inline">\(C\)</span>
+result in different margin widths</figcaption>
 </figure>
-<p>Hard-margin SVMs assume that the data are perfectly linearly separable, meaning that even a single outlier can force a drastic shift in the decision boundary. Soft-margin SVMs relax this assumption by introducing slack variables <span class="math inline">\(\xi_i\)</span>, allowing some margin violations while controlling the trade-off between margin width and classification errors through the regularization parameter <span class="math inline">\(C\)</span>. When the data are fundamentally not linearly separable, we preserve the same optimization framework but replace inner products <span class="math inline">\(\mathbf{x}_i^T \mathbf{x}_j\)</span> with a kernel function <span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j)\)</span>, which corresponds to an implicit nonlinear feature mapping <span class="math inline">\(\phi(\cdot)\)</span>.</p>
-<h2 data-number="4.8" id="non-linear-soft-margin-classifiers"><span class="header-section-number">4.8</span> Non-linear Soft Margin Classifiers</h2>
-<p>In many real-world datasets, a linear classifier in the original input space is not sufficient to separate the data. Support Vector Machines address this limitation through the <strong>kernel trick</strong>, which implicitly maps the input data into a higher-dimensional feature space using a transformation <span class="math inline">\(\phi(\cdot)\)</span>, while avoiding the explicit computation of this mapping. Instead, learning depends only on the kernel function <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) = \phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j),\]</span> which computes inner products in the transformed feature space.</p>
-<figure>
-<img alt="Adding a new dimension allows a nonlinear dataset to become linearly separable" id="fig:enter-label" src="img/lecture4/nonlinearsoftmargin.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Adding a new dimension allows a nonlinear dataset to become linearly separable</figcaption>
+<p>Hard-margin SVMs assume that the data are perfectly linearly
+separable, meaning that even a single outlier can force a drastic shift
+in the decision boundary. Soft-margin SVMs relax this assumption by
+introducing slack variables <span class="math inline">\(\xi_i\)</span>,
+allowing some margin violations while controlling the trade-off between
+margin width and classification errors through the regularization
+parameter <span class="math inline">\(C\)</span>. When the data are
+fundamentally not linearly separable, we preserve the same optimization
+framework but replace inner products <span class="math inline">\(\mathbf{x}_i^T \mathbf{x}_j\)</span> with a kernel
+function <span class="math inline">\(K(\mathbf{x}_i,\mathbf{x}_j)\)</span>, which
+corresponds to an implicit nonlinear feature mapping <span class="math inline">\(\phi(\cdot)\)</span>.</p>
+<h2 data-number="4.8" id="non-linear-soft-margin-classifiers"><span class="header-section-number">4.8</span> Non-linear Soft Margin
+Classifiers</h2>
+<p>In many real-world datasets, a linear classifier in the original
+input space is not sufficient to separate the data. Support Vector
+Machines address this limitation through the <strong>kernel
+trick</strong>, which implicitly maps the input data into a
+higher-dimensional feature space using a transformation <span class="math inline">\(\phi(\cdot)\)</span>, while avoiding the explicit
+computation of this mapping. Instead, learning depends only on the
+kernel function <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) =
+\phi(\mathbf{x}_i)^T \phi(\mathbf{x}_j),\]</span> which computes inner
+products in the transformed feature space.</p>
+<figure id="fig:enter-label">
+<img src="img/lecture4/nonlinearsoftmargin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Adding a new dimension allows a nonlinear dataset to become
+linearly separable</figcaption>
 </figure>
 <p>Common examples of kernel functions include:</p>
 <ul>
-<li><p><strong>Polynomial kernel</strong>: <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T \mathbf{x}_j + 1)^p\]</span></p></li>
+<li><p><strong>Polynomial kernel</strong>: <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) = (\mathbf{x}_i^T
+\mathbf{x}_j + 1)^p\]</span></p></li>
 <li><p><strong>Gaussian kernel</strong>: <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) =
 \exp\!\left(-\frac{1}{2\sigma^2}
 (\mathbf{x}_i-\mathbf{x}_j)^T(\mathbf{x}_i-\mathbf{x}_j)\right)\]</span></p></li>
@@ -460,39 +772,105 @@ Here, <span class="math inline">\(C &gt; 0\)</span> is the <strong>regularizatio
 \exp\!\left(-\gamma
 (\mathbf{x}_i-\mathbf{x}_j)^T(\mathbf{x}_i-\mathbf{x}_j)\right)\]</span></p></li>
 </ul>
-<p>Although these kernels induce nonlinear decision boundaries in the original input space, the classifier remains <em>linear</em> in the transformed feature space defined by <span class="math inline">\(\phi(\cdot)\)</span>. This is why SVMs with kernels are still referred to as linear classifiers in feature space, despite exhibiting highly nonlinear behavior in the input space.</p>
+<p>Although these kernels induce nonlinear decision boundaries in the
+original input space, the classifier remains <em>linear</em> in the
+transformed feature space defined by <span class="math inline">\(\phi(\cdot)\)</span>. This is why SVMs with
+kernels are still referred to as linear classifiers in feature space,
+despite exhibiting highly nonlinear behavior in the input space.</p>
 <h2 data-number="4.9" id="multi-class-svms"><span class="header-section-number">4.9</span> Multi-Class SVMs</h2>
-<p>Standard Support Vector Machines are inherently binary classifiers, meaning they are designed to separate data into two classes. However, SVMs can be extended to handle multi-class classification problems by decomposing the task into multiple binary classification problems and then combining their outputs.</p>
+<p>Standard Support Vector Machines are inherently binary classifiers,
+meaning they are designed to separate data into two classes. However,
+SVMs can be extended to handle multi-class classification problems by
+decomposing the task into multiple binary classification problems and
+then combining their outputs.</p>
 <p>Two common strategies for multi-class SVMs are:</p>
 <ul>
-<li><p><strong>One-Versus-All (OvA)</strong>: For a problem with <span class="math inline">\(K\)</span> classes, <span class="math inline">\(K\)</span> binary classifiers are trained, where each classifier distinguishes one class from all remaining classes. At prediction time, the classifier with the highest confidence score (e.g., largest margin) determines the predicted class.</p></li>
-<li><p><strong>One-Versus-One (OvO)</strong>: A binary classifier is trained for every pair of classes, resulting in <span class="math inline">\(\frac{K(K-1)}{2}\)</span> classifiers. Each classifier votes for one of the two classes it was trained on, and the class with the most votes is selected as the final prediction.</p></li>
+<li><p><strong>One-Versus-All (OvA)</strong>: For a problem with <span class="math inline">\(K\)</span> classes, <span class="math inline">\(K\)</span> binary classifiers are trained, where
+each classifier distinguishes one class from all remaining classes. At
+prediction time, the classifier with the highest confidence score (e.g.,
+largest margin) determines the predicted class.</p></li>
+<li><p><strong>One-Versus-One (OvO)</strong>: A binary classifier is
+trained for every pair of classes, resulting in <span class="math inline">\(\frac{K(K-1)}{2}\)</span> classifiers. Each
+classifier votes for one of the two classes it was trained on, and the
+class with the most votes is selected as the final prediction.</p></li>
 </ul>
-<p>The choice between these strategies involves a trade-off between computational efficiency and classification accuracy, and is often determined by the number of classes and the size of the dataset.</p>
+<p>The choice between these strategies involves a trade-off between
+computational efficiency and classification accuracy, and is often
+determined by the number of classes and the size of the dataset.</p>
 <h1 data-number="5" id="additional-details"><span class="header-section-number">5.</span> Additional Details</h1>
-<h2 data-number="5.1" id="duality-and-lagrange-multipliers"><span class="header-section-number">5.1</span> Duality and Lagrange Multipliers</h2>
-<p>The concept of <strong>duality</strong> provides a framework for analyzing and solving optimization problems with constraints. For a given optimization problem, called the <strong>primal problem</strong>, the <strong>dual problem</strong> offers an alternative perspective that can sometimes simplify the solution process or provide deeper insights.<br/>
+<h2 data-number="5.1" id="duality-and-lagrange-multipliers"><span class="header-section-number">5.1</span> Duality and Lagrange
+Multipliers</h2>
+<p>The concept of <strong>duality</strong> provides a framework for
+analyzing and solving optimization problems with constraints. For a
+given optimization problem, called the <strong>primal problem</strong>,
+the <strong>dual problem</strong> offers an alternative perspective that
+can sometimes simplify the solution process or provide deeper
+insights.<br/>
 <br/>
 Consider a primal optimization problem in its standard form: <span class="math display">\[\begin{aligned}
     \min_{\mathbf{w}} \quad &amp; f(\mathbf{w}) \\
-    \text{subject to} \quad &amp; g_i(\mathbf{w}) \leq 0, \quad i = 1, \dots, m \\
-    &amp; h_j(\mathbf{w}) = 0, \quad j = 1, \dots, p\end{aligned}\]</span> where <span class="math inline">\(f(\mathbf{w})\)</span> is the objective function to be minimized, <span class="math inline">\(g_i(\mathbf{w})\)</span> are inequality constraints, and <span class="math inline">\(h_j(\mathbf{w})\)</span> are equality constraints. To handle these constraints, we introduce Lagrange multipliers <span class="math inline">\(\alpha_i \geq 0\)</span> for the inequality constraints and <span class="math inline">\(\lambda_j\)</span> for the equality constraints. We then define the Lagrangian function <span class="math inline">\(\mathcal{L}(\mathbf{w}, \alpha, \lambda)\)</span> as follows: <span class="math display">\[\begin{aligned}
-    \mathcal{L}(\mathbf{w}, \alpha, \lambda) = f(\mathbf{w}) + \sum_{i=1}^{m} \alpha_i g_i(\mathbf{w}) + \sum_{j=1}^{p} \lambda_j h_j(\mathbf{w})\end{aligned}\]</span> The dual problem is derived by maximizing the Lagrangian with respect to the dual variables <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\lambda\)</span>, and minimizing it with respect to the primal variable <span class="math inline">\(\mathbf{w}\)</span>: <span class="math display">\[\begin{aligned}
-    \max_{\alpha \geq 0, \lambda} \min_{\mathbf{w}} \mathcal{L}(\mathbf{w}, \alpha, \lambda)\end{aligned}\]</span> This transformation can sometimes reveal properties of the problem that are not apparent in the primal formulation. Specifically, the difference between the primal and dual optimal values, known as the <strong>duality gap</strong>, can provide information about the nature of the solution. Under certain regularity conditions, known as the Karush-Kuhn-Tucker (KKT) conditions, the duality gap is zero, indicating that the primal and dual solutions are equivalent.<br/>
+    \text{subject to} \quad &amp; g_i(\mathbf{w}) \leq 0, \quad i = 1,
+\dots, m \\
+    &amp; h_j(\mathbf{w}) = 0, \quad j = 1, \dots, p
+\end{aligned}\]</span> where <span class="math inline">\(f(\mathbf{w})\)</span> is the objective function
+to be minimized, <span class="math inline">\(g_i(\mathbf{w})\)</span>
+are inequality constraints, and <span class="math inline">\(h_j(\mathbf{w})\)</span> are equality constraints.
+To handle these constraints, we introduce Lagrange multipliers <span class="math inline">\(\alpha_i \geq 0\)</span> for the inequality
+constraints and <span class="math inline">\(\lambda_j\)</span> for the
+equality constraints. We then define the Lagrangian function <span class="math inline">\(\mathcal{L}(\mathbf{w}, \alpha, \lambda)\)</span>
+as follows: <span class="math display">\[\begin{aligned}
+    \mathcal{L}(\mathbf{w}, \alpha, \lambda) = f(\mathbf{w}) +
+\sum_{i=1}^{m} \alpha_i g_i(\mathbf{w}) + \sum_{j=1}^{p} \lambda_j
+h_j(\mathbf{w})
+\end{aligned}\]</span> The dual problem is derived by maximizing the
+Lagrangian with respect to the dual variables <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\lambda\)</span>, and minimizing it with respect
+to the primal variable <span class="math inline">\(\mathbf{w}\)</span>:
+<span class="math display">\[\begin{aligned}
+    \max_{\alpha \geq 0, \lambda} \min_{\mathbf{w}}
+\mathcal{L}(\mathbf{w}, \alpha, \lambda)
+\end{aligned}\]</span> This transformation can sometimes reveal
+properties of the problem that are not apparent in the primal
+formulation. Specifically, the difference between the primal and dual
+optimal values, known as the <strong>duality gap</strong>, can provide
+information about the nature of the solution. Under certain regularity
+conditions, known as the Karush-Kuhn-Tucker (KKT) conditions, the
+duality gap is zero, indicating that the primal and dual solutions are
+equivalent.<br/>
 <br/>
-We observed this framework earlier for SVMs. The primal problem involved finding the optimal separating hyperplane by minimizing the norm of the weight vector <span class="math inline">\(\mathbf{w}\)</span> subject to the margin constraints: <span class="math display">\[\begin{aligned}
+We observed this framework earlier for SVMs. The primal problem involved
+finding the optimal separating hyperplane by minimizing the norm of the
+weight vector <span class="math inline">\(\mathbf{w}\)</span> subject to
+the margin constraints: <span class="math display">\[\begin{aligned}
     \min_{\mathbf{w}, b} \quad &amp; \frac{1}{2} \|\mathbf{w}\|^2 \\
-    \text{subject to} \quad &amp; y_i (\mathbf{w}^T \mathbf{x}_i + b) \geq 1, \quad i = 1, \dots, N\end{aligned}\]</span> The corresponding Lagrangian was given by: <span class="math display">\[\begin{aligned}
-    \mathcal{L}(\mathbf{w}, b, \alpha) = \frac{1}{2} \|\mathbf{w}\|^2 - \sum_{i=1}^{N} \alpha_i [y_i (\mathbf{w}^T \mathbf{x}_i + b) - 1]\end{aligned}\]</span> where <span class="math inline">\(\alpha_i \geq 0\)</span> were the Lagrange multipliers associated with the margin constraints.<br/>
-To find the dual problem, we maximized the Lagrangian with respect to <span class="math inline">\(\alpha\)</span> after minimizing with respect to <span class="math inline">\(\mathbf{w}\)</span> and <span class="math inline">\(b\)</span>: <span class="math display">\[\begin{aligned}
-    \max_{\alpha \geq 0} \quad &amp; \sum_{i=1}^{N} \alpha_i - \frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j \mathbf{x}_i^T \mathbf{x}_j \\
-    \text{subject to} \quad &amp; \sum_{i=1}^{N} \alpha_i y_i = 0\end{aligned}\]</span> Refer back to the section on to see how this dual problem was solved.</p>
+    \text{subject to} \quad &amp; y_i (\mathbf{w}^T \mathbf{x}_i + b)
+\geq 1, \quad i = 1, \dots, N
+\end{aligned}\]</span> The corresponding Lagrangian was given by: <span class="math display">\[\begin{aligned}
+    \mathcal{L}(\mathbf{w}, b, \alpha) = \frac{1}{2} \|\mathbf{w}\|^2 -
+\sum_{i=1}^{N} \alpha_i [y_i (\mathbf{w}^T \mathbf{x}_i + b) - 1]
+\end{aligned}\]</span> where <span class="math inline">\(\alpha_i \geq
+0\)</span> were the Lagrange multipliers associated with the margin
+constraints.<br/>
+To find the dual problem, we maximized the Lagrangian with respect to
+<span class="math inline">\(\alpha\)</span> after minimizing with
+respect to <span class="math inline">\(\mathbf{w}\)</span> and <span class="math inline">\(b\)</span>: <span class="math display">\[\begin{aligned}
+    \max_{\alpha \geq 0} \quad &amp; \sum_{i=1}^{N} \alpha_i -
+\frac{1}{2} \sum_{i=1}^{N} \sum_{j=1}^{N} \alpha_i \alpha_j y_i y_j
+\mathbf{x}_i^T \mathbf{x}_j \\
+    \text{subject to} \quad &amp; \sum_{i=1}^{N} \alpha_i y_i = 0
+\end{aligned}\]</span> Refer back to the section on to see how this dual
+problem was solved.</p>
 <h1 class="unnumbered" id="references">References</h1>
-<p>See Figure <a data-reference="fig:sigmoid" data-reference-type="ref" href="#fig:sigmoid">1</a> for the image sourced from ResearchGate. For more details, visit: <a href="https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915" rel="noopener noreferrer" target="_blank">https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915</a> [accessed 1 Sept 2024].<br/>
+<p>See Figure <a data-reference="fig:sigmoid" data-reference-type="ref" href="#fig:sigmoid">1</a> for the image sourced from
+ResearchGate. For more details, visit: <a class="uri" href="https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915" rel="noopener noreferrer" target="_blank">https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915</a>
+[accessed 1 Sept 2024].<br/>
 <br/>
-Boser, Bernhard E., Guyon, Isabelle M., and Vapnik, Vladimir N. (1992). A Training Algorithm for Optimal Margin Classifiers. <em>Proceedings of the Fifth Annual Workshop on Computational Learning Theory (COLT)</em>, 144–152.<br/>
+Boser, Bernhard E., Guyon, Isabelle M., and Vapnik, Vladimir N. (1992).
+A Training Algorithm for Optimal Margin Classifiers. <em>Proceedings of
+the Fifth Annual Workshop on Computational Learning Theory (COLT)</em>,
+144–152.<br/>
 <br/>
-Cortes, Corinna and Vapnik, Vladimir (1995). Support-Vector Networks. <em>Machine Learning</em>, 20(3), 273–297.</p>
+Cortes, Corinna and Vapnik, Vladimir (1995). Support-Vector Networks.
+<em>Machine Learning</em>, 20(3), 273–297.</p>
 
 </main>
 </body>

@@ -26,31 +26,78 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> What makes a Temporal Convolutional Network (TCN) <em>causal</em>, and how do dilated convolutions help it model long-range dependencies efficiently?</p>
-<p><strong>Solution:</strong> A TCN is causal if the output at time <span class="math inline">\(t\)</span> depends only on inputs at times <span class="math inline">\(\le t\)</span>, ensuring no information from the future is used. With kernel size <span class="math inline">\(k\)</span>, a causal convolution computes: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)}, \mathbf{x}^{(t-1)}, \dots, \mathbf{x}^{(t-k+1)}).\]</span> Dilated convolutions introduce a spacing factor <span class="math inline">\(d\)</span>, expanding the receptive field: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)}, \mathbf{x}^{(t-d)}, \dots, \mathbf{x}^{(t-d(k-1))}).\]</span> Using dilation factors such as <span class="math inline">\(1,2,4,8,\dots\)</span> across layers increases the receptive field exponentially while keeping the number of parameters per layer fixed.</p></li>
+<li><p><strong>Question:</strong> What makes a Temporal Convolutional
+Network (TCN) <em>causal</em>, and how do dilated convolutions help it
+model long-range dependencies efficiently?</p>
+<p><strong>Solution:</strong> A TCN is causal if the output at time
+<span class="math inline">\(t\)</span> depends only on inputs at times
+<span class="math inline">\(\le t\)</span>, ensuring no information from
+the future is used. With kernel size <span class="math inline">\(k\)</span>, a causal convolution computes: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)},
+\mathbf{x}^{(t-1)}, \dots, \mathbf{x}^{(t-k+1)}).\]</span> Dilated
+convolutions introduce a spacing factor <span class="math inline">\(d\)</span>, expanding the receptive field: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)},
+\mathbf{x}^{(t-d)}, \dots, \mathbf{x}^{(t-d(k-1))}).\]</span> Using
+dilation factors such as <span class="math inline">\(1,2,4,8,\dots\)</span> across layers increases the
+receptive field exponentially while keeping the number of parameters per
+layer fixed.</p></li>
 <li><p><strong>Question:</strong> For a TCN with kernel size <span class="math inline">\(k=3\)</span> and dilation factors <span class="math inline">\(1,2,4\)</span>, what is the receptive field?</p>
-<p><strong>Solution:</strong> <span class="math display">\[R = 1 + \sum_{\ell}(k-1)d_\ell
+<p><strong>Solution:</strong> <span class="math display">\[R = 1 +
+\sum_{\ell}(k-1)d_\ell
 = 1 + 2(1+2+4)
 = 15.\]</span> Thus, the output at time <span class="math inline">\(t\)</span> depends on inputs from <span class="math inline">\(t\)</span> back to <span class="math inline">\(t-14\)</span>.</p></li>
-<li><p><strong>Question:</strong> What is the main limitation of the basic Seq2Seq model without attention?</p>
-<p><strong>Solution:</strong> The encoder compresses the entire input sequence into a single fixed-size context vector <span class="math inline">\(c = h_T\)</span>. For long sequences, this vector may not retain all relevant information, creating an information bottleneck that degrades performance.</p></li>
-<li><p><strong>Question:</strong> How does dot-product attention address the Seq2Seq bottleneck?</p>
-<p><strong>Solution:</strong> Instead of using one fixed context vector, attention computes a dynamic context vector at each decoding step: <span class="math display">\[\alpha_{j,i} = \frac{\exp(s_j^\top h_i)}{\sum_k \exp(s_j^\top h_k)}, 
+<li><p><strong>Question:</strong> What is the main limitation of the
+basic Seq2Seq model without attention?</p>
+<p><strong>Solution:</strong> The encoder compresses the entire input
+sequence into a single fixed-size context vector <span class="math inline">\(c = h_T\)</span>. For long sequences, this vector
+may not retain all relevant information, creating an information
+bottleneck that degrades performance.</p></li>
+<li><p><strong>Question:</strong> How does dot-product attention address
+the Seq2Seq bottleneck?</p>
+<p><strong>Solution:</strong> Instead of using one fixed context vector,
+attention computes a dynamic context vector at each decoding step: <span class="math display">\[\alpha_{j,i} = \frac{\exp(s_j^\top h_i)}{\sum_k
+\exp(s_j^\top h_k)},
 \qquad
-c_j = \sum_i \alpha_{j,i} h_i.\]</span> This allows the decoder to focus on different parts of the input for each output token.</p></li>
-<li><p><strong>Question:</strong> What is the formula for scaled dot-product attention, and why is scaling necessary?</p>
+c_j = \sum_i \alpha_{j,i} h_i.\]</span> This allows the decoder to focus
+on different parts of the input for each output token.</p></li>
+<li><p><strong>Question:</strong> What is the formula for scaled
+dot-product attention, and why is scaling necessary?</p>
 <p><strong>Solution:</strong> <span class="math display">\[\text{Attention}(Q,K,V)
-= \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.\]</span> The scaling by <span class="math inline">\(\sqrt{d_k}\)</span> prevents the dot products from growing too large when <span class="math inline">\(d_k\)</span> is large, which would otherwise push the softmax into regions with very small gradients.</p></li>
-<li><p><strong>Question:</strong> Why does multi-head attention improve model capacity?</p>
-<p><strong>Solution:</strong> Each attention head learns separate projections: <span class="math display">\[\text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V).\]</span> Multiple heads allow the model to attend to different relationships (e.g., syntactic vs. semantic structure) simultaneously.</p></li>
-<li><p><strong>Question:</strong> Why is layer normalization preferred over batch normalization in transformers?</p>
-<p><strong>Solution:</strong> Layer normalization computes statistics across features within each token: <span class="math display">\[y = \frac{x - \mathbb{E}[x]}{\sqrt{\mathrm{Var}[x]+\epsilon}}\gamma + \beta.\]</span> It does not depend on batch statistics, making it stable for varying batch sizes and sequence lengths, and consistent during inference.</p></li>
-<li><p><strong>Question:</strong> What is the difference between Skip-Gram and CBOW in Word2Vec?</p>
-<p><strong>Solution:</strong> Skip-Gram predicts surrounding context words given a target word: <span class="math display">\[\sum_{t}\sum_{j\neq0} \log P(w_{t+j}\mid w_t).\]</span> CBOW predicts the target word from its surrounding context: <span class="math display">\[\sum_t \log P(w_t\mid w_{t-k},\dots,w_{t+k}).\]</span> Skip-Gram works well for rare words; CBOW is computationally more efficient.</p></li>
-<li><p><strong>Question:</strong> How does a Vision Transformer (ViT) process an image differently from a CNN?</p>
-<p><strong>Solution:</strong> ViT divides the image into patches, flattens them, projects them into embeddings, adds positional encodings, and processes the sequence using self-attention. Unlike CNNs, which use local convolutional filters, ViT models global relationships directly via attention.</p></li>
+= \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.\]</span> The
+scaling by <span class="math inline">\(\sqrt{d_k}\)</span> prevents the
+dot products from growing too large when <span class="math inline">\(d_k\)</span> is large, which would otherwise push
+the softmax into regions with very small gradients.</p></li>
+<li><p><strong>Question:</strong> Why does multi-head attention improve
+model capacity?</p>
+<p><strong>Solution:</strong> Each attention head learns separate
+projections: <span class="math display">\[\text{head}_i =
+\text{Attention}(QW_i^Q, KW_i^K, VW_i^V).\]</span> Multiple heads allow
+the model to attend to different relationships (e.g., syntactic vs.
+semantic structure) simultaneously.</p></li>
+<li><p><strong>Question:</strong> Why is layer normalization preferred
+over batch normalization in transformers?</p>
+<p><strong>Solution:</strong> Layer normalization computes statistics
+across features within each token: <span class="math display">\[y =
+\frac{x - \mathbb{E}[x]}{\sqrt{\mathrm{Var}[x]+\epsilon}}\gamma +
+\beta.\]</span> It does not depend on batch statistics, making it stable
+for varying batch sizes and sequence lengths, and consistent during
+inference.</p></li>
+<li><p><strong>Question:</strong> What is the difference between
+Skip-Gram and CBOW in Word2Vec?</p>
+<p><strong>Solution:</strong> Skip-Gram predicts surrounding context
+words given a target word: <span class="math display">\[\sum_{t}\sum_{j\neq0} \log P(w_{t+j}\mid
+w_t).\]</span> CBOW predicts the target word from its surrounding
+context: <span class="math display">\[\sum_t \log P(w_t\mid
+w_{t-k},\dots,w_{t+k}).\]</span> Skip-Gram works well for rare words;
+CBOW is computationally more efficient.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer (ViT)
+process an image differently from a CNN?</p>
+<p><strong>Solution:</strong> ViT divides the image into patches,
+flattens them, projects them into embeddings, adds positional encodings,
+and processes the sequence using self-attention. Unlike CNNs, which use
+local convolutional filters, ViT models global relationships directly
+via attention.</p></li>
 <li><p><strong>Question:</strong> If an image has size <span class="math inline">\(224 \times 224\)</span> and patch size <span class="math inline">\(P=16\)</span>, how many patches are produced?</p>
-<p><strong>Solution:</strong> <span class="math display">\[N = \frac{224 \times 224}{16^2}
+<p><strong>Solution:</strong> <span class="math display">\[N = \frac{224
+\times 224}{16^2}
 = \frac{50176}{256}
 = 196.\]</span></p></li>
 </ol></section>
