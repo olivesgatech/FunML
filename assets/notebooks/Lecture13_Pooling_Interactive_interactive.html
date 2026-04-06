@@ -1,0 +1,291 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pooling Layer Demo — Section 7</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .pool-type-row{display:flex;gap:8px;flex-wrap:wrap}
+    .pool-btn{border:2px solid var(--line);background:#fff;border-radius:10px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s}
+    .pool-btn.active{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+    .actions{display:flex;gap:8px;margin-bottom:14px}
+    button.act{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button.act:hover{background:var(--bg)}
+    .vis-wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px;align-items:start}
+    .vis-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px}
+    .vis-card h3{margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .grid-vis{overflow:auto}
+    table.grid{border-collapse:collapse}
+    table.grid td{border:1px solid #e2e8f0;font-size:12px;text-align:center;vertical-align:middle;font-weight:600;font-family:monospace}
+    .c-norm{background:#f1f5f9}
+    .c-hi{background:#2563eb;color:#fff}
+    .c-out{background:#d1fae5;color:#065f46}
+    .info-bar{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.7;font-family:monospace;white-space:pre-wrap}
+    .step-bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;font-weight:600;color:var(--muted)}
+    .step-bar .pos{color:var(--ink)}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.vis-wrap{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Pooling Layer Demo — Section 7</h1>
+  <p class="sub">Choose a pooling type and step through the pooling window to see how the feature map is downsampled.</p>
+
+  <div class="controls">
+    <div class="control" style="grid-column:1/-1">
+      <label>Pooling type</label>
+      <div class="pool-type-row">
+        <button class="pool-btn active" id="btnMax" onclick="setPoolType('max')">Max Pooling</button>
+        <button class="pool-btn" id="btnAvg" onclick="setPoolType('avg')">Average Pooling</button>
+        <button class="pool-btn" id="btnL2"  onclick="setPoolType('l2')">L2 Pooling</button>
+      </div>
+    </div>
+    <div class="control">
+      <label>Input size N</label>
+      <div class="row">
+        <input id="slN" type="range" min="4" max="10" step="1" value="6" oninput="onNChange()">
+        <span class="value" id="vN">6</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Pool size K</label>
+      <div class="row">
+        <input id="slK" type="range" min="2" max="4" step="1" value="2" oninput="onKChange()">
+        <span class="value" id="vK">2</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Stride S</label>
+      <div class="row">
+        <input id="slS" type="range" min="1" max="4" step="1" value="2" oninput="update()">
+        <span class="value" id="vS">2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="act" onclick="stepPool(-1)">◀ Previous</button>
+    <button class="act" onclick="stepPool(1)">Next ▶</button>
+    <button class="act" onclick="resetStep()">Reset</button>
+    <button class="act" onclick="computeAll()">Compute All</button>
+    <button class="act" onclick="rebuildInput()">New Input</button>
+  </div>
+
+  <div class="step-bar">
+    <span>Step:</span>
+    <span class="pos" id="stepLabel">—</span>
+  </div>
+
+  <div class="vis-wrap">
+    <div class="vis-card">
+      <h3>Input feature map (N × N)</h3>
+      <div class="grid-vis" id="gridInput"></div>
+    </div>
+    <div class="vis-card">
+      <h3>Current pool window</h3>
+      <div class="grid-vis" id="gridWindow"></div>
+      <div id="windowCalc" style="margin-top:10px;font-size:13px;color:var(--muted);font-family:monospace"></div>
+    </div>
+    <div class="vis-card">
+      <h3>Output (pooled)</h3>
+      <div class="grid-vis" id="gridOutput"></div>
+    </div>
+  </div>
+
+  <div class="info-bar" id="infoBar"></div>
+</div>
+
+<script>
+// ── state ────────────────────────────────────────────────────────────────────
+let N = 6, K = 2, S = 2, poolType = 'max';
+let X = [], Y = [];
+let step = 0;
+
+// ── PRNG ─────────────────────────────────────────────────────────────────────
+function prng(seed) {
+  let s = seed >>> 0;
+  return () => { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return (s >>> 0) / 0x100000000; };
+}
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function g(id) { return document.getElementById(id); }
+function sv(id, v) { g(id).textContent = v; }
+
+function outSize() {
+  const raw = (N - K) / S + 1;
+  return raw === Math.floor(raw) && raw > 0 ? Math.floor(raw) : null;
+}
+function numSteps() { const O = outSize(); return O ? O * O : 0; }
+function stepToRC(p) { const O = outSize(); return O ? [Math.floor(p / O), p % O] : [0, 0]; }
+
+function poolValue(vals) {
+  if (poolType === 'max') return Math.max(...vals);
+  if (poolType === 'avg') return vals.reduce((a, b) => a + b, 0) / vals.length;
+  return Math.sqrt(vals.reduce((a, b) => a + b * b, 0));  // L2
+}
+
+function buildInput(seed) {
+  const r = prng(seed || 42);
+  X = Array.from({ length: N }, () =>
+    Array.from({ length: N }, () => Math.floor(r() * 10))
+  );
+}
+
+function buildOutputUpTo(p) {
+  const O = outSize();
+  if (!O) return;
+  Y = Array.from({ length: O }, () => Array(O).fill(null));
+  for (let pp = 0; pp <= p && pp < numSteps(); pp++) {
+    const [ri, ci] = stepToRC(pp);
+    const ir = ri * S, ic = ci * S;
+    const vals = [];
+    for (let i = ir; i < ir + K; i++)
+      for (let j = ic; j < ic + K; j++)
+        if (X[i] && X[i][j] !== undefined) vals.push(X[i][j]);
+    Y[ri][ci] = Math.round(poolValue(vals) * 100) / 100;
+  }
+}
+
+// ── grid builders ─────────────────────────────────────────────────────────────
+function buildTable(containerId, rows, cols, cellW, cellH, classFn, textFn) {
+  const wrap = g(containerId);
+  wrap.innerHTML = '';
+  const t = document.createElement('table');
+  t.className = 'grid';
+  for (let i = 0; i < rows; i++) {
+    const tr = document.createElement('tr');
+    for (let j = 0; j < cols; j++) {
+      const td = document.createElement('td');
+      td.style.width = cellW + 'px';
+      td.style.height = cellH + 'px';
+      td.className = classFn(i, j);
+      td.textContent = textFn ? textFn(i, j) : '';
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  wrap.appendChild(t);
+}
+
+function drawInput() {
+  const O = outSize();
+  const [pri, pci] = stepToRC(Math.min(step, numSteps() - 1));
+  const ir = pri * S, ic = pci * S;
+  const cw = Math.max(22, Math.min(36, Math.floor(220 / N)));
+  buildTable('gridInput', N, N, cw, cw,
+    (i, j) => {
+      const inWin = i >= ir && i < ir + K && j >= ic && j < ic + K;
+      return inWin ? 'c-hi' : 'c-norm';
+    },
+    (i, j) => X[i] ? X[i][j] : ''
+  );
+}
+
+function drawWindow() {
+  const [pri, pci] = stepToRC(Math.min(step, numSteps() - 1));
+  const ir = pri * S, ic = pci * S;
+  const vals = [];
+  for (let i = ir; i < ir + K; i++)
+    for (let j = ic; j < ic + K; j++)
+      if (X[i] && X[i][j] !== undefined) vals.push(X[i][j]);
+
+  const cw = Math.max(28, Math.min(48, Math.floor(160 / K)));
+  buildTable('gridWindow', K, K, cw, cw,
+    () => 'c-hi',
+    (i, j) => vals[i * K + j] !== undefined ? vals[i * K + j] : ''
+  );
+
+  const result = Math.round(poolValue(vals) * 100) / 100;
+  let calc = '';
+  if (poolType === 'max')  calc = `max(${vals.join(', ')}) = ${result}`;
+  if (poolType === 'avg')  calc = `mean(${vals.join(', ')}) = ${result}`;
+  if (poolType === 'l2')   calc = `√(${vals.map(v => v+'²').join('+')}) = ${result}`;
+  g('windowCalc').textContent = calc;
+}
+
+function drawOutput() {
+  const O = outSize();
+  if (!O) { g('gridOutput').innerHTML = '<p style="color:var(--red);font-size:12px;margin:0">Invalid config</p>'; return; }
+  const [pri, pci] = stepToRC(Math.min(step, numSteps() - 1));
+  const cw = Math.max(24, Math.min(40, Math.floor(220 / O)));
+  buildTable('gridOutput', O, O, cw, cw,
+    (i, j) => {
+      if (Y[i] && Y[i][j] !== null) return 'c-out';
+      return 'c-norm';
+    },
+    (i, j) => Y[i] && Y[i][j] !== null ? Y[i][j] : ''
+  );
+}
+
+function updateStatus() {
+  const O = outSize();
+  const total = numSteps();
+  const [pri, pci] = stepToRC(Math.min(step, total - 1));
+  const poolLabel = { max: 'Max', avg: 'Average', l2: 'L2' }[poolType];
+  g('stepLabel').textContent = O ? `${step + 1} / ${total}  (window at input[${pri*S}:${pri*S+K}, ${pci*S}:${pci*S+K}])` : 'Invalid';
+
+  let info = `Pooling type: ${poolLabel} pooling\n`;
+  info += `Input: ${N}×${N}   Pool size: ${K}×${K}   Stride: ${S}\n`;
+  if (O) {
+    info += `Output: ${O}×${O}   (${numSteps()} pool windows total)\n\n`;
+    if (poolType === 'max')  info += `Max pooling: takes the largest value in each window. Captures the strongest activation.`;
+    if (poolType === 'avg')  info += `Average pooling: takes the mean of all values. Smoother, less sensitive to outliers.`;
+    if (poolType === 'l2')   info += `L2 pooling: computes the L2 norm √(Σxᵢ²). Captures the energy of activations.`;
+    info += `\n\nAll three have NO learnable parameters — they are fixed aggregation operations.`;
+  } else {
+    info += `✗ (N − K) = ${N - K} is not divisible by S = ${S}. Try changing S or K.`;
+  }
+  g('infoBar').textContent = info;
+}
+
+function drawAll() {
+  drawInput(); drawWindow(); drawOutput(); updateStatus();
+}
+
+// ── controls ──────────────────────────────────────────────────────────────────
+function setPoolType(t) {
+  poolType = t;
+  ['max', 'avg', 'l2'].forEach(p => g('btn' + p.charAt(0).toUpperCase() + p.slice(1)).classList.remove('active'));
+  g('btn' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active');
+  buildOutputUpTo(step); drawAll();
+}
+function stepPool(d) {
+  step = Math.max(0, Math.min(numSteps() - 1, step + d));
+  buildOutputUpTo(step); drawAll();
+}
+function resetStep() { step = 0; buildOutputUpTo(0); drawAll(); }
+function computeAll() { step = numSteps() - 1; buildOutputUpTo(step); drawAll(); }
+function rebuildInput() { buildInput(Date.now() & 0xffff); step = 0; buildOutputUpTo(0); drawAll(); }
+
+function onNChange() {
+  N = +g('slN').value; sv('vN', N); step = 0;
+  buildInput(42); buildOutputUpTo(0); drawAll();
+}
+function onKChange() {
+  K = +g('slK').value; sv('vK', K); step = 0;
+  buildOutputUpTo(0); drawAll();
+}
+function update() {
+  S = +g('slS').value; sv('vS', S); step = 0;
+  buildOutputUpTo(0); drawAll();
+}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+buildInput(42);
+buildOutputUpTo(0);
+drawAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Zero-Padding — Section 6.4</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1000px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .vis-wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:14px;align-items:start}
+    .vis-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px}
+    .vis-card h3{margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .grid-vis{overflow:auto}
+    table.grid{border-collapse:collapse}
+    table.grid td{border:1px solid var(--line);font-size:10px;text-align:center;vertical-align:middle;font-weight:600}
+    .c-input{background:#bfdbfe;color:#1e40af}
+    .c-pad{background:#fef9c3;color:#92400e;border:1px dashed #d97706}
+    .c-out{background:#d1fae5;color:#065f46}
+    .info-bar{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.8}
+    .formula{font-size:17px;font-weight:700;color:var(--blue);margin-bottom:6px}
+    .result-ok{color:var(--green);font-weight:700}
+    .result-err{color:var(--red);font-weight:700}
+    .same-tag{display:inline-block;background:#dcfce7;color:#166534;border:1px solid #86efac;border-radius:6px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:8px}
+    @media(max-width:700px){.controls{grid-template-columns:1fr}.vis-wrap{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Zero-Padding — Section 6.4</h1>
+  <p class="sub">Add zero-padding around the input to control the output size. Watch how the padded input grows and how the output size changes.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Input size N</label>
+      <div class="row">
+        <input id="slN" type="range" min="4" max="12" step="1" value="7" oninput="update()">
+        <span class="value" id="vN">7</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Filter size F (odd)</label>
+      <div class="row">
+        <input id="slF" type="range" min="1" max="7" step="2" value="3" oninput="update()">
+        <span class="value" id="vF">3</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Padding P</label>
+      <div class="row">
+        <input id="slP" type="range" min="0" max="5" step="1" value="0" oninput="update()">
+        <span class="value" id="vP">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vis-wrap">
+    <div class="vis-card">
+      <h3>Original input (N × N)</h3>
+      <div class="grid-vis" id="gridOriginal"></div>
+    </div>
+    <div class="vis-card">
+      <h3>Padded input ((N+2P) × (N+2P))</h3>
+      <div class="grid-vis" id="gridPadded"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px">
+        <span><span style="display:inline-block;width:12px;height:12px;background:#bfdbfe;border:1px solid #cbd5e1;vertical-align:middle;margin-right:3px;border-radius:2px"></span>Input</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#fef9c3;border:1px dashed #d97706;vertical-align:middle;margin-right:3px;border-radius:2px"></span>Zero padding</span>
+      </div>
+    </div>
+    <div class="vis-card">
+      <h3>Output (after convolution)</h3>
+      <div class="grid-vis" id="gridOutput"></div>
+    </div>
+  </div>
+
+  <div class="info-bar" id="infoBar"></div>
+</div>
+
+<script>
+function g(id) { return document.getElementById(id); }
+function sv(id, v) { g(id).textContent = v; }
+
+function buildTable(containerId, rows, cols, classFn, cellW, cellH) {
+  const wrap = g(containerId);
+  wrap.innerHTML = '';
+  const t = document.createElement('table');
+  t.className = 'grid';
+  const cap = 14;
+  const rr = Math.min(rows, cap), cc = Math.min(cols, cap);
+  for (let i = 0; i < rr; i++) {
+    const tr = document.createElement('tr');
+    for (let j = 0; j < cc; j++) {
+      const td = document.createElement('td');
+      td.style.width = cellW + 'px';
+      td.style.height = cellH + 'px';
+      td.className = classFn(i, j, rows, cols);
+      tr.appendChild(td);
+    }
+    if (cols > cap) {
+      const td = document.createElement('td');
+      td.style.cssText = 'border:none;padding:0 3px;font-size:10px;color:#94a3b8';
+      td.textContent = '⋯';
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  if (rows > cap) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = cc + (cols > cap ? 1 : 0);
+    td.style.cssText = 'border:none;font-size:10px;color:#94a3b8;text-align:center;padding:2px';
+    td.textContent = '⋮';
+    tr.appendChild(td);
+    t.appendChild(tr);
+  }
+  wrap.appendChild(t);
+}
+
+function update() {
+  const N = +g('slN').value, F = +g('slF').value, P = +g('slP').value;
+  sv('vN', N); sv('vF', F); sv('vP', P);
+
+  const Neff = N + 2 * P;
+  const rawO = (Neff - F) / 1 + 1;  // stride=1
+  const O = rawO > 0 ? Math.floor(rawO) : 0;
+
+  const cellW = Math.max(18, Math.min(28, Math.floor(220 / N)));
+
+  // Original input
+  buildTable('gridOriginal', N, N, () => 'c-input', cellW, cellW);
+
+  // Padded input
+  const cellWP = Math.max(16, Math.min(26, Math.floor(220 / Neff)));
+  buildTable('gridPadded', Neff, Neff, (i, j) => {
+    const inPad = i < P || i >= P + N || j < P || j >= P + N;
+    return inPad ? 'c-pad' : 'c-input';
+  }, cellWP, cellWP);
+
+  // Output
+  if (O > 0) {
+    const cellWO = Math.max(18, Math.min(32, Math.floor(220 / O)));
+    buildTable('gridOutput', O, O, () => 'c-out', cellWO, cellWO);
+  } else {
+    g('gridOutput').innerHTML = '<p style="color:var(--red);font-size:12px;margin:0">F > Neff</p>';
+  }
+
+  // Info bar
+  const sameConv = O === N;
+  const samePad = Math.floor((F - 1) / 2);
+
+  let html = `<div class="formula">⌊(N + 2P − F) / S⌋ + 1  =  ⌊(${N} + 2×${P} − ${F}) / 1⌋ + 1  =  <span class="${O > 0 ? 'result-ok' : 'result-err'}">${O}</span>`;
+  if (sameConv) html += `<span class="same-tag">✓ "Same" convolution</span>`;
+  html += `</div>`;
+
+  html += `<table style="font-size:13px;border-collapse:collapse;width:100%">
+    <tr><td style="padding:2px 8px;color:var(--muted)">Original input</td><td style="padding:2px 8px;font-weight:600">${N}×${N}</td></tr>
+    <tr><td style="padding:2px 8px;color:var(--muted)">Padding P</td><td style="padding:2px 8px;font-weight:600">${P} zeros on each side</td></tr>
+    <tr><td style="padding:2px 8px;color:var(--muted)">Padded input</td><td style="padding:2px 8px;font-weight:600">${Neff}×${Neff}  (added ${Neff*Neff - N*N} zero cells)</td></tr>
+    <tr><td style="padding:2px 8px;color:var(--muted)">Filter</td><td style="padding:2px 8px;font-weight:600">${F}×${F}</td></tr>
+    <tr><td style="padding:2px 8px;color:var(--muted)">Output</td><td style="padding:2px 8px;font-weight:600;color:var(--green)">${O}×${O}</td></tr>
+  </table>`;
+
+  if (sameConv) {
+    html += `<div style="margin-top:8px;font-size:13px;color:var(--green)">✓ Output matches input size (${O}×${O} = ${N}×${N}) — "same" convolution with P = (F−1)/2 = ${samePad}</div>`;
+  } else if (P === 0) {
+    html += `<div style="margin-top:8px;font-size:13px;color:var(--muted)">No padding → output (${O}×${O}) shrinks by ${N - O} on each side.  To get "same" convolution, set P = ${samePad}.</div>`;
+  } else {
+    html += `<div style="margin-top:8px;font-size:13px;color:var(--muted)">For "same" convolution with F=${F}, use P = (F−1)/2 = ${samePad}.</div>`;
+  }
+
+  g('infoBar').innerHTML = html;
+}
+
+update();
+</script>
+</body>
+</html>

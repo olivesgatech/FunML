@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Impact of Stride — Section 6.3</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1000px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .vis-wrap{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:14px}
+    .vis-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px}
+    .vis-card h3{margin:0 0 10px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .grid-vis{overflow:auto}
+    table.grid{border-collapse:collapse}
+    table.grid td{border:1px solid var(--line);font-size:11px;text-align:center;vertical-align:middle;font-weight:600}
+    .c-input{background:#e2e8f0;color:#475569}
+    .c-visited{background:#bfdbfe;color:#1d4ed8}
+    .c-current{background:#2563eb;color:#fff}
+    .c-skipped{background:#fee2e2;color:#991b1b}
+    .c-out{background:#d1fae5;color:#065f46}
+    .info-bar{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px;line-height:1.7}
+    .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin:0 3px}
+    .tag-v{background:#bfdbfe;color:#1e40af}
+    .tag-s{background:#fee2e2;color:#991b1b}
+    .tag-out{background:#d1fae5;color:#065f46}
+    @media(max-width:700px){.controls{grid-template-columns:1fr}.vis-wrap{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Impact of Stride — Section 6.3</h1>
+  <p class="sub">Change the stride to see which positions the filter visits and how that determines the output size.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Input size N</label>
+      <div class="row">
+        <input id="slN" type="range" min="5" max="12" step="1" value="7" oninput="update()">
+        <span class="value" id="vN">7</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Filter size F</label>
+      <div class="row">
+        <input id="slF" type="range" min="1" max="5" step="1" value="3" oninput="update()">
+        <span class="value" id="vF">3</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Stride S</label>
+      <div class="row">
+        <input id="slS" type="range" min="1" max="5" step="1" value="1" oninput="update()">
+        <span class="value" id="vS">1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vis-wrap">
+    <div class="vis-card">
+      <h3>Input grid — kernel anchor positions (top-left of filter)</h3>
+      <div class="grid-vis" id="inputGrid"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:12px">
+        <span><span style="display:inline-block;width:12px;height:12px;background:#e2e8f0;border:1px solid #cbd5e1;vertical-align:middle;margin-right:3px;border-radius:2px"></span>Input cell</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#bfdbfe;border:1px solid #cbd5e1;vertical-align:middle;margin-right:3px;border-radius:2px"></span>Visited (anchor)</span>
+        <span><span style="display:inline-block;width:12px;height:12px;background:#fee2e2;border:1px solid #cbd5e1;vertical-align:middle;margin-right:3px;border-radius:2px"></span>Skipped (stride)</span>
+      </div>
+    </div>
+    <div class="vis-card">
+      <h3>Output grid</h3>
+      <div class="grid-vis" id="outputGrid"></div>
+    </div>
+  </div>
+
+  <div class="info-bar" id="infoBar"></div>
+</div>
+
+<script>
+function g(id) { return document.getElementById(id); }
+function sv(id, v) { g(id).textContent = v; }
+
+function buildTable(containerId, rows, cols, classFn, cellW, cellH) {
+  const wrap = g(containerId);
+  wrap.innerHTML = '';
+  const t = document.createElement('table');
+  t.className = 'grid';
+  for (let i = 0; i < rows; i++) {
+    const tr = document.createElement('tr');
+    for (let j = 0; j < cols; j++) {
+      const td = document.createElement('td');
+      td.style.width = cellW + 'px';
+      td.style.height = cellH + 'px';
+      td.className = classFn(i, j);
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  wrap.appendChild(t);
+}
+
+function update() {
+  const N = +g('slN').value, F = +g('slF').value, S = +g('slS').value;
+  sv('vN', N); sv('vF', F); sv('vS', S);
+
+  const rawOut = (N - F) / S + 1;
+  const valid = rawOut === Math.floor(rawOut) && rawOut > 0;
+  const O = valid ? Math.floor(rawOut) : null;
+
+  // Build set of valid anchor positions (top-left corners where filter fits)
+  const anchors = new Set();
+  if (valid) {
+    for (let oi = 0; oi < O; oi++)
+      for (let oj = 0; oj < O; oj++)
+        anchors.add(`${oi * S},${oj * S}`);
+  }
+
+  // Build set of positions that WOULD be visited with S=1 but are skipped
+  const wouldVisit = new Set();
+  const maxAnchor = N - F;
+  for (let i = 0; i <= maxAnchor; i++)
+    for (let j = 0; j <= maxAnchor; j++)
+      wouldVisit.add(`${i},${j}`);
+
+  // Determine cell class for input grid
+  const cellW = Math.max(20, Math.min(32, Math.floor(280 / N)));
+  const cellH = cellW;
+
+  buildTable('inputGrid', N, N, (i, j) => {
+    const key = `${i},${j}`;
+    if (anchors.has(key)) return 'c-visited';
+    if (S > 1 && wouldVisit.has(key) && !anchors.has(key)) return 'c-skipped';
+    return 'c-input';
+  }, cellW, cellH);
+
+  // Output grid
+  if (O) {
+    const cellWO = Math.max(24, Math.min(40, Math.floor(280 / O)));
+    buildTable('outputGrid', O, O, () => 'c-out', cellWO, cellWO);
+  } else {
+    g('outputGrid').innerHTML = '<p style="color:var(--red);font-size:13px;margin:0">Invalid stride: (N − F) must be divisible by S</p>';
+  }
+
+  // Info bar
+  const visited = anchors.size;
+  const skipped = S > 1 ? (wouldVisit.size - visited) : 0;
+  let info = '';
+  if (valid) {
+    info = `Formula: ⌊(N − F) / S⌋ + 1 = ⌊(${N} − ${F}) / ${S}⌋ + 1 = ${O}\n\n`;
+    info += `With stride S=${S}: filter visits ${visited} positions`;
+    if (S > 1) info += `, skipping ${skipped} positions`;
+    info += `.\n`;
+    info += `Output size: ${O} × ${O}`;
+    if (S === 1) info += `   (maximum output, no downsampling)`;
+    else info += `   (downsampled by ≈${S}×)`;
+    if (S > 1) {
+      const s1O = N - F + 1;
+      const reduction = ((1 - O * O / (s1O * s1O)) * 100).toFixed(0);
+      info += `\n\nCompared to S=1 (output ${s1O}×${s1O} = ${s1O*s1O} cells):  stride S=${S} gives ${O}×${O} = ${O*O} cells  (${reduction}% fewer computations)`;
+    }
+  } else {
+    info = `⌊(${N} − ${F}) / ${S}⌋ + 1 = ${rawOut.toFixed(3)}  →  Not an integer!\n\n`;
+    info += `Stride S=${S} is invalid for this input/filter combination.\n`;
+    info += `Try S = 1, 2, or ${N - F > 1 ? (N - F) : 1} (any divisor of ${N - F}).`;
+  }
+  g('infoBar').textContent = info;
+}
+
+update();
+</script>
+</body>
+</html>

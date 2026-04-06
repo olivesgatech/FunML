@@ -1,0 +1,353 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interactive 2D Convolution Kernel Demo (Section 4.1)</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button:hover{background:var(--bg)}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    button.primary:hover{background:#1d4ed8}
+    .kernel-wrap{display:flex;flex-direction:column;gap:8px}
+    .kernel-grid{display:inline-grid;gap:3px}
+    .kernel-grid input{width:46px;height:36px;border:1px solid var(--line);border-radius:6px;text-align:center;font-size:13px;font-weight:600;background:#fff;color:var(--ink)}
+    .kernel-grid input:focus{outline:2px solid var(--blue);border-color:transparent}
+    .k-presets{display:flex;flex-wrap:wrap;gap:5px}
+    .plots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:290px}
+    .status{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.6;font-family:monospace;white-space:pre-wrap;word-break:break-word}
+    @media(max-width:900px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Interactive 2D Convolution — Kernel Demo (Section 4.1)</h1>
+  <p class="sub">Adjust the kernel size and values, then step through positions to see how each output value is computed.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Input size N × N</label>
+      <div class="row">
+        <input id="slN" type="range" min="5" max="9" step="1" value="7" oninput="onNChange()">
+        <span class="value" id="vN">7</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Kernel size F × F (odd)</label>
+      <div class="row">
+        <input id="slF" type="range" min="1" max="5" step="2" value="3" oninput="onFChange()">
+        <span class="value" id="vF">3</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Input values</label>
+      <select id="inputPreset" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff" onchange="rebuildInput()">
+        <option value="random">Random integers (0–9)</option>
+        <option value="ramp">Sequential (1, 2, 3, …)</option>
+        <option value="checker">Checkerboard (0 or 1)</option>
+      </select>
+    </div>
+    <div class="control" style="grid-column:1/-1">
+      <label>Kernel values — edit any cell directly</label>
+      <div class="kernel-wrap">
+        <div id="kernelGrid" class="kernel-grid"></div>
+        <div class="k-presets">
+          <button onclick="applyPreset('identity')">Identity</button>
+          <button onclick="applyPreset('edge')">Edge Detect</button>
+          <button onclick="applyPreset('blur')">Box Blur</button>
+          <button onclick="applyPreset('sharpen')">Sharpen</button>
+          <button onclick="applyPreset('random')">Randomize</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button onclick="step(-1)">◀ Previous</button>
+    <button class="primary" onclick="step(1)">Next ▶</button>
+    <button onclick="resetPos()">Reset to Start</button>
+    <button onclick="computeAll()">Compute All</button>
+    <button onclick="rebuildInput()">New Input</button>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Input (current kernel region highlighted)</div>
+      <div id="pInput" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Kernel W</div>
+      <div id="pKernel" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Output feature map Y</div>
+      <div id="pOutput" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="status" id="statusBar"></div>
+</div>
+
+<script>
+// ── state ────────────────────────────────────────────────────────────────────
+let N = 7, F = 3;
+let X = [], K = [], Y = [];   // Y[i][j] = null if not yet computed
+let pos = 0;                  // 0-indexed step counter (kernel positions row-major)
+
+// ── PRNG (xorshift) ─────────────────────────────────────────────────────────
+function prng(seed) {
+  let s = (seed || 1) >>> 0;
+  return () => { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return (s >>> 0) / 0x100000000; };
+}
+
+// ── input / kernel builders ──────────────────────────────────────────────────
+function buildX() {
+  const mode = document.getElementById('inputPreset').value;
+  const r = prng(42);
+  X = [];
+  for (let i = 0; i < N; i++) {
+    const row = [];
+    for (let j = 0; j < N; j++) {
+      if (mode === 'random')  row.push(Math.floor(r() * 10));
+      else if (mode === 'ramp') row.push(i * N + j + 1);
+      else                   row.push((i + j) % 2);
+    }
+    X.push(row);
+  }
+}
+
+function buildK() {
+  K = Array.from({ length: F }, () => Array(F).fill(0));
+  applyPreset('identity');
+}
+
+function readK() {
+  for (let i = 0; i < F; i++)
+    for (let j = 0; j < F; j++) {
+      const el = document.getElementById(`k_${i}_${j}`);
+      if (el) K[i][j] = parseFloat(el.value) || 0;
+    }
+}
+
+function buildY() {
+  const O = N - F + 1;
+  Y = Array.from({ length: O }, () => Array(O).fill(null));
+}
+
+function numPos() { const O = N - F + 1; return O * O; }
+function posToRC(p) { const O = N - F + 1; return [Math.floor(p / O), p % O]; }
+
+function convolveAt(ri, ci) {
+  let s = 0;
+  for (let i = 0; i < F; i++)
+    for (let j = 0; j < F; j++)
+      s += (X[ri + i] && X[ri + i][ci + j] !== undefined ? X[ri + i][ci + j] : 0)
+        * (K[i] && K[i][j] !== undefined ? K[i][j] : 0);
+  return Math.round(s * 1000) / 1000;
+}
+
+function recomputeUpTo(p) {
+  buildY();
+  for (let pp = 0; pp <= p && pp < numPos(); pp++) {
+    const [ri, ci] = posToRC(pp);
+    Y[ri][ci] = convolveAt(ri, ci);
+  }
+}
+
+// ── kernel presets ──────────────────────────────────────────────────────────
+function applyPreset(name) {
+  const mid = Math.floor(F / 2);
+  K = Array.from({ length: F }, () => Array(F).fill(0));
+  if (name === 'identity') {
+    if (F % 2 === 1) K[mid][mid] = 1;
+  } else if (name === 'edge') {
+    for (let i = 0; i < F; i++) for (let j = 0; j < F; j++) K[i][j] = -1;
+    K[mid][mid] = F * F - 1;
+  } else if (name === 'blur') {
+    const v = +(1 / (F * F)).toFixed(4);
+    for (let i = 0; i < F; i++) for (let j = 0; j < F; j++) K[i][j] = v;
+  } else if (name === 'sharpen') {
+    if (F >= 3) {
+      if (K[mid - 1]) K[mid - 1][mid] = -1;
+      if (K[mid + 1]) K[mid + 1][mid] = -1;
+      K[mid][mid - 1] = -1; K[mid][mid + 1] = -1;
+      K[mid][mid] = 5;
+    } else {
+      K[0][0] = 1;
+    }
+  } else if (name === 'random') {
+    const r = prng(Date.now() & 0xffff);
+    for (let i = 0; i < F; i++) for (let j = 0; j < F; j++)
+      K[i][j] = Math.round((r() * 6 - 3) * 10) / 10;
+  }
+  renderKernelGrid();
+  recomputeUpTo(pos);
+  drawAll();
+}
+
+// ── kernel grid UI ───────────────────────────────────────────────────────────
+function renderKernelGrid() {
+  const div = document.getElementById('kernelGrid');
+  div.style.gridTemplateColumns = `repeat(${F}, auto)`;
+  div.innerHTML = '';
+  for (let i = 0; i < F; i++) {
+    for (let j = 0; j < F; j++) {
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.id = `k_${i}_${j}`;
+      inp.value = K[i][j]; inp.step = '0.1';
+      inp.oninput = () => { readK(); recomputeUpTo(pos); drawAll(); };
+      div.appendChild(inp);
+    }
+  }
+}
+
+// ── Plotly helpers ──────────────────────────────────────────────────────────
+const LAYOUT_BASE = { margin: { t: 4, b: 4, l: 4, r: 4 }, paper_bgcolor: '#fff', plot_bgcolor: '#fff' };
+const PLOTLY_CFG = { responsive: true, displayModeBar: false };
+
+function mkAnnotations(z, rows, cols, opts = {}) {
+  const anns = [];
+  for (let i = 0; i < rows; i++)
+    for (let j = 0; j < cols; j++)
+      anns.push({
+        x: j, y: i,
+        text: `<b>${z[i][j] !== null && z[i][j] !== undefined ? z[i][j] : ''}</b>`,
+        font: { size: opts.size || 13, color: opts.color || '#0f172a' },
+        showarrow: false, xref: 'x', yref: 'y',
+      });
+  return anns;
+}
+
+function drawInput() {
+  const [ri, ci] = posToRC(Math.min(pos, numPos() - 1));
+  // Color layer: 0 = normal, 1 = in kernel window
+  const c = X.map((row, ii) => row.map((_, jj) =>
+    ii >= ri && ii < ri + F && jj >= ci && jj < ci + F ? 1 : 0));
+  const anns = [];
+  for (let i = 0; i < N; i++)
+    for (let j = 0; j < N; j++) {
+      const inW = c[i][j] === 1;
+      anns.push({
+        x: j, y: i,
+        text: `<b>${X[i][j]}</b>`,
+        font: { size: 13, color: inW ? '#fff' : '#0f172a' },
+        showarrow: false, xref: 'x', yref: 'y',
+      });
+    }
+  const SCALE = [[0, '#e2e8f0'], [0.01, '#e2e8f0'], [0.5, '#e2e8f0'], [0.5, '#2563eb'], [1, '#1d4ed8']];
+  Plotly.react('pInput', [{
+    z: c, type: 'heatmap', colorscale: SCALE, showscale: false, zmin: 0, zmax: 1,
+    hovertemplate: '%{text}<extra></extra>',
+    text: X.map(r => r.map(v => String(v))),
+  }], { ...LAYOUT_BASE, annotations: anns, xaxis: { visible: false }, yaxis: { visible: false, autorange: 'reversed' }, height: 290 }, PLOTLY_CFG);
+}
+
+function drawKernel() {
+  const flat = K.flat();
+  const mn = Math.min(...flat), mx = Math.max(...flat);
+  const z = K.map(r => [...r]);
+  const anns = mkAnnotations(z, F, F);
+  Plotly.react('pKernel', [{
+    z, type: 'heatmap',
+    colorscale: [[0, '#fef3c7'], [0.5, '#fbbf24'], [1, '#d97706']],
+    showscale: false, zmin: mn - 0.001, zmax: mx + 0.001,
+  }], { ...LAYOUT_BASE, annotations: anns, xaxis: { visible: false }, yaxis: { visible: false, autorange: 'reversed' }, height: 290 }, PLOTLY_CFG);
+}
+
+function drawOutput() {
+  const O = N - F + 1;
+  const [ri, ci] = posToRC(Math.min(pos, numPos() - 1));
+  const flat = Y.flat().filter(v => v !== null);
+  const mn = flat.length ? Math.min(...flat) : 0;
+  const mx = flat.length ? Math.max(...flat) : 1;
+  const anns = [];
+  for (let i = 0; i < O; i++)
+    for (let j = 0; j < O; j++) {
+      const v = Y[i][j];
+      const isCur = i === ri && j === ci && pos < numPos();
+      anns.push({
+        x: j, y: i,
+        text: `<b>${v !== null ? v : ''}</b>`,
+        font: { size: 13, color: isCur ? '#fff' : '#0f172a' },
+        showarrow: false, xref: 'x', yref: 'y',
+        ...(isCur ? { bgcolor: '#059669', borderpad: 3 } : {}),
+      });
+    }
+  Plotly.react('pOutput', [{
+    z: Y, type: 'heatmap',
+    colorscale: [[0, '#f0fdf4'], [1, '#059669']],
+    showscale: false, zmin: mn, zmax: mx || 1,
+  }], { ...LAYOUT_BASE, annotations: anns, xaxis: { visible: false }, yaxis: { visible: false, autorange: 'reversed' }, height: 290 }, PLOTLY_CFG);
+}
+
+function updateStatus() {
+  const O = N - F + 1, total = numPos();
+  const p = Math.min(pos, total - 1);
+  const [ri, ci] = posToRC(p);
+  if (pos >= total) {
+    document.getElementById('statusBar').textContent =
+      `✓ All ${total} positions computed.  Output size: ${O}×${O}  (Input: ${N}×${N}, Kernel: ${F}×${F})`;
+    return;
+  }
+  let terms = [], sum = 0;
+  for (let i = 0; i < F; i++)
+    for (let j = 0; j < F; j++) {
+      const xv = X[ri + i][ci + j], kv = K[i][j], pv = xv * kv;
+      sum += pv;
+      terms.push(`X[${ri+i}][${ci+j}]×W[${i}][${j}] = ${xv}×${kv} = ${Math.round(pv*100)/100}`);
+    }
+  document.getElementById('statusBar').textContent =
+    `Step ${pos + 1} / ${total}  —  Kernel top-left at X[${ri}][${ci}]\n\n` +
+    terms.join('  +  ') +
+    `\n\n→  Y[${ri}][${ci}] = ${Math.round(sum * 1000) / 1000}`;
+}
+
+function drawAll() { drawInput(); drawKernel(); drawOutput(); updateStatus(); }
+
+// ── controls ─────────────────────────────────────────────────────────────────
+function step(d) {
+  pos = Math.max(0, Math.min(numPos() - 1, pos + d));
+  recomputeUpTo(pos);
+  drawAll();
+}
+function resetPos() { pos = 0; recomputeUpTo(0); drawAll(); }
+function computeAll() { pos = numPos() - 1; recomputeUpTo(pos); drawAll(); }
+function rebuildInput() { buildX(); pos = 0; recomputeUpTo(0); drawAll(); }
+
+function onNChange() {
+  N = parseInt(document.getElementById('slN').value);
+  document.getElementById('vN').textContent = N;
+  buildX(); pos = 0; recomputeUpTo(0); drawAll();
+}
+function onFChange() {
+  F = parseInt(document.getElementById('slF').value);
+  document.getElementById('vF').textContent = F;
+  buildK(); renderKernelGrid(); pos = 0; recomputeUpTo(0); drawAll();
+}
+
+// ── init ─────────────────────────────────────────────────────────────────────
+buildX();
+buildK();
+renderKernelGrid();
+recomputeUpTo(0);
+drawAll();
+</script>
+</body>
+</html>

@@ -684,6 +684,51 @@
       "description": "Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.",
       "iframe_title": "Interactive Figure 9.25 Measured vs True Accuracy Under Label Noise Notebook",
       "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture14/image4.png",
+      "notebook_html": "Lecture13_Kernel_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture13_Kernel_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 4.1 \u2014 2D Convolution Kernel Demo",
+      "description": "Adjust the kernel size and values, then step through positions to see how each output value is computed from the element-wise product.",
+      "iframe_title": "Interactive Section 4.1 Convolution Kernel Demo",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture14/12.png",
+      "notebook_html": "Lecture13_OutputSize_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture13_OutputSize_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 6.2 \u2014 Output Size Formula",
+      "description": "Vary input size N, filter size F, stride S, and padding P to see the output dimensions change live. Switch to non-square mode for separate height and width controls.",
+      "iframe_title": "Interactive Section 6.2 Output Size Formula",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "img/lecture14/13.png",
+      "notebook_html": "Lecture13_Stride_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture13_Stride_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 6.3 \u2014 Impact of Stride",
+      "description": "Change the stride to see which positions the filter visits and how skipping positions reduces the output size.",
+      "iframe_title": "Interactive Section 6.3 Impact of Stride",
+      "iframe_height": 720
+    },
+    {
+      "image_match": "img/lecture14/16.png",
+      "notebook_html": "Lecture13_Padding_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture13_Padding_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 6.4 \u2014 Zero-Padding",
+      "description": "Adjust zero-padding P to see the padded input and resulting output size. Observe the special case where padding achieves \"same\" convolution.",
+      "iframe_title": "Interactive Section 6.4 Zero-Padding",
+      "iframe_height": 780
+    },
+    {
+      "image_match": "img/lecture14/Im2.png",
+      "notebook_html": "Lecture13_Pooling_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture13_Pooling_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 7 \u2014 Pooling Layer",
+      "description": "Choose between max, average, and L2 pooling. Step through the pooling window to see how each operation downsamples the feature map.",
+      "iframe_title": "Interactive Section 7 Pooling Layer",
+      "iframe_height": 860
     }
   ]
 }

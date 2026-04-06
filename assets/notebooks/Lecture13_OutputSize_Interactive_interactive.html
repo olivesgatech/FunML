@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Output Size Formula — Section 6.2</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .nonsquare-toggle{margin-bottom:10px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+    .formula-box{padding:16px 20px;border:2px solid var(--blue);border-radius:14px;background:#eff6ff;margin-bottom:16px}
+    .formula-box .formula{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:6px}
+    .formula-box .result{font-size:18px;color:var(--green);font-weight:700}
+    .formula-box .invalid{font-size:16px;color:var(--red);font-weight:700}
+    .formula-box .note{font-size:13px;color:var(--muted);margin-top:6px}
+    .vis-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:14px}
+    .vis-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px}
+    .vis-card h3{margin:0 0 10px;font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .grid-wrap{overflow:auto}
+    .grid-table{border-collapse:collapse}
+    .grid-table td{width:24px;height:24px;border:1px solid var(--line);font-size:9px;text-align:center;vertical-align:middle}
+    .cell-input{background:#e2e8f0}
+    .cell-kernel{background:#2563eb}
+    .cell-padding{background:#fef9c3;border:1px dashed #d97706}
+    .cell-output{background:#d1fae5}
+    .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:12px}
+    .legend-item{display:flex;align-items:center;gap:5px}
+    .legend-swatch{width:14px;height:14px;border-radius:3px;border:1px solid var(--line)}
+    .breakdown{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.7}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.vis-section{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Output Size Formula — Section 6.2</h1>
+  <p class="sub">Vary input size, filter size, stride, and padding to see how the output spatial dimensions change.</p>
+
+  <div class="nonsquare-toggle">
+    <input type="checkbox" id="chkNonSquare" onchange="toggleNonSquare()">
+    <label for="chkNonSquare">Non-square (separate H × W controls)</label>
+  </div>
+
+  <!-- Square controls (default) -->
+  <div id="squareControls" class="controls">
+    <div class="control">
+      <label>Input size N</label>
+      <div class="row"><input id="slN" type="range" min="4" max="15" step="1" value="7" oninput="update()"><span class="value" id="vN">7</span></div>
+    </div>
+    <div class="control">
+      <label>Filter size F (kernel)</label>
+      <div class="row"><input id="slF" type="range" min="1" max="7" step="1" value="3" oninput="update()"><span class="value" id="vF">3</span></div>
+    </div>
+    <div class="control">
+      <label>Stride S</label>
+      <div class="row"><input id="slS" type="range" min="1" max="5" step="1" value="1" oninput="update()"><span class="value" id="vS">1</span></div>
+    </div>
+    <div class="control">
+      <label>Padding P</label>
+      <div class="row"><input id="slP" type="range" min="0" max="5" step="1" value="0" oninput="update()"><span class="value" id="vP">0</span></div>
+    </div>
+  </div>
+
+  <!-- Non-square controls (hidden by default) -->
+  <div id="nsControls" class="controls" style="display:none">
+    <div class="control">
+      <label>Input height Nh</label>
+      <div class="row"><input id="slNh" type="range" min="4" max="15" step="1" value="7" oninput="update()"><span class="value" id="vNh">7</span></div>
+    </div>
+    <div class="control">
+      <label>Input width Nw</label>
+      <div class="row"><input id="slNw" type="range" min="4" max="15" step="1" value="7" oninput="update()"><span class="value" id="vNw">7</span></div>
+    </div>
+    <div class="control">
+      <label>Filter height Fh</label>
+      <div class="row"><input id="slFh" type="range" min="1" max="7" step="1" value="3" oninput="update()"><span class="value" id="vFh">3</span></div>
+    </div>
+    <div class="control">
+      <label>Filter width Fw</label>
+      <div class="row"><input id="slFw" type="range" min="1" max="7" step="1" value="3" oninput="update()"><span class="value" id="vFw">3</span></div>
+    </div>
+    <div class="control">
+      <label>Stride Sh (vertical)</label>
+      <div class="row"><input id="slSh" type="range" min="1" max="5" step="1" value="1" oninput="update()"><span class="value" id="vSh">1</span></div>
+    </div>
+    <div class="control">
+      <label>Stride Sw (horizontal)</label>
+      <div class="row"><input id="slSw" type="range" min="1" max="5" step="1" value="1" oninput="update()"><span class="value" id="vSw">1</span></div>
+    </div>
+    <div class="control">
+      <label>Padding Ph (vertical)</label>
+      <div class="row"><input id="slPh" type="range" min="0" max="5" step="1" value="0" oninput="update()"><span class="value" id="vPh">0</span></div>
+    </div>
+    <div class="control">
+      <label>Padding Pw (horizontal)</label>
+      <div class="row"><input id="slPw" type="range" min="0" max="5" step="1" value="0" oninput="update()"><span class="value" id="vPw">0</span></div>
+    </div>
+  </div>
+
+  <div class="formula-box" id="formulaBox"></div>
+
+  <div class="vis-section">
+    <div class="vis-card">
+      <h3>Input grid (padded)</h3>
+      <div class="grid-wrap"><table class="grid-table" id="gridInput"></table></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch cell-input"></div>Input cell</div>
+        <div class="legend-item"><div class="legend-swatch cell-padding"></div>Zero padding</div>
+      </div>
+    </div>
+    <div class="vis-card">
+      <h3>Output grid</h3>
+      <div class="grid-wrap"><table class="grid-table" id="gridOutput"></table></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch cell-output"></div>Output cell</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="breakdown" id="breakdown"></div>
+</div>
+
+<script>
+function g(id) { return document.getElementById(id); }
+function sv(id, v) { g(id).textContent = v; }
+
+function toggleNonSquare() {
+  const ns = g('chkNonSquare').checked;
+  g('squareControls').style.display = ns ? 'none' : 'grid';
+  g('nsControls').style.display = ns ? 'grid' : 'none';
+  update();
+}
+
+function getParams() {
+  const ns = g('chkNonSquare').checked;
+  if (!ns) {
+    const N = +g('slN').value, F = +g('slF').value, S = +g('slS').value, P = +g('slP').value;
+    sv('vN', N); sv('vF', F); sv('vS', S); sv('vP', P);
+    return { Nh: N, Nw: N, Fh: F, Fw: F, Sh: S, Sw: S, Ph: P, Pw: P };
+  } else {
+    const Nh = +g('slNh').value, Nw = +g('slNw').value;
+    const Fh = +g('slFh').value, Fw = +g('slFw').value;
+    const Sh = +g('slSh').value, Sw = +g('slSw').value;
+    const Ph = +g('slPh').value, Pw = +g('slPw').value;
+    sv('vNh', Nh); sv('vNw', Nw); sv('vFh', Fh); sv('vFw', Fw);
+    sv('vSh', Sh); sv('vSw', Sw); sv('vPh', Ph); sv('vPw', Pw);
+    return { Nh, Nw, Fh, Fw, Sh, Sw, Ph, Pw };
+  }
+}
+
+function outSize(N, F, S, P) {
+  const raw = (N - F + 2 * P) / S + 1;
+  return { raw, valid: raw === Math.floor(raw) && raw > 0, size: Math.floor(raw) };
+}
+
+function buildGrid(tableId, rows, cols, cellClass) {
+  const t = g(tableId);
+  t.innerHTML = '';
+  const cap = 12; // max cells to render per axis for visibility
+  const rr = Math.min(rows, cap), cc = Math.min(cols, cap);
+  for (let i = 0; i < rr; i++) {
+    const tr = document.createElement('tr');
+    for (let j = 0; j < cc; j++) {
+      const td = document.createElement('td');
+      td.className = (typeof cellClass === 'function') ? cellClass(i, j) : cellClass;
+      if (i === rr - 1 && rows > cap) td.style.borderBottom = '2px dashed #94a3b8';
+      if (j === cc - 1 && cols > cap) td.style.borderRight = '2px dashed #94a3b8';
+      tr.appendChild(td);
+    }
+    if (cols > cap) {
+      const td = document.createElement('td');
+      td.style.cssText = 'border:none;padding:0 4px;font-size:11px;color:#94a3b8;white-space:nowrap';
+      td.textContent = `…${cols}`;
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  }
+  if (rows > cap) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = cc + (cols > cap ? 1 : 0);
+    td.style.cssText = 'border:none;font-size:11px;color:#94a3b8;text-align:center;padding:2px';
+    td.textContent = `… ${rows} rows`;
+    tr.appendChild(td);
+    t.appendChild(tr);
+  }
+}
+
+function update() {
+  const p = getParams();
+  const rh = outSize(p.Nh, p.Fh, p.Sh, p.Ph);
+  const rw = outSize(p.Nw, p.Fw, p.Sw, p.Pw);
+  const ns = g('chkNonSquare').checked;
+  const bothValid = rh.valid && rw.valid;
+
+  // Formula box
+  const Neff_h = p.Nh + 2 * p.Ph, Neff_w = p.Nw + 2 * p.Pw;
+  let fHTML = '';
+  if (!ns) {
+    const r = rh;
+    fHTML += `<div class="formula">Output = ⌊(N − F + 2P) / S⌋ + 1</div>`;
+    fHTML += `<div class="formula">= ⌊(${p.Nh} − ${p.Fh} + 2×${p.Ph}) / ${p.Sh}⌋ + 1 = ⌊${r.raw.toFixed(4)}⌋ + 1</div>`;
+    if (r.valid) {
+      fHTML += `<div class="result">✓ Output size: ${r.size} × ${r.size}</div>`;
+    } else {
+      fHTML += `<div class="invalid">✗ Invalid stride: (${p.Nh} − ${p.Fh} + 2×${p.Ph}) = ${p.Nh - p.Fh + 2*p.Ph} is not divisible by S=${p.Sh}</div>`;
+    }
+  } else {
+    fHTML += `<div class="formula">Output H = ⌊(Nh − Fh + 2·Ph) / Sh⌋ + 1 = ⌊(${p.Nh}−${p.Fh}+${2*p.Ph})/${p.Sh}⌋+1`;
+    fHTML += rh.valid ? ` = <span style="color:var(--green)">${rh.size}</span></div>` : ` → <span style="color:var(--red)">invalid</span></div>`;
+    fHTML += `<div class="formula">Output W = ⌊(Nw − Fw + 2·Pw) / Sw⌋ + 1 = ⌊(${p.Nw}−${p.Fw}+${2*p.Pw})/${p.Sw}⌋+1`;
+    fHTML += rw.valid ? ` = <span style="color:var(--green)">${rw.size}</span></div>` : ` → <span style="color:var(--red)">invalid</span></div>`;
+    if (bothValid) fHTML += `<div class="result">✓ Output size: ${rh.size} × ${rw.size}</div>`;
+  }
+  g('formulaBox').innerHTML = fHTML;
+
+  // Input grid with padding highlighted
+  buildGrid('gridInput', Neff_h, Neff_w, (i, j) => {
+    const inPad = i < p.Ph || i >= p.Ph + p.Nh || j < p.Pw || j >= p.Pw + p.Nw;
+    return inPad ? 'cell-padding' : 'cell-input';
+  });
+
+  // Output grid
+  if (bothValid) {
+    buildGrid('gridOutput', rh.size, rw.size, 'cell-output');
+  } else {
+    g('gridOutput').innerHTML = '<tr><td style="border:none;color:#dc2626;font-size:12px;padding:8px">—</td></tr>';
+  }
+
+  // Breakdown
+  let bd = `Input: ${p.Nh}×${p.Nw}   Filter: ${p.Fh}×${p.Fw}   Stride: ${p.Sh}×${p.Sw}   Padding: ${p.Ph}×${p.Pw}\n`;
+  bd += `Padded input: (${p.Nh}+2×${p.Ph})×(${p.Nw}+2×${p.Pw}) = ${Neff_h}×${Neff_w}\n`;
+  if (bothValid) {
+    bd += `Output: ${rh.size}×${rw.size}\n\n`;
+    bd += `Key observations:\n`;
+    if (p.Ph === 0 && p.Pw === 0) bd += `  • No padding → output smaller than input (spatial information is lost at borders)\n`;
+    if (p.Ph > 0 || p.Pw > 0) bd += `  • Padding preserves more spatial info; P=(F-1)/2 gives "same" convolution\n`;
+    if (p.Sh > 1 || p.Sw > 1)  bd += `  • Stride > 1 downsamples the feature map aggressively\n`;
+    if (p.Fh === p.Fw && p.Sh === p.Sw && p.Ph === Math.floor((p.Fh-1)/2) && p.Fh % 2 === 1 && p.Sh === 1)
+      bd += `  • "Same" convolution: output matches input size\n`;
+  } else {
+    bd += `✗ Stride value is incompatible with (N - F + 2P). Try adjusting S, N, or P.`;
+  }
+  g('breakdown').textContent = bd;
+}
+
+update();
+</script>
+</body>
+</html>
