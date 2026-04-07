@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Residual Connections — Section 9.1</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:40px;text-align:right;font-weight:700;font-size:14px}
+    .toggle-row{display:flex;gap:8px}
+    .tog{border:2px solid var(--line);background:#fff;border-radius:8px;padding:5px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    .tog.on{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .canvas-wrap{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+    .canvas-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    canvas{display:block;width:100%;background:#fff}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:800px){.controls{grid-template-columns:1fr}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Residual Connections — Section 9.1</h1>
+  <p class="sub">Compare how gradients vanish in a plain deep network vs. a network with residual (skip) connections. Toggle residual on/off to see the effect on gradient magnitudes through layers.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Network depth (layers)</label>
+      <div class="row">
+        <input id="slDepth" type="range" min="4" max="30" step="2" value="20" oninput="update()">
+        <span class="value" id="vDepth">20</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Weight scale w</label>
+      <div class="row">
+        <input id="slW" type="range" min="0.5" max="1.2" step="0.05" value="0.9" oninput="update()">
+        <span class="value" id="vW">0.90</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Show</label>
+      <div class="toggle-row">
+        <button class="tog on" id="togPlain" onclick="toggle('plain')">Plain</button>
+        <button class="tog on" id="togRes"   onclick="toggle('residual')">Residual</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Gradient magnitude vs. layer (log scale)</div>
+      <div id="pGrad" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Relative gradient — fraction reaching each layer</div>
+      <div id="pRel" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <div class="canvas-title">Residual block: y = F(x) + x</div>
+    <canvas id="blockCanvas" height="140"></canvas>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const CFG = {responsive: true, displayModeBar: false};
+const LAY = {paper_bgcolor: '#fff', plot_bgcolor: '#f8fafc', margin: {t: 8, b: 42, l: 54, r: 8}};
+
+let showPlain = true, showResidual = true;
+
+function toggle(which) {
+  if (which === 'plain') {
+    showPlain = !showPlain;
+    document.getElementById('togPlain').classList.toggle('on', showPlain);
+  } else {
+    showResidual = !showResidual;
+    document.getElementById('togRes').classList.toggle('on', showResidual);
+  }
+  update();
+}
+
+function computeGradients(depth, w, residual) {
+  // Simulate gradient magnitude at each layer flowing back from the output.
+  // Plain: each layer multiplies gradient by w (≤1 → vanishes, >1 → explodes)
+  // Residual: gradient = w * prev + 1 (shortcut adds +1 at each residual block)
+  const grads = new Array(depth + 1);
+  grads[depth] = 1.0; // output gradient = 1
+  for (let l = depth - 1; l >= 0; l--) {
+    if (residual) {
+      // Residual block: ∂L/∂x_l = ∂L/∂x_{l+1} * (1 + ∂F/∂x_l) ≈ ∂L/∂x_{l+1} * (1 + w)
+      grads[l] = grads[l + 1] * (1 + w);
+    } else {
+      grads[l] = grads[l + 1] * w;
+    }
+  }
+  return grads;
+}
+
+function update() {
+  const depth = parseInt(document.getElementById('slDepth').value);
+  const w = parseFloat(document.getElementById('slW').value);
+  document.getElementById('vDepth').textContent = depth;
+  document.getElementById('vW').textContent = w.toFixed(2);
+
+  const layers = Array.from({length: depth + 1}, (_, i) => i);
+
+  const gradsPlain = computeGradients(depth, w, false);
+  const gradsRes   = computeGradients(depth, w, true);
+
+  // Normalize relative to output gradient
+  const relPlain = gradsPlain.map(g => g / gradsPlain[depth]);
+  const relRes   = gradsRes.map(g => g / gradsRes[depth]);
+
+  const tracesGrad = [];
+  const tracesRel  = [];
+
+  if (showPlain) {
+    tracesGrad.push({x: layers, y: gradsPlain.map(g => Math.max(1e-20, g)), name: 'Plain network',
+      line: {color: '#dc2626', width: 2}, type: 'scatter', mode: 'lines+markers', marker: {size: 4}});
+    tracesRel.push({x: layers, y: relPlain, name: 'Plain network',
+      line: {color: '#dc2626', width: 2}, type: 'scatter', mode: 'lines+markers', marker: {size: 4}});
+  }
+  if (showResidual) {
+    tracesGrad.push({x: layers, y: gradsRes.map(g => Math.max(1e-20, g)), name: 'Residual network',
+      line: {color: '#059669', width: 2}, type: 'scatter', mode: 'lines+markers', marker: {size: 4}});
+    tracesRel.push({x: layers, y: relRes, name: 'Residual network',
+      line: {color: '#059669', width: 2}, type: 'scatter', mode: 'lines+markers', marker: {size: 4}});
+  }
+
+  Plotly.react('pGrad', tracesGrad, {
+    ...LAY,
+    xaxis: {title: 'Layer (from output → input)', autorange: 'reversed'},
+    yaxis: {title: 'Gradient magnitude', type: 'log'},
+    height: 300,
+    legend: {x: 0.01, y: 0.99}
+  }, CFG);
+
+  Plotly.react('pRel', tracesRel, {
+    ...LAY,
+    xaxis: {title: 'Layer (from output → input)', autorange: 'reversed'},
+    yaxis: {title: 'Fraction of output gradient', range: [0, Math.min(2, relRes[0] + 0.1)]},
+    height: 300,
+    shapes: [{type: 'line', x0: 0, x1: depth, y0: 0.01, y1: 0.01,
+      line: {color: '#dc2626', width: 1, dash: 'dash'}}],
+    legend: {x: 0.01, y: 0.99}
+  }, CFG);
+
+  // Block diagram canvas
+  drawBlock();
+
+  // Info
+  const g0Plain = gradsPlain[0], g0Res = gradsRes[0];
+  const vanishPlain = w < 1;
+  const txt =
+    `Plain network:    gradient at layer 0 = ${g0Plain.toExponential(3)}\n` +
+    `Residual network: gradient at layer 0 = ${g0Res.toExponential(3)}\n\n` +
+    `Weight scale w=${w.toFixed(2)}:\n` +
+    (vanishPlain
+      ? `  Plain: gradient shrinks as w^${depth} = ${Math.pow(w, depth).toExponential(2)} — vanishing gradient.\n`
+      : `  Plain: gradient grows as w^${depth} = ${Math.pow(w, depth).toExponential(2)} — exploding gradient.\n`) +
+    `  Residual: each block adds 1 via the skip connection → gradient stays near 1.0\n\n` +
+    `Key insight: y = F(x) + x   ⟹   ∂y/∂x = ∂F/∂x + 1\n` +
+    `The "+1" ensures gradients cannot fully vanish, even in very deep networks.\n` +
+    `This is why ResNet can train 50, 101, and even 152 layers successfully.`;
+  document.getElementById('info').textContent = txt;
+}
+
+function drawBlock() {
+  const canvas = document.getElementById('blockCanvas');
+  const W = canvas.offsetWidth || 800;
+  canvas.width = W;
+  canvas.height = 140;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, 140);
+
+  const cx = W / 2, cy = 70;
+  const bW = 110, bH = 40, bR = 8;
+  const arrowLen = 50;
+
+  function roundRect(x, y, w, h, r, fill, stroke) {
+    ctx.beginPath();
+    ctx.roundRect(x - w/2, y - h/2, w, h, r);
+    ctx.fillStyle = fill; ctx.fill();
+    ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  function arrow(x1, y1, x2, y2, color='#475569') {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - 8 * Math.cos(angle - 0.4), y2 - 8 * Math.sin(angle - 0.4));
+    ctx.lineTo(x2 - 8 * Math.cos(angle + 0.4), y2 - 8 * Math.sin(angle + 0.4));
+    ctx.closePath();
+    ctx.fillStyle = color; ctx.fill();
+  }
+
+  function label(text, x, y, color='#0f172a', size=13, bold=false) {
+    ctx.font = (bold ? 'bold ' : '') + `${size}px "Segoe UI",sans-serif`;
+    ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, x, y);
+  }
+
+  // x input
+  arrow(50, cy, 50 + arrowLen, cy, '#475569');
+  label('x', 40, cy, '#0f172a', 14, true);
+
+  // F(x) block
+  const fx = 50 + arrowLen + bW / 2;
+  roundRect(fx, cy, bW, bH, bR, '#dbeafe', '#2563eb');
+  label('F(x)', fx, cy, '#1d4ed8', 13, true);
+  label('(conv layers)', fx, cy + 16, '#475569', 10);
+
+  // Arrow from F(x) to +
+  const addX = fx + bW / 2 + arrowLen;
+  arrow(fx + bW / 2, cy, addX - 20, cy, '#475569');
+
+  // + circle
+  ctx.beginPath();
+  ctx.arc(addX, cy, 18, 0, 2 * Math.PI);
+  ctx.fillStyle = '#dcfce7'; ctx.fill();
+  ctx.strokeStyle = '#059669'; ctx.lineWidth = 2; ctx.stroke();
+  label('+', addX, cy, '#059669', 18, true);
+
+  // Skip connection (curved arc above)
+  const skipY = cy - 52;
+  ctx.beginPath();
+  ctx.moveTo(50 + arrowLen, cy - bH / 2);
+  ctx.lineTo(50 + arrowLen, skipY);
+  ctx.lineTo(addX, skipY);
+  ctx.lineTo(addX, cy - 18);
+  ctx.strokeStyle = '#7c3aed'; ctx.lineWidth = 2;
+  ctx.setLineDash([5, 3]); ctx.stroke(); ctx.setLineDash([]);
+  // arrowhead on skip
+  ctx.beginPath();
+  ctx.moveTo(addX, cy - 18);
+  ctx.lineTo(addX - 5, cy - 28); ctx.lineTo(addX + 5, cy - 28); ctx.closePath();
+  ctx.fillStyle = '#7c3aed'; ctx.fill();
+  label('identity (x)', (50 + arrowLen + addX) / 2, skipY - 12, '#7c3aed', 11, true);
+
+  // Output arrow
+  arrow(addX + 18, cy, addX + 18 + arrowLen, cy, '#475569');
+  label('y = F(x)+x', addX + 18 + arrowLen + 40, cy, '#059669', 13, true);
+
+  // Gradient label
+  label('← gradient flows through skip (+1 always)', cx, cy + 55, '#7c3aed', 11);
+}
+
+update();
+window.addEventListener('resize', drawBlock);
+</script>
+</body>
+</html>

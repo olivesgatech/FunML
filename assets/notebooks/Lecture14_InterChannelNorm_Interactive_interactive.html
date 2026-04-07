@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Inter-Channel Normalization (LRN) — Section 6.5.4</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:42px;text-align:right;font-weight:700;font-size:14px}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .formula{padding:12px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.7;font-family:monospace;white-space:pre-wrap;margin-bottom:12px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Inter-Channel Normalization (LRN) — Section 6.5.4</h1>
+  <p class="sub">Local Response Normalization normalizes each neuron's activation using responses from neighboring channels. Adjust the parameters to see how each channel's output changes.</p>
+
+  <div class="formula" id="formulaBox"></div>
+
+  <div class="controls">
+    <div class="control">
+      <label>Channels N</label>
+      <div class="row">
+        <input id="slN" type="range" min="3" max="8" step="1" value="4" oninput="update()">
+        <span class="value" id="vN">4</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Window n</label>
+      <div class="row">
+        <input id="slWin" type="range" min="1" max="5" step="1" value="2" oninput="update()">
+        <span class="value" id="vWin">2</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>k (bias)</label>
+      <div class="row">
+        <input id="slK" type="range" min="0" max="4" step="0.5" value="0" oninput="update()">
+        <span class="value" id="vK">0</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>α × β (strength)</label>
+      <div class="row">
+        <input id="slAB" type="range" min="0" max="4" step="0.25" value="1" oninput="update()">
+        <span class="value" id="vAB">1.00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Activations before LRN</div>
+      <div id="pBefore" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Activations after LRN</div>
+      <div id="pAfter" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+// Fixed toy activations (one spatial location, N channels)
+// We regenerate based on N using a simple seeded pattern
+function getActivations(N) {
+  // Seeded pseudo-random pattern so values are meaningful
+  const base = [3.5, 1.2, 4.8, 0.7, 2.9, 1.5, 3.1, 0.4];
+  return base.slice(0, N);
+}
+
+function lrn(a, n, k, alpha_beta) {
+  // b_i = a_i / (k + alpha * sum_{j=max(0,i-n/2)}^{min(N-1,i+n/2)} a_j^2)^beta
+  // With alpha=beta=1 we use alpha_beta = alpha * beta = alpha (since beta=1 → divide by ^1)
+  // Simplified: b_i = a_i / (k + alpha_beta * sum_neighbors a_j^2)
+  const N = a.length;
+  const half = Math.floor(n / 2);
+  return a.map((ai, i) => {
+    let sum = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(N - 1, i + half); j++) {
+      sum += a[j] * a[j];
+    }
+    const denom = k + alpha_beta * sum;
+    return ai / denom;
+  });
+}
+
+const CFG = {responsive: true, displayModeBar: false};
+const COLORS = ['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2','#be185d','#65a30d'];
+
+function update() {
+  const N    = parseInt(document.getElementById('slN').value);
+  const n    = parseInt(document.getElementById('slWin').value);
+  const k    = parseFloat(document.getElementById('slK').value);
+  const ab   = parseFloat(document.getElementById('slAB').value);
+
+  document.getElementById('vN').textContent   = N;
+  document.getElementById('vWin').textContent = n;
+  document.getElementById('vK').textContent   = k.toFixed(1);
+  document.getElementById('vAB').textContent  = ab.toFixed(2);
+
+  const a = getActivations(N);
+  const b = lrn(a, n, k, ab);
+  const channels = Array.from({length: N}, (_, i) => `Ch ${i}`);
+
+  // Formula box
+  document.getElementById('formulaBox').textContent =
+    `LRN formula:  b_i = a_i / ( k + α · Σ_{j=max(0,i-⌊n/2⌋)}^{min(N-1,i+⌊n/2⌋)} a_j² )^β\n\n` +
+    `Parameters used:  N=${N} channels,  n=${n} (window),  k=${k.toFixed(1)},  α·β=${ab.toFixed(2)}\n` +
+    `(Setting α=β=1 means the sum is multiplied by α·β=${ab.toFixed(2)})`;
+
+  const barLayout = n => ({
+    margin: {t: 8, b: 34, l: 44, r: 8},
+    paper_bgcolor: '#fff',
+    plot_bgcolor: '#f8fafc',
+    xaxis: {tickvals: channels, ticktext: channels, title: 'Channel'},
+    yaxis: {title: 'Activation', range: [0, 6]},
+    height: 300,
+  });
+
+  Plotly.react('pBefore',
+    [{x: channels, y: a, type: 'bar', marker: {color: COLORS.slice(0, N)}, name: 'Before'}],
+    barLayout('Before'), CFG);
+
+  Plotly.react('pAfter',
+    [{x: channels, y: b, type: 'bar', marker: {color: COLORS.slice(0, N), opacity: 0.8}, name: 'After'}],
+    {...barLayout('After'), yaxis: {title: 'Normalized activation', range: [0, 3]}},
+    CFG);
+
+  // Info
+  const half = Math.floor(n / 2);
+  let txt = `Channel-by-channel breakdown (window half = ${half}):\n\n`;
+  for (let i = 0; i < N; i++) {
+    const jLo = Math.max(0, i - half), jHi = Math.min(N - 1, i + half);
+    const neighbors = Array.from({length: jHi - jLo + 1}, (_, d) => `a[${jLo+d}]²`).join(' + ');
+    const sumVal = a.slice(jLo, jHi + 1).reduce((s, v) => s + v * v, 0);
+    const denom  = k + ab * sumVal;
+    txt += `  Ch ${i}: a=${a[i].toFixed(2)}  neighbors: [${jLo}..${jHi}]  Σ a²=${sumVal.toFixed(2)}  denom=${denom.toFixed(2)}  b=${b[i].toFixed(4)}\n`;
+  }
+  txt += `\nLarger activations (e.g. Ch 2 = ${a[2].toFixed(2)}) are suppressed more strongly,\n`;
+  txt += `while smaller activations are relatively preserved — encouraging competition across channels.`;
+  document.getElementById('info').textContent = txt;
+}
+
+update();
+</script>
+</body>
+</html>

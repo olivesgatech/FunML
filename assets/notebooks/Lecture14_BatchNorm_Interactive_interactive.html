@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Batch Normalization — Section 8.3.0.1</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:44px;text-align:right;font-weight:700;font-size:14px}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+    .step-card{border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--panel);font-size:13px}
+    .step-card h3{margin:0 0 6px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+    .step-card .eq{font-family:monospace;font-size:13px;line-height:1.6;color:var(--ink)}
+    .step-card .val{font-weight:700;color:var(--blue)}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:280px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.steps{grid-template-columns:1fr}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Batch Normalization — Section 8.3.0.1</h1>
+  <p class="sub">Batch Normalization normalizes activations within a mini-batch, then applies a learnable scale (γ) and shift (β). Adjust the parameters to see how the distribution changes.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Mini-batch size m</label>
+      <div class="row">
+        <input id="slM" type="range" min="4" max="16" step="2" value="8" oninput="update()">
+        <span class="value" id="vM">8</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>γ (scale)</label>
+      <div class="row">
+        <input id="slGamma" type="range" min="0.1" max="3" step="0.1" value="1" oninput="update()">
+        <span class="value" id="vGamma">1.0</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>β (shift)</label>
+      <div class="row">
+        <input id="slBeta" type="range" min="-2" max="2" step="0.1" value="0" oninput="update()">
+        <span class="value" id="vBeta">0.0</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>ε (stability)</label>
+      <div class="row">
+        <input id="slEps" type="range" min="-6" max="-1" step="0.5" value="-5" oninput="update()">
+        <span class="value" id="vEps">1e-5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step-card">
+      <h3>Step 1 — Mini-batch statistics</h3>
+      <div class="eq">μ_B = (1/m) Σ x_i<br>σ²_B = (1/m) Σ (x_i − μ_B)²</div>
+      <div class="eq" id="statVals"></div>
+    </div>
+    <div class="step-card">
+      <h3>Step 2 — Normalize</h3>
+      <div class="eq">x̂_i = (x_i − μ_B) / √(σ²_B + ε)</div>
+      <div class="eq" id="normStats"></div>
+    </div>
+    <div class="step-card">
+      <h3>Step 3 — Scale and shift</h3>
+      <div class="eq">y_i = γ · x̂_i + β</div>
+      <div class="eq" id="outStats"></div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Input distribution x</div>
+      <div id="pIn" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Output distribution y = γx̂ + β</div>
+      <div id="pOut" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+// Seeded PRNG for reproducible batches
+function prng(seed) {
+  let s = seed >>> 0;
+  return () => { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return (s >>> 0) / 0x100000000; };
+}
+function randn(r) {
+  let u = 0, v = 0;
+  while (!u) u = r();
+  while (!v) v = r();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+// Generate a batch from a skewed distribution (mean~3, std~2) to make normalization visible
+function getBatch(m) {
+  const r = prng(42);
+  return Array.from({length: m}, () => randn(r) * 2 + 3);
+}
+
+const CFG = {responsive: true, displayModeBar: false};
+const LAY = {paper_bgcolor: '#fff', plot_bgcolor: '#f8fafc', margin: {t: 8, b: 34, l: 44, r: 8}};
+
+function histTrace(vals, color, name) {
+  return {x: vals, type: 'histogram', nbinsx: 12,
+    marker: {color, opacity: 0.75, line: {color: '#fff', width: 1}}, name};
+}
+
+function vline(v, color) {
+  return {type: 'line', x0: v, x1: v, y0: 0, y1: 1, yref: 'paper',
+    line: {color, width: 2, dash: 'dash'}};
+}
+
+function mean(arr) { return arr.reduce((s, v) => s + v, 0) / arr.length; }
+function variance(arr, mu) { return arr.reduce((s, v) => s + (v - mu) ** 2, 0) / arr.length; }
+
+function update() {
+  const m     = parseInt(document.getElementById('slM').value);
+  const gamma = parseFloat(document.getElementById('slGamma').value);
+  const beta  = parseFloat(document.getElementById('slBeta').value);
+  const eps   = Math.pow(10, parseFloat(document.getElementById('slEps').value));
+
+  document.getElementById('vM').textContent     = m;
+  document.getElementById('vGamma').textContent = gamma.toFixed(1);
+  document.getElementById('vBeta').textContent  = beta.toFixed(1);
+  document.getElementById('vEps').textContent   = eps < 0.001 ? eps.toExponential(0) : eps.toFixed(4);
+
+  const x = getBatch(m);
+  const mu = mean(x);
+  const sigma2 = variance(x, mu);
+  const sigma = Math.sqrt(sigma2 + eps);
+  const xhat = x.map(v => (v - mu) / sigma);
+  const y = xhat.map(v => gamma * v + beta);
+
+  const muY = mean(y);
+  const sigma2Y = variance(y, muY);
+
+  // Step cards
+  document.getElementById('statVals').innerHTML =
+    `<span class="val">μ_B = ${mu.toFixed(3)}</span><br><span class="val">σ²_B = ${sigma2.toFixed(3)}</span>`;
+  document.getElementById('normStats').innerHTML =
+    `x̂ mean ≈ <span class="val">${mean(xhat).toFixed(4)}</span><br>x̂ var ≈ <span class="val">${variance(xhat, mean(xhat)).toFixed(4)}</span>`;
+  document.getElementById('outStats').innerHTML =
+    `y mean ≈ <span class="val">${muY.toFixed(3)}</span><br>y var ≈ <span class="val">${sigma2Y.toFixed(3)}</span>`;
+
+  // Plots
+  Plotly.react('pIn',
+    [histTrace(x, '#2563eb', 'Input x')],
+    {...LAY, shapes: [vline(mu, '#dc2626')],
+      xaxis: {title: 'Value'},
+      yaxis: {title: 'Count'},
+      height: 280,
+      annotations: [{x: mu, y: 1, yref: 'paper', text: `μ=${mu.toFixed(2)}`, showarrow: false, yanchor: 'bottom', font: {color: '#dc2626', size: 11}}]
+    }, CFG);
+
+  Plotly.react('pOut',
+    [histTrace(y, '#059669', 'Output y')],
+    {...LAY, shapes: [vline(muY, '#dc2626')],
+      xaxis: {title: 'Value'},
+      yaxis: {title: 'Count'},
+      height: 280,
+      annotations: [{x: muY, y: 1, yref: 'paper', text: `μ=${muY.toFixed(2)}`, showarrow: false, yanchor: 'bottom', font: {color: '#dc2626', size: 11}}]
+    }, CFG);
+
+  // Info text
+  const gammaEff = gamma === 1 && beta === 0
+    ? 'γ=1, β=0 → identity: output is the pure normalized x̂ (zero mean, unit variance)'
+    : `γ=${gamma.toFixed(1)}, β=${beta.toFixed(1)} → output mean≈${muY.toFixed(2)}, std≈${Math.sqrt(sigma2Y).toFixed(2)}`;
+
+  document.getElementById('info').textContent =
+    `Batch Normalizing Transform summary:\n\n` +
+    `  Input: mean=${mu.toFixed(3)},  variance=${sigma2.toFixed(3)},  std=${Math.sqrt(sigma2).toFixed(3)}\n` +
+    `  After normalize: mean≈${mean(xhat).toExponential(2)},  variance≈${variance(xhat, mean(xhat)).toFixed(4)}  (≈ 0 mean, unit var)\n` +
+    `  After scale/shift: ${gammaEff}\n\n` +
+    `ε=${eps.toExponential(0)} prevents division by zero when variance is near zero.\n` +
+    `γ and β are learned during training — they allow the network to recover the\n` +
+    `original (unnormalized) distribution if normalization hurts performance.`;
+}
+
+update();
+</script>
+</body>
+</html>

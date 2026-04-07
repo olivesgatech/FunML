@@ -219,11 +219,7 @@ real-world image recognition tasks until the combination of GPUs, large
 datasets, and improved training methods became available <span class="citation" data-cites="alregib2024neural">(AlRegib and
 Prabhushankar 2024)</span>.</p>
 <h1 data-number="5" id="vanishing-gradient-problem"><span class="header-section-number">5.</span> Vanishing Gradient Problem</h1>
-<figure id="fig:vanishing-gradient">
-<img src="img/lecture15/Vanishing%20Gradient%20Problem.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Illustration of the vanishing gradient problem and its
-architectural solutions.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 5 — Vanishing Gradient Problem</h3><p>See how gradient magnitudes shrink through deep networks for different activation functions. Toggle activations and adjust depth to observe vanishing vs stable gradients.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_VanishingGradient_Interactive_interactive.html" style="height:820px;" title="Interactive Section 5 Vanishing Gradient Problem"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_VanishingGradient_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Training very deep neural networks was historically difficult due to
 the <em>vanishing gradient problem</em>. When activation functions such
 as sigmoid or tanh are used, their derivatives are bounded between 0 and
@@ -307,11 +303,7 @@ averaging over this large ensemble.</p>
 <figcaption>Training and testing performance with and without dropout
 (CIFAR-10).</figcaption>
 </figure>
-<figure id="fig:dropout-network">
-<img src="img/lecture15/AlexNet3_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Illustration of a neural network with randomly dropped units
-during training.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.3 — Dropout Regularization</h3><p>Click any hidden neuron to toggle it on/off and simulate dropout. Track the effective dropout rate and see how the active sub-network changes.</p><iframe class="interactive-notebook-frame" data-default-height="720" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_Dropout_Interactive_interactive.html" style="height:720px;" title="Interactive Section 6.3 Dropout Regularization"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_Dropout_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>In AlexNet, dropout was applied primarily to the fully connected
 layers, which contain the majority of the model parameters and are most
 prone to overfitting. This regularization strategy played a major role
@@ -339,11 +331,7 @@ to networks using tanh activations <span class="citation" data-cites="alregib202
 This improvement arises from its <strong>piecewise-linear,
 non-saturating form</strong>, which promotes efficient gradient flow
 during backpropagation.</p>
-<figure id="fig:relu-comparison">
-<img src="img/lecture15/AlexNet4_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of training dynamics using ReLU vs. tanh
-activation functions</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.4.2 — Training Dynamics</h3><p>Train a small neural network on a toy dataset and compare how different activation functions affect convergence speed and final accuracy.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_TrainingDynamics_Interactive_interactive.html" style="height:760px;" title="Interactive Section 6.4.2 Training Dynamics"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_TrainingDynamics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h3 data-number="6.4.3" id="sigmoid-function"><span class="header-section-number">6.4.3</span> Sigmoid Function</h3>
 <figure id="fig:Sigmoid">
 <img src="img/lecture15/AlexNet4_2.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
@@ -460,10 +448,7 @@ responses of its neighboring channels.</p>
 <figcaption>Inter-channel LRN vs. intra-channel
 normalization</figcaption>
 </figure>
-<figure id="fig:lrn-normalization">
-<img src="img/lecture15/AlexNet6_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Activations before and after applying LRN</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.5.4 — Inter-Channel Normalization (LRN)</h3><p>Adjust LRN parameters k, α, β, and window n to see how channel activations are normalized. Observe how large activations are suppressed more than small ones.</p><iframe class="interactive-notebook-frame" data-default-height="740" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_InterChannelNorm_Interactive_interactive.html" style="height:740px;" title="Interactive Section 6.5.4 Inter-Channel LRN"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_InterChannelNorm_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Before normalization, neuron activations may vary widely across
 channels. After applying LRN, activations are scaled to a more balanced
 range, particularly reducing extremely large responses. This helps
@@ -835,11 +820,7 @@ is not beneficial for a given layer.</p>
 <p>The Batch Normalization transformation is applied before the
 activation function, ensuring that normalized inputs are passed into the
 nonlinearity.</p>
-<figure id="fig:Batch Normalization Process">
-<img src="img/lecture15/BatchNormalization.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Illustration of the Batch Normalization process applied to
-activations within a mini-batch.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 8.3.0.1 — Batch Normalizing Transform</h3><p>Adjust batch size, γ (scale), β (shift), and ε to see the three-step BN transform: compute statistics, normalize, then scale and shift.</p><iframe class="interactive-notebook-frame" data-default-height="780" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_BatchNorm_Interactive_interactive.html" style="height:780px;" title="Interactive Section 8.3.0.1 Batch Normalizing Transform"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_BatchNorm_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h4 data-number="8.3.0.2" id="local-response-normalization-vs.-batch-normalization"><span class="header-section-number">8.3.0.2</span> Local Response
 Normalization vs. Batch Normalization</h4>
 <p><br/>
@@ -902,10 +883,7 @@ transformed output. This identity mapping enables gradients to propagate
 through the network without vanishing, allowing much deeper models to be
 trained successfully <span class="citation" data-cites="he2015deepresiduallearningimage">(He et al.
 2015)</span>.</p>
-<figure id="Residual Block Struc">
-<img src="img/lecture15/ResBlock.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Structure of a Residual Block</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 9.1 — Residual Connections</h3><p>Compare gradient flow in plain vs residual networks. Vary depth and weight scale to see how skip connections prevent vanishing gradients.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_ResidualConnection_Interactive_interactive.html" style="height:760px;" title="Interactive Section 9.1 Residual Connections"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_ResidualConnection_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="9.1" id="novelty-of-resnet"><span class="header-section-number">9.1</span> Novelty of ResNet</h2>
 <h4 data-number="9.1.0.1" id="residual-learning."><span class="header-section-number">9.1.0.1</span> Residual Learning.</h4>
 <p>ResNet introduces residual blocks that learn identity mappings

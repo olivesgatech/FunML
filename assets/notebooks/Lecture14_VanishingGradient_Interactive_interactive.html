@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Vanishing Gradient — Section 5</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:40px;text-align:right;font-weight:700;font-size:14px}
+    .act-row{display:flex;flex-wrap:wrap;gap:6px}
+    .act-btn{border:2px solid var(--line);background:#fff;border-radius:8px;padding:5px 12px;cursor:pointer;font-size:13px;font-weight:600}
+    .act-btn.on{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+    .plots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;background:var(--panel);overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.6;white-space:pre-wrap;font-family:monospace}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Vanishing Gradient Problem — Section 5</h1>
+  <p class="sub">See how gradient magnitudes shrink through deep networks for different activation functions. A gradient near zero means the early layers learn extremely slowly.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Input value x</label>
+      <div class="row">
+        <input id="slX" type="range" min="-4" max="4" step="0.1" value="0.5" oninput="update()">
+        <span class="value" id="vX">0.5</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Max depth (layers)</label>
+      <div class="row">
+        <input id="slD" type="range" min="2" max="50" step="1" value="20" oninput="update()">
+        <span class="value" id="vD">20</span>
+      </div>
+    </div>
+    <div class="control" style="grid-column:1/-1">
+      <label>Activation functions (toggle)</label>
+      <div class="act-row">
+        <button class="act-btn on" id="btnSigmoid" onclick="toggleAct('Sigmoid')">Sigmoid</button>
+        <button class="act-btn on" id="btnTanh"    onclick="toggleAct('Tanh')">Tanh</button>
+        <button class="act-btn on" id="btnSoftplus" onclick="toggleAct('Softplus')">Softplus</button>
+        <button class="act-btn on" id="btnReLU"    onclick="toggleAct('ReLU')">ReLU</button>
+        <button class="act-btn on" id="btnHinge"   onclick="toggleAct('Hinge')">Hinge</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Activation functions f(x)</div>
+      <div id="pAct" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Derivatives f ′(x) — gradient magnitude at one layer</div>
+      <div id="pDeriv" class="plot"></div>
+    </div>
+    <div class="plot-card" style="grid-column:1/-1">
+      <div class="plot-title">Gradient magnitude after N layers  =  |f ′(x)|^N  (log scale)</div>
+      <div id="pGrad" class="plot" style="height:260px"></div>
+    </div>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+// ── activations ────────────────────────────────────────────────────────────────
+const COLORS = {Sigmoid:'#2563eb',Tanh:'#059669',Softplus:'#d97706',ReLU:'#dc2626',Hinge:'#7c3aed'};
+const ACTIVE = {Sigmoid:true,Tanh:true,Softplus:true,ReLU:true,Hinge:true};
+
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+function tanh(x){ return Math.tanh(x); }
+function softplus(x){ return Math.log(1+Math.exp(Math.min(x,30))); }
+function relu(x){ return Math.max(0,x); }
+function hinge(x){ return Math.max(0,1-x); }
+
+function dsigmoid(x){ const s=sigmoid(x); return s*(1-s); }
+function dtanh(x){ const t=Math.tanh(x); return 1-t*t; }
+function dsoftplus(x){ return sigmoid(x); }
+function drelu(x){ return x>0?1:0; }
+function dhinge(x){ return x<1?-1:0; }
+
+const FN  = {Sigmoid:sigmoid, Tanh:tanh, Softplus:softplus, ReLU:relu, Hinge:hinge};
+const DFN = {Sigmoid:dsigmoid,Tanh:dtanh,Softplus:dsoftplus,ReLU:drelu,Hinge:dhinge};
+
+// ── helpers ────────────────────────────────────────────────────────────────────
+function linspace(a,b,n){ return Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1)); }
+const CFG = {responsive:true,displayModeBar:false};
+const LAY = {margin:{t:4,b:34,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc'};
+
+function toggleAct(name){
+  ACTIVE[name]=!ACTIVE[name];
+  document.getElementById('btn'+name).classList.toggle('on',ACTIVE[name]);
+  update();
+}
+
+function update(){
+  const x0 = parseFloat(document.getElementById('slX').value);
+  const D  = parseInt(document.getElementById('slD').value);
+  document.getElementById('vX').textContent = x0.toFixed(1);
+  document.getElementById('vD').textContent = D;
+
+  const xs = linspace(-4,4,200);
+  const tracesAct=[], tracesD=[], tracesG=[];
+
+  const depths = Array.from({length:D},(_,i)=>i+1);
+  const details = [];
+
+  for(const name of ['Sigmoid','Tanh','Softplus','ReLU','Hinge']){
+    if(!ACTIVE[name]) continue;
+    const c = COLORS[name];
+    const fn = FN[name], dfn = DFN[name];
+
+    tracesAct.push({x:xs,y:xs.map(fn),name,line:{color:c,width:2},type:'scatter'});
+    tracesD.push({x:xs,y:xs.map(x=>Math.abs(dfn(x))),name,line:{color:c,width:2},type:'scatter'});
+
+    // Gradient magnitude after N layers (assuming same x at each layer for simplicity)
+    const gv = Math.abs(dfn(x0));
+    const gradMag = depths.map(d=>Math.max(1e-20, Math.pow(gv,d)));
+    tracesG.push({x:depths,y:gradMag,name,line:{color:c,width:2},type:'scatter',mode:'lines'});
+
+    details.push({name, deriv:gv, g10:Math.pow(gv,10), g20:Math.pow(gv,20)});
+  }
+
+  // Vertical marker at x0 on act and deriv plots
+  const vline = v => ({type:'line',x0:v,x1:v,y0:0,y1:1,yref:'paper',line:{color:'#0f172a',width:1.5,dash:'dot'}});
+
+  Plotly.react('pAct', tracesAct, {...LAY,shapes:[vline(x0)],xaxis:{title:'x'},yaxis:{title:'f(x)'},height:300,legend:{orientation:'h',y:-0.22}}, CFG);
+  Plotly.react('pDeriv', tracesD, {...LAY,shapes:[vline(x0)],xaxis:{title:'x'},yaxis:{title:"|f′(x)|",range:[0,1.1]},height:300,legend:{orientation:'h',y:-0.22}}, CFG);
+  Plotly.react('pGrad', tracesG, {
+    ...LAY,
+    xaxis:{title:'Depth (layers)'},
+    yaxis:{title:'Gradient magnitude',type:'log'},
+    shapes:[{type:'line',x0:0,x1:D,y0:1e-7,y1:1e-7,line:{color:'#dc2626',width:1,dash:'dash'}}],
+    height:260,legend:{orientation:'h',y:-0.28}
+  }, CFG);
+
+  // Info text
+  let txt = `At x = ${x0.toFixed(2)}:\n\n`;
+  for(const d of details){
+    const v = d.deriv;
+    const status = v >= 0.9 ? '✓ stable gradient' : v < 0.01 ? '✗ vanishes immediately' : v < 0.25 ? '⚠ shrinks quickly' : '~ moderate';
+    txt += `${d.name.padEnd(10)} |f′(x)| = ${v.toFixed(4)}   after 10 layers: ${d.g10.toExponential(2)}   after 20: ${d.g20.toExponential(2)}   ${status}\n`;
+  }
+  txt += `\nReLU has |f′(x)| = 1 when x > 0, so gradients don't vanish (but neurons can "die" when x < 0).`;
+  txt += `\nSigmoid's max |f′(x)| = 0.25, so after 20 layers the gradient ≤ 0.25²⁰ ≈ 9×10⁻¹³.`;
+  document.getElementById('info').textContent = txt;
+}
+
+update();
+</script>
+</body>
+</html>

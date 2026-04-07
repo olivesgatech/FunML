@@ -1,0 +1,282 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dropout Demo — Section 6.3</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--dead:#94a3b8}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1000px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:36px;text-align:right;font-weight:700;font-size:14px}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button:hover{background:var(--bg)}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .main-area{display:grid;grid-template-columns:1fr 280px;gap:16px}
+    canvas#net{display:block;cursor:pointer;border:1px solid var(--line);border-radius:12px;background:#fff}
+    .side{display:flex;flex-direction:column;gap:12px}
+    .side-card{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}
+    .side-card h3{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+    .stat-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px}
+    .stat-val{font-weight:700}
+    .stat-val.good{color:var(--green)}
+    .stat-val.warn{color:var(--gold)}
+    .stat-val.bad{color:var(--red)}
+    .legend{font-size:12px;color:var(--muted)}
+    .legend-item{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+    .dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.6;margin-top:12px;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:1fr}.main-area{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Dropout Demo — Section 6.3</h1>
+  <p class="sub">Click on any hidden neuron to toggle it on/off (simulate dropout). Observe how the active network changes and track the dropout rate.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Hidden neurons per layer</label>
+      <div class="row">
+        <input id="slH" type="range" min="3" max="8" step="1" value="5" oninput="rebuild()">
+        <span class="value" id="vH">5</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Hidden layers</label>
+      <div class="row">
+        <input id="slL" type="range" min="1" max="3" step="1" value="2" oninput="rebuild()">
+        <span class="value" id="vL">2</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Show mode</label>
+      <select id="selMode" style="width:100%;padding:7px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff" onchange="draw()">
+        <option value="both">Both (training vs inference)</option>
+        <option value="train">Training only</option>
+        <option value="infer">Inference only</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" onclick="randomDropout()">Random Dropout</button>
+    <button onclick="clearDropout()">Restore All</button>
+    <button onclick="dropHalf()">Drop 50%</button>
+  </div>
+
+  <div class="main-area">
+    <canvas id="net" width="620" height="440"></canvas>
+    <div class="side">
+      <div class="side-card">
+        <h3>Network Stats</h3>
+        <div class="stat-row"><span>Total hidden neurons</span><span class="stat-val" id="sTotal">—</span></div>
+        <div class="stat-row"><span>Active neurons</span><span class="stat-val good" id="sActive">—</span></div>
+        <div class="stat-row"><span>Dropped neurons</span><span class="stat-val bad" id="sDropped">—</span></div>
+        <div class="stat-row"><span>Effective dropout rate</span><span class="stat-val warn" id="sRate">—</span></div>
+        <div class="stat-row"><span>Active connections</span><span class="stat-val" id="sConn">—</span></div>
+      </div>
+      <div class="side-card">
+        <h3>Legend</h3>
+        <div class="legend">
+          <div class="legend-item"><div class="dot" style="background:#bfdbfe;border:2px solid #2563eb"></div>Active neuron</div>
+          <div class="legend-item"><div class="dot" style="background:#f1f5f9;border:2px solid #94a3b8"></div>Dropped neuron (click to restore)</div>
+          <div class="legend-item"><div class="dot" style="background:#86efac;border:2px solid #059669"></div>Input neuron</div>
+          <div class="legend-item"><div class="dot" style="background:#fca5a5;border:2px solid #dc2626"></div>Output neuron</div>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted)">Click any hidden neuron to toggle it on/off</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const canvas = document.getElementById('net');
+const ctx = canvas.getContext('2d');
+
+let H = 5, L = 2;
+let dropped = new Set();  // set of "layer_idx" strings for dropped neurons
+let neurons = [];  // [{x,y,layer,idx,type}]
+
+const COLORS = {active:'#bfdbfe',dropped:'#f1f5f9',input:'#86efac',output:'#fca5a5'};
+const BORDER = {active:'#2563eb',dropped:'#94a3b8',input:'#059669',output:'#dc2626'};
+const NR = 20;  // neuron radius
+
+function nodeKey(layer, idx){ return `${layer}_${idx}`; }
+
+function buildNeurons(){
+  neurons = [];
+  const W = canvas.width, ht = canvas.height;
+  const layers = [2, ...Array(L).fill(H), 1];  // input, hidden..., output
+  const totalLayers = layers.length;
+  const xStep = W / (totalLayers + 1);
+
+  for(let l=0; l<totalLayers; l++){
+    const n = layers[l];
+    const x = xStep * (l+1);
+    const yStep = ht / (n+1);
+    for(let i=0; i<n; i++){
+      const y = yStep * (i+1);
+      const type = l===0?'input':(l===totalLayers-1?'output':'hidden');
+      neurons.push({x,y,layer:l,idx:i,type,totalLayers});
+    }
+  }
+}
+
+function isActive(n){
+  if(n.type!=='hidden') return true;
+  return !dropped.has(nodeKey(n.layer,n.idx));
+}
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const totalLayers = L+2;
+
+  // Draw connections
+  for(let li=0; li<totalLayers-1; li++){
+    const fromNeurons = neurons.filter(n=>n.layer===li);
+    const toNeurons = neurons.filter(n=>n.layer===li+1);
+    for(const from of fromNeurons){
+      for(const to of toNeurons){
+        if(!isActive(from)||!isActive(to)) continue;
+        ctx.beginPath();
+        ctx.moveTo(from.x,from.y);
+        ctx.lineTo(to.x,to.y);
+        ctx.strokeStyle='#cbd5e1';
+        ctx.lineWidth=1;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw dropped connections (faint)
+  for(let li=0; li<totalLayers-1; li++){
+    const fromNeurons = neurons.filter(n=>n.layer===li);
+    const toNeurons = neurons.filter(n=>n.layer===li+1);
+    for(const from of fromNeurons){
+      for(const to of toNeurons){
+        if(isActive(from)&&isActive(to)) continue;
+        ctx.beginPath();
+        ctx.moveTo(from.x,from.y);
+        ctx.lineTo(to.x,to.y);
+        ctx.strokeStyle='#f1f5f9';
+        ctx.lineWidth=0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw neurons
+  for(const n of neurons){
+    const active = isActive(n);
+    const state = n.type!=='hidden'?n.type:(active?'active':'dropped');
+    ctx.beginPath();
+    ctx.arc(n.x,n.y,NR,0,2*Math.PI);
+    ctx.fillStyle = COLORS[state];
+    ctx.fill();
+    ctx.strokeStyle = BORDER[state];
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    if(!active){
+      ctx.beginPath();
+      ctx.moveTo(n.x-8,n.y-8); ctx.lineTo(n.x+8,n.y+8);
+      ctx.moveTo(n.x+8,n.y-8); ctx.lineTo(n.x-8,n.y+8);
+      ctx.strokeStyle='#94a3b8'; ctx.lineWidth=2; ctx.stroke();
+    }
+  }
+
+  updateStats();
+}
+
+function updateStats(){
+  const hidden = neurons.filter(n=>n.type==='hidden');
+  const total = hidden.length;
+  const droppedCount = dropped.size;
+  const activeCount = total - droppedCount;
+  const rate = total>0?(droppedCount/total*100).toFixed(0):0;
+
+  let activeConn=0;
+  const totalLayers=L+2;
+  for(let li=0;li<totalLayers-1;li++){
+    const from=neurons.filter(n=>n.layer===li);
+    const to=neurons.filter(n=>n.layer===li+1);
+    for(const f of from) for(const t of to) if(isActive(f)&&isActive(t)) activeConn++;
+  }
+
+  document.getElementById('sTotal').textContent=total;
+  document.getElementById('sActive').textContent=activeCount;
+  document.getElementById('sDropped').textContent=droppedCount;
+  document.getElementById('sRate').textContent=rate+'%';
+  document.getElementById('sConn').textContent=activeConn;
+
+  const rateNum = parseInt(rate);
+  const info = dropped.size===0
+    ? `No dropout applied — all neurons are active.\n\nDuring training, dropout randomly sets neurons to zero with probability p (dropout rate).\nThis prevents co-adaptation: neurons can't rely on specific other neurons.\n\nAt inference, all neurons are kept but outputs are scaled by (1−p) — or equivalently,\nduring training weights are scaled by 1/(1−p) ("inverted dropout").`
+    : `Dropout rate: ${rate}% of hidden neurons dropped.\n\n`+
+      `Active neurons: ${activeCount} / ${total}\n`+
+      `Active connections: ${activeConn}\n\n`+
+      (rateNum>60
+        ? `⚠ High dropout (${rate}%) — network capacity is very limited. May underfit.`
+        : rateNum<20
+        ? `Low dropout (${rate}%) — mild regularization effect.`
+        : `Moderate dropout (${rate}%) — typical range is 20–50% for hidden layers.`);
+  document.getElementById('info').textContent=info;
+}
+
+canvas.addEventListener('click', e=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(canvas.width/rect.width);
+  const my=(e.clientY-rect.top)*(canvas.height/rect.height);
+  for(const n of neurons){
+    if(n.type!=='hidden') continue;
+    const d=Math.sqrt((mx-n.x)**2+(my-n.y)**2);
+    if(d<=NR){
+      const k=nodeKey(n.layer,n.idx);
+      if(dropped.has(k)) dropped.delete(k); else dropped.add(k);
+      draw(); return;
+    }
+  }
+});
+
+function rebuild(){
+  H=parseInt(document.getElementById('slH').value);
+  L=parseInt(document.getElementById('slL').value);
+  document.getElementById('vH').textContent=H;
+  document.getElementById('vL').textContent=L;
+  dropped.clear(); buildNeurons(); draw();
+}
+
+function randomDropout(){
+  dropped.clear();
+  const p=0.5;
+  for(const n of neurons){
+    if(n.type==='hidden'&&Math.random()<p) dropped.add(nodeKey(n.layer,n.idx));
+  }
+  draw();
+}
+function clearDropout(){ dropped.clear(); draw(); }
+function dropHalf(){
+  dropped.clear();
+  const hidden=neurons.filter(n=>n.type==='hidden');
+  const half=Math.floor(hidden.length/2);
+  const shuffled=[...hidden].sort(()=>Math.random()-.5);
+  for(let i=0;i<half;i++) dropped.add(nodeKey(shuffled[i].layer,shuffled[i].idx));
+  draw();
+}
+
+rebuild();
+</script>
+</body>
+</html>

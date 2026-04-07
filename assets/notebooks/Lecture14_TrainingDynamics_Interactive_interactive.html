@@ -1,0 +1,302 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Training Dynamics — Section 6.4.2</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:44px;text-align:right;font-weight:700;font-size:14px}
+    select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}
+    .actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button:hover{background:var(--bg)}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    button.primary:hover{background:#1d4ed8}
+    button.stop{background:var(--red);color:#fff;border-color:var(--red)}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .status{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Training Dynamics — Section 6.4.2</h1>
+  <p class="sub">Train a small neural network on a toy dataset and compare how different activation functions affect convergence speed and final accuracy.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Activation function</label>
+      <select id="selAct" onchange="resetTrain()">
+        <option value="sigmoid">Sigmoid</option>
+        <option value="tanh">Tanh</option>
+        <option value="softplus">Softplus</option>
+        <option value="relu" selected>ReLU</option>
+        <option value="hinge">Hinge (shifted)</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Learning rate</label>
+      <div class="row">
+        <input id="slLR" type="range" min="-3" max="0" step="0.25" value="-1" oninput="onLRChange()">
+        <span class="value" id="vLR">0.1</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Dataset</label>
+      <select id="selData" onchange="rebuildData();resetTrain()">
+        <option value="circles">Circles</option>
+        <option value="xor">XOR</option>
+        <option value="moons">Moons</option>
+      </select>
+    </div>
+    <div class="control">
+      <label>Hidden units</label>
+      <div class="row">
+        <input id="slH" type="range" min="4" max="16" step="2" value="8" oninput="resetTrain()">
+        <span class="value" id="vH">8</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btnRun" onclick="startStop()">▶ Train</button>
+    <button onclick="step100()">+100 steps</button>
+    <button onclick="resetTrain()">Reset</button>
+    <button onclick="rebuildData();resetTrain()">New Data</button>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Training Loss</div>
+      <div id="pLoss" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Decision boundary (after current training)</div>
+      <div id="pBound" class="plot"></div>
+    </div>
+  </div>
+  <div class="status" id="statusBar">Press ▶ Train to start.</div>
+</div>
+
+<script>
+// ── activations ────────────────────────────────────────────────────────────────
+const ACT = {
+  sigmoid:  {f:x=>1/(1+Math.exp(-Math.max(-30,Math.min(30,x)))),  df:x=>{const s=1/(1+Math.exp(-Math.max(-30,Math.min(30,x))));return s*(1-s);}},
+  tanh:     {f:x=>Math.tanh(x),  df:x=>{const t=Math.tanh(x);return 1-t*t;}},
+  softplus: {f:x=>Math.log(1+Math.exp(Math.min(x,30))),  df:x=>1/(1+Math.exp(-Math.min(x,30)))},
+  relu:     {f:x=>Math.max(0,x), df:x=>x>0?1:0},
+  hinge:    {f:x=>Math.max(0,x+1), df:x=>x>-1?1:0},
+};
+
+// ── dataset generators ─────────────────────────────────────────────────────────
+function prng(seed){let s=seed>>>0;return()=>{s^=s<<13;s^=s>>17;s^=s<<5;return(s>>>0)/0x100000000;}}
+
+function makeCircles(n,seed){
+  const r=prng(seed);const X=[],y=[];
+  for(let i=0;i<n;i++){
+    const angle=r()*2*Math.PI,inner=Math.floor(i*2/n)===0;
+    const radius=inner?(0.3+r()*0.2):(0.7+r()*0.2);
+    X.push([Math.cos(angle)*radius,Math.sin(angle)*radius]);
+    y.push(inner?0:1);
+  }
+  return {X,y};
+}
+function makeXOR(n,seed){
+  const r=prng(seed);const X=[],y=[];
+  for(let i=0;i<n;i++){
+    const x1=r()*2-1,x2=r()*2-1;
+    X.push([x1,x2]);
+    y.push((x1>0)!==(x2>0)?1:0);
+  }
+  return {X,y};
+}
+function makeMoons(n,seed){
+  const r=prng(seed);const X=[],y=[];
+  for(let i=0;i<n;i++){
+    const t=Math.PI*i/n;
+    const noise=()=>(r()-0.5)*0.2;
+    if(i<n/2){X.push([Math.cos(t)+noise(),Math.sin(t)+noise()]);y.push(0);}
+    else{X.push([1-Math.cos(t)+noise(),-Math.sin(t)+0.5+noise()]);y.push(1);}
+  }
+  return {X,y};
+}
+
+// ── MLP ───────────────────────────────────────────────────────────────────────
+function randn(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function initNet(H,seed){
+  const r=prng(seed);
+  const s=Math.sqrt(2);
+  return {
+    W1:Array.from({length:H},()=>[randn(r)*s,randn(r)*s]),
+    b1:Array(H).fill(0),
+    W2:Array.from({length:1},()=>Array.from({length:H},()=>randn(r)*s/Math.sqrt(H))),
+    b2:[0],
+  };
+}
+
+function forward(net,x,act){
+  const {f}=act;
+  const z1=net.W1.map((w,i)=>w[0]*x[0]+w[1]*x[1]+net.b1[i]);
+  const a1=z1.map(f);
+  const z2=net.W2[0].reduce((s,w,i)=>s+w*a1[i],0)+net.b2[0];
+  const a2=1/(1+Math.exp(-Math.max(-30,Math.min(30,z2))));
+  return {z1,a1,z2,a2};
+}
+
+function trainStep(net,X,y,lr,act){
+  const {f,df}=act;
+  const N=X.length,H=net.W1.length;
+  const dW1=net.W1.map(()=>[0,0]),db1=Array(H).fill(0);
+  const dW2=[Array(H).fill(0)],db2=[0];
+  let loss=0;
+
+  for(let n=0;n<N;n++){
+    const {z1,a1,z2,a2}=forward(net,X[n],act);
+    const err=-( y[n]*Math.log(Math.max(1e-15,a2))+(1-y[n])*Math.log(Math.max(1e-15,1-a2)) );
+    loss+=err;
+    // output grad
+    const dz2=a2-y[n];
+    for(let h=0;h<H;h++){dW2[0][h]+=dz2*a1[h];}
+    db2[0]+=dz2;
+    // hidden grad
+    for(let h=0;h<H;h++){
+      const dz1=dz2*net.W2[0][h]*df(z1[h]);
+      dW1[h][0]+=dz1*X[n][0]; dW1[h][1]+=dz1*X[n][1]; db1[h]+=dz1;
+    }
+  }
+  // update
+  for(let h=0;h<H;h++){
+    net.W1[h][0]-=lr*dW1[h][0]/N; net.W1[h][1]-=lr*dW1[h][1]/N; net.b1[h]-=lr*db1[h]/N;
+    net.W2[0][h]-=lr*dW2[0][h]/N;
+  }
+  net.b2[0]-=lr*db2[0]/N;
+  return loss/N;
+}
+
+function accuracy(net,X,y,act){
+  let c=0;
+  for(let i=0;i<X.length;i++){const{a2}=forward(net,X[i],act);c+=((a2>0.5?1:0)===y[i]?1:0);}
+  return c/X.length;
+}
+
+// ── state ─────────────────────────────────────────────────────────────────────
+let dataset={X:[],y:[]}, net=null, losses=[], stepCount=0, animId=null, running=false;
+let lr=0.1, dataSeed=42;
+
+function getParams(){
+  const actName=document.getElementById('selAct').value;
+  const H=parseInt(document.getElementById('slH').value);
+  document.getElementById('vH').textContent=H;
+  return {actName,act:ACT[actName],H};
+}
+function onLRChange(){
+  lr=Math.pow(10,parseFloat(document.getElementById('slLR').value));
+  document.getElementById('vLR').textContent=lr<0.01?lr.toExponential(1):lr.toFixed(3);
+}
+
+function rebuildData(){
+  dataSeed=Math.floor(Math.random()*999)+1;
+  const mode=document.getElementById('selData').value;
+  if(mode==='circles') dataset=makeCircles(100,dataSeed);
+  else if(mode==='xor') dataset=makeXOR(100,dataSeed);
+  else dataset=makeMoons(100,dataSeed);
+}
+
+function resetTrain(){
+  stopAnim();
+  const{H}=getParams();
+  net=initNet(H,1);
+  losses=[]; stepCount=0;
+  drawLoss(); drawBoundary(); updateStatus();
+}
+
+function doSteps(n){
+  const{act}=getParams();
+  for(let i=0;i<n;i++){
+    losses.push(trainStep(net,dataset.X,dataset.y,lr,act));
+    stepCount++;
+  }
+}
+
+function step100(){doSteps(100);drawLoss();drawBoundary();updateStatus();}
+
+function animate(){
+  if(!running) return;
+  doSteps(10);
+  if(stepCount%50===0){drawLoss();drawBoundary();}
+  updateStatus();
+  animId=requestAnimationFrame(animate);
+}
+
+function startStop(){
+  running=!running;
+  document.getElementById('btnRun').textContent=running?'⏸ Pause':'▶ Train';
+  document.getElementById('btnRun').className=running?'primary stop':'primary';
+  if(running) animate();
+}
+function stopAnim(){running=false;if(animId){cancelAnimationFrame(animId);animId=null;}document.getElementById('btnRun').textContent='▶ Train';document.getElementById('btnRun').className='primary';}
+
+const CFG={responsive:true,displayModeBar:false};
+
+function drawLoss(){
+  Plotly.react('pLoss',[{y:losses,type:'scatter',mode:'lines',line:{color:'#2563eb',width:2},name:'loss'}],{
+    margin:{t:5,b:34,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Step'},yaxis:{title:'Binary cross-entropy'},height:300
+  },CFG);
+}
+
+function drawBoundary(){
+  const{act}=getParams();
+  if(!net) return;
+  const res=40;
+  const xs=Array.from({length:res},(_,i)=>-1.2+i*2.4/(res-1));
+  const z=[],x_=[],y_=[];
+  for(let i=0;i<res;i++){for(let j=0;j<res;j++){
+    const pred=forward(net,[xs[j],xs[i]],act).a2;
+    z.push(pred); x_.push(xs[j]); y_.push(xs[i]);
+  }}
+  const zz=Array.from({length:res},(_,i)=>z.slice(i*res,(i+1)*res));
+
+  const c0={x:dataset.X.filter((_,i)=>dataset.y[i]===0).map(p=>p[0]),y:dataset.X.filter((_,i)=>dataset.y[i]===0).map(p=>p[1])};
+  const c1={x:dataset.X.filter((_,i)=>dataset.y[i]===1).map(p=>p[0]),y:dataset.X.filter((_,i)=>dataset.y[i]===1).map(p=>p[1])};
+
+  Plotly.react('pBound',[
+    {z:zz,x:xs,y:xs,type:'heatmap',colorscale:[[0,'#eff6ff'],[0.5,'#f8fafc'],[1,'#fef2f2']],showscale:false,zmin:0,zmax:1},
+    {x:c0.x,y:c0.y,mode:'markers',type:'scatter',marker:{color:'#2563eb',size:7,line:{color:'#fff',width:1}},name:'Class 0'},
+    {x:c1.x,y:c1.y,mode:'markers',type:'scatter',marker:{color:'#dc2626',symbol:'square',size:7,line:{color:'#fff',width:1}},name:'Class 1'},
+  ],{
+    margin:{t:5,b:5,l:5,r:5},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{visible:false,range:[-1.2,1.2]},yaxis:{visible:false,range:[-1.2,1.2]},height:300,
+    legend:{x:0,y:1,bgcolor:'rgba(255,255,255,0.8)'}
+  },CFG);
+}
+
+function updateStatus(){
+  const{act,actName}=getParams();
+  const acc=net?accuracy(net,dataset.X,dataset.y,act):0;
+  const lastLoss=losses.length?losses[losses.length-1]:null;
+  document.getElementById('statusBar').textContent=
+    `Step: ${stepCount}   Loss: ${lastLoss!==null?lastLoss.toFixed(4):'—'}   Accuracy: ${(acc*100).toFixed(1)}%   Activation: ${actName}   LR: ${lr}`;
+}
+
+// Init
+onLRChange(); rebuildData(); resetTrain();
+</script>
+</body>
+</html>
