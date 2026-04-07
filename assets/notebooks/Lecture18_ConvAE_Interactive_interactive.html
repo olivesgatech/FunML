@@ -145,6 +145,7 @@ function drawArch(arch) {
   const gap = 1 / (n + 1);
   const boxH = 0.38;
   const yCenter = 0.55;
+  const hh = boxH / 2;
 
   const shapes = [];
   const annotations = [];
@@ -153,7 +154,6 @@ function drawArch(arch) {
     const s = stages[i];
     const xc = (i + 1) * gap;
     const hw = s.w / 2;
-    const hh = boxH / 2;
 
     // Box
     shapes.push({
