@@ -1,0 +1,314 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Weight Init + Activation Histograms Playground</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .ctrl select,.ctrl input[type=range]{width:100%;margin-top:2px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:36px;text-align:right;font-weight:700;font-size:13px}
+    .actions{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;cursor:pointer;font-size:13px;font-weight:700}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    button.primary:hover{background:#1d4ed8}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:260px}
+    .layer-grid{display:grid;gap:6px;margin-bottom:10px}
+    .layer-row{display:flex;gap:6px;align-items:center;font-size:12px}
+    .layer-label{min-width:60px;font-weight:700;font-size:11px;color:var(--muted)}
+    .layer-bar-wrap{flex:1;background:#e2e8f0;border-radius:4px;height:18px;overflow:hidden;position:relative}
+    .layer-bar{height:100%;border-radius:4px;transition:width 0.3s}
+    .layer-val{min-width:55px;text-align:right;font-size:11px;font-weight:700;font-family:monospace}
+    .status-badge{padding:2px 7px;border-radius:6px;font-size:10px;font-weight:700;min-width:60px;text-align:center}
+    .stat-ok{background:#d1fae5;color:#065f46}
+    .stat-warn{background:#fef3c7;color:#92400e}
+    .stat-dead{background:#fee2e2;color:#991b1b}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.6;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Weight Init + Activation/Gradient Histograms — Sections 10–11</h1>
+  <p class="sub">Simulate a forward+backward pass through a deep MLP. See how weight initialization affects activation variance and gradient flow per layer.</p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Initialization scheme</label>
+      <select id="selInit" onchange="simulate()">
+        <option value="zeros">Zeros (broken)</option>
+        <option value="large">Large random (σ=2.0, unstable)</option>
+        <option value="small">Small random (σ=0.01, vanishing)</option>
+        <option value="xavier" selected>Xavier / Glorot</option>
+        <option value="kaiming">Kaiming / He (ReLU)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Activation function</label>
+      <select id="selAct" onchange="simulate()">
+        <option value="sigmoid">Sigmoid</option>
+        <option value="tanh" selected>Tanh</option>
+        <option value="relu">ReLU</option>
+        <option value="leakyrelu">Leaky ReLU (0.01)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Network depth (layers)</label>
+      <div class="row">
+        <input id="slDepth" type="range" min="3" max="10" step="1" value="6" oninput="simulate()">
+        <span class="val" id="vDepth">6</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Layer width (neurons)</label>
+      <div class="row">
+        <input id="slWidth" type="range" min="16" max="128" step="16" value="64" oninput="simulate()">
+        <span class="val" id="vWidth">64</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" onclick="simulate()">▶ Simulate Forward + Backward</button>
+    <button onclick="setPreset('working')">✓ Working config</button>
+    <button onclick="setPreset('vanishing')">⚠ Vanishing gradients</button>
+    <button onclick="setPreset('exploding')">⚠ Exploding activations</button>
+    <button onclick="setPreset('dead')">⚠ Dead neurons (ReLU)</button>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Activation std per layer (forward pass)</div>
+      <div id="pAct" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Gradient norm per layer (backward pass)</div>
+      <div id="pGrad" class="plot"></div>
+    </div>
+  </div>
+
+  <div class="plot-card" style="margin-bottom:10px">
+    <div class="plot-title">Activation histogram — layer by layer</div>
+    <div id="pHist" style="height:220px"></div>
+  </div>
+
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const CFG={responsive:true,displayModeBar:false};
+
+// Simple seeded PRNG (Mulberry32)
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+
+let rng=mulberry32(42);
+function randn(){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function randnArr(n){return Array.from({length:n},randn);}
+function randnMat(r,c){return Array.from({length:r},()=>randnArr(c));}
+
+function initScale(scheme,fanIn,fanOut,activation){
+  if(scheme==='zeros') return 0;
+  if(scheme==='large') return 2.0;
+  if(scheme==='small') return 0.01;
+  if(scheme==='xavier') return Math.sqrt(2/(fanIn+fanOut));
+  if(scheme==='kaiming') return Math.sqrt(2/fanIn);
+  return 0.1;
+}
+
+function applyAct(x,act){
+  if(act==='sigmoid') return 1/(1+Math.exp(-x));
+  if(act==='tanh') return Math.tanh(x);
+  if(act==='relu') return Math.max(0,x);
+  if(act==='leakyrelu') return x>=0?x:0.01*x;
+  return x;
+}
+function actDerivative(x,act){
+  if(act==='sigmoid'){const s=1/(1+Math.exp(-x));return s*(1-s);}
+  if(act==='tanh'){const t=Math.tanh(x);return 1-t*t;}
+  if(act==='relu') return x>0?1:0;
+  if(act==='leakyrelu') return x>0?1:0.01;
+  return 1;
+}
+
+// matmul: (batch,n) x (n,m) → (batch,m)
+function matmul(A,B){
+  const bsz=A.length, n=B.length, m=B[0].length;
+  return A.map(row=>{
+    const out=new Array(m).fill(0);
+    for(let j=0;j<m;j++) for(let k=0;k<n;k++) out[j]+=row[k]*B[k][j];
+    return out;
+  });
+}
+
+function simulate(){
+  rng=mulberry32(42); // reset seed for reproducibility
+  const scheme=document.getElementById('selInit').value;
+  const act=document.getElementById('selAct').value;
+  const depth=parseInt(document.getElementById('slDepth').value);
+  const width=parseInt(document.getElementById('slWidth').value);
+  document.getElementById('vDepth').textContent=depth;
+  document.getElementById('vWidth').textContent=width;
+
+  const batchSize=32;
+
+  // Build weight matrices
+  const Ws=[];
+  for(let l=0;l<depth;l++){
+    const sc=initScale(scheme,width,width,act);
+    const W=randnMat(width,width).map(row=>row.map(v=>v*sc));
+    Ws.push(W);
+  }
+
+  // Forward pass
+  let h=Array.from({length:batchSize},()=>randnArr(width)); // input ~ N(0,1)
+  const preActivations=[];  // pre-activation z values per layer
+  const activations=[h.map(row=>[...row])];  // layer 0 = input
+
+  for(let l=0;l<depth;l++){
+    const z=matmul(h,Ws[l]);
+    preActivations.push(z);
+    h=z.map(row=>row.map(x=>applyAct(x,act)));
+    activations.push(h.map(row=>[...row]));
+  }
+
+  // Backward pass: dL/dh_last = h_last (simple MSE-like gradient)
+  let delta=activations[depth].map(row=>row.map(x=>x/batchSize));
+  const gradNorms=[];
+  for(let l=depth-1;l>=0;l--){
+    // delta shape: (batch, width)
+    // dL/dz_l = delta * act'(z_l)
+    const dz=delta.map((row,b)=>row.map((d,j)=>d*actDerivative(preActivations[l][b][j],act)));
+    // grad w.r.t. W_l: sum over batch of h_l^T @ dz
+    let gnorm=0;
+    for(let b=0;b<batchSize;b++) for(let j=0;j<width;j++) gnorm+=dz[b][j]*dz[b][j];
+    gradNorms.unshift(Math.sqrt(gnorm/batchSize));
+    // backprop: delta = dz @ W_l^T
+    delta=dz.map(row=>{
+      const out=new Array(width).fill(0);
+      for(let k=0;k<width;k++) for(let j=0;j<width;j++) out[k]+=row[j]*Ws[l][k][j];
+      return out;
+    });
+  }
+
+  // Compute stats per layer
+  const actStds=activations.map(layer=>{
+    const flat=layer.flat();
+    const mean=flat.reduce((a,b)=>a+b,0)/flat.length;
+    const variance=flat.reduce((s,v)=>s+(v-mean)**2,0)/flat.length;
+    return Math.sqrt(variance);
+  });
+  const deadFracs=activations.slice(1).map(layer=>{
+    const flat=layer.flat();
+    return flat.filter(v=>Math.abs(v)<1e-4).length/flat.length;
+  });
+
+  const layerLabels=['Input',...Array.from({length:depth},(_,i)=>`L${i+1}`)];
+  const gradLabels=Array.from({length:depth},(_,i)=>`L${i+1}`);
+
+  // Color by health
+  function healthColor(std,deadFrac){
+    if(std<0.01||deadFrac>0.8) return '#dc2626';  // dead/vanishing
+    if(std>5||deadFrac>0.4) return '#d97706';       // exploding/warning
+    return '#059669';                                // healthy
+  }
+
+  const barColors=actStds.map((std,i)=>healthColor(std,i>0?deadFracs[i-1]:0));
+  const gradColors=gradNorms.map((g)=>g<1e-6?'#dc2626':g>10?'#d97706':'#7c3aed');
+
+  // Plot 1: activation std per layer
+  Plotly.react('pAct',[{
+    x:layerLabels, y:actStds, type:'bar',
+    marker:{color:barColors},name:'Act std'
+  },{
+    x:layerLabels, y:Array(depth+1).fill(1), type:'scatter', mode:'lines',
+    line:{color:'#059669',dash:'dash',width:1}, name:'σ=1 (ideal)', showlegend:true
+  }],{
+    margin:{t:8,b:40,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Layer'},yaxis:{title:'Activation std',type:'log'},
+    legend:{x:0.7,y:1,font:{size:10}},height:260
+  },CFG);
+
+  // Plot 2: gradient norm per layer
+  Plotly.react('pGrad',[{
+    x:gradLabels, y:gradNorms, type:'bar',
+    marker:{color:gradColors},name:'Grad norm'
+  }],{
+    margin:{t:8,b:40,l:60,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Layer'},yaxis:{title:'Gradient norm',type:'log'},
+    height:260
+  },CFG);
+
+  // Plot 3: activation histograms (show first, middle, last layer)
+  const layerIndices=[1, Math.floor(depth/2)+1, depth];
+  const histColors=['#2563eb','#7c3aed','#059669'];
+  const histTraces=layerIndices.map((li,i)=>{
+    const vals=activations[li].flat();
+    return{x:vals,type:'histogram',opacity:0.6,nbinsx:40,
+      name:`Layer ${li}`,marker:{color:histColors[i]}};
+  });
+  Plotly.react('pHist',histTraces,{
+    barmode:'overlay',margin:{t:8,b:40,l:54,r:8},
+    paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Activation value'},yaxis:{title:'Count'},
+    legend:{x:0.8,y:1,font:{size:10}},height:220
+  },CFG);
+
+  // Info
+  const overallActStd=actStds[actStds.length-1].toFixed(4);
+  const overallGradNorm=gradNorms[0].toFixed(6);
+  const maxDeadFrac=(Math.max(...deadFracs)*100).toFixed(1);
+  let diagnosis='';
+  if(scheme==='zeros') diagnosis='⛔ ALL ZEROS: symmetry breaking fails — all neurons learn the same thing. Gradients are identical, no differentiation.';
+  else if(actStds[depth]<0.01) diagnosis='⛔ VANISHING: activations near zero at last layer. Gradients will vanish — network cannot learn.';
+  else if(actStds[depth]>5) diagnosis='⚠ EXPLODING: activations too large. Gradients may explode — use smaller scale or batch norm.';
+  else if(parseFloat(maxDeadFrac)>50) diagnosis='⚠ DEAD NEURONS: >50% neurons output ~0 (ReLU collapse). Try Kaiming init or Leaky ReLU.';
+  else diagnosis='✓ HEALTHY: activations and gradients propagate stably through all layers.';
+
+  document.getElementById('info').textContent=
+`Configuration: ${scheme} init | ${act} activation | ${depth} layers | width=${width}
+
+Layer stats (activation std):
+${actStds.map((s,i)=>`  ${layerLabels[i].padEnd(7)} std=${s.toFixed(4).padEnd(8)} ${s<0.01?'⛔ vanishing':s>5?'⚠ exploding':'✓ ok'}`).join('\n')}
+
+Gradient norms (layer ${depth} → layer 1):
+${gradNorms.map((g,i)=>`  L${(i+1).toString().padEnd(3)}  norm=${g.toFixed(6)}  ${g<1e-6?'⛔ vanished':g>10?'⚠ exploding':'✓ ok'}`).join('\n')}
+
+Dead neuron fraction (max): ${maxDeadFrac}%
+
+${diagnosis}
+
+Xavier init: W ~ N(0, 2/(fan_in + fan_out))  — balanced for sigmoid/tanh
+Kaiming init: W ~ N(0, 2/fan_in)             — designed for ReLU (accounts for half-rectification)`;
+}
+
+function setPreset(name){
+  const si=document.getElementById('selInit');
+  const sa=document.getElementById('selAct');
+  const sd=document.getElementById('slDepth');
+  const sw=document.getElementById('slWidth');
+  if(name==='working'){si.value='xavier';sa.value='tanh';sd.value=6;sw.value=64;}
+  else if(name==='vanishing'){si.value='small';sa.value='sigmoid';sd.value=8;sw.value=64;}
+  else if(name==='exploding'){si.value='large';sa.value='relu';sd.value=6;sw.value=64;}
+  else if(name==='dead'){si.value='zeros';sa.value='relu';sd.value=6;sw.value=64;}
+  simulate();
+}
+
+simulate();
+</script>
+</body>
+</html>

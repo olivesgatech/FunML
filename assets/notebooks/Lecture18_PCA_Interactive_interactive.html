@@ -1,0 +1,328 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PCA — Section 2.2</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:40px;text-align:right;font-weight:700;font-size:13px}
+    select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;margin-top:2px}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.6;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>PCA — Section 2.2</h1>
+  <p class="sub">Principal components find the axes of maximum variance. A linear autoencoder learns the same subspace as PCA.</p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label># Points N</label>
+      <div class="row">
+        <input id="slN" type="range" min="50" max="500" step="50" value="200" oninput="update()">
+        <span class="val" id="vN">200</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Data angle θ°</label>
+      <div class="row">
+        <input id="slTheta" type="range" min="0" max="90" step="5" value="30" oninput="update()">
+        <span class="val" id="vTheta">30°</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Variance ratio σ₁/σ₂</label>
+      <div class="row">
+        <input id="slVar" type="range" min="1" max="20" step="1" value="10" oninput="update()">
+        <span class="val" id="vVar">10</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show components</label>
+      <select id="selPC" onchange="update()">
+        <option value="1">1 PC</option>
+        <option value="2" selected>2 PCs</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Data + Principal Components</div>
+      <div id="pScatter" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Explained Variance</div>
+      <div id="pVar" class="plot"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const CFG = {responsive: true, displayModeBar: false};
+
+// Seeded RNG — Mulberry32
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Box-Muller — returns two standard normals using the provided rng
+function randn2(rng) {
+  let u, v;
+  do { u = rng(); } while (u === 0);
+  v = rng();
+  const mag = Math.sqrt(-2 * Math.log(u));
+  return [mag * Math.cos(2 * Math.PI * v), mag * Math.sin(2 * Math.PI * v)];
+}
+
+// Generate N samples from N(0, C) where C = R * diag(s1^2, s2^2) * R^T
+// R = rotation by theta; s1 = varRatio, s2 = 1
+function generateData(N, thetaDeg, varRatio) {
+  const rng = mulberry32(0xDEADBEEF);
+  const theta = thetaDeg * Math.PI / 180;
+  const cos = Math.cos(theta), sin = Math.sin(theta);
+  const s1 = varRatio, s2 = 1;
+
+  // Cholesky of C: L = R * diag(s1, s2)
+  // x = L * z  where z ~ N(0, I)
+  const xs = [], ys = [];
+  for (let i = 0; i < N; i++) {
+    const [z1, z2] = randn2(rng);
+    // rotated: x = cos*s1*z1 - sin*s2*z2,  y = sin*s1*z1 + cos*s2*z2
+    xs.push(cos * s1 * z1 - sin * s2 * z2);
+    ys.push(sin * s1 * z1 + cos * s2 * z2);
+  }
+
+  // Center
+  const mx = xs.reduce((a, b) => a + b, 0) / N;
+  const my = ys.reduce((a, b) => a + b, 0) / N;
+  for (let i = 0; i < N; i++) { xs[i] -= mx; ys[i] -= my; }
+
+  return {xs, ys};
+}
+
+// Compute 2x2 covariance matrix: C = X^T X / N
+// Returns {c00, c01, c10, c11}
+function covMatrix(xs, ys) {
+  const N = xs.length;
+  let c00 = 0, c01 = 0, c11 = 0;
+  for (let i = 0; i < N; i++) {
+    c00 += xs[i] * xs[i];
+    c01 += xs[i] * ys[i];
+    c11 += ys[i] * ys[i];
+  }
+  return {c00: c00/N, c01: c01/N, c10: c01/N, c11: c11/N};
+}
+
+// Eigendecomposition of symmetric 2x2 matrix [[a,b],[b,d]]
+// Returns [{lambda, vec}, ...] sorted descending by lambda
+function eig2x2(a, b, d) {
+  const trace = a + d;
+  const det = a * d - b * b;
+  const disc = Math.sqrt(Math.max(0, trace * trace / 4 - det));
+  const l1 = trace / 2 + disc;
+  const l2 = trace / 2 - disc;
+
+  // Eigenvector for l1: (C - l1*I)v = 0
+  // [a-l1, b; b, d-l1] * v = 0
+  // Use the larger-magnitude row
+  function eigvec(lam) {
+    const r0a = a - lam, r0b = b;
+    const r1a = b,       r1b = d - lam;
+    const mag0 = Math.sqrt(r0a*r0a + r0b*r0b);
+    const mag1 = Math.sqrt(r1a*r1a + r1b*r1b);
+    let vx, vy;
+    if (mag0 >= mag1 && mag0 > 1e-12) {
+      vx = -r0b; vy = r0a;
+    } else if (mag1 > 1e-12) {
+      vx = -r1b; vy = r1a;
+    } else {
+      vx = 1; vy = 0;
+    }
+    const len = Math.sqrt(vx*vx + vy*vy);
+    return [vx/len, vy/len];
+  }
+
+  const v1 = eigvec(l1);
+  const v2 = eigvec(l2);
+
+  return [
+    {lambda: l1, vec: v1},
+    {lambda: l2, vec: v2}
+  ];
+}
+
+function update() {
+  const N        = parseInt(document.getElementById('slN').value);
+  const thetaDeg = parseInt(document.getElementById('slTheta').value);
+  const varRatio = parseInt(document.getElementById('slVar').value);
+  const nPC      = parseInt(document.getElementById('selPC').value);
+
+  document.getElementById('vN').textContent     = N;
+  document.getElementById('vTheta').textContent = thetaDeg + '°';
+  document.getElementById('vVar').textContent   = varRatio;
+
+  // Generate data
+  const {xs, ys} = generateData(N, thetaDeg, varRatio);
+
+  // Covariance & PCA
+  const C = covMatrix(xs, ys);
+  const pcs = eig2x2(C.c00, C.c01, C.c11);
+  const totalVar = pcs[0].lambda + pcs[1].lambda;
+  const explained = pcs.map(pc => pc.lambda / totalVar * 100);
+
+  // PC arrows: centroid is (0,0) since data is centered
+  // arrow end = eigenvector * sqrt(eigenvalue) * 2
+  const arrowColors = ['#2563eb', '#dc2626'];
+  const arrowTraces = [];
+
+  for (let i = 0; i < nPC; i++) {
+    const scale = Math.sqrt(Math.max(0, pcs[i].lambda)) * 2;
+    const ex = pcs[i].vec[0] * scale;
+    const ey = pcs[i].vec[1] * scale;
+    const col = arrowColors[i];
+
+    // Forward arrow
+    arrowTraces.push({
+      x: [0, ex], y: [0, ey],
+      mode: 'lines',
+      line: {color: col, width: 3},
+      showlegend: false,
+      hoverinfo: 'skip'
+    });
+    // Backward arrow
+    arrowTraces.push({
+      x: [0, -ex], y: [0, -ey],
+      mode: 'lines',
+      line: {color: col, width: 3},
+      showlegend: false,
+      hoverinfo: 'skip'
+    });
+    // Arrowhead marker at tip
+    arrowTraces.push({
+      x: [ex], y: [ey],
+      mode: 'markers',
+      marker: {symbol: 'triangle-up', size: 10, color: col,
+               angle: Math.atan2(ey, ex) * 180 / Math.PI - 90},
+      showlegend: false,
+      hoverinfo: 'skip'
+    });
+    // Arrowhead at negative tip
+    arrowTraces.push({
+      x: [-ex], y: [-ey],
+      mode: 'markers',
+      marker: {symbol: 'triangle-up', size: 10, color: col,
+               angle: Math.atan2(-ey, -ex) * 180 / Math.PI - 90},
+      showlegend: false,
+      hoverinfo: 'skip'
+    });
+    // Legend entry
+    arrowTraces.push({
+      x: [null], y: [null],
+      mode: 'lines',
+      line: {color: col, width: 3},
+      name: `PC${i+1} (${explained[i].toFixed(1)}%)`,
+      showlegend: true
+    });
+  }
+
+  // Scatter trace
+  const scatterTrace = {
+    x: xs, y: ys,
+    mode: 'markers',
+    marker: {color: '#94a3b8', size: 5, opacity: 0.55},
+    name: 'Data',
+    type: 'scatter'
+  };
+
+  // Auto axis range
+  const allVals = [...xs, ...ys];
+  const maxAbs = Math.max(...allVals.map(Math.abs)) * 1.2 || 5;
+
+  Plotly.react('pScatter',
+    [scatterTrace, ...arrowTraces],
+    {
+      xaxis: {range: [-maxAbs, maxAbs], zeroline: true, zerolinecolor: '#cbd5e1',
+              title: 'x₁', gridcolor: '#e2e8f0'},
+      yaxis: {range: [-maxAbs, maxAbs], zeroline: true, zerolinecolor: '#cbd5e1',
+              title: 'x₂', scaleanchor: 'x', scaleratio: 1, gridcolor: '#e2e8f0'},
+      margin: {t: 8, b: 40, l: 50, r: 8},
+      paper_bgcolor: '#fff', plot_bgcolor: '#f8fafc',
+      height: 300,
+      legend: {x: 0.01, y: 0.99, bgcolor: 'rgba(255,255,255,0.85)', font: {size: 11}}
+    },
+    CFG
+  );
+
+  // Explained variance bar chart (horizontal)
+  const barColors = ['#2563eb', '#dc2626'];
+  const labels = ['PC1', 'PC2'];
+  // Show both PCs always in bar chart for context, but highlight active ones
+  const barTrace = {
+    x: [explained[0], explained[1]],
+    y: ['PC1', 'PC2'],
+    type: 'bar',
+    orientation: 'h',
+    marker: {
+      color: ['#2563eb', '#dc2626'],
+      opacity: [1, nPC >= 2 ? 1 : 0.3]
+    },
+    text: [explained[0].toFixed(1) + '%', explained[1].toFixed(1) + '%'],
+    textposition: 'outside',
+    cliponaxis: false,
+    hoverinfo: 'x+y'
+  };
+
+  Plotly.react('pVar',
+    [barTrace],
+    {
+      xaxis: {range: [0, 108], title: 'Explained variance (%)', gridcolor: '#e2e8f0'},
+      yaxis: {autorange: 'reversed'},
+      margin: {t: 8, b: 40, l: 44, r: 50},
+      paper_bgcolor: '#fff', plot_bgcolor: '#f8fafc',
+      height: 300,
+      showlegend: false
+    },
+    CFG
+  );
+
+  // Info panel
+  document.getElementById('info').textContent =
+`Eigenvalues:   λ₁ = ${pcs[0].lambda.toFixed(4)}   λ₂ = ${pcs[1].lambda.toFixed(4)}
+Explained var: PC1 = ${explained[0].toFixed(2)}%   PC2 = ${explained[1].toFixed(2)}%
+PC1 direction: [${pcs[0].vec[0].toFixed(4)}, ${pcs[0].vec[1].toFixed(4)}]
+PC2 direction: [${pcs[1].vec[0].toFixed(4)}, ${pcs[1].vec[1].toFixed(4)}]
+
+Linear AE with k=1 neuron learns the top-1 PCA subspace (PC1 only).
+Linear AE with k=2 neurons learns the full 2D PCA subspace (PC1 + PC2).
+A linear autoencoder (no bias, tied weights) minimises reconstruction MSE ⟺ PCA.`;
+}
+
+update();
+</script>
+</body>
+</html>

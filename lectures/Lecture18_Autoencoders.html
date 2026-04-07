@@ -170,17 +170,7 @@ dataset that originally has ten dimensions may be well represented by
 only two or three principal components. By projecting the data onto
 these few components, PCA reduces the dimensionality of the dataset
 while preserving its essential structure.</p>
-<figure id="fig:pca_example">
-<img src="img/lecture18/output.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption><strong>Illustration of PCA for dimensionality
-reduction.</strong> <strong>Left:</strong> The original dataset in three
-dimensions. The points lie roughly near a tilted plane, indicating that
-much of the variation occurs along only a few directions.
-<strong>Right:</strong> The same dataset after applying PCA and
-projecting onto the first two principal components. The projection
-preserves the dominant variance while reducing the dimensionality from
-3D to 2D.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 2.2 — PCA</h3><p>Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions and how a linear AE learns the same subspace.</p><iframe class="interactive-notebook-frame" data-default-height="700" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_PCA_Interactive_interactive.html" style="height:700px;" title="Interactive Section 2.2 PCA"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_PCA_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Figure <a data-reference="fig:pca_example" data-reference-type="ref" href="#fig:pca_example">2</a> illustrates how PCA reduces
 dimensionality while preserving the most important structure in the
 data. The original three-dimensional dataset lies close to a
@@ -268,12 +258,7 @@ structure. Nevertheless, nonlinear fully-connected autoencoders learn
 more expressive latent representations than linear autoencoders,
 producing sharper reconstructions and lower mean squared reconstruction
 error.</p>
-<figure id="fig:fc-ae-results">
-<img src="img/lecture18/Screenshot%202024-10-30%20at%206.37.17%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>MNIST reconstructions using linear and nonlinear
-fully-connected autoencoders. Nonlinear models produce sharper
-reconstructions.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 2.3–3 — Linear vs Nonlinear Autoencoder</h3><p>Compare linear AE (equivalent to PCA) with nonlinear AEs (Sigmoid, Tanh, ReLU). Adjust latent dimension k and see reconstruction quality and latent space cluster separation.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_AE_Interactive_interactive.html" style="height:820px;" title="Interactive Sections 2.3-3 Linear vs Nonlinear AE"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_AE_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="3.1" id="visualization-of-learned-filters-second-and-third-layers"><span class="header-section-number">3.1</span> Visualization of Learned
 Filters: Second and Third Layers</h2>
 <p>To better understand what the autoencoder learns internally, we can
@@ -372,13 +357,7 @@ by expanding feature maps back to larger spatial dimensions. Unlike
 pooling, however, unpooling does not uniquely recover the original
 activations; instead, it relies on heuristic upsampling strategies.</p>
 <p>Two common unpooling strategies are illustrated in Figure <a data-reference="fig:unpooling" data-reference-type="ref" href="#fig:unpooling">13</a>.</p>
-<figure id="fig:unpooling">
-<img src="img/lecture18/Screenshot%202024-11-02%20at%209.41.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption><strong>Unpooling strategies.</strong> Left:
-Nearest-neighbor upsampling duplicates values to increase resolution.
-Right: Bed-of-nails upsampling inserts zeros between original
-activations.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 5.1 — Unpooling Strategies</h3><p>See all three unpooling strategies side by side: max-unpooling (uses stored indices), bed-of-nails (top-left placement), and nearest-neighbor (fill entire block). Randomize the input to explore different cases.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_Unpooling_Interactive_interactive.html" style="height:760px;" title="Interactive Section 5.1 Unpooling"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_Unpooling_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p><strong>Nearest-neighbor unpooling</strong> expands the feature map
 by repeating each value into a larger block. For example, a <span class="math inline">\(2 \times 2\)</span> input can be expanded into a
 <span class="math inline">\(4 \times 4\)</span> output by duplicating
@@ -412,11 +391,7 @@ important for image reconstruction and dense prediction tasks such as
 segmentation.</p>
 <h2 data-number="5.3" id="learnable-upsampling-transposed-convolution-with-stride"><span class="header-section-number">5.3</span> Learnable Upsampling:
 Transposed Convolution with Stride</h2>
-<figure id="fig:learnable-upsampling">
-<img src="img/lecture18/Screenshot%202024-11-02%20at%208.32.21%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Learnable upsampling using transposed
-convolution.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 5.3 — Transposed Convolution</h3><p>Step through a transposed convolution one input element at a time. See how each input scales the kernel and accumulates in the output. Formula: H_out = (H_in−1)×s − 2p + k.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_TransposedConv_Interactive_interactive.html" style="height:860px;" title="Interactive Section 5.3 Transposed Convolution"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_TransposedConv_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Transposed convolution is a learnable upsampling operation commonly
 used in the decoder of convolutional autoencoders. It is sometimes
 called <em>fractionally-strided convolution</em> or
@@ -474,12 +449,7 @@ reconstruction error (measured using mean squared error) compared to
 linear autoencoders, demonstrating their ability to capture spatial
 structure in images. Figure <a data-reference="fig:input-reconstruction" data-reference-type="ref" href="#fig:input-reconstruction">17</a> shows examples of
 original images and their reconstructions.</p>
-<figure id="fig:input-reconstruction">
-<img src="img/lecture18/Screenshot%202024-11-02%20at%208.28.20%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption><strong>Original vs reconstructed MNIST images.</strong> The
-autoencoder learns a compact representation that preserves the key
-structure of the digits.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 5.4 — Convolutional Autoencoder on MNIST</h3><p>Compare FC-AE and Conv-AE reconstruction quality across latent dimensions. Conv-AEs exploit spatial structure for better reconstructions at smaller latent sizes.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_ConvAE_Interactive_interactive.html" style="height:880px;" title="Interactive Section 5.4 Convolutional AE"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_ConvAE_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 
 </main>
 </body>

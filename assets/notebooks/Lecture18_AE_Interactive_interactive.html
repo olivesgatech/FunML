@@ -1,0 +1,253 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Linear vs Nonlinear Autoencoder — Sections 2.3–3</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:36px;text-align:right;font-weight:700;font-size:13px}
+    select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;margin-top:2px}
+    .ctrl-check{display:flex;align-items:center;gap:8px;padding-top:6px}
+    .ctrl-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer}
+    .ctrl-check span{font-size:13px;font-weight:600;cursor:pointer}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:320px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.7;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Linear vs Nonlinear Autoencoder — Sections 2.3–3</h1>
+  <p class="sub">A linear AE learns the same subspace as PCA. Nonlinear activations enable more expressive latent representations.</p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Architecture</label>
+      <select id="selArch" onchange="update()">
+        <option value="linear">Linear AE</option>
+        <option value="sigmoid">Sigmoid AE</option>
+        <option value="tanh" selected>Tanh AE</option>
+        <option value="relu">ReLU AE</option>
+        <option value="leakyrelu">Leaky ReLU AE</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Latent dim k</label>
+      <div class="row">
+        <input id="slK" type="range" min="1" max="32" step="1" value="8" oninput="update()">
+        <span class="val" id="vK">8</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Depth (hidden layers)</label>
+      <div class="row">
+        <input id="slD" type="range" min="1" max="4" step="1" value="2" oninput="update()">
+        <span class="val" id="vD">2</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Show comparison</label>
+      <div class="ctrl-check">
+        <input type="checkbox" id="chkCompare" checked onchange="update()">
+        <span onclick="document.getElementById('chkCompare').click()">All methods on same plot</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Reconstruction MSE vs Latent Dim k</div>
+      <div class="plot" id="pLoss"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">2D Latent Space Visualization (Digits 0–9)</div>
+      <div class="plot" id="pLatent"></div>
+    </div>
+  </div>
+
+  <div class="info" id="infoPanel"></div>
+</div>
+
+<script>
+const CFG = {responsive:true, displayModeBar:false};
+
+// Mulberry32 seeded RNG
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Pre-baked reconstruction MSE curves
+function getCurve(arch, k) {
+  const base = {linear:0.12, sigmoid:0.08, tanh:0.06, relu:0.05, leakyrelu:0.05};
+  const decay = {linear:0.6, sigmoid:0.75, tanh:0.82, relu:0.85, leakyrelu:0.85};
+  const b = base[arch], d = decay[arch];
+  return b * Math.pow(d, k / 2) + 0.01 + (arch === 'linear' ? 0.02 : 0);
+}
+
+const archs = ['linear','sigmoid','tanh','relu','leakyrelu'];
+const archLabels = {linear:'Linear AE', sigmoid:'Sigmoid AE', tanh:'Tanh AE', relu:'ReLU AE', leakyrelu:'Leaky ReLU AE'};
+const archColors = {linear:'#94a3b8', sigmoid:'#dc2626', tanh:'#2563eb', relu:'#059669', leakyrelu:'#7c3aed'};
+const archDash = {linear:'dash', sigmoid:'solid', tanh:'solid', relu:'solid', leakyrelu:'solid'};
+
+// Separation quality per arch
+const sepQuality = {linear:0.18, sigmoid:0.48, tanh:0.75, relu:0.80, leakyrelu:0.82};
+
+// 10 digit class colors (tab10-like)
+const classColors = [
+  '#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd',
+  '#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'
+];
+
+// Generate simulated 2D latent scatter
+function genLatentScatter(arch, k) {
+  const rng = mulberry32(0xdeadbeef);
+  const sep = sepQuality[arch] * Math.min(1, 0.5 + k / 8);
+  const noise = 0.45 * (1 - sep) + 0.05;
+
+  // Base cluster centers in a circle
+  const nPts = 120; // per class
+  const traces = [];
+
+  for (let c = 0; c < 10; c++) {
+    const angle = (c / 10) * 2 * Math.PI;
+    const cx = Math.cos(angle) * 2.5 * sep;
+    const cy = Math.sin(angle) * 2.5 * sep;
+    const xs = [], ys = [];
+    for (let i = 0; i < nPts; i++) {
+      // Box-Muller for normal random
+      const u1 = rng(), u2 = rng();
+      const z0 = Math.sqrt(-2 * Math.log(u1 + 1e-10)) * Math.cos(2 * Math.PI * u2);
+      const z1 = Math.sqrt(-2 * Math.log(u1 + 1e-10)) * Math.sin(2 * Math.PI * u2);
+      xs.push(cx + z0 * noise);
+      ys.push(cy + z1 * noise);
+    }
+    traces.push({
+      x: xs, y: ys,
+      mode: 'markers',
+      type: 'scatter',
+      name: 'Digit ' + c,
+      marker: {color: classColors[c], size: 4, opacity: 0.65},
+    });
+  }
+  return traces;
+}
+
+function update() {
+  const arch = document.getElementById('selArch').value;
+  const k = parseInt(document.getElementById('slK').value);
+  const depth = parseInt(document.getElementById('slD').value);
+  const compare = document.getElementById('chkCompare').checked;
+
+  document.getElementById('vK').textContent = k;
+  document.getElementById('vD').textContent = depth;
+
+  const ks = Array.from({length:32}, (_,i) => i + 1);
+
+  // --- Loss plot ---
+  const lossTraces = [];
+  const activeArchs = compare ? archs : [arch];
+
+  for (const a of activeArchs) {
+    const yVals = ks.map(kk => getCurve(a, kk));
+    lossTraces.push({
+      x: ks, y: yVals,
+      mode: 'lines',
+      name: archLabels[a],
+      line: {color: archColors[a], width: a === arch ? 3 : 1.5, dash: archDash[a]},
+      opacity: a === arch ? 1 : 0.5
+    });
+  }
+
+  // Vertical dashed line at current k
+  const curMSE = getCurve(arch, k);
+  lossTraces.push({
+    x: [k, k], y: [0, 0.16],
+    mode: 'lines',
+    name: 'Current k',
+    line: {color:'#0f172a', width:1.5, dash:'dot'},
+    showlegend: false
+  });
+  // Marker at intersection
+  lossTraces.push({
+    x: [k], y: [curMSE],
+    mode: 'markers',
+    name: archLabels[arch] + ' @ k=' + k,
+    marker: {color: archColors[arch], size: 10, symbol:'circle'},
+    showlegend: false
+  });
+
+  const lossLayout = {
+    xaxis: {title:'Latent dim k', range:[0.5, 32.5], gridcolor:'#e2e8f0'},
+    yaxis: {title:'Reconstruction MSE (simulated)', range:[0, 0.17], gridcolor:'#e2e8f0'},
+    legend: {font:{size:10}, orientation:'v', x:0.98, xanchor:'right', y:0.98},
+    margin: {t:20, b:50, l:60, r:10},
+    plot_bgcolor:'#fff',
+    paper_bgcolor:'#fff',
+    font: {family:'"Segoe UI",Arial,sans-serif', size:11}
+  };
+  Plotly.react('pLoss', lossTraces, lossLayout, CFG);
+
+  // --- Latent scatter plot ---
+  const latentTraces = genLatentScatter(arch, k);
+  const latentLayout = {
+    xaxis: {title:'Latent dim 1 (PC1)', zeroline:false, showgrid:true, gridcolor:'#e2e8f0'},
+    yaxis: {title:'Latent dim 2 (PC2)', zeroline:false, showgrid:true, gridcolor:'#e2e8f0'},
+    legend: {font:{size:9}, orientation:'h', x:0, y:-0.18, ncols:5},
+    margin: {t:20, b:70, l:55, r:10},
+    plot_bgcolor:'#fff',
+    paper_bgcolor:'#fff',
+    font: {family:'"Segoe UI",Arial,sans-serif', size:11}
+  };
+  Plotly.react('pLatent', latentTraces, latentLayout, CFG);
+
+  // --- Info panel ---
+  const mseVal = curMSE.toFixed(4);
+  const sepLabel = {linear:'Low (clusters overlap — same as PCA projection)', sigmoid:'Medium', tanh:'High', relu:'High', leakyrelu:'High'}[arch];
+  const isPCA = arch === 'linear';
+  const archDesc = {
+    linear: 'Encoder: x → Wz  |  Decoder: z → W\'x̂\n  Single-layer linear AE is equivalent to PCA (up to rotation).\n  Weight matrix spans the same subspace as top-k PCA eigenvectors.',
+    sigmoid: 'Encoder: x → σ(Wz)  |  Decoder: z → σ(W\'x̂)\n  Sigmoid activations constrain outputs to (0,1); can saturate.',
+    tanh: 'Encoder: x → tanh(Wz)  |  Decoder: z → tanh(W\'x̂)\n  Zero-centred; often faster convergence than sigmoid.',
+    relu: 'Encoder: x → ReLU(Wz)  |  Decoder: z → ReLU(W\'x̂)\n  Sparse activations; no vanishing gradient for positive pre-acts.',
+    leakyrelu: 'Encoder: x → LReLU(Wz)  |  Decoder: z → LReLU(W\'x̂)\n  Fixes dying-ReLU with slope 0.01 for negative pre-activations.'
+  }[arch];
+
+  document.getElementById('infoPanel').textContent =
+    'Architecture : ' + archLabels[arch] + (isPCA ? ' ★ PCA-equivalent' : '') + '\n' +
+    'Description  : ' + archDesc + '\n' +
+    'Depth        : ' + depth + ' hidden layer(s) in encoder + decoder\n' +
+    'Latent dim k : ' + k + '\n' +
+    'Recon. MSE   : ' + mseVal + '  (simulated)\n' +
+    'Cluster sep. : ' + sepLabel + '\n' +
+    '\n' +
+    'KEY FACT — Linear AE = PCA subspace\n' +
+    '  For a 1-hidden-layer linear AE trained with MSE loss and no bias,\n' +
+    '  the weight matrices W_enc, W_dec converge to the top-k PCA\n' +
+    '  eigenvectors (exact equivalence, up to an orthogonal rotation).';
+}
+
+update();
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Transposed Convolution — Section 5.3</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .eq-box{padding:12px 16px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+      margin-bottom:14px;font-size:13px;line-height:2}
+    .eq-box .eq{font-family:monospace;font-size:14px;font-weight:700;color:var(--blue);display:block}
+    .eq-box .eq-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+    .controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+      background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:32px;text-align:right;font-weight:700;font-size:13px}
+    select{width:100%;padding:5px 8px;border:1px solid var(--line);border-radius:6px;
+      font-size:13px;background:#fff;color:var(--ink)}
+    .formula-bar{padding:10px 14px;background:var(--bg);border:1px solid var(--line);
+      border-radius:10px;margin-bottom:12px;font-size:13px;font-family:monospace;
+      display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+    .formula-bar .lbl{color:var(--muted);font-size:11px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.05em;font-family:"Segoe UI",Arial,sans-serif}
+    .formula-bar .fval{font-weight:700;color:var(--blue)}
+    .formula-bar .fval.out{color:var(--green)}
+    .step-info{padding:8px 14px;background:#fff8e1;border:1px solid var(--gold);
+      border-radius:8px;margin-bottom:12px;font-size:12px;color:#92400e;line-height:1.6}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);
+      font-size:12px;line-height:1.7;color:var(--muted)}
+    .info strong{color:var(--ink)}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Transposed Convolution — Section 5.3</h1>
+  <p class="sub">Learnable upsampling: each input element multiplies the full kernel and results are summed where they overlap. Unlike unpooling, the kernel weights are learned during training.</p>
+
+  <div class="eq-box">
+    <span class="eq-label">Eq 17.1 — Output height:</span>
+    <span class="eq">H_out = (H_in − 1) × stride − 2 × padding + kernel_size</span>
+    <span class="eq-label">Eq 17.2 — Output width:</span>
+    <span class="eq">W_out = (W_in − 1) × stride − 2 × padding + kernel_size</span>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Input size (square)</label>
+      <div class="row">
+        <input id="slIn" type="range" min="2" max="6" step="1" value="3" oninput="onCtrl()">
+        <span class="val" id="vIn">3</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Kernel size</label>
+      <select id="selK" onchange="onCtrl()">
+        <option value="2">2×2</option>
+        <option value="3">3×3</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Stride</label>
+      <div class="row">
+        <input id="slS" type="range" min="1" max="3" step="1" value="2" oninput="onCtrl()">
+        <span class="val" id="vS">2</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Padding</label>
+      <div class="row">
+        <input id="slP" type="range" min="0" max="2" step="1" value="0" oninput="onCtrl()">
+        <span class="val" id="vP">0</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Step (0 = none placed)</label>
+      <div class="row">
+        <input id="slStep" type="range" min="0" max="36" step="1" value="0" oninput="onStep()">
+        <span class="val" id="vStep">0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="formula-bar" id="formulaBar">
+    <span>
+      <span class="lbl">H_in</span>&nbsp;
+      <span class="fval" id="fHin">3</span>
+    </span>
+    <span>
+      <span class="lbl">Kernel</span>&nbsp;
+      <span class="fval" id="fK">2</span>
+    </span>
+    <span>
+      <span class="lbl">Stride</span>&nbsp;
+      <span class="fval" id="fS">2</span>
+    </span>
+    <span>
+      <span class="lbl">Padding</span>&nbsp;
+      <span class="fval" id="fP">0</span>
+    </span>
+    <span>
+      <span class="lbl">H_out = (3−1)×2 − 2×0 + 2 =</span>&nbsp;
+      <span class="fval out" id="fHout">6</span>
+    </span>
+    <span>
+      <span class="lbl">W_out =</span>&nbsp;
+      <span class="fval out" id="fWout">6</span>
+    </span>
+  </div>
+
+  <div class="step-info" id="stepInfo">Step 0 of 9: No input elements placed yet. Move the Step slider to see each input cell's kernel contribution added to the output.</div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title" id="titleIn">Input (3×3) — active cell highlighted in red</div>
+      <div class="plot" id="plotIn"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title" id="titleOut">Output (6×6) — accumulated contributions</div>
+      <div class="plot" id="plotOut"></div>
+    </div>
+  </div>
+
+  <div class="info">
+    <strong>How transposed convolution works:</strong> For each input cell (r, c), we place a scaled copy of the kernel (input[r,c] × kernel) into the output at position
+    <code>r_start = r×stride − padding</code>, <code>c_start = c×stride − padding</code>.
+    Where scaled patches overlap, values are <strong>summed</strong>.
+    This is why transposed convolution is also called a <strong>fractionally-strided convolution</strong> or <strong>deconvolution</strong> (informally).
+    The kernel weights are <strong>learned</strong>, making this more powerful than fixed unpooling strategies.
+    The kernel shown here is: 2×2 → [[1,2],[3,4]], 3×3 → [[1,0,1],[0,1,0],[1,0,1]].
+  </div>
+</div>
+
+<script>
+const CFG = {responsive:true, displayModeBar:false};
+
+// State
+let H_in = 3, k = 2, stride = 2, padding = 0;
+let inputGrid = [], kernel2 = [[1,2],[3,4]], kernel3 = [[1,0,1],[0,1,0],[1,0,1]];
+let totalSteps = 9;
+
+function getKernel() { return k === 2 ? kernel2 : kernel3; }
+
+function buildInput(H) {
+  const x = [];
+  for (let i = 0; i < H; i++) {
+    x.push([]);
+    for (let j = 0; j < H; j++) {
+      x[i].push(i * H + j + 1);
+    }
+  }
+  return x;
+}
+
+function computeHout() {
+  return (H_in - 1) * stride - 2 * padding + k;
+}
+
+function transpConvPartial(x, ker, s, pad, steps) {
+  const H = x.length;
+  const W = x[0].length;
+  const kk = ker.length;
+  const Hout = (H - 1) * s - 2 * pad + kk;
+  const Wout = (W - 1) * s - 2 * pad + kk;
+  const out = Array.from({length: Hout}, () => Array(Wout).fill(0));
+  const positions = [];
+  for (let i = 0; i < H; i++) for (let j = 0; j < W; j++) positions.push([i, j]);
+
+  const n = Math.min(steps, positions.length);
+  for (let t = 0; t < n; t++) {
+    const [i, j] = positions[t];
+    const rStart = i * s - pad;
+    const cStart = j * s - pad;
+    for (let ki = 0; ki < kk; ki++) {
+      for (let kj = 0; kj < kk; kj++) {
+        const r = rStart + ki;
+        const c = cStart + kj;
+        if (r >= 0 && r < Hout && c >= 0 && c < Wout) {
+          out[r][c] += x[i][j] * ker[ki][kj];
+        }
+      }
+    }
+  }
+  return {out, positions, Hout, Wout};
+}
+
+function makeAnnotations(z, activeR, activeC, isInput) {
+  const anns = [];
+  const n = z.length;
+  const m = z[0].length;
+  let zmax = 1;
+  for (let i = 0; i < n; i++) for (let j = 0; j < m; j++) if (z[i][j] > zmax) zmax = z[i][j];
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      const v = z[i][j];
+      const bright = v > zmax * 0.55;
+      anns.push({
+        x: j, y: i,
+        text: `<b>${v}</b>`,
+        showarrow: false,
+        font: {size: isInput ? 14 : 11, color: bright ? '#fff' : '#0f172a'}
+      });
+    }
+  }
+  return anns;
+}
+
+function drawInput(x, activeR, activeC, Hin) {
+  // Plotly heatmap: y axis is inverted so row 0 is top → flip
+  const zRaw = x;
+  const z = zRaw.slice().reverse();
+  const flipR = activeR !== null ? (Hin - 1 - activeR) : null;
+
+  const shapes = [];
+  if (activeR !== null && activeC !== null) {
+    shapes.push({
+      type: 'rect',
+      x0: activeC - 0.5, x1: activeC + 0.5,
+      y0: flipR - 0.5,   y1: flipR + 0.5,
+      line: {color: '#dc2626', width: 3},
+      fillcolor: 'rgba(220,38,38,0.08)'
+    });
+  }
+
+  Plotly.react('plotIn', [{
+    type: 'heatmap',
+    z: z,
+    colorscale: 'Blues',
+    zmin: 0,
+    showscale: false,
+    hovertemplate: 'val=%{z}<extra></extra>'
+  }], {
+    margin: {t: 10, b: 20, l: 20, r: 10},
+    shapes: shapes,
+    annotations: makeAnnotations(z, flipR, activeC, true),
+    xaxis: {visible: false, showgrid: false, zeroline: false},
+    yaxis: {visible: false, showgrid: false, zeroline: false, scaleanchor: 'x'},
+    paper_bgcolor: '#fff',
+    plot_bgcolor: '#fff'
+  }, CFG);
+}
+
+function drawOutput(out, Hout, Wout) {
+  const z = out.slice().reverse();
+  let zmax = 1;
+  for (let i = 0; i < z.length; i++) for (let j = 0; j < z[i].length; j++) if (z[i][j] > zmax) zmax = z[i][j];
+
+  Plotly.react('plotOut', [{
+    type: 'heatmap',
+    z: z,
+    colorscale: 'Purples',
+    zmin: 0,
+    zmax: zmax,
+    showscale: false,
+    hovertemplate: 'val=%{z}<extra></extra>'
+  }], {
+    margin: {t: 10, b: 20, l: 20, r: 10},
+    annotations: makeAnnotations(z, null, null, false),
+    xaxis: {visible: false, showgrid: false, zeroline: false},
+    yaxis: {visible: false, showgrid: false, zeroline: false, scaleanchor: 'x'},
+    paper_bgcolor: '#fff',
+    plot_bgcolor: '#fff'
+  }, CFG);
+}
+
+function updateFormula() {
+  const Hout = computeHout();
+  document.getElementById('fHin').textContent = H_in;
+  document.getElementById('fK').textContent = `${k}×${k}`;
+  document.getElementById('fS').textContent = stride;
+  document.getElementById('fP').textContent = padding;
+  document.getElementById('fHout').textContent = Hout;
+  document.getElementById('fWout').textContent = Hout;
+  const lbl = document.getElementById('formulaBar').querySelector('.lbl:last-of-type') ||
+              document.querySelector('#formulaBar span:nth-child(5) .lbl');
+  // Update formula label text
+  const spans = document.querySelectorAll('#formulaBar span');
+  if (spans[4]) {
+    spans[4].querySelector('.lbl').textContent =
+      `H_out = (${H_in}−1)×${stride} − 2×${padding} + ${k} =`;
+  }
+}
+
+function updateStepSlider() {
+  totalSteps = H_in * H_in;
+  const sl = document.getElementById('slStep');
+  sl.max = totalSteps;
+  const cur = parseInt(sl.value);
+  if (cur > totalSteps) sl.value = totalSteps;
+}
+
+function render() {
+  const step = parseInt(document.getElementById('slStep').value);
+  document.getElementById('vStep').textContent = step;
+
+  inputGrid = buildInput(H_in);
+  const ker = getKernel();
+  const {out, positions, Hout, Wout} = transpConvPartial(inputGrid, ker, stride, padding, step);
+
+  // Active cell
+  let activeR = null, activeC = null;
+  if (step > 0 && step <= positions.length) {
+    [activeR, activeC] = positions[step - 1];
+  }
+
+  // Titles
+  document.getElementById('titleIn').textContent =
+    `Input (${H_in}×${H_in})${activeR !== null ? ` — processing cell (${activeR},${activeC})` : ' — no cell active'}`;
+  document.getElementById('titleOut').textContent =
+    `Output (${Hout}×${Wout}) — ${step} of ${totalSteps} contributions placed`;
+
+  // Step info
+  let info = '';
+  if (step === 0) {
+    info = `Step 0 of ${totalSteps}: No input elements placed yet. Move the Step slider to see each input cell's kernel contribution added to the output.`;
+  } else if (step <= positions.length) {
+    const [r, c] = positions[step - 1];
+    const rStart = r * stride - padding;
+    const cStart = c * stride - padding;
+    const val = inputGrid[r][c];
+    info = `Step ${step} of ${totalSteps}: Input cell (${r},${c}) = ${val}. ` +
+           `Kernel placed at output (${rStart},${cStart}) to (${rStart+k-1},${cStart+k-1}). ` +
+           `(r_start = ${r}×${stride} − ${padding} = ${rStart}, c_start = ${c}×${stride} − ${padding} = ${cStart})`;
+  } else {
+    info = `All ${totalSteps} input elements have been processed. Output is complete.`;
+  }
+  document.getElementById('stepInfo').textContent = info;
+
+  drawInput(inputGrid, activeR, activeC, H_in);
+  drawOutput(out, Hout, Wout);
+  updateFormula();
+}
+
+function onCtrl() {
+  H_in = parseInt(document.getElementById('slIn').value);
+  k = parseInt(document.getElementById('selK').value);
+  stride = parseInt(document.getElementById('slS').value);
+  padding = parseInt(document.getElementById('slP').value);
+
+  document.getElementById('vIn').textContent = H_in;
+  document.getElementById('vS').textContent = stride;
+  document.getElementById('vP').textContent = padding;
+
+  updateStepSlider();
+
+  // Reset step to 0 when params change
+  document.getElementById('slStep').value = 0;
+  render();
+}
+
+function onStep() {
+  render();
+}
+
+// Init
+onCtrl();
+</script>
+</body>
+</html>

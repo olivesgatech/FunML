@@ -1,0 +1,175 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VAE Training — ELBO &amp; Reparameterization</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:42px;text-align:right;font-weight:700;font-size:13px}
+    .plots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:280px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.6;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>VAE Training — ELBO &amp; Reparameterization — Section 2.4</h1>
+  <p class="sub">The VAE encoder outputs μ and σ per dimension. A sample z = μ + σ·ε (ε∼N(0,1)) is passed to the decoder. The ELBO loss balances reconstruction quality against a KL penalty pulling q(z|x) toward N(0,1).</p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Encoder mean μ</label>
+      <div class="row">
+        <input id="slMu" type="range" min="-3" max="3" step="0.1" value="1.5" oninput="update()">
+        <span class="val" id="vMu">1.5</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Encoder std σ</label>
+      <div class="row">
+        <input id="slSig" type="range" min="0.1" max="3" step="0.05" value="1.0" oninput="update()">
+        <span class="val" id="vSig">1.00</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>KL weight β</label>
+      <div class="row">
+        <input id="slBeta" type="range" min="0" max="3" step="0.1" value="1.0" oninput="update()">
+        <span class="val" id="vBeta">1.0</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Reconstruction loss</label>
+      <div class="row">
+        <input id="slRec" type="range" min="0.01" max="2" step="0.01" value="0.5" oninput="update()">
+        <span class="val" id="vRec">0.50</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Posterior q(z|x) = N(μ,σ²) vs prior p(z) = N(0,1)</div>
+      <div id="pGauss" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Reparameterization: z = μ + σ·ε,  ε∼N(0,1)</div>
+      <div id="pReparam" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">ELBO = −Rec − β·KL  (maximize)</div>
+      <div id="pELBO" class="plot"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const CFG={responsive:true,displayModeBar:false};
+const N=300;
+const linspace=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
+const zs=linspace(-6,6,N);
+
+function normalPDF(x,mu,sig){ const s=sig||1e-6; return Math.exp(-0.5*((x-mu)/s)**2)/(s*Math.sqrt(2*Math.PI)); }
+
+function mulberry32(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+const rng=mulberry32(7);
+function randn(){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+
+function klDiv(mu,sig){
+  // KL[N(mu,sig^2)||N(0,1)] = 0.5*(mu^2 + sig^2 - log(sig^2) - 1)
+  return 0.5*(mu*mu + sig*sig - 2*Math.log(sig) - 1);
+}
+
+function update(){
+  const mu=parseFloat(document.getElementById('slMu').value);
+  const sig=parseFloat(document.getElementById('slSig').value);
+  const beta=parseFloat(document.getElementById('slBeta').value);
+  const rec=parseFloat(document.getElementById('slRec').value);
+
+  document.getElementById('vMu').textContent=mu.toFixed(1);
+  document.getElementById('vSig').textContent=sig.toFixed(2);
+  document.getElementById('vBeta').textContent=beta.toFixed(1);
+  document.getElementById('vRec').textContent=rec.toFixed(2);
+
+  const kl=klDiv(mu,sig);
+  const elbo=-(rec + beta*kl);
+
+  // Plot 1: Gaussian PDFs
+  const prior=zs.map(z=>normalPDF(z,0,1));
+  const post=zs.map(z=>normalPDF(z,mu,sig));
+  Plotly.react('pGauss',[
+    {x:zs,y:prior,name:'Prior p(z)=N(0,1)',line:{color:'#2563eb',width:2},mode:'lines',fill:'tozeroy',fillcolor:'rgba(37,99,235,0.08)'},
+    {x:zs,y:post,name:`q(z|x)=N(${mu.toFixed(1)},${sig.toFixed(2)}²)`,line:{color:'#dc2626',width:2.5},mode:'lines',fill:'tozeroy',fillcolor:'rgba(220,38,38,0.08)'},
+    {x:[mu,mu],y:[0,normalPDF(mu,mu,sig)],name:'μ',line:{color:'#dc2626',width:2,dash:'dot'},mode:'lines',showlegend:false},
+  ],{margin:{t:8,b:40,l:50,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'z',range:[-6,6]},yaxis:{title:'Density'},
+    legend:{x:0.01,y:0.99,bgcolor:'rgba(255,255,255,0.85)',font:{size:10}},height:280},CFG);
+
+  // Plot 2: Reparameterization — scatter eps vs z
+  const eps_samples=Array.from({length:100},randn);
+  const z_samples=eps_samples.map(e=>mu+sig*e);
+  const eps_grid=linspace(-3,3,100);
+  const z_grid=eps_grid.map(e=>mu+sig*e);
+  Plotly.react('pReparam',[
+    {x:eps_grid,y:z_grid,name:'z=μ+σ·ε (line)',line:{color:'#7c3aed',width:2},mode:'lines'},
+    {x:eps_samples,y:z_samples,name:'Samples',mode:'markers',
+     marker:{color:'#dc2626',size:5,opacity:0.6}},
+    {x:[-3,3],y:[0,0],line:{color:'#94a3b8',width:1},mode:'lines',showlegend:false},
+    {x:[0,0],y:[-6,6],line:{color:'#94a3b8',width:1},mode:'lines',showlegend:false},
+  ],{margin:{t:8,b:40,l:50,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'ε ~ N(0,1)',range:[-3.5,3.5]},yaxis:{title:'z = μ + σ·ε',range:[-7,7]},
+    legend:{x:0.01,y:0.99,bgcolor:'rgba(255,255,255,0.85)',font:{size:10}},height:280},CFG);
+
+  // Plot 3: ELBO components — vary mu keeping sig,beta,rec fixed
+  const muRange=linspace(-3,3,100);
+  const kl_curve=muRange.map(m=>klDiv(m,sig));
+  const elbo_curve=muRange.map(m=>-(rec+beta*klDiv(m,sig)));
+  Plotly.react('pELBO',[
+    {x:muRange,y:kl_curve,name:'β·KL penalty',line:{color:'#dc2626',width:2},mode:'lines'},
+    {x:muRange,y:elbo_curve,name:'ELBO = −Rec − β·KL',line:{color:'#059669',width:2.5},mode:'lines'},
+    {x:[mu,mu],y:[-5,5],name:'current μ',line:{color:'#d97706',width:2,dash:'dot'},mode:'lines'},
+    {x:[-3,3],y:[-rec,-rec],name:'−Rec (const)',line:{color:'#7c3aed',width:1.5,dash:'dash'},mode:'lines'},
+  ],{margin:{t:8,b:40,l:50,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'μ'},yaxis:{title:'Value',range:[-5,3]},
+    legend:{x:0.01,y:0.99,bgcolor:'rgba(255,255,255,0.85)',font:{size:10}},height:280},CFG);
+
+  const elboColor = elbo < -2 ? '#dc2626' : elbo > -1 ? '#059669' : '#d97706';
+  document.getElementById('info').textContent=
+`ELBO = −Reconstruction − β·KL[q(z|x) ∥ p(z)]
+     = −${rec.toFixed(3)}  −  ${beta.toFixed(1)}×${kl.toFixed(4)}
+     = ${elbo.toFixed(4)}  (higher = better; we maximise ELBO)
+
+KL[N(μ,σ²)∥N(0,1)] = ½(μ² + σ² − log σ² − 1)
+                    = ½(${mu.toFixed(2)}² + ${sig.toFixed(2)}² − 2log(${sig.toFixed(2)}) − 1)
+                    = ${kl.toFixed(4)}
+
+Reparameterization trick: z = μ + σ·ε,  ε∼N(0,1)
+  → Gradient flows through μ and σ (deterministic nodes)
+  → ε is the only stochastic node; no gradient needed through it
+
+ELBO = ${elbo.toFixed(4)}  ${elbo < -2 ? '⚠ poor (large KL or bad reconstruction)' : elbo > -1 ? '✓ good' : '~ moderate'}
+
+β = ${beta.toFixed(1)}:  ${beta===0?'β=0 → pure AE (no KL regularization)':beta<1?'β<1 → less KL pressure, potentially more expressive latent':beta===1?'β=1 → standard VAE':beta>1?'β>1 → β-VAE, stronger regularization, disentangled representations':''}`;
+}
+
+update();
+</script>
+</body>
+</html>

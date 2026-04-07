@@ -1,0 +1,196 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CE vs Weighted CE vs Focal Loss — Section 4</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:40px;text-align:right;font-weight:700;font-size:13px}
+    .toggles{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+    .toggle{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:2px solid;border-radius:999px;cursor:pointer;font-size:12px;font-weight:700;user-select:none}
+    .tog-ce{border-color:var(--blue);color:var(--blue)}
+    .tog-ce.on{background:var(--blue);color:#fff}
+    .tog-wce{border-color:var(--red);color:var(--red)}
+    .tog-wce.on{background:var(--red);color:#fff}
+    .tog-fl{border-color:var(--green);color:var(--green)}
+    .tog-fl.on{background:var(--green);color:#fff}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:280px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.6;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:700px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CE vs Weighted CE vs Focal Loss — Section 4</h1>
+  <p class="sub">Adjust weights and γ to see how each loss re-weights hard vs easy examples. Focal loss suppresses easy-example loss via (1−p_t)^γ; weighted CE scales loss by class weights.</p>
+
+  <div class="toggles">
+    <span class="toggle tog-ce on" id="togCE" onclick="toggle('CE')">■ Cross-Entropy (CE)</span>
+    <span class="toggle tog-wce on" id="togWCE" onclick="toggle('WCE')">■ Weighted CE</span>
+    <span class="toggle tog-fl on" id="togFL" onclick="toggle('FL')">■ Focal Loss</span>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Class 1 weight w₁ (WCE)</label>
+      <div class="row">
+        <input id="slW" type="range" min="0.5" max="10" step="0.5" value="3" oninput="update()">
+        <span class="val" id="vW">3.0</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Focal γ (focus strength)</label>
+      <div class="row">
+        <input id="slG" type="range" min="0" max="5" step="0.25" value="2" oninput="update()">
+        <span class="val" id="vG">2.0</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Focal α (class-1 weight)</label>
+      <div class="row">
+        <input id="slA" type="range" min="0.05" max="0.95" step="0.05" value="0.75" oninput="update()">
+        <span class="val" id="vA">0.75</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Model output p (class 1 prob)</label>
+      <div class="row">
+        <input id="slP" type="range" min="0.01" max="0.99" step="0.01" value="0.3" oninput="update()">
+        <span class="val" id="vP">0.30</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Class 0 weight w₀ (WCE)</label>
+      <div class="row">
+        <input id="slW0" type="range" min="0.1" max="3" step="0.1" value="1" oninput="update()">
+        <span class="val" id="vW0">1.0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Minority class (y=1) — loss vs model output p</div>
+      <div id="p1" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Majority class (y=0) — loss vs model output p</div>
+      <div id="p2" class="plot"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const CFG={responsive:true,displayModeBar:false};
+const N=200;
+const ps=Array.from({length:N},(_,i)=>0.01+0.98*i/(N-1));
+let showCE=true, showWCE=true, showFL=true;
+
+function toggle(name){
+  if(name==='CE'){showCE=!showCE;document.getElementById('togCE').classList.toggle('on',showCE);}
+  else if(name==='WCE'){showWCE=!showWCE;document.getElementById('togWCE').classList.toggle('on',showWCE);}
+  else{showFL=!showFL;document.getElementById('togFL').classList.toggle('on',showFL);}
+  update();
+}
+
+function clamp(x,lo=1e-7,hi=1-1e-7){return Math.max(lo,Math.min(hi,x));}
+
+// y=1 (minority): p_t = p
+function ceY1(p){return -Math.log(clamp(p));}
+function wceY1(p,w1){return -w1*Math.log(clamp(p));}
+function flY1(p,gamma,alpha){const pt=clamp(p);return -alpha*Math.pow(1-pt,gamma)*Math.log(pt);}
+
+// y=0 (majority): p_t = 1-p
+function ceY0(p){return -Math.log(clamp(1-p));}
+function wceY0(p,w0){return -w0*Math.log(clamp(1-p));}
+function flY0(p,gamma,alpha){const pt=clamp(1-p);return -(1-alpha)*Math.pow(1-pt,gamma)*Math.log(pt);}
+
+function update(){
+  const w1=parseFloat(document.getElementById('slW').value);
+  const w0=parseFloat(document.getElementById('slW0').value);
+  const gamma=parseFloat(document.getElementById('slG').value);
+  const alpha=parseFloat(document.getElementById('slA').value);
+  const pval=parseFloat(document.getElementById('slP').value);
+
+  document.getElementById('vW').textContent=w1.toFixed(1);
+  document.getElementById('vW0').textContent=w0.toFixed(1);
+  document.getElementById('vG').textContent=gamma.toFixed(2);
+  document.getElementById('vA').textContent=alpha.toFixed(2);
+  document.getElementById('vP').textContent=pval.toFixed(2);
+
+  const traces1=[], traces2=[];
+  const linesCE={color:'#2563eb',width:2}, linesWCE={color:'#dc2626',width:2}, linesFL={color:'#059669',width:2};
+
+  if(showCE){
+    traces1.push({x:ps,y:ps.map(p=>ceY1(p)),name:'CE',line:linesCE,mode:'lines'});
+    traces2.push({x:ps,y:ps.map(p=>ceY0(p)),name:'CE',line:linesCE,mode:'lines',showlegend:false});
+  }
+  if(showWCE){
+    traces1.push({x:ps,y:ps.map(p=>wceY1(p,w1)),name:`WCE (w₁=${w1.toFixed(1)})`,line:{...linesWCE,dash:'dash'},mode:'lines'});
+    traces2.push({x:ps,y:ps.map(p=>wceY0(p,w0)),name:`WCE (w₀=${w0.toFixed(1)})`,line:{...linesWCE,dash:'dash'},mode:'lines',showlegend:false});
+  }
+  if(showFL){
+    traces1.push({x:ps,y:ps.map(p=>flY1(p,gamma,alpha)),name:`Focal (γ=${gamma.toFixed(1)},α=${alpha.toFixed(2)})`,line:{...linesFL,dash:'dot'},mode:'lines'});
+    traces2.push({x:ps,y:ps.map(p=>flY0(p,gamma,alpha)),name:`Focal (γ=${gamma.toFixed(1)},α=${alpha.toFixed(2)})`,line:{...linesFL,dash:'dot'},mode:'lines',showlegend:false});
+  }
+
+  // Vertical line at current p
+  const vline={type:'line',x0:pval,x1:pval,y0:0,y1:4,line:{color:'#d97706',width:2,dash:'dot'}};
+
+  const layout={
+    margin:{t:8,b:40,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Model output p',range:[0,1]},yaxis:{title:'Loss',range:[0,4]},
+    shapes:[vline],legend:{x:0.01,y:0.99,bgcolor:'rgba(255,255,255,0.85)',font:{size:11}},height:280
+  };
+  Plotly.react('p1',traces1,layout,CFG);
+  Plotly.react('p2',traces2,{...layout,shapes:[{...vline}],yaxis:{...layout.yaxis}},CFG);
+
+  // Info
+  const ce1=ceY1(pval).toFixed(4), wce1=wceY1(pval,w1).toFixed(4), fl1=flY1(pval,gamma,alpha).toFixed(4);
+  const ce0=ceY0(pval).toFixed(4), wce0=wceY0(pval,w0).toFixed(4), fl0=flY0(pval,gamma,alpha).toFixed(4);
+  const mod1=(Math.pow(1-clamp(pval),gamma)).toFixed(4), mod0=(Math.pow(clamp(pval),gamma)).toFixed(4);
+  document.getElementById('info').textContent=
+`Equations:
+  CE(p,y=1) = −log(p)                      CE(p,y=0) = −log(1−p)
+  WCE(p,y=1) = −w₁·log(p)                 WCE(p,y=0) = −w₀·log(1−p)
+  Focal(p,y=1) = −α·(1−p)^γ·log(p)        Focal(p,y=0) = −(1−α)·p^γ·log(1−p)
+
+At p = ${pval.toFixed(2)}:
+  ┌──────────────┬──────────┬──────────┬────────────────────────┐
+  │ Loss         │  y=1     │  y=0     │  Notes                 │
+  ├──────────────┼──────────┼──────────┼────────────────────────┤
+  │ CE           │  ${ce1.padEnd(8)} │  ${ce0.padEnd(8)} │  baseline              │
+  │ WCE          │  ${wce1.padEnd(8)} │  ${wce0.padEnd(8)} │  w₁=${w1.toFixed(1)}, w₀=${w0.toFixed(1)}            │
+  │ Focal        │  ${fl1.padEnd(8)} │  ${fl0.padEnd(8)} │  γ=${gamma.toFixed(1)}, α=${alpha.toFixed(2)}         │
+  └──────────────┴──────────┴──────────┴────────────────────────┘
+
+  Focal modulating factor (1−p_t)^γ:  y=1 → ${mod1}   y=0 → ${mod0}
+  ${parseFloat(mod1)<0.1?'  ↑ Easy example — focal loss suppresses this (nearly zero weight)':parseFloat(mod1)>0.5?'  ↑ Hard example — focal loss amplifies relative to CE':'  ↑ Moderate confidence'}
+
+Key insight: Focal loss = CE × (1−p_t)^γ
+  • When p_t ≈ 1 (easy, correct): modulator ≈ 0  → loss suppressed
+  • When p_t ≈ 0 (hard, wrong):  modulator ≈ 1  → loss ≈ CE
+  • γ=0 recovers standard CE; γ=2 (default) works well for imbalanced tasks`;
+}
+
+update();
+</script>
+</body>
+</html>

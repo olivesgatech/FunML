@@ -1,0 +1,475 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Convolutional Autoencoder on MNIST — Section 5.4</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+    .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    .ctrl{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fff,var(--bg))}
+    .ctrl label{font-size:12px;font-weight:700;display:block;margin-bottom:5px}
+    .row{display:flex;align-items:center;gap:6px}
+    .row input[type=range]{flex:1}
+    .val{min-width:36px;text-align:right;font-weight:700;font-size:13px}
+    select{width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff;margin-top:2px}
+    .btn-row{display:flex;gap:8px;margin-top:6px}
+    .toggle-btn{flex:1;padding:6px 0;border-radius:8px;border:2px solid var(--blue);
+                background:#fff;color:var(--blue);font-weight:700;font-size:12px;cursor:pointer;transition:all .15s}
+    .toggle-btn.on{background:var(--blue);color:#fff}
+    .plots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:10px}
+    .plot-card{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .plot-title{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:320px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:12px;line-height:1.7;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Convolutional Autoencoder on MNIST — Section 5.4</h1>
+  <p class="sub">Conv-AEs exploit spatial structure via conv+pool (encoder) and transposed conv+unpool (decoder). Compare reconstruction quality vs a fully-connected AE.</p>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Architecture</label>
+      <select id="selArch" onchange="update()">
+        <option value="fc">FC-AE (flatten)</option>
+        <option value="conv">Conv-AE (spatial)</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Latent dim k</label>
+      <div class="row">
+        <input id="slK" type="range" min="2" max="64" step="2" value="16" oninput="update()">
+        <span class="val" id="vK">16</span>
+      </div>
+    </div>
+    <div class="ctrl">
+      <label>Non-linearity</label>
+      <select id="selAct" onchange="update()">
+        <option value="relu" selected>ReLU</option>
+        <option value="leakyrelu">Leaky ReLU</option>
+        <option value="tanh">Tanh</option>
+      </select>
+    </div>
+    <div class="ctrl">
+      <label>Show comparison</label>
+      <div class="btn-row">
+        <button class="toggle-btn on" id="btnCompare" onclick="toggleCompare()">Both architectures</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Architecture Diagram</div>
+      <div class="plot" id="pArch"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Reconstruction MSE vs Latent Dim k</div>
+      <div class="plot" id="pQuality"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">4×4 Reconstruction Grid (simulated)</div>
+      <div class="plot" id="pGrid"></div>
+    </div>
+  </div>
+
+  <div class="info" id="infoPanel"></div>
+</div>
+
+<script>
+const CFG = {responsive:true, displayModeBar:false};
+
+let showBoth = true;
+
+function toggleCompare() {
+  showBoth = !showBoth;
+  const btn = document.getElementById('btnCompare');
+  btn.classList.toggle('on', showBoth);
+  btn.textContent = showBoth ? 'Both architectures' : 'Selected only';
+  update();
+}
+
+// Pre-baked MSE curves
+function mse(arch, act, k) {
+  const base  = {fc:0.05, conv:0.03};
+  const decay = {fc:0.78, conv:0.88};
+  const act_bonus = {relu:0, leakyrelu:0.005, tanh:0.003};
+  return base[arch] * Math.pow(decay[arch], k / 4) + 0.008 + (act_bonus[act] || 0);
+}
+
+// Mulberry32 seeded RNG
+function mulberry32(seed) {
+  return function() {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Draw architecture diagram using Plotly shapes + annotations
+function drawArch(arch) {
+  const isFc = arch === 'fc';
+
+  // FC-AE: 784→256→k→256→784
+  // Conv-AE: 28×28 → 14×14 → 7×7 → k → 7×7 → 14×14 → 28×28
+  const stages = isFc
+    ? [
+        {label:'784\n(28×28)', color:'#2563eb', w:0.12, note:'Input'},
+        {label:'256',          color:'#7c3aed', w:0.10, note:'FC+Act'},
+        {label:'k',            color:'#dc2626', w:0.08, note:'Latent'},
+        {label:'256',          color:'#7c3aed', w:0.10, note:'FC+Act'},
+        {label:'784\n(28×28)', color:'#059669', w:0.12, note:'Output'},
+      ]
+    : [
+        {label:'28×28',        color:'#2563eb', w:0.14, note:'Input'},
+        {label:'14×14',        color:'#0891b2', w:0.12, note:'Conv+Pool'},
+        {label:'7×7',          color:'#7c3aed', w:0.10, note:'Conv+Pool'},
+        {label:'k',            color:'#dc2626', w:0.08, note:'Latent'},
+        {label:'7×7',          color:'#7c3aed', w:0.10, note:'ConvT+Up'},
+        {label:'14×14',        color:'#0891b2', w:0.12, note:'ConvT+Up'},
+        {label:'28×28',        color:'#059669', w:0.14, note:'Output'},
+      ];
+
+  const n = stages.length;
+  const gap = 1 / (n + 1);
+  const boxH = 0.38;
+  const yCenter = 0.55;
+
+  const shapes = [];
+  const annotations = [];
+
+  for (let i = 0; i < n; i++) {
+    const s = stages[i];
+    const xc = (i + 1) * gap;
+    const hw = s.w / 2;
+    const hh = boxH / 2;
+
+    // Box
+    shapes.push({
+      type:'rect',
+      x0: xc - hw, x1: xc + hw,
+      y0: yCenter - hh, y1: yCenter + hh,
+      fillcolor: s.color,
+      line: {color:'#fff', width:2},
+      opacity: 0.88
+    });
+
+    // Label inside box
+    annotations.push({
+      x: xc, y: yCenter,
+      text: s.label.replace('\n','<br>'),
+      showarrow: false,
+      font: {color:'#fff', size: 11, family:'"Segoe UI",Arial,sans-serif'},
+      align:'center'
+    });
+
+    // Note below box
+    annotations.push({
+      x: xc, y: yCenter - hh - 0.09,
+      text: s.note,
+      showarrow: false,
+      font: {color:'#475569', size: 9, family:'"Segoe UI",Arial,sans-serif'},
+      align:'center'
+    });
+
+    // Arrow to next box
+    if (i < n - 1) {
+      const xNext = (i + 2) * gap;
+      const nextHw = stages[i + 1].w / 2;
+      shapes.push({
+        type:'line',
+        x0: xc + hw + 0.005, x1: xNext - nextHw - 0.005,
+        y0: yCenter, y1: yCenter,
+        line: {color:'#94a3b8', width:2}
+      });
+    }
+  }
+
+  // Encoder / Decoder labels
+  const midIdx = Math.floor(n / 2);
+  const encEnd = (midIdx + 1) * gap;
+  const decStart = (midIdx + 1) * gap;
+  const decEnd = n * gap;
+
+  // Bracket-style annotations
+  annotations.push({
+    x: (gap + encEnd) / 2, y: yCenter + hh + 0.14,
+    text: '← Encoder →',
+    showarrow: false,
+    font: {color:'#475569', size: 10, family:'"Segoe UI",Arial,sans-serif'}
+  });
+  annotations.push({
+    x: (decStart + decEnd) / 2, y: yCenter + hh + 0.14,
+    text: '← Decoder →',
+    showarrow: false,
+    font: {color:'#475569', size: 10, family:'"Segoe UI",Arial,sans-serif'}
+  });
+
+  const layout = {
+    shapes,
+    annotations,
+    xaxis: {visible:false, range:[0, 1]},
+    yaxis: {visible:false, range:[0, 1]},
+    margin: {t:10, b:10, l:10, r:10},
+    plot_bgcolor:'#fff',
+    paper_bgcolor:'#fff'
+  };
+
+  Plotly.react('pArch', [], layout, CFG);
+}
+
+// Reconstruction grid using Plotly heatmap-style scatter
+function drawGrid(arch) {
+  const rng = mulberry32(arch === 'conv' ? 0xabcdef12 : 0x12345678);
+  const sharp = arch === 'conv' ? 0.82 : 0.42;
+
+  // 4x4 grid, each cell is a 7x7 pixel block
+  // Digit patterns for classes 0-9 (simplified 7x7)
+  const digitPatterns = [
+    // 0: ring shape
+    [0,1,1,1,1,1,0,
+     1,0,0,0,0,0,1,
+     1,0,0,0,0,0,1,
+     1,0,0,0,0,0,1,
+     1,0,0,0,0,0,1,
+     1,0,0,0,0,0,1,
+     0,1,1,1,1,1,0],
+    // 1: vertical line
+    [0,0,0,1,0,0,0,
+     0,0,1,1,0,0,0,
+     0,0,0,1,0,0,0,
+     0,0,0,1,0,0,0,
+     0,0,0,1,0,0,0,
+     0,0,0,1,0,0,0,
+     0,0,1,1,1,0,0],
+    // 2
+    [0,1,1,1,1,0,0,
+     1,0,0,0,0,1,0,
+     0,0,0,0,1,0,0,
+     0,0,0,1,0,0,0,
+     0,0,1,0,0,0,0,
+     0,1,0,0,0,0,0,
+     1,1,1,1,1,1,0],
+    // 3
+    [0,1,1,1,1,0,0,
+     0,0,0,0,0,1,0,
+     0,0,0,0,1,0,0,
+     0,0,1,1,1,0,0,
+     0,0,0,0,0,1,0,
+     0,0,0,0,0,1,0,
+     0,1,1,1,1,0,0],
+    // 4
+    [0,0,0,1,1,0,0,
+     0,0,1,0,1,0,0,
+     0,1,0,0,1,0,0,
+     1,0,0,0,1,0,0,
+     1,1,1,1,1,1,0,
+     0,0,0,0,1,0,0,
+     0,0,0,0,1,0,0],
+    // 5
+    [0,1,1,1,1,1,0,
+     1,0,0,0,0,0,0,
+     1,0,0,0,0,0,0,
+     0,1,1,1,1,0,0,
+     0,0,0,0,0,1,0,
+     0,0,0,0,0,1,0,
+     0,1,1,1,1,0,0],
+    // 6
+    [0,0,1,1,1,0,0,
+     0,1,0,0,0,0,0,
+     1,0,0,0,0,0,0,
+     1,1,1,1,1,0,0,
+     1,0,0,0,0,1,0,
+     1,0,0,0,0,1,0,
+     0,1,1,1,1,0,0],
+    // 7
+    [1,1,1,1,1,1,0,
+     0,0,0,0,0,1,0,
+     0,0,0,0,1,0,0,
+     0,0,0,1,0,0,0,
+     0,0,1,0,0,0,0,
+     0,1,0,0,0,0,0,
+     1,0,0,0,0,0,0],
+    // 8
+    [0,1,1,1,1,0,0,
+     1,0,0,0,0,1,0,
+     1,0,0,0,0,1,0,
+     0,1,1,1,1,0,0,
+     1,0,0,0,0,1,0,
+     1,0,0,0,0,1,0,
+     0,1,1,1,1,0,0],
+    // 9
+    [0,1,1,1,1,0,0,
+     1,0,0,0,0,1,0,
+     1,0,0,0,0,1,0,
+     0,1,1,1,1,1,0,
+     0,0,0,0,0,1,0,
+     0,0,0,0,1,0,0,
+     0,1,1,1,0,0,0],
+  ];
+
+  const cellSize = 7;
+  const gridN = 4;
+  const xs = [], ys = [], cs = [];
+
+  // Assign digits to grid cells: row 0-1 = classes 0-7, row 2-3 also
+  const classAssign = [0,1,2,3,4,5,6,7,8,9,1,3,5,7,2,4];
+
+  for (let row = 0; row < gridN; row++) {
+    for (let col = 0; col < gridN; col++) {
+      const cellIdx = row * gridN + col;
+      const digit = classAssign[cellIdx % classAssign.length];
+      const pat = digitPatterns[digit];
+
+      for (let py = 0; py < cellSize; py++) {
+        for (let px = 0; px < cellSize; px++) {
+          const patVal = pat[py * cellSize + px];
+          // Add noise proportional to sharpness
+          const noise = (rng() - 0.5) * (1 - sharp) * 0.6;
+          let val = Math.max(0, Math.min(1, patVal * sharp + noise));
+
+          // Blur for FC-AE: mix with neighbourhood average
+          if (arch === 'fc') {
+            val = val * 0.55 + 0.45 * (rng() * 0.5);
+          }
+
+          xs.push(col * (cellSize + 1) + px);
+          ys.push(row * (cellSize + 1) + (cellSize - 1 - py));
+          cs.push(val);
+        }
+      }
+    }
+  }
+
+  const trace = {
+    x: xs, y: ys,
+    mode: 'markers',
+    type: 'scatter',
+    marker: {
+      color: cs,
+      colorscale: [[0,'#fff'],[1,'#0f172a']],
+      size: 7,
+      symbol: 'square',
+      showscale: false
+    },
+    hoverinfo: 'skip'
+  };
+
+  const layout = {
+    xaxis: {visible:false, scaleanchor:'y'},
+    yaxis: {visible:false},
+    margin: {t:16, b:16, l:10, r:10},
+    plot_bgcolor:'#fff',
+    paper_bgcolor:'#fff',
+    annotations: [{
+      x: 0.5, y: 1.01, xref:'paper', yref:'paper',
+      text: arch === 'conv' ? 'Conv-AE: sharper spatial edges' : 'FC-AE: blurrier, less spatial structure',
+      showarrow: false,
+      font: {size:10, color:'#475569', family:'"Segoe UI",Arial,sans-serif'}
+    }]
+  };
+  Plotly.react('pGrid', [trace], layout, CFG);
+}
+
+function update() {
+  const arch = document.getElementById('selArch').value;
+  const k    = parseInt(document.getElementById('slK').value);
+  const act  = document.getElementById('selAct').value;
+  document.getElementById('vK').textContent = k;
+
+  // Architecture diagram
+  drawArch(arch);
+
+  // Quality curves
+  const ks = Array.from({length:32}, (_,i) => (i + 1) * 2);
+  const qTraces = [];
+
+  if (showBoth || arch === 'fc') {
+    const yFc = ks.map(kk => mse('fc', act, kk));
+    qTraces.push({
+      x: ks, y: yFc,
+      mode:'lines+markers',
+      name:'FC-AE',
+      line:{color:'#2563eb', width: arch === 'fc' ? 3 : 1.5},
+      marker:{size: arch === 'fc' ? 5 : 3},
+      opacity: arch === 'fc' ? 1 : 0.45
+    });
+  }
+  if (showBoth || arch === 'conv') {
+    const yConv = ks.map(kk => mse('conv', act, kk));
+    qTraces.push({
+      x: ks, y: yConv,
+      mode:'lines+markers',
+      name:'Conv-AE',
+      line:{color:'#059669', width: arch === 'conv' ? 3 : 1.5},
+      marker:{size: arch === 'conv' ? 5 : 3},
+      opacity: arch === 'conv' ? 1 : 0.45
+    });
+  }
+
+  // Marker at current k
+  const curMse = mse(arch, act, k);
+  qTraces.push({
+    x:[k], y:[curMse],
+    mode:'markers',
+    name:(arch === 'fc' ? 'FC-AE' : 'Conv-AE') + ' @ k=' + k,
+    marker:{color: arch === 'fc' ? '#2563eb' : '#059669', size:12, symbol:'circle-open', line:{width:2.5}},
+    showlegend:false
+  });
+  // Vertical dashed line
+  qTraces.push({
+    x:[k, k], y:[0, 0.065],
+    mode:'lines', name:'Current k',
+    line:{color:'#0f172a', width:1.2, dash:'dot'},
+    showlegend:false
+  });
+
+  const qLayout = {
+    xaxis:{title:'Latent dim k', range:[0, 66], gridcolor:'#e2e8f0'},
+    yaxis:{title:'Reconstruction MSE (simulated)', range:[0, 0.065], gridcolor:'#e2e8f0'},
+    legend:{font:{size:10}, x:0.98, xanchor:'right', y:0.98},
+    margin:{t:20, b:50, l:60, r:10},
+    plot_bgcolor:'#fff',
+    paper_bgcolor:'#fff',
+    font:{family:'"Segoe UI",Arial,sans-serif', size:11}
+  };
+  Plotly.react('pQuality', qTraces, qLayout, CFG);
+
+  // Reconstruction grid
+  drawGrid(arch);
+
+  // Info panel
+  const fcArch = 'FC-AE    : Input(784) → FC(256) → Latent(k) → FC(256) → Output(784)';
+  const convArch = 'Conv-AE  : Input(28×28) → Conv+Pool(14×14) → Conv+Pool(7×7)\n           → Latent(k) → ConvT+Up(7×7) → ConvT+Up(14×14) → Output(28×28)';
+  const actNote = {relu:'ReLU: f(x)=max(0,x)  — sparse activations, no saturation',
+                   leakyrelu:'Leaky ReLU: f(x)=x if x>0 else 0.01x  — fixes dying ReLU',
+                   tanh:'Tanh: f(x)=tanh(x)  — zero-centred, bounded (−1,1)'}[act];
+
+  document.getElementById('infoPanel').textContent =
+    'Selected : ' + (arch === 'fc' ? 'FC-AE (flatten)' : 'Conv-AE (spatial)') + '\n' +
+    'Activation : ' + actNote + '\n' +
+    'Latent dim k : ' + k + '  |  MSE @ k=' + k + ' : ' + curMse.toFixed(4) + '\n\n' +
+    fcArch + '\n' +
+    convArch + '\n\n' +
+    'WHY CONV-AE IS BETTER:\n' +
+    '  • Weight sharing reduces parameters significantly (e.g. 3×3 conv vs dense FC)\n' +
+    '  • Translation equivariance: features detected anywhere in the image\n' +
+    '  • Spatial hierarchy: pooling builds multi-scale feature maps\n' +
+    '  • Transposed convolution (ConvT) upsamples feature maps in the decoder';
+}
+
+update();
+</script>
+</body>
+</html>

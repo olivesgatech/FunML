@@ -1,0 +1,292 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Unpooling Strategies — Section 5.1</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+          --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 4px;font-size:21px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+    .input-section{margin-bottom:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+    .input-section h3{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .grid-wrap{display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap}
+    .grid-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-align:center}
+    table.input-grid{border-collapse:collapse}
+    table.input-grid td{padding:2px}
+    table.input-grid input{width:40px;height:40px;text-align:center;font-size:16px;font-weight:700;
+      border:2px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+      -moz-appearance:textfield}
+    table.input-grid input::-webkit-outer-spin-button,
+    table.input-grid input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    table.input-grid input:focus{outline:none;border-color:var(--blue)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:var(--blue);
+      color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+      transition:background .15s}
+    .btn:hover{background:#1d4ed8}
+    .pooled-section{margin-bottom:14px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+    .pooled-section h3{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+    .pooled-display{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .pooled-info{font-size:12px;color:var(--muted);line-height:1.6}
+    .pooled-info span{font-weight:700;color:var(--ink)}
+    .panels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+    .panel{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .panel-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.05em;background:var(--bg);border-bottom:1px solid var(--line);color:var(--muted)}
+    .panel-title .name{color:var(--ink);font-size:13px;text-transform:none;letter-spacing:0}
+    .plot{height:260px}
+    .info{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);
+      font-size:12px;line-height:1.7;color:var(--muted)}
+    .info strong{color:var(--ink)}
+    @media(max-width:700px){.panels{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Unpooling Strategies — Section 5.1</h1>
+  <p class="sub">Unpooling reverses spatial downsampling (e.g. after max pooling in an encoder). Three strategies differ in where they place the pooled value within each 2×2 block of the upsampled output.</p>
+
+  <div class="input-section">
+    <h3>Step 1 — Edit the 4×4 feature map (values 0–9)</h3>
+    <div class="grid-wrap">
+      <div>
+        <div class="grid-label">Input 4×4</div>
+        <table class="input-grid" id="inputGrid"></table>
+      </div>
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:10px">
+        <button class="btn" onclick="applyPooling()">&#9654; Apply Max Pooling</button>
+        <div class="pooled-info" id="poolSummary">Press the button to compute max pooling.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pooled-section" id="pooledSection" style="display:none">
+    <h3>2×2 Max-Pooled Result (with stored indices)</h3>
+    <div class="pooled-display">
+      <div>
+        <div class="grid-label">Pooled 2×2</div>
+        <div id="pooledPlot" style="width:180px;height:180px"></div>
+      </div>
+      <div class="pooled-info" id="indexInfo"></div>
+    </div>
+  </div>
+
+  <div class="panels" id="unpool-panels" style="display:none">
+    <div class="panel">
+      <div class="panel-title">Strategy 1<br><span class="name">Max-Unpooling</span></div>
+      <div class="plot" id="plotMax"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Strategy 2<br><span class="name">Bed-of-Nails</span></div>
+      <div class="plot" id="plotNails"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Strategy 3<br><span class="name">Nearest-Neighbor</span></div>
+      <div class="plot" id="plotNN"></div>
+    </div>
+  </div>
+
+  <div class="info">
+    <strong>Max-unpooling</strong> stores the exact position of the maximum value during the forward pooling pass, then restores it there during unpooling (all other cells = 0).&nbsp;
+    <strong>Bed-of-nails</strong> always places the pooled value at position (0,0) of each 2×2 block and zeros elsewhere — no index memory needed.&nbsp;
+    <strong>Nearest-neighbor</strong> fills all 4 cells of each 2×2 block with the pooled value, producing a smooth (but blocky) upsampling. Only max-unpooling requires storing extra information from the forward pass.
+  </div>
+</div>
+
+<script>
+const CFG = {responsive:true, displayModeBar:false};
+const DEFAULT = [[8,3,5,2],[4,7,1,6],[9,2,4,3],[1,8,5,7]];
+
+// Build editable input grid
+function buildInputGrid() {
+  const tbl = document.getElementById('inputGrid');
+  tbl.innerHTML = '';
+  for (let r = 0; r < 4; r++) {
+    const tr = document.createElement('tr');
+    for (let c = 0; c < 4; c++) {
+      const td = document.createElement('td');
+      const inp = document.createElement('input');
+      inp.type = 'number';
+      inp.min = 0; inp.max = 9; inp.step = 1;
+      inp.value = DEFAULT[r][c];
+      inp.id = `cell_${r}_${c}`;
+      inp.addEventListener('change', () => { clamp(inp); applyPooling(); });
+      td.appendChild(inp);
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+}
+
+function clamp(inp) {
+  let v = parseInt(inp.value);
+  if (isNaN(v)) v = 0;
+  inp.value = Math.max(0, Math.min(9, v));
+}
+
+function readGrid() {
+  const x = [];
+  for (let r = 0; r < 4; r++) {
+    x.push([]);
+    for (let c = 0; c < 4; c++) {
+      x[r].push(parseInt(document.getElementById(`cell_${r}_${c}`).value) || 0);
+    }
+  }
+  return x;
+}
+
+function maxPool(x) {
+  const pooled = [], indices = [];
+  for (let i = 0; i < 2; i++) {
+    pooled.push([]); indices.push([]);
+    for (let j = 0; j < 2; j++) {
+      const block = [
+        [x[2*i][2*j],   x[2*i][2*j+1]],
+        [x[2*i+1][2*j], x[2*i+1][2*j+1]]
+      ];
+      let maxVal = -Infinity, ri = 0, ci = 0;
+      for (let r = 0; r < 2; r++) {
+        for (let c = 0; c < 2; c++) {
+          if (block[r][c] > maxVal) { maxVal = block[r][c]; ri = r; ci = c; }
+        }
+      }
+      pooled[i].push(maxVal);
+      indices[i].push([ri, ci]);
+    }
+  }
+  return { pooled, indices };
+}
+
+function unpoolMax(pooled, indices) {
+  const out = Array.from({length:4}, () => Array(4).fill(0));
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      const [ri, ci] = indices[i][j];
+      out[2*i+ri][2*j+ci] = pooled[i][j];
+    }
+  }
+  return out;
+}
+
+function unpoolNails(pooled) {
+  const out = Array.from({length:4}, () => Array(4).fill(0));
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      out[2*i][2*j] = pooled[i][j];
+    }
+  }
+  return out;
+}
+
+function unpoolNN(pooled) {
+  const out = [];
+  for (let i = 0; i < 2; i++) {
+    for (let rr = 0; rr < 2; rr++) {
+      out.push([]);
+      for (let j = 0; j < 2; j++) {
+        out[out.length-1].push(pooled[i][j], pooled[i][j]);
+      }
+    }
+  }
+  return out;
+}
+
+function makeHeatmap(data, divId, title, colorscale) {
+  const z = data.slice().reverse();
+  const text = z.map(row => row.map(v => `${v}`));
+  const n = z.length;
+  const tickvals = Array.from({length:n}, (_,i) => i);
+  const ticktext = Array.from({length:n}, (_,i) => `${n-1-i}`);
+  Plotly.react(divId, [{
+    type: 'heatmap',
+    z: z,
+    text: text,
+    texttemplate: '%{text}',
+    textfont: {size: 15, color: 'auto'},
+    colorscale: colorscale || 'Blues',
+    zmin: 0, zmax: 9,
+    showscale: false,
+    hoverongaps: false,
+    hovertemplate: 'val=%{z}<extra></extra>'
+  }], {
+    margin: {t:10, b:30, l:30, r:10},
+    xaxis: {visible: true, showticklabels: false, showgrid: false, zeroline: false},
+    yaxis: {visible: true, showticklabels: false, showgrid: false, zeroline: false},
+    annotations: makeAnnotations(z),
+    paper_bgcolor: '#fff',
+    plot_bgcolor: '#fff'
+  }, CFG);
+}
+
+function makeAnnotations(z) {
+  const anns = [];
+  const n = z.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < z[i].length; j++) {
+      const v = z[i][j];
+      anns.push({
+        x: j, y: i,
+        text: `<b>${v}</b>`,
+        showarrow: false,
+        font: {size: 15, color: v > 5 ? '#fff' : '#0f172a'}
+      });
+    }
+  }
+  return anns;
+}
+
+function makeSmallHeatmap(pooled, divId) {
+  const z = pooled.slice().reverse();
+  Plotly.react(divId, [{
+    type: 'heatmap',
+    z: z,
+    colorscale: 'Blues',
+    zmin: 0, zmax: 9,
+    showscale: false,
+    hovertemplate: 'val=%{z}<extra></extra>'
+  }], {
+    margin: {t:6, b:6, l:6, r:6},
+    xaxis: {visible:false, showgrid:false},
+    yaxis: {visible:false, showgrid:false},
+    annotations: makeAnnotations(z),
+    paper_bgcolor: '#f8fafc',
+    plot_bgcolor: '#f8fafc'
+  }, CFG);
+}
+
+function applyPooling() {
+  const x = readGrid();
+  const {pooled, indices} = maxPool(x);
+
+  // Show pooled section
+  document.getElementById('pooledSection').style.display = 'block';
+  document.getElementById('unpool-panels').style.display = 'grid';
+
+  makeSmallHeatmap(pooled, 'pooledPlot');
+
+  // Index info
+  let info = '<b>Stored max indices (row, col within each 2×2 block):</b><br>';
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      const [ri, ci] = indices[i][j];
+      info += `&nbsp;Block(${i},${j}): val=<b>${pooled[i][j]}</b>, max at local (${ri},${ci}) → global (${2*i+ri}, ${2*j+ci})<br>`;
+    }
+  }
+  document.getElementById('indexInfo').innerHTML = info;
+
+  // Draw 3 unpooled grids
+  makeHeatmap(unpoolMax(pooled, indices), 'plotMax', 'Max-Unpooling', 'Blues');
+  makeHeatmap(unpoolNails(pooled),        'plotNails', 'Bed-of-Nails', 'Blues');
+  makeHeatmap(unpoolNN(pooled),           'plotNN', 'Nearest-Neighbor', 'Blues');
+}
+
+buildInputGrid();
+applyPooling();
+</script>
+</body>
+</html>
