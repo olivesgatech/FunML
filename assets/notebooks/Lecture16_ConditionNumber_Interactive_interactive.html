@@ -1,0 +1,208 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Condition Numbers & Curvature — Section 6</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+      --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:44px;text-align:right;font-weight:700;font-size:14px}
+    .hess-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;font-family:monospace;font-size:13px;background:var(--bg);padding:8px;border-radius:8px;border:1px solid var(--line)}
+    .hv{text-align:center;color:var(--blue);font-weight:700}
+    .plots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:900px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Condition Numbers &amp; Curvature — Section 6</h1>
+  <p class="sub">The condition number κ = λ_max / λ_min measures how anisotropic the loss curvature is. High κ means the surface is a narrow valley — gradient descent oscillates and converges slowly.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>λ₁ (steep direction)</label>
+      <div class="row">
+        <input id="slL1" type="range" min="0.5" max="20" step="0.5" value="10" oninput="update()">
+        <span class="value" id="vL1">10</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>λ₂ (flat direction)</label>
+      <div class="row">
+        <input id="slL2" type="range" min="0.1" max="5" step="0.1" value="1" oninput="update()">
+        <span class="value" id="vL2">1.0</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Rotation angle θ°</label>
+      <div class="row">
+        <input id="slTheta" type="range" min="0" max="90" step="5" value="0" oninput="update()">
+        <span class="value" id="vTheta">0°</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Learning rate α</label>
+      <div class="row">
+        <input id="slLR" type="range" min="-2" max="0" step="0.1" value="-0.7" oninput="update()">
+        <span class="value" id="vLR">0.20</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hessian display -->
+  <div style="display:flex;gap:12px;margin-bottom:14px;align-items:flex-start">
+    <div style="padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);min-width:200px">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px">Hessian H</div>
+      <div class="hess-grid" id="hessDisp">
+        <span class="hv" id="h11">—</span><span class="hv" id="h12">—</span>
+        <span class="hv" id="h21">—</span><span class="hv" id="h22">—</span>
+      </div>
+    </div>
+    <div style="padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);flex:1">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:6px">Key metrics</div>
+      <div style="font-size:13px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="metricsGrid"></div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Loss surface (3D)</div>
+      <div id="p3d" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Contours + GD path</div>
+      <div id="p2d" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Loss vs step (GD from start)</div>
+      <div id="pConv" class="plot"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+function linspace(a,b,n){return Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));}
+const CFG={responsive:true,displayModeBar:false};
+
+function update(){
+  const l1=parseFloat(document.getElementById('slL1').value);
+  const l2=parseFloat(document.getElementById('slL2').value);
+  const deg=parseFloat(document.getElementById('slTheta').value);
+  const lr=Math.pow(10,parseFloat(document.getElementById('slLR').value));
+
+  document.getElementById('vL1').textContent=l1.toFixed(1);
+  document.getElementById('vL2').textContent=l2.toFixed(1);
+  document.getElementById('vTheta').textContent=deg+'°';
+  document.getElementById('vLR').textContent=lr.toFixed(3);
+
+  // Build Hessian H = R * diag(l1,l2) * R^T
+  const t=deg*Math.PI/180;
+  const c=Math.cos(t), s=Math.sin(t);
+  // H = [[c,-s],[s,c]] * [[l1,0],[0,l2]] * [[c,s],[-s,c]]
+  const h11=l1*c*c+l2*s*s, h12=(l1-l2)*c*s, h22=l1*s*s+l2*c*c;
+
+  document.getElementById('h11').textContent=h11.toFixed(2);
+  document.getElementById('h12').textContent=h12.toFixed(2);
+  document.getElementById('h21').textContent=h12.toFixed(2);
+  document.getElementById('h22').textContent=h22.toFixed(2);
+
+  const kappa=l1/l2;
+
+  // Metrics
+  const metricsHTML=`
+    <div><span style="font-size:11px;color:var(--muted)">λ_max</span><br><b style="color:var(--blue)">${l1.toFixed(2)}</b></div>
+    <div><span style="font-size:11px;color:var(--muted)">λ_min</span><br><b style="color:var(--green)">${l2.toFixed(2)}</b></div>
+    <div><span style="font-size:11px;color:var(--muted)">κ = λ_max/λ_min</span><br><b style="color:${kappa>20?'var(--red)':kappa>5?'var(--gold)':'var(--green)'}">${kappa.toFixed(1)}</b></div>
+    <div><span style="font-size:11px;color:var(--muted)">Optimal α</span><br><b>≤ 1/λ_max = ${(1/l1).toFixed(3)}</b></div>
+    <div><span style="font-size:11px;color:var(--muted)">Convergence</span><br><b>${kappa>20?'⚠ Very slow':kappa>5?'~ Slow':'✓ Fast'}</b></div>
+    <div><span style="font-size:11px;color:var(--muted)">α used</span><br><b>${lr.toFixed(3)}</b></div>`;
+  document.getElementById('metricsGrid').innerHTML=metricsHTML;
+
+  // Loss function in original coordinates
+  // f(u,v) = 0.5 * l1 * u^2 + 0.5 * l2 * v^2
+  // u = c*x + s*y,  v = -s*x + c*y
+  const f=(x,y)=>0.5*(h11*x*x+2*h12*x*y+h22*y*y);
+  const gxFn=(x,y)=>h11*x+h12*y;
+  const gyFn=(x,y)=>h12*x+h22*y;
+
+  // Grid
+  const xs=linspace(-2.5,2.5,50), ys=linspace(-2.5,2.5,50);
+  const z=ys.map(y=>xs.map(x=>Math.min(f(x,y),30)));
+
+  // GD path from (-2, -1.5)
+  const px=[],py=[],pz=[];
+  let cx=-2,cy=-1.5;
+  for(let i=0;i<150;i++){
+    px.push(cx);py.push(cy);pz.push(f(cx,cy)+0.02);
+    const nx=cx-lr*gxFn(cx,cy);
+    const ny=cy-lr*gyFn(cx,cy);
+    cx=Math.max(-3,Math.min(3,nx));
+    cy=Math.max(-3,Math.min(3,ny));
+  }
+  const losses=px.map((_,i)=>Math.max(1e-10,f(px[i],py[i])));
+
+  // 3D
+  Plotly.react('p3d',[
+    {type:'surface',x:xs,y:ys,z,colorscale:[[0,'#eff6ff'],[0.5,'#f8fafc'],[1,'#fef2f2']],
+     showscale:false,opacity:0.85},
+    {type:'scatter3d',x:px.slice(0,80),y:py.slice(0,80),z:pz.slice(0,80),
+     mode:'lines',line:{color:'#2563eb',width:3},name:'GD path'},
+  ],{scene:{xaxis:{title:'θ₁'},yaxis:{title:'θ₂'},zaxis:{title:'f'},
+     camera:{eye:{x:1.4,y:-1.4,z:1.1}}},
+     margin:{t:0,b:0,l:0,r:0},height:300,paper_bgcolor:'#fff'},CFG);
+
+  // 2D contour
+  Plotly.react('p2d',[
+    {type:'contour',x:xs,y:ys,z,ncontours:20,
+     colorscale:[[0,'#eff6ff'],[1,'#fef2f2']],showscale:false,contours:{coloring:'fill'},opacity:0.7},
+    {type:'scatter',x:px.slice(0,80),y:py.slice(0,80),mode:'lines+markers',
+     line:{color:'#2563eb',width:2},marker:{size:3},name:'GD path'},
+    {type:'scatter',x:[px[0]],y:[py[0]],mode:'markers',
+     marker:{size:10,color:'#059669',symbol:'star'},name:'Start'},
+  ],{margin:{t:8,b:34,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+     xaxis:{range:[-2.5,2.5],title:'θ₁'},yaxis:{range:[-2.5,2.5],title:'θ₂'},
+     height:300,legend:{x:0,y:1,bgcolor:'rgba(255,255,255,0.8)'}},CFG);
+
+  // Convergence
+  Plotly.react('pConv',[{y:losses,type:'scatter',mode:'lines',
+    line:{color:'#2563eb',width:2},name:'Loss'}],{
+    margin:{t:8,b:34,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Step'},yaxis:{title:'Loss',type:'log'},height:300},CFG);
+
+  // Info
+  const stable=lr<=1/l1;
+  document.getElementById('info').textContent=
+    `Condition number κ = λ_max / λ_min = ${l1.toFixed(2)} / ${l2.toFixed(2)} = ${kappa.toFixed(1)}\n\n`+
+    `Hessian eigenvalues: λ₁ = ${l1.toFixed(2)} (steep),  λ₂ = ${l2.toFixed(2)} (flat)\n`+
+    `For stable convergence:  α ≤ 2/λ_max = ${(2/l1).toFixed(4)}\n`+
+    `Your α = ${lr.toFixed(4)}  →  ${stable?'✓ stable':'⚠ may diverge or oscillate'}\n\n`+
+    `Number of GD steps to converge ∝ κ = ${kappa.toFixed(1)}\n`+
+    (kappa>20
+      ? `  κ=${kappa.toFixed(0)} is HIGH — the narrow valley causes zigzagging. Adaptive methods (RMSProp, Adam) rescale\n  each dimension individually and converge much faster.`
+      : kappa>5
+      ? `  κ=${kappa.toFixed(0)} is MODERATE — some oscillation; momentum or adaptive methods help.`
+      : `  κ=${kappa.toFixed(0)} is LOW — near-circular contours; GD converges quickly.`)+
+    `\n\nRotation angle θ=${deg}° tilts the principal curvature directions — the contours rotate but κ stays the same.`;
+}
+
+update();
+</script>
+</body>
+</html>

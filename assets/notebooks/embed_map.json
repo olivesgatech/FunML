@@ -783,6 +783,51 @@
       "description": "Compare gradient flow in plain vs residual networks. Vary depth and weight scale to see how skip connections prevent vanishing gradients.",
       "iframe_title": "Interactive Section 9.1 Residual Connections",
       "iframe_height": 760
+    },
+    {
+      "image_match": "img/lecture16/saddle_point.jpg",
+      "notebook_html": "Lecture16_SaddlePoint_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture16_SaddlePoint_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 4.2 — Saddle Points",
+      "description": "Gradient descent locks onto the saddle point of f(x,y)=x²−y² regardless of learning rate. Toggle modes to see how noise or momentum can escape.",
+      "iframe_title": "Interactive Section 4.2 Saddle Points",
+      "iframe_height": 820
+    },
+    {
+      "image_match": "img/lecture16/gradient_plus_mumentum.jpg",
+      "notebook_html": "Lecture16_OptimizerComparison_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture16_OptimizerComparison_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Sections 5–8 — Optimizer Comparison",
+      "description": "Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.",
+      "iframe_title": "Interactive Sections 5–8 Optimizer Comparison",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture16/Adagrad.jpg",
+      "notebook_html": "Lecture16_OptimizerComparison_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture16_OptimizerComparison_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Sections 5–8 — Optimizer Comparison",
+      "description": "Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.",
+      "iframe_title": "Interactive Sections 5–8 Optimizer Comparison",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture16/Curvature.png",
+      "notebook_html": "Lecture16_ConditionNumber_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture16_ConditionNumber_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 6 — Condition Numbers & Curvature",
+      "description": "Adjust the Hessian eigenvalues λ₁ and λ₂ to change the condition number κ=λ_max/λ_min. See how anisotropic curvature slows GD convergence.",
+      "iframe_title": "Interactive Section 6 Condition Numbers",
+      "iframe_height": 840
+    },
+    {
+      "image_match": "img/lecture16/RMSProp.png",
+      "notebook_html": "Lecture16_Adam_Interactive_interactive.html",
+      "notebook_ipynb": "Lecture16_Adam_Interactive.ipynb",
+      "section_title": "Interactive Notebook: Section 9 — Adam Optimizer",
+      "description": "Adam combines momentum and RMSProp with bias correction. Adjust α, β₁, β₂ and compare against GD, Momentum, and RMSProp.",
+      "iframe_title": "Interactive Section 9 Adam Optimizer",
+      "iframe_height": 900
     }
   ]
 }

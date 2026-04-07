@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Adam Optimizer — Section 9</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;
+      --blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+    .block{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .block h3{margin:0 0 8px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+    .ctrl-grid{display:grid;gap:8px}
+    .ctrl-row{display:flex;align-items:center;gap:8px;font-size:13px}
+    .ctrl-row label{min-width:56px;font-weight:600;font-size:12px}
+    .ctrl-row input[type=range]{flex:1}
+    .ctrl-row .v{min-width:46px;text-align:right;font-weight:700;font-size:13px}
+    select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}
+    .opt-toggles{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+    .tog{border:2px solid var(--line);background:#fff;border-radius:8px;padding:5px 13px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .tog.on{border-color:var(--blue);background:#eff6ff;color:var(--blue)}
+    .tog .dot{width:10px;height:10px;border-radius:50%}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:300px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:900px){.controls{grid-template-columns:1fr}.plots{grid-template-columns:1fr}.plot3col{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Adam Optimizer — Section 9</h1>
+  <p class="sub">Adam combines momentum (1st moment) and RMSProp (2nd moment) with bias correction. Toggle optimizers to compare; adjust Adam's β₁, β₂, and ε.</p>
+
+  <div class="controls">
+    <div class="block">
+      <h3>Loss surface</h3>
+      <div class="ctrl-grid">
+        <select id="selSurf" onchange="reset()">
+          <option value="bowl">Elongated bowl (ill-conditioned)</option>
+          <option value="banana" selected>Rosenbrock (banana)</option>
+          <option value="saddle_valley">Saddle + valley</option>
+        </select>
+        <div class="ctrl-row">
+          <label>κ</label>
+          <input type="range" min="1" max="50" step="1" value="10" id="slKappa" oninput="reset()">
+          <span class="v" id="vKappa">10</span>
+        </div>
+        <div class="ctrl-row">
+          <label>Steps</label>
+          <input type="range" min="50" max="1000" step="50" value="300" id="slSteps" oninput="reset()">
+          <span class="v" id="vSteps">300</span>
+        </div>
+      </div>
+    </div>
+    <div class="block">
+      <h3>Adam parameters</h3>
+      <div class="ctrl-grid">
+        <div class="ctrl-row"><label>α</label><input type="range" min="-3" max="0" step="0.1" value="-2" id="slALR" oninput="reset()"><span class="v" id="vALR">0.01</span></div>
+        <div class="ctrl-row"><label>β₁</label><input type="range" min="0.5" max="0.999" step="0.01" value="0.9" id="slB1" oninput="reset()"><span class="v" id="vB1">0.900</span></div>
+        <div class="ctrl-row"><label>β₂</label><input type="range" min="0.5" max="0.9999" step="0.001" value="0.999" id="slB2" oninput="reset()"><span class="v" id="vB2">0.999</span></div>
+        <div class="ctrl-row"><label>ε</label><input type="range" min="-9" max="-5" step="1" value="-8" id="slEps" oninput="reset()"><span class="v" id="vEps">1e-8</span></div>
+      </div>
+    </div>
+    <div class="block">
+      <h3>Comparison optimizers</h3>
+      <div class="ctrl-grid">
+        <div class="ctrl-row"><label>GD α</label><input type="range" min="-3" max="-0.5" step="0.25" value="-1.5" id="slGDLR" oninput="reset()"><span class="v" id="vGDLR">0.03</span></div>
+        <div class="ctrl-row"><label>Mom α</label><input type="range" min="-3" max="-0.5" step="0.25" value="-1.5" id="slMLR" oninput="reset()"><span class="v" id="vMLR">0.03</span></div>
+        <div class="ctrl-row"><label>RMS α</label><input type="range" min="-3" max="-0.5" step="0.25" value="-1.5" id="slRLR" oninput="reset()"><span class="v" id="vRLR">0.03</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="opt-toggles">
+    <div class="tog on" id="togAdam" onclick="toggleOpt('Adam')"><div class="dot" style="background:#7c3aed"></div>Adam</div>
+    <div class="tog on" id="togGD" onclick="toggleOpt('GD')"><div class="dot" style="background:#2563eb"></div>Batch GD</div>
+    <div class="tog on" id="togMom" onclick="toggleOpt('Mom')"><div class="dot" style="background:#dc2626"></div>Momentum</div>
+    <div class="tog on" id="togRMS" onclick="toggleOpt('RMS')"><div class="dot" style="background:#d97706"></div>RMSProp</div>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">Trajectories on loss contours</div>
+      <div id="pTraj" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Loss vs step</div>
+      <div id="pLoss" class="plot"></div>
+    </div>
+  </div>
+  <div class="plot3col">
+    <div class="plot-card">
+      <div class="plot-title">1st moment m̂ₜ (momentum estimate)</div>
+      <div id="pM1" class="plot" style="height:220px"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">2nd moment v̂ₜ (variance estimate)</div>
+      <div id="pM2" class="plot" style="height:220px"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Effective step size α/√v̂ₜ (per dim)</div>
+      <div id="pEff" class="plot" style="height:220px"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+const COLORS = {Adam:'#7c3aed', GD:'#2563eb', Mom:'#dc2626', RMS:'#d97706'};
+const ENABLED = {Adam:true, GD:true, Mom:true, RMS:true};
+
+function toggleOpt(n){ENABLED[n]=!ENABLED[n];document.getElementById('tog'+n).classList.toggle('on',ENABLED[n]);reset();}
+
+function linspace(a,b,n){return Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));}
+const CFG={responsive:true,displayModeBar:false};
+
+function getLoss(){
+  const surf=document.getElementById('selSurf').value;
+  const kappa=parseFloat(document.getElementById('slKappa').value);
+  document.getElementById('vKappa').textContent=kappa;
+  document.getElementById('vSteps').textContent=document.getElementById('slSteps').value;
+
+  if(surf==='bowl'){
+    const b=1/Math.sqrt(kappa);
+    return {f:(x,y)=>0.5*x*x+0.5*(y/b)**2,
+      gx:(x,y)=>x,gy:(x,y)=>y/(b*b),x0:-1.8,y0:-1.8,xl:[-2.2,2.2],yl:[-2.2,2.2]};
+  } else if(surf==='banana'){
+    return {f:(x,y)=>(1-x)**2+100*(y-x*x)**2,
+      gx:(x,y)=>-2*(1-x)-400*x*(y-x*x),gy:(x,y)=>200*(y-x*x),x0:-1.2,y0:1.0,xl:[-2,2],yl:[-1,3]};
+  } else {
+    return {f:(x,y)=>x*x/kappa-y*y+0.1*y**4,
+      gx:(x,y)=>2*x/kappa,gy:(x,y)=>-2*y+0.4*y**3,x0:0.5,y0:0.2,xl:[-3,3],yl:[-2.5,2.5]};
+  }
+}
+
+function runAdam(loss, steps, lr, b1, b2, eps){
+  let x=loss.x0, y=loss.y0;
+  let m1x=0,m1y=0,m2x=1e-8,m2y=1e-8;
+  const path=[{x,y}], losses=[loss.f(x,y)];
+  const m1h=[], m2h=[], effh=[];
+
+  for(let t=1;t<=steps;t++){
+    const gx=loss.gx(x,y), gy=loss.gy(x,y);
+    m1x=b1*m1x+(1-b1)*gx; m1y=b1*m1y+(1-b1)*gy;
+    m2x=b2*m2x+(1-b2)*gx*gx; m2y=b2*m2y+(1-b2)*gy*gy;
+    const m1xh=m1x/(1-Math.pow(b1,t)), m1yh=m1y/(1-Math.pow(b1,t));
+    const m2xh=m2x/(1-Math.pow(b2,t)), m2yh=m2y/(1-Math.pow(b2,t));
+    x=Math.max(loss.xl[0]-0.5,Math.min(loss.xl[1]+0.5,x-lr*m1xh/(Math.sqrt(m2xh)+eps)));
+    y=Math.max(loss.yl[0]-0.5,Math.min(loss.yl[1]+0.5,y-lr*m1yh/(Math.sqrt(m2yh)+eps)));
+    path.push({x,y}); losses.push(Math.max(1e-10,loss.f(x,y)));
+    m1h.push({x:m1xh,y:m1yh});
+    m2h.push({x:m2xh,y:m2yh});
+    effh.push({x:lr/Math.sqrt(m2xh+eps),y:lr/Math.sqrt(m2yh+eps)});
+  }
+  return {path,losses,m1h,m2h,effh};
+}
+
+function runSimple(name, loss, steps, lr, beta=0.9, rho=0.9){
+  let x=loss.x0,y=loss.y0,vx=0,vy=0,Ex=1e-8,Ey=1e-8,Gx=0,Gy=0;
+  const path=[{x,y}],losses=[loss.f(x,y)];
+  for(let i=0;i<steps;i++){
+    const gx=loss.gx(x,y),gy=loss.gy(x,y);
+    let dx,dy;
+    if(name==='GD'){dx=-lr*gx;dy=-lr*gy;}
+    else if(name==='Mom'){vx=beta*vx-lr*gx;vy=beta*vy-lr*gy;dx=vx;dy=vy;}
+    else{Ex=rho*Ex+(1-rho)*gx*gx;Ey=rho*Ey+(1-rho)*gy*gy;dx=-lr/Math.sqrt(Ex+1e-8)*gx;dy=-lr/Math.sqrt(Ey+1e-8)*gy;}
+    x=Math.max(loss.xl[0]-0.5,Math.min(loss.xl[1]+0.5,x+dx));
+    y=Math.max(loss.yl[0]-0.5,Math.min(loss.yl[1]+0.5,y+dy));
+    path.push({x,y});losses.push(Math.max(1e-10,loss.f(x,y)));
+  }
+  return {path,losses};
+}
+
+function getParams(){
+  const alr=Math.pow(10,parseFloat(document.getElementById('slALR').value));
+  const b1=parseFloat(document.getElementById('slB1').value);
+  const b2=parseFloat(document.getElementById('slB2').value);
+  const eps=Math.pow(10,parseFloat(document.getElementById('slEps').value));
+  const gdlr=Math.pow(10,parseFloat(document.getElementById('slGDLR').value));
+  const mlr=Math.pow(10,parseFloat(document.getElementById('slMLR').value));
+  const rlr=Math.pow(10,parseFloat(document.getElementById('slRLR').value));
+  document.getElementById('vALR').textContent=alr<0.01?alr.toExponential(1):alr.toFixed(4);
+  document.getElementById('vB1').textContent=b1.toFixed(3);
+  document.getElementById('vB2').textContent=b2.toFixed(3);
+  document.getElementById('vEps').textContent=eps.toExponential(0);
+  document.getElementById('vGDLR').textContent=gdlr<0.01?gdlr.toExponential(1):gdlr.toFixed(4);
+  document.getElementById('vMLR').textContent=mlr<0.01?mlr.toExponential(1):mlr.toFixed(4);
+  document.getElementById('vRLR').textContent=rlr<0.01?rlr.toExponential(1):rlr.toFixed(4);
+  return {alr,b1,b2,eps,gdlr,mlr,rlr};
+}
+
+function reset(){
+  const p=getParams();
+  const loss=getLoss();
+  const steps=parseInt(document.getElementById('slSteps').value);
+
+  const results={};
+  if(ENABLED.Adam) results.Adam=runAdam(loss,steps,p.alr,p.b1,p.b2,p.eps);
+  if(ENABLED.GD)   results.GD  =runSimple('GD', loss,steps,p.gdlr);
+  if(ENABLED.Mom)  results.Mom =runSimple('Mom',loss,steps,p.mlr,0.9);
+  if(ENABLED.RMS)  results.RMS =runSimple('RMS',loss,steps,p.rlr,0.9,0.9);
+
+  drawAll(loss,results,steps,p);
+}
+
+function drawAll(loss,results,steps,p){
+  const xs=linspace(loss.xl[0],loss.xl[1],60);
+  const ys=linspace(loss.yl[0],loss.yl[1],60);
+  const z=ys.map(y=>xs.map(x=>Math.min(loss.f(x,y),50)));
+
+  const trajTraces=[{type:'contour',x:xs,y:ys,z,ncontours:20,
+    colorscale:[[0,'#eff6ff'],[1,'#fef2f2']],showscale:false,contours:{coloring:'fill'},opacity:0.7}];
+  const lossTraces=[];
+
+  for(const [name,res] of Object.entries(results)){
+    const px=res.path.map(p=>p.x),py=res.path.map(p=>p.y);
+    trajTraces.push({type:'scatter',x:px,y:py,mode:'lines+markers',
+      line:{color:COLORS[name],width:2},marker:{size:3,color:COLORS[name]},name});
+    lossTraces.push({x:Array.from({length:res.losses.length},(_,i)=>i),
+      y:res.losses,type:'scatter',mode:'lines',line:{color:COLORS[name],width:2},name});
+  }
+
+  const firstRes=Object.values(results)[0];
+  if(firstRes){
+    trajTraces.push({type:'scatter',x:[loss.x0],y:[loss.y0],mode:'markers',
+      marker:{size:12,color:'#0f172a',symbol:'star'},name:'Start',showlegend:true});
+  }
+
+  Plotly.react('pTraj',trajTraces,{
+    margin:{t:8,b:34,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{range:loss.xl,title:'θ₁'},yaxis:{range:loss.yl,title:'θ₂'},
+    height:300,legend:{x:0,y:1,bgcolor:'rgba(255,255,255,0.8)'}},CFG);
+
+  Plotly.react('pLoss',lossTraces,{
+    margin:{t:8,b:34,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    xaxis:{title:'Step'},yaxis:{title:'Loss',type:'log'},
+    height:300,legend:{x:1,y:1,xanchor:'right',bgcolor:'rgba(255,255,255,0.8)'}},CFG);
+
+  // Adam internals
+  if(results.Adam){
+    const ad=results.Adam;
+    const t=Array.from({length:ad.m1h.length},(_,i)=>i+1);
+    Plotly.react('pM1',[
+      {x:t,y:ad.m1h.map(m=>m.x),name:'dim 1',line:{color:'#7c3aed',width:2},type:'scatter',mode:'lines'},
+      {x:t,y:ad.m1h.map(m=>m.y),name:'dim 2',line:{color:'#be185d',width:2,dash:'dash'},type:'scatter',mode:'lines'},
+    ],{margin:{t:4,b:30,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+      xaxis:{title:'Step'},yaxis:{title:'m̂ₜ'},height:220,legend:{x:0,y:1}},CFG);
+
+    Plotly.react('pM2',[
+      {x:t,y:ad.m2h.map(m=>m.x),name:'dim 1',line:{color:'#7c3aed',width:2},type:'scatter',mode:'lines'},
+      {x:t,y:ad.m2h.map(m=>m.y),name:'dim 2',line:{color:'#be185d',width:2,dash:'dash'},type:'scatter',mode:'lines'},
+    ],{margin:{t:4,b:30,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+      xaxis:{title:'Step'},yaxis:{title:'v̂ₜ',type:'log'},height:220,legend:{x:1,y:1,xanchor:'right'}},CFG);
+
+    Plotly.react('pEff',[
+      {x:t,y:ad.effh.map(e=>e.x),name:'dim 1',line:{color:'#7c3aed',width:2},type:'scatter',mode:'lines'},
+      {x:t,y:ad.effh.map(e=>e.y),name:'dim 2',line:{color:'#be185d',width:2,dash:'dash'},type:'scatter',mode:'lines'},
+    ],{margin:{t:4,b:30,l:54,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+      xaxis:{title:'Step'},yaxis:{title:'α/√v̂ₜ'},height:220,legend:{x:1,y:1,xanchor:'right'}},CFG);
+  }
+
+  // Info
+  let txt='Adam update:\n  m = β₁·m + (1−β₁)·g          (1st moment: momentum)\n  v = β₂·v + (1−β₂)·g²         (2nd moment: variance)\n  m̂ = m/(1−β₁ᵗ)               (bias correction)\n  v̂ = v/(1−β₂ᵗ)               (bias correction)\n  θ ← θ − α · m̂ / (√v̂ + ε)\n\n';
+  txt+=`Parameters: α=${p.alr.toFixed(4)}, β₁=${p.b1.toFixed(3)}, β₂=${p.b2.toFixed(3)}, ε=${p.eps.toExponential(0)}\n\n`;
+  txt+='Final losses:\n';
+  for(const [name,res] of Object.entries(results)){
+    txt+=`  ${name.padEnd(10)} ${res.losses[res.losses.length-1].toExponential(3)}\n`;
+  }
+  txt+='\nβ₁ controls momentum smoothing; β₂ controls variance smoothing.\n';
+  txt+='Bias correction (1−βᵗ) prevents underestimation early in training.\n';
+  txt+='Adam = Momentum + RMSProp + bias correction → robust across most problems.';
+  document.getElementById('info').textContent=txt;
+}
+
+reset();
+</script>
+</body>
+</html>

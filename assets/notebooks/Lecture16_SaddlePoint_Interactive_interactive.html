@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Saddle Points — Section 4.2</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .controls{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+    .control{padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:13px;font-weight:600;display:block;margin-bottom:6px}
+    .row{display:flex;align-items:center;gap:8px}
+    .row input[type=range]{flex:1}
+    .value{min-width:48px;text-align:right;font-weight:700;font-size:14px}
+    select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;background:#fff}
+    .actions{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+    button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;font-weight:600}
+    button:hover{background:var(--bg)}
+    button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+    button.primary:hover{background:#1d4ed8}
+    button.stop{background:var(--red);color:#fff;border-color:var(--red)}
+    .plots{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .plot-card{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .plot-title{padding:7px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--bg);border-bottom:1px solid var(--line)}
+    .plot{height:380px}
+    .info{padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:13px;line-height:1.55;font-family:monospace;white-space:pre-wrap}
+    @media(max-width:800px){.controls{grid-template-columns:repeat(2,1fr)}.plots{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Saddle Points — Section 4.2</h1>
+  <p class="sub">Gradient descent locks onto the saddle point of f(x,y) = x² − y² because the gradient is zero there — regardless of learning rate. Only a perturbation or momentum can escape.</p>
+
+  <div class="controls">
+    <div class="control">
+      <label>Learning rate α</label>
+      <div class="row">
+        <input id="slLR" type="range" min="-3" max="-0.5" step="0.25" value="-1" oninput="onLRChange()">
+        <span class="value" id="vLR">0.1</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Start x₀</label>
+      <div class="row">
+        <input id="slX0" type="range" min="-1.8" max="1.8" step="0.1" value="0.5" oninput="reset()">
+        <span class="value" id="vX0">0.5</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Start y₀</label>
+      <div class="row">
+        <input id="slY0" type="range" min="-1.8" max="1.8" step="0.1" value="0.3" oninput="reset()">
+        <span class="value" id="vY0">0.3</span>
+      </div>
+    </div>
+    <div class="control">
+      <label>Mode</label>
+      <select id="selMode" onchange="reset()">
+        <option value="pure_gd">Pure GD (locks at saddle)</option>
+        <option value="perturbed">GD + tiny noise</option>
+        <option value="momentum">GD + momentum (escapes!)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btnRun" onclick="startStop()">▶ Run</button>
+    <button onclick="step1()">+1 step</button>
+    <button onclick="step20()">+20 steps</button>
+    <button onclick="reset()">Reset</button>
+  </div>
+
+  <div class="plots">
+    <div class="plot-card">
+      <div class="plot-title">f(x,y) = x² − y²  (3D surface + GD path)</div>
+      <div id="p3d" class="plot"></div>
+    </div>
+    <div class="plot-card">
+      <div class="plot-title">Contour + gradient field + GD trajectory</div>
+      <div id="p2d" class="plot"></div>
+    </div>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+
+<script>
+// f(x,y) = x^2 - y^2  → saddle at (0,0)
+// ∂f/∂x = 2x,  ∂f/∂y = -2y
+const f  = (x,y) => x*x - y*y;
+const gx = (x,y) => 2*x;
+const gy = (x,y) => -2*y;
+
+let lr = 0.1, x0 = 0.5, y0 = 0.3;
+let path = [], running = false, animId = null;
+let vx = 0, vy = 0;  // momentum velocity
+const beta = 0.85;
+
+function getMode(){ return document.getElementById('selMode').value; }
+
+function onLRChange(){
+  lr = Math.pow(10, parseFloat(document.getElementById('slLR').value));
+  document.getElementById('vLR').textContent = lr<0.01?lr.toExponential(1):lr.toFixed(3);
+  reset();
+}
+
+function reset(){
+  stopAnim();
+  x0 = parseFloat(document.getElementById('slX0').value);
+  y0 = parseFloat(document.getElementById('slY0').value);
+  document.getElementById('vX0').textContent = x0.toFixed(1);
+  document.getElementById('vY0').textContent = y0.toFixed(1);
+  path = [{x:x0, y:y0}];
+  vx = 0; vy = 0;
+  draw(); updateInfo();
+}
+
+function doStep(){
+  const last = path[path.length-1];
+  const cx = last.x, cy = last.y;
+  const mode = getMode();
+
+  let nx, ny;
+  let noise = 0;
+  if(mode === 'perturbed') noise = (Math.random()-0.5)*0.01;
+
+  if(mode === 'momentum'){
+    vx = beta*vx - lr*gx(cx,cy);
+    vy = beta*vy - lr*gy(cx,cy);
+    nx = cx + vx;
+    ny = cy + vy;
+  } else {
+    nx = cx - lr*gx(cx,cy) + noise;
+    ny = cy - lr*gy(cx,cy) + (Math.random()-0.5)*0.01*(mode==='perturbed'?1:0);
+  }
+  // Clamp
+  nx = Math.max(-2.5, Math.min(2.5, nx));
+  ny = Math.max(-2.5, Math.min(2.5, ny));
+  path.push({x:nx, y:ny});
+}
+
+function step1(){ doStep(); draw(); updateInfo(); }
+function step20(){ for(let i=0;i<20;i++) doStep(); draw(); updateInfo(); }
+
+function animate(){
+  if(!running) return;
+  for(let i=0;i<3;i++) doStep();
+  draw(); updateInfo();
+  if(path.length > 800){ stopAnim(); return; }
+  animId = requestAnimationFrame(animate);
+}
+
+function startStop(){
+  running=!running;
+  const btn=document.getElementById('btnRun');
+  btn.textContent=running?'⏸ Pause':'▶ Run';
+  btn.className=running?'primary stop':'primary';
+  if(running) animate();
+}
+function stopAnim(){
+  running=false; if(animId){cancelAnimationFrame(animId);animId=null;}
+  const btn=document.getElementById('btnRun');
+  btn.textContent='▶ Run'; btn.className='primary';
+}
+
+const CFG={responsive:true,displayModeBar:false};
+const N=40;
+const lin=(a,b,n)=>Array.from({length:n},(_,i)=>a+(b-a)*i/(n-1));
+
+function draw(){
+  const xs=lin(-2.5,2.5,N), ys=lin(-2.5,2.5,N);
+  const z=ys.map(y=>xs.map(x=>f(x,y)));
+
+  // 3D surface
+  const pathXs=path.map(p=>p.x), pathYs=path.map(p=>p.y), pathZs=path.map(p=>f(p.x,p.y)+0.05);
+  Plotly.react('p3d',[
+    {type:'surface',x:xs,y:ys,z,colorscale:[[0,'#eff6ff'],[0.5,'#f8fafc'],[1,'#fef2f2']],
+     showscale:false,opacity:0.85,contours:{z:{show:true,color:'#cbd5e1',width:1}}},
+    {type:'scatter3d',x:pathXs,y:pathYs,z:pathZs,mode:'lines+markers',
+     line:{color:'#2563eb',width:3},marker:{size:3,color:'#2563eb'},name:'GD path'},
+    {type:'scatter3d',x:[0],[y:0],[z:[0.05]],mode:'markers',
+     marker:{size:8,color:'#dc2626',symbol:'cross'},name:'Saddle (0,0)'},
+  ],{
+    scene:{xaxis:{title:'x'},yaxis:{title:'y'},zaxis:{title:'f(x,y)'},
+      camera:{eye:{x:1.5,y:-1.5,z:1.2}}},
+    margin:{t:0,b:0,l:0,r:0},height:380,paper_bgcolor:'#fff',
+    legend:{x:0,y:1,bgcolor:'rgba(255,255,255,0.8)'}
+  },CFG);
+
+  // Contour + gradient field
+  const contourZ=ys.map(y=>xs.map(x=>f(x,y)));
+  // Quiver arrows (subsample)
+  const qxS=[],qyS=[],qu=[],qv=[];
+  const qs=lin(-2,2,10);
+  for(const qx of qs) for(const qy of qs){
+    const mag=Math.sqrt(gx(qx,qy)**2+gy(qx,qy)**2)||1;
+    const scale=0.25/mag;
+    qxS.push(qx); qyS.push(qy);
+    qu.push(-gx(qx,qy)*scale); qv.push(-gy(qx,qy)*scale);
+  }
+
+  Plotly.react('p2d',[
+    {type:'contour',x:xs,y:ys,z:contourZ,ncontours:20,
+     colorscale:[[0,'#eff6ff'],[1,'#fef2f2']],showscale:false,
+     contours:{coloring:'fill'},opacity:0.7},
+    // Gradient arrows as annotations via scatter + text hack — use actual lines
+    ...qxS.map((_,i)=>({
+      type:'scatter',x:[qxS[i],qxS[i]+qu[i]],y:[qyS[i],qyS[i]+qv[i]],
+      mode:'lines',line:{color:'rgba(100,116,139,0.35)',width:1},showlegend:false,hoverinfo:'skip'
+    })),
+    {type:'scatter',x:pathXs,y:pathYs,mode:'lines+markers',
+     line:{color:'#2563eb',width:2},marker:{size:4,color:'#2563eb'},name:'GD path'},
+    {type:'scatter',x:[0],y:[0],mode:'markers',
+     marker:{size:12,color:'#dc2626',symbol:'x',line:{width:2}},name:'Saddle'},
+    {type:'scatter',x:[path[0].x],y:[path[0].y],mode:'markers',
+     marker:{size:10,color:'#059669',symbol:'star'},name:'Start'},
+  ],{
+    xaxis:{range:[-2.5,2.5],title:'x'},yaxis:{range:[-2.5,2.5],title:'y'},
+    margin:{t:8,b:34,l:44,r:8},paper_bgcolor:'#fff',plot_bgcolor:'#f8fafc',
+    height:380,legend:{x:0,y:1,bgcolor:'rgba(255,255,255,0.8)'}
+  },CFG);
+}
+
+function updateInfo(){
+  const last=path[path.length-1];
+  const fval=f(last.x,last.y);
+  const gradMag=Math.sqrt(gx(last.x,last.y)**2+gy(last.x,last.y)**2);
+  const mode=getMode();
+  const stuck=gradMag<1e-4&&path.length>5;
+  const modeLabels={pure_gd:'Pure GD (no escape)',perturbed:'GD + tiny noise',momentum:'GD + momentum'};
+
+  let status;
+  if(stuck && mode==='pure_gd') status='⚠ STUCK at saddle — gradient ≈ 0. Changing lr won\'t help!';
+  else if(mode==='momentum' && Math.abs(last.y)>0.5) status='✓ Escaped! Momentum carried it past the saddle.';
+  else status='Running...';
+
+  document.getElementById('info').textContent =
+    `Mode: ${modeLabels[mode]}   Steps: ${path.length-1}   α = ${lr}\n`+
+    `Current position: x=${last.x.toFixed(4)},  y=${last.y.toFixed(4)}\n`+
+    `f(x,y) = ${fval.toFixed(6)}   |∇f| = ${gradMag.toFixed(6)}\n\n`+
+    `${status}\n\n`+
+    `Insight: f(x,y) = x² − y²  →  ∂f/∂x = 2x, ∂f/∂y = −2y.\n`+
+    `At (0,0): ∇f = 0 exactly. GD has no gradient signal → no update → stuck forever.\n`+
+    `x-direction: +curvature (loss goes up) — GD pushes x toward 0 correctly.\n`+
+    `y-direction: −curvature (loss goes down) — but GD needs non-zero gradient to move!\n`+
+    `Momentum accumulates velocity from past steps and can slide through the zero-gradient point.`;
+}
+
+onLRChange();
+</script>
+</body>
+</html>

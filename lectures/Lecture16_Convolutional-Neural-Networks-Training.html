@@ -270,12 +270,7 @@ slow.</p></li>
 <li><p>Some directions have positive curvature (loss increases), while
 others have negative curvature (loss decreases).</p></li>
 </ul>
-<figure id="fig:saddle_ex">
-<img src="img/lecture16/saddle_point.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>At saddle points, gradients vanish even though better
-solutions exist in certain directions. This can significantly slow
-training.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 4.2 — Saddle Points</h3><p>Gradient descent locks onto the saddle point of f(x,y)=x²−y² regardless of learning rate. Toggle modes to see how noise or momentum can escape.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_SaddlePoint_Interactive_interactive.html" style="height:820px;" title="Interactive Section 4.2 Saddle Points"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_SaddlePoint_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>In practice, these challenges explain why training deep neural
 networks requires careful optimization strategies such as momentum,
 adaptive learning rates (e.g., Adam), and stochastic gradient descent.
@@ -349,14 +344,7 @@ allows the optimization algorithm to handle noisy gradients better but
 better account for the true effects the gradients should have on the
 momentum so that overshoot is minimized, leading to faster and more
 stable convergence.</p>
-<figure id="fig:mumentum_ex">
-<img src="img/lecture16/gradient_plus_mumentum.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>When gradient decent is combined with the concept of
-momentum the optimization algorithm has a driving force even when the
-gradient at a given point is 0. This helps the algorithm overcome local
-minima and saddle points and continue towards the global solution, as
-seen in the image.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–8 — Optimizer Comparison</h3><p>Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_OptimizerComparison_Interactive_interactive.html" style="height:920px;" title="Interactive Sections 5–8 Optimizer Comparison"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_OptimizerComparison_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h1 data-number="6" id="condition-numbers-within-optimization"><span class="header-section-number">6.</span> Condition Numbers Within
 Optimization</h1>
 <h2 data-number="6.1" id="loss-curvature-and-the-hessian-matrix"><span class="header-section-number">6.1</span> Loss Curvature and the Hessian
@@ -422,12 +410,7 @@ methods can make larger progress along flat directions while remaining
 stable in steep directions. In the following sections, we will explore
 several adaptive optimization algorithms and examine how they improve
 convergence in practice.</p>
-<figure id="fig:curvature_ex">
-<img src="img/lecture16/Curvature.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>An illustration of anisotropic curvature: the surface is
-much steeper in one direction than another, producing a narrow valley
-that slows gradient descent.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6 — Condition Numbers &amp; Curvature</h3><p>Adjust the Hessian eigenvalues λ₁ and λ₂ to change the condition number κ=λ_max/λ_min. See how anisotropic curvature slows GD convergence.</p><iframe class="interactive-notebook-frame" data-default-height="840" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_ConditionNumber_Interactive_interactive.html" style="height:840px;" title="Interactive Section 6 Condition Numbers"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_ConditionNumber_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h1 data-number="7" id="adagrad---adaptive-gradient-algorithm"><span class="header-section-number">7.</span> AdaGrad - Adaptive Gradient
 Algorithm</h1>
 <h2 data-number="7.1" id="overview"><span class="header-section-number">7.1</span> Overview</h2>
@@ -496,12 +479,7 @@ other non-convex problems that require sustained exploration of the
 parameter space. Later adaptive optimization methods, such as RMSProp
 and Adam, were developed to address this issue by preventing the
 learning rate from decaying too aggressively.</p>
-<figure id="fig:adagrad_ex">
-<img src="img/lecture16/Adagrad.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>AdaGrad adapts the learning rate to follow the optimal path
-in ill-conditioned problems, reducing oscillations compared to standard
-gradient descent.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–8 — Optimizer Comparison</h3><p>Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_OptimizerComparison_Interactive_interactive.html" style="height:920px;" title="Interactive Sections 5–8 Optimizer Comparison"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_OptimizerComparison_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h1 data-number="8" id="rmsprop---root-mean-square-propagation"><span class="header-section-number">8.</span> RMSProp - Root Mean Square
 Propagation</h1>
 <h2 data-number="8.1" id="overview-1"><span class="header-section-number">8.1</span> Overview</h2>
@@ -562,12 +540,7 @@ loss landscapes.</p>
 than AdaGrad, particularly for deep neural networks. This idea of
 combining adaptive learning rates with momentum will be further extended
 in the Adam optimizer, which builds directly on RMSProp.</p>
-<figure id="fig:rmsprop_ex">
-<img src="img/lecture16/RMSProp.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Comparison of optimization trajectories. RMSProp follows a
-similar path to AdaGrad but converges faster by preventing the learning
-rate from shrinking too aggressively.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 9 — Adam Optimizer</h3><p>Adam combines momentum and RMSProp with bias correction. Adjust α, β₁, β₂ and compare against GD, Momentum, and RMSProp.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_Adam_Interactive_interactive.html" style="height:900px;" title="Interactive Section 9 Adam Optimizer"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_Adam_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h1 data-number="9" id="adam---adaptive-moment-estimation"><span class="header-section-number">9.</span> Adam - Adaptive Moment
 Estimation</h1>
 <h2 data-number="9.1" id="overview-2"><span class="header-section-number">9.1</span> Overview</h2>
