@@ -204,7 +204,8 @@ function update() {
     margin: {t:20, b:50, l:60, r:10},
     plot_bgcolor:'#fff',
     paper_bgcolor:'#fff',
-    font: {family:'"Segoe UI",Arial,sans-serif', size:11}
+    font: {family:'"Segoe UI",Arial,sans-serif', size:11},
+    height: 320
   };
   Plotly.react('pLoss', lossTraces, lossLayout, CFG);
 
@@ -217,7 +218,8 @@ function update() {
     margin: {t:20, b:70, l:55, r:10},
     plot_bgcolor:'#fff',
     paper_bgcolor:'#fff',
-    font: {family:'"Segoe UI",Arial,sans-serif', size:11}
+    font: {family:'"Segoe UI",Arial,sans-serif', size:11},
+    height: 320
   };
   Plotly.react('pLatent', latentTraces, latentLayout, CFG);
 

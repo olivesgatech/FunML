@@ -223,10 +223,12 @@ function drawArch(arch) {
     yaxis: {visible:false, range:[0, 1]},
     margin: {t:10, b:10, l:10, r:10},
     plot_bgcolor:'#fff',
-    paper_bgcolor:'#fff'
+    paper_bgcolor:'#fff',
+    height: 320
   };
 
-  Plotly.react('pArch', [], layout, CFG);
+  // Need at least one invisible trace so Plotly renders shapes/annotations
+  Plotly.react('pArch', [{type:'scatter',x:[0,1],y:[0,1],mode:'markers',marker:{opacity:0},showlegend:false,hoverinfo:'skip'}], layout, CFG);
 }
 
 // Reconstruction grid using Plotly heatmap-style scatter
@@ -372,6 +374,7 @@ function drawGrid(arch) {
     margin: {t:16, b:16, l:10, r:10},
     plot_bgcolor:'#fff',
     paper_bgcolor:'#fff',
+    height: 320,
     annotations: [{
       x: 0.5, y: 1.01, xref:'paper', yref:'paper',
       text: arch === 'conv' ? 'Conv-AE: sharper spatial edges' : 'FC-AE: blurrier, less spatial structure',
@@ -442,7 +445,8 @@ function update() {
     margin:{t:20, b:50, l:60, r:10},
     plot_bgcolor:'#fff',
     paper_bgcolor:'#fff',
-    font:{family:'"Segoe UI",Arial,sans-serif', size:11}
+    font:{family:'"Segoe UI",Arial,sans-serif', size:11},
+    height: 320
   };
   Plotly.react('pQuality', qTraces, qLayout, CFG);
 
