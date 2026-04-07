@@ -791,7 +791,7 @@
       "section_title": "Interactive Notebook: Section 4.2 \u2014 Saddle Points",
       "description": "Gradient descent locks onto the saddle point of f(x,y)=x\u00b2\u2212y\u00b2 regardless of learning rate. Toggle modes to see how noise or momentum can escape.",
       "iframe_title": "Interactive Section 4.2 Saddle Points",
-      "iframe_height": 820
+      "iframe_height": 900
     },
     {
       "image_match": "img/lecture16/gradient_plus_mumentum.jpg",
@@ -800,7 +800,7 @@
       "section_title": "Interactive Notebook: Sections 5\u20138 \u2014 Optimizer Comparison",
       "description": "Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.",
       "iframe_title": "Interactive Sections 5\u20138 Optimizer Comparison",
-      "iframe_height": 920
+      "iframe_height": 1020
     },
     {
       "image_match": "img/lecture16/Adagrad.jpg",
@@ -809,7 +809,7 @@
       "section_title": "Interactive Notebook: Sections 5\u20138 \u2014 Optimizer Comparison",
       "description": "Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.",
       "iframe_title": "Interactive Sections 5\u20138 Optimizer Comparison",
-      "iframe_height": 920
+      "iframe_height": 1020
     },
     {
       "image_match": "img/lecture16/Curvature.png",
@@ -818,7 +818,7 @@
       "section_title": "Interactive Notebook: Section 6 \u2014 Condition Numbers & Curvature",
       "description": "Adjust the Hessian eigenvalues \u03bb\u2081 and \u03bb\u2082 to change the condition number \u03ba=\u03bb_max/\u03bb_min. See how anisotropic curvature slows GD convergence.",
       "iframe_title": "Interactive Section 6 Condition Numbers",
-      "iframe_height": 840
+      "iframe_height": 900
     },
     {
       "image_match": "img/lecture16/RMSProp.png",
@@ -827,7 +827,7 @@
       "section_title": "Interactive Notebook: Section 9 \u2014 Adam Optimizer",
       "description": "Adam combines momentum and RMSProp with bias correction. Adjust \u03b1, \u03b2\u2081, \u03b2\u2082 and compare against GD, Momentum, and RMSProp.",
       "iframe_title": "Interactive Section 9 Adam Optimizer",
-      "iframe_height": 900
+      "iframe_height": 960
     },
     {
       "image_match": "img/lecture17/scribeim3.png",
@@ -835,7 +835,7 @@
       "notebook_ipynb": "Lecture17_LossFunctions_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 4 \u2014 CE vs Weighted CE vs Focal Loss",
       "description": "Adjust class weights (WCE) and focus parameter \u03b3 (Focal Loss) to see how each loss re-weights hard vs easy examples for imbalanced datasets.",
-      "iframe_height": 760,
+      "iframe_height": 840,
       "iframe_title": "Interactive Section 4 Loss Functions"
     },
     {
@@ -844,7 +844,7 @@
       "notebook_ipynb": "Lecture17_TrainingPlayground_Interactive.ipynb",
       "section_title": "Interactive Notebook: Sections 10\u201311 \u2014 Weight Init & Activation/Gradient Histograms",
       "description": "Select initialization scheme (Zeros, Xavier, Kaiming) and activation function to see activation std and gradient norms per layer. Compare healthy vs broken configurations.",
-      "iframe_height": 900,
+      "iframe_height": 980,
       "iframe_title": "Interactive Sections 10-11 Weight Init and Activation Histograms"
     },
     {
@@ -853,7 +853,7 @@
       "notebook_ipynb": "Lecture18_PCA_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 2.2 \u2014 PCA",
       "description": "Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions and how a linear AE learns the same subspace.",
-      "iframe_height": 700,
+      "iframe_height": 820,
       "iframe_title": "Interactive Section 2.2 PCA"
     },
     {
@@ -862,7 +862,7 @@
       "notebook_ipynb": "Lecture18_AE_Interactive.ipynb",
       "section_title": "Interactive Notebook: Sections 2.3\u20133 \u2014 Linear vs Nonlinear Autoencoder",
       "description": "Compare linear AE (equivalent to PCA) with nonlinear AEs (Sigmoid, Tanh, ReLU). Adjust latent dimension k and see reconstruction quality and latent space cluster separation.",
-      "iframe_height": 820,
+      "iframe_height": 920,
       "iframe_title": "Interactive Sections 2.3-3 Linear vs Nonlinear AE"
     },
     {
@@ -871,7 +871,7 @@
       "notebook_ipynb": "Lecture18_Unpooling_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 5.1 \u2014 Unpooling Strategies",
       "description": "See all three unpooling strategies side by side: max-unpooling (uses stored indices), bed-of-nails (top-left placement), and nearest-neighbor (fill entire block). Randomize the input to explore different cases.",
-      "iframe_height": 760,
+      "iframe_height": 860,
       "iframe_title": "Interactive Section 5.1 Unpooling"
     },
     {
@@ -880,7 +880,7 @@
       "notebook_ipynb": "Lecture18_TransposedConv_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 5.3 \u2014 Transposed Convolution",
       "description": "Step through a transposed convolution one input element at a time. See how each input scales the kernel and accumulates in the output. Formula: H_out = (H_in\u22121)\u00d7s \u2212 2p + k.",
-      "iframe_height": 860,
+      "iframe_height": 960,
       "iframe_title": "Interactive Section 5.3 Transposed Convolution"
     },
     {
@@ -889,7 +889,7 @@
       "notebook_ipynb": "Lecture18_ConvAE_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 5.4 \u2014 Convolutional Autoencoder on MNIST",
       "description": "Compare FC-AE and Conv-AE reconstruction quality across latent dimensions. Conv-AEs exploit spatial structure for better reconstructions at smaller latent sizes.",
-      "iframe_height": 880,
+      "iframe_height": 980,
       "iframe_title": "Interactive Section 5.4 Convolutional AE"
     },
     {
@@ -898,7 +898,7 @@
       "notebook_ipynb": "Lecture19_VAETraining_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 2.4 \u2014 VAE Training (ELBO & Reparameterization)",
       "description": "Adjust \u03bc and \u03c3 to see how the posterior q(z|x) compares to the prior N(0,1). The KL divergence measures their distance. See the reparameterization trick z=\u03bc+\u03c3\u03b5 and the full ELBO as a function of \u03bc.",
-      "iframe_height": 800,
+      "iframe_height": 900,
       "iframe_title": "Interactive Section 2.4 VAE Training"
     },
     {
@@ -907,7 +907,7 @@
       "notebook_ipynb": "Lecture19_VAEInference_Interactive.ipynb",
       "section_title": "Interactive Notebook: Section 2.4 \u2014 VAE Latent Space Explorer",
       "description": "Click anywhere in the 2D latent space to decode z directly into a digit \u2014 no encoder needed. Explore how different regions generate different digits and interpolate smoothly between them.",
-      "iframe_height": 700,
+      "iframe_height": 860,
       "iframe_title": "Interactive Section 2.4 VAE Inference"
     }
   ]

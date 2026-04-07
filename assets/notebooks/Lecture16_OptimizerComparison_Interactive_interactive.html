@@ -119,7 +119,7 @@
   </div>
 
   <div class="actions">
-    <button class="primary" id="btnRun" onclick="startStop()">▶ Run all</button>
+    <button class="primary" id="btnRun" onclick="startStop()">▶ Animate</button>
     <button onclick="reset()">Reset</button>
   </div>
 
@@ -239,7 +239,7 @@ function runOptimizer(name, loss, steps){
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let results={}, running=false, animId=null;
+let results={}, running=false, animId=null, animStep=0, animMax=0;
 
 function reset(){
   stopAnim();
@@ -249,25 +249,41 @@ function reset(){
   for(const name of ['BGD','Mom','AG','RMS']){
     if(PARAMS[name].enabled) results[name]=runOptimizer(name,loss,steps);
   }
-  draw(loss);
-}
-
-function animate(){
-  if(!running) return;
-  // already computed; just stop
-  stopAnim();
+  draw(loss, steps);
 }
 
 function startStop(){
-  reset();
+  if(running){ stopAnim(); return; }
+  const loss=getLoss();
+  const steps=parseInt(document.getElementById('slSteps').value);
+  results={};
+  for(const name of ['BGD','Mom','AG','RMS']){
+    if(PARAMS[name].enabled) results[name]=runOptimizer(name,loss,steps);
+  }
+  animStep=0; animMax=steps; running=true;
+  document.getElementById('btnRun').textContent='⏸ Pause';
+  document.getElementById('btnRun').className='primary stop';
+  function frame(){
+    if(!running) return;
+    animStep=Math.min(animStep+Math.max(1,Math.floor(animMax/80)), animMax);
+    draw(loss, animStep);
+    if(animStep>=animMax){ stopAnim(); return; }
+    animId=requestAnimationFrame(frame);
+  }
+  animId=requestAnimationFrame(frame);
 }
-function stopAnim(){running=false;if(animId){cancelAnimationFrame(animId);animId=null;}
-  document.getElementById('btnRun').textContent='▶ Run all';
-  document.getElementById('btnRun').className='primary';}
+
+function stopAnim(){
+  running=false;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  document.getElementById('btnRun').textContent='▶ Animate';
+  document.getElementById('btnRun').className='primary';
+}
 
 const CFG={responsive:true,displayModeBar:false};
 
-function draw(loss){
+function draw(loss, maxStep){
+  if(maxStep===undefined) maxStep=Infinity;
   const xs=linspace(loss.xlim[0],loss.xlim[1],60);
   const ys=linspace(loss.ylim[0],loss.ylim[1],60);
   const z=ys.map(y=>xs.map(x=>Math.min(loss.f(x,y),50)));
@@ -279,11 +295,13 @@ function draw(loss){
   const lossTraces=[];
 
   for(const [name,res] of Object.entries(results)){
-    const px=res.path.map(p=>p.x), py=res.path.map(p=>p.y);
+    const pathSlice=res.path.slice(0,maxStep+1);
+    const lossSlice=res.losses.slice(0,maxStep+1);
+    const px=pathSlice.map(p=>p.x), py=pathSlice.map(p=>p.y);
     traces.push({type:'scatter',x:px,y:py,mode:'lines+markers',
       line:{color:COLORS[name],width:2},marker:{size:4,color:COLORS[name]},name});
-    lossTraces.push({x:Array.from({length:res.losses.length},(_,i)=>i),
-      y:res.losses,type:'scatter',mode:'lines',line:{color:COLORS[name],width:2},name});
+    lossTraces.push({x:Array.from({length:lossSlice.length},(_,i)=>i),
+      y:lossSlice,type:'scatter',mode:'lines',line:{color:COLORS[name],width:2},name});
   }
 
   // Mark start
