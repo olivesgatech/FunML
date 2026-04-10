@@ -127,7 +127,7 @@ A regression models a relationship between an input variable $x$ and a continuou
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\linewidth]{img/lecture7/bli_scatter_fit.png}
-\caption{Better Life Index example: GDP per capita vs.\ life satisfaction with a linear fit. Training points are used to fit the line; test points illustrate generalization.}
+\caption{Figure 7.1: Better Life Index example: GDP per capita vs.\ life satisfaction with a linear fit. Training points are used to fit the line; test points illustrate generalization.}
 \label{fig:bli_scatter_fit}
 \end{figure}
 
@@ -157,7 +157,7 @@ After fitting a regression model, it is useful to inspect \textbf{residuals} $r_
     \caption{Residuals vs.\ predictions (train).}
     \label{fig:bli_residuals_scatter}
 \end{subfigure}
-\caption{Residual diagnostics for the Better Life Index linear regression model on the training set. Ideally, residuals are roughly centered around zero with no systematic trend versus $\hat{y}$.}
+\caption{Figure 7.2: Residual diagnostics for the Better Life Index linear regression model on the training set. Ideally, residuals are roughly centered around zero with no systematic trend versus $\hat{y}$.}
 \label{fig:bli_residual_diagnostics}
 \end{figure}
 
@@ -218,7 +218,7 @@ The loss surface for the two-parameter case $(\theta_0,\theta_1)$ is illustrated
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\linewidth]{img/lecture7/mse_contour_theta0_theta1.png}
-\caption{Contours of the least squares loss $L(\theta_0,\theta_1)$ for the Better Life Index example (training set). The marked point indicates the minimizer obtained by the normal equation.}
+\caption{Figure 7.3: Contours of the least squares loss $L(\theta_0,\theta_1)$ for the Better Life Index example (training set). The marked point indicates the minimizer obtained by the normal equation.}
 \label{fig:mse_contours}
 \end{figure}
 
@@ -283,7 +283,7 @@ The columns of \(\mathbf{X} = [\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\linewidth]{img/lecture7/image.png}
-\caption{2D linear subspace (green) spanned by \( \begin{pmatrix}1 & 1 & 1\end{pmatrix} \text{ and } \begin{pmatrix}1 & -1 & 1\end{pmatrix} \).}
+\caption{Figure 7.4: 2D linear subspace (green) spanned by \( \begin{pmatrix}1 & 1 & 1\end{pmatrix} \text{ and } \begin{pmatrix}1 & -1 & 1\end{pmatrix} \).}
 \end{figure}
 
 \noindent Since \(\hat{\mathbf{y}} \in \text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\), \(\hat{\mathbf{y}}\) will be a linear combination of \(\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\) with a coefficient vector \(\hat{\boldsymbol{\theta}}\) such that:
@@ -305,7 +305,7 @@ and the estimated output vector \(\hat{\mathbf{y}}\) is:
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.4\linewidth]{img/lecture7/projectionmatrix.png}
-\caption{Projection of \(\mathbf{y}\) onto \(\hat{\mathbf{y}}\), where the residual \(\mathbf{y} - \hat{\mathbf{y}}\) is orthogonal to the subspace.}
+\caption{Figure 7.5: Projection of \(\mathbf{y}\) onto \(\hat{\mathbf{y}}\), where the residual \(\mathbf{y} - \hat{\mathbf{y}}\) is orthogonal to the subspace.}
 \end{figure}
 
 \noindent This projection \(\hat{\mathbf{y}}\) can be viewed as an orthogonal projection of \(\mathbf{y}\) onto \(\text{span}\{\mathbf{1}, \mathbf{x}_{:,1}, \dots, \mathbf{x}_{:,P}\}\).
@@ -457,7 +457,7 @@ The coefficient path shows how each model parameter evolves as regularization st
     \caption{Lasso (L1): coefficients are driven to exactly zero, yielding sparsity.}
     \label{fig:lasso_paths}
 \end{subfigure}
-\caption{Regularization coefficient paths (standardized features). Ridge shrinks all coefficients continuously, while Lasso performs shrinkage plus feature selection by setting some coefficients exactly to zero.}
+\caption{Figure 7.7: Regularization coefficient paths (standardized features). Ridge shrinks all coefficients continuously, while Lasso performs shrinkage plus feature selection by setting some coefficients exactly to zero.}
 \label{fig:coef_paths}
 \end{figure}
 

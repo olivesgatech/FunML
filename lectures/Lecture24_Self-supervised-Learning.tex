@@ -147,7 +147,7 @@ This lecture introduces self-supervised learning as a modern paradigm that bridg
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{img/lecture26/S US SSL.png}
-    \caption{Comparison of supervised, unsupervised, and self-supervised learning pipelines and their sources of supervision.}
+    \caption{Figure 24.1: Comparison of supervised, unsupervised, and self-supervised learning pipelines and their sources of supervision.}
     \label{fig:ssl-comparison}
 \end{figure}
 
@@ -174,7 +174,7 @@ Self-supervised learning (SSL) follows a three-stage pipeline designed to learn 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/gen pseudo lab.png}
-    \caption{Pseudo-label generation using a pre-text task.}
+    \caption{Figure 24.2: Pseudo-label generation using a pre-text task.}
     \label{fig:pseudo-label-generation}
 \end{figure}
 
@@ -185,7 +185,7 @@ The first stage focuses on constructing artificial supervision directly from \te
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/pre train on pse.png}
-    \caption{Self-supervised pre-training using pseudo-labels.}
+    \caption{Figure 24.3: Self-supervised pre-training using pseudo-labels.}
     \label{fig:ssl-pretraining}
 \end{figure}
 
@@ -196,7 +196,7 @@ In the second stage, the pseudo-labeled dataset is used to train a neural networ
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/utilize learn model.png}
-    \caption{Fine-tuning the pre-trained model for downstream tasks.}
+    \caption{Figure 24.4: Fine-tuning the pre-trained model for downstream tasks.}
     \label{fig:ssl-finetuning}
 \end{figure}
 
@@ -211,7 +211,7 @@ Self-supervised learning relies on carefully designed \textbf{pre-text tasks} to
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/tran.png}
-    \caption{Transformation prediction using image rotations as pseudo-labels.}
+    \caption{Figure 24.5: Transformation prediction using image rotations as pseudo-labels.}
     \label{fig:ssl-rotation}
 \end{figure}
 
@@ -222,7 +222,7 @@ Self-supervised learning relies on carefully designed \textbf{pre-text tasks} to
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/mask.png}
-    \caption{Masked prediction using an encoder–decoder architecture.}
+    \caption{Figure 24.6: Masked prediction using an encoder–decoder architecture.}
     \label{fig:ssl-masking}
 \end{figure}
 
@@ -233,7 +233,7 @@ Self-supervised learning relies on carefully designed \textbf{pre-text tasks} to
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/cluster.png}
-    \caption{Deep clustering for generating pseudo-labels from feature clusters.}
+    \caption{Figure 24.7: Deep clustering for generating pseudo-labels from feature clusters.}
     \label{fig:ssl-clustering}
 \end{figure}
 
@@ -244,7 +244,7 @@ Self-supervised learning relies on carefully designed \textbf{pre-text tasks} to
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/cont.png}
-    \caption{Contrastive learning using positive and negative pairs of data.}
+    \caption{Figure 24.8: Contrastive learning using positive and negative pairs of data.}
     \label{fig:ssl-contrastive}
 \end{figure}
 
@@ -259,7 +259,7 @@ After introducing contrastive learning as an important \textbf{pre-text task}, w
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/SimCLR_Framework.png}
-    \caption{Overview of the SimCLR contrastive learning pipeline.}
+    \caption{Figure 24.9: Overview of the SimCLR contrastive learning pipeline.}
     \label{fig:simclr_framework}
 \end{figure}
 
@@ -276,7 +276,7 @@ The framework then performs \textbf{similarity computation} using cosine similar
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/performance_comparison.png}
-    \caption{Performance comparison between contrastive and supervised learning models.}
+    \caption{Figure 24.10: Performance comparison between contrastive and supervised learning models.}
     \label{fig:contrastive_vs_supervised}
 \end{figure}
 
@@ -299,7 +299,7 @@ The key differentiating factor among contrastive learning approaches is the stra
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/fisheye_region.png}
-    \caption{Region-based contrastive learning in fisheye images.}
+    \caption{Figure 24.11: Region-based contrastive learning in fisheye images.}
     \label{fig:fisheye_region}
 \end{figure}
 
@@ -323,7 +323,7 @@ Alternative partitioning strategies include square-based divisions, radial parti
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/fisheye_alternative.png}
-    \caption{Alternative region partitioning strategies for fisheye images.}
+    \caption{Figure 24.12: Alternative region partitioning strategies for fisheye images.}
     \label{fig:fisheye_alternative}
 \end{figure}
 
@@ -334,7 +334,7 @@ This example highlights how domain geometry influences pair construction.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/seismic.png}
-    \caption{Contrastive learning via volume partitioning in seismic data.}
+    \caption{Figure 24.13: Contrastive learning via volume partitioning in seismic data.}
     \label{fig:seismic_contrastive}
 \end{figure}
 
@@ -347,7 +347,7 @@ This formulation transforms a structural geospatial property into a supervisory 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/medical.png}
-    \caption{Patient-based positive pair construction in medical imaging.}
+    \caption{Figure 24.14: Patient-based positive pair construction in medical imaging.}
     \label{fig:medical_contrastive}
 \end{figure}
 
@@ -360,7 +360,7 @@ This approach leverages domain-specific metadata to define meaningful similarity
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/other_modalities.png}
-    \caption{Contrastive learning applications in text and audio modalities.}
+    \caption{Figure 24.15: Contrastive learning applications in text and audio modalities.}
     \label{fig:contrastive_other_modalities}
 \end{figure}
 
@@ -377,7 +377,7 @@ Foundation models represent a major shift in modern machine learning. Instead of
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/sam.png}
-    \caption{Segment Anything Model (SAM): a large-scale foundation model for image segmentation.}
+    \caption{Figure 24.16: Segment Anything Model (SAM): a large-scale foundation model for image segmentation.}
     \label{fig:sam}
 \end{figure}
 
@@ -396,7 +396,7 @@ After 2019, the field experienced a major transition with the introduction of \t
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{img/lecture26/foundation_model.png}
-    \caption{Foundation models trained on diverse multimodal data and adapted to downstream tasks.}
+    \caption{Figure 24.17: Foundation models trained on diverse multimodal data and adapted to downstream tasks.}
     \label{fig:foundation_models}
 \end{figure}
 

@@ -166,7 +166,7 @@ Careful hyperparameter tuning plays an important role in achieving strong perfor
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim1.png}
-    \caption{Classification Pipeline}
+    \caption{Figure 16.1: Classification Pipeline}
 \label{0}
     
 \end{figure}
@@ -184,7 +184,7 @@ The \textbf{decoder} then reconstructs high-resolution outputs from the encoderâ
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim2.png}
-    \caption{Dense prediction architecture using mainly convolution}
+    \caption{Figure 16.2: Dense prediction architecture using mainly convolution}
     \label{1}
 \end{figure}
 
@@ -268,7 +268,7 @@ where \(\hat{p}\) is the probability assigned to the true class. The parameter \
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim3.png}
-    \caption{Effect of $\gamma$ on focal loss}
+    \caption{Figure 16.3: Effect of $\gamma$ on focal loss}
     \label{2}
 \end{figure}
 
@@ -333,7 +333,7 @@ A key limitation is that label smoothing modifies the training objective itself.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.62\linewidth]{img/lecture17/label_smoothing_targets.png}
-    \caption{Illustration of label smoothing: a one-hot target distribution is replaced by a softened target distribution that assigns most of the probability mass to the true class while distributing a small amount across the remaining classes.}
+    \caption{Figure 16.4: Illustration of label smoothing: a one-hot target distribution is replaced by a softened target distribution that assigns most of the probability mass to the true class while distributing a small amount across the remaining classes.}
     \label{fig:label_smoothing}
 \end{figure}
 
@@ -380,7 +380,7 @@ Temperature scaling is widely used because it is simple, computationally cheap, 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.72\linewidth]{img/lecture17/temperature_scaling_reliability.png}
-    \caption{Conceptual illustration of calibration using a reliability diagram. A well-calibrated model has accuracy that closely matches confidence across prediction bins. Temperature scaling adjusts confidence values so that the reliability curve moves closer to the diagonal.}
+    \caption{Figure 16.5: Conceptual illustration of calibration using a reliability diagram. A well-calibrated model has accuracy that closely matches confidence across prediction bins. Temperature scaling adjusts confidence values so that the reliability curve moves closer to the diagonal.}
     \label{fig:temperature_scaling}
 \end{figure}
 
@@ -474,7 +474,7 @@ Here, \(c_{x,i}\) and \(c_{y,i}\) denote the complex wavelet coefficients of ima
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim4.png}
-    \caption{Image Reconstructions and their Performance Scores}
+    \caption{Figure 16.6: Image Reconstructions and their Performance Scores}
     \label{3}
 \end{figure}
 
@@ -503,7 +503,7 @@ A model is said to \textbf{underfit} when it achieves low accuracy on both the t
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim5.png}
-    \caption{Underfitting, Proper Fitting, and Overfitting}
+    \caption{Figure 16.7: Underfitting, Proper Fitting, and Overfitting}
     \label{4}
 \end{figure}
 
@@ -516,7 +516,7 @@ Common augmentation techniques involve applying various \textbf{transformations}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scriveim6.png}
-    \caption{Examples of Transformations Applied to an Image}
+    \caption{Figure 16.8: Examples of Transformations Applied to an Image}
     \label{fig:5}
 \end{figure}
 
@@ -553,7 +553,7 @@ One important use of activation histograms is identifying \textbf{dead neurons}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim6.png}
-    \caption{Activation Histogram with Dead Neurons and Vanishing Gradients}
+    \caption{Figure 16.9: Activation Histogram with Dead Neurons and Vanishing Gradients}
     \label{fig:6}
 \end{figure}
 
@@ -562,7 +562,7 @@ Activation histograms also help diagnose \textbf{vanishing and exploding gradien
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim8.png}
-    \caption{Activation Histogram with Exploding Gradients}
+    \caption{Figure 16.10: Activation Histogram with Exploding Gradients}
     \label{fig:7}
 \end{figure}
 
@@ -571,7 +571,7 @@ A healthy network typically exhibits a \textbf{balanced activation distribution}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim9.png}
-    \caption{Ideal Activation Histogram}
+    \caption{Figure 16.11: Ideal Activation Histogram}
     \label{fig:8}
 \end{figure}
 
@@ -580,7 +580,7 @@ Activation histograms can also reveal \textbf{outliers}, where extremely large o
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture17/scribeim7.png}
-    \caption{Activation Histogram with Outliers}
+    \caption{Figure 16.12: Activation Histogram with Outliers}
     \label{fig:9}
 \end{figure}
 

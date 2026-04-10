@@ -226,7 +226,7 @@ We can initialize the EM Algorithm as follows:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/GMM clustering Examples/Initialization of EM algorithm.png}
-    \caption{Initialization of EM Algorithm}
+    \caption{Figure 12.1: Initialization of EM Algorithm}
 \end{figure}
 \subsubsection{Iteration 0}
 
@@ -288,7 +288,7 @@ Cluster Covariances:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/GMM clustering Examples/Iteration 0 of EM algorithm.png}
-    \caption{Iteration 0 of EM Algorithm}
+    \caption{Figure 12.2: Iteration 0 of EM Algorithm}
 \end{figure}
 
 \subsubsection{Iteration 50}
@@ -324,7 +324,7 @@ Cluster Covariances:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/GMM clustering Examples/Iteration 50 of EM Algorithm.png}
-    \caption{Iteration 50 of EM Algorithm}
+    \caption{Figure 12.3: Iteration 50 of EM Algorithm}
 \end{figure}
 
 \subsubsection{Iteration 100}
@@ -360,7 +360,7 @@ Cluster Covariances:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/GMM clustering Examples/Iteration 100 of EM Algorithm.png}
-    \caption{Iteration 100 of EM Algorithm}
+    \caption{Figure 12.4: Iteration 100 of EM Algorithm}
 \end{figure}
 
 \subsubsection{Iteration 150}
@@ -396,7 +396,7 @@ Cluster Covariances:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/GMM clustering Examples/Iteration 150 of EM Algorithm.png}
-    \caption{Iteration 150 of EM Algorithm}
+    \caption{Figure 12.5: Iteration 150 of EM Algorithm}
 \end{figure}
 
 Keep iterating until the log likelihood converges. Note:
@@ -476,7 +476,7 @@ The silhouette value for a sample $x_i$ is computed using the following steps:
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/Clustering Performance Evaluation/Silhouette Coefficient.png}
-    \caption{Demonstration of Silhouette Coefficient}
+    \caption{Figure 12.6: Demonstration of Silhouette Coefficient}
 \end{figure}
 
 The silhouette value lies in the range $-1 \le s(x_i) \le 1$. Values close to $1$ indicate that the sample is well matched to its own cluster and far from neighboring clusters, values near $0$ indicate overlapping clusters, and negative values suggest that the sample may be misclassified or represent an outlier. In general, clustering algorithms that produce \textbf{larger average silhouette coefficients} are preferred.
@@ -486,7 +486,7 @@ From the silhouette values, we can also construct a \textbf{Cluster Silhouette P
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture12/Clustering Performance Evaluation/Cluster Silhouette Plot.png}
-    \caption{Cluster Silhouette Plot of k-means and GMMs}
+    \caption{Figure 12.7: Cluster Silhouette Plot of k-means and GMMs}
 \end{figure}
 
 The silhouette plot provides a visual summary of clustering quality. Negative coefficients typically correspond to outliers or poorly assigned samples. The thickness of each silhouette region reflects the size of the corresponding cluster, while the mean silhouette coefficient provides a single measure of overall clustering performance. This visualization is therefore useful for assessing and comparing clustering results across different methods. \\
@@ -513,7 +513,7 @@ The calculation of Rand Index requires measurement of the following 4 number of 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture12/Clustering Performance Evaluation/Rand Index.png}
-    \caption{Rand Index Parameters Demonstration}
+    \caption{Figure 12.8: Rand Index Parameters Demonstration}
 \end{figure}
 With the four measurements, Rand Index can be denoted as:\[
 RI(R,Q)=\frac{a+d}{a+b+c+d}

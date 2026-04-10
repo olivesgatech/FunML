@@ -195,7 +195,7 @@ The objective of regularization is to prevent the encoder–decoder network from
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture19/121mapping1.JPG}
-    \caption{Regularization prevents the undesirable identity mapping and encourages the model to learn meaningful patterns.}
+    \caption{Figure 18.1: Regularization prevents the undesirable identity mapping and encourages the model to learn meaningful patterns.}
     \label{fig:enter-label}
 \end{figure}
 
@@ -220,7 +220,7 @@ Sparse representations are widely used in machine learning and neuroscience beca
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/lecture19/SparseMapping.JPG}
-    \caption{Sparse autoencoders activate only a subset of neurons for any given input.}
+    \caption{Figure 18.2: Sparse autoencoders activate only a subset of neurons for any given input.}
 \end{figure}
 
 \paragraph{How sparsity is enforced.}
@@ -239,7 +239,7 @@ In other words, the model is no longer rewarded only for reconstructing well. It
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/lecture19/LossFunction4.JPG}
-    \caption{Sparse autoencoders add a regularization term to the reconstruction loss.}
+    \caption{Figure 18.3: Sparse autoencoders add a regularization term to the reconstruction loss.}
 \end{figure}
 
 Figure 18.3 illustrates this idea visually, but the key mathematical point is that sparsity is enforced by augmenting the reconstruction objective with an additional penalty term. Two common techniques are used to define \(\Omega(Z)\).
@@ -266,7 +266,7 @@ This equation shows that the model is penalized whenever many latent coordinates
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\linewidth]{img/lecture19/L1norm.JPG}
-    \caption{L1 regularization encourages many latent activations to become zero.}
+    \caption{Figure 18.4: L1 regularization encourages many latent activations to become zero.}
 \end{figure}
 
 Figure 18.4 provides the geometric intuition behind the \(L_1\) penalty. In the sparse autoencoder setting, the practical consequence is that different inputs activate different small subsets of latent units rather than spreading information across all neurons.
@@ -312,7 +312,7 @@ This equation penalizes the model when the average activation of a latent neuron
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{img/lecture19/KL.JPG}
-    \caption{KL divergence penalizes neurons that activate too frequently.}
+    \caption{Figure 18.5: KL divergence penalizes neurons that activate too frequently.}
 \end{figure}
 
 Figure 18.5 provides the intuition for the KL penalty. In practice, this encourages each latent neuron to specialize in detecting only certain structures or patterns, resulting in a sparse but still distributed representation.
@@ -323,7 +323,7 @@ During training, the reconstruction loss and sparsity penalty are optimized join
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/lecture19/Sparse4.JPG}
-    \caption{Sparse autoencoders represent inputs using only a few active features.}
+    \caption{Figure 18.6: Sparse autoencoders represent inputs using only a few active features.}
 \end{figure}
 
 \paragraph{Key Takeaways:}
@@ -344,7 +344,7 @@ The goal of a denoising autoencoder is to learn features that can remove noise f
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\linewidth]{img/lecture19/DeNoiseManifold.JPG}
-    \caption{Denoising autoencoder: corrupted inputs are mapped back to clean outputs.}
+    \caption{Figure 18.7: Denoising autoencoder: corrupted inputs are mapped back to clean outputs.}
 \end{figure}
 
 A useful way to understand denoising autoencoders is through the concept of a \emph{data manifold}. Real-world data often lies on a lower-dimensional, smooth manifold embedded in a high-dimensional space. Clean data points lie on this manifold, while noisy or corrupted inputs are pushed away from it. The denoising autoencoder learns to map corrupted inputs back to the nearest point on the learned manifold, effectively pulling noisy samples toward the region where true data lives.
@@ -376,7 +376,7 @@ In this objective, the expectation is taken over corrupted versions of the same 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture19/NoiseLoss.JPG}
-    \caption{Loss function used to train a denoising autoencoder.}
+    \caption{Figure 18.8: Loss function used to train a denoising autoencoder.}
 \end{figure}
 
 Figure 18.8 shows this objective visually. The important mathematical idea is that the network is not rewarded for simply reproducing its input. Instead, it must infer the clean underlying structure from a corrupted observation. This is why denoising acts as a form of regularization and leads to more robust latent features.
@@ -402,7 +402,7 @@ Instead of encoding each input as a single point in latent space, a VAE encodes 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture19/Structure-of-the-variational-autoencoder-VAE.png}
-    \caption{Structure of a variational autoencoder. The encoder maps an input \(X\) to the parameters \(\mu\) and \(\sigma\) of the approximate posterior \(q_\theta(Z|X)\). A latent code \(Z\) is sampled from this distribution and passed through the decoder \(p_\phi(X|Z)\) to reconstruct the input.}
+    \caption{Figure 18.9: Structure of a variational autoencoder. The encoder maps an input \(X\) to the parameters \(\mu\) and \(\sigma\) of the approximate posterior \(q_\theta(Z|X)\). A latent code \(Z\) is sampled from this distribution and passed through the decoder \(p_\phi(X|Z)\) to reconstruct the input.}
 \end{figure}
 
 Sampling from these distributions produces latent points that are close to one another in a continuous manner. This continuity allows smooth interpolation between data points and enables the model to generate realistic new samples.
@@ -483,7 +483,7 @@ Here, \(q_\theta(Z|X)\) is the encoder distribution, \(p_\phi(X|Z)\) is the deco
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.70\linewidth]{img/lecture19/ELBO2.JPG}
-    \caption{Evidence Lower Bound (ELBO) objective.}
+    \caption{Figure 18.10: Evidence Lower Bound (ELBO) objective.}
 \end{figure}
 
 Unlike a standard autoencoder that maps each input to a single latent vector, a VAE maps each input to a distribution in latent space, meaning that one observed sample can have many plausible latent explanations.
@@ -524,7 +524,7 @@ In this form, the randomness is isolated in \(\epsilon\), while \(Z\) becomes a 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\linewidth]{img/lecture19/Trick2.JPG}
-    \caption{Reparameterization trick for gradient-based training.}
+    \caption{Figure 18.11: Reparameterization trick for gradient-based training.}
 \end{figure}
 
 \paragraph{Reconstruction and Generation Modes}
@@ -534,7 +534,7 @@ Because the latent space is probabilistic and structured, VAEs support two modes
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\linewidth]{img/lecture19/NovelSamples.JPG}
-    \caption{Generation mode: sampling from latent space.}
+    \caption{Figure 18.12: Generation mode: sampling from latent space.}
 \end{figure}
 
 \paragraph{Smooth Interpolation in Latent Space}
@@ -544,7 +544,7 @@ The Gaussian prior encourages nearby latent points to decode into similar output
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/lecture19/VAEMorphing1.JPG}
-    \caption{Smooth transitions in VAE latent space.}
+    \caption{Figure 18.13: Smooth transitions in VAE latent space.}
 \end{figure}
 
 \paragraph{Key Advantages}

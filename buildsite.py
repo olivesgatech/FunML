@@ -1324,7 +1324,28 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
 
     notebook_ipynb = resolve_notebook_ipynb(matched_rule, notebooks_dir)
     iframe_src = normalize_web_path(f"../assets/notebooks/{matched_rule['notebook_html']}")
-    section_title = matched_rule["section_title"] or "Interactive Notebook"
+
+    # Auto-derive section title from the figure caption when not explicitly set.
+    section_title = matched_rule["section_title"]
+    if not section_title:
+      figure = img.find_parent("figure")
+      if figure is not None:
+        figcap = figure.find("figcaption")
+        if figcap is not None:
+          cap_text = figcap.get_text(" ", strip=True)
+          # Truncate long captions at first sentence boundary or ~100 chars.
+          for sep in (".", "!", "?"):
+            idx = cap_text.find(sep)
+            if 0 < idx <= 100:
+              cap_text = cap_text[:idx + 1]
+              break
+          else:
+            if len(cap_text) > 100:
+              cap_text = cap_text[:97] + "…"
+          section_title = f"Interactive Notebook: {cap_text}"
+    if not section_title:
+      section_title = "Interactive Notebook"
+
     description = matched_rule["description"] or (
       "Click inside the interactive plot to move the new point. "
       "Classification updates automatically."

@@ -144,7 +144,7 @@ Visualizing \textbf{weights across different layers} helps reveal the importance
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net10.png}
 \end{center}
-\caption{Visualizing activations of intermediate layers}
+\caption{Figure 23.1: Visualizing activations of intermediate layers}
 \label{fig:activation_visualization}
 \end{figure}
 
@@ -173,7 +173,7 @@ Another example, nearest neighbor samples, show which training samples are close
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net11.png}
 \end{center}
-\caption{Examples of indirect explanation techniques, including maximally activated patches, activation visualizations, dimensionality reduction, and nearest-neighbor retrieval.}
+\caption{Figure 23.2: Examples of indirect explanation techniques, including maximally activated patches, activation visualizations, dimensionality reduction, and nearest-neighbor retrieval.}
 \label{fig:indirect_explanations}
 \end{figure}
 
@@ -193,7 +193,7 @@ In the case of an elephant image, the heatmap might highlight the elephant’s e
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net12.png}
 \end{center}
-\caption{Examples of direct explanation techniques: saliency via occlusion and saliency via feature importance.}
+\caption{Figure 23.3: Examples of direct explanation techniques: saliency via occlusion and saliency via feature importance.}
 \label{fig:direct_explanations}
 \end{figure}
 
@@ -227,7 +227,7 @@ For example, Figure~\ref{fig:targeted_spoonbill} illustrates how the network may
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net13.png}
 \end{center}
-\caption{Targeted explanations}
+\caption{Figure 23.4: Targeted explanations}
 \label{fig:targeted_spoonbill}
 \end{figure}
 
@@ -237,7 +237,7 @@ To further illustrate these paradigms, consider a second example in which a mode
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net14.png}
 \end{center}
-\caption{Targeted explanations — identifying a Bullmastiff}
+\caption{Figure 23.5: Targeted explanations — identifying a Bullmastiff}
 \label{fig:targeted_bullmastiff}
 \end{figure}
 
@@ -285,7 +285,7 @@ The overall workflow is illustrated in Figure~\ref{fig:gradcam_pipeline_l23}.
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.75\linewidth]{img/lecture23/net15.png}
-  \caption{Grad-CAM workflow. Gradients are aggregated to weight convolutional feature maps, producing a heatmap that highlights image regions supporting the queried class.}
+  \caption{Figure 23.6: Grad-CAM workflow. Gradients are aggregated to weight convolutional feature maps, producing a heatmap that highlights image regions supporting the queried class.}
   \label{fig:gradcam_pipeline_l23}
 \end{figure}
 
@@ -347,7 +347,7 @@ The overall workflow is illustrated in Figure~\ref{fig:counterfactual_cam_proces
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\linewidth]{img/lecture23/net16.png}
-\caption{Counterfactual-CAM workflow. Gradients are negated to suppress features contributing to class $P$, revealing alternative regions that could support other classes if $P$ were absent.}
+\caption{Figure 23.7: Counterfactual-CAM workflow. Gradients are negated to suppress features contributing to class $P$, revealing alternative regions that could support other classes if $P$ were absent.}
 \label{fig:counterfactual_cam_process}
 \end{figure}
 
@@ -415,7 +415,7 @@ The overall workflow is illustrated in Figure~\ref{fig:contrast_cam_examples}.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.8\linewidth]{img/lecture23/net19.png}
-\caption{Comparison of explanation types. Contrast-CAM highlights regions that differentiate a predicted class from alternative classes, revealing discriminative and confusing features.}
+\caption{Figure 23.8: Comparison of explanation types. Contrast-CAM highlights regions that differentiate a predicted class from alternative classes, revealing discriminative and confusing features.}
 \label{fig:contrast_cam_examples}
 \end{figure}
 
@@ -458,7 +458,7 @@ The overall taxonomy is illustrated in Figure~\ref{fig:evaluation_taxonomy}.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\linewidth]{img/lecture23/net8.png}
-\caption{Explanatory evaluation taxonomy. Human, application, and network evaluation provide complementary perspectives for assessing explanation quality.}
+\caption{Figure 23.9: Explanatory evaluation taxonomy. Human, application, and network evaluation provide complementary perspectives for assessing explanation quality.}
 \label{fig:evaluation_taxonomy}
 \end{figure}
 
@@ -469,7 +469,7 @@ Human Evaluation focuses on directly involving humans in assessing the quality a
 \begin{center}
 \includegraphics[width=4in]{img/lecture23/net9.png}
 \end{center}
-\caption{Qualitative comparison of Backpropagation, Deconvolution, and Guided Backpropagation explanations.}
+\caption{Figure 23.10: Qualitative comparison of Backpropagation, Deconvolution, and Guided Backpropagation explanations.}
 \label{fig:backprop_comparison}
 % \label{fig:figure1}
 \end{figure}
@@ -490,7 +490,7 @@ human fixation patterns across diverse scenes.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture22/vsi.png}
-    \caption{Saliency maps compared across multiple explanation and saliency detection methods applied to the same images.}
+    \caption{Figure 23.11: Saliency maps compared across multiple explanation and saliency detection methods applied to the same images.}
     \label{fig:saliency_comparison_grid}
 \end{figure}
 
@@ -546,7 +546,7 @@ of human visual attention measured using gaze tracking.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net6.png}
-\caption{Gaze-tracking example illustrating human visual attention on salient image regions.}
+\caption{Figure 23.12: Gaze-tracking example illustrating human visual attention on salient image regions.}
 \label{fig:gaze_tracking_example}
 \end{figure}
 
@@ -598,7 +598,7 @@ collected using the pointing game.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net7.png}
-\caption{Pointing game illustrating human-indicated regions of importance in images.}
+\caption{Figure 23.13: Pointing game illustrating human-indicated regions of importance in images.}
 \label{fig:pointing_game_example}
 \end{figure}
 
@@ -623,7 +623,7 @@ Backpropagation} or \emph{Grad-CAM}.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net2.png}
-\caption{Masking using explanation heatmaps to evaluate feature importance.}
+\caption{Figure 23.14: Masking using explanation heatmaps to evaluate feature importance.}
 \label{fig:masking_evaluation}
 \end{figure}
 
@@ -686,7 +686,7 @@ or dataset mean), and the modified image is re-evaluated by the network.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net3.png}
-\caption{Pixel-wise deletion: progressively masking pixels from highest to lowest importance.}
+\caption{Figure 23.15: Pixel-wise deletion: progressively masking pixels from highest to lowest importance.}
 \label{fig:pixel_deletion_order}
 \end{figure}
 
@@ -703,14 +703,14 @@ most important pixels quickly destroys evidence for the predicted class.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net4.png}
-\caption{Deletion curves: stronger explanations cause faster confidence drop, yielding lower AUC.}
+\caption{Figure 23.16: Deletion curves: stronger explanations cause faster confidence drop, yielding lower AUC.}
 \label{fig:deletion_auc_examples}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net5.png}
-\caption{Additional deletion examples illustrating the effect of importance ranking on confidence decay.}
+\caption{Figure 23.17: Additional deletion examples illustrating the effect of importance ranking on confidence decay.}
 \label{fig:deletion_more_examples}
 \end{figure}
 
@@ -733,7 +733,7 @@ prediction recovers rapidly as important evidence is restored.
 \begin{figure}[H]
 \centering
 \includegraphics[width=4in]{img/lecture23/net6.png}
-\caption{Insertion curves: stronger explanations cause faster confidence rise, yielding higher AUC.}
+\caption{Figure 23.18: Insertion curves: stronger explanations cause faster confidence rise, yielding higher AUC.}
 \label{fig:insertion_auc_examples}
 \end{figure}
 

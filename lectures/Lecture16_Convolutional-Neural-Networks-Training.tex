@@ -143,7 +143,7 @@ Unlike the convex objectives studied earlier in the course, neural network loss 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture16/loss_landscape_CNN.png}
-    \caption{Example of a non-convex loss landscape with local minima and saddle points.}
+    \caption{Figure 15.1: Example of a non-convex loss landscape with local minima and saddle points.}
     \label{fig:cnnlosslandscape}
 \end{figure}
 
@@ -160,7 +160,7 @@ Together, non-convexity, ill-conditioning, and noisy gradients make training dee
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{img/lecture16/graddescent.png}
-    \caption{Gradient descent and the effect of learning rate. Small learning rates lead to slow convergence, while large learning rates may cause overshooting or divergence.}
+    \caption{Figure 15.2: Gradient descent and the effect of learning rate. Small learning rates lead to slow convergence, while large learning rates may cause overshooting or divergence.}
     \label{fig:graddescent}
 \end{figure}
 
@@ -195,7 +195,7 @@ This method provides the most accurate estimate of the true gradient and produce
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{img/lecture16/batch_gd.png}
-    \caption{Batch Gradient Descent convergence path.}
+    \caption{Figure 15.3: Batch Gradient Descent convergence path.}
 \end{figure}
 
 \subsubsection{Stochastic Gradient Descent (SGD)}
@@ -209,7 +209,7 @@ Interestingly, this noise can be beneficial: it helps the optimizer escape saddl
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{img/lecture16/stochastic_gd.png}
-    \caption{Stochastic Gradient Descent convergence path.}
+    \caption{Figure 15.4: Stochastic Gradient Descent convergence path.}
 \end{figure}
 
 \subsubsection{Mini-batch Gradient Descent (MBGD)}
@@ -221,7 +221,7 @@ This approach reduces gradient variance compared to SGD while remaining computat
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{img/lecture16/minibatch_gd.png}
-    \caption{Mini-batch Gradient Descent convergence path.}
+    \caption{Figure 15.5: Mini-batch Gradient Descent convergence path.}
 \end{figure}
 
 \medskip
@@ -246,7 +246,7 @@ A local minimum is a point on the loss surface where the loss is smaller than in
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/Loss_function_visual.png}
-\caption{Loss surfaces may contain many local minima and flat regions where gradient descent can slow down or stop, potentially leading to suboptimal solutions.}
+\caption{Figure 15.6: Loss surfaces may contain many local minima and flat regions where gradient descent can slow down or stop, potentially leading to suboptimal solutions.}
 \label{fig:loss_function_ex}
 \end{figure}
 
@@ -262,7 +262,7 @@ At a saddle point:
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/saddle_point.jpg}
-\caption{At saddle points, gradients vanish even though better solutions exist in certain directions. This can significantly slow training.}
+\caption{Figure 15.7: At saddle points, gradients vanish even though better solutions exist in certain directions. This can significantly slow training.}
 \label{fig:saddle_ex}
 \end{figure}
 
@@ -318,7 +318,7 @@ The velocity term in the momentum-based gradient descent can be interpreted as a
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/gradient_plus_mumentum.jpg}
-\caption{When gradient decent is combined with the concept of momentum the optimization algorithm has a driving force even when the gradient at a given point is 0. This helps the algorithm overcome local minima and saddle points and continue towards the global solution, as seen in the image.}
+\caption{Figure 15.8: When gradient decent is combined with the concept of momentum the optimization algorithm has a driving force even when the gradient at a given point is 0. This helps the algorithm overcome local minima and saddle points and continue towards the global solution, as seen in the image.}
 \label{fig:mumentum_ex}
 \end{figure}
 
@@ -370,7 +370,7 @@ One way to mitigate the challenges of ill-conditioning is to use optimization al
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/Curvature.png}
-\caption{An illustration of anisotropic curvature: the surface is much steeper in one direction than another, producing a narrow valley that slows gradient descent.}
+\caption{Figure 15.9: An illustration of anisotropic curvature: the surface is much steeper in one direction than another, producing a narrow valley that slows gradient descent.}
 \label{fig:curvature_ex}
 \end{figure}
 
@@ -422,7 +422,7 @@ This limitation makes AdaGrad less suitable for deep learning and other non-conv
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/Adagrad.jpg}
-\caption{AdaGrad adapts the learning rate to follow the optimal path in ill-conditioned problems, reducing oscillations compared to standard gradient descent.}
+\caption{Figure 15.10: AdaGrad adapts the learning rate to follow the optimal path in ill-conditioned problems, reducing oscillations compared to standard gradient descent.}
 \label{fig:adagrad_ex}
 \end{figure}
 
@@ -475,7 +475,7 @@ As a result, RMSProp typically converges faster and more reliably than AdaGrad, 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\linewidth]{img/lecture16/RMSProp.png}
-\caption{Comparison of optimization trajectories. RMSProp follows a similar path to AdaGrad but converges faster by preventing the learning rate from shrinking too aggressively.}
+\caption{Figure 15.11: Comparison of optimization trajectories. RMSProp follows a similar path to AdaGrad but converges faster by preventing the learning rate from shrinking too aggressively.}
 \label{fig:rmsprop_ex}
 \end{figure}
 
@@ -557,7 +557,7 @@ Figure~\ref{fig:earlyfilter} illustrates an example kernel designed to detect ed
 \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{img/lecture16/earlylayer.png}
-    \caption{An example convolution of a $17 \times 17 \times 1$ image with a $3 \times 3$ edge-detection kernel.}
+    \caption{Figure 15.12: An example convolution of a $17 \times 17 \times 1$ image with a $3 \times 3$ edge-detection kernel.}
     \label{fig:earlyfilter}
 \end{figure}
 
@@ -570,7 +570,7 @@ One of the most influential CNN architectures is \textbf{AlexNet}, which won the
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\linewidth]{img/lecture16/alexnet.png}
-    \caption{AlexNet architecture. An image of size $224\times224\times3$ is processed through multiple convolutional layers with progressively smaller filters.}
+    \caption{Figure 15.13: AlexNet architecture. An image of size $224\times224\times3$ is processed through multiple convolutional layers with progressively smaller filters.}
 \end{figure}
 
 \medskip
@@ -580,7 +580,7 @@ The first convolutional layer of AlexNet contains 64 filters of size $11\times11
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture16/alexnet-firstlayer.png}
-    \caption{Filters from the first convolutional layer of AlexNet.}
+    \caption{Figure 15.14: Filters from the first convolutional layer of AlexNet.}
     \label{fig:alexnet-firstlayer}
 \end{figure}
 
@@ -589,7 +589,7 @@ As we progress deeper into the network, filters become less visually interpretab
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture16/alexnet-secondthird.png}
-    \caption{Filters from the second and third convolutional layers of AlexNet showing more abstract patterns.}
+    \caption{Figure 15.15: Filters from the second and third convolutional layers of AlexNet showing more abstract patterns.}
     \label{fig:deeper-layer-filters}
 \end{figure}
 
@@ -598,7 +598,7 @@ By the final convolutional layer, filters respond to highly specific object part
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/lecture16/final-filter.png}
-    \caption{Activation maps from the fifth convolutional layer of AlexNet. The highlighted filter responds strongly to wheels across multiple images.}
+    \caption{Figure 15.16: Activation maps from the fifth convolutional layer of AlexNet. The highlighted filter responds strongly to wheels across multiple images.}
     \label{fig:final-layer}
 \end{figure}
 

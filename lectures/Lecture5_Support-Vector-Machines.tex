@@ -191,7 +191,7 @@ Definition:
     \begin{figure}[h]
         \centering
         \includegraphics[width=0.4\textwidth]{img/lecture4/sigmoid.png}
-        \caption{Sigmoid Function Plots showing the effect of weight (left) and bias (right).}
+        \caption{Figure 4.1: Sigmoid Function Plots showing the effect of weight (left) and bias (right).}
         \label{fig:sigmoid}
     \end{figure}
     \item Ultimately, the decision boundary of logistic regression corresponds to the \textbf{hyperplane} $\mathbf{w}^T\mathbf{x} + b = 0$, which separates the data in feature space.
@@ -410,7 +410,7 @@ Recall this example from Lecture 2 where given several weather features, we were
     \begin{minipage}{0.55\textwidth}
         \centering
         \includegraphics[width=\textwidth]{img/lecture4/tree_outlook.png}
-        \caption{Final decision tree computed based on the dataset}
+        \caption{Figure 4.2: Final decision tree computed based on the dataset}
         \label{fig:decisiontree1}
     \end{minipage}\hfill
     \begin{minipage}{0.42\textwidth}
@@ -481,7 +481,7 @@ depends on the angle $\theta$ between $\mathbf{w}$ and $\mathbf{x}$, and therefo
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.3\textwidth]{img/lecture4/linearhyperplane.png}
-    \caption{Separation of two-dimensional feature space by a hyperplane}
+    \caption{Figure 4.3: Separation of two-dimensional feature space by a hyperplane}
     \label{fig:linearhyperplane}
 \end{figure}
 
@@ -498,7 +498,7 @@ Suppose that our classifier is correctly able to classify test data given some k
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.3\textwidth]{img/lecture4/multiplehyperplanes.png}
-    \caption{Multiple separating hyperplanes}
+    \caption{Figure 4.4: Multiple separating hyperplanes}
     \label{fig:multiplehyperplanes}
 \end{figure}
 
@@ -507,7 +507,7 @@ The \textbf{maximal margin hyperplane} (MMH) is the separating hyperplane that i
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]{img/lecture4/mmh.png}
-    \caption{Maximal margin hyperplane along with its support vectors}
+    \caption{Figure 4.5: Maximal margin hyperplane along with its support vectors}
     \label{fig:mmh}
 \end{figure}
 
@@ -531,7 +531,7 @@ The appearance of \(+1\) and \(-1\) on the right-hand side, rather than \(0\), i
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]{img/lecture4/marginwidth.png}
-    \caption{Maximal margin classifier with margin width shown}
+    \caption{Figure 4.6: Maximal margin classifier with margin width shown}
     \label{fig:marginwidth}
 \end{figure}
 
@@ -696,7 +696,7 @@ while small $C$ prefers a wider margin and is more tolerant of outliers/noisy la
 \begin{figure}
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture4/Soft Margin.png}
-    \caption{Varying values of $C$ result in different margin widths}
+    \caption{Figure 4.7: Varying values of $C$ result in different margin widths}
     \label{fig:enter-label}
 \end{figure}
 Hard-margin SVMs assume that the data are perfectly linearly separable, meaning that even a single outlier can force a drastic shift in the decision boundary. Soft-margin SVMs relax this assumption by introducing slack variables $\xi_i$, allowing some margin violations while controlling the trade-off between margin width and classification errors through the regularization parameter $C$. When the data are fundamentally not linearly separable, we preserve the same optimization framework but replace inner products $\mathbf{x}_i^T \mathbf{x}_j$ with a kernel function $K(\mathbf{x}_i,\mathbf{x}_j)$, which corresponds to an implicit nonlinear feature mapping $\phi(\cdot)$.
@@ -727,7 +727,7 @@ which computes inner products in the transformed feature space.
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture4/nonlinearsoftmargin.png}
-    \caption{Adding a new dimension allows a nonlinear dataset to become linearly separable}
+    \caption{Figure 4.8: Adding a new dimension allows a nonlinear dataset to become linearly separable}
     \label{fig:enter-label}
 \end{figure}
 
