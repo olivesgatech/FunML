@@ -1,0 +1,393 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="plotly-2.35.2.min.js"></script>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--panel:#fff;--blue:#2563eb;--red:#dc2626;--green:#059669;--gold:#d97706;--purple:#7c3aed}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}
+    .wrap{max-width:1240px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:24px}
+    p.desc{margin:0 0 12px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:12px 16px;margin:14px 0 16px}
+    .control{display:grid;gap:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff 0%,var(--bg) 100%)}
+    .control label{font-size:14px;font-weight:600}
+    .row{display:flex;align-items:center;gap:10px}
+    .row select{flex:1;padding:4px 8px;border:1px solid var(--line);border-radius:6px;font-size:14px}
+    .value{min-width:56px;text-align:right;font-weight:700;font-size:14px}
+    .plots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:16px}
+    .plot-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+    .plot{width:100%;height:340px}
+    .metrics-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px}
+    .metrics-card{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px 20px}
+    .metrics-card h3{margin:0 0 12px;font-size:16px;color:var(--ink)}
+    table.mtable{width:100%;border-collapse:collapse;font-size:14px}
+    table.mtable th{background:var(--bg);border:1px solid var(--line);padding:8px 10px;text-align:left;font-weight:600;color:var(--muted)}
+    table.mtable td{border:1px solid var(--line);padding:8px 10px}
+    table.mtable tr:nth-child(even) td{background:#f8fafc}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700}
+    .badge-int{background:#dbeafe;color:#1e40af}
+    .badge-ext{background:#dcfce7;color:#166534}
+    .winner{background:#fef9c3;font-weight:700}
+    .data-table-wrap{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px 20px;margin-bottom:16px}
+    .data-table-wrap h3{margin:0 0 12px;font-size:16px}
+    table.dtable{border-collapse:collapse;font-size:14px}
+    table.dtable th,table.dtable td{border:1px solid var(--line);padding:7px 14px;text-align:center}
+    table.dtable th{background:var(--bg);font-weight:600;color:var(--muted)}
+    table.dtable tr:nth-child(even) td{background:#f8fafc}
+    .note{font-size:13px;color:var(--muted);margin-top:8px}
+    @media(max-width:900px){.plots{grid-template-columns:1fr}.metrics-wrap{grid-template-columns:1fr}.controls{grid-template-columns:repeat(2,minmax(0,1fr))}.plot{height:280px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Interactive Clustering Metrics (Section 12.3)</h1>
+  <p class="desc">Five-point dataset from the Q&amp;A exercises. Select a method to see predicted clusters, per-sample silhouette scores, and all internal &amp; external metrics.</p>
+
+  <!-- Dataset table -->
+  <div class="data-table-wrap">
+    <h3>Dataset</h3>
+    <table class="dtable">
+      <thead><tr><th>Sample</th><th>Features</th><th>GT Cluster</th><th>Method 1</th><th>Method 2</th></tr></thead>
+      <tbody>
+        <tr><td>S1</td><td>[0, 1]</td><td>C1</td><td>C1</td><td>C1</td></tr>
+        <tr><td>S2</td><td>[1, 1]</td><td>C1</td><td>C1</td><td>C2</td></tr>
+        <tr><td>S3</td><td>[3, 1]</td><td>C2</td><td>C2</td><td>C2</td></tr>
+        <tr><td>S4</td><td>[5, 1]</td><td>C2</td><td>C3</td><td>C3</td></tr>
+        <tr><td>S5</td><td>[6, 1]</td><td>C3</td><td>C3</td><td>C3</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Points lie on y = 1. x values: 0, 1, 3, 5, 6.</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="control">
+      <label>Clustering Method</label>
+      <div class="row">
+        <select id="methodSel">
+          <option value="1">Method 1</option>
+          <option value="2">Method 2</option>
+        </select>
+      </div>
+    </div>
+    <div class="control">
+      <label>Metric Category</label>
+      <div class="row">
+        <select id="catSel">
+          <option value="all">All Metrics</option>
+          <option value="internal">Internal Only</option>
+          <option value="external">External Only</option>
+        </select>
+      </div>
+    </div>
+    <div class="control">
+      <label>Active Method</label>
+      <div class="row" style="justify-content:center">
+        <span class="value" id="activeLabel" style="font-size:18px;min-width:auto">Method 1</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scatter plots + silhouette bar -->
+  <div class="plots">
+    <div class="plot-card"><div id="gtPlot" class="plot"></div></div>
+    <div class="plot-card"><div id="predPlot" class="plot"></div></div>
+    <div class="plot-card"><div id="silPlot" class="plot"></div></div>
+  </div>
+
+  <!-- Metrics tables -->
+  <div class="metrics-wrap">
+    <div class="metrics-card" id="internalCard">
+      <h3>Internal Metrics <span class="badge badge-int">No ground truth needed</span></h3>
+      <table class="mtable" id="internalTable">
+        <thead><tr><th>Metric</th><th>Method 1</th><th>Method 2</th><th>Better when</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="metrics-card" id="externalCard">
+      <h3>External Metrics <span class="badge badge-ext">Requires ground truth</span></h3>
+      <table class="mtable" id="externalTable">
+        <thead><tr><th>Metric</th><th>Method 1</th><th>Method 2</th><th>Better when</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────────
+const X  = [[0,1],[1,1],[3,1],[5,1],[6,1]];
+const GT = [0,0,1,1,2];          // 0-indexed
+const M1 = [0,0,1,2,2];
+const M2 = [0,1,1,2,2];
+const NAMES = ['S1','S2','S3','S4','S5'];
+const COLORS = ['#2563eb','#dc2626','#059669'];
+const CLUSTER_NAMES = ['C1','C2','C3'];
+
+// ── Math helpers ─────────────────────────────────────────────────────────────
+function dist(a,b){return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2);}
+function mean(arr){return arr.reduce((s,v)=>s+v,0)/arr.length;}
+
+function centroid(pts){
+  if(!pts.length) return [0,0];
+  return [mean(pts.map(p=>p[0])), mean(pts.map(p=>p[1]))];
+}
+
+function silhouetteScores(labels){
+  const n=labels.length, unique=[...new Set(labels)].sort(), scores=new Array(n).fill(0);
+  for(let i=0;i<n;i++){
+    const myC=labels[i];
+    const sameIdx=[];
+    for(let j=0;j<n;j++) if(j!==i && labels[j]===myC) sameIdx.push(j);
+    if(!sameIdx.length){scores[i]=0; continue;}
+    const a_i = mean(sameIdx.map(j=>dist(X[i],X[j])));
+    const b_vals=[];
+    for(const c of unique){
+      if(c===myC) continue;
+      const otherIdx=[...Array(n).keys()].filter(j=>labels[j]===c);
+      if(otherIdx.length) b_vals.push(mean(otherIdx.map(j=>dist(X[i],X[j]))));
+    }
+    const b_i=b_vals.length?Math.min(...b_vals):0;
+    const denom=Math.max(a_i,b_i);
+    scores[i]=denom>0?(b_i-a_i)/denom:0;
+  }
+  return scores;
+}
+
+function meanSilhouette(labels){return mean(silhouetteScores(labels));}
+
+function daviesBouldin(labels){
+  const unique=[...new Set(labels)].sort(), k=unique.length;
+  const centroids={}, s={};
+  for(const c of unique){
+    const pts=X.filter((_,i)=>labels[i]===c);
+    centroids[c]=centroid(pts);
+    s[c]=mean(pts.map(p=>dist(p,centroids[c])));
+  }
+  let dbSum=0;
+  for(const ci of unique){
+    let maxR=0;
+    for(const cj of unique){
+      if(ci===cj) continue;
+      const d=dist(centroids[ci],centroids[cj]);
+      if(d>0) maxR=Math.max(maxR,(s[ci]+s[cj])/d);
+    }
+    dbSum+=maxR;
+  }
+  return dbSum/k;
+}
+
+function dunnIndex(labels){
+  const unique=[...new Set(labels)].sort(), n=labels.length;
+  let minInter=Infinity, maxIntra=0;
+  for(let u=0;u<unique.length;u++){
+    for(let v=u+1;v<unique.length;v++){
+      const c1=unique[u],c2=unique[v];
+      for(let i=0;i<n;i++) for(let j=0;j<n;j++)
+        if(labels[i]===c1&&labels[j]===c2) minInter=Math.min(minInter,dist(X[i],X[j]));
+    }
+    const cPts=[...Array(n).keys()].filter(i=>labels[i]===unique[u]);
+    for(let a=0;a<cPts.length;a++) for(let b=a+1;b<cPts.length;b++)
+      maxIntra=Math.max(maxIntra,dist(X[cPts[a]],X[cPts[b]]));
+  }
+  return maxIntra>0?minInter/maxIntra:Infinity;
+}
+
+function randIndex(gt,pred){
+  const n=gt.length; let a=0,d=0;
+  for(let i=0;i<n;i++) for(let j=i+1;j<n;j++){
+    const sgt=(gt[i]===gt[j]), sp=(pred[i]===pred[j]);
+    if(sgt&&sp) a++; else if(!sgt&&!sp) d++;
+  }
+  return (a+d)/(n*(n-1)/2);
+}
+
+function purity(gt,pred){
+  const n=gt.length; let total=0;
+  for(const c of [...new Set(pred)]){
+    const clGt=gt.filter((_,i)=>pred[i]===c);
+    const counts={};
+    for(const g of clGt) counts[g]=(counts[g]||0)+1;
+    total+=Math.max(...Object.values(counts));
+  }
+  return total/n;
+}
+
+function nmi(gt,pred){
+  const n=gt.length;
+  const joint={}, gtC={}, predC={};
+  for(let i=0;i<n;i++){
+    const key=`${gt[i]},${pred[i]}`;
+    joint[key]=(joint[key]||0)+1;
+    gtC[gt[i]]=(gtC[gt[i]]||0)+1;
+    predC[pred[i]]=(predC[pred[i]]||0)+1;
+  }
+  let mi=0;
+  for(const [key,cnt] of Object.entries(joint)){
+    const [g,p]=key.split(',');
+    const p_gp=cnt/n, p_g=gtC[g]/n, p_p=predC[p]/n;
+    mi+=p_gp*Math.log(p_gp/(p_g*p_p));
+  }
+  const h_gt=-Object.values(gtC).reduce((s,c)=>s+(c/n)*Math.log(c/n),0);
+  const h_pred=-Object.values(predC).reduce((s,c)=>s+(c/n)*Math.log(c/n),0);
+  return (h_gt+h_pred)>0?2*mi/(h_gt+h_pred):1;
+}
+
+// ── Pre-compute for both methods ─────────────────────────────────────────────
+const metrics1={
+  silhouette: meanSilhouette(M1),
+  db: daviesBouldin(M1),
+  dunn: dunnIndex(M1),
+  rand: randIndex(GT,M1),
+  purity: purity(GT,M1),
+  nmi: nmi(GT,M1),
+};
+const metrics2={
+  silhouette: meanSilhouette(M2),
+  db: daviesBouldin(M2),
+  dunn: dunnIndex(M2),
+  rand: randIndex(GT,M2),
+  purity: purity(GT,M2),
+  nmi: nmi(GT,M2),
+};
+const silScores1=silhouetteScores(M1);
+const silScores2=silhouetteScores(M2);
+
+// ── Plotting ─────────────────────────────────────────────────────────────────
+const JITTER=0.12; // offset on y so labels don't overlap
+
+function scatterTrace(labels,title,showCentroids){
+  const unique=[...new Set(labels)].sort();
+  const traces=[];
+  for(const c of unique){
+    const idx=[...Array(labels.length).keys()].filter(i=>labels[i]===c);
+    traces.push({
+      x:idx.map(i=>X[i][0]), y:idx.map(i=>X[i][1]),
+      mode:'markers+text', type:'scatter',
+      marker:{color:COLORS[c],size:18,line:{color:'#fff',width:2}},
+      text:idx.map(i=>NAMES[i]), textposition:'top center', textfont:{size:13},
+      name:CLUSTER_NAMES[c], legendgroup:String(c),
+    });
+    if(showCentroids){
+      const pts=idx.map(i=>X[i]);
+      const cen=centroid(pts);
+      traces.push({
+        x:[cen[0]], y:[cen[1]], mode:'markers', type:'scatter',
+        marker:{color:COLORS[c],symbol:'x',size:16,line:{color:'#000',width:2}},
+        name:`${CLUSTER_NAMES[c]} centroid`, legendgroup:String(c), showlegend:false,
+      });
+    }
+  }
+  return traces;
+}
+
+const layoutBase={
+  margin:{l:44,r:12,t:44,b:44},
+  xaxis:{title:'Feature 1',range:[-0.8,7.2],gridcolor:'#e2e8f0'},
+  yaxis:{title:'Feature 2',range:[0.6,1.8],gridcolor:'#e2e8f0'},
+  plot_bgcolor:'#fff', paper_bgcolor:'#fff',
+  legend:{orientation:'h',y:-0.18,x:0,font:{size:12}},
+};
+
+function drawGT(){
+  const traces=scatterTrace(GT,'Ground Truth',false);
+  Plotly.newPlot('gtPlot',traces,{
+    ...layoutBase, title:{text:'Ground Truth Labels',font:{size:15}},
+  },{responsive:true,displayModeBar:false});
+}
+
+function drawPred(method){
+  const labels=method===1?M1:M2;
+  const traces=scatterTrace(labels,`Method ${method}`,true);
+  Plotly.newPlot('predPlot',traces,{
+    ...layoutBase, title:{text:`Method ${method} Predicted Clusters`,font:{size:15}},
+    xaxis:{...layoutBase.xaxis}, yaxis:{...layoutBase.yaxis},
+  },{responsive:true,displayModeBar:false});
+}
+
+function drawSilhouette(method){
+  const labels=method===1?M1:M2;
+  const scores=method===1?silScores1:silScores2;
+  const barColors=labels.map(l=>COLORS[l]);
+  const meanVal=mean(scores);
+  Plotly.newPlot('silPlot',[
+    {
+      type:'bar', x:NAMES, y:scores,
+      marker:{color:barColors,line:{color:'#fff',width:1}},
+      name:'Silhouette score',
+    },
+    {
+      type:'scatter', x:[-0.5,'S5+extra'], y:[meanVal,meanVal],
+      mode:'lines', line:{color:'#0f172a',dash:'dash',width:2},
+      name:`Mean = ${meanVal.toFixed(4)}`, showlegend:true,
+      x:[NAMES[0],NAMES[NAMES.length-1]], hoverinfo:'skip',
+    }
+  ],{
+    title:{text:`Per-Sample Silhouette Scores (Method ${method})`,font:{size:15}},
+    margin:{l:52,r:12,t:44,b:44},
+    xaxis:{title:'Sample',gridcolor:'#e2e8f0'},
+    yaxis:{title:'Silhouette Score',range:[-1,1],gridcolor:'#e2e8f0',zeroline:true,zerolinecolor:'#94a3b8'},
+    plot_bgcolor:'#fff', paper_bgcolor:'#fff',
+    legend:{orientation:'h',y:-0.2,x:0,font:{size:12}},
+  },{responsive:true,displayModeBar:false});
+}
+
+function renderMetricsTables(method, category){
+  const internalRows=[
+    {name:'Silhouette Score',v1:metrics1.silhouette,v2:metrics2.silhouette,dir:'↑',better:metrics1.silhouette>metrics2.silhouette?1:2},
+    {name:'Davies–Bouldin Index',v1:metrics1.db,v2:metrics2.db,dir:'↓',better:metrics1.db<metrics2.db?1:2},
+    {name:'Dunn Index',v1:metrics1.dunn,v2:metrics2.dunn,dir:'↑',better:metrics1.dunn>metrics2.dunn?1:2},
+  ];
+  const externalRows=[
+    {name:'Rand Index',v1:metrics1.rand,v2:metrics2.rand,dir:'↑',better:metrics1.rand>metrics2.rand?1:2},
+    {name:'Purity',v1:metrics1.purity,v2:metrics2.purity,dir:'↑',better:metrics1.purity>metrics2.purity?1:2},
+    {name:'NMI',v1:metrics1.nmi,v2:metrics2.nmi,dir:'↑',better:metrics1.nmi>metrics2.nmi?1:2},
+  ];
+
+  function buildRows(rows){
+    return rows.map(r=>{
+      const w1=r.better===1?'class="winner"':'';
+      const w2=r.better===2?'class="winner"':'';
+      return `<tr>
+        <td>${r.name}</td>
+        <td ${w1}>${r.v1.toFixed(4)}</td>
+        <td ${w2}>${r.v2.toFixed(4)}</td>
+        <td style="color:var(--muted);font-size:12px">Higher ${r.dir==='\u2191'?'better':'is worse'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.querySelector('#internalTable tbody').innerHTML=buildRows(internalRows);
+  document.querySelector('#externalTable tbody').innerHTML=buildRows(externalRows);
+
+  const showInternal=category==='all'||category==='internal';
+  const showExternal=category==='all'||category==='external';
+  document.getElementById('internalCard').style.display=showInternal?'block':'none';
+  document.getElementById('externalCard').style.display=showExternal?'block':'none';
+}
+
+// ── Init & Events ─────────────────────────────────────────────────────────────
+let curMethod=1, curCat='all';
+
+function update(){
+  document.getElementById('activeLabel').textContent=`Method ${curMethod}`;
+  drawPred(curMethod);
+  drawSilhouette(curMethod);
+  renderMetricsTables(curMethod,curCat);
+}
+
+document.getElementById('methodSel').addEventListener('change',function(){
+  curMethod=+this.value; update();
+});
+document.getElementById('catSel').addEventListener('change',function(){
+  curCat=this.value; renderMetricsTables(curMethod,curCat);
+});
+
+drawGT();
+update();
+</script>
+</body>
+</html>
