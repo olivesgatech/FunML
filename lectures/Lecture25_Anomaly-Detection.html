@@ -196,8 +196,8 @@ often subtle and difficult to detect manually, motivating automated
 anomaly detection techniques.</p>
 <figure id="fig:anomaly_material_example">
 <img src="img/lecture24/image1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Example of anomalous structures within a structured
-material.</figcaption>
+<figcaption>Figure 27.1: Example of anomalous structures within a
+structured material.</figcaption>
 </figure>
 <p>Anomaly detection is also widely used in public safety and
 surveillance scenarios. Figure <a data-reference="fig:anomaly_surveillance_example" data-reference-type="ref" href="#fig:anomaly_surveillance_example">2</a> shows an example
@@ -206,7 +206,8 @@ settings, anomaly detection systems help identify unusual or suspicious
 behavior in large-scale visual data.</p>
 <figure id="fig:anomaly_surveillance_example">
 <img src="img/lecture24/Picture2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Anomaly detection scenario in a public setting.</figcaption>
+<figcaption>Figure 27.2: Anomaly detection scenario in a public
+setting.</figcaption>
 </figure>
 <h2 data-number="2.3" id="anomaly-detection-in-images"><span class="header-section-number">2.3</span> Anomaly Detection in
 Images</h2>
@@ -260,7 +261,8 @@ normal process <span class="math inline">\(\phi_0\)</span>, while
 occasional samples arise from an anomalous process <span class="math inline">\(\phi_1\)</span>.</p>
 <figure id="fig:anomaly_timeseries_process">
 <img src="img/lecture24/Picture3.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Process of detecting anomalies in a time-series signal <span class="math inline">\(x(t)\)</span></figcaption>
+<figcaption>Figure 27.3: Process of detecting anomalies in a time-series
+signal <span class="math inline">\(x(t)\)</span></figcaption>
 </figure>
 <h3 data-number="2.4.1" id="statistics"><span class="header-section-number">2.4.1</span> Statistics</h3>
 <p>A <em>statistic</em> is a numerical quantity computed from data that
@@ -296,8 +298,8 @@ over time, an anomaly is declared when it crosses the decision threshold
 <span class="math inline">\(\gamma\)</span>.</p>
 <figure id="fig:statistical_anomaly_detection">
 <img src="img/lecture24/Picture4.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Threshold-based anomaly detection: an evolving statistic
-crosses the decision threshold <span class="math inline">\(\gamma\)</span>, triggering an anomaly
+<figcaption>Figure 27.4: Threshold-based anomaly detection: an evolving
+statistic crosses the decision threshold <span class="math inline">\(\gamma\)</span>, triggering an anomaly
 alarm.</figcaption>
 </figure>
 <h2 data-number="2.5" id="performance-metrics"><span class="header-section-number">2.5</span> Performance Metrics</h2>
@@ -352,9 +354,9 @@ decreases FPR but may reduce TPR (more missed anomalies).</p></li>
 changing the decision threshold affects detection.</p>
 <figure id="fig:anomaly_threshold_tradeoff">
 <img src="img/lecture24/Picture24.5.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Effect of the decision threshold on anomaly detection. Lower
-thresholds detect more anomalies but increase false positives, while
-higher thresholds reduce false positives but may miss
+<figcaption>Figure 27.5: Effect of the decision threshold on anomaly
+detection. Lower thresholds detect more anomalies but increase false
+positives, while higher thresholds reduce false positives but may miss
 anomalies.</figcaption>
 </figure>
 <h3 data-number="2.5.3" id="combined-performance-metrics"><span class="header-section-number">2.5.3</span> Combined Performance
@@ -407,9 +409,9 @@ algorithm, and the associated AUC values allow direct quantitative
 comparison.</p>
 <figure id="fig:roc_auc_anomaly">
 <img src="img/lecture24/Picture6.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>ROC curve comparison across anomaly detection methods.
-Curves closer to the top-left corner and with larger AUC values indicate
-superior detection performance.</figcaption>
+<figcaption>Figure 27.6: ROC curve comparison across anomaly detection
+methods. Curves closer to the top-left corner and with larger AUC values
+indicate superior detection performance.</figcaption>
 </figure>
 <p>Overall, ROC curves and AUC provide a robust and
 threshold-independent framework for evaluating and comparing anomaly
@@ -513,8 +515,8 @@ neighborhoods, whereas anomalies are relatively distant from their
 nearest neighbors.</p>
 <figure id="fig:distance_based">
 <img src="img/lecture24/Picture1.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Distance-based anomaly detection: anomalies lie far from
-dense clusters.</figcaption>
+<figcaption>Figure 27.7: Distance-based anomaly detection: anomalies lie
+far from dense clusters.</figcaption>
 </figure>
 <p>Under this approach, each data point is assigned an anomaly score
 based on its distance to nearby samples.</p>
@@ -541,8 +543,8 @@ tend to be isolated in fewer partitioning steps than normal data
 points.</p>
 <figure id="fig:isolation_forest">
 <img src="img/lecture24/Picture8.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Isolation Forest: anomalies are isolated in fewer
-splits.</figcaption>
+<figcaption>Figure 27.8: Isolation Forest: anomalies are isolated in
+fewer splits.</figcaption>
 </figure>
 <h4 data-number="3.2.4.1" id="algorithm-overview.-1"><span class="header-section-number">3.2.4.1</span> Algorithm overview.</h4>
 <ol>
@@ -700,8 +702,8 @@ confident predictions for in-distribution samples and lower confidence
 for unfamiliar or anomalous inputs.</p>
 <figure id="fig:msp">
 <img src="img/lecture24/Picture10.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Using a trained convolutional neural network for anomaly
-detection via softmax confidence.</figcaption>
+<figcaption>Figure 27.9: Using a trained convolutional neural network
+for anomaly detection via softmax confidence.</figcaption>
 </figure>
 <h3 data-number="4.3.1" id="concept-and-motivation"><span class="header-section-number">4.3.1</span> Concept and Motivation</h3>
 <p>Modern neural networks trained for classification typically end with
@@ -849,8 +851,8 @@ network <span class="math inline">\(D(\cdot)\)</span> that reconstructs
 the input from this representation.</p>
 <figure id="fig:autoencoder">
 <img src="img/lecture24/Picture11.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Structure of an autoencoder used for reconstruction-based
-anomaly detection.</figcaption>
+<figcaption>Figure 27.10: Structure of an autoencoder used for
+reconstruction-based anomaly detection.</figcaption>
 </figure>
 <p>During training, the network is optimized to reconstruct all samples
 in the training set. The reconstruction loss over the training data is

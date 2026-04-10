@@ -142,7 +142,8 @@ illustrate the progression of feature abstraction (see Figure <a data-reference
 <div class="center">
 <img src="img/lecture23/net10.png" style="width:4in"/>
 </div>
-<figcaption>Visualizing activations of intermediate layers</figcaption>
+<figcaption>Figure 23.1: Visualizing activations of intermediate
+layers</figcaption>
 </figure>
 <p>This type of visualization highlights how internal feature
 representations evolve across layers and provides intuition about what
@@ -193,9 +194,9 @@ it processes and organizes input data.</p>
 <div class="center">
 <img src="img/lecture23/net11.png" style="width:4in"/>
 </div>
-<figcaption>Examples of indirect explanation techniques, including
-maximally activated patches, activation visualizations, dimensionality
-reduction, and nearest-neighbor retrieval.</figcaption>
+<figcaption>Figure 23.2: Examples of indirect explanation techniques,
+including maximally activated patches, activation visualizations,
+dimensionality reduction, and nearest-neighbor retrieval.</figcaption>
 </figure>
 <p>These examples illustrate how indirect explanations provide insight
 into the learned representations and structure of the feature space
@@ -227,8 +228,8 @@ outcome.</p>
 <div class="center">
 <img src="img/lecture23/net12.png" style="width:4in"/>
 </div>
-<figcaption>Examples of direct explanation techniques: saliency via
-occlusion and saliency via feature importance.</figcaption>
+<figcaption>Figure 23.3: Examples of direct explanation techniques:
+saliency via occlusion and saliency via feature importance.</figcaption>
 </figure>
 <p>These examples demonstrate how direct explanations attribute
 importance to specific input regions, providing clear and intuitive
@@ -286,7 +287,7 @@ make the model’s logic more interpretable.</p>
 <div class="center">
 <img src="img/lecture23/net13.png" style="width:4in"/>
 </div>
-<figcaption>Targeted explanations</figcaption>
+<figcaption>Figure 23.4: Targeted explanations</figcaption>
 </figure>
 <p>To further illustrate these paradigms, consider a second example in
 which a model classifies an image as a Bullmastiff (Figure <a data-reference="fig:targeted_bullmastiff" data-reference-type="ref" href="#fig:targeted_bullmastiff">5</a>):</p>
@@ -294,7 +295,7 @@ which a model classifies an image as a Bullmastiff (Figure <a data-reference="f
 <div class="center">
 <img src="img/lecture23/net14.png" style="width:4in"/>
 </div>
-<figcaption>Targeted explanations — identifying a
+<figcaption>Figure 23.5: Targeted explanations — identifying a
 Bullmastiff</figcaption>
 </figure>
 <h4 data-number="2.1.3.4" id="why-bullmastiff-observed-correlation"><span class="header-section-number">2.1.3.4</span> Why Bullmastiff? — Observed
@@ -352,9 +353,9 @@ and normalize for visualization.</p></li>
 <p>The overall workflow is illustrated in Figure <a data-reference="fig:gradcam_pipeline_l23" data-reference-type="ref" href="#fig:gradcam_pipeline_l23">6</a>.</p>
 <figure id="fig:gradcam_pipeline_l23">
 <img src="img/lecture23/net15.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Grad-CAM workflow. Gradients are aggregated to weight
-convolutional feature maps, producing a heatmap that highlights image
-regions supporting the queried class.</figcaption>
+<figcaption>Figure 23.6: Grad-CAM workflow. Gradients are aggregated to
+weight convolutional feature maps, producing a heatmap that highlights
+image regions supporting the queried class.</figcaption>
 </figure>
 <h4 data-number="2.2.0.1" id="observations-for-why-blue-jay"><span class="header-section-number">2.2.0.1</span> Observations for “Why Blue
 Jay?”</h4>
@@ -409,8 +410,8 @@ interpretation.</p></li>
 <p>The overall workflow is illustrated in Figure <a data-reference="fig:counterfactual_cam_process" data-reference-type="ref" href="#fig:counterfactual_cam_process">7</a>.</p>
 <figure id="fig:counterfactual_cam_process">
 <img src="img/lecture23/net16.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Counterfactual-CAM workflow. Gradients are negated to
-suppress features contributing to class <span class="math inline">\(P\)</span>, revealing alternative regions that
+<figcaption>Figure 23.7: Counterfactual-CAM workflow. Gradients are
+negated to suppress features contributing to class <span class="math inline">\(P\)</span>, revealing alternative regions that
 could support other classes if <span class="math inline">\(P\)</span>
 were absent.</figcaption>
 </figure>
@@ -474,9 +475,9 @@ visualization.</p></li>
 <p>The overall workflow is illustrated in Figure <a data-reference="fig:contrast_cam_examples" data-reference-type="ref" href="#fig:contrast_cam_examples">8</a>.</p>
 <figure id="fig:contrast_cam_examples">
 <img src="img/lecture23/net19.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of explanation types. Contrast-CAM highlights
-regions that differentiate a predicted class from alternative classes,
-revealing discriminative and confusing features.</figcaption>
+<figcaption>Figure 23.8: Comparison of explanation types. Contrast-CAM
+highlights regions that differentiate a predicted class from alternative
+classes, revealing discriminative and confusing features.</figcaption>
 </figure>
 <h4 data-number="2.4.0.1" id="example-why-bullmastiff-rather-than-boxer"><span class="header-section-number">2.4.0.1</span> Example: “Why Bullmastiff
 rather than Boxer?”</h4>
@@ -544,9 +545,9 @@ regions highlighted by an explanation.</p>
 <p>The overall taxonomy is illustrated in Figure <a data-reference="fig:evaluation_taxonomy" data-reference-type="ref" href="#fig:evaluation_taxonomy">9</a>.</p>
 <figure id="fig:evaluation_taxonomy">
 <img src="img/lecture23/net8.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Explanatory evaluation taxonomy. Human, application, and
-network evaluation provide complementary perspectives for assessing
-explanation quality.</figcaption>
+<figcaption>Figure 23.9: Explanatory evaluation taxonomy. Human,
+application, and network evaluation provide complementary perspectives
+for assessing explanation quality.</figcaption>
 </figure>
 <h2 data-number="3.3" id="human-evaluation-of-explanatory-techniques"><span class="header-section-number">3.3</span> Human Evaluation of Explanatory
 Techniques</h2>
@@ -567,8 +568,8 @@ insightful and challenging.</p>
 <div class="center">
 <img src="img/lecture23/net9.png" style="width:4in"/>
 </div>
-<figcaption>Qualitative comparison of Backpropagation, Deconvolution,
-and Guided Backpropagation explanations.</figcaption>
+<figcaption>Figure 23.10: Qualitative comparison of Backpropagation,
+Deconvolution, and Guided Backpropagation explanations.</figcaption>
 </figure>
 <p>To address these challenges, it is important to mitigate biases and
 increase reliability. One effective method is to involve a large number
@@ -592,8 +593,9 @@ enabling researchers to assess which approaches best approximate human
 fixation patterns across diverse scenes.</p>
 <figure id="fig:saliency_comparison_grid">
 <img src="img/lecture22/vsi.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Saliency maps compared across multiple explanation and
-saliency detection methods applied to the same images.</figcaption>
+<figcaption>Figure 23.11: Saliency maps compared across multiple
+explanation and saliency detection methods applied to the same
+images.</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:saliency_comparison_grid" data-reference-type="ref" href="#fig:saliency_comparison_grid">11</a> provides a
 side-by-side comparison of saliency maps generated by multiple
@@ -658,8 +660,8 @@ reasoning. Figure <a data-reference="fig:gaze_tracking_example" data-reference-
 of human visual attention measured using gaze tracking.</p>
 <figure id="fig:gaze_tracking_example">
 <img src="img/lecture23/net6.png" style="width:4in"/>
-<figcaption>Gaze-tracking example illustrating human visual attention on
-salient image regions.</figcaption>
+<figcaption>Figure 23.12: Gaze-tracking example illustrating human
+visual attention on salient image regions.</figcaption>
 </figure>
 <p>To quantitatively compare explanation maps with human attention,
 several metrics are commonly used:</p>
@@ -699,8 +701,8 @@ through highly tailored instructions.</p></li>
 human attention collected using the pointing game.</p>
 <figure id="fig:pointing_game_example">
 <img src="img/lecture23/net7.png" style="width:4in"/>
-<figcaption>Pointing game illustrating human-indicated regions of
-importance in images.</figcaption>
+<figcaption>Figure 23.13: Pointing game illustrating human-indicated
+regions of importance in images.</figcaption>
 </figure>
 <h2 data-number="3.5" id="network-evaluation-in-explanatory-evaluation"><span class="header-section-number">3.5</span> Network Evaluation in
 Explanatory Evaluation</h2>
@@ -721,8 +723,8 @@ regions identified as important by explanation methods such as
 <em>Guided Backpropagation</em> or <em>Grad-CAM</em>.</p>
 <figure id="fig:masking_evaluation">
 <img src="img/lecture23/net2.png" style="width:4in"/>
-<figcaption>Masking using explanation heatmaps to evaluate feature
-importance.</figcaption>
+<figcaption>Figure 23.14: Masking using explanation heatmaps to evaluate
+feature importance.</figcaption>
 </figure>
 <p>The central idea is simple: mask the regions identified as important
 and observe how the network’s predictions change. If removing
@@ -772,8 +774,8 @@ image, constant gray value, or dataset mean), and the modified image is
 re-evaluated by the network.</p>
 <figure id="fig:pixel_deletion_order">
 <img src="img/lecture23/net3.png" style="width:4in"/>
-<figcaption>Pixel-wise deletion: progressively masking pixels from
-highest to lowest importance.</figcaption>
+<figcaption>Figure 23.15: Pixel-wise deletion: progressively masking
+pixels from highest to lowest importance.</figcaption>
 </figure>
 <p>This procedure produces a <em>deletion curve</em>: the model’s
 confidence for the target class plotted against the fraction of pixels
@@ -786,13 +788,13 @@ since removing the most important pixels quickly destroys evidence for
 the predicted class.</p>
 <figure id="fig:deletion_auc_examples">
 <img src="img/lecture23/net4.png" style="width:4in"/>
-<figcaption>Deletion curves: stronger explanations cause faster
-confidence drop, yielding lower AUC.</figcaption>
+<figcaption>Figure 23.16: Deletion curves: stronger explanations cause
+faster confidence drop, yielding lower AUC.</figcaption>
 </figure>
 <figure id="fig:deletion_more_examples">
 <img src="img/lecture23/net5.png" style="width:4in"/>
-<figcaption>Additional deletion examples illustrating the effect of
-importance ranking on confidence decay.</figcaption>
+<figcaption>Figure 23.17: Additional deletion examples illustrating the
+effect of importance ranking on confidence decay.</figcaption>
 </figure>
 <h3 data-number="3.5.4" id="pixel-wise-insertion"><span class="header-section-number">3.5.4</span> Pixel-wise Insertion</h3>
 <p>Pixel-wise insertion is the complementary experiment. We begin from a
@@ -809,8 +811,8 @@ because the prediction recovers rapidly as important evidence is
 restored.</p>
 <figure id="fig:insertion_auc_examples">
 <img src="img/lecture23/net6.png" style="width:4in"/>
-<figcaption>Insertion curves: stronger explanations cause faster
-confidence rise, yielding higher AUC.</figcaption>
+<figcaption>Figure 23.18: Insertion curves: stronger explanations cause
+faster confidence rise, yielding higher AUC.</figcaption>
 </figure>
 <h4 data-number="3.5.4.1" id="notes-and-limitations."><span class="header-section-number">3.5.4.1</span> Notes and limitations.</h4>
 <p>Deletion and insertion metrics are attractive because they are fully

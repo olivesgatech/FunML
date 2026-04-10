@@ -124,8 +124,9 @@ growing importance of self-supervision in modern AI systems.</p>
 and Structures</h1>
 <figure id="fig:ssl-comparison">
 <img src="img/lecture26/S%20US%20SSL.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Comparison of supervised, unsupervised, and self-supervised
-learning pipelines and their sources of supervision.</figcaption>
+<figcaption>Figure 24.1: Comparison of supervised, unsupervised, and
+self-supervised learning pipelines and their sources of
+supervision.</figcaption>
 </figure>
 <p>As illustrated in Fig. <a data-reference="fig:ssl-comparison" data-reference-type="ref" href="#fig:ssl-comparison">1</a>, the
 primary difference between modern learning paradigms lies in how
@@ -178,7 +179,8 @@ fine-tuning.</p>
 Pseudo-Labels</h2>
 <figure id="fig:pseudo-label-generation">
 <img src="img/lecture26/gen%20pseudo%20lab.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Pseudo-label generation using a pre-text task.</figcaption>
+<figcaption>Figure 24.2: Pseudo-label generation using a pre-text
+task.</figcaption>
 </figure>
 <p>The first stage focuses on constructing artificial supervision
 directly from <strong>unlabeled data</strong>. Given a large dataset
@@ -195,7 +197,7 @@ pre-text tasks transform unlabeled data into pseudo-labeled data.</p>
 on Pseudo-Labels</h2>
 <figure id="fig:ssl-pretraining">
 <img src="img/lecture26/pre%20train%20on%20pse.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Self-supervised pre-training using
+<figcaption>Figure 24.3: Self-supervised pre-training using
 pseudo-labels.</figcaption>
 </figure>
 <p>In the second stage, the pseudo-labeled dataset is used to train a
@@ -211,8 +213,8 @@ extractor trained using large-scale unlabeled data, as shown in Fig. <a data-re
 for Downstream Tasks</h2>
 <figure id="fig:ssl-finetuning">
 <img src="img/lecture26/utilize%20learn%20model.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Fine-tuning the pre-trained model for downstream
-tasks.</figcaption>
+<figcaption>Figure 24.4: Fine-tuning the pre-trained model for
+downstream tasks.</figcaption>
 </figure>
 <p>The final stage adapts the learned representation to a specific
 <strong>downstream task</strong>. The pre-trained network <span class="math inline">\(h_{\theta^*}\)</span> is reused either as a fixed
@@ -236,8 +238,8 @@ learning toward useful semantic features.</p>
 <h2 data-number="4.1" id="transformation-prediction"><span class="header-section-number">4.1</span> Transformation Prediction</h2>
 <figure id="fig:ssl-rotation">
 <img src="img/lecture26/tran.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Transformation prediction using image rotations as
-pseudo-labels.</figcaption>
+<figcaption>Figure 24.5: Transformation prediction using image rotations
+as pseudo-labels.</figcaption>
 </figure>
 <p><strong>Transformation prediction</strong> applies known
 transformations to input data and trains the model to identify which
@@ -251,7 +253,7 @@ later be reused for downstream classification tasks.</p>
 <h2 data-number="4.2" id="masked-prediction"><span class="header-section-number">4.2</span> Masked Prediction</h2>
 <figure id="fig:ssl-masking">
 <img src="img/lecture26/mask.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Masked prediction using an encoder–decoder
+<figcaption>Figure 24.6: Masked prediction using an encoder–decoder
 architecture.</figcaption>
 </figure>
 <p><strong>Masked prediction</strong> removes a portion of the input and
@@ -265,8 +267,8 @@ learns to reconstruct missing regions.</p>
 <h2 data-number="4.3" id="deep-clustering"><span class="header-section-number">4.3</span> Deep Clustering</h2>
 <figure id="fig:ssl-clustering">
 <img src="img/lecture26/cluster.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Deep clustering for generating pseudo-labels from feature
-clusters.</figcaption>
+<figcaption>Figure 24.7: Deep clustering for generating pseudo-labels
+from feature clusters.</figcaption>
 </figure>
 <p><strong>Deep clustering</strong> combines representation learning
 with clustering algorithms to iteratively generate pseudo-labels. First,
@@ -279,8 +281,8 @@ clustering quality. The overall workflow is illustrated in Fig. <a data-referen
 <h2 data-number="4.4" id="contrastive-learning"><span class="header-section-number">4.4</span> Contrastive Learning</h2>
 <figure id="fig:ssl-contrastive">
 <img src="img/lecture26/cont.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Contrastive learning using positive and negative pairs of
-data.</figcaption>
+<figcaption>Figure 24.8: Contrastive learning using positive and
+negative pairs of data.</figcaption>
 </figure>
 <p><strong>Contrastive learning</strong> has become one of the most
 influential self-supervised approaches. The core idea is to learn
@@ -301,7 +303,7 @@ framework and its impact on modern machine learning systems.</p>
 <h2 data-number="5.1" id="simclr-framework"><span class="header-section-number">5.1</span> SimCLR Framework</h2>
 <figure id="fig:simclr_framework">
 <img src="img/lecture26/SimCLR_Framework.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Overview of the SimCLR contrastive learning
+<figcaption>Figure 24.9: Overview of the SimCLR contrastive learning
 pipeline.</figcaption>
 </figure>
 <p><strong>SimCLR</strong> is a representative contrastive learning
@@ -330,8 +332,8 @@ for downstream tasks.</p>
 Contrastive vs. Supervised Learning</h2>
 <figure id="fig:contrastive_vs_supervised">
 <img src="img/lecture26/performance_comparison.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Performance comparison between contrastive and supervised
-learning models.</figcaption>
+<figcaption>Figure 24.10: Performance comparison between contrastive and
+supervised learning models.</figcaption>
 </figure>
 <p>Recent empirical results demonstrate that large-scale
 <strong>contrastive learning</strong> can rival or even surpass
@@ -368,7 +370,7 @@ contrastive learning adapts naturally to the structure of the data.</p>
 <h3 class="unnumbered" id="fisheye-images">Fisheye Images</h3>
 <figure id="fig:fisheye_region">
 <img src="img/lecture26/fisheye_region.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Region-based contrastive learning in fisheye
+<figcaption>Figure 24.11: Region-based contrastive learning in fisheye
 images.</figcaption>
 </figure>
 <p>In fisheye image analysis, spatial distortion varies significantly
@@ -391,16 +393,16 @@ radial partitioning, or grid-wise segmentation, as illustrated in
 Fig. <a data-reference="fig:fisheye_alternative" data-reference-type="ref" href="#fig:fisheye_alternative">12</a>.</p>
 <figure id="fig:fisheye_alternative">
 <img src="img/lecture26/fisheye_alternative.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Alternative region partitioning strategies for fisheye
-images.</figcaption>
+<figcaption>Figure 24.12: Alternative region partitioning strategies for
+fisheye images.</figcaption>
 </figure>
 <p>This example highlights how domain geometry influences pair
 construction.</p>
 <h3 class="unnumbered" id="seismic-images">Seismic Images</h3>
 <figure id="fig:seismic_contrastive">
 <img src="img/lecture26/seismic.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Contrastive learning via volume partitioning in seismic
-data.</figcaption>
+<figcaption>Figure 24.13: Contrastive learning via volume partitioning
+in seismic data.</figcaption>
 </figure>
 <p>In seismic imaging, the data is volumetric rather than planar. As
 illustrated in Fig. <a data-reference="fig:seismic_contrastive" data-reference-type="ref" href="#fig:seismic_contrastive">13</a>, the full seismic volume
@@ -414,8 +416,8 @@ learn spatially consistent geological representations.</p>
 <h3 class="unnumbered" id="medical-images">Medical Images</h3>
 <figure id="fig:medical_contrastive">
 <img src="img/lecture26/medical.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Patient-based positive pair construction in medical
-imaging.</figcaption>
+<figcaption>Figure 24.14: Patient-based positive pair construction in
+medical imaging.</figcaption>
 </figure>
 <p>In medical imaging, positive and negative pairs can be defined using
 patient identity or clinical characteristics. As shown in Fig. <a data-reference="fig:medical_contrastive" data-reference-type="ref" href="#fig:medical_contrastive">14</a>, images from the same
@@ -428,8 +430,8 @@ similarity relationships.</p>
 Modalities</h2>
 <figure id="fig:contrastive_other_modalities">
 <img src="img/lecture26/other_modalities.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Contrastive learning applications in text and audio
-modalities.</figcaption>
+<figcaption>Figure 24.15: Contrastive learning applications in text and
+audio modalities.</figcaption>
 </figure>
 <p>Although contrastive learning gained prominence in computer vision,
 it has been successfully extended to other modalities. In
@@ -453,8 +455,8 @@ discussed throughout this lecture.</p>
 <h2 data-number="7.1" id="recent-developments"><span class="header-section-number">7.1</span> Recent Developments</h2>
 <figure id="fig:sam">
 <img src="img/lecture26/sam.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Segment Anything Model (SAM): a large-scale foundation model
-for image segmentation.</figcaption>
+<figcaption>Figure 24.16: Segment Anything Model (SAM): a large-scale
+foundation model for image segmentation.</figcaption>
 </figure>
 <p>One prominent example of a modern foundation model is the
 <strong>Segment Anything Model (SAM)</strong>, released by Meta in April
@@ -481,8 +483,8 @@ foundation model paradigm.</p>
 <h2 data-number="7.3" id="applications-and-impact"><span class="header-section-number">7.3</span> Applications and Impact</h2>
 <figure id="fig:foundation_models">
 <img src="img/lecture26/foundation_model.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Foundation models trained on diverse multimodal data and
-adapted to downstream tasks.</figcaption>
+<figcaption>Figure 24.17: Foundation models trained on diverse
+multimodal data and adapted to downstream tasks.</figcaption>
 </figure>
 <p>Foundation models leverage <strong>transfer learning at
 scale</strong>. As illustrated in Fig. <a data-reference="fig:foundation_models" data-reference-type="ref" href="#fig:foundation_models">17</a>,

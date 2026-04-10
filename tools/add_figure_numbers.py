@@ -172,8 +172,8 @@ def add_figure_numbers_to_tex(tex_path: Path, dry_run: bool = False) -> int:
 
 def main():
     dry_run = "--dry-run" in sys.argv
-    lectures_dir = Path(__file__).resolve().parent.parent / "lectures"
-    tex_files = sorted(lectures_dir.glob("*.tex"))
+    src_root = Path(__file__).resolve().parent.parent / "source" / "raw"
+    tex_files = sorted(src_root.rglob("*.tex"))
 
     total_files = 0
     total_caps = 0

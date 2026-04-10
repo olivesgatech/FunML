@@ -285,7 +285,8 @@ preserving relationships such as “king” to “queen” (Male–Female),
 (Country–Capital), as illustrated in Figure <a data-reference="fig:word_embeddings" data-reference-type="ref" href="#fig:word_embeddings">1</a>.</p>
 <figure id="fig:word_embeddings">
 <img src="img/lecture21/1_SYiW1MUZul1NvL1kc1RxwQ.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
-<figcaption>Linear Relationships between Words.</figcaption>
+<figcaption>Figure 20.1: Linear Relationships between
+Words.</figcaption>
 </figure>
 <p>Encoder–Decoder architectures leverage these embeddings to create
 contextual representations of word sequences, enabling tasks such as
@@ -336,7 +337,7 @@ encourages the model to learn embeddings that capture shared semantic
 and syntactic properties across context words.</p>
 <figure id="fig:skipgram_cbow">
 <img src="img/lecture21/skipgram-vs-cbow-continuous-bag-of-words-word2vec-word-representation-2048x1075.png" style="width:44.40%; max-width:44.40%; height:auto;"/>
-<figcaption>Difference between Skip-Gram and CBOW training
+<figcaption>Figure 20.2: Difference between Skip-Gram and CBOW training
 architectures.</figcaption>
 </figure>
 <p>Both Skip-Gram and CBOW produce word embeddings that capture rich
@@ -355,7 +356,8 @@ hidden state summarizing the entire input sequence into a context
 vector.</p>
 <figure id="fig:seq2seq_model">
 <img src="img/lecture21/ezgif-5-d49a166959.jpg" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>LSTM-based Seq2Seq Encoder–Decoder Architecture</figcaption>
+<figcaption>Figure 20.3: LSTM-based Seq2Seq Encoder–Decoder
+Architecture</figcaption>
 </figure>
 <p>As illustrated in Figure <a data-reference="fig:seq2seq_model" data-reference-type="ref" href="#fig:seq2seq_model">3</a>, let
 <span class="math inline">\(x_i\)</span> denote the input token at
@@ -429,7 +431,8 @@ embeddings. Given an input image <span class="math display">\[x \in
 into non-overlapping square patches of size <span class="math inline">\(P \times P\)</span>.</p>
 <figure id="fig:vit_architecture">
 <img src="img/lecture21/%E6%88%AA%E5%9C%96%202024-11-10%20%E4%B8%8B%E5%8D%885.15.24.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Vision Transformer (ViT) Architecture</figcaption>
+<figcaption>Figure 20.4: Vision Transformer (ViT)
+Architecture</figcaption>
 </figure>
 <p>The total number of patches produced is <span class="math display">\[N = \frac{H \times W}{P^2}.\]</span> Each patch
 is flattened into a vector of dimension <span class="math inline">\(P^2
@@ -486,10 +489,10 @@ Transformer architectures, where normalization is applied repeatedly
 within attention and feed-forward blocks.</p>
 <figure id="fig:layer_norm">
 <img src="img/lecture21/e068e06a.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
-<figcaption>Comparison of Batch Normalization and Layer Normalization.
-Batch normalization computes statistics across the batch dimension,
-whereas layer normalization computes statistics across the feature
-dimension of each token independently.</figcaption>
+<figcaption>Figure 20.5: Comparison of Batch Normalization and Layer
+Normalization. Batch normalization computes statistics across the batch
+dimension, whereas layer normalization computes statistics across the
+feature dimension of each token independently.</figcaption>
 </figure>
 <h2 data-number="4.3" id="attention-mechanism"><span class="header-section-number">4.3</span> Attention Mechanism</h2>
 <p>Attention is the core operation that enables transformer models to
@@ -521,8 +524,9 @@ to simultaneously capture multiple types of relationships, such as
 syntactic structure and long-range semantic dependencies.</p>
 <figure id="fig:attention">
 <img src="img/lecture21/%E5%9C%96%E7%89%87%201.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Scaled dot-product attention (left) and multi-head attention
-(right) used in transformer architectures.</figcaption>
+<figcaption>Figure 20.6: Scaled dot-product attention (left) and
+multi-head attention (right) used in transformer
+architectures.</figcaption>
 </figure>
 
 </main>

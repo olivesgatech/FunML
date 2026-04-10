@@ -204,8 +204,8 @@ non-negative eigenvalues, which guarantees locally convex curvature and
 enables reliable descent toward a minimum.</p>
 <figure id="fig:P2.png">
 <img src="img/lecture9/P2.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Visualization of the function with respect to parameters
-<span class="math inline">\(w_1\)</span> and <span class="math inline">\(w_2\)</span> (quadratic function in
+<figcaption>Figure 9.1: Visualization of the function with respect to
+parameters <span class="math inline">\(w_1\)</span> and <span class="math inline">\(w_2\)</span> (quadratic function in
 blue)</figcaption>
 </figure>
 <h2 data-number="2.3" id="convexity"><span class="header-section-number">2.3</span> Convexity</h2>
@@ -258,11 +258,12 @@ function is convex or when the optimization has already reached a region
 close to a local minimum.</p>
 <figure id="fig:P3.png">
 <img src="img/lecture9/P3.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Newton’s Method Convergence: Convex Functions</figcaption>
+<figcaption>Figure 9.2: Newton’s Method Convergence: Convex
+Functions</figcaption>
 </figure>
 <figure id="fig:P4.png">
 <img src="img/lecture9/P4.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Newton’s Method Convergence: Non-Convex
+<figcaption>Figure 9.3: Newton’s Method Convergence: Non-Convex
 Functions</figcaption>
 </figure>
 <h2 data-number="2.5" id="computational-complexity"><span class="header-section-number">2.5</span> Computational Complexity</h2>
@@ -324,8 +325,8 @@ descent directions along coordinate axes, moving step-by-step toward
 lower values of the objective function.</p>
 <figure id="fig:P5.png">
 <img src="img/lecture9/P5.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Coordinate Search Algorithm: Exploring Descent Directions
-Along Coordinate Axes</figcaption>
+<figcaption>Figure 9.4: Coordinate Search Algorithm: Exploring Descent
+Directions Along Coordinate Axes</figcaption>
 </figure>
 <h1 data-number="4" id="coordinate-descent"><span class="header-section-number">4.</span> Coordinate Descent</h1>
 <p>While Coordinate Search explores directions without using gradients,
@@ -357,8 +358,8 @@ effective for large-scale machine learning problems where computing full
 gradients is expensive.</p>
 <figure id="fig:P6.png">
 <img src="img/lecture9/P6.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Coordinate Descent Algorithm: Stepwise Optimization Along
-Coordinate Axes</figcaption>
+<figcaption>Figure 9.5: Coordinate Descent Algorithm: Stepwise
+Optimization Along Coordinate Axes</figcaption>
 </figure>
 <h2 data-number="4.2" id="convergence-1"><span class="header-section-number">4.2</span> Convergence</h2>
 <p>In early iterations, coordinate search methods can make progress by
@@ -375,8 +376,8 @@ minimum. This stepwise progress often produces a characteristic
 “zig-zag” path toward the optimum.</p>
 <figure id="fig:P7.png">
 <img src="img/lecture9/P7.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Comparison of Coordinate Search (Left) and Coordinate
-Descent (Right): Efficiency in Finding Lower Cost Function
+<figcaption>Figure 9.6: Comparison of Coordinate Search (Left) and
+Coordinate Descent (Right): Efficiency in Finding Lower Cost Function
 Values</figcaption>
 </figure>
 <h2 data-number="4.3" id="advantages"><span class="header-section-number">4.3</span> Advantages</h2>
@@ -403,7 +404,8 @@ As a result, the optimization path (shown in red) can stall or progress
 very slowly toward the global minimum.</p>
 <figure id="fig:P8.png">
 <img src="img/lecture9/P8.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>A Case of Non-Smooth Multivariable Function</figcaption>
+<figcaption>Figure 9.7: A Case of Non-Smooth Multivariable
+Function</figcaption>
 </figure>
 <p>The red trajectory highlights how the optimization may stagnate or
 move inefficiently due to the non-smooth geometry of the loss
@@ -619,8 +621,8 @@ standard linear regression, while a large <span class="math inline">\(\lambda\)<
 produces a smoother, lower-variance model.</p>
 <figure id="fig:P14.png">
 <img src="img/lecture9/P14.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Gradient Descent Path to Optimal Weights: Minimizing Loss in
-Ridge Regression</figcaption>
+<figcaption>Figure 9.13: Gradient Descent Path to Optimal Weights:
+Minimizing Loss in Ridge Regression</figcaption>
 </figure>
 <h1 data-number="7" id="lasso-regression-formulation"><span class="header-section-number">7.</span> Lasso Regression:
 Formulation</h1>
@@ -676,9 +678,9 @@ the most relevant features while discarding irrelevant ones.</p>
 powerful tool for building compact and interpretable models.</p>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-21%20at%203.39.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>As <span class="math inline">\(\lambda\)</span> increases,
-coefficients of less important features shrink to zero before those of
-more important features.</figcaption>
+<figcaption>Figure 9.14: As <span class="math inline">\(\lambda\)</span>
+increases, coefficients of less important features shrink to zero before
+those of more important features.</figcaption>
 </figure>
 <h1 data-number="8" id="lasso-regularization-gradient-descent"><span class="header-section-number">8.</span> Lasso Regularization: Gradient
 Descent</h1>
@@ -902,7 +904,7 @@ reserved for testing, while the remaining data is used for training and
 validation.</p>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.02.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Visualization of dataset split</figcaption>
+<figcaption>Figure 9.16: Visualization of dataset split</figcaption>
 </figure>
 <h4 data-number="12.1.0.1" id="k-fold-cross-validation-procedure"><span class="header-section-number">12.1.0.1</span> K-fold Cross-Validation
 Procedure</h4>
@@ -925,7 +927,7 @@ as the training set.</p></li>
 data before final evaluation on the test set.</p>
 <figure>
 <img src="img/lecture10/crossvalidation.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>K-fold cross-validation procedure.</figcaption>
+<figcaption>Figure 9.17: K-fold cross-validation procedure.</figcaption>
 </figure>
 <h2 data-number="12.2" id="learning-curves"><span class="header-section-number">12.2</span> Learning Curves</h2>
 <p>When we evaluate a model’s performance, we typically look at two key
@@ -967,11 +969,12 @@ n-v\)</span>:</p>
 </ol>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.00%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Underfit linear regression model</figcaption>
+<figcaption>Figure 9.18: Underfit linear regression model</figcaption>
 </figure>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.19%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Overfit polynomial regression model</figcaption>
+<figcaption>Figure 9.19: Overfit polynomial regression
+model</figcaption>
 </figure>
 <p>What we can see from this is that the linear model shows higher error
 rates and plateaus early in training and validation causing
@@ -1010,7 +1013,8 @@ complexity.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.20 Model Complexity</h3><p>Adjust model complexity and observe error behavior.</p><iframe class="interactive-notebook-frame" data-default-height="1080" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" style="height:1080px;" title="Interactive Figure 9.20 Model Complexity Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig920_ModelComplexity.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img src="img/lecture10/modelcomplexity.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Model complexity vs training and testing error.</figcaption>
+<figcaption>Figure 9.21: Model complexity vs training and testing
+error.</figcaption>
 </figure>
 <h2 data-number="12.5" id="bias-variance-tradeoff"><span class="header-section-number">12.5</span> Bias-Variance Tradeoff</h2>
 <p>The bias–variance tradeoff provides a theoretical explanation for the
@@ -1049,11 +1053,12 @@ optimal tradeoff.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.21 Model Complexity vs Error</h3><p>Adjust model complexity and inspect bias/variance trends.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" style="height:900px;" title="Interactive Figure 9.21 Model Complexity vs Error Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig921_ComplexityVsError.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.30.13%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Diagram depicting the bias-variance tradeoff</figcaption>
+<figcaption>Figure 9.23: Diagram depicting the bias-variance
+tradeoff</figcaption>
 </figure>
 <figure>
 <img src="img/lecture9/Screenshot%202024-09-22%20at%206.41.12%E2%80%AFPM.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption aria-hidden="true"></figcaption>
+<figcaption>Figure 9.24: </figcaption>
 </figure>
 <p>This decomposition motivates the bias–variance tradeoff: increasing
 model complexity typically reduces bias but increases variance.</p>
@@ -1161,10 +1166,10 @@ look like both a 3 and an 8.</p>
 labels can improve generalization and robustness <span class="citation" data-cites="cifar10h">(Joshua C. Peterson et al. 2019a)</span>.</p>
 <figure id="fig:human_cnn_uncertainty">
 <img src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
-<figcaption><strong>Humans and neural networks disagree in their
-uncertainty.</strong> Top: examples where humans are confident but CNN
-predictions are uncertain. Middle: examples where humans are uncertain
-but CNN predictions are confident. Bottom: examples where both
+<figcaption>Figure 9.26: <strong>Humans and neural networks disagree in
+their uncertainty.</strong> Top: examples where humans are confident but
+CNN predictions are uncertain. Middle: examples where humans are
+uncertain but CNN predictions are confident. Bottom: examples where both
 distributions diverge. This highlights that label disagreement contains
 useful information about ambiguity in the data.</figcaption>
 </figure>

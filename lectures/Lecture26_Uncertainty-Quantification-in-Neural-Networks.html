@@ -175,9 +175,9 @@ the uncertainty arises from the data itself rather than the
 observer.</p>
 <figure id="fig:blue_gold_dress">
 <img src="img/lecture27/blueorgolddress.jpg" style="width:16.80%; max-width:16.80%; height:auto;"/>
-<figcaption>The viral “Blue or Gold Dress” image illustrating how the
-same visual input can lead to different interpretations due to
-perceptual ambiguity.</figcaption>
+<figcaption>Figure 27.1: The viral “Blue or Gold Dress” image
+illustrating how the same visual input can lead to different
+interpretations due to perceptual ambiguity.</figcaption>
 </figure>
 <p>Another example arises in expert decision-making tasks such as
 reading chest X-rays, as illustrated in Fig. <a data-reference="fig:chest_xray_uncertainty" data-reference-type="ref" href="#fig:chest_xray_uncertainty">2</a>. A trained radiologist
@@ -191,11 +191,12 @@ uncertainty results from incomplete knowledge rather than inherent data
 noise.</p>
 <figure id="fig:chest_xray_uncertainty">
 <img src="img/lecture27/Difference-in-Chest-X-Ray-Images-in-Normal-and-Pneumonia.png" style="width:39.00%; max-width:39.00%; height:auto;"/>
-<figcaption>Comparison between a normal chest X-ray and one showing
-pneumonia. Medical experts can identify abnormal patterns such as fluid
-accumulation, while non-experts may not recognize these features. This
-illustrates epistemic uncertainty arising from differences in knowledge
-rather than ambiguity in the data itself.</figcaption>
+<figcaption>Figure 27.2: Comparison between a normal chest X-ray and one
+showing pneumonia. Medical experts can identify abnormal patterns such
+as fluid accumulation, while non-experts may not recognize these
+features. This illustrates epistemic uncertainty arising from
+differences in knowledge rather than ambiguity in the data
+itself.</figcaption>
 </figure>
 <p>Together, these examples highlight an important principle that
 carries over directly to machine learning: uncertainty can arise either
@@ -259,8 +260,8 @@ variation between model decision boundaries and the impact of unknown
 samples.</p>
 <figure id="fig:factors_uncertainty">
 <img src="img/lecture27/factors_uncer.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Factors that Cause Uncertainty. (left) Variations among
-Model Configurations, (right) Unknown Data</figcaption>
+<figcaption>Figure 27.3: Factors that Cause Uncertainty. (left)
+Variations among Model Configurations, (right) Unknown Data</figcaption>
 </figure>
 <h1 data-number="4" id="sec:27.4"><span class="header-section-number">4.</span> Two Main Types of
 Uncertainty</h1>
@@ -323,9 +324,9 @@ Monte Carlo dropout (Sec. <a data-reference="sec:mc-dropout" data-reference-typ
 <h2 data-number="5.2" id="sec:ensemble"><span class="header-section-number">5.2</span> [Example 1] Deep Ensembles</h2>
 <figure id="fig:deep-ensembles">
 <img src="img/lecture27/deep-ensembles.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Deep ensembles generate multiple predictions by training
-independent neural networks and combining their outputs to estimate
-uncertainty.</figcaption>
+<figcaption>Figure 27.4: Deep ensembles generate multiple predictions by
+training independent neural networks and combining their outputs to
+estimate uncertainty.</figcaption>
 </figure>
 <p>Deep ensembles estimate uncertainty by training multiple neural
 networks independently and combining their predictions. Each network is
@@ -395,8 +396,8 @@ allowing uncertainty to be estimated through repeated stochastic forward
 passes.</p>
 <figure id="fig:mc-dropout">
 <img src="img/lecture27/MC-dropout.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Monte Carlo dropout approximates an ensemble by performing
-multiple stochastic forward passes using dropout at inference
+<figcaption>Figure 27.5: Monte Carlo dropout approximates an ensemble by
+performing multiple stochastic forward passes using dropout at inference
 time.</figcaption>
 </figure>
 <h2 data-number="5.4" id="summary"><span class="header-section-number">5.4</span> Summary</h2>
@@ -408,7 +409,7 @@ while MC-dropout approximates this behavior through stochastic sampling
 within a single network.</p>
 <figure id="fig:iter_summary">
 <img src="img/lecture27/iterative_sampling_summary.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Summary of iterative uncertainty estimation
+<figcaption>Figure 27.6: Summary of iterative uncertainty estimation
 methods.</figcaption>
 </figure>
 <p>To better understand how these methods quantify uncertainty, we can
@@ -439,8 +440,8 @@ epistemic uncertainty arises from model knowledge gaps, it can often be
 reduced through better models or more data.</p>
 <figure id="fig:uncertainty_types">
 <img src="img/lecture27/uncertainty-summary.jpg" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Visualization of confident predictions, high aleatoric
-uncertainty, and high epistemic uncertainty.</figcaption>
+<figcaption>Figure 27.7: Visualization of confident predictions, high
+aleatoric uncertainty, and high epistemic uncertainty.</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:uncertainty_types" data-reference-type="ref" href="#fig:uncertainty_types">7</a> visualizes these
 uncertainty types using a probability simplex. Each vertex represents a
@@ -519,7 +520,7 @@ practice to guide data collection, trigger human review, or improve
 model robustness.</p>
 <figure id="fig:iterative_application">
 <img src="img/lecture27/uncertainty_application_segmentation.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Uncertainty Quantification in Segmentation
+<figcaption>Figure 27.8: Uncertainty Quantification in Segmentation
 Applications</figcaption>
 </figure>
 <h1 data-number="6" id="single-pass-uncertainty-estimation"><span class="header-section-number">6.</span> Single Pass Uncertainty
@@ -583,7 +584,7 @@ estimated from the output prediction</p></li>
 </ul>
 <figure id="fig:paradigm_single_pass">
 <img src="img/lecture27/paradigm_of_single_pass.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Typical paradigm of single-pass uncertainty
+<figcaption>Figure 27.9: Typical paradigm of single-pass uncertainty
 estimation.</figcaption>
 </figure>
 <p>A common interpretation of this framework is that uncertainty
@@ -721,8 +722,8 @@ These metrics quantify how well uncertainty estimates correlate with
 prediction performance across different uncertainty levels.</p>
 <figure id="fig:gradtrust">
 <img src="img/lecture27/gradtrust.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Example of per-dataset uncertainty evaluation using
-ImageNet.</figcaption>
+<figcaption>Figure 27.10: Example of per-dataset uncertainty evaluation
+using ImageNet.</figcaption>
 </figure>
 <p>As shown in Fig. <a data-reference="fig:gradtrust" data-reference-type="ref" href="#fig:gradtrust">10</a>, higher uncertainty typically
 corresponds to lower accuracy and F1 scores. Ideally, a good uncertainty

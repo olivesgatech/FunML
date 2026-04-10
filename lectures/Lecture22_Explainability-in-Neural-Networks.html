@@ -158,7 +158,7 @@ prediction.</p>
 AlexNet</h4>
 <figure id="fig:Architecture of AlexNet">
 <img src="img/lecture22/01.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Different layers in a CNN</figcaption>
+<figcaption>Figure 22.1: Different layers in a CNN</figcaption>
 </figure>
 <h4 data-number="2.3.0.2" id="section"><span class="header-section-number">2.3.0.2</span> </h4>
 <p>AlexNet contains eight learnable layers:</p>
@@ -209,7 +209,8 @@ Layers</h2>
 <h3 data-number="3.1.1" id="alexnet"><span class="header-section-number">3.1.1</span> AlexNet</h3>
 <figure id="fig:The sequence of convolutional layers of AlexNet">
 <img src="img/lecture22/AlexNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>The sequence of convolutional layers of AlexNet</figcaption>
+<figcaption>Figure 22.2: The sequence of convolutional layers of
+AlexNet</figcaption>
 </figure>
 <ul>
 <li><p>64 filters in the first convolutional layer.</p></li>
@@ -221,7 +222,8 @@ oriented edges, color blobs, textures, and simple patterns.</p></li>
 <h3 data-number="3.1.2" id="resnet"><span class="header-section-number">3.1.2</span> ResNet</h3>
 <figure id="fig:The sequence of convolutional layers of ResNet">
 <img src="img/lecture22/ResNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>The sequence of convolutional layers of ResNet</figcaption>
+<figcaption>Figure 22.3: The sequence of convolutional layers of
+ResNet</figcaption>
 </figure>
 <ul>
 <li><p>Uses deeper architectures with identity shortcuts and
@@ -248,7 +250,7 @@ and semantically meaningful patterns.</p>
 <h3 data-number="3.2.1" id="layer-specific-details"><span class="header-section-number">3.2.1</span> Layer-specific Details</h3>
 <figure id="fig:Layer-specific Outputs">
 <img src="img/lecture22/layers.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Layer-specific Outputs</figcaption>
+<figcaption>Figure 22.4: Layer-specific Outputs</figcaption>
 </figure>
 <p>In the initial layers (e.g., Conv1), weights can be visualized as RGB
 images and are relatively interpretable, capturing basic structures such
@@ -270,7 +272,7 @@ the network’s internal representation and ultimately influence the final
 prediction.</p>
 <figure id="fig:Conv5 of AlexNet">
 <img src="img/lecture22/conv5.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
-<figcaption>Conv5 of AlexNet</figcaption>
+<figcaption>Figure 22.5: Conv5 of AlexNet</figcaption>
 </figure>
 <h2 data-number="3.3" id="maximally-activating-patches"><span class="header-section-number">3.3</span> Maximally Activating
 Patches</h2>
@@ -363,7 +365,7 @@ categories, making it easier to interpret the structure of the dataset
 and the behavior of the model.</p>
 <figure id="fig:Exaample usage of TSNE">
 <img src="img/lecture22/tsne%20ex.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>t-SNE visualization of MNIST</figcaption>
+<figcaption>Figure 22.6: t-SNE visualization of MNIST</figcaption>
 </figure>
 <h2 data-number="3.6" id="summary-of-visualizing-cnns"><span class="header-section-number">3.6</span> Summary of Visualizing
 CNNs</h2>
@@ -427,7 +429,7 @@ output probability. Similarly, saliency methods estimate how important
 each <em>pixel region</em> is to the CNN’s prediction.</p>
 <figure id="fig:Demonstartion">
 <img src="img/lecture22/wi.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Occlusion-based saliency heatmaps</figcaption>
+<figcaption>Figure 22.7: Occlusion-based saliency heatmaps</figcaption>
 </figure>
 <h2 data-number="4.2" id="saliency-via-gradients"><span class="header-section-number">4.2</span> Saliency via Gradients</h2>
 <p>Gradient-based saliency provides a more efficient alternative to
@@ -472,7 +474,7 @@ forward–backward pass, making the method practical even for
 high-dimensional images.</p>
 <figure id="Highly non-linear mapping function">
 <img src="img/lecture22/a.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Highly non-linear mapping function</figcaption>
+<figcaption>Figure 22.8: Highly non-linear mapping function</figcaption>
 </figure>
 <h3 data-number="4.2.3" id="computing-gradient-based-saliency-maps"><span class="header-section-number">4.2.3</span> Computing Gradient-Based
 Saliency Maps</h3>
@@ -488,7 +490,7 @@ class probabilities. For example, suppose the network outputs</p>
 This predicted class becomes the target for saliency analysis.</p>
 <figure id="fig:forward-pass">
 <img src="img/lecture22/forward.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Forward pass through the CNN</figcaption>
+<figcaption>Figure 22.9: Forward pass through the CNN</figcaption>
 </figure>
 <h4 data-number="4.2.3.2" id="step-2-backward-pass"><span class="header-section-number">4.2.3.2</span> Step 2: Backward Pass</h4>
 <p>Next, we compute the gradient of the selected class score with
@@ -546,8 +548,8 @@ as animals or foreground objects, while suppressing irrelevant
 background regions.</p>
 <figure>
 <img src="img/lecture22/Picture3.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Examples of weakly-supervised segmentation using saliency
-maps.</figcaption>
+<figcaption>Figure 22.10: Examples of weakly-supervised segmentation
+using saliency maps.</figcaption>
 </figure>
 <h2 data-number="4.4" id="uncovering-biases"><span class="header-section-number">4.4</span> Uncovering Biases</h2>
 <p>Saliency maps are not only useful for understanding <em>how</em> a
@@ -658,7 +660,7 @@ interpreting gradient-based saliency methods, since these methods rely
 directly on the gradients propagated through the network.</p>
 <figure id="fig:ReLU Activation Forward and Backward Pass Illustration">
 <img src="img/lecture22/Details.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>ReLU activation in the forward and backward
+<figcaption>Figure 22.12: ReLU activation in the forward and backward
 pass.</figcaption>
 </figure>
 <h3 data-number="5.3.1" id="relu-nonlinearities-and-backpropagation"><span class="header-section-number">5.3.1</span> ReLU Nonlinearities and
@@ -803,7 +805,8 @@ techniques (such as Grad-CAM) that explicitly incorporate class
 information when generating explanations.</p>
 <figure id="fig:Example of backdrop">
 <img src="img/lecture22/xdog.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Example of noisy gradient-based saliency maps.</figcaption>
+<figcaption>Figure 22.13: Example of noisy gradient-based saliency
+maps.</figcaption>
 </figure>
 <h2 data-number="5.7" id="summary-of-saliency-maps"><span class="header-section-number">5.7</span> Summary of Saliency Maps</h2>
 <p>Saliency methods can be broadly divided into two categories:
@@ -897,15 +900,15 @@ the class prediction.</p></li>
 </ol>
 <figure id="fig:gradcam_overview_l22">
 <img src="img/lecture22/activation.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Grad-CAM produces class-discriminative localization maps
-that highlight semantic regions responsible for the
+<figcaption>Figure 22.14: Grad-CAM produces class-discriminative
+localization maps that highlight semantic regions responsible for the
 prediction.</figcaption>
 </figure>
 <figure id="fig:gradcam_process_l22">
 <img src="img/lecture23/net15.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Grad-CAM computation pipeline: forward pass, gradient
-backpropagation, global-average pooling of gradients, and weighted
-combination of feature maps.</figcaption>
+<figcaption>Figure 22.15: Grad-CAM computation pipeline: forward pass,
+gradient backpropagation, global-average pooling of gradients, and
+weighted combination of feature maps.</figcaption>
 </figure>
 <p>Together, these steps allow Grad-CAM to connect internal feature
 representations to human-interpretable image regions. Compared to Guided

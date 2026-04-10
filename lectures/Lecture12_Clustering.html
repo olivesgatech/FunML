@@ -264,13 +264,13 @@ criteria introduced, we will now look at a few examples to enhance our
 concept. This is the sample data we will work within this example.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2011.12.16%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Data Points</figcaption>
+<figcaption>Figure 11.2: Data Points</figcaption>
 </figure>
 <p>Step 1 of the algorithm states we will randomly choose k points from
 all data points to be the initial centroids. So we predefined <span class="math inline">\(k=3\)</span>, and chose <span class="math inline">\(m_1\)</span>,<span class="math inline">\(m_2\)</span>, and <span class="math inline">\(m_3\)</span> as centroids.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2011.14.26%E2%80%AFAM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Initialized centroids</figcaption>
+<figcaption>Figure 11.3: Initialized centroids</figcaption>
 </figure>
 <p>Step 2 is the assignment step. We need to determine cluster
 membership for each sample using the Euclidean distance equation: <span class="math display">\[C_j^{(t)} = \left\{ x_i : \|x_i - m_j^{(t)}\|_2
@@ -283,7 +283,7 @@ centroid <span class="math inline">\(m_1\)</span> has coordinates (2.1,
 for each sample, the following result is obtained.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2011.31.47%E2%80%AFAM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Assignment of all samples using Euclidean
+<figcaption>Figure 11.4: Assignment of all samples using Euclidean
 distance</figcaption>
 </figure>
 <p>Step 3 is the update step, where we need to re-estimate centroids
@@ -292,8 +292,8 @@ distance</figcaption>
 calculated by <span class="math inline">\(m_1=(\frac{0.8+2.1+3.2+3.7+....+7.3}{9},\frac{4.1+3.9+4.3+....+3.1}{9})\)</span>.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2012.07.38%E2%80%AFPM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>centroids move the to the calculated mean of the
-clusters</figcaption>
+<figcaption>Figure 11.5: centroids move the to the calculated mean of
+the clusters</figcaption>
 </figure>
 <h2 data-number="4.2" id="second-iteration"><span class="header-section-number">4.2</span> Second Iteration</h2>
 <p>Now, we have to repeat steps 2 and 3 in the second iteration since we
@@ -304,14 +304,15 @@ using the equation <span class="math display">\[C_j^{(t)} = \left\{ x_i
 l \leq k \right\}.\]</span> we reached this plot:</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2012.10.20%E2%80%AFPM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Second iteration assignment cluster membership</figcaption>
+<figcaption>Figure 11.6: Second iteration assignment cluster
+membership</figcaption>
 </figure>
 <p>Based on the reassigned clusters, we need to update the centroids
 using the previously introduced equation for step 3:<span class="math inline">\(m_j = \frac{1}{|C_j|} \sum_{x_i \in C_j} x_i,
 \quad \forall j, 1 \leq j \leq 3\)</span></p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%2012.18.27%E2%80%AFPM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>second iteration update step: Re-estimate
+<figcaption>Figure 11.7: second iteration update step: Re-estimate
 centroids</figcaption>
 </figure>
 <h2 data-number="4.3" id="third-iteration"><span class="header-section-number">4.3</span> Third Iteration</h2>
@@ -325,9 +326,11 @@ centroids using the Euclidean distance equation.</p>
 re-estimate centroids:</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%201.41.59%E2%80%AFPM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Third iteration update step</figcaption>
+<figcaption>Figure 11.9: Figure 11.8: Third iteration update
+step</figcaption>
 </figure>
-<figcaption>Third iteration update step</figcaption>
+<figcaption>Figure 11.9: Figure 11.8: Third iteration update
+step</figcaption>
 </figure>
 <h2 data-number="4.4" id="fourth-iteration"><span class="header-section-number">4.4</span> Fourth Iteration</h2>
 <p>We will reassign every point. However, since there are no changes in
@@ -335,7 +338,7 @@ cluster membership, the algorithm converges as the convergence criteria
 are met.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%202.01.26%E2%80%AFPM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Converged Algorithm, and final cluster
+<figcaption>Figure 11.10: Converged Algorithm, and final cluster
 assignment</figcaption>
 </figure>
 <h1 data-number="5" id="initialization"><span class="header-section-number">5.</span> Initialization</h1>
@@ -381,8 +384,8 @@ which selects well-separated starting centroids to increase the
 likelihood of finding a better solution.</p>
 <figure id="fig:init-centroids">
 <img src="img/lecture11/Screenshot%202024-09-29%20at%202.23.47%E2%80%AFPM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Different methods of initializing centroids can change the
-outcome.</figcaption>
+<figcaption>Figure 11.12: Different methods of initializing centroids
+can change the outcome.</figcaption>
 </figure></li>
 </ol>
 <h2 data-number="5.1" id="choice-of-k"><span class="header-section-number">5.1</span> Choice of <span class="math inline">\(k\)</span></h2>
@@ -504,9 +507,9 @@ result.</p>
 <figure id="fig:kmeans-outlier">
 <p><img alt="image" src="img/lecture11/images/Dataset.jpg" style="width:19.20%; max-width:19.20%; height:auto;"/> <img alt="image" src="img/lecture11/images/Undesirable_clustering.jpg" style="width:19.20%; max-width:19.20%; height:auto;"/>
 <img alt="image" src="img/lecture11/images/Ideal_clustering.jpg" style="width:19.20%; max-width:19.20%; height:auto;"/></p>
-<figcaption>Sensitivity of k-means to outliers. Left: original dataset.
-Middle: undesirable clustering influenced by an outlier. Right:
-desirable clustering without the outlier.</figcaption>
+<figcaption>Figure 11.13: Sensitivity of k-means to outliers. Left:
+original dataset. Middle: undesirable clustering influenced by an
+outlier. Right: desirable clustering without the outlier.</figcaption>
 </figure>
 <p>For a more in-depth analysis of these issues, please refer to the
 theoretical discussion in <a class="footnote-ref" href="#fn1" id="fnref1" role="doc-noteref"><sup>1</sup></a>, particularly Section
@@ -677,9 +680,9 @@ panel highlights the small differences in assignments between the
 methods.</p>
 <figure id="fig:minibatch_compare">
 <img src="img/lecture11/images/Mini-batch-k-Means-diff.jpg"/>
-<figcaption>Comparison of clustering results from mini-batch k-means and
-standard k-means. The solutions are similar but not
-identical.</figcaption>
+<figcaption>Figure 11.15: Comparison of clustering results from
+mini-batch k-means and standard k-means. The solutions are similar but
+not identical.</figcaption>
 </figure>
 <p>In practice, mini-batch k-means is often preferred when datasets are
 large and training time is a critical constraint, whereas standard

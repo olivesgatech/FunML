@@ -273,7 +273,7 @@ model to continuously improve while using a minimal number of labeled
 samples.</p>
 <figure id="fig:active_learning_process">
 <img src="img/lecture25/process.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Active learning process workflow.</figcaption>
+<figcaption>Figure 25.1: Active learning process workflow.</figcaption>
 </figure>
 <p>Formally, several key elements define the active learning framework.
 The unlabeled data pool is denoted by <span class="math inline">\(\mathbf{X}_{\text{pool}}\)</span>, which contains
@@ -330,7 +330,7 @@ strong performance with fewer labeled samples, indicating more efficient
 use of annotation resources.</p>
 <figure id="fig:performance_curve">
 <img src="img/lecture25/perform.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Comparison of acquisition strategies by
+<figcaption>Figure 25.2: Comparison of acquisition strategies by
 performance</figcaption>
 </figure>
 <h2 data-number="4.2" id="annotator-metrics"><span class="header-section-number">4.2</span> Annotator Metrics</h2>
@@ -358,8 +358,8 @@ careful sample selection is essential in active learning: selecting the
 wrong samples wastes both time and money.</p>
 <figure id="fig:annotator_constraints">
 <img src="img/lecture25/performance.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Annotator effort metrics for different acquisition
-strategies</figcaption>
+<figcaption>Figure 25.3: Annotator effort metrics for different
+acquisition strategies</figcaption>
 </figure>
 <h2 data-number="4.3" id="optimizing-metrics"><span class="header-section-number">4.3</span> Optimizing Metrics</h2>
 <p>An effective active learning system must balance two competing
@@ -455,7 +455,7 @@ classes exhibit higher entropy and are therefore selected for
 labeling.</p>
 <figure id="fig:entropy_sampling">
 <img src="img/lecture25/entro_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Entropy Sampling Visualization</figcaption>
+<figcaption>Figure 25.4: Entropy Sampling Visualization</figcaption>
 </figure>
 <h3 data-number="5.2.2" id="least-confidence-sampling"><span class="header-section-number">5.2.2</span> Least Confidence
 Sampling</h3>
@@ -477,7 +477,7 @@ focuses annotation effort on areas where it is most uncertain.</p>
 of this concept.</p>
 <figure id="fig:least_sampling">
 <img src="img/lecture25/least_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Least Sampling Visualization</figcaption>
+<figcaption>Figure 25.5: Least Sampling Visualization</figcaption>
 </figure>
 <h3 data-number="5.2.3" id="margin-sampling"><span class="header-section-number">5.2.3</span> Margin Sampling</h3>
 <p>Margin sampling refines this idea further by considering the
@@ -500,7 +500,7 @@ it focuses on samples near class boundaries.</p>
 visually.</p>
 <figure id="fig:margin_sampling">
 <img src="img/lecture25/margin_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Margin Sampling Visualization</figcaption>
+<figcaption>Figure 25.6: Margin Sampling Visualization</figcaption>
 </figure>
 <h2 data-number="5.3" id="summary-of-strategies"><span class="header-section-number">5.3</span> Summary of Strategies</h2>
 <p>Although entropy sampling, least confidence sampling, and margin
@@ -613,8 +613,8 @@ optimal coverage problem and is widely used in practice because of its
 simplicity and effectiveness.</p>
 <figure id="fig:coreset_example">
 <img src="img/lecture25/Corset%20Example%20of%20a%20Dataset.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Core Set sampling illustration showing representative sample
-selection</figcaption>
+<figcaption>Figure 25.7: Core Set sampling illustration showing
+representative sample selection</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:coreset_example" data-reference-type="ref" href="#fig:coreset_example">7</a> illustrates this idea. The
 red points represent unlabeled samples in the dataset, while the blue
@@ -654,8 +654,8 @@ poorly trained or the dataset is highly imbalanced, the method may fail
 to identify truly informative samples.</p>
 <figure id="fig:discriminative_sampling">
 <img src="img/lecture25/Discriminative.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Discriminative sampling identifying underrepresented
-regions</figcaption>
+<figcaption>Figure 25.8: Discriminative sampling identifying
+underrepresented regions</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:discriminative_sampling" data-reference-type="ref" href="#fig:discriminative_sampling">8</a> shows how
 discriminative sampling identifies samples that differ from the labeled
@@ -730,8 +730,8 @@ and computational cost must often be considered in practical
 deployments.</p>
 <figure id="fig:fusion_active_learning">
 <img src="img/lecture25/Fusion-based.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Fusion-based Active Learning Process combining diversity and
-difficulty criteria</figcaption>
+<figcaption>Figure 25.9: Fusion-based Active Learning Process combining
+diversity and difficulty criteria</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:fusion_active_learning" data-reference-type="ref" href="#fig:fusion_active_learning">9</a> illustrates how
 fusion-based active learning integrates both diversity and difficulty
@@ -776,8 +776,8 @@ correctly may now be misclassified. This illustrates how performance
 regression can occur even when aggregate metrics improve.</p>
 <figure id="fig:regression_example">
 <img src="img/lecture25/Regression.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Example of performance regression in an autonomous driving
-scenario</figcaption>
+<figcaption>Figure 25.10: Example of performance regression in an
+autonomous driving scenario</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:regression_example" data-reference-type="ref" href="#fig:regression_example">10</a> highlights how model
 updates can simultaneously improve some predictions while degrading
@@ -808,7 +808,8 @@ introduced by new training data.</p>
 phenomenon.</p>
 <figure id="fig:negative_flips">
 <img src="img/lecture25/Negative%20Flips.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Regression manifested through negative flips</figcaption>
+<figcaption>Figure 25.11: Regression manifested through negative
+flips</figcaption>
 </figure>
 <p>In this figure, samples are grouped based on how their predictions
 change between two learning rounds. Samples shown in gray are classified
@@ -853,7 +854,8 @@ but become incorrect are counted as negative flips. The NFR is then
 computed as the proportion of such samples among the total dataset.</p>
 <figure id="fig:nfr_workflow">
 <img src="img/lecture25/Workflow.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Workflow for computing the Negative Flip Rate</figcaption>
+<figcaption>Figure 25.12: Workflow for computing the Negative Flip
+Rate</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:nfr_workflow" data-reference-type="ref" href="#fig:nfr_workflow">12</a> illustrates this comparison
 process. By explicitly tracking prediction changes between training
@@ -884,8 +886,8 @@ during early learning stages due to unstable decision boundaries, but
 eventually stabilizes as the model becomes more robust.</p>
 <figure id="fig:nfr_comparison">
 <img src="img/lecture25/NFR.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
-<figcaption>Negative Flip Rate comparison between CIFAR-10 and
-CIFAR-100</figcaption>
+<figcaption>Figure 25.13: Negative Flip Rate comparison between CIFAR-10
+and CIFAR-100</figcaption>
 </figure>
 <h2 data-number="8.7" id="conclusions-and-implications"><span class="header-section-number">8.7</span> Conclusions and
 Implications</h2>

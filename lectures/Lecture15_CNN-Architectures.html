@@ -135,7 +135,8 @@ Zisserman 2015; Szegedy et al. 2014; He et al. 2015; AlRegib and
 Prabhushankar 2024)</span>.</p>
 <figure id="fig:Evolution of CNNs">
 <img src="img/lecture15/HIstory%20of%20CNN.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Timeline of major CNN architecture milestones.</figcaption>
+<figcaption>Figure 14.1: Timeline of major CNN architecture
+milestones.</figcaption>
 </figure>
 <h1 data-number="3" id="architecture-diagram-legend"><span class="header-section-number">3.</span> Architecture Diagram Legend</h1>
 <p>Before examining individual CNN architectures, we first introduce the
@@ -143,8 +144,8 @@ notation and symbols that will be used consistently throughout the
 lecture diagrams.</p>
 <figure id="fig:Evolution of CNNs">
 <img src="img/lecture15/Legend.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Notation and symbols used in CNN architecture diagrams
-throughout this lecture.</figcaption>
+<figcaption>Figure 14.2: Notation and symbols used in CNN architecture
+diagrams throughout this lecture.</figcaption>
 </figure>
 <h3 class="unnumbered" id="layers">Layers</h3>
 <ul>
@@ -179,7 +180,7 @@ probabilities.</p></li>
 <h1 data-number="4" id="lenet"><span class="header-section-number">4.</span> LeNet</h1>
 <figure id="fig:lenet-architecture">
 <img src="img/lecture15/Lenet_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>LeNet-5 architecture, based on the original
+<figcaption>Figure 14.3: LeNet-5 architecture, based on the original
 paper.</figcaption>
 </figure>
 <h2 class="unnumbered" id="architecture-and-novelty">Architecture and
@@ -240,7 +241,7 @@ Prabhushankar 2024)</span>.</p>
 <h1 data-number="6" id="alexnet"><span class="header-section-number">6.</span> AlexNet</h1>
 <figure id="fig:AlexNet Architecure">
 <img src="img/lecture15/AlexNet1.jpg" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>AlexNet Architecture</figcaption>
+<figcaption>Figure 14.5: AlexNet Architecture</figcaption>
 </figure>
 <h2 data-number="6.1" id="novel-features"><span class="header-section-number">6.1</span> Novel Features</h2>
 <p>AlexNet marked a major breakthrough in deep learning and computer
@@ -262,7 +263,7 @@ and Hinton 2012)</span>.</p>
 <h2 data-number="6.2" id="detailed-architecture"><span class="header-section-number">6.2</span> Detailed Architecture</h2>
 <figure id="fig:alexnet-detailed">
 <img src="img/lecture15/AlexNet2.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>AlexNet Architecture</figcaption>
+<figcaption>Figure 14.6: AlexNet Architecture</figcaption>
 </figure>
 <p>AlexNet consists of five convolutional layers followed by three fully
 connected layers. The first layer, <strong>CONV1</strong>, extracts
@@ -300,8 +301,8 @@ time, the full network is used, producing predictions that approximate
 averaging over this large ensemble.</p>
 <figure id="fig:dropout-train-test">
 <img src="img/lecture15/AlexNet3_1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Training and testing performance with and without dropout
-(CIFAR-10).</figcaption>
+<figcaption>Figure 14.7: Training and testing performance with and
+without dropout (CIFAR-10).</figcaption>
 </figure>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 6.3 — Dropout Regularization</h3><p>Click any hidden neuron to toggle it on/off and simulate dropout. Track the effective dropout rate and see how the active sub-network changes.</p><iframe class="interactive-notebook-frame" data-default-height="720" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_Dropout_Interactive_interactive.html" style="height:720px;" title="Interactive Section 6.3 Dropout Regularization"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_Dropout_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>In AlexNet, dropout was applied primarily to the fully connected
@@ -335,7 +336,7 @@ during backpropagation.</p>
 <h3 data-number="6.4.3" id="sigmoid-function"><span class="header-section-number">6.4.3</span> Sigmoid Function</h3>
 <figure id="fig:Sigmoid">
 <img src="img/lecture15/AlexNet4_2.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Sigmoid</figcaption>
+<figcaption>Figure 14.10: Sigmoid</figcaption>
 </figure>
 <p><strong>The sigmoid function</strong> is a classical activation
 function widely used in neural networks, particularly in the
@@ -347,7 +348,7 @@ in deep networks.</p>
 <h3 data-number="6.4.4" id="tanh-function"><span class="header-section-number">6.4.4</span> Tanh Function</h3>
 <figure id="fig:Tanh">
 <img src="img/lecture15/AlexNet4_3.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Tanh</figcaption>
+<figcaption>Figure 14.11: Tanh</figcaption>
 </figure>
 <p><strong>The hyperbolic tangent function (tanh)</strong> is another
 commonly used activation function. Similar to sigmoid, it is smooth and
@@ -358,7 +359,7 @@ suffers from gradient saturation in deep networks.</p>
 <h3 data-number="6.4.5" id="relu-function"><span class="header-section-number">6.4.5</span> ReLU Function</h3>
 <figure id="fig:ReLU">
 <img src="img/lecture15/AlexNet4_4.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>ReLU</figcaption>
+<figcaption>Figure 14.12: ReLU</figcaption>
 </figure>
 <p><strong>The Rectified Linear Unit (ReLU)</strong> has become the
 <strong>default activation function</strong> for modern deep neural
@@ -433,7 +434,8 @@ top-5 classification error.</p>
 CNNs</h3>
 <figure id="fig:lrn-diagram">
 <img src="img/lecture15/AlexNet5.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Local Response Normalization in AlexNet</figcaption>
+<figcaption>Figure 14.13: Local Response Normalization in
+AlexNet</figcaption>
 </figure>
 <p>The figure illustrates how activations from neighboring feature maps
 are combined and normalized at each spatial location.</p>
@@ -445,7 +447,7 @@ Normalization</h3>
 responses of its neighboring channels.</p>
 <figure id="fig:lrn-example">
 <img src="img/lecture15/AlexNet6_1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Inter-channel LRN vs. intra-channel
+<figcaption>Figure 14.14: Inter-channel LRN vs. intra-channel
 normalization</figcaption>
 </figure>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 6.5.4 — Inter-Channel Normalization (LRN)</h3><p>Adjust LRN parameters k, α, β, and window n to see how channel activations are normalized. Observe how large activations are suppressed more than small ones.</p><iframe class="interactive-notebook-frame" data-default-height="740" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture14_InterChannelNorm_Interactive_interactive.html" style="height:740px;" title="Interactive Section 6.5.4 Inter-Channel LRN"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture14_InterChannelNorm_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
@@ -482,8 +484,9 @@ revolution <span class="citation" data-cites="NIPS2012_c399862d alregib2024neura
 and Hinton 2012; AlRegib and Prabhushankar 2024)</span>.</p>
 <figure id="fig:imagenet-error">
 <img src="img/lecture15/AlexNet7_1.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet classification error rates
-showing the dramatic improvement achieved by AlexNet.</figcaption>
+<figcaption>Figure 14.16: Yearly progress in ImageNet classification
+error rates showing the dramatic improvement achieved by
+AlexNet.</figcaption>
 </figure>
 <h3 data-number="6.6.2" id="key-innovations-behind-alexnet"><span class="header-section-number">6.6.2</span> Key Innovations Behind
 AlexNet</h3>
@@ -518,8 +521,8 @@ in computer vision and provided the data necessary to train deep neural
 networks effectively.</p>
 <figure id="fig:imagenet-dataset">
 <img src="img/lecture15/AlexNet7_2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Examples from the ImageNet dataset used in the ILSVRC
-challenge.</figcaption>
+<figcaption>Figure 14.17: Examples from the ImageNet dataset used in the
+ILSVRC challenge.</figcaption>
 </figure>
 <h2 data-number="6.7" id="alexnets-advantages-and-disadvantages"><span class="header-section-number">6.7</span> AlexNet’s Advantages and
 Disadvantages</h2>
@@ -584,7 +587,7 @@ modern computer vision models <span class="citation" data-cites="simonyan2015dee
 and Zisserman 2015)</span>.</p>
 <figure id="fig:VGG Architecture">
 <img src="img/lecture15/VGG1.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>VGG Architecture</figcaption>
+<figcaption>Figure 14.18: VGG Architecture</figcaption>
 </figure>
 <h2 data-number="7.1" id="key-ideas-and-novelty-of-vgg"><span class="header-section-number">7.1</span> Key Ideas and Novelty of
 VGG</h2>
@@ -610,8 +613,8 @@ and Zisserman 2015)</span>.</p>
 (VGG)</h2>
 <figure id="fig:VGG Error">
 <img src="img/lecture15/VGG2.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet top-5 classification error
-rates.</figcaption>
+<figcaption>Figure 14.19: Yearly progress in ImageNet top-5
+classification error rates.</figcaption>
 </figure>
 <p>VGG, introduced in 2014, achieved a significant reduction in top-5
 error to <strong>7.3%</strong>, improving upon the previous year’s 11.7%
@@ -688,8 +691,9 @@ modern CNN design.</p>
 <h3 data-number="7.3.5" id="visual-representation"><span class="header-section-number">7.3.5</span> Visual Representation</h3>
 <figure id="fig:vgg-architecture">
 <img src="img/lecture15/VGG3.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of CNN architectures showing the progression from
-AlexNet to VGG and deeper residual networks.</figcaption>
+<figcaption>Figure 14.20: Comparison of CNN architectures showing the
+progression from AlexNet to VGG and deeper residual
+networks.</figcaption>
 </figure>
 <h2 data-number="7.4" id="advantages-and-disadvantages-of-vgg"><span class="header-section-number">7.4</span> Advantages and Disadvantages of
 VGG</h2>
@@ -731,7 +735,8 @@ convolutions, Inception modules, and global average pooling <span class="citatio
 2014)</span>.</p>
 <figure id="fig:GoogleNet Architecture">
 <img src="img/lecture15/Garc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>GoogLeNet (Inception V1) architecture.</figcaption>
+<figcaption>Figure 14.21: GoogLeNet (Inception V1)
+architecture.</figcaption>
 </figure>
 <h2 data-number="8.1" id="key-innovations-of-googlenet"><span class="header-section-number">8.1</span> Key Innovations of
 GoogLeNet</h2>
@@ -764,7 +769,8 @@ problem and improving optimization in very deep networks <span class="citation" 
 <h2 data-number="8.2" id="inception-module"><span class="header-section-number">8.2</span> Inception Module</h2>
 <figure id="fig:Inception Module Struc">
 <img src="img/lecture15/Inceptionarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Structure of an Inception Module in GoogLeNet.</figcaption>
+<figcaption>Figure 14.22: Structure of an Inception Module in
+GoogLeNet.</figcaption>
 </figure>
 <p>The <strong>Inception module</strong> is the fundamental building
 block of GoogLeNet. The full network is constructed by stacking multiple
@@ -871,7 +877,7 @@ very deep architectures <span class="citation" data-cites="he2015deepresiduallea
 2015)</span>.</p>
 <figure id="fig:ResNet Architecture">
 <img src="img/lecture15/ResNetarc.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>ResNet Architecture</figcaption>
+<figcaption>Figure 14.24: ResNet Architecture</figcaption>
 </figure>
 <p>Within a residual block, the input <span class="math inline">\(x\)</span> is passed through a sequence of weight
 layers to produce a transformation <span class="math inline">\(F(x)\)</span>. Instead of learning a direct
@@ -912,8 +918,9 @@ unprecedented accuracy when the optimization challenges of depth are
 properly addressed.</p>
 <figure id="fig:ResNet Error">
 <img src="img/lecture15/ResNetError.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Yearly progress in ImageNet top-5 classification error
-rates, highlighting the impact of ResNet.</figcaption>
+<figcaption>Figure 14.26: Yearly progress in ImageNet top-5
+classification error rates, highlighting the impact of
+ResNet.</figcaption>
 </figure>
 <p>The figure illustrates the rapid reduction in classification error
 across successive CNN architectures. Starting from early shallow
@@ -929,8 +936,8 @@ demonstrated stable training with over <strong>150 layers</strong> <span class="
 hierarchical feature representations.</p>
 <figure id="fig:ResNet Depth">
 <img src="img/lecture15/ResNetDepth.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>ResNet enabled dramatically deeper CNNs while reducing
-classification error.</figcaption>
+<figcaption>Figure 14.27: ResNet enabled dramatically deeper CNNs while
+reducing classification error.</figcaption>
 </figure>
 <p>Together, these results highlight a turning point in deep learning:
 depth alone was not the limiting factor—rather, the key challenge was
@@ -968,9 +975,10 @@ spatial resolution, they typically use a stride of 2 to perform
 downsampling.</p>
 <figure id="fig:ResNet Comparison">
 <img src="img/lecture15/ResNetCompare.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Example network architectures for ImageNet. Left: VGG-19.
-Middle: a plain 34-layer network. Right: a 34-layer residual network.
-Dotted shortcuts indicate dimension-matching connections.</figcaption>
+<figcaption>Figure 14.28: Example network architectures for ImageNet.
+Left: VGG-19. Middle: a plain 34-layer network. Right: a 34-layer
+residual network. Dotted shortcuts indicate dimension-matching
+connections.</figcaption>
 </figure>
 <h2 data-number="9.4" id="advantages-and-disadvantages-of-resnet"><span class="header-section-number">9.4</span> Advantages and Disadvantages of
 ResNet</h2>
