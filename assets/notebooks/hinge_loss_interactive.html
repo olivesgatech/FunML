@@ -135,11 +135,10 @@
       });
 
       Plotly.newPlot('plot', traces, {
-        margin:{l:60,r:20,t:50,b:55},
-        title,
+        margin:{l:60,r:20,t:32,b:55},
         xaxis:{title:'θᵀx'},
         yaxis:{title:yaxis},
-        legend:{orientation:'h', y:1.12, font:{size:11}}
+        legend:{orientation:'h', y:-0.18, x:0.5, xanchor:'center', font:{size:11}}
       }, {displayModeBar:false, responsive:true});
     }
 

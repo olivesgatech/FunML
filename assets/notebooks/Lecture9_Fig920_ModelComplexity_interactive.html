@@ -94,11 +94,10 @@ function render(){
     {x:xg,y:xg.map(v=>polyval(midFit,v)),mode:'lines',name:`degree ${mid}`,line:{color:'#059669',width:3}},
     {x:xg,y:xg.map(v=>polyval(highFit,v)),mode:'lines',name:`degree ${high}`,line:{color:'#dc2626',width:3}}
   ], {
-    title:'All model complexities in one figure',
-    margin:{t:44,l:52,r:18,b:48},
+    margin:{t:30,l:52,r:18,b:90},
     xaxis:{title:'x'},
     yaxis:{title:'y'},
-    legend:{orientation:'h',yanchor:'bottom',y:1.02,xanchor:'left',x:0}
+    legend:{orientation:'h',y:-0.18,x:0.5,xanchor:'center'}
   }, {displayModeBar:false,responsive:true});
   document.getElementById('status').textContent=`Degree 1 is the low-complexity baseline; degree ${mid} is the moderate model; degree ${high} is the high-complexity model.\nUse Figure 9.21 for the error-vs-complexity summary.`;
 }

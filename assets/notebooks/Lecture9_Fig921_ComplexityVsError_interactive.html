@@ -120,11 +120,10 @@ function render(){
     {x,y:out.variance,mode:'lines+markers',name:'variance',line:{color:'#d97706',width:3}},
     {x,y:out.bias2.map((v,i)=>v+out.variance[i]),mode:'lines+markers',name:'bias² + variance',line:{color:'#7c3aed',width:3,dash:'dot'}}
   ], {
-    title:'Complexity vs error in one figure',
-    margin:{t:48,l:52,r:16,b:48},
+    margin:{t:30,l:52,r:16,b:90},
     xaxis:{title:'model degree'},
     yaxis:{title:'error / contribution'},
-    legend:{orientation:'h',yanchor:'bottom',y:1.02,xanchor:'left',x:0}
+    legend:{orientation:'h',y:-0.18,x:0.5,xanchor:'center'}
   }, {displayModeBar:false,responsive:true});
   const best=out.testErr.indexOf(Math.min(...out.testErr))+1;
   document.getElementById('status').textContent=`Best test error occurs near degree ${best} for this setting.\nThe combined plot shows how training error falls while variance rises as complexity increases.`;

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Figure 8.2 Polynomial Fit</title>
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <script src="plotly-2.35.2.min.js"></script>
   <style>
     :root { color-scheme: light; }
     body { margin: 0; font-family: Arial, sans-serif; background: #f3f4f6; color: #0f172a; }
@@ -134,20 +134,19 @@
           xaxis: 'x2', yaxis: 'y2'
         }
       ], {
-        title: `Quadratic data and polynomial regression (degree=${d})`,
         grid: { rows: 1, columns: 2, pattern: 'independent' },
         xaxis: { title: 'x', range: [-2.5, 2.5], autorange: false },
         yaxis: { title: 'y', range: [-4.5, 3.5], autorange: false },
         xaxis2: { title: 'x', range: [-2.5, 2.5], autorange: false },
         yaxis2: { title: 'y', range: [-4.5, 3.5], autorange: false },
         annotations: [
-          { text: 'Nonlinear data generated via quadratic equation', x: 0.19, y: 1.04, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 14 } },
-          { text: 'Polynomial regression model prediction fitted to data', x: 0.81, y: 1.04, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 14 } }
+          { text: 'Nonlinear data — quadratic', x: 0.19, y: 1.04, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13 } },
+          { text: 'Polynomial regression fit', x: 0.81, y: 1.04, xref: 'paper', yref: 'paper', showarrow: false, font: { size: 13 } }
         ],
-        margin: { l: 70, r: 20, t: 80, b: 60 },
+        margin: { l: 70, r: 20, t: 50, b: 90 },
         paper_bgcolor: '#e5e7eb',
         plot_bgcolor: '#e5e7eb',
-        legend: { orientation: 'h', y: 1.16 }
+        legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center' }
       }, { displayModeBar: false, responsive: true });
     }
 

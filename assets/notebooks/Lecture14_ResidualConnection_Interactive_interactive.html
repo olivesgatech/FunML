@@ -150,7 +150,7 @@ function update() {
     xaxis: {title: 'Layer (from output → input)', autorange: 'reversed'},
     yaxis: {title: 'Gradient magnitude', type: 'log'},
     height: 300,
-    legend: {x: 0.01, y: 0.99}
+    legend: {x: 0.98, y: 0.99, xanchor: 'right'}
   }, CFG);
 
   Plotly.react('pRel', tracesRel, {
@@ -160,7 +160,7 @@ function update() {
     height: 300,
     shapes: [{type: 'line', x0: 0, x1: depth, y0: 0.01, y1: 0.01,
       line: {color: '#dc2626', width: 1, dash: 'dash'}}],
-    legend: {x: 0.01, y: 0.99}
+    legend: {x: 0.98, y: 0.99, xanchor: 'right'}
   }, CFG);
 
   // Block diagram canvas

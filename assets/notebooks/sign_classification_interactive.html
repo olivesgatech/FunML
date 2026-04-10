@@ -255,13 +255,12 @@
       ];
 
       const signLayout = {
-        title: { text: "sign(x) Function", font: { size: 18 } },
-        margin: { l: 60, r: 20, t: 48, b: 48 },
+        margin: { l: 60, r: 20, t: 30, b: 48 },
         paper_bgcolor: "#ffffff",
         plot_bgcolor: "#ffffff",
         xaxis: { title: "x", range: [-10, 10], gridcolor: "#e2e8f0", zerolinecolor: "#64748b" },
         yaxis: { title: "sign(x)", range: [-1.2, 1.2], gridcolor: "#e2e8f0", zerolinecolor: "#64748b", tickvals: [-1, 0, 1] },
-        legend: { x: 0.03, y: 0.97, bgcolor: "rgba(255,255,255,0.9)" }
+        legend: { x: 0.98, y: 0.99, xanchor: "right", bgcolor: "rgba(255,255,255,0.9)" }
       };
 
       const classificationData = [
@@ -300,13 +299,12 @@
       ];
 
       const classificationLayout = {
-        title: { text: "Sign Function for Classification", font: { size: 18 } },
-        margin: { l: 60, r: 20, t: 48, b: 48 },
+        margin: { l: 60, r: 20, t: 30, b: 48 },
         paper_bgcolor: "#ffffff",
         plot_bgcolor: "#ffffff",
         xaxis: { title: "x", range: [-6.5, 6.5], gridcolor: "#e2e8f0", zerolinecolor: "#64748b" },
         yaxis: { title: "Sign(x)", range: [-1.2, 1.2], gridcolor: "#e2e8f0", zerolinecolor: "#64748b", tickvals: [-1, 0, 1] },
-        legend: { x: 0.03, y: 0.97, bgcolor: "rgba(255,255,255,0.9)" }
+        legend: { x: 0.98, y: 0.99, xanchor: "right", bgcolor: "rgba(255,255,255,0.9)" }
       };
 
       if (!signInitialized) {

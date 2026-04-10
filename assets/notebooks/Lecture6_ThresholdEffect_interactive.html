@@ -104,12 +104,11 @@
         {x: ths, y: prs, name: 'Precision', mode: 'lines', line: {color: '#2563eb', dash: 'dash', width: 3}},
         {x: ths, y: rcs, name: 'Recall', mode: 'lines', line: {color: '#16a34a', width: 3}}
       ], {
-        title: 'Precision and Recall as Functions of the Decision Threshold',
         xaxis: {title: 'Threshold', range: [-700000, 700000], dtick: 200000},
         yaxis: {title: 'Metric value', range: [0, 1], dtick: 0.2},
         shapes: [{type:'line', x0:tNow, x1:tNow, y0:0, y1:1, line:{color:'#111827', width:2, dash:'dot'}}],
-        margin: {l:70, r:20, t:60, b:65},
-        legend: {x: 0.03, y: 0.98}
+        margin: {l:70, r:20, t:30, b:65},
+        legend: {x: 1.01, y: 1, xanchor: 'left'}
       }, {displayModeBar:false, responsive:true});
 
       const mNow = metricsAtThreshold(tNow);
