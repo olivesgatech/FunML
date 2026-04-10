@@ -18,6 +18,21 @@ EXCLUDED_TEX_FILENAMES = {"lect1213_extra.tex"}
 EXCLUDED_TEX_PATH_PARTIALS = {"lect1213_extra", "funml_l12_l13_ext"}
 INCLUDEGRAPHICS_WIDTH_SCALE = 0.60
 
+# A few late-semester note titles map to slide decks with different lecture
+# numbers than the notes themselves.
+MEDIA_KEY_TITLE_OVERRIDES = {
+  "self-supervised learning": "Lecture26",
+  "anomaly detection": "Lecture24",
+  "uncertainty quantification in neural networks": "Lecture27",
+  "data and label efficient learning - active learning": "Lecture25",
+}
+
+# Transformers slides are not currently published in this repo.
+SLIDES_DISABLED_TITLE_OVERRIDES = {
+  "machine learning - transformers",
+  "machine learning: transformers",
+}
+
 CSS = """
 html, body {
   margin: 0;
@@ -645,6 +660,13 @@ def lecture_tex_filename(out_html_name: str):
   return f"{Path(out_html_name).stem}.tex"
 
 
+def normalize_lookup_text(value: str):
+  normalized = (value or "").strip().lower()
+  normalized = normalized.replace("–", "-").replace("—", "-")
+  normalized = re.sub(r"\s+", " ", normalized)
+  return normalized
+
+
 def lecture_number_from_dir(lec_dir: Path):
   name = lec_dir.name
   for pattern in (r"funml[_-]?l\s*(\d+)", r"lecture\s*(\d+)"):
@@ -652,6 +674,18 @@ def lecture_number_from_dir(lec_dir: Path):
     if m:
       return m.group(1)
   return ""
+
+
+def resolve_media_key(title: str, lecture_number: str, display_idx: int):
+  title_key = normalize_lookup_text(title)
+  override = MEDIA_KEY_TITLE_OVERRIDES.get(title_key)
+  if override:
+    return override
+  return f"Lecture{lecture_number}" if lecture_number else f"Lecture{display_idx}"
+
+
+def slides_disabled_for_title(title: str):
+  return normalize_lookup_text(title) in SLIDES_DISABLED_TITLE_OVERRIDES
 
 
 def lecture_dir_sort_key(lec_dir: Path):
@@ -1406,6 +1440,8 @@ def sync_portal_index(index_path: Path, lecture_pages):
     if media_key.lower() == "lecture0":
       a["data-disable-slides"] = "true"
       a["data-hide-viewer-actions"] = "true"
+    elif slides_disabled_for_title(title):
+      a["data-disable-slides"] = "true"
     a["href"] = "#"
     a["role"] = "listitem"
 
@@ -1664,7 +1700,7 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
       title = extract_title(tex) or title
       lecture_slug = slugify_lecture_title(title)
       out_html = f"Lecture{display_idx}_{lecture_slug}.html"
-    media_key = f"Lecture{lecture_number}" if lecture_number else f"Lecture{display_idx}"
+    media_key = resolve_media_key(title, lecture_number, display_idx)
     lecture_key = Path(out_html).stem
     lecture_label = f"Lecture{display_idx}"
     source_tex_name = lecture_tex_filename(out_html)
