@@ -257,7 +257,8 @@ const silScores1=silhouetteScores(M1);
 const silScores2=silhouetteScores(M2);
 
 // ── Plotting ─────────────────────────────────────────────────────────────────
-const JITTER=0.12; // offset on y so labels don't overlap
+// Alternate label positions so tightly-packed points (S1 x=0, S2 x=1) don't overlap
+const TEXT_POS=['top center','bottom center','top center','bottom center','top center'];
 
 function scatterTrace(labels,title,showCentroids){
   const unique=[...new Set(labels)].sort();
@@ -268,7 +269,9 @@ function scatterTrace(labels,title,showCentroids){
       x:idx.map(i=>X[i][0]), y:idx.map(i=>X[i][1]),
       mode:'markers+text', type:'scatter',
       marker:{color:COLORS[c],size:18,line:{color:'#fff',width:2}},
-      text:idx.map(i=>NAMES[i]), textposition:'top center', textfont:{size:13},
+      text:idx.map(i=>NAMES[i]),
+      textposition:idx.map(i=>TEXT_POS[i]),
+      textfont:{size:13},
       name:CLUSTER_NAMES[c], legendgroup:String(c),
     });
     if(showCentroids){
@@ -285,11 +288,11 @@ function scatterTrace(labels,title,showCentroids){
 }
 
 const layoutBase={
-  margin:{l:44,r:12,t:44,b:44},
+  margin:{l:44,r:12,t:44,b:60},
   xaxis:{title:'Feature 1',range:[-0.8,7.2],gridcolor:'#e2e8f0'},
-  yaxis:{title:'Feature 2',range:[0.6,1.8],gridcolor:'#e2e8f0'},
+  yaxis:{title:'Feature 2',range:[0.5,2.0],gridcolor:'#e2e8f0'},
   plot_bgcolor:'#fff', paper_bgcolor:'#fff',
-  legend:{orientation:'h',y:-0.18,x:0,font:{size:12}},
+  legend:{orientation:'h',y:-0.22,x:0,font:{size:12}},
 };
 
 function drawGT(){
@@ -320,18 +323,17 @@ function drawSilhouette(method){
       name:'Silhouette score',
     },
     {
-      type:'scatter', x:[-0.5,'S5+extra'], y:[meanVal,meanVal],
+      type:'scatter', x:[NAMES[0],NAMES[NAMES.length-1]], y:[meanVal,meanVal],
       mode:'lines', line:{color:'#0f172a',dash:'dash',width:2},
-      name:`Mean = ${meanVal.toFixed(4)}`, showlegend:true,
-      x:[NAMES[0],NAMES[NAMES.length-1]], hoverinfo:'skip',
+      name:`Mean = ${meanVal.toFixed(4)}`, showlegend:true, hoverinfo:'skip',
     }
   ],{
     title:{text:`Per-Sample Silhouette Scores (Method ${method})`,font:{size:15}},
-    margin:{l:52,r:12,t:44,b:44},
+    margin:{l:52,r:12,t:44,b:60},
     xaxis:{title:'Sample',gridcolor:'#e2e8f0'},
-    yaxis:{title:'Silhouette Score',range:[-1,1],gridcolor:'#e2e8f0',zeroline:true,zerolinecolor:'#94a3b8'},
+    yaxis:{title:'Silhouette Score',range:[-1.1,1.1],gridcolor:'#e2e8f0',zeroline:true,zerolinecolor:'#94a3b8'},
     plot_bgcolor:'#fff', paper_bgcolor:'#fff',
-    legend:{orientation:'h',y:-0.2,x:0,font:{size:12}},
+    legend:{orientation:'h',y:-0.22,x:0,font:{size:12}},
   },{responsive:true,displayModeBar:false});
 }
 
