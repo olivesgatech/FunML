@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lecture 8 Q4: L1-Regularized MSE Contours</title>
+  <style>
+    :root{--bg:#f8fafc;--ink:#0f172a;--muted:#475569;--line:#cbd5e1}
+    html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:"Segoe UI",Arial,sans-serif}
+    body{padding:14px}.wrap{max-width:960px;margin:0 auto}
+    h1{margin:0 0 6px;font-size:22px}
+    p.sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    .control{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);max-width:440px}
+    .control label{min-width:60px;font-weight:600}
+    .control input[type=range]{flex:1}
+    .value{min-width:40px;text-align:right;font-weight:700;color:#2563eb}
+    .panels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px}
+    .panel{text-align:center}
+    .panel canvas{border:1px solid var(--line);border-radius:8px;display:block;margin:0 auto}
+    .panel h3{margin:6px 0 4px;font-size:13px;color:var(--ink)}
+    .panel p{margin:0;font-size:12px;color:var(--muted)}
+    .note{margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#166534}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Q4: L1-Regularized MSE Loss Contours</h1>
+  <p class="sub">Drag λ to see how adding an L1 penalty deforms the elliptical MSE contours.</p>
+
+  <div class="control">
+    <label>λ</label>
+    <input id="lam" type="range" min="0" max="2" step="0.05" value="0" />
+    <span class="value" id="lamv">0.00</span>
+  </div>
+
+  <div class="panels">
+    <div class="panel">
+      <canvas id="c1" width="270" height="240"></canvas>
+      <h3>MSE Loss</h3>
+      <p>Smooth elliptical contours</p>
+    </div>
+    <div class="panel">
+      <canvas id="c2" width="270" height="240"></canvas>
+      <h3>L1 Norm ‖θ‖₁</h3>
+      <p>Diamond-shaped contours</p>
+    </div>
+    <div class="panel">
+      <canvas id="c3" width="270" height="240"></canvas>
+      <h3 id="title3">MSE + λ·‖θ‖₁ (λ=0.00)</h3>
+      <p id="desc3">Pure MSE — elliptical</p>
+    </div>
+  </div>
+
+  <div class="note" id="note">
+    <strong>Key insight:</strong> As λ increases, the MSE contours acquire axis-aligned <em>kinks (corners)</em>
+    inherited from the L1 diamond — this is the correct option A. The corners encourage solutions where
+    one parameter is exactly zero (sparsity).
+  </div>
+</div>
+
+<script>
+const W = 270, H = 240;
+// coordinate system: θ1 in [-2,4], θ2 in [-2,3]
+const th1_min=-2, th1_max=4, th2_min=-2, th2_max=3;
+const cx_min=1.5, cx_max=0.5; // MSE minimizer
+
+function toCanvas(th1, th2) {
+  return [
+    (th1-th1_min)/(th1_max-th1_min)*W,
+    H - (th2-th2_min)/(th2_max-th2_min)*H
+  ];
+}
+
+// Sample grid
+const GRID = 180;
+const T1 = [], T2 = [];
+for (let i=0;i<GRID;i++) T1.push(th1_min + i/(GRID-1)*(th1_max-th1_min));
+for (let j=0;j<GRID;j++) T2.push(th2_min + j/(GRID-1)*(th2_max-th2_min));
+
+// A = [[3,1],[1,1.2]] (symmetric positive definite)
+function mseLoss(t1,t2){
+  const d1=t1-cx_min, d2=t2-cx_max;
+  return 3*d1*d1 + 2*d1*d2 + 1.2*d2*d2;
+}
+function l1Norm(t1,t2){ return Math.abs(t1)+Math.abs(t2); }
+
+// Precompute grids
+let Z_mse=[], Z_l1=[], Z_max_mse=0, Z_max_l1=0;
+for (let j=0;j<GRID;j++){
+  Z_mse.push([]); Z_l1.push([]);
+  for (let i=0;i<GRID;i++){
+    const m=mseLoss(T1[i],T2[j]), l=l1Norm(T1[i],T2[j]);
+    Z_mse[j].push(m); Z_l1[j].push(l);
+    if(m>Z_max_mse) Z_max_mse=m;
+    if(l>Z_max_l1)  Z_max_l1=l;
+  }
+}
+
+// Normalise
+for (let j=0;j<GRID;j++) for (let i=0;i<GRID;i++){
+  Z_mse[j][i]/=Z_max_mse; Z_l1[j][i]/=Z_max_l1;
+}
+
+// Map value (0-1) to colour gradient
+function valToHSL(v, h, s){
+  const l = 95 - v*60;
+  return `hsl(${h},${s}%,${l}%)`;
+}
+
+function drawHeatmap(canvas, Zfn, lam, h, s){
+  const ctx=canvas.getContext('2d');
+  const img=ctx.createImageData(W,H);
+  for(let py=0;py<H;py++) for(let px=0;px<W;px++){
+    const th1=th1_min+px/W*(th1_max-th1_min);
+    const th2=th2_max-py/H*(th2_max-th2_min);
+    const v=Math.min(1,Zfn(th1,th2,lam));
+    // convert hsl to rgb inline
+    const hh=h/360, ss=s/100, ll=(95-v*60)/100;
+    const [r,g,b]=hslToRgb(hh,ss,ll);
+    const idx=4*(py*W+px);
+    img.data[idx]=r; img.data[idx+1]=g; img.data[idx+2]=b; img.data[idx+3]=255;
+  }
+  ctx.putImageData(img,0,0);
+
+  // Axes
+  ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=1;
+  const [ax0,ay0]=toCanvas(0,th2_min), [ax1,ay1]=toCanvas(0,th2_max);
+  ctx.beginPath(); ctx.moveTo(ax0,ay0); ctx.lineTo(ax1,ay1); ctx.stroke();
+  const [bx0,by0]=toCanvas(th1_min,0), [bx1,by1]=toCanvas(th1_max,0);
+  ctx.beginPath(); ctx.moveTo(bx0,by0); ctx.lineTo(bx1,by1); ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='#475569'; ctx.font='11px sans-serif';
+  ctx.fillText('θ₁',W-18,H/2-4); ctx.fillText('θ₂',W/2+4,12);
+}
+
+function hslToRgb(h,s,l){
+  let r,g,b;
+  if(s===0){r=g=b=l;}else{
+    const q=l<0.5?l*(1+s):l+s-l*s, p=2*l-q;
+    r=hue2rgb(p,q,h+1/3); g=hue2rgb(p,q,h); b=hue2rgb(p,q,h-1/3);
+  }
+  return [Math.round(r*255),Math.round(g*255),Math.round(b*255)];
+}
+function hue2rgb(p,q,t){
+  if(t<0)t+=1; if(t>1)t-=1;
+  if(t<1/6)return p+(q-p)*6*t;
+  if(t<1/2)return q;
+  if(t<2/3)return p+(q-p)*(2/3-t)*6;
+  return p;
+}
+
+// Fn closures
+function fnMSE(t1,t2){ return mseLoss(t1,t2)/Z_max_mse; }
+function fnL1(t1,t2){  return l1Norm(t1,t2)/Z_max_l1; }
+function fnReg(lam){ return (t1,t2)=>Math.min(1, fnMSE(t1,t2)+lam*fnL1(t1,t2)); }
+
+function render(lam){
+  drawHeatmap(document.getElementById('c1'), fnMSE, 0, 210, 80);
+  drawHeatmap(document.getElementById('c2'), fnL1,  0, 30,  85);
+  const rfn=fnReg(lam);
+  drawHeatmap(document.getElementById('c3'), rfn, lam, 145, 75);
+  document.getElementById('title3').textContent=`MSE + λ·‖θ‖₁ (λ=${lam.toFixed(2)})`;
+  let desc='Pure MSE — elliptical';
+  if(lam>0.1 && lam<1.0) desc='Axis-aligned kinks appear ← Answer A';
+  else if(lam>=1.0) desc='Strongly L1-distorted shape';
+  document.getElementById('desc3').textContent=desc;
+}
+
+const slider=document.getElementById('lam');
+const lamv=document.getElementById('lamv');
+slider.addEventListener('input',()=>{
+  const v=parseFloat(slider.value);
+  lamv.textContent=v.toFixed(2);
+  render(v);
+});
+render(0);
+</script>
+</body>
+</html>
