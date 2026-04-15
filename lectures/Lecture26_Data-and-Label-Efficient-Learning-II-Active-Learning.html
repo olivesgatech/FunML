@@ -514,10 +514,7 @@ benefit from additional supervision <span class="citation" data-cites="2"></span
 Samples with spread-out probability distributions across multiple
 classes exhibit higher entropy and are therefore selected for
 labeling.</p>
-<figure id="fig:entropy_sampling">
-<img src="img/lecture25/entro_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Entropy Sampling Visualization</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.2 — Active Learning Sampling Strategies</h3><p>Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture26_ActiveLearning_Interactive_interactive.html" style="height:860px;" title="Interactive Section 6.2 Active Learning Sampling"></iframe></section>
 <h3 data-number="6.2.2" id="least-confidence-sampling"><span class="header-section-number">6.2.2</span> Least Confidence
 Sampling</h3>
 <p>Least confidence sampling is a simpler uncertainty measure that
@@ -536,10 +533,7 @@ with probability 0.95. By selecting low-confidence samples, the model
 focuses annotation effort on areas where it is most uncertain <span class="citation" data-cites="2"></span>.</p>
 <p>Figure <a data-reference="fig:least_sampling" data-reference-type="ref" href="#fig:least_sampling">5</a> provides a visual illustration
 of this concept.</p>
-<figure id="fig:least_sampling">
-<img src="img/lecture25/least_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Least Sampling Visualization</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.2 — Active Learning Sampling Strategies</h3><p>Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture26_ActiveLearning_Interactive_interactive.html" style="height:860px;" title="Interactive Section 6.2 Active Learning Sampling"></iframe></section>
 <h3 data-number="6.2.3" id="margin-sampling"><span class="header-section-number">6.2.3</span> Margin Sampling</h3>
 <p>Margin sampling refines this idea further by considering the
 difference between the two most probable classes. Instead of looking
@@ -559,10 +553,7 @@ strategy is particularly useful for refining decision boundaries because
 it focuses on samples near class boundaries <span class="citation" data-cites="2"></span>.</p>
 <p>Figure <a data-reference="fig:margin_sampling" data-reference-type="ref" href="#fig:margin_sampling">6</a> illustrates this idea
 visually.</p>
-<figure id="fig:margin_sampling">
-<img src="img/lecture25/margin_sampling.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Margin Sampling Visualization</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 6.2 — Active Learning Sampling Strategies</h3><p>Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture26_ActiveLearning_Interactive_interactive.html" style="height:860px;" title="Interactive Section 6.2 Active Learning Sampling"></iframe></section>
 <h2 data-number="6.3" id="summary-of-strategies"><span class="header-section-number">6.3</span> Summary of Strategies</h2>
 <p>Although entropy sampling, least confidence sampling, and margin
 sampling all aim to identify uncertain samples, they differ in how much

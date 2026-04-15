@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Active Learning Sampling — Lecture 26</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:12px;}
+  @media(max-width:750px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.8rem;font-weight:600;color:var(--muted);min-width:120px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:32px;text-align:right;}
+  .strat-btns{display:flex;flex-direction:column;gap:6px;margin:8px 0;}
+  .strat-btn{padding:8px 12px;border-radius:7px;border:2px solid;cursor:pointer;
+             font-size:.83rem;font-weight:700;text-align:left;transition:all .15s;
+             display:flex;align-items:center;gap:8px;}
+  .strat-btn.active{color:#fff;}
+  .s-entropy{border-color:#2563eb;color:#2563eb;}.s-entropy.active{background:#2563eb;}
+  .s-margin{border-color:#dc2626;color:#dc2626;}.s-margin.active{background:#dc2626;}
+  .s-lc{border-color:#059669;color:#059669;}.s-lc.active{background:#059669;}
+  .s-random{border-color:#94a3b8;color:#64748b;}.s-random.active{background:#64748b;color:#fff;}
+  .btn-primary{padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:7px;
+               font-size:.875rem;font-weight:700;cursor:pointer;width:100%;margin-top:8px;transition:all .15s;}
+  .btn-primary:hover{background:#1d4ed8;}
+  .btn-secondary{padding:6px 12px;background:#fff;color:var(--muted);border:1.5px solid var(--border);
+                 border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;width:100%;margin-top:6px;}
+  #chart-main{width:100%;height:380px;}
+  #chart-scores{width:100%;height:240px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.845rem;line-height:1.65;margin-top:10px;}
+  .badge{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.77rem;font-weight:700;margin:1px;}
+  .badge-labeled{background:#dbeafe;color:#1d4ed8;}
+  .badge-queried{background:#fef3c7;color:#92400e;}
+  .badge-unlabeled{background:#f1f5f9;color:#64748b;}
+  .stat-row{display:flex;gap:10px;margin-top:8px;}
+  .stat-card{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:7px;
+              padding:8px;text-align:center;}
+  .stat-card .lbl{font-size:.72rem;color:var(--muted);font-weight:600;text-transform:uppercase;}
+  .stat-card .num{font-size:1.2rem;font-weight:800;margin-top:3px;}
+  .iter-log{max-height:100px;overflow-y:auto;font-size:.78rem;font-family:monospace;
+            background:#f8fafc;border:1px solid var(--border);border-radius:6px;
+            padding:6px;margin-top:8px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<h2>Section 6.2 — Active Learning: Uncertainty Sampling Strategies</h2>
+<p class="subtitle">Compare entropy, margin, and least-confidence sampling on a synthetic 2-class dataset. Select a strategy and query the most uncertain points.</p>
+
+<div class="layout">
+  <!-- Controls -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3>Sampling Strategy</h3>
+      <div class="strat-btns" id="strat-btns">
+        <button class="strat-btn s-entropy active" onclick="setStrategy('entropy')">
+          <span>📊</span> Entropy Sampling
+        </button>
+        <button class="strat-btn s-margin" onclick="setStrategy('margin')">
+          <span>📏</span> Margin Sampling
+        </button>
+        <button class="strat-btn s-lc" onclick="setStrategy('lc')">
+          <span>🎯</span> Least Confidence
+        </button>
+        <button class="strat-btn s-random" onclick="setStrategy('random')">
+          <span>🎲</span> Random Sampling
+        </button>
+      </div>
+
+      <div class="ctrl-row">
+        <label>Query batch size</label>
+        <input type="range" id="batch_k" min="1" max="5" step="1" value="3"/>
+        <span class="val" id="batch_k_val">3</span>
+      </div>
+
+      <button class="btn-primary" onclick="queryStep()">Query Next Batch →</button>
+      <button class="btn-secondary" onclick="resetAll()">↺ Reset</button>
+    </div>
+
+    <div class="panel">
+      <h3>Statistics</h3>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="lbl">Labeled</div>
+          <div class="num" id="stat-labeled" style="color:#2563eb">5</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Unlabeled</div>
+          <div class="num" id="stat-unlabeled" style="color:#94a3b8">25</div>
+        </div>
+        <div class="stat-card">
+          <div class="lbl">Queries</div>
+          <div class="num" id="stat-queries" style="color:#d97706">0</div>
+        </div>
+      </div>
+      <div class="iter-log" id="iter-log">
+        [Ready] Select a strategy and click "Query Next Batch".
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3 id="chart-title">Dataset + Query Selection</h3>
+      <div id="chart-main"></div>
+    </div>
+    <div class="panel">
+      <h3>Acquisition Scores (unlabeled points)</h3>
+      <div id="chart-scores"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" id="info-box">Loading…</div>
+
+<script>
+// ── Dataset ───────────────────────────────────────────────────────────────────
+// 30 points in 2D, 2 classes, with a fuzzy boundary near x=0
+const SEED_POINTS = [
+  // Class 0 (left)
+  [-2.5,0.3],[−2.1,1.2],[−1.8,−0.6],[−1.5,0.8],[−2.3,−1.1],
+  [−1.9,1.5],[−2.7,0.0],[−1.3,−1.4],[−2.0,0.5],[−1.6,1.1],
+  // Near-boundary (uncertain)
+  [−0.3,0.2],[0.1,0.5],[0.4,−0.3],[−0.2,−0.6],[0.3,0.8],
+  [−0.5,0.3],[0.2,−0.1],[−0.1,0.7],[0.5,0.2],[−0.4,−0.4],
+  // Class 1 (right)
+  [1.3,0.4],[1.8,−0.7],[2.1,1.1],[1.5,−1.2],[2.5,0.6],
+  [2.0,0.3],[1.7,1.4],[2.3,−0.5],[1.4,0.9],[2.6,−0.2]
+];
+
+// Ground truth labels (0=left, 1=right) — roughly by x position + noise
+const GT_LABELS = SEED_POINTS.map(([x])=> x<0.5 ? 0 : 1);
+
+// "Model" probability p(y=1|x) — sigmoidal along x with noise
+function modelProb(x, y){
+  const base = 1/(1+Math.exp(-2.5*x));
+  const noise = 0.05*Math.sin(y*3.1);
+  return Math.max(0.01, Math.min(0.99, base + noise));
+}
+
+// Initialize
+let labeled   = new Set([0,5,12,20,27]);  // 5 initial labeled points
+let queried   = new Set();
+let totalQueries = 0;
+let strategy  = 'entropy';
+
+// Acquisition scores
+function score(idx){
+  const [x,y] = SEED_POINTS[idx];
+  const p1 = modelProb(x,y), p0 = 1-p1;
+  switch(strategy){
+    case 'entropy':
+      return -(p1*Math.log(p1+1e-9) + p0*Math.log(p0+1e-9));
+    case 'margin':
+      return 1 - Math.abs(p1 - p0);
+    case 'lc':
+      return 1 - Math.max(p1, p0);
+    case 'random':
+      return Math.random();
+  }
+}
+
+function setStrategy(s){
+  strategy = s;
+  document.querySelectorAll('.strat-btn').forEach(b=>{
+    b.classList.remove('active');
+    if(b.className.includes('s-'+s)) b.classList.add('active');
+  });
+  // Fix: select by partial class match
+  document.querySelectorAll('.strat-btn').forEach(b=>{
+    const match = (s==='entropy'&&b.className.includes('s-entropy')) ||
+                  (s==='margin'&&b.className.includes('s-margin')) ||
+                  (s==='lc'&&b.className.includes('s-lc')) ||
+                  (s==='random'&&b.className.includes('s-random'));
+    b.classList.toggle('active', match);
+  });
+  render();
+}
+
+function queryStep(){
+  const k = +document.getElementById('batch_k').value;
+  const unlabeled = SEED_POINTS.map((_,i)=>i).filter(i=>!labeled.has(i));
+  if(unlabeled.length === 0){ addLog('[Done] All points labeled!'); return; }
+
+  const scores = unlabeled.map(i=>({i, s:score(i)}));
+  scores.sort((a,b)=>b.s-a.s);
+  const selected = scores.slice(0, Math.min(k, unlabeled.length)).map(x=>x.i);
+  selected.forEach(i=>{ labeled.add(i); queried.add(i); });
+  totalQueries += selected.length;
+
+  const names = selected.map(i=>`#${i}(${SEED_POINTS[i].map(v=>v.toFixed(1)).join(',')})`).join(', ');
+  addLog(`[${strategy.toUpperCase()}] Queried: ${names}`);
+  render();
+}
+
+function resetAll(){
+  labeled   = new Set([0,5,12,20,27]);
+  queried   = new Set();
+  totalQueries = 0;
+  document.getElementById('iter-log').textContent = '[Reset] Ready.';
+  render();
+}
+
+function addLog(msg){
+  const el = document.getElementById('iter-log');
+  el.textContent = msg + '\n' + el.textContent;
+}
+
+document.getElementById('batch_k').addEventListener('input',()=>{
+  document.getElementById('batch_k_val').textContent = document.getElementById('batch_k').value;
+});
+
+function render(){
+  const n = SEED_POINTS.length;
+  const unlabeled = SEED_POINTS.map((_,i)=>i).filter(i=>!labeled.has(i));
+
+  // Compute probabilities and scores
+  const probs = SEED_POINTS.map(([x,y])=>modelProb(x,y));
+
+  // ── Main scatter plot ────────────────────────────────────────────────────
+  // Decision boundary curve
+  const bxArr = Array.from({length:50},(_,i)=>-3+6*i/49);
+  const byArr = bxArr.map(()=>0);  // vertical boundary at x=0.5*something
+
+  // Score colors for unlabeled
+  const acqScores = SEED_POINTS.map((_,i)=>{
+    if(labeled.has(i)) return null;
+    return score(i);
+  });
+  const maxScore = Math.max(...acqScores.filter(v=>v!==null));
+
+  const traces = [];
+
+  // Background gradient (fake "model confidence" as density)
+  const gridX=[], gridY=[], gridZ=[];
+  for(let gx=-3;gx<=3;gx+=0.15){
+    for(let gy=-2;gy<=2;gy+=0.15){
+      gridX.push(gx); gridY.push(gy);
+      gridZ.push(modelProb(gx,gy));
+    }
+  }
+  traces.push({
+    x:gridX,y:gridY,z:gridZ,
+    type:'heatmap', showscale:false, opacity:0.18,
+    colorscale:[[0,'#ef4444'],[0.5,'#f9fafb'],[1,'#3b82f6']],
+    zmin:0,zmax:1, hoverinfo:'skip'
+  });
+
+  // Decision boundary line
+  traces.push({
+    x:[0.2,0.2], y:[-2.2,2.2],
+    type:'scatter', mode:'lines',
+    line:{color:'#94a3b8',width:1.5,dash:'dash'},
+    name:'Decision boundary', showlegend:false, hoverinfo:'skip'
+  });
+
+  // Labeled points (initial)
+  const initLabeled = [...labeled].filter(i=>!queried.has(i));
+  traces.push({
+    x:initLabeled.map(i=>SEED_POINTS[i][0]),
+    y:initLabeled.map(i=>SEED_POINTS[i][1]),
+    type:'scatter', mode:'markers',
+    marker:{color:initLabeled.map(i=>GT_LABELS[i]===0?'#ef4444':'#3b82f6'),
+            size:11, symbol:'circle', line:{color:'#1e293b',width:1.5}},
+    name:'Labeled (initial)', text:initLabeled.map(i=>`Point ${i}\np(y=1)=${probs[i].toFixed(2)}`),
+    hovertemplate:'%{text}<extra>Labeled</extra>'
+  });
+
+  // Queried points
+  if(queried.size>0){
+    const qArr = [...queried];
+    traces.push({
+      x:qArr.map(i=>SEED_POINTS[i][0]),
+      y:qArr.map(i=>SEED_POINTS[i][1]),
+      type:'scatter', mode:'markers',
+      marker:{color:qArr.map(i=>GT_LABELS[i]===0?'#ef4444':'#3b82f6'),
+              size:14, symbol:'star', line:{color:'#d97706',width:2.5}},
+      name:'Queried', text:qArr.map(i=>`Point ${i}\np(y=1)=${probs[i].toFixed(2)}`),
+      hovertemplate:'%{text}<extra>Queried ⭐</extra>'
+    });
+  }
+
+  // Unlabeled points — colored by acquisition score
+  if(unlabeled.length>0){
+    const unlabScores = unlabeled.map(i=>acqScores[i]);
+    const unlabColors = unlabScores.map(s=> {
+      const norm = maxScore>0 ? s/maxScore : 0;
+      // orange-to-white gradient
+      const r = Math.round(255);
+      const g = Math.round(255 - norm*150);
+      const b = Math.round(255 - norm*255);
+      return `rgb(${r},${g},${b})`;
+    });
+    traces.push({
+      x:unlabeled.map(i=>SEED_POINTS[i][0]),
+      y:unlabeled.map(i=>SEED_POINTS[i][1]),
+      type:'scatter', mode:'markers',
+      marker:{color:unlabColors, size:9, symbol:'circle',
+              line:{color:'#64748b',width:1}},
+      name:'Unlabeled (heat = acq. score)',
+      text:unlabeled.map(i=>`Point ${i}\np(y=1)=${probs[i].toFixed(2)}\nScore=${(acqScores[i]||0).toFixed(3)}`),
+      hovertemplate:'%{text}<extra>Unlabeled</extra>'
+    });
+  }
+
+  const stratName = {entropy:'Entropy',margin:'Margin',lc:'Least Conf.',random:'Random'}[strategy];
+  Plotly.newPlot('chart-main', traces, {
+    title:{text:`Active Learning — ${stratName} Sampling`, font:{size:13}, x:0.5},
+    xaxis:{title:'Feature x₁', range:[-3.2,3.2], gridcolor:'#f1f5f9'},
+    yaxis:{title:'Feature x₂', range:[-2.2,2.2], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:50,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  // ── Acquisition score bar chart ──────────────────────────────────────────
+  const unlabByScore = unlabeled.map(i=>({i,s:acqScores[i]})).sort((a,b)=>b.s-a.s);
+  const batchK = +document.getElementById('batch_k').value;
+  const barColors = unlabByScore.map(({},rank)=>rank<batchK?'#d97706':'#cbd5e1');
+
+  Plotly.newPlot('chart-scores', [{
+    x:unlabByScore.map(({i})=>`#${i}`),
+    y:unlabByScore.map(({s})=>s),
+    type:'bar',
+    marker:{color:barColors, line:{color:'#fff',width:1}},
+    hovertemplate:'Point %{x}<br>Score = %{y:.4f}<extra></extra>'
+  }], {
+    title:{text:`${stratName} Scores (orange = next batch)`, font:{size:12}, x:0.5},
+    xaxis:{title:'Point index', gridcolor:'#f1f5f9'},
+    yaxis:{title:'Acquisition score', gridcolor:'#f1f5f9'},
+    margin:{t:45,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  document.getElementById('stat-labeled').textContent   = labeled.size;
+  document.getElementById('stat-unlabeled').textContent = unlabeled.length;
+  document.getElementById('stat-queries').textContent   = totalQueries;
+
+  // ── Info ───────────────────────────────────────────────────────────────────
+  const formulas = {
+    entropy: 'H(x) = −Σ p(y|x) log p(y|x)   (max at p=0.5 for binary)',
+    margin:  'M(x) = 1 − |p(y₁|x) − p(y₂|x)|   (max when two top probs tied)',
+    lc:      'LC(x) = 1 − max_y p(y|x)   (max when top class prob is lowest)',
+    random:  'U(x) = Uniform random   (baseline, ignores model output)'
+  };
+  const descriptions = {
+    entropy: 'Entropy sampling picks points where the model is most uncertain across all classes. High entropy = probability spread over many classes.',
+    margin:  'Margin sampling picks points where the top two predicted classes are almost equally likely. Tight margin = hardest decision boundary.',
+    lc:      'Least-confidence sampling picks points where the most probable class has lowest confidence. Equivalent to entropy for binary problems.',
+    random:  'Random sampling serves as a baseline. It ignores model uncertainty and queries points uniformly at random.'
+  };
+  document.getElementById('info-box').innerHTML =
+    `<b>Strategy: ${stratName}</b> — ${descriptions[strategy]}<br><br>`+
+    `<b>Formula:</b> <code>${formulas[strategy]}</code><br><br>`+
+    `Background color shows model probability p(y=1|x). <span class="badge badge-labeled">Blue/Red circles</span> = initially labeled. `+
+    `<span class="badge badge-queried">Stars</span> = queried. Orange points in bar chart = next batch to query.`;
+}
+
+render();
+</script>
+</body>
+</html>

@@ -312,16 +312,8 @@ enable long-term memory.</p></li>
 </ul>
 <p>These improvements allow RNNs to capture longer temporal
 dependencies.</p>
-<figure id="fig:figure_label3">
-<img src="img/lecture20/Gradient.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Effects of standard initialization versus identity
-initialization</figcaption>
-</figure>
-<figure id="fig:figure_label4">
-<img src="img/lecture20/ReLU.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Comparison of sigmoid, tanh, and ReLU activation
-functions</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3.3 — Vanishing Gradient in RNNs</h3><p>Vary the number of timesteps T and weight magnitude to see how gradient magnitude decays for sigmoid, tanh, and ReLU activations in BPTT.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture20_GradientVanishing_Interactive_interactive.html" style="height:760px;" title="Interactive Section 3.3 Vanishing Gradient in RNNs"></iframe></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3.3 — Vanishing Gradient in RNNs</h3><p>Vary the number of timesteps T and weight magnitude to see how gradient magnitude decays for sigmoid, tanh, and ReLU activations in BPTT.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture20_GradientVanishing_Interactive_interactive.html" style="height:760px;" title="Interactive Section 3.3 Vanishing Gradient in RNNs"></iframe></section>
 <h1 data-number="4" id="long-short-term-memory-lstm-networks"><span class="header-section-number">4.</span> Long Short-Term Memory (LSTM)
 Networks</h1>
 <p>Long Short-Term Memory (LSTM) networks are a type of Recurrent Neural
@@ -331,10 +323,7 @@ Section <a data-reference="subsec:rnn-architecture" data-reference-type="ref" h
 mechanisms, LSTMs regulate the flow of information through time and
 enable learning of long-term dependencies. Figure <a data-reference="fig:figure_label5" data-reference-type="ref" href="#fig:figure_label5">5</a> illustrates the structure of an
 individual LSTM cell.</p>
-<figure id="fig:figure_label5">
-<img src="img/lecture20/LSTM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>An LSTM cell for one time step</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 4–5 — LSTM and GRU Gate Mechanics</h3><p>Toggle forget, input, and output gates on/off and adjust inputs to see how cell state and hidden state evolve over time. Switch to GRU tab for update/reset gates.</p><iframe class="interactive-notebook-frame" data-default-height="780" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture20_LSTMGates_Interactive_interactive.html" style="height:780px;" title="Interactive Sections 4–5 LSTM and GRU Gates"></iframe></section>
 <h2 data-number="4.1" id="lstm-architecture-and-gates"><span class="header-section-number">4.1</span> LSTM Architecture and
 Gates</h2>
 <p>An LSTM cell augments the standard RNN hidden state with a

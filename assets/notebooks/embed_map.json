@@ -909,6 +909,123 @@
       "description": "Click anywhere in the 2D latent space to decode z directly into a digit \u2014 no encoder needed. Explore how different regions generate different digits and interpolate smoothly between them.",
       "iframe_height": 860,
       "iframe_title": "Interactive Section 2.4 VAE Inference"
+    },
+    {
+      "image_match": "img/lecture20/Gradient.png",
+      "notebook_html": "Lecture20_GradientVanishing_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3.3 \u2014 Vanishing Gradient in RNNs",
+      "description": "Vary the number of timesteps T and weight magnitude to see how gradient magnitude decays for sigmoid, tanh, and ReLU activations in BPTT.",
+      "iframe_title": "Interactive Section 3.3 Vanishing Gradient in RNNs",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "img/lecture20/ReLU.png",
+      "notebook_html": "Lecture20_GradientVanishing_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3.3 \u2014 Vanishing Gradient in RNNs",
+      "description": "Vary the number of timesteps T and weight magnitude to see how gradient magnitude decays for sigmoid, tanh, and ReLU activations in BPTT.",
+      "iframe_title": "Interactive Section 3.3 Vanishing Gradient in RNNs",
+      "iframe_height": 760
+    },
+    {
+      "image_match": "img/lecture20/LSTM.png",
+      "notebook_html": "Lecture20_LSTMGates_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 4\u20135 \u2014 LSTM and GRU Gate Mechanics",
+      "description": "Toggle forget, input, and output gates on/off and adjust inputs to see how cell state and hidden state evolve over time. Switch to GRU tab for update/reset gates.",
+      "iframe_title": "Interactive Sections 4\u20135 LSTM and GRU Gates",
+      "iframe_height": 780
+    },
+    {
+      "image_match": "img/lecture20/global_attention.png",
+      "notebook_html": "Lecture21_Attention_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Local vs Global Attention",
+      "description": "Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.",
+      "iframe_title": "Interactive Section 3 Local vs Global Attention",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture20/local_attention.png",
+      "notebook_html": "Lecture21_Attention_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Local vs Global Attention",
+      "description": "Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.",
+      "iframe_title": "Interactive Section 3 Local vs Global Attention",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture26/SimCLR_Framework.png",
+      "notebook_html": "Lecture25_SSL_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Self-Supervised Learning & SimCLR",
+      "description": "Explore pretext tasks (rotation, masking, jigsaw, colorization) and SimCLR contrastive learning. See how the latent space clusters improve with more SSL pretraining.",
+      "iframe_title": "Interactive Section 3 SSL and SimCLR",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture26/cont.png",
+      "notebook_html": "Lecture25_SSL_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Self-Supervised Learning & SimCLR",
+      "description": "Explore pretext tasks (rotation, masking, jigsaw, colorization) and SimCLR contrastive learning. See how the latent space clusters improve with more SSL pretraining.",
+      "iframe_title": "Interactive Section 3 SSL and SimCLR",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture25/entro_sampling.png",
+      "notebook_html": "Lecture26_ActiveLearning_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 6.2 \u2014 Active Learning Sampling Strategies",
+      "description": "Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.",
+      "iframe_title": "Interactive Section 6.2 Active Learning Sampling",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture25/margin_sampling.png",
+      "notebook_html": "Lecture26_ActiveLearning_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 6.2 \u2014 Active Learning Sampling Strategies",
+      "description": "Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.",
+      "iframe_title": "Interactive Section 6.2 Active Learning Sampling",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture25/least_sampling.png",
+      "notebook_html": "Lecture26_ActiveLearning_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 6.2 \u2014 Active Learning Sampling Strategies",
+      "description": "Compare entropy, margin, and least-confidence sampling on a 2D dataset. Query the most uncertain points batch by batch and watch the labeled set grow.",
+      "iframe_title": "Interactive Section 6.2 Active Learning Sampling",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture27/factors_uncer.png",
+      "notebook_html": "Lecture27_Uncertainty_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Aleatoric, Epistemic & Predictive Uncertainty",
+      "description": "Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.",
+      "iframe_title": "Interactive Section 3 Uncertainty Types",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture27/MC-dropout.jpg",
+      "notebook_html": "Lecture27_Uncertainty_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Aleatoric, Epistemic & Predictive Uncertainty",
+      "description": "Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.",
+      "iframe_title": "Interactive Section 3 Uncertainty Types",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture27/uncertainty-summary.jpg",
+      "notebook_html": "Lecture27_Uncertainty_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 3 \u2014 Aleatoric, Epistemic & Predictive Uncertainty",
+      "description": "Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.",
+      "iframe_title": "Interactive Section 3 Uncertainty Types",
+      "iframe_height": 860
     }
   ]
 }

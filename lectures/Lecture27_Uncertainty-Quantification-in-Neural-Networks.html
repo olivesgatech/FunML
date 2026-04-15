@@ -302,11 +302,7 @@ may be misleading.</p>
 <p>These three sources are illustrated in Fig. <a data-reference="fig:factors_uncertainty" data-reference-type="ref" href="#fig:factors_uncertainty">3</a>, which shows both
 variation between model decision boundaries and the impact of unknown
 samples.</p>
-<figure id="fig:factors_uncertainty">
-<img src="img/lecture27/factors_uncer.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Factors that Cause Uncertainty. (left) Variations among
-Model Configurations, (right) Unknown Data</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Aleatoric, Epistemic &amp; Predictive Uncertainty</h3><p>Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture27_Uncertainty_Interactive_interactive.html" style="height:860px;" title="Interactive Section 3 Uncertainty Types"></iframe></section>
 <h1 data-number="4" id="sec:27.4"><span class="header-section-number">4.</span> Two Main Types of
 Uncertainty</h1>
 <p>Uncertainty in machine learning is commonly divided into two major
@@ -462,12 +458,7 @@ randomness only during training and uses deterministic inference.
 MC-dropout introduces randomness during both training and inference,
 allowing uncertainty to be estimated through repeated stochastic forward
 passes.</p>
-<figure id="fig:mc-dropout">
-<img src="img/lecture27/MC-dropout.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Monte Carlo dropout approximates an ensemble by performing
-multiple stochastic forward passes using dropout at inference
-time.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Aleatoric, Epistemic &amp; Predictive Uncertainty</h3><p>Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture27_Uncertainty_Interactive_interactive.html" style="height:860px;" title="Interactive Section 3 Uncertainty Types"></iframe></section>
 <h2 data-number="5.4" id="summary"><span class="header-section-number">5.4</span> Summary</h2>
 <p>Both deep ensembles and MC-dropout estimate uncertainty by generating
 multiple predictions and measuring their agreement. Conceptually, both
@@ -507,11 +498,7 @@ Softmax(f_{\hat{W}_t}(\boldsymbol{x}))
 while epistemic uncertainty reflects disagreement among models. Because
 epistemic uncertainty arises from model knowledge gaps, it can often be
 reduced through better models or more data.</p>
-<figure id="fig:uncertainty_types">
-<img src="img/lecture27/uncertainty-summary.jpg" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Visualization of confident predictions, high aleatoric
-uncertainty, and high epistemic uncertainty.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Aleatoric, Epistemic &amp; Predictive Uncertainty</h3><p>Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture27_Uncertainty_Interactive_interactive.html" style="height:860px;" title="Interactive Section 3 Uncertainty Types"></iframe></section>
 <p>Figure <a data-reference="fig:uncertainty_types" data-reference-type="ref" href="#fig:uncertainty_types">7</a> visualizes these
 uncertainty types using a probability simplex. Each vertex represents a
 class label, and each point corresponds to a model prediction for the

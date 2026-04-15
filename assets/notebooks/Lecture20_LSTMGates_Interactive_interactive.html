@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>LSTM & GRU Gates — Lecture 20</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .tab{padding:7px 18px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.875rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:800px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.95rem;margin-bottom:10px;color:var(--blue);}
+  .slider-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .slider-row label{font-size:.8rem;font-weight:600;color:var(--muted);min-width:110px;}
+  .slider-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .slider-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:38px;text-align:right;}
+  .gate-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .gate-btn{padding:6px 14px;border-radius:7px;border:2px solid;cursor:pointer;
+            font-size:.82rem;font-weight:700;transition:all .15s;}
+  .gate-btn.on{color:#fff;}
+  .gate-forget{border-color:#dc2626;}.gate-forget.on{background:#dc2626;}
+  .gate-forget.off{color:#dc2626;background:#fff;}
+  .gate-input{border-color:#2563eb;}.gate-input.on{background:#2563eb;}
+  .gate-input.off{color:#2563eb;background:#fff;}
+  .gate-output{border-color:#059669;}.gate-output.on{background:#059669;}
+  .gate-output.off{color:#059669;background:#fff;}
+  .gate-update{border-color:#7c3aed;}.gate-update.on{background:#7c3aed;}
+  .gate-update.off{color:#7c3aed;background:#fff;}
+  .gate-reset{border-color:#d97706;}.gate-reset.on{background:#d97706;}
+  .gate-reset.off{color:#d97706;background:#fff;}
+  #chart-lstm{width:100%;height:340px;}
+  #chart-states{width:100%;height:260px;}
+  .eq-box{font-family:monospace;font-size:.82rem;background:#f1f5f9;border-radius:6px;
+           padding:10px;line-height:1.8;margin-top:8px;color:#1e293b;}
+  .eq-gate-f{color:#dc2626;font-weight:700;}
+  .eq-gate-i{color:#2563eb;font-weight:700;}
+  .eq-gate-o{color:#059669;font-weight:700;}
+  .eq-gate-u{color:#7c3aed;font-weight:700;}
+  .eq-gate-r{color:#d97706;font-weight:700;}
+  .highlight{background:#fef3c7;border-radius:3px;padding:1px 3px;}
+  .state-row{display:flex;gap:12px;margin-top:8px;}
+  .state-card{flex:1;background:#f8fafc;border:1px solid var(--border);border-radius:8px;
+               padding:10px;text-align:center;}
+  .state-card .lbl{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;}
+  .state-card .num{font-size:1.3rem;font-weight:800;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<h2>Sections 4 & 5 — LSTM and GRU Gate Mechanics</h2>
+<p class="subtitle">Toggle gates on/off and adjust inputs to see how cell state and hidden state evolve over time.</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-lstm" onclick="setTab('lstm')">LSTM (3 Gates)</button>
+  <button class="tab" id="tab-gru" onclick="setTab('gru')">GRU (2 Gates)</button>
+</div>
+
+<div class="layout">
+  <!-- Left: controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">LSTM Controls</h3>
+
+    <div id="gate-buttons">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="slider-row">
+      <label>Input x(t)</label>
+      <input type="range" id="xt" min="-3" max="3" step="0.1" value="1.0"/>
+      <span class="val" id="xt_val">1.0</span>
+    </div>
+    <div class="slider-row">
+      <label>Prev hidden h(t−1)</label>
+      <input type="range" id="ht_prev" min="-2" max="2" step="0.1" value="0.5"/>
+      <span class="val" id="ht_prev_val">0.5</span>
+    </div>
+    <div class="slider-row" id="ct_prev_row">
+      <label>Prev cell c(t−1)</label>
+      <input type="range" id="ct_prev" min="-2" max="2" step="0.1" value="0.8"/>
+      <span class="val" id="ct_prev_val">0.8</span>
+    </div>
+    <div class="slider-row">
+      <label>Time steps T</label>
+      <input type="range" id="T_steps" min="5" max="30" step="1" value="15"/>
+      <span class="val" id="T_steps_val">15</span>
+    </div>
+
+    <div class="eq-box" id="eq-box">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="state-row" id="state-cards">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- Right: chart -->
+  <div class="panel">
+    <h3>State Evolution Over Time</h3>
+    <div id="chart-lstm"></div>
+    <div id="chart-states"></div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let currentTab = 'lstm';
+// LSTM gate toggles
+let gateState = { forget:true, input:true, output:true, update:true, reset:true };
+
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+
+// ── LSTM simulation ─────────────────────────────────────────────────────────
+// Simplified: each gate is a fixed sigmoid of (0.5*x + 0.5*h + bias_g)
+// We use fixed biases to give non-trivial dynamics
+function lstm_step(x, h_prev, c_prev, gates){
+  const combined = 0.6*x + 0.4*h_prev;
+  let f = gates.forget ? sigmoid(combined - 0.3) : 1.0; // forget=1 → keep everything
+  let i = gates.input  ? sigmoid(combined + 0.2) : 0.0; // input=0 → no new info
+  let o = gates.output ? sigmoid(combined + 0.1) : 0.5; // output=0.5 → half
+  let g = Math.tanh(combined);           // candidate cell value
+
+  const c = f * c_prev + i * g;
+  const h = o * Math.tanh(c);
+  return {h, c, f, i, o, g};
+}
+
+// ── GRU simulation ─────────────────────────────────────────────────────────
+function gru_step(x, h_prev, gates){
+  const combined = 0.6*x + 0.4*h_prev;
+  let z = gates.update ? sigmoid(combined + 0.1) : 0.0; // update gate
+  let r = gates.reset  ? sigmoid(combined - 0.2) : 1.0; // reset gate (1=keep all history)
+
+  const h_cand = Math.tanh(0.6*x + 0.4*(r * h_prev));
+  const h = (1 - z) * h_prev + z * h_cand;
+  return {h, z, r, h_cand};
+}
+
+// ── Run simulation over T steps ─────────────────────────────────────────────
+function simulate(){
+  const xt    = +document.getElementById('xt').value;
+  const h0    = +document.getElementById('ht_prev').value;
+  const c0    = +document.getElementById('ct_prev').value;
+  const T     = +document.getElementById('T_steps').value;
+
+  const times = Array.from({length:T+1}, (_,i)=>i);
+
+  if(currentTab === 'lstm'){
+    let h = h0, c = c0;
+    const hs=[], cs=[], fs=[], is_=[], os=[];
+    hs.push(h); cs.push(c); fs.push(null); is_.push(null); os.push(null);
+    for(let t=1;t<=T;t++){
+      const r = lstm_step(xt, h, c, gateState);
+      h=r.h; c=r.c;
+      hs.push(h); cs.push(c); fs.push(r.f); is_.push(r.i); os.push(r.o);
+    }
+    return {times, hs, cs, fs, is_arr:is_, os};
+  } else {
+    let h = h0;
+    const hs=[], zs=[], rs=[];
+    hs.push(h); zs.push(null); rs.push(null);
+    for(let t=1;t<=T;t++){
+      const r = gru_step(xt, h, gateState);
+      h=r.h;
+      hs.push(h); zs.push(r.z); rs.push(r.r);
+    }
+    return {times, hs, zs, rs};
+  }
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+function render(){
+  const xt    = +document.getElementById('xt').value;
+  const h0    = +document.getElementById('ht_prev').value;
+  const c0    = +document.getElementById('ct_prev').value;
+  const T     = +document.getElementById('T_steps').value;
+
+  document.getElementById('xt_val').textContent      = xt.toFixed(1);
+  document.getElementById('ht_prev_val').textContent = h0.toFixed(1);
+  document.getElementById('ct_prev_val').textContent = c0.toFixed(1);
+  document.getElementById('T_steps_val').textContent = T;
+
+  const sim = simulate();
+
+  if(currentTab === 'lstm'){
+    renderLSTM(sim);
+  } else {
+    renderGRU(sim);
+  }
+}
+
+function renderLSTM(sim){
+  const {times, hs, cs, fs, is_arr, os} = sim;
+
+  const tracesTop = [
+    {x:times, y:cs, name:'Cell state c(t)', line:{color:'#2563eb',width:2.5}, mode:'lines+markers',
+     hovertemplate:'t=%{x}<br>c(t)=%{y:.3f}<extra>Cell c(t)</extra>'},
+    {x:times, y:hs, name:'Hidden state h(t)', line:{color:'#059669',width:2.5}, mode:'lines+markers',
+     hovertemplate:'t=%{x}<br>h(t)=%{y:.3f}<extra>Hidden h(t)</extra>'},
+  ];
+
+  const tracesBot = [
+    {x:times, y:fs, name:'Forget f(t)', line:{color:'#dc2626',width:2,dash:gateState.forget?'solid':'dot'},
+     mode:'lines+markers', marker:{size:5},
+     hovertemplate:'t=%{x}<br>f(t)=%{y:.3f}<extra>Forget</extra>'},
+    {x:times, y:is_arr, name:'Input i(t)', line:{color:'#2563eb',width:2,dash:gateState.input?'solid':'dot'},
+     mode:'lines+markers', marker:{size:5},
+     hovertemplate:'t=%{x}<br>i(t)=%{y:.3f}<extra>Input</extra>'},
+    {x:times, y:os, name:'Output o(t)', line:{color:'#059669',width:2,dash:gateState.output?'solid':'dot'},
+     mode:'lines+markers', marker:{size:5},
+     hovertemplate:'t=%{x}<br>o(t)=%{y:.3f}<extra>Output</extra>'},
+  ];
+
+  Plotly.newPlot('chart-lstm', tracesTop, {
+    title:{text:'Cell & Hidden State', font:{size:13}, x:0.5},
+    xaxis:{title:'Timestep t', gridcolor:'#f1f5f9'},
+    yaxis:{title:'State value', range:[-1.1,1.1], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h', y:1.1, x:0.5, xanchor:'center'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff', hovermode:'x unified'
+  },{responsive:true, displayModeBar:false});
+
+  Plotly.newPlot('chart-states', tracesBot, {
+    title:{text:'Gate Values (0–1)', font:{size:13}, x:0.5},
+    xaxis:{title:'Timestep t', gridcolor:'#f1f5f9'},
+    yaxis:{title:'Gate value', range:[-0.05,1.05], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h', y:1.1, x:0.5, xanchor:'center'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff', hovermode:'x unified'
+  },{responsive:true, displayModeBar:false});
+
+  const fOff = !gateState.forget, iOff = !gateState.input, oOff = !gateState.output;
+  document.getElementById('eq-box').innerHTML =
+    `<span class="${fOff?'':'eq-gate-f'}">f(t)</span> = σ(W<sub>f</sub>·[h<sub>t-1</sub>,x<sub>t</sub>]) ${fOff?'→ <b>1 (OFF: keep all)</b>':''}<br>`+
+    `<span class="${iOff?'':'eq-gate-i'}">i(t)</span> = σ(W<sub>i</sub>·[h<sub>t-1</sub>,x<sub>t</sub>]) ${iOff?'→ <b>0 (OFF: block new)</b>':''}<br>`+
+    `<span class="${oOff?'':'eq-gate-o'}">o(t)</span> = σ(W<sub>o</sub>·[h<sub>t-1</sub>,x<sub>t</sub>]) ${oOff?'→ <b>0.5 (OFF: half output)</b>':''}<br>`+
+    `<b>c(t)</b> = <span class="${fOff?'':'eq-gate-f'}">f(t)</span>⊙c<sub>t-1</sub> + <span class="${iOff?'':'eq-gate-i'}">i(t)</span>⊙tanh(·)<br>`+
+    `<b>h(t)</b> = <span class="${oOff?'':'eq-gate-o'}">o(t)</span>⊙tanh(c(t))`;
+
+  const lastH = hs[hs.length-1], lastC = cs[cs.length-1];
+  document.getElementById('state-cards').innerHTML =
+    `<div class="state-card"><div class="lbl">Final h(T)</div><div class="num" style="color:#059669">${lastH.toFixed(3)}</div></div>`+
+    `<div class="state-card"><div class="lbl">Final c(T)</div><div class="num" style="color:#2563eb">${lastC.toFixed(3)}</div></div>`;
+}
+
+function renderGRU(sim){
+  const {times, hs, zs, rs} = sim;
+
+  const tracesTop = [
+    {x:times, y:hs, name:'Hidden state h(t)', line:{color:'#059669',width:2.5}, mode:'lines+markers',
+     hovertemplate:'t=%{x}<br>h(t)=%{y:.3f}<extra>Hidden h(t)</extra>'},
+  ];
+  const tracesBot = [
+    {x:times, y:zs, name:'Update z(t)', line:{color:'#7c3aed',width:2,dash:gateState.update?'solid':'dot'},
+     mode:'lines+markers', marker:{size:5},
+     hovertemplate:'t=%{x}<br>z(t)=%{y:.3f}<extra>Update</extra>'},
+    {x:times, y:rs, name:'Reset r(t)', line:{color:'#d97706',width:2,dash:gateState.reset?'solid':'dot'},
+     mode:'lines+markers', marker:{size:5},
+     hovertemplate:'t=%{x}<br>r(t)=%{y:.3f}<extra>Reset</extra>'},
+  ];
+
+  Plotly.newPlot('chart-lstm', tracesTop, {
+    title:{text:'Hidden State h(t)', font:{size:13}, x:0.5},
+    xaxis:{title:'Timestep t', gridcolor:'#f1f5f9'},
+    yaxis:{title:'State value', range:[-1.1,1.1], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h', y:1.1, x:0.5, xanchor:'center'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff', hovermode:'x unified'
+  },{responsive:true, displayModeBar:false});
+
+  Plotly.newPlot('chart-states', tracesBot, {
+    title:{text:'Gate Values (0–1)', font:{size:13}, x:0.5},
+    xaxis:{title:'Timestep t', gridcolor:'#f1f5f9'},
+    yaxis:{title:'Gate value', range:[-0.05,1.05], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h', y:1.1, x:0.5, xanchor:'center'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff', hovermode:'x unified'
+  },{responsive:true, displayModeBar:false});
+
+  const zOff = !gateState.update, rOff = !gateState.reset;
+  document.getElementById('eq-box').innerHTML =
+    `<span class="${zOff?'':'eq-gate-u'}">z(t)</span> = σ(W<sub>z</sub>·[h<sub>t-1</sub>,x<sub>t</sub>]) ${zOff?'→ <b>0 (OFF: no update)</b>':''}<br>`+
+    `<span class="${rOff?'':'eq-gate-r'}">r(t)</span> = σ(W<sub>r</sub>·[h<sub>t-1</sub>,x<sub>t</sub>]) ${rOff?'→ <b>1 (OFF: full history)</b>':''}<br>`+
+    `h̃(t) = tanh(W<sub>h</sub>·[<span class="${rOff?'':'eq-gate-r'}">r(t)</span>⊙h<sub>t-1</sub>, x<sub>t</sub>])<br>`+
+    `<b>h(t)</b> = (1−<span class="${zOff?'':'eq-gate-u'}">z(t)</span>)⊙h<sub>t-1</sub> + <span class="${zOff?'':'eq-gate-u'}">z(t)</span>⊙h̃(t)`;
+
+  const lastH = hs[hs.length-1];
+  document.getElementById('state-cards').innerHTML =
+    `<div class="state-card"><div class="lbl">Final h(T)</div><div class="num" style="color:#059669">${lastH.toFixed(3)}</div></div>`;
+}
+
+// ── Tab switching ────────────────────────────────────────────────────────────
+function setTab(tab){
+  currentTab = tab;
+  document.getElementById('tab-lstm').classList.toggle('active', tab==='lstm');
+  document.getElementById('tab-gru').classList.toggle('active', tab==='gru');
+  document.getElementById('ct_prev_row').style.display = tab==='lstm' ? '' : 'none';
+  document.getElementById('ctrl-title').textContent = tab==='lstm' ? 'LSTM Controls' : 'GRU Controls';
+  updateGateButtons();
+  render();
+}
+
+function updateGateButtons(){
+  const div = document.getElementById('gate-buttons');
+  if(currentTab === 'lstm'){
+    div.innerHTML = `<div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Toggle Gates</div>
+    <div class="gate-row">
+      <button class="gate-btn gate-forget ${gateState.forget?'on':'off'}" onclick="toggle('forget')">
+        ${gateState.forget?'✓':'✗'} Forget Gate
+      </button>
+      <button class="gate-btn gate-input ${gateState.input?'on':'off'}" onclick="toggle('input')">
+        ${gateState.input?'✓':'✗'} Input Gate
+      </button>
+      <button class="gate-btn gate-output ${gateState.output?'on':'off'}" onclick="toggle('output')">
+        ${gateState.output?'✓':'✗'} Output Gate
+      </button>
+    </div>`;
+  } else {
+    div.innerHTML = `<div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Toggle Gates</div>
+    <div class="gate-row">
+      <button class="gate-btn gate-update ${gateState.update?'on':'off'}" onclick="toggle('update')">
+        ${gateState.update?'✓':'✗'} Update Gate
+      </button>
+      <button class="gate-btn gate-reset ${gateState.reset?'on':'off'}" onclick="toggle('reset')">
+        ${gateState.reset?'✓':'✗'} Reset Gate
+      </button>
+    </div>`;
+  }
+}
+
+function toggle(gate){
+  gateState[gate] = !gateState[gate];
+  updateGateButtons();
+  render();
+}
+
+// ── Slider listeners ─────────────────────────────────────────────────────────
+['xt','ht_prev','ct_prev','T_steps'].forEach(id=>
+  document.getElementById(id).addEventListener('input', render));
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+setTab('lstm');
+</script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>RNN Gradient Vanishing — Lecture 20</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc; --panel:#ffffff; --border:#e2e8f0;
+    --accent:#2563eb; --accent2:#dc2626; --accent3:#059669; --accent4:#d97706;
+    --text:#1e293b; --muted:#64748b; --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;background:var(--panel);border:1px solid var(--border);
+            border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;align-items:flex-end;}
+  .ctrl{display:flex;flex-direction:column;gap:4px;min-width:180px;}
+  label{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
+  input[type=range]{width:100%;accent-color:var(--accent);}
+  .val{font-size:.85rem;font-weight:700;color:var(--accent);}
+  select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.875rem;background:#fff;}
+  .checkrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .check-item{display:flex;align-items:center;gap:5px;font-size:.875rem;cursor:pointer;}
+  .check-item input{accent-color:var(--accent);width:14px;height:14px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:14px 16px;margin-bottom:12px;font-size:.875rem;line-height:1.65;}
+  .info-box b{color:var(--accent);}
+  .tag{display:inline-block;padding:1px 7px;border-radius:4px;font-size:.78rem;font-weight:600;margin-left:4px;}
+  .tag-sig{background:#fef3c7;color:#92400e;}
+  .tag-tanh{background:#ede9fe;color:#5b21b6;}
+  .tag-relu{background:#dcfce7;color:#166534;}
+  .tag-clip{background:#fee2e2;color:#991b1b;}
+  #chart{width:100%;height:420px;}
+  #stats{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+         padding:12px 16px;margin-top:10px;font-size:.875rem;}
+  #stats table{width:100%;border-collapse:collapse;}
+  #stats td,#stats th{padding:5px 10px;text-align:left;border-bottom:1px solid var(--border);}
+  #stats th{font-weight:700;color:var(--muted);font-size:.78rem;text-transform:uppercase;}
+  .small-num{font-family:monospace;font-size:.875rem;}
+</style>
+</head>
+<body>
+
+<h2>Section 3.3 — Vanishing Gradient in RNNs (BPTT)</h2>
+<p class="subtitle">How gradient magnitude decays over timesteps for different activations. Adjust T and W<sub>h</sub> to observe the effect.</p>
+
+<div class="controls">
+  <div class="ctrl">
+    <label>Timesteps T</label>
+    <input type="range" id="T" min="5" max="50" step="1" value="20"/>
+    <span class="val" id="T_val">20</span>
+  </div>
+  <div class="ctrl">
+    <label>Weight magnitude |W<sub>h</sub>|</label>
+    <input type="range" id="Wh" min="0.5" max="2.0" step="0.05" value="1.0"/>
+    <span class="val" id="Wh_val">1.00</span>
+  </div>
+  <div class="ctrl">
+    <label>Activation point h (for saturation)</label>
+    <input type="range" id="hval" min="-3" max="3" step="0.1" value="0"/>
+    <span class="val" id="hval_val">0.0</span>
+  </div>
+  <div class="ctrl" style="min-width:280px;">
+    <label>Show activations</label>
+    <div class="checkrow">
+      <label class="check-item"><input type="checkbox" id="chk_sig" checked/> Sigmoid</label>
+      <label class="check-item"><input type="checkbox" id="chk_tanh" checked/> Tanh</label>
+      <label class="check-item"><input type="checkbox" id="chk_relu" checked/> ReLU</label>
+      <label class="check-item"><input type="checkbox" id="chk_clip"/> Grad Clip</label>
+    </div>
+  </div>
+  <div class="ctrl">
+    <label>Y-axis scale</label>
+    <select id="yscale">
+      <option value="log">Log (recommended)</option>
+      <option value="linear">Linear</option>
+    </select>
+  </div>
+</div>
+
+<div class="info-box" id="infobox">
+  Computing…
+</div>
+
+<div id="chart"></div>
+
+<div id="stats">
+  <table id="stats_table">
+    <tr><th>Activation</th><th>f ′(h)</th><th>Step factor |W<sub>h</sub>·f ′|</th><th>Gradient at t=0 (after T steps)</th><th>Assessment</th></tr>
+  </table>
+</div>
+
+<script>
+// ── Math helpers ────────────────────────────────────────────────────────────
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+function sigmoid_d(x){ const s=sigmoid(x); return s*(1-s); }
+function tanh_d(x){ const t=Math.tanh(x); return 1-t*t; }
+function relu_d(x){ return x>=0?1:0; }
+
+// ── Main render ─────────────────────────────────────────────────────────────
+function render(){
+  const T    = +document.getElementById('T').value;
+  const Wh   = +document.getElementById('Wh').value;
+  const h    = +document.getElementById('hval').value;
+  const showSig  = document.getElementById('chk_sig').checked;
+  const showTanh = document.getElementById('chk_tanh').checked;
+  const showRelu = document.getElementById('chk_relu').checked;
+  const showClip = document.getElementById('chk_clip').checked;
+  const yscale   = document.getElementById('yscale').value;
+
+  document.getElementById('T_val').textContent    = T;
+  document.getElementById('Wh_val').textContent   = Wh.toFixed(2);
+  document.getElementById('hval_val').textContent = h.toFixed(1);
+
+  // Per-activation derivative at operating point h
+  const fd_sig  = sigmoid_d(h);    // σ'(h)
+  const fd_tanh = tanh_d(h);       // tanh'(h)
+  const fd_relu = relu_d(h);       // relu'(h)
+  const fd_clip = 1.0;             // Gradient clipping keeps norms at 1
+
+  // Step factor = |Wh * f'|  (scalar approximation)
+  const sf_sig  = Math.abs(Wh * fd_sig);
+  const sf_tanh = Math.abs(Wh * fd_tanh);
+  const sf_relu = Math.abs(Wh * fd_relu);
+  const sf_clip = 1.0;             // clipping enforces norm=1
+
+  // Gradient at each earlier timestep k (propagating backwards from T)
+  // |dh(T)/dh(k)| ≈ sf^(T-k)
+  const steps = Array.from({length:T}, (_,i)=>i);  // k = 0..T-1
+  const grad  = k => (T-k);  // exponent
+
+  function gradMag(sf, k){ return Math.pow(sf, T-k); }
+
+  const colors = { sig:'#d97706', tanh:'#7c3aed', relu:'#059669', clip:'#dc2626' };
+
+  const traces = [];
+  const activDefs = [
+    {id:'sig',  label:'Sigmoid',         sf:sf_sig,  fd:fd_sig,  col:colors.sig,  show:showSig},
+    {id:'tanh', label:'Tanh',            sf:sf_tanh, fd:fd_tanh, col:colors.tanh, show:showTanh},
+    {id:'relu', label:'ReLU',            sf:sf_relu, fd:fd_relu, col:colors.relu, show:showRelu},
+    {id:'clip', label:'Grad Clip (≈1)',  sf:sf_clip, fd:1.0,     col:colors.clip, show:showClip},
+  ];
+
+  activDefs.forEach(a=>{
+    if(!a.show) return;
+    const y = steps.map(k=>gradMag(a.sf, k));
+    traces.push({
+      x: steps,
+      y: y,
+      type:'scatter', mode:'lines+markers',
+      name: a.label,
+      line:{color:a.col, width:2.5},
+      marker:{size:5, color:a.col},
+      hovertemplate:'Step k=%{x}<br>|∂h(T)/∂h(k)| = %{y:.4e}<extra>'+a.label+'</extra>'
+    });
+  });
+
+  // Danger zone annotation at 1e-4
+  const layout = {
+    title:{text:'Gradient Magnitude vs Backprop Step (T='+T+', |Wₕ|='+Wh.toFixed(2)+')',
+           font:{size:14}, x:0.5},
+    xaxis:{title:'Timestep k (0 = oldest, T−1 = most recent)', gridcolor:'#f1f5f9'},
+    yaxis:{
+      title:'|∂h(T)/∂h(k)| (gradient magnitude)',
+      type:yscale, gridcolor:'#f1f5f9',
+      ...(yscale==='log' ? {range:[-10,1]} : {})
+    },
+    shapes:[{
+      type:'line', xref:'paper', yref:'y',
+      x0:0, x1:1, y0:1e-4, y1:1e-4,
+      line:{color:'#94a3b8', width:1, dash:'dot'}
+    }],
+    annotations:[{
+      xref:'paper', yref:'y', x:0.01, y:1e-4,
+      text:'Vanishing threshold (1e-4)',
+      showarrow:false, font:{size:10, color:'#94a3b8'}, yanchor:'bottom'
+    }],
+    legend:{orientation:'h', y:1.08, x:0.5, xanchor:'center'},
+    margin:{t:60,b:50,l:70,r:20},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    hovermode:'x unified'
+  };
+
+  Plotly.newPlot('chart', traces, layout, {responsive:true, displayModeBar:false});
+
+  // ── Info box ──────────────────────────────────────────────────────────────
+  const active_sf = activDefs.filter(a=>a.show);
+  let infoLines = `<b>How to read:</b> Each line shows |∂h(T)/∂h(k)| — the gradient magnitude when backpropagating from the last step T to step k.<br>
+  The scalar approximation is: |∂h(T)/∂h(k)| ≈ |W<sub>h</sub>·f′(h)|<sup>T−k</sup><br><br>
+  <b>Current operating point h = ${h.toFixed(1)}:</b> `;
+  activDefs.forEach(a=>{
+    if(!a.show) return;
+    const label = a.sf < 1 ? '→ <b style="color:#dc2626">VANISHES</b>' :
+                  a.sf > 1 ? '→ <b style="color:#d97706">EXPLODES</b>' :
+                              '→ <b style="color:#059669">STABLE</b>';
+    infoLines += `<span class="tag tag-${a.id==='clip'?'clip':a.id}">${a.label}</span> f′=${a.fd.toFixed(3)}, step factor=${a.sf.toFixed(3)} ${label}. `;
+  });
+  document.getElementById('infobox').innerHTML = infoLines;
+
+  // ── Stats table ──────────────────────────────────────────────────────────
+  let rows = '';
+  activDefs.forEach(a=>{
+    if(!a.show) return;
+    const g0 = gradMag(a.sf, 0);
+    const assess = a.sf < 0.99 ? '⚠ Vanishes' : a.sf > 1.01 ? '⚠ Explodes' : '✓ Stable';
+    const ac = a.sf < 0.99 ? '#dc2626' : a.sf > 1.01 ? '#d97706' : '#059669';
+    rows += `<tr>
+      <td><span class="tag tag-${a.id==='clip'?'clip':a.id}">${a.label}</span></td>
+      <td class="small-num">${a.fd.toFixed(4)}</td>
+      <td class="small-num">${a.sf.toFixed(4)}</td>
+      <td class="small-num">${g0.toExponential(3)}</td>
+      <td style="color:${ac};font-weight:700">${assess}</td>
+    </tr>`;
+  });
+  document.getElementById('stats_table').innerHTML =
+    `<tr><th>Activation</th><th>f′(h)</th><th>|Wₕ·f′|</th><th>|grad| at k=0</th><th>Assessment</th></tr>${rows}`;
+}
+
+// ── Event listeners ─────────────────────────────────────────────────────────
+['T','Wh','hval'].forEach(id=>document.getElementById(id).addEventListener('input', render));
+['chk_sig','chk_tanh','chk_relu','chk_clip','yscale'].forEach(id=>
+  document.getElementById(id).addEventListener('change', render));
+
+render();
+</script>
+</body>
+</html>

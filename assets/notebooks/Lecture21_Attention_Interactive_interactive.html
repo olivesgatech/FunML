@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Local vs Global Attention — Lecture 21</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .top-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+  @media(max-width:780px){.top-row{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.8rem;font-weight:600;color:var(--muted);min-width:130px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:34px;text-align:right;}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;}
+  .tab{padding:6px 14px;border-radius:7px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  #chart-attn{width:100%;height:340px;}
+  #chart-heatmap{width:100%;height:320px;}
+  .info{font-size:.84rem;line-height:1.65;margin-top:8px;color:var(--text);}
+  .info b{color:var(--blue);}
+  .seq-display{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;}
+  .tok{padding:4px 8px;border-radius:5px;font-size:.82rem;font-weight:600;
+       border:1.5px solid;cursor:pointer;transition:all .15s;}
+  .tok.selected{border-color:var(--blue);background:#eff6ff;}
+  .score-bar{height:6px;border-radius:3px;margin-top:2px;}
+</style>
+</head>
+<body>
+
+<h2>Section 3 — Local vs Global Attention Mechanisms</h2>
+<p class="subtitle">See how attention scores differ between global (all positions) and local (window-based) attention. Click a query position to explore.</p>
+
+<!-- Sentence input + controls -->
+<div class="top-row">
+  <div class="panel">
+    <h3>Controls</h3>
+    <div class="tabs">
+      <button class="tab active" id="tab-global" onclick="setMode('global')">Global Attention</button>
+      <button class="tab" id="tab-local" onclick="setMode('local')">Local Attention</button>
+    </div>
+
+    <div class="ctrl-row">
+      <label>Query position p</label>
+      <input type="range" id="qpos" min="0" max="9" step="1" value="4"/>
+      <span class="val" id="qpos_val">4</span>
+    </div>
+    <div class="ctrl-row" id="window-row">
+      <label>Window size D</label>
+      <input type="range" id="window" min="1" max="5" step="1" value="2"/>
+      <span class="val" id="window_val">2</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Temperature τ</label>
+      <input type="range" id="temp" min="0.1" max="3.0" step="0.1" value="1.0"/>
+      <span class="val" id="temp_val">1.0</span>
+    </div>
+
+    <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.04em;">
+      Click a token to set query position
+    </div>
+    <div class="seq-display" id="seq-display"></div>
+
+    <div class="info" id="info-text">Loading…</div>
+  </div>
+
+  <div class="panel">
+    <h3>Attention Scores</h3>
+    <div id="chart-attn"></div>
+  </div>
+</div>
+
+<!-- Heatmap: full attention matrix -->
+<div class="panel">
+  <h3>Full Attention Heatmap (all query positions)</h3>
+  <div id="chart-heatmap"></div>
+</div>
+
+<script>
+// ── Sentence (fixed 10-token example) ────────────────────────────────────────
+const TOKENS = ['The','cat','sat','on','the','mat','and','slept','all','day'];
+const N = TOKENS.length;
+
+// Fixed "key" vectors (1D projections for simplicity)
+// Simulate meaningful similarity structure
+const KEY_VEC = [0.1, 0.6, -0.3, 0.2, 0.1, -0.4, 0.3, -0.8, 0.5, -0.2];
+
+let mode = 'global';
+
+function softmax(arr, tau){
+  const scaled = arr.map(v=>v/tau);
+  const m = Math.max(...scaled);
+  const exps = scaled.map(v=>Math.exp(v-m));
+  const s = exps.reduce((a,b)=>a+b,0);
+  return exps.map(v=>v/s);
+}
+
+function computeScores(qpos, window_D, tau, modeStr){
+  // Query vector = KEY_VEC[qpos] (simplified dot-product attention)
+  const raw = TOKENS.map((_,k)=>KEY_VEC[qpos]*KEY_VEC[k] + 0.5*Math.cos((qpos-k)*0.8));
+
+  // For local: mask out tokens outside [p-D, p+D]
+  const masked = raw.map((v,k)=>{
+    if(modeStr === 'local' && Math.abs(k - qpos) > window_D) return -1e9;
+    return v;
+  });
+  return softmax(masked, tau);
+}
+
+function render(){
+  const qpos = +document.getElementById('qpos').value;
+  const D    = +document.getElementById('window').value;
+  const tau  = +document.getElementById('temp').value;
+
+  document.getElementById('qpos_val').textContent   = qpos;
+  document.getElementById('window_val').textContent = D;
+  document.getElementById('temp_val').textContent   = tau.toFixed(1);
+  document.getElementById('window-row').style.display = mode==='local' ? '' : 'none';
+  document.getElementById('qpos').max = N-1;
+
+  // ── Token display ───────────────────────────────────────────────────────
+  const seqDiv = document.getElementById('seq-display');
+  seqDiv.innerHTML = TOKENS.map((t,i)=>{
+    const isQ = i===qpos;
+    const inWindow = mode==='local' && Math.abs(i-qpos)<=D;
+    const bg = isQ?'background:#dbeafe;border-color:#2563eb;' :
+               inWindow?'background:#f0fdf4;border-color:#059669;':'border-color:#e2e8f0;';
+    return `<div class="tok ${isQ?'selected':''}" style="${bg}" onclick="setQpos(${i})">${t}</div>`;
+  }).join('');
+
+  // ── Attention scores (current query) ─────────────────────────────────────
+  const scores = computeScores(qpos, D, tau, mode);
+
+  const colors = scores.map((_,k)=>{
+    if(k===qpos) return '#2563eb';
+    if(mode==='local' && Math.abs(k-qpos)>D) return '#e2e8f0';
+    return '#059669';
+  });
+
+  Plotly.newPlot('chart-attn', [{
+    x:TOKENS, y:scores,
+    type:'bar',
+    marker:{color:colors, line:{color:'#fff',width:1}},
+    text:scores.map(v=>v.toFixed(3)),
+    textposition:'outside',
+    hovertemplate:'%{x}<br>α = %{y:.4f}<extra></extra>'
+  }], {
+    title:{text:(mode==='global'?'Global':'Local (D='+D+')')+' Attention — Query: "'+TOKENS[qpos]+'"',
+           font:{size:13}, x:0.5},
+    xaxis:{title:'Key position', gridcolor:'#f1f5f9'},
+    yaxis:{title:'Attention weight α', range:[0, Math.max(...scores)*1.2], gridcolor:'#f1f5f9'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    shapes: mode==='local' ? [
+      {type:'rect', xref:'x', yref:'paper',
+       x0:Math.max(qpos-D-0.5,-.5), x1:Math.min(qpos+D+0.5,N-0.5),
+       y0:0, y1:1, fillcolor:'rgba(5,150,105,.08)', line:{color:'#059669',width:1.5,dash:'dot'}}
+    ] : []
+  }, {responsive:true, displayModeBar:false});
+
+  // ── Full attention heatmap ────────────────────────────────────────────────
+  const mat = [];
+  for(let q=0;q<N;q++){
+    mat.push(computeScores(q, D, tau, mode));
+  }
+
+  Plotly.newPlot('chart-heatmap', [{
+    z:mat, x:TOKENS, y:TOKENS,
+    type:'heatmap',
+    colorscale:'Blues',
+    hovertemplate:'Query: %{y}<br>Key: %{x}<br>α = %{z:.3f}<extra></extra>',
+    zmin:0, zmax:mode==='global'?0.25:1.0
+  }], {
+    xaxis:{title:'Key tokens', side:'bottom'},
+    yaxis:{title:'Query tokens', autorange:'reversed'},
+    margin:{t:20,b:60,l:60,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    annotations:[{
+      xref:'paper', yref:'paper', x:0.5, y:1.04,
+      text: mode==='global'
+        ? 'Global: every query attends to all N tokens'
+        : `Local: each query only sees tokens within ±${D} positions`,
+      showarrow:false, font:{size:11, color:'#64748b'}
+    }]
+  }, {responsive:true, displayModeBar:false});
+
+  // ── Info text ──────────────────────────────────────────────────────────────
+  const topK = scores.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v).slice(0,3);
+  const topStr = topK.map(({v,i})=>`"${TOKENS[i]}" (${v.toFixed(3)})`).join(', ');
+  const infoEl = document.getElementById('info-text');
+  if(mode==='global'){
+    infoEl.innerHTML = `<b>Global attention:</b> Query "${TOKENS[qpos]}" (position ${qpos}) attends to <b>all ${N} tokens</b>. `+
+      `Top-3 attended: ${topStr}.<br><br>`+
+      `<b>Formula:</b> α(t,s) = softmax(score(h<sub>t</sub>, h<sub>s</sub>)) over all s ∈ [1, T].<br>`+
+      `Lower temperature τ makes attention sharper (more peaked); higher τ spreads it more uniformly.`;
+  } else {
+    infoEl.innerHTML = `<b>Local attention:</b> Query "${TOKENS[qpos]}" (position ${qpos}) only attends to positions <b>[${Math.max(0,qpos-D)}, ${Math.min(N-1,qpos+D)}]</b> (window ±${D}). `+
+      `Top attended: ${topStr}.<br><br>`+
+      `<b>Formula:</b> α(t,s) = softmax(score(h<sub>t</sub>, h<sub>s</sub>)) for s ∈ [p−D, p+D].<br>`+
+      `Local attention reduces O(N²) computation to O(N·D). Green shaded region shows the active window.`;
+  }
+}
+
+function setQpos(i){
+  document.getElementById('qpos').value = i;
+  render();
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('tab-global').classList.toggle('active', m==='global');
+  document.getElementById('tab-local').classList.toggle('active', m==='local');
+  render();
+}
+
+['qpos','window','temp'].forEach(id=>document.getElementById(id).addEventListener('input', render));
+
+render();
+</script>
+</body>
+</html>

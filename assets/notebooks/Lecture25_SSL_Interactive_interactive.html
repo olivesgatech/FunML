@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Self-Supervised Learning — Lecture 25</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:780px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.79rem;font-weight:600;color:var(--muted);min-width:130px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:34px;text-align:right;}
+  select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.84rem;background:#fff;}
+  .aug-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;}
+  .aug-btn{padding:5px 8px;border-radius:6px;border:1.5px solid var(--border);background:#fff;
+           cursor:pointer;font-size:.79rem;font-weight:600;text-align:center;transition:all .15s;}
+  .aug-btn.on{background:#eff6ff;border-color:#2563eb;color:#2563eb;}
+  #chart-pretext{width:100%;height:340px;}
+  #chart-latent{width:100%;height:320px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.84rem;line-height:1.65;margin-top:10px;}
+  .info-box b{color:var(--blue);}
+  .simclr-diagram{background:#f8fafc;border:1px solid var(--border);border-radius:8px;
+                   padding:12px;font-size:.8rem;line-height:2;text-align:center;margin-top:6px;}
+  .arrow{color:#64748b;font-size:1rem;}
+  .box{display:inline-block;padding:3px 10px;border-radius:5px;font-weight:700;font-size:.8rem;margin:2px;}
+  .box-blue{background:#dbeafe;color:#1d4ed8;}
+  .box-green{background:#dcfce7;color:#166534;}
+  .box-amber{background:#fef3c7;color:#92400e;}
+  .box-purple{background:#ede9fe;color:#5b21b6;}
+</style>
+</head>
+<body>
+
+<h2>Section 3 — Self-Supervised Learning: Pretext Tasks & SimCLR</h2>
+<p class="subtitle">Explore SSL pretext tasks and see how contrastive learning (SimCLR) groups representations in latent space.</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-pretext" onclick="setTab('pretext')">Pretext Tasks</button>
+  <button class="tab" id="tab-simclr" onclick="setTab('simclr')">SimCLR Contrastive</button>
+  <button class="tab" id="tab-latent" onclick="setTab('latent')">Latent Space</button>
+</div>
+
+<div class="layout">
+  <!-- Controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">Pretext Task Controls</h3>
+
+    <!-- Pretext controls -->
+    <div id="ctrl-pretext">
+      <div class="ctrl-row">
+        <label>Pretext task</label>
+        <select id="pretext_task" style="flex:1;" onchange="render()">
+          <option value="rotation">Rotation Prediction</option>
+          <option value="masking">Patch Masking</option>
+          <option value="jigsaw">Jigsaw Puzzle</option>
+          <option value="colorize">Colorization</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>Rotation angle</label>
+        <input type="range" id="rot_angle" min="0" max="270" step="90" value="90"/>
+        <span class="val" id="rot_angle_val">90°</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Mask fraction</label>
+        <input type="range" id="mask_frac" min="0.1" max="0.9" step="0.05" value="0.4"/>
+        <span class="val" id="mask_frac_val">0.40</span>
+      </div>
+    </div>
+
+    <!-- SimCLR controls -->
+    <div id="ctrl-simclr" style="display:none">
+      <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">
+        Augmentations (T₁, T₂)
+      </div>
+      <div class="aug-grid">
+        <button class="aug-btn on" id="aug-crop" onclick="toggleAug('crop')">✓ Random Crop</button>
+        <button class="aug-btn on" id="aug-flip" onclick="toggleAug('flip')">✓ Horiz. Flip</button>
+        <button class="aug-btn on" id="aug-color" onclick="toggleAug('color')">✓ Color Jitter</button>
+        <button class="aug-btn off" id="aug-blur" onclick="toggleAug('blur')">✗ Gaussian Blur</button>
+        <button class="aug-btn off" id="aug-grayscale" onclick="toggleAug('grayscale')">✗ Grayscale</button>
+      </div>
+      <div class="ctrl-row" style="margin-top:8px;">
+        <label>Temperature τ</label>
+        <input type="range" id="simclr_tau" min="0.1" max="1.0" step="0.05" value="0.5"/>
+        <span class="val" id="simclr_tau_val">0.50</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Batch size N</label>
+        <input type="range" id="simclr_N" min="4" max="20" step="2" value="8"/>
+        <span class="val" id="simclr_N_val">8</span>
+      </div>
+    </div>
+
+    <!-- Latent controls -->
+    <div id="ctrl-latent" style="display:none">
+      <div class="ctrl-row">
+        <label>SSL pretrain epochs</label>
+        <input type="range" id="ssl_epochs" min="0" max="100" step="10" value="50"/>
+        <span class="val" id="ssl_epochs_val">50</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Latent dim</label>
+        <select id="latent_dim" style="flex:1;" onchange="render()">
+          <option value="2">2D</option>
+          <option value="4">4D → t-SNE</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>Labeled fraction</label>
+        <input type="range" id="label_frac" min="0.05" max="1.0" step="0.05" value="0.1"/>
+        <span class="val" id="label_frac_val">10%</span>
+      </div>
+    </div>
+
+    <div class="info-box" id="info-side" style="margin-top:10px;font-size:.82rem;"></div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3 id="chart-title">Pretext Task Visualization</h3>
+      <div id="chart-pretext"></div>
+    </div>
+    <div class="panel">
+      <h3>Learned Representations</h3>
+      <div id="chart-latent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Deterministic RNG ──────────────────────────────────────────────────────
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+const rng=mulberry32(99);
+function randn(){ const u=rng(),v=rng(); return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v); }
+
+let currentTab='pretext';
+const augStates = {crop:true,flip:true,color:true,blur:false,grayscale:false};
+
+function toggleAug(a){
+  augStates[a]=!augStates[a];
+  const btn=document.getElementById('aug-'+a);
+  btn.classList.toggle('on',augStates[a]);
+  btn.classList.toggle('off',!augStates[a]);
+  btn.textContent=(augStates[a]?'✓ ':'✗ ')+btn.textContent.slice(2);
+  render();
+}
+
+// ── Synthetic "image" (8×8 pixel grid) ───────────────────────────────────────
+// 3 shape classes: circle, square, triangle (encoded as patterns)
+function makePixels(shape, size=8){
+  const grid=Array.from({length:size},()=>new Array(size).fill(0));
+  const cx=3.5, cy=3.5, r=2.5;
+  for(let i=0;i<size;i++) for(let j=0;j<size;j++){
+    if(shape==='circle'){
+      grid[i][j]=((i-cy)**2+(j-cx)**2)<r**2?0.8+0.2*rng():0.05*rng();
+    } else if(shape==='square'){
+      grid[i][j]=(i>=1&&i<=6&&j>=1&&j<=6&&(i===1||i===6||j===1||j===6))?0.8+0.2*rng():0.05*rng();
+    } else {
+      // triangle: lower-left half
+      grid[i][j]=(j<=i+1&&j>=0&&i<size)?0.6+0.2*rng():0.05*rng();
+    }
+  }
+  return grid;
+}
+
+function rotateGrid(grid, deg){
+  const n=grid.length;
+  const out=Array.from({length:n},()=>new Array(n).fill(0));
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    let ni=i,nj=j;
+    if(deg===90){ni=j;nj=n-1-i;}
+    else if(deg===180){ni=n-1-i;nj=n-1-j;}
+    else if(deg===270){ni=n-1-j;nj=i;}
+    out[ni][nj]=grid[i][j];
+  }
+  return out;
+}
+
+function flatGrid(grid){ return grid.flat(); }
+function maskGrid(grid, frac){ return grid.map(row=>row.map(v=>rng()<frac?0:v)); }
+
+// ── Render functions ──────────────────────────────────────────────────────────
+function renderPretext(){
+  const task     = document.getElementById('pretext_task').value;
+  const rotAngle = +document.getElementById('rot_angle').value;
+  const maskFrac = +document.getElementById('mask_frac').value;
+  document.getElementById('rot_angle_val').textContent = rotAngle+'°';
+  document.getElementById('mask_frac_val').textContent = maskFrac.toFixed(2);
+
+  const shape='circle';
+  const orig=makePixels(shape);
+  let transformed;
+  let taskLabel='';
+
+  if(task==='rotation'){
+    transformed=rotateGrid(orig, rotAngle);
+    taskLabel=`Rotation by ${rotAngle}° — label: ${rotAngle}`;
+  } else if(task==='masking'){
+    transformed=maskGrid(orig, maskFrac);
+    taskLabel=`Masked (${(maskFrac*100).toFixed(0)}%) — predict missing patches`;
+  } else if(task==='jigsaw'){
+    // Swap 2×2 blocks
+    transformed=orig.map(r=>[...r]);
+    const tmp=transformed[0][0];
+    transformed[0][0]=transformed[7][7]; transformed[7][7]=tmp;
+    taskLabel='Jigsaw: permuted patches — predict permutation index';
+  } else {
+    // Colorization: zeroed-out
+    transformed=orig.map(r=>r.map(()=>0));
+    taskLabel='Colorization: grayscale input → predict color channels';
+  }
+
+  const SIDE=8;
+  // Show 4 panels: original + transformed pair
+  const annotations=[];
+  const images=[];
+
+  // Original annotation
+  annotations.push({xref:'paper',yref:'paper',x:0.22,y:1.02,text:'Original',
+    font:{size:11,color:'#1e293b'},showarrow:false,xanchor:'center'});
+  annotations.push({xref:'paper',yref:'paper',x:0.78,y:1.02,text:'Transformed ('+taskLabel+')',
+    font:{size:11,color:'#2563eb'},showarrow:false,xanchor:'center'});
+
+  Plotly.newPlot('chart-pretext',[
+    {z:orig, type:'heatmap', showscale:false, colorscale:'Greys',
+     xaxis:'x', yaxis:'y', zmin:0, zmax:1,
+     hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra>Original</extra>'},
+    {z:transformed, type:'heatmap', showscale:false, colorscale:task==='masking'?'Blues':'Greys',
+     xaxis:'x2', yaxis:'y2', zmin:0, zmax:1,
+     hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra>Transformed</extra>'}
+  ],{
+    grid:{rows:1,columns:2,pattern:'independent'},
+    annotations,
+    margin:{t:40,b:20,l:30,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    height:300
+  },{responsive:true, displayModeBar:false});
+
+  // Representations after pretext training — 3 classes in 2D
+  const CLASSES=['circle','square','triangle'];
+  const COLORS=['#2563eb','#dc2626','#059669'];
+  const repTraces=[];
+  CLASSES.forEach((cls,ci)=>{
+    const xs=[],ys=[];
+    for(let i=0;i<20;i++){
+      // Cluster centers differ by class
+      xs.push(ci*2-2+0.4*randn());
+      ys.push(0.3*randn());
+    }
+    repTraces.push({x:xs,y:ys,type:'scatter',mode:'markers',
+      marker:{color:COLORS[ci],size:8,opacity:0.8},
+      name:cls.charAt(0).toUpperCase()+cls.slice(1),
+      hovertemplate:`${cls}<br>(z₁=%{x:.2f}, z₂=%{y:.2f})<extra></extra>`});
+  });
+  Plotly.newPlot('chart-latent',repTraces,{
+    title:{text:'Learned Representations after Pretext Training',font:{size:12},x:0.5},
+    xaxis:{title:'z₁',gridcolor:'#f1f5f9'},
+    yaxis:{title:'z₂',gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.12,x:0.5,xanchor:'center'},
+    margin:{t:50,b:40,l:50,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  const taskDescriptions={
+    rotation:'<b>Rotation Prediction:</b> The network is trained to classify which rotation was applied (0°, 90°, 180°, 270°). A useful representation emerges because predicting rotation requires understanding object orientation.',
+    masking:'<b>Masked Patch Prediction (MAE/BERT-style):</b> Random patches are masked out; the network predicts the missing pixels. Requires learning rich local and global structure.',
+    jigsaw:'<b>Jigsaw Puzzle:</b> Patches are shuffled; the network predicts the correct permutation. Forces the model to understand spatial layout and part relationships.',
+    colorize:'<b>Colorization:</b> The network maps grayscale → color. Requires learning semantic content (sky=blue, grass=green) without any labels.'
+  };
+  document.getElementById('info-side').innerHTML=
+    taskDescriptions[task]+'<br><br><b>Key idea:</b> The pretext task provides free supervision from the data itself. The learned encoder is then fine-tuned with a <em>small</em> labeled set.';
+}
+
+function renderSimCLR(){
+  const tau   = +document.getElementById('simclr_tau').value;
+  const N     = +document.getElementById('simclr_N').value;
+  document.getElementById('simclr_tau_val').textContent=tau.toFixed(2);
+  document.getElementById('simclr_N_val').textContent=N;
+
+  const nAugs = Object.values(augStates).filter(Boolean).length;
+  const augStr = Object.entries(augStates).filter(([,v])=>v).map(([k])=>k).join(', ');
+
+  // Simulate: anchor + positive are close; negatives spread out
+  // Each pair (i, i') = positive pair; all others = negatives
+  const anchors={x:[],y:[],labels:[]};
+  const positives={x:[],y:[],labels:[]};
+  for(let i=0;i<N;i++){
+    const cx=3*Math.cos(2*Math.PI*i/N), cy=3*Math.sin(2*Math.PI*i/N);
+    anchors.x.push(cx+0.15*randn()); anchors.y.push(cy+0.15*randn()); anchors.labels.push('Image '+i);
+    // Positive: same image, different augmentation → closer cluster
+    const spread=Math.max(0.05, 0.3-nAugs*0.05)*(1+tau);
+    positives.x.push(cx+spread*randn()); positives.y.push(cy+spread*randn()); positives.labels.push('Image '+i+'\'');
+  }
+
+  const traces=[
+    // Positive pair lines
+    ...Array.from({length:N},(_,i)=>({
+      x:[anchors.x[i],positives.x[i]], y:[anchors.y[i],positives.y[i]],
+      type:'scatter',mode:'lines',
+      line:{color:'#059669',width:1.5,dash:'dot'},
+      showlegend:i===0, name:'Positive pair',hoverinfo:'skip'
+    })),
+    // Anchors
+    {x:anchors.x, y:anchors.y, type:'scatter', mode:'markers+text',
+     text:anchors.labels, textposition:'top center', textfont:{size:9},
+     marker:{color:'#2563eb',size:12,symbol:'circle',line:{color:'#fff',width:1.5}},
+     name:'Anchor z_i',
+     hovertemplate:'%{text}<br>z=(%{x:.2f},%{y:.2f})<extra>Anchor</extra>'},
+    // Positives
+    {x:positives.x, y:positives.y, type:'scatter', mode:'markers+text',
+     text:positives.labels, textposition:'bottom center', textfont:{size:9},
+     marker:{color:'#059669',size:12,symbol:'diamond',line:{color:'#fff',width:1.5}},
+     name:'Positive z_i\'',
+     hovertemplate:'%{text}<br>z=(%{x:.2f},%{y:.2f})<extra>Positive</extra>'}
+  ];
+
+  Plotly.newPlot('chart-pretext',traces,{
+    title:{text:`SimCLR: ${N} pairs, τ=${tau.toFixed(2)}, augs: [${augStr||'none'}]`,
+           font:{size:12},x:0.5},
+    xaxis:{title:'Projection z₁',range:[-5,5],gridcolor:'#f1f5f9'},
+    yaxis:{title:'Projection z₂',range:[-5,5],gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:45,l:50,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  // NT-Xent loss approximation
+  const steps=Array.from({length:20},(_,i)=>i*5);
+  const lossDecay=steps.map(s=>{
+    const baseline=2*Math.log(N)+0.5;
+    return baseline*Math.exp(-s/30*(0.5+0.1*nAugs))+(0.1+0.05*tau)*randn()*0.1+0.05;
+  });
+  Plotly.newPlot('chart-latent',[{
+    x:steps, y:lossDecay.map(v=>Math.max(0.05,v)),
+    type:'scatter', mode:'lines+markers',
+    line:{color:'#2563eb',width:2.5}, marker:{size:5},
+    fill:'tozeroy', fillcolor:'rgba(37,99,235,.12)',
+    hovertemplate:'Epoch %{x}<br>NT-Xent = %{y:.3f}<extra></extra>'
+  }],{
+    title:{text:'NT-Xent Loss (simulated)',font:{size:12},x:0.5},
+    xaxis:{title:'Training epoch'},
+    yaxis:{title:'Contrastive loss'},
+    margin:{t:45,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  document.getElementById('info-side').innerHTML=
+    `<b>SimCLR:</b> For each image x, generate two augmented views (x_i, x_i') using composition T₁∘T₂.<br><br>`+
+    `<b>NT-Xent loss:</b> ℓ(i,j) = −log exp(sim(z_i,z_j)/τ) / Σ<sub>k≠i</sub> exp(sim(z_i,z_k)/τ)<br><br>`+
+    `Active augmentations: <b>${augStr||'none'}</b> (${nAugs}/5).<br>`+
+    `More augmentations → harder positives → better representations. Lower τ = sharper contrast.`;
+}
+
+function renderLatent(){
+  const epochs    = +document.getElementById('ssl_epochs').value;
+  const labelFrac = +document.getElementById('label_frac').value;
+  document.getElementById('ssl_epochs_val').textContent=epochs;
+  document.getElementById('label_frac_val').textContent=(labelFrac*100).toFixed(0)+'%';
+
+  // Simulate t-SNE clusters: better separation with more epochs
+  const CLASSES=['C1','C2','C3','C4'];
+  const COLORS=['#2563eb','#dc2626','#059669','#d97706'];
+  const N_PER=25;
+  const spread=Math.max(0.3, 1.5-epochs/100*1.2);
+
+  const traces=[];
+  CLASSES.forEach((cls,ci)=>{
+    const cx=4*Math.cos(2*Math.PI*ci/CLASSES.length);
+    const cy=4*Math.sin(2*Math.PI*ci/CLASSES.length);
+    const xs=[],ys=[],isLabeled=[];
+    for(let i=0;i<N_PER;i++){
+      xs.push(cx+spread*randn()); ys.push(cy+spread*randn());
+      isLabeled.push(rng()<labelFrac);
+    }
+    // Unlabeled
+    traces.push({
+      x:xs.filter((_,i)=>!isLabeled[i]),
+      y:ys.filter((_,i)=>!isLabeled[i]),
+      type:'scatter',mode:'markers',
+      marker:{color:COLORS[ci],size:7,opacity:0.5,symbol:'circle'},
+      name:`${cls} (unlabeled)`,legendgroup:cls,
+      hovertemplate:`${cls} unlabeled<br>z=(%{x:.2f},%{y:.2f})<extra></extra>`
+    });
+    // Labeled
+    const lxs=xs.filter((_,i)=>isLabeled[i]), lys=ys.filter((_,i)=>isLabeled[i]);
+    if(lxs.length) traces.push({
+      x:lxs, y:lys, type:'scatter', mode:'markers',
+      marker:{color:COLORS[ci],size:11,symbol:'star',
+              line:{color:'#1e293b',width:1.5}},
+      name:`${cls} (labeled)`, legendgroup:cls,
+      hovertemplate:`${cls} labeled<br>z=(%{x:.2f},%{y:.2f})<extra></extra>`
+    });
+  });
+
+  Plotly.newPlot('chart-pretext',traces,{
+    title:{text:`t-SNE of SSL Latent Space (${epochs} SSL epochs, ${(labelFrac*100).toFixed(0)}% labeled)`,
+           font:{size:12},x:0.5},
+    xaxis:{title:'t-SNE 1',gridcolor:'#f1f5f9'},
+    yaxis:{title:'t-SNE 2',gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:40,l:50,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  // Accuracy vs labeled fraction
+  const fracs=Array.from({length:10},(_,i)=>0.05+i*0.1);
+  function accAt(f,ep){ return 0.6+0.38*(1-Math.exp(-6*f))*(ep/100)**0.3+0.02*randn()*0.3; }
+  const accSSL  = fracs.map(f=>Math.min(0.98,Math.max(0,accAt(f,epochs))));
+  const accSup  = fracs.map(f=>Math.min(0.98,Math.max(0,0.4+0.55*(1-Math.exp(-5*f)))));
+
+  Plotly.newPlot('chart-latent',[
+    {x:fracs.map(v=>(v*100).toFixed(0)+'%'), y:accSSL, type:'scatter', mode:'lines+markers',
+     line:{color:'#2563eb',width:2.5}, marker:{size:6},
+     name:`SSL pretrain (${epochs} ep) + finetune`,
+     hovertemplate:'%{x} labeled → acc=%{y:.3f}<extra>SSL</extra>'},
+    {x:fracs.map(v=>(v*100).toFixed(0)+'%'), y:accSup, type:'scatter', mode:'lines+markers',
+     line:{color:'#dc2626',width:2,dash:'dash'}, marker:{size:6},
+     name:'Supervised only',
+     hovertemplate:'%{x} labeled → acc=%{y:.3f}<extra>Supervised</extra>'}
+  ],{
+    title:{text:'Classification Accuracy vs Labeled Fraction',font:{size:12},x:0.5},
+    xaxis:{title:'Fraction of labels used'},
+    yaxis:{title:'Test accuracy',range:[0,1]},
+    shapes:[{type:'line',xref:'x',yref:'y',
+             x0:(labelFrac*100).toFixed(0)+'%', x1:(labelFrac*100).toFixed(0)+'%',
+             y0:0,y1:1,line:{color:'#94a3b8',width:1.5,dash:'dot'}}],
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  document.getElementById('info-side').innerHTML=
+    `<b>SSL + Fine-tuning:</b> Pre-train on unlabeled data with a pretext task (e.g., SimCLR), then fine-tune on a small labeled set.<br><br>`+
+    `At <b>${(labelFrac*100).toFixed(0)}% labels</b> and <b>${epochs} SSL epochs</b>:<br>`+
+    `• SSL accuracy: ~${(accAt(labelFrac,epochs)*100).toFixed(1)}%<br>`+
+    `• Supervised only: ~${((0.4+0.55*(1-Math.exp(-5*labelFrac)))*100).toFixed(1)}%<br><br>`+
+    `Stars = labeled points. More SSL pre-training → better clusters → higher accuracy with fewer labels.`;
+}
+
+function setTab(t){
+  currentTab=t;
+  ['pretext','simclr','latent'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active',id===t);
+    document.getElementById('ctrl-'+id).style.display=id===t?'':'none';
+  });
+  const titles={pretext:'Pretext Task Controls',simclr:'SimCLR Controls',latent:'Latent Space Controls'};
+  document.getElementById('ctrl-title').textContent=titles[t];
+  render();
+}
+
+function render(){
+  if(currentTab==='pretext') renderPretext();
+  else if(currentTab==='simclr') renderSimCLR();
+  else renderLatent();
+}
+
+['rot_angle','mask_frac','simclr_tau','simclr_N','ssl_epochs','label_frac'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',render);
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Uncertainty Quantification — Lecture 27</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.83rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:280px 1fr;gap:12px;}
+  @media(max-width:750px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.79rem;font-weight:600;color:var(--muted);min-width:120px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:34px;text-align:right;}
+  #chart1{width:100%;height:370px;}
+  #chart2{width:100%;height:240px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.845rem;line-height:1.65;margin-top:10px;}
+  .info-box b{color:var(--blue);}
+  .legend-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:.8rem;}
+  .legend-dot{width:12px;height:12px;border-radius:50%;}
+</style>
+</head>
+<body>
+
+<h2>Section 3 — Types of Uncertainty in Neural Networks</h2>
+<p class="subtitle">Visualize aleatoric, epistemic, and predictive uncertainty on 1D regression. Switch views using the tabs below.</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-aleat" onclick="setTab('aleat')">Aleatoric Uncertainty</button>
+  <button class="tab" id="tab-epist" onclick="setTab('epist')">Epistemic Uncertainty</button>
+  <button class="tab" id="tab-mcd"   onclick="setTab('mcd')">MC Dropout</button>
+</div>
+
+<div class="layout">
+  <!-- Controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">Controls</h3>
+
+    <!-- Aleatoric controls -->
+    <div id="ctrl-aleat">
+      <div class="ctrl-row">
+        <label>Noise amplitude σ</label>
+        <input type="range" id="aleat_sigma" min="0.05" max="1.0" step="0.05" value="0.3"/>
+        <span class="val" id="aleat_sigma_val">0.30</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Heteroscedastic?</label>
+        <input type="checkbox" id="hetero" checked style="width:18px;height:18px;accent-color:var(--blue);"/>
+      </div>
+      <div class="ctrl-row">
+        <label>N data points</label>
+        <input type="range" id="aleat_N" min="20" max="200" step="10" value="80"/>
+        <span class="val" id="aleat_N_val">80</span>
+      </div>
+    </div>
+
+    <!-- Epistemic controls -->
+    <div id="ctrl-epist" style="display:none">
+      <div class="ctrl-row">
+        <label>Training region</label>
+        <select id="epist_region" style="flex:1;padding:4px;border:1px solid var(--border);border-radius:5px;font-size:.83rem;">
+          <option value="left">Left only [−3, 0]</option>
+          <option value="center">Center [−1.5, 1.5]</option>
+          <option value="full" selected>Full [−3, 3]</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>N ensemble models</label>
+        <input type="range" id="epist_M" min="1" max="10" step="1" value="5"/>
+        <span class="val" id="epist_M_val">5</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Model diversity</label>
+        <input type="range" id="epist_div" min="0.1" max="1.5" step="0.1" value="0.5"/>
+        <span class="val" id="epist_div_val">0.5</span>
+      </div>
+    </div>
+
+    <!-- MC Dropout controls -->
+    <div id="ctrl-mcd" style="display:none">
+      <div class="ctrl-row">
+        <label>Dropout rate p</label>
+        <input type="range" id="mcd_p" min="0.1" max="0.7" step="0.05" value="0.3"/>
+        <span class="val" id="mcd_p_val">0.30</span>
+      </div>
+      <div class="ctrl-row">
+        <label>MC samples T</label>
+        <input type="range" id="mcd_T" min="5" max="50" step="5" value="20"/>
+        <span class="val" id="mcd_T_val">20</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Model capacity</label>
+        <input type="range" id="mcd_cap" min="1" max="4" step="1" value="2"/>
+        <span class="val" id="mcd_cap_val">2</span>
+      </div>
+    </div>
+
+    <div class="legend-row" id="legend-row" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <div id="chart1"></div>
+    </div>
+    <div class="panel">
+      <div id="chart2"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" id="info-box"></div>
+
+<script>
+// ── Deterministic RNG (seeded) ────────────────────────────────────────────────
+function mulberry32(seed){
+  return function(){
+    seed|=0; seed=seed+0x6D2B79F5|0;
+    let t=Math.imul(seed^seed>>>15,1|seed);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+const rng = mulberry32(42);
+function randn(){
+  // Box-Muller
+  const u=rng(),v=rng();
+  return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v);
+}
+
+// True function: f(x) = sin(x) + 0.3*x
+function fTrue(x){ return Math.sin(x) + 0.3*x; }
+
+// X grid
+const XGRID = Array.from({length:100},(_,i)=>-3+6*i/99);
+
+let currentTab = 'aleat';
+
+// ── Aleatoric render ──────────────────────────────────────────────────────────
+function renderAleat(){
+  const sigma  = +document.getElementById('aleat_sigma').value;
+  const N      = +document.getElementById('aleat_N').value;
+  const hetero = document.getElementById('hetero').checked;
+
+  document.getElementById('aleat_sigma_val').textContent = sigma.toFixed(2);
+  document.getElementById('aleat_N_val').textContent = N;
+
+  // Generate data
+  const xs=[], ys=[], errs=[];
+  for(let i=0;i<N;i++){
+    const x = -3 + 6*rng();
+    const noise_scale = hetero ? sigma*(1+Math.abs(x)/3) : sigma;
+    const y = fTrue(x) + noise_scale*randn();
+    xs.push(x); ys.push(y); errs.push(noise_scale);
+  }
+
+  // Model fit (true function)
+  const yFit = XGRID.map(x=>fTrue(x));
+  // Predicted uncertainty (heteroscedastic model)
+  const yUpper = XGRID.map(x=>fTrue(x) + (hetero ? sigma*(1+Math.abs(x)/3) : sigma));
+  const yLower = XGRID.map(x=>fTrue(x) - (hetero ? sigma*(1+Math.abs(x)/3) : sigma));
+  const yUpper2 = XGRID.map(x=>fTrue(x) + 2*(hetero ? sigma*(1+Math.abs(x)/3) : sigma));
+  const yLower2 = XGRID.map(x=>fTrue(x) - 2*(hetero ? sigma*(1+Math.abs(x)/3) : sigma));
+
+  const traces = [
+    // 2σ band
+    {x:[...XGRID,...XGRID.slice().reverse()],
+     y:[...yUpper2,...yLower2.slice().reverse()],
+     fill:'toself', fillcolor:'rgba(37,99,235,.10)', line:{color:'transparent'},
+     name:'±2σ (95%)', hoverinfo:'skip'},
+    // 1σ band
+    {x:[...XGRID,...XGRID.slice().reverse()],
+     y:[...yUpper,...yLower.slice().reverse()],
+     fill:'toself', fillcolor:'rgba(37,99,235,.20)', line:{color:'transparent'},
+     name:'±1σ (68%)', hoverinfo:'skip'},
+    // True fn
+    {x:XGRID, y:yFit, type:'scatter', mode:'lines',
+     line:{color:'#2563eb',width:2.5}, name:'True f(x)', hoverinfo:'skip'},
+    // Data
+    {x:xs, y:ys, type:'scatter', mode:'markers',
+     marker:{color:'#64748b', size:5, opacity:0.7},
+     name:'Noisy observations', hovertemplate:'x=%{x:.2f}, y=%{y:.2f}<extra></extra>'}
+  ];
+
+  Plotly.newPlot('chart1', traces, {
+    title:{text:`Aleatoric Uncertainty — ${hetero?'Heteroscedastic':'Homoscedastic'} Noise`,
+           font:{size:13}, x:0.5},
+    xaxis:{title:'x', range:[-3.3,3.3], gridcolor:'#f1f5f9'},
+    yaxis:{title:'y', gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  // Bar: noise level per region
+  const regions = [[-3,-2],[-2,-1],[-1,0],[0,1],[1,2],[2,3]];
+  const avgNoise = regions.map(([a,b])=>{
+    const inRegion = xs.filter((x,i)=>x>=a&&x<b);
+    const inNoise  = errs.filter((_,i)=>xs[i]>=a&&xs[i]<b);
+    return inNoise.length>0 ? inNoise.reduce((s,v)=>s+v,0)/inNoise.length : 0;
+  });
+  Plotly.newPlot('chart2', [{
+    x:regions.map(([a,b])=>`[${a},${b}]`),
+    y:avgNoise,
+    type:'bar',
+    marker:{color:'#2563eb', opacity:0.8},
+    hovertemplate:'Region %{x}<br>Avg σ = %{y:.3f}<extra></extra>'
+  }], {
+    title:{text:'Avg Noise Level per Region', font:{size:12}, x:0.5},
+    xaxis:{title:'x region'}, yaxis:{title:'Noise σ(x)'},
+    margin:{t:45,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  document.getElementById('info-box').innerHTML =
+    `<b>Aleatoric uncertainty</b> arises from inherent randomness in the data — it <b>cannot be reduced</b> by adding more training data.<br>`+
+    (hetero
+      ? `<b>Heteroscedastic:</b> noise variance σ(x) depends on x. The model must predict <em>both</em> mean and variance: p(y|x) = 𝒩(μ(x), σ²(x)). Wider bands at |x| > 0 reflect higher irreducible noise.`
+      : `<b>Homoscedastic:</b> noise variance is constant across all x. A single σ parameter captures all aleatoric uncertainty. The bands are uniform.`)+
+    `<br><br><b>Key insight:</b> No matter how well the model trains, predictions in high-noise regions will remain uncertain.`;
+}
+
+// ── Epistemic render ──────────────────────────────────────────────────────────
+function renderEpist(){
+  const region  = document.getElementById('epist_region').value;
+  const M       = +document.getElementById('epist_M').value;
+  const div     = +document.getElementById('epist_div').value;
+
+  document.getElementById('epist_M_val').textContent  = M;
+  document.getElementById('epist_div_val').textContent = div.toFixed(1);
+
+  // Training range
+  const trainRange = region==='left'?[-3,0]:region==='center'?[-1.5,1.5]:[-3,3];
+
+  // Each ensemble model = slightly perturbed true fn
+  const modelPreds = [];
+  for(let m=0;m<M;m++){
+    const phase = (rng()-0.5)*div;
+    const amp   = 1+(rng()-0.5)*div*0.5;
+    const offset= (rng()-0.5)*div*0.3;
+    modelPreds.push(XGRID.map(x=>amp*Math.sin(x+phase)+0.3*x+offset));
+  }
+
+  // Mean and std
+  const mean = XGRID.map((_,i)=>modelPreds.reduce((s,m)=>s+m[i],0)/M);
+  const std  = XGRID.map((_,i)=>{
+    const v = modelPreds.reduce((s,m)=>s+(m[i]-mean[i])**2,0)/M;
+    return Math.sqrt(v);
+  });
+  const yUpper = mean.map((v,i)=>v+std[i]);
+  const yLower = mean.map((v,i)=>v-std[i]);
+  const yUpper2= mean.map((v,i)=>v+2*std[i]);
+  const yLower2= mean.map((v,i)=>v-2*std[i]);
+
+  // In-distribution mask (for shading)
+  const inDist = XGRID.map(x=>x>=trainRange[0]&&x<=trainRange[1]);
+
+  const traces = [];
+
+  // OOD shading
+  if(region!=='full'){
+    const oodLeft  = XGRID.filter(x=>x<trainRange[0]);
+    const oodRight = XGRID.filter(x=>x>trainRange[1]);
+    if(oodLeft.length){
+      traces.push({
+        x:[oodLeft[0],oodLeft[oodLeft.length-1]],
+        y:[-3,3], type:'scatter', mode:'none',
+        fill:'tozeroy', fillcolor:'rgba(220,38,38,.06)',
+        name:'OOD region', showlegend:true, hoverinfo:'skip'
+      });
+    }
+    if(oodRight.length){
+      traces.push({
+        x:[trainRange[1],3.1], y:[-3,3],
+        type:'scatter', mode:'none',
+        fill:'tozeroy', fillcolor:'rgba(220,38,38,.06)',
+        showlegend:false, hoverinfo:'skip'
+      });
+    }
+  }
+
+  // 2σ band
+  traces.push({
+    x:[...XGRID,...XGRID.slice().reverse()],
+    y:[...yUpper2,...yLower2.slice().reverse()],
+    fill:'toself', fillcolor:'rgba(124,58,237,.10)', line:{color:'transparent'},
+    name:'±2σ ensemble', hoverinfo:'skip'
+  });
+  // 1σ band
+  traces.push({
+    x:[...XGRID,...XGRID.slice().reverse()],
+    y:[...yUpper,...yLower.slice().reverse()],
+    fill:'toself', fillcolor:'rgba(124,58,237,.20)', line:{color:'transparent'},
+    name:'±1σ ensemble', hoverinfo:'skip'
+  });
+
+  // Individual models
+  for(let m=0;m<Math.min(M,5);m++){
+    traces.push({
+      x:XGRID, y:modelPreds[m], type:'scatter', mode:'lines',
+      line:{color:'rgba(124,58,237,.35)',width:1},
+      name: m===0?'Ensemble members':null, showlegend:m===0,
+      hoverinfo:'skip'
+    });
+  }
+
+  // Mean
+  traces.push({
+    x:XGRID, y:mean, type:'scatter', mode:'lines',
+    line:{color:'#7c3aed',width:2.5}, name:'Ensemble mean',
+    hovertemplate:'x=%{x:.2f}<br>mean=%{y:.2f}<extra></extra>'
+  });
+
+  // True fn
+  traces.push({
+    x:XGRID, y:XGRID.map(x=>fTrue(x)), type:'scatter', mode:'lines',
+    line:{color:'#059669',width:1.5,dash:'dash'}, name:'True f(x)', hoverinfo:'skip'
+  });
+
+  const regionStr = region==='left'?'[−3, 0]':region==='center'?'[−1.5, 1.5]':'[−3, 3]';
+  Plotly.newPlot('chart1', traces, {
+    title:{text:`Epistemic Uncertainty — Training on ${regionStr}, M=${M} models`,
+           font:{size:13}, x:0.5},
+    xaxis:{title:'x', range:[-3.3,3.3], gridcolor:'#f1f5f9'},
+    yaxis:{title:'y', range:[-3.5,3.5], gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  // Std per x
+  Plotly.newPlot('chart2', [{
+    x:XGRID, y:std, type:'scatter', mode:'lines',
+    fill:'tozeroy', fillcolor:'rgba(124,58,237,.2)',
+    line:{color:'#7c3aed',width:2},
+    name:'Epistemic σ', hovertemplate:'x=%{x:.2f}<br>σ=%{y:.3f}<extra></extra>'
+  }], {
+    title:{text:'Epistemic Uncertainty σ(x) per Location', font:{size:12}, x:0.5},
+    xaxis:{title:'x', range:[-3.3,3.3]}, yaxis:{title:'Epistemic σ'},
+    shapes: region!=='full' ? [{
+      type:'rect', xref:'x', yref:'paper',
+      x0:trainRange[0], x1:trainRange[1], y0:0, y1:1,
+      fillcolor:'rgba(5,150,105,.1)', line:{color:'#059669',width:1,dash:'dot'}
+    }] : [],
+    margin:{t:45,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  document.getElementById('info-box').innerHTML =
+    `<b>Epistemic uncertainty</b> (model uncertainty) arises from limited training data. It <b>can be reduced</b> by adding more data.<br>`+
+    `With training region <b>${regionStr}</b>, the ensemble disagrees most outside the training distribution (red-shaded OOD regions).<br><br>`+
+    `<b>Deep Ensembles:</b> Train M independent models with different random seeds. Variance across model predictions estimates epistemic uncertainty.<br>`+
+    `<b>Key insight:</b> High σ in OOD regions signals "the model doesn't know what it doesn't know." Collect more data there to reduce epistemic uncertainty.`;
+}
+
+// ── MC Dropout render ─────────────────────────────────────────────────────────
+function renderMCD(){
+  const p   = +document.getElementById('mcd_p').value;
+  const T   = +document.getElementById('mcd_T').value;
+  const cap = +document.getElementById('mcd_cap').value;
+
+  document.getElementById('mcd_p_val').textContent  = p.toFixed(2);
+  document.getElementById('mcd_T_val').textContent  = T;
+  document.getElementById('mcd_cap_val').textContent = cap;
+
+  // MC Dropout: each forward pass, randomly drop neurons → different effective fn
+  const mcPreds = [];
+  for(let t=0;t<T;t++){
+    // Simulate: perturb phase and amplitude by dropout-induced noise
+    // Higher p → more perturbation
+    const phase  = (rng()-0.5)*p*2*cap;
+    const ampDev = (rng()-0.5)*p*cap;
+    const offDev = (rng()-0.5)*p*0.5*cap;
+    mcPreds.push(XGRID.map(x=>(1+ampDev)*Math.sin(x+phase)+0.3*x+offDev));
+  }
+
+  const mean = XGRID.map((_,i)=>mcPreds.reduce((s,m)=>s+m[i],0)/T);
+  const std  = XGRID.map((_,i)=>{
+    return Math.sqrt(mcPreds.reduce((s,m)=>s+(m[i]-mean[i])**2,0)/T);
+  });
+  const yUpper = mean.map((v,i)=>v+std[i]);
+  const yLower = mean.map((v,i)=>v-std[i]);
+
+  const traces = [
+    // Individual MC samples
+    ...mcPreds.slice(0,10).map((pred,idx)=>({
+      x:XGRID, y:pred, type:'scatter', mode:'lines',
+      line:{color:'rgba(37,99,235,.18)',width:0.8},
+      name:idx===0?`${T} MC samples (10 shown)`:null, showlegend:idx===0,
+      hoverinfo:'skip'
+    })),
+    // Uncertainty band
+    {x:[...XGRID,...XGRID.slice().reverse()],
+     y:[...yUpper,...yLower.slice().reverse()],
+     fill:'toself', fillcolor:'rgba(37,99,235,.18)', line:{color:'transparent'},
+     name:'±1σ MC', hoverinfo:'skip'},
+    // Mean
+    {x:XGRID, y:mean, type:'scatter', mode:'lines',
+     line:{color:'#2563eb',width:2.5}, name:'MC mean',
+     hovertemplate:'x=%{x:.2f}<br>μ=%{y:.2f}, σ=%{customdata:.3f}<extra>MC mean</extra>',
+     customdata:std},
+    // True fn
+    {x:XGRID, y:XGRID.map(x=>fTrue(x)), type:'scatter', mode:'lines',
+     line:{color:'#059669',width:1.5,dash:'dash'}, name:'True f(x)', hoverinfo:'skip'}
+  ];
+
+  Plotly.newPlot('chart1', traces, {
+    title:{text:`MC Dropout (p=${p.toFixed(2)}, T=${T} samples)`, font:{size:13}, x:0.5},
+    xaxis:{title:'x', range:[-3.3,3.3], gridcolor:'#f1f5f9'},
+    yaxis:{title:'y', gridcolor:'#f1f5f9'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:50,b:45,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  // Decomposed: compare aleatoric vs epistemic proxy
+  const aleatory = XGRID.map(x=>0.1*(1+0.3*Math.abs(x)));  // proxy
+  const epistemic= std;
+  const total    = XGRID.map((_,i)=>Math.sqrt(aleatory[i]**2+epistemic[i]**2));
+
+  Plotly.newPlot('chart2', [
+    {x:XGRID, y:total, type:'scatter', mode:'lines',
+     line:{color:'#1e293b',width:2}, name:'Total σ', fill:'tozeroy',
+     fillcolor:'rgba(100,116,139,.12)', hovertemplate:'x=%{x:.2f}<br>Total σ=%{y:.3f}<extra>Total</extra>'},
+    {x:XGRID, y:epistemic, type:'scatter', mode:'lines',
+     line:{color:'#7c3aed',width:1.5,dash:'dot'}, name:'Epistemic (MC var)',
+     hovertemplate:'x=%{x:.2f}<br>Epistemic=%{y:.3f}<extra>Epistemic</extra>'},
+    {x:XGRID, y:aleatory, type:'scatter', mode:'lines',
+     line:{color:'#dc2626',width:1.5,dash:'dash'}, name:'Aleatoric (proxy)',
+     hovertemplate:'x=%{x:.2f}<br>Aleatoric=%{y:.3f}<extra>Aleatoric</extra>'}
+  ], {
+    title:{text:'Uncertainty Decomposition', font:{size:12}, x:0.5},
+    xaxis:{title:'x'}, yaxis:{title:'σ'},
+    legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+    margin:{t:45,b:40,l:55,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  },{responsive:true, displayModeBar:false});
+
+  document.getElementById('info-box').innerHTML =
+    `<b>MC Dropout</b> approximates Bayesian inference at test time: keep dropout <em>active</em> during inference and run T forward passes.<br><br>`+
+    `<b>Predictive mean:</b> μ*(x) = (1/T) Σ f̂ᵢ(x)&emsp;&emsp;<b>Predictive variance:</b> σ²(x) ≈ (1/T) Σ f̂ᵢ(x)² − μ*(x)²<br><br>`+
+    `The variance can be <b>decomposed</b> into:<br>`+
+    `• <b style="color:#7c3aed">Epistemic σ</b>: captured by MC Dropout variance (reducible with more data)<br>`+
+    `• <b style="color:#dc2626">Aleatoric σ</b>: predicted by model's output variance head (irreducible noise)<br>`+
+    `• <b>Total σ</b> = √(epistemic² + aleatoric²)<br><br>`+
+    `Higher dropout p increases estimated epistemic uncertainty. More MC samples T reduces estimation noise.`;
+}
+
+function setTab(t){
+  currentTab = t;
+  ['aleat','epist','mcd'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active', id===t);
+    document.getElementById('ctrl-'+id).style.display = id===t?'':'none';
+  });
+  render();
+}
+
+function render(){
+  if(currentTab==='aleat') renderAleat();
+  else if(currentTab==='epist') renderEpist();
+  else renderMCD();
+}
+
+// ── Listeners ───────────────────────────────────────────────────────────────
+['aleat_sigma','aleat_N','epist_M','epist_div','mcd_p','mcd_T','mcd_cap'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', render);
+});
+document.getElementById('hetero').addEventListener('change', render);
+document.getElementById('epist_region').addEventListener('change', render);
+
+render();
+</script>
+</body>
+</html>

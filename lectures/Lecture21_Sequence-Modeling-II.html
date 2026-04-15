@@ -457,12 +457,7 @@ any input position when generating the next token. However, this
 flexibility also comes with higher computational cost, especially for
 long input sequences, since attention weights must be computed over all
 encoder states at every decoding step.</p>
-<figure id="fig:global_attention">
-<img src="img/lecture20/global_attention.png" style="width:43.20%; max-width:43.20%; height:auto;"/>
-<figcaption>Global attention model. At each decoder step, the model
-computes attention weights over all encoder hidden states and forms the
-context vector as their weighted average.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Local vs Global Attention</h3><p>Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture21_Attention_Interactive_interactive.html" style="height:900px;" title="Interactive Section 3 Local vs Global Attention"></iframe></section>
 <h2 data-number="4.2" id="local-attention"><span class="header-section-number">4.2</span> Local Attention</h2>
 <p>Local attention reduces the computational burden of global attention
 by restricting the decoder to attend only to a small subset of encoder
@@ -485,12 +480,7 @@ cheaper than global attention while still allowing the model to focus on
 the most relevant part of the source sequence. Luong et al. report that
 local attention can achieve performance comparable to, and in some cases
 better than, the global approach <span class="citation" data-cites="8"></span>.</p>
-<figure id="fig:local_attention">
-<img src="img/lecture20/local_attention.png" style="width:43.20%; max-width:43.20%; height:auto;"/>
-<figcaption>Local attention model. At each decoder step, the model
-predicts an aligned source position and computes attention only within a
-window around that position.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Local vs Global Attention</h3><p>Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture21_Attention_Interactive_interactive.html" style="height:900px;" title="Interactive Section 3 Local vs Global Attention"></iframe></section>
 <h2 data-number="4.3" id="discussion"><span class="header-section-number">4.3</span> Discussion</h2>
 <p>Both global and local attention address the main limitation of the
 basic Seq2Seq model, namely the fixed-context bottleneck. Instead of
