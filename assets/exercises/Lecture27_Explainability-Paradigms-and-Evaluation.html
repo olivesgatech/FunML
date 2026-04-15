@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> In this lecture, we discussed
+<em>indirect</em>, <em>direct</em>, and <em>targeted</em> explanations.
+Give one example of each type and briefly explain what makes them
+different.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Indirect explanation:</strong> dimensionality reduction
+(e.g., t-SNE/PCA) on embeddings to visualize clustering structure. It
+provides auxiliary insight into learned representations without directly
+attributing importance to inputs <span class="citation" data-cites="8"></span>.</p></li>
+<li><p><strong>Direct explanation:</strong> saliency via occlusion,
+where masking regions and observing confidence changes directly
+identifies which input regions influence the prediction.</p></li>
+<li><p><strong>Targeted explanation:</strong> “Why <span class="math inline">\(P\)</span> rather than <span class="math inline">\(Q\)</span>?” (contrastive) explanations that
+highlight discriminative evidence supporting <span class="math inline">\(P\)</span> over an alternative <span class="math inline">\(Q\)</span>.</p></li>
+</ul>
+<p>Indirect explanations provide context about representations; direct
+explanations attribute importance to specific input regions; targeted
+explanations answer a specific question (why/what-if/contrast).</p></li>
+<li><p><strong>Question:</strong> What are the three targeted
+explanation questions introduced in the lecture, and what does each one
+aim to reveal?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>“Why <span class="math inline">\(P\)</span>?”</strong>
+(correlation-based): identifies evidence that supports predicting class
+<span class="math inline">\(P\)</span> (e.g., saliency highlighting beak
+shape for “Spoonbill”).</p></li>
+<li><p><strong>“What if?”</strong> (counterfactual): tests how the
+prediction changes under plausible modifications (e.g., changing a
+straight beak to curved).</p></li>
+<li><p><strong>“Why <span class="math inline">\(P\)</span> rather than
+<span class="math inline">\(Q\)</span>?”</strong> (contrastive):
+highlights evidence that distinguishes <span class="math inline">\(P\)</span> from a competing class <span class="math inline">\(Q\)</span> (e.g., Bullmastiff vs. Boxer).</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> Describe the main steps of Grad-CAM
+and write the expression for the Grad-CAM heatmap.</p>
+<p><strong>Solution:</strong> Grad-CAM computes a class-specific heatmap
+using gradients of the class logit with respect to feature maps in the
+last convolutional layer:</p>
+<ol>
+<li><p>Forward pass to obtain feature maps <span class="math inline">\(A^k\)</span> and class logit <span class="math inline">\(y^c\)</span>.</p></li>
+<li><p>Backward pass to compute gradients <span class="math inline">\(\frac{\partial y^c}{\partial
+A^k_{ij}}\)</span>.</p></li>
+<li><p>Global-average pool gradients to obtain weights <span class="math display">\[\alpha_k^c = \frac{1}{Z}\sum_i\sum_j
+\frac{\partial y^c}{\partial A^k_{ij}}.\]</span></p></li>
+<li><p>Combine weighted feature maps and apply ReLU: <span class="math display">\[L_{\text{Grad-CAM}}^c =
+\mathrm{ReLU}\!\left(\sum_k \alpha_k^c A^k\right).\]</span></p></li>
+</ol>
+<p>The heatmap is then upsampled to input resolution for
+visualization.</p></li>
+<li><p><strong>Question:</strong> How do Counterfactual-CAM and
+Contrast-CAM modify the Grad-CAM objective, and what question does each
+method answer?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Counterfactual-CAM</strong> addresses <em>“What if <span class="math inline">\(P\)</span> was not in the image?”</em> by
+suppressing evidence for class <span class="math inline">\(P\)</span>
+(e.g., using negated gradients when computing importance weights). This
+reveals alternative regions that could support other predictions if
+<span class="math inline">\(P\)</span>-supporting evidence were
+removed.</p></li>
+<li><p><strong>Contrast-CAM</strong> addresses <em>“Why <span class="math inline">\(P\)</span> rather than <span class="math inline">\(Q\)</span>?”</em> by using a contrastive score
+<span class="math display">\[s(P,Q)=y^P-y^Q,\]</span> and
+backpropagating gradients of <span class="math inline">\(y^P-y^Q\)</span> to produce a heatmap emphasizing
+regions that favor <span class="math inline">\(P\)</span> over <span class="math inline">\(Q\)</span>.</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> Explain the <em>explanatory evaluation
+taxonomy</em> and provide one example of a metric or procedure used in
+each category.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Human evaluation:</strong> humans judge explanation
+quality (e.g., choosing which saliency map is “cleaner” or more
+class-discriminative).</p></li>
+<li><p><strong>Application evaluation:</strong> explanation quality is
+inferred from task-level or human-attention proxies (e.g., gaze
+tracking; metrics like IoU between saliency maps and fixation
+maps).</p></li>
+<li><p><strong>Network evaluation:</strong> explanation quality is
+evaluated through model behavior (e.g., masking or insertion/deletion;
+deletion AUC and insertion AUC).</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> In network evaluation, what do
+<em>pixel-wise deletion</em> and <em>pixel-wise insertion</em> measure,
+and how should AUC behave for a better explanation?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Deletion:</strong> progressively remove pixels in
+decreasing order of importance (replace with a baseline) and track the
+target-class confidence. A better explanation removes truly important
+evidence early, so confidence drops quickly <span class="math inline">\(\Rightarrow\)</span> <strong>lower deletion AUC is
+better</strong>.</p></li>
+<li><p><strong>Insertion:</strong> start from a baseline image (minimal
+signal) and progressively add pixels in decreasing order of importance.
+A better explanation restores key evidence early, so confidence rises
+quickly <span class="math inline">\(\Rightarrow\)</span> <strong>higher
+insertion AUC is better</strong>.</p></li>
+</ul>
+<p>Both tests depend on the choice of baseline and may be biased toward
+large or diffuse explanations.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

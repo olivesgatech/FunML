@@ -1,0 +1,190 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> What problem do Transformers solve
+compared to RNNs?</p>
+<p><strong>Solution:</strong> RNNs process sequences sequentially,
+making training difficult to parallelize and slow for long sequences.
+They also struggle with long-range dependencies due to vanishing or
+exploding gradients.</p>
+<p>Transformers replace recurrence with self-attention, which:</p>
+<ul>
+<li><p>Processes all tokens in parallel</p></li>
+<li><p>Computes direct interactions between any pair of tokens</p></li>
+<li><p>Enables better modeling of long-range dependencies</p></li>
+</ul>
+<p>This allows Transformers to scale better and train more efficiently
+than RNNs.</p></li>
+<li><p><strong>Question:</strong> Why are there separate Query, Key, and
+Value vectors instead of a single representation?</p>
+<p><strong>Solution:</strong> Separate Query, Key, and Value projections
+allow the model to learn different feature spaces for matching and
+information retrieval.</p>
+<p>Specifically:</p>
+<ul>
+<li><p>Queries represent what a token is searching for</p></li>
+<li><p>Keys represent what each token offers for matching</p></li>
+<li><p>Values represent the information passed forward</p></li>
+</ul>
+<p>This separation allows the model to learn asymmetric relationships.
+For example, one token may attend strongly to another without the
+reverse necessarily being true.</p>
+<p>Separating matching (<span class="math inline">\(Q,K\)</span>) from
+information flow (<span class="math inline">\(V\)</span>) also allows
+the model to learn more flexible representations.</p></li>
+<li><p><strong>Question:</strong> Why do we scale by <span class="math inline">\(\sqrt{d_k}\)</span> in the attention formula?</p>
+<p><strong>Solution:</strong> If the components of <span class="math inline">\(Q\)</span> and <span class="math inline">\(K\)</span> have variance near 1, the variance of
+their dot product grows proportionally to <span class="math inline">\(d_k\)</span>.</p>
+<p>Large dot products push the softmax into regions with very small
+gradients, which harms learning.</p>
+<p>Dividing by <span class="math inline">\(\sqrt{d_k}\)</span>
+normalizes the magnitude of the dot products:</p>
+<p><span class="math display">\[\text{Attention}(Q,K,V)
+=
+\text{softmax}
+\left(
+\frac{QK^\top}{\sqrt{d_k}}
+\right)V\]</span></p>
+<p>This keeps gradients well-scaled and improves training
+stability.</p></li>
+<li><p><strong>Question:</strong> What is the difference between
+self-attention and cross-attention?</p>
+<p><strong>Solution:</strong> In self-attention, <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> are derived from the same input
+sequence. This allows tokens to learn relationships within the same
+sequence.</p>
+<p>In cross-attention:</p>
+<ul>
+<li><p><span class="math inline">\(Q\)</span> comes from one sequence
+(typically the decoder)</p></li>
+<li><p><span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> come from another sequence (typically
+the encoder)</p></li>
+</ul>
+<p>Cross-attention allows the decoder to retrieve relevant contextual
+information from the encoder representations.</p></li>
+<li><p><strong>Question:</strong> Why is layer normalization preferred
+over batch normalization in Transformers?</p>
+<p><strong>Solution:</strong> Batch normalization computes statistics
+across the batch dimension, which can be unstable when batch sizes are
+small or variable.</p>
+<p>Layer normalization instead computes statistics across features for
+each token independently.</p>
+<p>Advantages include:</p>
+<ul>
+<li><p>Independence from batch size</p></li>
+<li><p>Stable behavior during inference</p></li>
+<li><p>Consistent normalization across sequence positions</p></li>
+<li><p>Better suitability for sequence models</p></li>
+</ul>
+<p>Because Transformers often operate with variable sequence lengths and
+small batches, layer normalization is generally preferred.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer differ
+from a standard Transformer?</p>
+<p><strong>Solution:</strong> A Vision Transformer (ViT) adapts the
+Transformer encoder for image data.</p>
+<p>Instead of word tokens, ViT:</p>
+<ul>
+<li><p>Splits images into fixed-size patches</p></li>
+<li><p>Flattens each patch into a vector</p></li>
+<li><p>Projects patches into embeddings</p></li>
+<li><p>Adds positional embeddings</p></li>
+</ul>
+<p>Unlike the original Transformer, ViT typically uses only the encoder
+stack (no decoder) for classification tasks.</p>
+<p>The final CLS token representation is used for
+classification.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer (ViT)
+process an image differently from a CNN?</p>
+<p><strong>Solution:</strong> ViT divides the image into patches,
+flattens them, projects them into embeddings, adds positional encodings,
+and processes the sequence using self-attention. Unlike CNNs, which use
+local convolutional filters, ViT models global relationships directly
+via attention.</p></li>
+<li><p><strong>Question:</strong> If an image has size <span class="math inline">\(224 \times 224\)</span> and patch size <span class="math inline">\(P=16\)</span>, how many patches are produced?</p>
+<p><strong>Solution:</strong> <span class="math display">\[N = \frac{224
+\times 224}{16^2}
+= \frac{50176}{256}
+= 196.\]</span></p></li>
+<li><p><strong>Question:</strong> Why is the Transformer decoder
+autoregressive?</p>
+<p><strong>Solution:</strong> In sequence generation tasks, each token
+depends on previously generated tokens.</p>
+<p>During inference, the decoder generates tokens sequentially:</p>
+<ul>
+<li><p>Predict next token</p></li>
+<li><p>Append to sequence</p></li>
+<li><p>Repeat until EOS</p></li>
+</ul>
+<p>During training, however, teacher forcing is used, where the decoder
+receives the ground-truth previous tokens instead of its own
+predictions.</p>
+<p>Autoregressive structure allows the model to learn conditional
+sequence generation.</p></li>
+<li><p><strong>Question:</strong> What role does the <code>[CLS]</code>
+token play in Vision Transformers?</p>
+<p><strong>Solution:</strong> The <code>[CLS]</code> token is a
+learnable embedding prepended to the sequence of patch embeddings.</p>
+<p>Through self-attention, this token aggregates information from all
+patches.</p>
+<p>Its final representation serves as a global image representation and
+is passed to the classification head (MLP) to produce
+predictions.</p></li>
+<li><p><strong>Question:</strong> Why do Transformers include a
+Feed-Forward Network (FFN) after the attention layer?</p>
+<p><strong>Solution:</strong> Self-attention allows tokens to exchange
+information, but it is fundamentally a linear weighted averaging
+operation across tokens. Without additional nonlinear transformations,
+the model’s expressive power would be limited.</p>
+<p>The Feed-Forward Network (FFN) provides:</p>
+<ul>
+<li><p><strong>Nonlinearity:</strong> Introduces nonlinear
+transformations that increase model expressiveness.</p></li>
+<li><p><strong>Feature transformation:</strong> Allows each token
+representation to be independently transformed after contextual
+information has been incorporated.</p></li>
+<li><p><strong>Dimension expansion:</strong> Typically expands the
+hidden dimension (for example from <span class="math inline">\(d\)</span> to <span class="math inline">\(4d\)</span>) before projecting back, allowing
+richer feature interactions.</p></li>
+<li><p><strong>Token-wise processing:</strong> Unlike attention, which
+mixes information across tokens, the FFN processes each token
+independently while sharing parameters across all positions.</p></li>
+</ul>
+<p>Mathematically, the FFN is typically:</p>
+<p><span class="math display">\[\text{FFN}(x)
+=
+\max(0, xW_1 + b_1)W_2 + b_2\]</span></p>
+<p>or in modern Transformers:</p>
+<p><span class="math display">\[\text{FFN}(x)
+=
+\text{GELU}(xW_1)W_2\]</span></p>
+<p>Thus, attention mixes information across tokens, while the FFN
+increases representation power within each token. Both are necessary for
+strong performance.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

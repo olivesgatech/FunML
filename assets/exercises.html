@@ -2417,7 +2417,150 @@ forming disconnected regions. As a result, nearby points in latent space
 tend to decode into similar outputs, enabling smooth interpolation and
 meaningful sampling.</p></li>
 </ol></section></section>
-<section><h2>Lecture21 - Sequence Modeling II</h2><section><h1>Exercises</h1>
+<section><h2>Lecture21 - Sequence Modeling</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> Why are standard MLPs poorly suited
+for sequence modeling, especially when sequence lengths vary?</p>
+<p><strong>Solution:</strong> MLPs assume <em>fixed-size</em> inputs and
+outputs, so they do not naturally handle variable-length sequences. More
+importantly, an MLP processes inputs as independent feature vectors, so
+it does not encode temporal order and cannot capture dependencies across
+time. Modeling long sequences with an MLP typically requires a large
+number of parameters (e.g., by concatenating many time steps into one
+huge input), which increases memory/computation and often leads to
+overfitting when data is limited.</p></li>
+<li><p><strong>Question:</strong> Write the forward-pass equations of a
+basic RNN (with bias terms) that produces a probability vector at each
+time step.</p>
+<p><strong>Solution:</strong> A standard RNN computes, for each time
+step <span class="math inline">\(t\)</span>: <span class="math display">\[\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t),
+    \qquad
+    \mathbf{h}(t)=\tanh(\mathbf{a}(t)),\]</span> then outputs logits and
+probabilities: <span class="math display">\[\mathbf{o}(t)=\mathbf{c}+\mathbf{V}\mathbf{h}(t),
+    \qquad
+    \mathbf{y}(t)=\mathrm{softmax}(\mathbf{o}(t)).\]</span></p></li>
+<li><p><strong>Question:</strong> In Backpropagation Through Time
+(BPTT), why can gradients <em>vanish</em> as the sequence length grows?
+Give the key product form that explains this behavior.</p>
+<p><strong>Solution:</strong> In BPTT, the dependence of a later hidden
+state on an earlier hidden state contains a product of Jacobians: <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+    =\prod_{k=1}^{t}\frac{\partial \mathbf{h}(k)}{\partial
+\mathbf{h}(k-1)}.\]</span> For the RNN update <span class="math inline">\(\mathbf{h}(t)=\sigma(\mathbf{a}(t))\)</span> with
+<span class="math inline">\(\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t)\)</span>,
+<span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(t-1)}=\mathbf{J}(t)\mathbf{W}^T,
+    \quad \text{where }
+\mathbf{J}(t)=\mathrm{diag}(\sigma'(\mathbf{a}(t))).\]</span> Thus,
+<span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+    =\mathbf{J}(t)\mathbf{W}^T\mathbf{J}(t-1)\mathbf{W}^T\cdots
+\mathbf{J}(1)\mathbf{W}^T.\]</span> If the relevant singular
+values/eigenvalues of <span class="math inline">\(\mathbf{W}\)</span>
+and typical magnitudes of <span class="math inline">\(\sigma'(\cdot)\)</span> are <span class="math inline">\(&lt;1\)</span>, repeated multiplication shrinks
+the gradient exponentially toward <span class="math inline">\(0\)</span>, making early time steps contribute
+very little to learning.</p></li>
+<li><p><strong>Question:</strong> State the LSTM gate equations (forget,
+input, output), and the update equations for the cell state and hidden
+state. What is the key structural reason LSTMs reduce vanishing
+gradients?</p>
+<p><strong>Solution:</strong> The gates are: <span class="math display">\[\mathbf{f}^{(t)}=\sigma(\mathbf{b}^f+\mathbf{U}^f\mathbf{x}^{(t)}+\mathbf{W}^f\mathbf{h}^{(t-1)}),\quad
+    \mathbf{g}^{(t)}=\sigma(\mathbf{b}^g+\mathbf{U}^g\mathbf{x}^{(t)}+\mathbf{W}^g\mathbf{h}^{(t-1)}),\]</span>
+<span class="math display">\[\mathbf{o}^{(t)}=\sigma(\mathbf{b}^o+\mathbf{U}^o\mathbf{x}^{(t)}+\mathbf{W}^o\mathbf{h}^{(t-1)}).\]</span>
+Candidate cell state, cell update, and hidden update: <span class="math display">\[\tilde{\mathbf{s}}^{(t)}=\tanh(\mathbf{b}^c+\mathbf{U}^c\mathbf{x}^{(t)}+\mathbf{W}^c\mathbf{h}^{(t-1)}),\]</span>
+<span class="math display">\[\mathbf{s}^{(t)}=\mathbf{f}^{(t)}\circ
+\mathbf{s}^{(t-1)}+\mathbf{g}^{(t)}\circ \tilde{\mathbf{s}}^{(t)},\quad
+    \mathbf{h}^{(t)}=\mathbf{o}^{(t)}\circ\tanh(\mathbf{s}^{(t)}).\]</span>
+Key reason: the cell state update is <em>additive</em> (a controlled
+“skip” pathway through time), which provides a more stable route for
+gradient flow compared to repeatedly multiplying by <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\sigma'(\cdot)\)</span> at every
+step.</p></li>
+<li><p><strong>Question:</strong> Compare <strong>RNNs</strong>,
+<strong>LSTMs</strong> and <strong>GRUs</strong> in terms of (i) ability
+to model long-range dependencies, (ii) parameter/computational cost, and
+(iii) parallelizability.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>RNNs:</strong> The simplest recurrent models. They often
+struggle with long-range dependencies due to vanishing/exploding
+gradients. They use fewer parameters than gated variants but process
+sequences sequentially, limiting parallelism across time.</p></li>
+<li><p><strong>LSTMs:</strong> Introduce a separate cell state and
+multiple gates to stabilize gradient flow and improve long-range
+modeling. They require more parameters and computational cost than
+vanilla RNNs and still operate sequentially.</p></li>
+<li><p><strong>GRUs:</strong> A streamlined alternative to LSTMs that
+combines gates and removes the separate cell state. They often achieve
+similar performance with fewer parameters and faster training, but
+remain sequential due to recurrence.</p></li>
+</ul></li>
+</ol></section></section>
+<section><h2>Lecture22 - Sequence Modeling II</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> What makes a Temporal Convolutional
+Network (TCN) <em>causal</em>, and how do dilated convolutions help it
+model long-range dependencies efficiently?</p>
+<p><strong>Solution:</strong> A TCN is causal if the output at time
+<span class="math inline">\(t\)</span> depends only on inputs at times
+<span class="math inline">\(\le t\)</span>, ensuring no information from
+the future is used. With kernel size <span class="math inline">\(k\)</span>, a causal convolution computes: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)},
+\mathbf{x}^{(t-1)}, \dots, \mathbf{x}^{(t-k+1)}).\]</span> Dilated
+convolutions introduce a spacing factor <span class="math inline">\(d\)</span>, expanding the receptive field: <span class="math display">\[\mathbf{y}^{(t)} = f(\mathbf{x}^{(t)},
+\mathbf{x}^{(t-d)}, \dots, \mathbf{x}^{(t-d(k-1))}).\]</span> Using
+dilation factors such as <span class="math inline">\(1,2,4,8,\dots\)</span> across layers increases the
+receptive field exponentially while keeping the number of parameters per
+layer fixed.</p></li>
+<li><p><strong>Question:</strong> For a TCN with kernel size <span class="math inline">\(k=3\)</span> and dilation factors <span class="math inline">\(1,2,4\)</span>, what is the receptive field?</p>
+<p><strong>Solution:</strong> <span class="math display">\[R = 1 +
+\sum_{\ell}(k-1)d_\ell
+= 1 + 2(1+2+4)
+= 15.\]</span> Thus, the output at time <span class="math inline">\(t\)</span> depends on inputs from <span class="math inline">\(t\)</span> back to <span class="math inline">\(t-14\)</span>.</p></li>
+<li><p><strong>Question:</strong> What is the main limitation of the
+basic Seq2Seq model without attention?</p>
+<p><strong>Solution:</strong> The encoder compresses the entire input
+sequence into a single fixed-size context vector <span class="math inline">\(c = h_T\)</span>. For long sequences, this vector
+may not retain all relevant information, creating an information
+bottleneck that degrades performance.</p></li>
+<li><p><strong>Question:</strong> How does dot-product attention address
+the Seq2Seq bottleneck?</p>
+<p><strong>Solution:</strong> Instead of using one fixed context vector,
+attention computes a dynamic context vector at each decoding step: <span class="math display">\[\alpha_{j,i} = \frac{\exp(s_j^\top h_i)}{\sum_k
+\exp(s_j^\top h_k)},
+\qquad
+c_j = \sum_i \alpha_{j,i} h_i.\]</span> This allows the decoder to focus
+on different parts of the input for each output token.</p></li>
+<li><p><strong>Question:</strong> What is the formula for scaled
+dot-product attention, and why is scaling necessary?</p>
+<p><strong>Solution:</strong> <span class="math display">\[\text{Attention}(Q,K,V)
+= \text{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V.\]</span> The
+scaling by <span class="math inline">\(\sqrt{d_k}\)</span> prevents the
+dot products from growing too large when <span class="math inline">\(d_k\)</span> is large, which would otherwise push
+the softmax into regions with very small gradients.</p></li>
+<li><p><strong>Question:</strong> Why does multi-head attention improve
+model capacity?</p>
+<p><strong>Solution:</strong> Each attention head learns separate
+projections: <span class="math display">\[\text{head}_i =
+\text{Attention}(QW_i^Q, KW_i^K, VW_i^V).\]</span> Multiple heads allow
+the model to attend to different relationships (e.g., syntactic vs.
+semantic structure) simultaneously.</p></li>
+<li><p><strong>Question:</strong> Why is layer normalization preferred
+over batch normalization in transformers?</p>
+<p><strong>Solution:</strong> Layer normalization computes statistics
+across features within each token: <span class="math display">\[y =
+\frac{x - \mathbb{E}[x]}{\sqrt{\mathrm{Var}[x]+\epsilon}}\gamma +
+\beta.\]</span> It does not depend on batch statistics, making it stable
+for varying batch sizes and sequence lengths, and consistent during
+inference.</p></li>
+<li><p><strong>Question:</strong> What is the difference between
+Skip-Gram and CBOW in Word2Vec?</p>
+<p><strong>Solution:</strong> Skip-Gram predicts surrounding context
+words given a target word: <span class="math display">\[\sum_{t}\sum_{j\neq0} \log P(w_{t+j}\mid
+w_t).\]</span> CBOW predicts the target word from its surrounding
+context: <span class="math display">\[\sum_t \log P(w_t\mid
+w_{t-k},\dots,w_{t+k}).\]</span> Skip-Gram works well for rare words;
+CBOW is computationally more efficient.</p></li>
+</ol></section></section>
+<section><h2>Lecture23 - Sequence Modeling II</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What makes a Temporal Convolutional
 Network (TCN) <em>causal</em>, and how do dilated convolutions help it
@@ -2494,7 +2637,168 @@ via attention.</p></li>
 = \frac{50176}{256}
 = 196.\]</span></p></li>
 </ol></section></section>
-<section><h2>Lecture22 - Explainability in Neural Networks</h2><section><h1>Exercises</h1>
+<section><h2>Lecture24 - Transformers</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> What problem do Transformers solve
+compared to RNNs?</p>
+<p><strong>Solution:</strong> RNNs process sequences sequentially,
+making training difficult to parallelize and slow for long sequences.
+They also struggle with long-range dependencies due to vanishing or
+exploding gradients.</p>
+<p>Transformers replace recurrence with self-attention, which:</p>
+<ul>
+<li><p>Processes all tokens in parallel</p></li>
+<li><p>Computes direct interactions between any pair of tokens</p></li>
+<li><p>Enables better modeling of long-range dependencies</p></li>
+</ul>
+<p>This allows Transformers to scale better and train more efficiently
+than RNNs.</p></li>
+<li><p><strong>Question:</strong> Why are there separate Query, Key, and
+Value vectors instead of a single representation?</p>
+<p><strong>Solution:</strong> Separate Query, Key, and Value projections
+allow the model to learn different feature spaces for matching and
+information retrieval.</p>
+<p>Specifically:</p>
+<ul>
+<li><p>Queries represent what a token is searching for</p></li>
+<li><p>Keys represent what each token offers for matching</p></li>
+<li><p>Values represent the information passed forward</p></li>
+</ul>
+<p>This separation allows the model to learn asymmetric relationships.
+For example, one token may attend strongly to another without the
+reverse necessarily being true.</p>
+<p>Separating matching (<span class="math inline">\(Q,K\)</span>) from
+information flow (<span class="math inline">\(V\)</span>) also allows
+the model to learn more flexible representations.</p></li>
+<li><p><strong>Question:</strong> Why do we scale by <span class="math inline">\(\sqrt{d_k}\)</span> in the attention formula?</p>
+<p><strong>Solution:</strong> If the components of <span class="math inline">\(Q\)</span> and <span class="math inline">\(K\)</span> have variance near 1, the variance of
+their dot product grows proportionally to <span class="math inline">\(d_k\)</span>.</p>
+<p>Large dot products push the softmax into regions with very small
+gradients, which harms learning.</p>
+<p>Dividing by <span class="math inline">\(\sqrt{d_k}\)</span>
+normalizes the magnitude of the dot products:</p>
+<p><span class="math display">\[\text{Attention}(Q,K,V)
+=
+\text{softmax}
+\left(
+\frac{QK^\top}{\sqrt{d_k}}
+\right)V\]</span></p>
+<p>This keeps gradients well-scaled and improves training
+stability.</p></li>
+<li><p><strong>Question:</strong> What is the difference between
+self-attention and cross-attention?</p>
+<p><strong>Solution:</strong> In self-attention, <span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> are derived from the same input
+sequence. This allows tokens to learn relationships within the same
+sequence.</p>
+<p>In cross-attention:</p>
+<ul>
+<li><p><span class="math inline">\(Q\)</span> comes from one sequence
+(typically the decoder)</p></li>
+<li><p><span class="math inline">\(K\)</span> and <span class="math inline">\(V\)</span> come from another sequence (typically
+the encoder)</p></li>
+</ul>
+<p>Cross-attention allows the decoder to retrieve relevant contextual
+information from the encoder representations.</p></li>
+<li><p><strong>Question:</strong> Why is layer normalization preferred
+over batch normalization in Transformers?</p>
+<p><strong>Solution:</strong> Batch normalization computes statistics
+across the batch dimension, which can be unstable when batch sizes are
+small or variable.</p>
+<p>Layer normalization instead computes statistics across features for
+each token independently.</p>
+<p>Advantages include:</p>
+<ul>
+<li><p>Independence from batch size</p></li>
+<li><p>Stable behavior during inference</p></li>
+<li><p>Consistent normalization across sequence positions</p></li>
+<li><p>Better suitability for sequence models</p></li>
+</ul>
+<p>Because Transformers often operate with variable sequence lengths and
+small batches, layer normalization is generally preferred.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer differ
+from a standard Transformer?</p>
+<p><strong>Solution:</strong> A Vision Transformer (ViT) adapts the
+Transformer encoder for image data.</p>
+<p>Instead of word tokens, ViT:</p>
+<ul>
+<li><p>Splits images into fixed-size patches</p></li>
+<li><p>Flattens each patch into a vector</p></li>
+<li><p>Projects patches into embeddings</p></li>
+<li><p>Adds positional embeddings</p></li>
+</ul>
+<p>Unlike the original Transformer, ViT typically uses only the encoder
+stack (no decoder) for classification tasks.</p>
+<p>The final CLS token representation is used for
+classification.</p></li>
+<li><p><strong>Question:</strong> How does a Vision Transformer (ViT)
+process an image differently from a CNN?</p>
+<p><strong>Solution:</strong> ViT divides the image into patches,
+flattens them, projects them into embeddings, adds positional encodings,
+and processes the sequence using self-attention. Unlike CNNs, which use
+local convolutional filters, ViT models global relationships directly
+via attention.</p></li>
+<li><p><strong>Question:</strong> If an image has size <span class="math inline">\(224 \times 224\)</span> and patch size <span class="math inline">\(P=16\)</span>, how many patches are produced?</p>
+<p><strong>Solution:</strong> <span class="math display">\[N = \frac{224
+\times 224}{16^2}
+= \frac{50176}{256}
+= 196.\]</span></p></li>
+<li><p><strong>Question:</strong> Why is the Transformer decoder
+autoregressive?</p>
+<p><strong>Solution:</strong> In sequence generation tasks, each token
+depends on previously generated tokens.</p>
+<p>During inference, the decoder generates tokens sequentially:</p>
+<ul>
+<li><p>Predict next token</p></li>
+<li><p>Append to sequence</p></li>
+<li><p>Repeat until EOS</p></li>
+</ul>
+<p>During training, however, teacher forcing is used, where the decoder
+receives the ground-truth previous tokens instead of its own
+predictions.</p>
+<p>Autoregressive structure allows the model to learn conditional
+sequence generation.</p></li>
+<li><p><strong>Question:</strong> What role does the <code>[CLS]</code>
+token play in Vision Transformers?</p>
+<p><strong>Solution:</strong> The <code>[CLS]</code> token is a
+learnable embedding prepended to the sequence of patch embeddings.</p>
+<p>Through self-attention, this token aggregates information from all
+patches.</p>
+<p>Its final representation serves as a global image representation and
+is passed to the classification head (MLP) to produce
+predictions.</p></li>
+<li><p><strong>Question:</strong> Why do Transformers include a
+Feed-Forward Network (FFN) after the attention layer?</p>
+<p><strong>Solution:</strong> Self-attention allows tokens to exchange
+information, but it is fundamentally a linear weighted averaging
+operation across tokens. Without additional nonlinear transformations,
+the model’s expressive power would be limited.</p>
+<p>The Feed-Forward Network (FFN) provides:</p>
+<ul>
+<li><p><strong>Nonlinearity:</strong> Introduces nonlinear
+transformations that increase model expressiveness.</p></li>
+<li><p><strong>Feature transformation:</strong> Allows each token
+representation to be independently transformed after contextual
+information has been incorporated.</p></li>
+<li><p><strong>Dimension expansion:</strong> Typically expands the
+hidden dimension (for example from <span class="math inline">\(d\)</span> to <span class="math inline">\(4d\)</span>) before projecting back, allowing
+richer feature interactions.</p></li>
+<li><p><strong>Token-wise processing:</strong> Unlike attention, which
+mixes information across tokens, the FFN processes each token
+independently while sharing parameters across all positions.</p></li>
+</ul>
+<p>Mathematically, the FFN is typically:</p>
+<p><span class="math display">\[\text{FFN}(x)
+=
+\max(0, xW_1 + b_1)W_2 + b_2\]</span></p>
+<p>or in modern Transformers:</p>
+<p><span class="math display">\[\text{FFN}(x)
+=
+\text{GELU}(xW_1)W_2\]</span></p>
+<p>Thus, attention mixes information across tokens, while the FFN
+increases representation power within each token. Both are necessary for
+strong performance.</p></li>
+</ol></section></section>
+<section><h2>Lecture25 - Explainability in Neural Networks</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Compare occlusion-based saliency and
 gradient-based saliency in terms of faithfulness and computational
@@ -2542,7 +2846,205 @@ retaining only features that positively support the target class. This
 improves interpretability by focusing the heatmap on regions that
 provide evidence <em>for</em> the class rather than against it.</p></li>
 </ol></section></section>
-<section><h2>Lecture23 - Explainability Paradigms and Evaluation</h2><section><h1>Exercises</h1>
+<section><h2>Lecture26 - Explainability in Neural Networks</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> Compare occlusion-based saliency and
+gradient-based saliency in terms of faithfulness and computational
+cost.</p>
+<p><strong>Solution:</strong> Occlusion-based saliency measures
+importance by directly perturbing the input and observing changes in the
+prediction, making it causally grounded but computationally expensive
+due to many forward passes. Gradient-based saliency is efficient (single
+forward/backward pass) but provides only a local linear approximation of
+importance.</p></li>
+<li><p><strong>Question:</strong> Explain why early convolutional layers
+and fully connected layers are both unsuitable for producing meaningful
+localization maps in Grad-CAM.</p>
+<p><strong>Solution:</strong> Early layers retain spatial resolution but
+encode only low-level features (edges/textures), lacking semantic
+meaning. Fully connected layers capture high-level semantics but discard
+spatial structure. Grad-CAM therefore uses the last convolutional layer
+as a compromise.</p></li>
+<li><p><strong>Question:</strong> How do Vanilla Backpropagation,
+Deconvnet, and Guided Backpropagation differ in how they handle
+gradients through ReLU?</p>
+<p><strong>Solution:</strong> Vanilla BP blocks gradients where forward
+activations were negative. Deconvnet blocks negative gradients during
+the backward pass. Guided BP blocks gradients unless both the forward
+activation and backward gradient are positive, producing sharper
+maps.</p></li>
+<li><p><strong>Question:</strong> Why does Guided Backpropagation lack
+class discriminativity?</p>
+<p><strong>Solution:</strong> It primarily highlights generic edges and
+textures based on gradient flow, rather than weighting feature maps by
+class-specific importance. As a result, maps for different classes often
+appear similar.</p></li>
+<li><p><strong>Question:</strong> In Grad-CAM, what is the
+interpretation of the weight <span class="math display">\[\alpha_k^c =
+\frac{1}{Z} \sum_{i,j} \frac{\partial y^c}{\partial A_{ij}^k}
+?\]</span></p>
+<p><strong>Solution:</strong> It measures how strongly feature map <span class="math inline">\(k\)</span> influences the target class score <span class="math inline">\(y^c\)</span> on average across spatial locations.
+These weights determine how much each feature map contributes to the
+final class activation map.</p></li>
+<li><p><strong>Question:</strong> Why is a ReLU applied after computing
+<span class="math display">\[L_{\text{Grad-CAM}}^c = \sum_k \alpha_k^c
+A^k ?\]</span></p>
+<p><strong>Solution:</strong> ReLU removes negative contributions,
+retaining only features that positively support the target class. This
+improves interpretability by focusing the heatmap on regions that
+provide evidence <em>for</em> the class rather than against it.</p></li>
+<li><p><strong>Question:</strong> Why is LIME considered a local
+explanation method rather than a global explanation method?</p>
+<p><strong>Solution:</strong> LIME approximates the behavior of a
+complex model only in the neighborhood of a specific input by fitting a
+simple surrogate model to perturbed samples. Because this approximation
+is valid only near that instance, it does not necessarily reflect the
+model’s behavior across the entire dataset. Therefore, LIME provides
+local explanations rather than global interpretability.</p></li>
+<li><p><strong>Question:</strong> Why does LIME generate perturbed
+samples when constructing explanations?</p>
+<p><strong>Solution:</strong> LIME generates perturbed samples to
+observe how small changes in the input affect the model’s prediction. By
+analyzing how predictions vary with these perturbations, LIME can
+estimate which features are most influential for that specific
+prediction. This allows the method to approximate the model’s local
+decision boundary.</p></li>
+<li><p><strong>Question:</strong> What is the main theoretical advantage
+of SHAP over LIME?</p>
+<p><strong>Solution:</strong> SHAP is based on Shapley values from
+cooperative game theory, which provide a theoretically grounded way to
+fairly attribute feature importance. These values satisfy desirable
+properties such as consistency and additivity. In contrast, LIME relies
+on locally fitted surrogate models and does not guarantee these
+theoretical properties.</p></li>
+<li><p><strong>Question:</strong> Why is computing exact SHAP values
+often computationally expensive?</p>
+<p><strong>Solution:</strong> Computing exact Shapley values requires
+evaluating the contribution of each feature across all possible subsets
+of features. Since the number of subsets grows exponentially with the
+number of features, exact computation becomes intractable for
+high-dimensional data. Practical implementations therefore rely on
+approximations.</p></li>
+<li><p><strong>Question:</strong> Compare LIME and SHAP in terms of
+explanation stability.</p>
+<p><strong>Solution:</strong> LIME explanations may vary depending on
+the randomly generated perturbations used to construct the local
+surrogate model, which can reduce stability. SHAP explanations tend to
+be more stable because they are derived from a principled attribution
+framework based on Shapley values, although approximations may still
+introduce some variability.</p></li>
+<li><p><strong>Question:</strong> When might LIME be preferred over SHAP
+in practice?</p>
+<p><strong>Solution:</strong> LIME may be preferred when computational
+efficiency is important, since it typically requires fewer computations
+than SHAP. It may also be preferred when quick local explanations are
+sufficient and theoretical guarantees are less critical.</p></li>
+</ol></section></section>
+<section><h2>Lecture27 - Explainability Paradigms and Evaluation</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> In this lecture, we discussed
+<em>indirect</em>, <em>direct</em>, and <em>targeted</em> explanations.
+Give one example of each type and briefly explain what makes them
+different.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Indirect explanation:</strong> dimensionality reduction
+(e.g., t-SNE/PCA) on embeddings to visualize clustering structure. It
+provides auxiliary insight into learned representations without directly
+attributing importance to inputs <span class="citation" data-cites="8"></span>.</p></li>
+<li><p><strong>Direct explanation:</strong> saliency via occlusion,
+where masking regions and observing confidence changes directly
+identifies which input regions influence the prediction.</p></li>
+<li><p><strong>Targeted explanation:</strong> “Why <span class="math inline">\(P\)</span> rather than <span class="math inline">\(Q\)</span>?” (contrastive) explanations that
+highlight discriminative evidence supporting <span class="math inline">\(P\)</span> over an alternative <span class="math inline">\(Q\)</span>.</p></li>
+</ul>
+<p>Indirect explanations provide context about representations; direct
+explanations attribute importance to specific input regions; targeted
+explanations answer a specific question (why/what-if/contrast).</p></li>
+<li><p><strong>Question:</strong> What are the three targeted
+explanation questions introduced in the lecture, and what does each one
+aim to reveal?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>“Why <span class="math inline">\(P\)</span>?”</strong>
+(correlation-based): identifies evidence that supports predicting class
+<span class="math inline">\(P\)</span> (e.g., saliency highlighting beak
+shape for “Spoonbill”).</p></li>
+<li><p><strong>“What if?”</strong> (counterfactual): tests how the
+prediction changes under plausible modifications (e.g., changing a
+straight beak to curved).</p></li>
+<li><p><strong>“Why <span class="math inline">\(P\)</span> rather than
+<span class="math inline">\(Q\)</span>?”</strong> (contrastive):
+highlights evidence that distinguishes <span class="math inline">\(P\)</span> from a competing class <span class="math inline">\(Q\)</span> (e.g., Bullmastiff vs. Boxer).</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> Describe the main steps of Grad-CAM
+and write the expression for the Grad-CAM heatmap.</p>
+<p><strong>Solution:</strong> Grad-CAM computes a class-specific heatmap
+using gradients of the class logit with respect to feature maps in the
+last convolutional layer:</p>
+<ol>
+<li><p>Forward pass to obtain feature maps <span class="math inline">\(A^k\)</span> and class logit <span class="math inline">\(y^c\)</span>.</p></li>
+<li><p>Backward pass to compute gradients <span class="math inline">\(\frac{\partial y^c}{\partial
+A^k_{ij}}\)</span>.</p></li>
+<li><p>Global-average pool gradients to obtain weights <span class="math display">\[\alpha_k^c = \frac{1}{Z}\sum_i\sum_j
+\frac{\partial y^c}{\partial A^k_{ij}}.\]</span></p></li>
+<li><p>Combine weighted feature maps and apply ReLU: <span class="math display">\[L_{\text{Grad-CAM}}^c =
+\mathrm{ReLU}\!\left(\sum_k \alpha_k^c A^k\right).\]</span></p></li>
+</ol>
+<p>The heatmap is then upsampled to input resolution for
+visualization.</p></li>
+<li><p><strong>Question:</strong> How do Counterfactual-CAM and
+Contrast-CAM modify the Grad-CAM objective, and what question does each
+method answer?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Counterfactual-CAM</strong> addresses <em>“What if <span class="math inline">\(P\)</span> was not in the image?”</em> by
+suppressing evidence for class <span class="math inline">\(P\)</span>
+(e.g., using negated gradients when computing importance weights). This
+reveals alternative regions that could support other predictions if
+<span class="math inline">\(P\)</span>-supporting evidence were
+removed.</p></li>
+<li><p><strong>Contrast-CAM</strong> addresses <em>“Why <span class="math inline">\(P\)</span> rather than <span class="math inline">\(Q\)</span>?”</em> by using a contrastive score
+<span class="math display">\[s(P,Q)=y^P-y^Q,\]</span> and
+backpropagating gradients of <span class="math inline">\(y^P-y^Q\)</span> to produce a heatmap emphasizing
+regions that favor <span class="math inline">\(P\)</span> over <span class="math inline">\(Q\)</span>.</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> Explain the <em>explanatory evaluation
+taxonomy</em> and provide one example of a metric or procedure used in
+each category.</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Human evaluation:</strong> humans judge explanation
+quality (e.g., choosing which saliency map is “cleaner” or more
+class-discriminative).</p></li>
+<li><p><strong>Application evaluation:</strong> explanation quality is
+inferred from task-level or human-attention proxies (e.g., gaze
+tracking; metrics like IoU between saliency maps and fixation
+maps).</p></li>
+<li><p><strong>Network evaluation:</strong> explanation quality is
+evaluated through model behavior (e.g., masking or insertion/deletion;
+deletion AUC and insertion AUC).</p></li>
+</ul></li>
+<li><p><strong>Question:</strong> In network evaluation, what do
+<em>pixel-wise deletion</em> and <em>pixel-wise insertion</em> measure,
+and how should AUC behave for a better explanation?</p>
+<p><strong>Solution:</strong></p>
+<ul>
+<li><p><strong>Deletion:</strong> progressively remove pixels in
+decreasing order of importance (replace with a baseline) and track the
+target-class confidence. A better explanation removes truly important
+evidence early, so confidence drops quickly <span class="math inline">\(\Rightarrow\)</span> <strong>lower deletion AUC is
+better</strong>.</p></li>
+<li><p><strong>Insertion:</strong> start from a baseline image (minimal
+signal) and progressively add pixels in decreasing order of importance.
+A better explanation restores key evidence early, so confidence rises
+quickly <span class="math inline">\(\Rightarrow\)</span> <strong>higher
+insertion AUC is better</strong>.</p></li>
+</ul>
+<p>Both tests depend on the choice of baseline and may be biased toward
+large or diffuse explanations.</p></li>
+</ol></section></section>
+<section><h2>Lecture28 - Explainability Paradigms and Evaluation</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> In this lecture, we discussed
 <em>indirect</em>, <em>direct</em>, and <em>targeted</em> explanations.
@@ -2646,7 +3148,96 @@ insertion AUC is better</strong>.</p></li>
 <p>Both tests depend on the choice of baseline and may be biased toward
 large or diffuse explanations.</p></li>
 </ol></section></section>
-<section><h2>Lecture24 - Self-supervised Learning</h2><section><h1>Exercises</h1>
+<section><h2>Lecture29 - Data and Label Efficient Learning I: Self-supervised Learning</h2><section><h1>Exercises</h1>
+<ol>
+<li><p><strong>Question:</strong> What is the main difference between
+<strong>supervised</strong>, <strong>unsupervised</strong>, and
+<strong>self-supervised</strong> learning in terms of where the
+supervision comes from?</p>
+<p><strong>Solution:</strong> In <strong>supervised learning</strong>,
+the supervision is provided by humans in the form of ground-truth labels
+<span class="math inline">\(y\)</span>. The model learns a mapping from
+<span class="math inline">\(x\)</span> to <span class="math inline">\(y\)</span> by minimizing a loss between
+predictions and labels. In <strong>unsupervised learning</strong>, there
+are no labels at all — the model tries to discover structure directly
+from the data (for example, reconstruction or clustering). In
+<strong>self-supervised learning</strong>, the supervision is generated
+automatically from the data itself. A pre-text task creates
+<strong>pseudo-labels</strong> <span class="math inline">\(z\)</span>
+from the raw inputs <span class="math inline">\(x\)</span>, and the
+model is trained to predict those pseudo-labels before being fine-tuned
+on a real task.</p></li>
+<li><p><strong>Question:</strong> Describe the three main stages of the
+self-supervised learning pipeline.</p>
+<p><strong>Solution:</strong> The pipeline has three steps. First, we
+<strong>generate pseudo-labels</strong> by applying a pre-text task to
+large amounts of unlabeled data. This turns raw data into a
+pseudo-labeled dataset. Second, we perform <strong>self-supervised
+pre-training</strong>, where a neural network learns to predict those
+pseudo-labels and becomes a strong feature extractor. Finally, we
+<strong>fine-tune</strong> the model on a downstream task using a
+smaller labeled dataset, adapting the learned representation to the
+final objective.</p></li>
+<li><p><strong>Question:</strong> How do <strong>masked
+prediction</strong> and <strong>transformation prediction</strong>
+differ in what they teach the model?</p>
+<p><strong>Solution:</strong> <strong>Masked prediction</strong> forces
+the model to fill in missing parts of the input, so it learns contextual
+relationships and global structure. The model has to understand how
+different parts of the data relate to each other. <strong>Transformation
+prediction</strong> asks the model to identify a known transformation
+(such as rotation). This encourages the model to learn semantic
+information like object orientation and shape. In short, masked
+prediction focuses on <em>context</em>, while transformation prediction
+focuses on <em>semantics and structure</em>.</p></li>
+<li><p><strong>Question:</strong> What are <strong>positive
+pairs</strong> and <strong>negative pairs</strong> in contrastive
+learning, and what is the goal of the contrastive objective?</p>
+<p><strong>Solution:</strong> Positive pairs are two different views of
+the <em>same</em> sample (for example, two augmentations of the same
+image). Negative pairs come from <em>different</em> samples. The goal is
+to learn representations where positive pairs are close together in the
+embedding space and negative pairs are far apart. This makes the
+representation both invariant to augmentations and discriminative across
+different inputs.</p></li>
+<li><p><strong>Question:</strong> Why does SimCLR use a
+<strong>projection head</strong> during training, and what part of the
+model is used later?</p>
+<p><strong>Solution:</strong> SimCLR first encodes images into
+representations and then maps them into a separate embedding space using
+a projection head. The contrastive loss works better in this projection
+space. After training, the projection head is removed, and the
+<strong>encoder</strong> is kept as the feature extractor for downstream
+tasks.</p></li>
+<li><p><strong>Question:</strong> What are <strong>foundation
+models</strong>, and why does <strong>scale</strong> matter so much for
+them?</p>
+<p><strong>Solution:</strong> Foundation models are large models trained
+on massive and diverse datasets so they can learn general-purpose
+representations. These models can then be adapted to many different
+tasks. Scale is critical because training on huge datasets with large
+models allows useful features and capabilities to <em>emerge</em>. As a
+result, the model can transfer knowledge across tasks even with limited
+labeled data.</p></li>
+<li><p><strong>Question:</strong> What is the goal of the InfoNCE loss
+in contrastive learning?</p>
+<p><strong>Solution:</strong> The InfoNCE loss encourages the model to
+bring representations of positive pairs (different views of the same
+data point) closer together, while pushing representations of negative
+pairs (different data points) farther apart. This enables the model to
+learn invariant and discriminative feature representations.</p></li>
+<li><p><strong>Question:</strong> How do decorrelation-based objectives
+such as VICReg avoid representation collapse without using negative
+samples?</p>
+<p><strong>Solution:</strong> Decorrelation-based methods avoid collapse
+by enforcing three constraints: invariance, variance, and covariance.
+The invariance term aligns representations of augmented views, the
+variance term ensures that each feature dimension maintains sufficient
+spread, and the covariance term reduces redundancy between features.
+Together, these prevent trivial constant representations without
+requiring negative samples.</p></li>
+</ol></section></section>
+<section><h2>Lecture30 - Self-supervised Learning</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What is the main difference between
 <strong>supervised</strong>, <strong>unsupervised</strong>, and
@@ -2718,71 +3309,189 @@ models allows useful features and capabilities to <em>emerge</em>. As a
 result, the model can transfer knowledge across tasks even with limited
 labeled data.</p></li>
 </ol></section></section>
-<section><h2>Lecture25 - Anomaly Detection</h2><section><h1>Exercises</h1>
+<section><h2>Lecture31 - Data and Label Efficient Learning II – Active Learning</h2><section><h1>Exercises</h1>
 <ol>
-<li><p>What is the primary challenge in defining anomalies within a
-dataset? <strong>Answer:</strong> The primary challenge is accurately
-defining “normal” behavior. Since anomalies are detected as deviations
-from normal patterns, an incorrect definition of normality can lead to
-false positives or false negatives. <strong>Explanation:</strong>
-Anomaly detection relies on modeling the statistical properties of
-normal data. If the model of normal behavior is inaccurate or
-incomplete, the detection process becomes unreliable.</p></li>
-<li><p>Why are anomalies often considered the most significant data
-points in a dataset? <strong>Answer:</strong> Anomalies correspond to
-rare and unusual events such as fraud, failures, or medical
-abnormalities. <strong>Explanation:</strong> Although rare, anomalies
-often carry the most actionable information and are therefore critical
-in many real-world applications.</p></li>
-<li><p>What are the two main components of a statistical anomaly
-detection algorithm? <strong>Answer:</strong> (1) A statistic that
-measures data behavior, and (2) a decision rule that determines whether
-a sample is anomalous. <strong>Explanation:</strong> The statistic
-quantifies how unusual a sample is, while the decision rule applies a
-threshold to classify it as normal or anomalous.</p></li>
-<li><p>What is the trade-off between True Positive Rate (TPR) and False
-Positive Rate (FPR)? <strong>Answer:</strong> Lowering the threshold
-<span class="math inline">\(\gamma\)</span> increases TPR but also
-increases FPR, while raising <span class="math inline">\(\gamma\)</span>
-decreases FPR but may miss anomalies. <strong>Explanation:</strong>
-Threshold selection determines the sensitivity of the detector and
-directly affects detection performance.</p></li>
-<li><p>What is the main challenge of density-based anomaly detection
-methods? <strong>Answer:</strong> Density estimation becomes difficult
-in high-dimensional spaces due to the curse of dimensionality.
-<strong>Explanation:</strong> As dimensionality increases, data become
-sparse and probability density estimation becomes computationally
-expensive and prone to overfitting.</p></li>
-<li><p>Why is unsupervised anomaly detection often formulated as a
-ranking problem? <strong>Answer:</strong> Because models typically
-output anomaly scores rather than class labels.
-<strong>Explanation:</strong> Samples are ranked by their anomaly score,
-and the most abnormal samples are flagged based on a threshold or
-top-<span class="math inline">\(k\)</span> selection.</p></li>
-<li><p>Why are anomalies easier to detect using Isolation Forest
-compared to density estimation? <strong>Answer:</strong> Anomalies are
-easier to isolate and require fewer random splits in decision trees.
-<strong>Explanation:</strong> Isolation Forest exploits the fact that
-anomalous points are rare and different, leading to shorter path lengths
-during recursive partitioning.</p></li>
-<li><p>Why do reconstruction-based methods detect anomalies using
-reconstruction error? <strong>Answer:</strong> Models trained on normal
-data reconstruct normal samples well but fail to reconstruct anomalies.
-<strong>Explanation:</strong> Large reconstruction errors indicate that
-the input does not lie on the learned manifold of normal data.</p></li>
-<li><p>Why is Maximum Softmax Probability (MSP) useful for detecting
-out-of-distribution samples? <strong>Answer:</strong>
-Out-of-distribution inputs typically produce lower softmax confidence
-scores. <strong>Explanation:</strong> Neural networks tend to assign
-high probability to familiar data and lower confidence to unfamiliar
-inputs.</p></li>
-<li><p>Why is anomaly detection challenging in high-dimensional data?
-<strong>Answer:</strong> Distance and density measures become less
-informative in high dimensions. <strong>Explanation:</strong> This
-phenomenon, known as the curse of dimensionality, makes it harder to
-distinguish normal and anomalous samples reliably.</p></li>
+<li><p>Which of the following best describes the main goal of active
+learning?</p>
+<ol>
+<li><p>Maximize the size of the labeled dataset before training</p></li>
+<li><p>Achieve high model performance while minimizing labeling
+cost</p></li>
+<li><p>Eliminate the need for human annotation entirely</p></li>
+<li><p>Guarantee perfect classification after one training
+round</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Achieve high model performance while minimizing labeling cost</p>
+<p><strong>Explanation:</strong><br/>
+The main objective of active learning is to use a limited annotation
+budget efficiently. Instead of labeling all available data, the learner
+selectively queries the most informative samples so that strong model
+performance can be achieved with fewer labeled examples.</p></li>
+<li><p>What is the main difference between standard supervised learning
+and active learning?</p>
+<ol>
+<li><p>Supervised learning uses only unlabeled data, while active
+learning uses only labeled data</p></li>
+<li><p>Supervised learning assumes labels are already available, while
+active learning selectively requests labels during training</p></li>
+<li><p>Active learning does not require a machine learning
+model</p></li>
+<li><p>Supervised learning always requires fewer samples than active
+learning</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Supervised learning assumes labels are already available, while
+active learning selectively requests labels during training</p>
+<p><strong>Explanation:</strong><br/>
+In supervised learning, the labeled dataset is assumed to be prepared in
+advance. In active learning, the learner interacts with an unlabeled
+pool and chooses which samples should be labeled next under a limited
+budget.</p></li>
+<li><p>In the active learning pipeline, what is the role of the
+acquisition function?</p>
+<ol>
+<li><p>It provides the true labels for selected samples</p></li>
+<li><p>It ranks unlabeled samples according to their expected
+usefulness</p></li>
+<li><p>It replaces the training dataset with the test dataset</p></li>
+<li><p>It guarantees zero training error</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) It ranks unlabeled samples according to their expected usefulness</p>
+<p><strong>Explanation:</strong><br/>
+The acquisition function is the mechanism that decides which unlabeled
+samples should be selected for annotation. It typically uses criteria
+such as uncertainty, diversity, or expected model improvement.</p></li>
+<li><p>Which metric is often more informative than accuracy for
+imbalanced classification problems?</p>
+<ol>
+<li><p>F1-score</p></li>
+<li><p>FLOPS</p></li>
+<li><p>Mean squared error</p></li>
+<li><p>IoU threshold</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) F1-score</p>
+<p><strong>Explanation:</strong><br/>
+Accuracy may be misleading when one class dominates the dataset. The
+F1-score balances precision and recall, making it more appropriate for
+imbalanced classification settings.</p></li>
+<li><p>Why is the area under the performance curve (AUC) useful in
+active learning?</p>
+<ol>
+<li><p>It measures how much GPU memory is used during
+retraining</p></li>
+<li><p>It summarizes how efficiently performance improves as more labels
+are acquired</p></li>
+<li><p>It counts the number of oracle queries only</p></li>
+<li><p>It replaces all other evaluation metrics</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) It summarizes how efficiently performance improves as more labels are
+acquired</p>
+<p><strong>Explanation:</strong><br/>
+In active learning, we care not only about final performance but also
+about how quickly the model improves with additional labeled samples. A
+higher AUC indicates a more label-efficient acquisition
+strategy.</p></li>
+<li><p>Entropy sampling selects samples that:</p>
+<ol>
+<li><p>Have the smallest feature norm</p></li>
+<li><p>Have the highest uncertainty across predicted class
+probabilities</p></li>
+<li><p>Are closest to the class centroid</p></li>
+<li><p>Have already been labeled</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Have the highest uncertainty across predicted class probabilities</p>
+<p><strong>Explanation:</strong><br/>
+Entropy measures uncertainty in the predicted class distribution. If the
+model spreads probability mass across several classes, the entropy is
+high, indicating that the sample is informative for annotation.</p></li>
+<li><p>What is the key idea behind margin sampling?</p>
+<ol>
+<li><p>Select samples with the largest distance from the training
+set</p></li>
+<li><p>Select samples with the smallest difference between the top two
+predicted class probabilities</p></li>
+<li><p>Select samples with the highest training loss only</p></li>
+<li><p>Select samples uniformly at random</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Select samples with the smallest difference between the top two
+predicted class probabilities</p>
+<p><strong>Explanation:</strong><br/>
+Margin sampling focuses on samples for which the model is nearly
+undecided between two classes. These are often near the decision
+boundary and are especially useful for refining the classifier.</p></li>
+<li><p>Which statement best describes diversity-based active
+learning?</p>
+<ol>
+<li><p>It selects samples that collectively cover the overall data
+distribution</p></li>
+<li><p>It always selects the most uncertain sample, even if
+redundant</p></li>
+<li><p>It ignores feature-space structure</p></li>
+<li><p>It is identical to least-confidence sampling</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) It selects samples that collectively cover the overall data
+distribution</p>
+<p><strong>Explanation:</strong><br/>
+Diversity-based methods aim to avoid redundancy by selecting
+representative samples from different regions of the feature space. This
+improves global coverage of the dataset.</p></li>
+<li><p>Why can fusion-based active learning be useful?</p>
+<ol>
+<li><p>It combines diversity and difficulty, balancing dataset coverage
+and uncertainty</p></li>
+<li><p>It removes the need for oracle labeling</p></li>
+<li><p>It guarantees the lowest computational cost</p></li>
+<li><p>It always outperforms all other methods without tuning</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) It combines diversity and difficulty, balancing dataset coverage and
+uncertainty</p>
+<p><strong>Explanation:</strong><br/>
+Fusion-based methods combine the strengths of diversity-based and
+difficulty-based strategies. This allows the learner to improve global
+representation early on while refining difficult decision boundaries
+later.</p></li>
+<li><p>What is a negative flip in the context of active learning
+deployment?</p>
+<ol>
+<li><p>A previously incorrect prediction becomes correct</p></li>
+<li><p>A previously correct prediction becomes incorrect after model
+updating</p></li>
+<li><p>The training loss becomes negative</p></li>
+<li><p>The acquisition function fails to assign a score</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) A previously correct prediction becomes incorrect after model
+updating</p>
+<p><strong>Explanation:</strong><br/>
+A negative flip captures regression at the sample level. It occurs when
+the updated model makes an error on a sample that the previous model had
+classified correctly.</p></li>
+<li><p>What does the Negative Flip Rate (NFR) measure?</p>
+<ol>
+<li><p>The proportion of correctly classified samples in the test
+set</p></li>
+<li><p>The fraction of previously correct samples that become incorrect
+after model updating</p></li>
+<li><p>The number of labels acquired per active learning round</p></li>
+<li><p>The total annotation time for the dataset</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) The fraction of previously correct samples that become incorrect
+after model updating</p>
+<p><strong>Explanation:</strong><br/>
+NFR is a deployment-oriented metric that measures prediction stability
+across model updates. It is useful because overall accuracy may improve
+even while some previously correct predictions are lost.</p></li>
 </ol></section></section>
-<section><h2>Lecture26 - Uncertainty Quantification in Neural Networks</h2><section><h1>Exercises</h1>
+<section><h2>Lecture32 - Uncertainty Quantification in Neural Networks</h2><section><h1>Exercises</h1>
 <ol>
 <li><p>Which of the following best describes the goal of uncertainty
 quantification in neural networks?</p>
@@ -3043,7 +3752,429 @@ improves a downstream task. For example, in active learning, better
 uncertainty estimates should lead to better sample selection and faster
 model improvement.</p></li>
 </ol></section></section>
-<section><h2>Lecture27 - Data and Label Efficient Learning – Active Learning</h2><section><h1>Exercises</h1>
+<section><h2>Lecture33 - Anomaly Detection</h2><section><h1>Exercises</h1>
+<ol>
+<li><p>What is the primary challenge in defining anomalies within a
+dataset? <strong>Answer:</strong> The primary challenge is accurately
+defining “normal” behavior. Since anomalies are detected as deviations
+from normal patterns, an incorrect definition of normality can lead to
+false positives or false negatives. <strong>Explanation:</strong>
+Anomaly detection relies on modeling the statistical properties of
+normal data. If the model of normal behavior is inaccurate or
+incomplete, the detection process becomes unreliable.</p></li>
+<li><p>Why are anomalies often considered the most significant data
+points in a dataset? <strong>Answer:</strong> Anomalies correspond to
+rare and unusual events such as fraud, failures, or medical
+abnormalities. <strong>Explanation:</strong> Although rare, anomalies
+often carry the most actionable information and are therefore critical
+in many real-world applications.</p></li>
+<li><p>What are the two main components of a statistical anomaly
+detection algorithm? <strong>Answer:</strong> (1) A statistic that
+measures data behavior, and (2) a decision rule that determines whether
+a sample is anomalous. <strong>Explanation:</strong> The statistic
+quantifies how unusual a sample is, while the decision rule applies a
+threshold to classify it as normal or anomalous.</p></li>
+<li><p>What is the trade-off between True Positive Rate (TPR) and False
+Positive Rate (FPR)? <strong>Answer:</strong> Lowering the threshold
+<span class="math inline">\(\gamma\)</span> increases TPR but also
+increases FPR, while raising <span class="math inline">\(\gamma\)</span>
+decreases FPR but may miss anomalies. <strong>Explanation:</strong>
+Threshold selection determines the sensitivity of the detector and
+directly affects detection performance.</p></li>
+<li><p>What is the main challenge of density-based anomaly detection
+methods? <strong>Answer:</strong> Density estimation becomes difficult
+in high-dimensional spaces due to the curse of dimensionality.
+<strong>Explanation:</strong> As dimensionality increases, data become
+sparse and probability density estimation becomes computationally
+expensive and prone to overfitting.</p></li>
+<li><p>Why is unsupervised anomaly detection often formulated as a
+ranking problem? <strong>Answer:</strong> Because models typically
+output anomaly scores rather than class labels.
+<strong>Explanation:</strong> Samples are ranked by their anomaly score,
+and the most abnormal samples are flagged based on a threshold or
+top-<span class="math inline">\(k\)</span> selection.</p></li>
+<li><p>Why are anomalies easier to detect using Isolation Forest
+compared to density estimation? <strong>Answer:</strong> Anomalies are
+easier to isolate and require fewer random splits in decision trees.
+<strong>Explanation:</strong> Isolation Forest exploits the fact that
+anomalous points are rare and different, leading to shorter path lengths
+during recursive partitioning.</p></li>
+<li><p>Why do reconstruction-based methods detect anomalies using
+reconstruction error? <strong>Answer:</strong> Models trained on normal
+data reconstruct normal samples well but fail to reconstruct anomalies.
+<strong>Explanation:</strong> Large reconstruction errors indicate that
+the input does not lie on the learned manifold of normal data.</p></li>
+<li><p>Why is Maximum Softmax Probability (MSP) useful for detecting
+out-of-distribution samples? <strong>Answer:</strong>
+Out-of-distribution inputs typically produce lower softmax confidence
+scores. <strong>Explanation:</strong> Neural networks tend to assign
+high probability to familiar data and lower confidence to unfamiliar
+inputs.</p></li>
+<li><p>Why is anomaly detection challenging in high-dimensional data?
+<strong>Answer:</strong> Distance and density measures become less
+informative in high dimensions. <strong>Explanation:</strong> This
+phenomenon, known as the curse of dimensionality, makes it harder to
+distinguish normal and anomalous samples reliably.</p></li>
+<li><p><strong>Question:</strong> Can a sample be <strong>highly
+uncertain</strong> for a classifier but <strong>not</strong> be an
+anomaly? Explain the difference.</p>
+<p><strong>Solution:</strong> Yes. A sample can lie near the decision
+boundary between two classes, making the classifier uncertain (e.g.,
+similar probabilities for multiple classes). However, such a sample may
+still belong to the normal data distribution and therefore is not an
+anomaly.</p>
+<p>Uncertainty reflects ambiguity in classification, while anomaly
+detection focuses on deviations from the underlying data distribution.
+Thus, uncertain samples are often informative and valid, whereas
+anomalies are rare and structurally different from normal data.</p></li>
+<li><p><strong>Question:</strong> What is the key difference between
+<strong>anomaly detection</strong>, <strong>OOD detection</strong>, and
+<strong>open set recognition</strong>?</p>
+<p><strong>Solution:</strong> Anomaly detection focuses on identifying
+rare or unusual samples relative to a learned notion of normality, often
+without relying on labeled classes.</p>
+<p>OOD detection assumes a supervised setting and aims to detect inputs
+that fall outside the training distribution of known classes.</p>
+<p>Open set recognition extends classification by requiring the model to
+both classify known classes and reject samples from unseen classes.</p>
+<p>While all three involve detecting unfamiliar inputs, they differ in
+their assumptions about training data and the role of
+classification.</p></li>
+<li><p><strong>Question:</strong> Why might out-of-distribution (OOD)
+samples be problematic in active learning?</p>
+<p><strong>Solution:</strong> OOD samples may exhibit high uncertainty,
+which could cause them to be selected by uncertainty-based acquisition
+functions. However, labeling such samples may not improve the model
+because they do not belong to the target data distribution. As a result,
+they can waste annotation budget and potentially degrade
+performance.</p></li>
+</ol></section></section>
+<section><h2>Lecture34 - Anomaly Detection</h2><section><h1>Exercises</h1>
+<ol>
+<li><p>What is the primary challenge in defining anomalies within a
+dataset? <strong>Answer:</strong> The primary challenge is accurately
+defining “normal” behavior. Since anomalies are detected as deviations
+from normal patterns, an incorrect definition of normality can lead to
+false positives or false negatives. <strong>Explanation:</strong>
+Anomaly detection relies on modeling the statistical properties of
+normal data. If the model of normal behavior is inaccurate or
+incomplete, the detection process becomes unreliable.</p></li>
+<li><p>Why are anomalies often considered the most significant data
+points in a dataset? <strong>Answer:</strong> Anomalies correspond to
+rare and unusual events such as fraud, failures, or medical
+abnormalities. <strong>Explanation:</strong> Although rare, anomalies
+often carry the most actionable information and are therefore critical
+in many real-world applications.</p></li>
+<li><p>What are the two main components of a statistical anomaly
+detection algorithm? <strong>Answer:</strong> (1) A statistic that
+measures data behavior, and (2) a decision rule that determines whether
+a sample is anomalous. <strong>Explanation:</strong> The statistic
+quantifies how unusual a sample is, while the decision rule applies a
+threshold to classify it as normal or anomalous.</p></li>
+<li><p>What is the trade-off between True Positive Rate (TPR) and False
+Positive Rate (FPR)? <strong>Answer:</strong> Lowering the threshold
+<span class="math inline">\(\gamma\)</span> increases TPR but also
+increases FPR, while raising <span class="math inline">\(\gamma\)</span>
+decreases FPR but may miss anomalies. <strong>Explanation:</strong>
+Threshold selection determines the sensitivity of the detector and
+directly affects detection performance.</p></li>
+<li><p>What is the main challenge of density-based anomaly detection
+methods? <strong>Answer:</strong> Density estimation becomes difficult
+in high-dimensional spaces due to the curse of dimensionality.
+<strong>Explanation:</strong> As dimensionality increases, data become
+sparse and probability density estimation becomes computationally
+expensive and prone to overfitting.</p></li>
+<li><p>Why is unsupervised anomaly detection often formulated as a
+ranking problem? <strong>Answer:</strong> Because models typically
+output anomaly scores rather than class labels.
+<strong>Explanation:</strong> Samples are ranked by their anomaly score,
+and the most abnormal samples are flagged based on a threshold or
+top-<span class="math inline">\(k\)</span> selection.</p></li>
+<li><p>Why are anomalies easier to detect using Isolation Forest
+compared to density estimation? <strong>Answer:</strong> Anomalies are
+easier to isolate and require fewer random splits in decision trees.
+<strong>Explanation:</strong> Isolation Forest exploits the fact that
+anomalous points are rare and different, leading to shorter path lengths
+during recursive partitioning.</p></li>
+<li><p>Why do reconstruction-based methods detect anomalies using
+reconstruction error? <strong>Answer:</strong> Models trained on normal
+data reconstruct normal samples well but fail to reconstruct anomalies.
+<strong>Explanation:</strong> Large reconstruction errors indicate that
+the input does not lie on the learned manifold of normal data.</p></li>
+<li><p>Why is Maximum Softmax Probability (MSP) useful for detecting
+out-of-distribution samples? <strong>Answer:</strong>
+Out-of-distribution inputs typically produce lower softmax confidence
+scores. <strong>Explanation:</strong> Neural networks tend to assign
+high probability to familiar data and lower confidence to unfamiliar
+inputs.</p></li>
+<li><p>Why is anomaly detection challenging in high-dimensional data?
+<strong>Answer:</strong> Distance and density measures become less
+informative in high dimensions. <strong>Explanation:</strong> This
+phenomenon, known as the curse of dimensionality, makes it harder to
+distinguish normal and anomalous samples reliably.</p></li>
+</ol></section></section>
+<section><h2>Lecture35 - Uncertainty Quantification in Neural Networks</h2><section><h1>Exercises</h1>
+<ol>
+<li><p>Which of the following best describes the goal of uncertainty
+quantification in neural networks?</p>
+<ol>
+<li><p>To improve training speed by reducing the number of model
+parameters</p></li>
+<li><p>To measure how confident a model is in its predictions</p></li>
+<li><p>To eliminate all noise in the data</p></li>
+<li><p>To replace model evaluation metrics such as accuracy</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) To measure how confident a model is in its predictions</p>
+<p><strong>Explanation:</strong><br/>
+Uncertainty quantification is used to estimate how reliable or confident
+a model is about its prediction. This is especially important in
+safety-critical tasks, where a prediction alone may not be sufficient. A
+model that can identify when it is uncertain is often more trustworthy
+than a model that always outputs confident predictions.</p></li>
+<li><p>Suppose a model is trained to classify road signs, but at test
+time it encounters a completely new object that never appeared in
+training. Which type of uncertainty is most directly involved?</p>
+<ol>
+<li><p>Aleatoric uncertainty</p></li>
+<li><p>Epistemic uncertainty</p></li>
+<li><p>Deterministic uncertainty</p></li>
+<li><p>Measurement uncertainty only</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Epistemic uncertainty</p>
+<p><strong>Explanation:</strong><br/>
+Epistemic uncertainty arises when the model lacks sufficient knowledge
+about the input space. If the test sample is out-of-distribution or not
+well represented in training data, the model may not know how to respond
+reliably. This type of uncertainty can often be reduced by collecting
+more diverse training data.</p></li>
+<li><p>Which statement best distinguishes aleatoric uncertainty from
+epistemic uncertainty?</p>
+<ol>
+<li><p>Aleatoric uncertainty is always larger than epistemic
+uncertainty</p></li>
+<li><p>Aleatoric uncertainty arises from noisy or ambiguous data, while
+epistemic uncertainty arises from limited model knowledge</p></li>
+<li><p>Aleatoric uncertainty only applies to regression, while epistemic
+uncertainty only applies to classification</p></li>
+<li><p>Aleatoric uncertainty can always be removed with enough training
+data</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Aleatoric uncertainty arises from noisy or ambiguous data, while
+epistemic uncertainty arises from limited model knowledge</p>
+<p><strong>Explanation:</strong><br/>
+Aleatoric uncertainty is associated with the data itself, such as
+measurement noise, occlusion, or ambiguous inputs. Epistemic
+uncertainty, in contrast, reflects the model’s lack of knowledge and can
+often be reduced by improving the model or expanding the training
+dataset.</p></li>
+<li><p>Why are deep ensembles considered an iterative uncertainty
+estimation method?</p>
+<ol>
+<li><p>Because the same network is trained once and evaluated
+once</p></li>
+<li><p>Because they iteratively modify the labels of the
+dataset</p></li>
+<li><p>Because they generate multiple predictions from independently
+trained models and combine them</p></li>
+<li><p>Because they remove uncertain samples during
+preprocessing</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+c) Because they generate multiple predictions from independently trained
+models and combine them</p>
+<p><strong>Explanation:</strong><br/>
+Deep ensembles estimate uncertainty by training multiple models with
+different initializations and aggregating their predictions. The
+variation across these predictions provides information about model
+uncertainty. Since multiple models or passes are involved, this falls
+under iterative uncertainty estimation.</p></li>
+<li><p>What is the main idea behind Monte Carlo dropout?</p>
+<ol>
+<li><p>Use dropout only during training and disable it at test
+time</p></li>
+<li><p>Apply dropout during both training and inference, and average
+multiple stochastic predictions</p></li>
+<li><p>Replace dropout with batch normalization during
+inference</p></li>
+<li><p>Train many fully independent models from scratch</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Apply dropout during both training and inference, and average
+multiple stochastic predictions</p>
+<p><strong>Explanation:</strong><br/>
+Monte Carlo dropout keeps dropout active during inference so that each
+forward pass produces a slightly different prediction. These stochastic
+predictions can be averaged to form a final prediction, and their
+variability can be used to estimate uncertainty. This gives a
+computationally cheaper approximation to ensemble-style uncertainty
+estimation.</p></li>
+<li><p>In the decomposition <span class="math display">\[U_{total} =
+U_{epistemic} + U_{aleatoric},\]</span> which component is typically
+reducible with more data or better modeling?</p>
+<ol>
+<li><p>Aleatoric uncertainty only</p></li>
+<li><p>Epistemic uncertainty only</p></li>
+<li><p>Both are always reducible</p></li>
+<li><p>Neither is reducible</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Epistemic uncertainty only</p>
+<p><strong>Explanation:</strong><br/>
+Epistemic uncertainty comes from incomplete model knowledge and can
+often be reduced by collecting more data, improving the architecture, or
+better exploring the parameter space. Aleatoric uncertainty is tied to
+the inherent ambiguity or noise in the data and is generally not
+removable by modeling alone.</p></li>
+<li><p>In a segmentation task, where would aleatoric uncertainty most
+likely be highest?</p>
+<ol>
+<li><p>In regions where the model has seen many similar training
+examples</p></li>
+<li><p>Along object or class boundaries where labels are inherently
+ambiguous</p></li>
+<li><p>Only in background regions</p></li>
+<li><p>Only when the training loss is zero</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Along object or class boundaries where labels are inherently
+ambiguous</p>
+<p><strong>Explanation:</strong><br/>
+Aleatoric uncertainty is typically highest where the input itself is
+ambiguous. In segmentation, this often occurs near class boundaries,
+where neighboring pixels may belong to different classes and image
+resolution or noise makes the correct label less certain.</p></li>
+<li><p>Why can single-pass uncertainty estimation be attractive in
+practice?</p>
+<ol>
+<li><p>It completely removes the need for a trained model</p></li>
+<li><p>It avoids the computational cost of multiple forward passes or
+multiple models</p></li>
+<li><p>It guarantees better uncertainty estimates than deep
+ensembles</p></li>
+<li><p>It requires no assumptions about the feature space</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) It avoids the computational cost of multiple forward passes or
+multiple models</p>
+<p><strong>Explanation:</strong><br/>
+Single-pass methods estimate uncertainty from one forward pass, making
+them more efficient in time-sensitive or resource-constrained
+environments. Their main tradeoff is that they often rely on additional
+assumptions and may produce less reliable uncertainty estimates than
+iterative methods.</p></li>
+<li><p>Why can difficulty-based single-pass uncertainty methods become
+poorly calibrated?</p>
+<ol>
+<li><p>Because they only work for linear models</p></li>
+<li><p>Because uncertainty is estimated in latent feature space, which
+may not preserve the true geometry of the input space</p></li>
+<li><p>Because they require ground-truth labels at test time</p></li>
+<li><p>Because they eliminate all outliers before inference</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Because uncertainty is estimated in latent feature space, which may
+not preserve the true geometry of the input space</p>
+<p><strong>Explanation:</strong><br/>
+If the learned feature space distorts relationships between samples,
+then distance- or confidence-based uncertainty estimates may no longer
+reflect actual ambiguity in the original input space. This can lead to
+calibration problems, especially for outliers or underrepresented
+samples.</p></li>
+<li><p>What is the purpose of imposing a Bi-Lipschitz constraint in
+distance-preservation methods?</p>
+<ol>
+<li><p>To ensure that all feature vectors collapse to the same
+point</p></li>
+<li><p>To preserve meaningful distances between inputs and their latent
+representations</p></li>
+<li><p>To eliminate epistemic uncertainty completely</p></li>
+<li><p>To convert classification into regression</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) To preserve meaningful distances between inputs and their latent
+representations</p>
+<p><strong>Explanation:</strong><br/>
+A Bi-Lipschitz constraint helps ensure that distances in input space are
+not excessively compressed or expanded in feature space. This improves
+the reliability of uncertainty estimates derived from latent
+representations because nearby samples remain nearby and distinct
+samples remain distinguishable.</p></li>
+<li><p>Which of the following is a <em>per-sample</em> uncertainty
+evaluation metric?</p>
+<ol>
+<li><p>Area Under the Accuracy Curve (AUAC)</p></li>
+<li><p>Open-set recognition accuracy</p></li>
+<li><p>Negative Log-Likelihood (NLL)</p></li>
+<li><p>Active learning label efficiency</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+c) Negative Log-Likelihood (NLL)</p>
+<p><strong>Explanation:</strong><br/>
+Per-sample metrics evaluate the quality of uncertainty for individual
+predictions, usually when ground-truth labels are known. NLL and Brier
+score are common examples. In contrast, AUAC and active learning
+performance are dataset- or application-level measures.</p></li>
+<li><p>What does a lower Brier score indicate?</p>
+<ol>
+<li><p>Worse calibration of predicted probabilities</p></li>
+<li><p>Better agreement between predicted probabilities and true
+outcomes</p></li>
+<li><p>Higher computational cost</p></li>
+<li><p>Greater epistemic uncertainty</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Better agreement between predicted probabilities and true
+outcomes</p>
+<p><strong>Explanation:</strong><br/>
+The Brier score measures the mean squared difference between predicted
+probabilities and the true labels. Lower values indicate better
+calibrated and more accurate probabilistic predictions, while higher
+values indicate larger mismatch between confidence and
+correctness.</p></li>
+<li><p>In misprediction detection, what should a good uncertainty
+estimator do?</p>
+<ol>
+<li><p>Assign low uncertainty to all predictions</p></li>
+<li><p>Rank incorrect predictions as more uncertain than correct
+predictions</p></li>
+<li><p>Maximize entropy for every sample</p></li>
+<li><p>Produce identical uncertainty scores for the entire
+dataset</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Rank incorrect predictions as more uncertain than correct
+predictions</p>
+<p><strong>Explanation:</strong><br/>
+A useful uncertainty estimator should help distinguish reliable
+predictions from unreliable ones. In dataset-level evaluation, this
+means that incorrect predictions should generally receive higher
+uncertainty scores than correct predictions. This behavior leads to
+stronger misprediction detection performance.</p></li>
+<li><p>Why is uncertainty often evaluated through downstream
+applications such as active learning?</p>
+<ol>
+<li><p>Because uncertainty has no relationship to model
+performance</p></li>
+<li><p>Because uncertainty is only meaningful in theoretical
+settings</p></li>
+<li><p>Because the practical value of uncertainty is often best measured
+by how much it improves decision-making</p></li>
+<li><p>Because per-sample metrics are always unavailable</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+c) Because the practical value of uncertainty is often best measured by
+how much it improves decision-making</p>
+<p><strong>Explanation:</strong><br/>
+In many real-world settings, the usefulness of an uncertainty estimate
+is not judged only by a standalone numerical metric, but by whether it
+improves a downstream task. For example, in active learning, better
+uncertainty estimates should lead to better sample selection and faster
+model improvement.</p></li>
+</ol></section></section>
+<section><h2>Lecture36 - Data and Label Efficient Learning – Active Learning</h2><section><h1>Exercises</h1>
 <ol>
 <li><p>Which of the following best describes the main goal of active
 learning?</p>
@@ -3225,7 +4356,7 @@ NFR is a deployment-oriented metric that measures prediction stability
 across model updates. It is useful because overall accuracy may improve
 even while some previously correct predictions are lost.</p></li>
 </ol></section></section>
-<section><h2>Lecture28 - Machine Learning - Transformers</h2><section><h1>Exercises</h1>
+<section><h2>Lecture37 - Machine Learning - Transformers</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What problem do Transformers solve
 compared to RNNs?</p>

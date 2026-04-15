@@ -907,24 +907,6 @@ algorithm terminates.</p></li>
 <p>This final configuration represents a locally optimal clustering
 under the Manhattan distance metric.</p>
 
-<h1 data-number="13" id="clustering-metrics"><span class="header-section-number">13.</span> Clustering Metrics</h1>
-<p>After running a clustering algorithm, we need to evaluate the quality of the resulting clusters. Clustering evaluation metrics fall into two broad categories: <strong>internal metrics</strong>, which assess cluster quality using only the data itself, and <strong>external metrics</strong>, which compare the predicted clusters against known ground-truth labels.</p>
-<h2 data-number="13.1" id="internal-metrics"><span class="header-section-number">13.1</span> Internal Metrics</h2>
-<p>Internal metrics evaluate clustering quality without reference to any external information. They measure properties such as cluster compactness and separation.</p>
-<ul>
-<li><p><strong>Silhouette Score:</strong> Measures how similar each point is to its own cluster compared to other clusters. Values range from <span class="math inline">\(-1\)</span> to <span class="math inline">\(1\)</span>; higher values indicate better-defined clusters.</p></li>
-<li><p><strong>Davies–Bouldin Index:</strong> Computes the average ratio of within-cluster scatter to between-cluster separation. Lower values indicate better clustering.</p></li>
-<li><p><strong>Dunn Index:</strong> Measures the ratio of the minimum inter-cluster distance to the maximum intra-cluster diameter. Higher values indicate more compact and well-separated clusters.</p></li>
-</ul>
-<h2 data-number="13.2" id="external-metrics"><span class="header-section-number">13.2</span> External Metrics</h2>
-<p>External metrics compare the predicted cluster assignments against ground-truth labels, which are used only for evaluation.</p>
-<ul>
-<li><p><strong>Rand Index:</strong> Counts the fraction of point pairs where both predicted and true labels agree (both same cluster or both different clusters). Values range from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>; higher is better.</p></li>
-<li><p><strong>Purity:</strong> For each predicted cluster, finds the most common true label and sums these counts. Higher purity indicates that clusters align well with true classes.</p></li>
-<li><p><strong>Mutual Information:</strong> Measures the amount of information shared between predicted and true cluster assignments. Higher values indicate greater agreement.</p></li>
-</ul>
-<section class="interactive-notebook"><h3>Interactive Notebook: Section 12.3 Clustering Metrics</h3><p>Same data, computed internal and external clustering metrics.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:860px;" title="Interactive Section 12.3 Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-
 </main>
 </body>
 </html>

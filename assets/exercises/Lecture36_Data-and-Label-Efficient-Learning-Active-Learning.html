@@ -1,0 +1,211 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Exercises</title>
+  <link rel="stylesheet" href="../style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+<main>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p>Which of the following best describes the main goal of active
+learning?</p>
+<ol>
+<li><p>Maximize the size of the labeled dataset before training</p></li>
+<li><p>Achieve high model performance while minimizing labeling
+cost</p></li>
+<li><p>Eliminate the need for human annotation entirely</p></li>
+<li><p>Guarantee perfect classification after one training
+round</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Achieve high model performance while minimizing labeling cost</p>
+<p><strong>Explanation:</strong><br/>
+The main objective of active learning is to use a limited annotation
+budget efficiently. Instead of labeling all available data, the learner
+selectively queries the most informative samples so that strong model
+performance can be achieved with fewer labeled examples.</p></li>
+<li><p>What is the main difference between standard supervised learning
+and active learning?</p>
+<ol>
+<li><p>Supervised learning uses only unlabeled data, while active
+learning uses only labeled data</p></li>
+<li><p>Supervised learning assumes labels are already available, while
+active learning selectively requests labels during training</p></li>
+<li><p>Active learning does not require a machine learning
+model</p></li>
+<li><p>Supervised learning always requires fewer samples than active
+learning</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Supervised learning assumes labels are already available, while
+active learning selectively requests labels during training</p>
+<p><strong>Explanation:</strong><br/>
+In supervised learning, the labeled dataset is assumed to be prepared in
+advance. In active learning, the learner interacts with an unlabeled
+pool and chooses which samples should be labeled next under a limited
+budget.</p></li>
+<li><p>In the active learning pipeline, what is the role of the
+acquisition function?</p>
+<ol>
+<li><p>It provides the true labels for selected samples</p></li>
+<li><p>It ranks unlabeled samples according to their expected
+usefulness</p></li>
+<li><p>It replaces the training dataset with the test dataset</p></li>
+<li><p>It guarantees zero training error</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) It ranks unlabeled samples according to their expected usefulness</p>
+<p><strong>Explanation:</strong><br/>
+The acquisition function is the mechanism that decides which unlabeled
+samples should be selected for annotation. It typically uses criteria
+such as uncertainty, diversity, or expected model improvement.</p></li>
+<li><p>Which metric is often more informative than accuracy for
+imbalanced classification problems?</p>
+<ol>
+<li><p>F1-score</p></li>
+<li><p>FLOPS</p></li>
+<li><p>Mean squared error</p></li>
+<li><p>IoU threshold</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) F1-score</p>
+<p><strong>Explanation:</strong><br/>
+Accuracy may be misleading when one class dominates the dataset. The
+F1-score balances precision and recall, making it more appropriate for
+imbalanced classification settings.</p></li>
+<li><p>Why is the area under the performance curve (AUC) useful in
+active learning?</p>
+<ol>
+<li><p>It measures how much GPU memory is used during
+retraining</p></li>
+<li><p>It summarizes how efficiently performance improves as more labels
+are acquired</p></li>
+<li><p>It counts the number of oracle queries only</p></li>
+<li><p>It replaces all other evaluation metrics</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) It summarizes how efficiently performance improves as more labels are
+acquired</p>
+<p><strong>Explanation:</strong><br/>
+In active learning, we care not only about final performance but also
+about how quickly the model improves with additional labeled samples. A
+higher AUC indicates a more label-efficient acquisition
+strategy.</p></li>
+<li><p>Entropy sampling selects samples that:</p>
+<ol>
+<li><p>Have the smallest feature norm</p></li>
+<li><p>Have the highest uncertainty across predicted class
+probabilities</p></li>
+<li><p>Are closest to the class centroid</p></li>
+<li><p>Have already been labeled</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Have the highest uncertainty across predicted class probabilities</p>
+<p><strong>Explanation:</strong><br/>
+Entropy measures uncertainty in the predicted class distribution. If the
+model spreads probability mass across several classes, the entropy is
+high, indicating that the sample is informative for annotation.</p></li>
+<li><p>What is the key idea behind margin sampling?</p>
+<ol>
+<li><p>Select samples with the largest distance from the training
+set</p></li>
+<li><p>Select samples with the smallest difference between the top two
+predicted class probabilities</p></li>
+<li><p>Select samples with the highest training loss only</p></li>
+<li><p>Select samples uniformly at random</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) Select samples with the smallest difference between the top two
+predicted class probabilities</p>
+<p><strong>Explanation:</strong><br/>
+Margin sampling focuses on samples for which the model is nearly
+undecided between two classes. These are often near the decision
+boundary and are especially useful for refining the classifier.</p></li>
+<li><p>Which statement best describes diversity-based active
+learning?</p>
+<ol>
+<li><p>It selects samples that collectively cover the overall data
+distribution</p></li>
+<li><p>It always selects the most uncertain sample, even if
+redundant</p></li>
+<li><p>It ignores feature-space structure</p></li>
+<li><p>It is identical to least-confidence sampling</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) It selects samples that collectively cover the overall data
+distribution</p>
+<p><strong>Explanation:</strong><br/>
+Diversity-based methods aim to avoid redundancy by selecting
+representative samples from different regions of the feature space. This
+improves global coverage of the dataset.</p></li>
+<li><p>Why can fusion-based active learning be useful?</p>
+<ol>
+<li><p>It combines diversity and difficulty, balancing dataset coverage
+and uncertainty</p></li>
+<li><p>It removes the need for oracle labeling</p></li>
+<li><p>It guarantees the lowest computational cost</p></li>
+<li><p>It always outperforms all other methods without tuning</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+a) It combines diversity and difficulty, balancing dataset coverage and
+uncertainty</p>
+<p><strong>Explanation:</strong><br/>
+Fusion-based methods combine the strengths of diversity-based and
+difficulty-based strategies. This allows the learner to improve global
+representation early on while refining difficult decision boundaries
+later.</p></li>
+<li><p>What is a negative flip in the context of active learning
+deployment?</p>
+<ol>
+<li><p>A previously incorrect prediction becomes correct</p></li>
+<li><p>A previously correct prediction becomes incorrect after model
+updating</p></li>
+<li><p>The training loss becomes negative</p></li>
+<li><p>The acquisition function fails to assign a score</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) A previously correct prediction becomes incorrect after model
+updating</p>
+<p><strong>Explanation:</strong><br/>
+A negative flip captures regression at the sample level. It occurs when
+the updated model makes an error on a sample that the previous model had
+classified correctly.</p></li>
+<li><p>What does the Negative Flip Rate (NFR) measure?</p>
+<ol>
+<li><p>The proportion of correctly classified samples in the test
+set</p></li>
+<li><p>The fraction of previously correct samples that become incorrect
+after model updating</p></li>
+<li><p>The number of labels acquired per active learning round</p></li>
+<li><p>The total annotation time for the dataset</p></li>
+</ol>
+<p><strong>Solution:</strong><br/>
+b) The fraction of previously correct samples that become incorrect
+after model updating</p>
+<p><strong>Explanation:</strong><br/>
+NFR is a deployment-oriented metric that measures prediction stability
+across model updates. It is useful because overall accuracy may improve
+even while some previously correct predictions are lost.</p></li>
+</ol></section>
+</main>
+</body>
+</html>

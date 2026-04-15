@@ -1,0 +1,473 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Sequence Modeling</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
+</head>
+<body>
+<main>
+  <div class="center">
+</div>
+
+
+
+
+
+<h1 data-number="1" id="learning-objectives"><span class="header-section-number">1.</span> Learning Objectives</h1>
+<p>This lecture introduces sequence modeling for data with temporal or
+ordered structure, such as time-series signals and natural language. We
+begin by analyzing the limitations of Multilayer Perceptrons (MLPs) for
+modeling variable-length sequences and temporal dependencies. We then
+develop Recurrent Neural Networks (RNNs), including their mathematical
+formulation, loss evaluation across time, and training via
+Backpropagation Through Time (BPTT). A detailed analysis of gradient
+propagation reveals the vanishing gradient problem and explains why
+learning long-range dependencies can be difficult in standard recurrent
+models.</p>
+<p>To address these limitations, we introduce gated recurrent
+architectures, including Long Short-Term Memory (LSTM) networks and
+Gated Recurrent Units (GRUs). We derive their gate equations and update
+rules, and examine how gating mechanisms improve gradient flow and
+enable long-term memory retention. By the end of this lecture, students
+should understand the theoretical foundations of recurrent sequence
+models, the challenges of training them, and the architectural
+innovations that make deep sequence learning feasible. Many of these
+architectures are discussed in standard deep learning texts <span class="citation" data-cites="5"></span>.</p>
+<h1 data-number="2" id="introduction-to-sequence-modeling"><span class="header-section-number">2.</span> Introduction to Sequence
+Modeling</h1>
+<h2 class="unnumbered" id="limitations-of-mlps-in-modeling-sequences">Limitations of MLPs in
+Modeling Sequences</h2>
+<p>Multilayer Perceptrons (MLPs) expect fixed-size inputs and outputs,
+which makes them poorly suited for modeling variable-length sequences.
+Because MLPs process inputs as independent feature vectors, they do not
+naturally account for the ordering of inputs and therefore fail to
+capture temporal dependencies that are essential in time-series tasks
+such as language modeling, stock prediction, and sensor data
+analysis.</p>
+<p>In addition, modeling long sequences with MLPs would require an
+extremely large number of parameters. This often leads to severe
+overfitting when training data is limited, making MLPs impractical for
+many sequence modeling problems.</p>
+<h2 class="unnumbered" id="types-of-sequence-modeling-problems">Types of
+Sequence Modeling Problems</h2>
+<p>Sequence modeling tasks arise in several common forms. One important
+class is <strong>sequence prediction and classification</strong>, where
+a single output (such as a label or real value) is predicted from an
+input sequence. Examples include sentiment analysis and stock price
+prediction.</p>
+<p>Another class is <strong>sequence generation</strong>, where the
+model produces an output sequence based on learned patterns in the data.
+Applications include generating music, text, or other structured
+signals.</p>
+<p>A third class is <strong>sequence-to-sequence prediction</strong>,
+which maps an input sequence to an output sequence. This setting is
+essential for applications such as machine translation and video
+captioning, where the output sequence may have arbitrary length.</p>
+<figure id="fig:figure_label1">
+<img src="img/lecture20/h_graph.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Parameter sharing with state history in sequence
+models</figcaption>
+</figure>
+<h2 class="unnumbered" id="variables-in-figure-figfigure_label1">Variables in Figure <a data-reference="fig:figure_label1" data-reference-type="ref" href="#fig:figure_label1">1</a></h2>
+<ul>
+<li><p><span class="math inline">\(\mathbf{x}(t)\)</span>: Input vector
+at time <span class="math inline">\(t\)</span>, providing new
+information at each time step.</p></li>
+<li><p><span class="math inline">\(\mathbf{h}(t)\)</span>: Hidden state
+at time <span class="math inline">\(t\)</span>, representing the
+accumulated memory from previous inputs.</p></li>
+<li><p><span class="math inline">\(\mathbf{o}(t)\)</span>: Output vector
+at time <span class="math inline">\(t\)</span>, generated from the
+current hidden state.</p></li>
+<li><p><span class="math inline">\(\mathbf{U}\)</span>: Weight matrix
+mapping input <span class="math inline">\(\mathbf{x}(t)\)</span> to the
+hidden state.</p></li>
+<li><p><span class="math inline">\(\mathbf{W}\)</span>: Weight matrix
+connecting <span class="math inline">\(\mathbf{h}(t-1)\)</span> to <span class="math inline">\(\mathbf{h}(t)\)</span>.</p></li>
+<li><p><span class="math inline">\(\mathbf{V}\)</span>: Weight matrix
+mapping <span class="math inline">\(\mathbf{h}(t)\)</span> to the output
+<span class="math inline">\(\mathbf{o}(t)\)</span>.</p></li>
+</ul>
+<h1 data-number="3" id="recurrent-neural-networks-rnns"><span class="header-section-number">3.</span> Recurrent Neural Networks
+(RNNs)</h1>
+<p>Recurrent Neural Networks (RNNs) are designed to model sequential
+data by maintaining a hidden state that evolves over time, originally
+introduced for temporal representation learning <span class="citation" data-cites="1"></span>. As illustrated in Figure <a data-reference="fig:figure_label2" data-reference-type="ref" href="#fig:figure_label2">2</a>, RNNs maintain a hidden state
+that acts as memory, allowing information to persist across time steps.
+At each time step, the hidden state is updated using both the current
+input and the previous hidden state, enabling the model to capture
+temporal dependencies. This makes RNNs well suited for tasks such as
+language modeling, time-series forecasting, and any application where
+context from prior inputs influences future predictions.</p>
+<h2 data-number="3.1" id="subsec:rnn-architecture"><span class="header-section-number">3.1</span> RNN Architecture</h2>
+<figure id="fig:figure_label2">
+<img src="img/lecture20/bigH.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>The structure of a Recurrent Neural Network (RNN) and how
+the states and inputs are processed over time</figcaption>
+</figure>
+<p>The key idea behind RNNs is that each output depends not only on the
+current input but also on a hidden <em>state</em> that summarizes past
+information. Because the same parameters are reused at every time step,
+RNNs can handle variable-length sequences while keeping the number of
+parameters manageable.</p>
+<p>At a high level, the hidden state evolves according to the recurrence
+<span class="math display">\[\mathbf{h}(t) = f(\mathbf{h}(t-1),
+\mathbf{x}(t)),\]</span> where <span class="math inline">\(f(\cdot)\)</span> is a nonlinear function such as
+<span class="math inline">\(\tanh\)</span> or ReLU.</p>
+<p>To make this computation explicit, we introduce bias vectors <span class="math inline">\(\mathbf{b}\)</span> and <span class="math inline">\(\mathbf{c}\)</span> and write the full RNN update
+equations:</p>
+<p><span class="math display">\[\begin{aligned}
+\mathbf{a}(t) &amp;= \mathbf{b} + \mathbf{W}\mathbf{h}(t-1) +
+\mathbf{U}\mathbf{x}(t)
+&amp;&amp; \text{(pre-activation)} \\
+\mathbf{h}(t) &amp;= \tanh(\mathbf{a}(t))
+&amp;&amp; \text{(hidden state)} \\
+\mathbf{o}(t) &amp;= \mathbf{c} + \mathbf{V}\mathbf{h}(t)
+&amp;&amp; \text{(output logits)} \\
+\mathbf{y}(t) &amp;= \text{softmax}(\mathbf{o}(t))
+&amp;&amp; \text{(output probabilities)}
+\end{aligned}\]</span></p>
+<p>These equations show how an RNN processes an input sequence by
+repeatedly updating its hidden state, combining new information with
+previously stored context, and producing an output at each time
+step.</p>
+<h2 data-number="3.2" id="loss-evaluation-and-backpropagation"><span class="header-section-number">3.2</span> Loss Evaluation and
+Backpropagation</h2>
+<p>In RNN training, the predicted output at each time step is compared
+with the corresponding target output. The total loss over a sequence of
+length <span class="math inline">\(T\)</span> is typically defined as
+the sum of per-time-step losses: <span class="math display">\[\mathcal{L} = \sum_{t=1}^{T} L(t),\]</span> where
+<span class="math inline">\(L(t)\)</span> denotes the loss at time step
+<span class="math inline">\(t\)</span>. Common choices include Mean
+Squared Error (MSE) for regression and Cross-Entropy Loss for
+classification.</p>
+<p>To minimize this sequence-level objective, RNNs are trained using
+Backpropagation Through Time (BPTT), a temporal extension of
+backpropagation developed for recurrent systems <span class="citation" data-cites="2"></span>. The network is first <em>unrolled</em> across
+the entire sequence, forming a deep computational graph with one layer
+per time step. Gradients are then computed by applying the chain rule
+backward through this unfolded network.</p>
+<p>Because each hidden state depends on the previous hidden state, the
+gradient at a given time step depends not only on the local loss but
+also on future time steps. During BPTT, gradients with respect to the
+parameters (e.g., <span class="math inline">\(\mathbf{U}, \mathbf{W},
+\mathbf{V}\)</span>) accumulate contributions from the entire sequence:
+<span class="math display">\[\frac{\partial \mathcal{L}}{\partial
+\mathbf{W}}
+= \sum_{t=1}^{T} \frac{\partial L(t)}{\partial \mathbf{W}}.\]</span></p>
+<p>However, computing each term requires repeated application of the
+chain rule through the hidden-state dynamics. In particular, gradients
+with respect to the recurrent weights involve products of Jacobian
+matrices of the form <span class="math display">\[\frac{\partial
+\mathbf{h}(t)}{\partial \mathbf{h}(t-1)},\]</span> which are multiplied
+across many time steps. This repeated multiplication leads directly to a
+fundamental training challenge for RNNs.</p>
+<h2 data-number="3.3" id="the-vanishing-gradient-problem"><span class="header-section-number">3.3</span> The Vanishing Gradient
+Problem</h2>
+<p>A major difficulty in training RNNs is the <strong>vanishing gradient
+problem</strong>, which becomes severe when backpropagating through long
+sequences. Because BPTT requires gradients to propagate across many time
+steps, small changes in gradient magnitude can compound
+dramatically.</p>
+<h2 class="unnumbered" id="gradient-propagation-in-rnns">Gradient
+Propagation in RNNs</h2>
+<p>As introduced in Section <a data-reference="subsec:rnn-architecture" data-reference-type="ref" href="#subsec:rnn-architecture">3.1</a>, the RNN state update
+is <span class="math display">\[\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t),
+\qquad
+\mathbf{h}(t)=\sigma(\mathbf{a}(t)),\]</span> where <span class="math inline">\(\sigma(\cdot)\)</span> is an element-wise
+nonlinearity (e.g., <span class="math inline">\(\tanh\)</span> or
+ReLU).</p>
+<p>To understand gradient behavior, consider how a hidden state at time
+<span class="math inline">\(t\)</span> depends on a much earlier state:
+<span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+= \prod_{k=1}^{t}\frac{\partial \mathbf{h}(k)}{\partial
+\mathbf{h}(k-1)}.\]</span></p>
+<p>From the update equation, <span class="math display">\[\frac{\partial
+\mathbf{h}(t)}{\partial \mathbf{h}(t-1)}
+= \mathbf{J}(t)\mathbf{W}^{T},\]</span> where <span class="math inline">\(\mathbf{J}(t)=\mathrm{diag}\!\left(\sigma'(\mathbf{a}(t))\right)\)</span>
+is the Jacobian of the activation function.</p>
+<p>Expanding across time steps yields <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+= \mathbf{J}(t)\mathbf{W}^{T}
+\mathbf{J}(t-1)\mathbf{W}^{T}\cdots
+\mathbf{J}(1)\mathbf{W}^{T}.\]</span></p>
+<h2 class="unnumbered" id="why-gradients-vanish">Why Gradients
+Vanish</h2>
+<p>Gradients therefore become products of many matrices. If the
+eigenvalues of <span class="math inline">\(\mathbf{W}\)</span> and the
+derivatives of the activation function are smaller than one, repeated
+multiplication drives the gradient toward zero: <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)} \approx 0
+\quad \text{for large } t.\]</span></p>
+<p>As a result, early time steps have little influence on learning,
+making it difficult for RNNs to capture long-range dependencies.</p>
+<h2 class="unnumbered" id="mitigating-the-vanishing-gradient-problem">Mitigating the Vanishing
+Gradient Problem</h2>
+<p>Several techniques help preserve gradient flow:</p>
+<ul>
+<li><p><strong>ReLU activations:</strong> Non-saturating activations
+maintain larger gradients than sigmoid or tanh.</p></li>
+<li><p><strong>Identity initialization:</strong> Initializing <span class="math inline">\(\mathbf{W}\)</span> close to the identity
+stabilizes gradient magnitude across time.</p></li>
+<li><p><strong>Gradient clipping:</strong> Prevents exploding gradients
+during training.</p></li>
+<li><p><strong>LSTM and GRU architectures:</strong> Gating mechanisms
+enable long-term memory.</p></li>
+</ul>
+<p>These improvements allow RNNs to capture longer temporal
+dependencies.</p>
+<figure id="fig:figure_label3">
+<img src="img/lecture20/Gradient.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Effects of standard initialization versus identity
+initialization</figcaption>
+</figure>
+<figure id="fig:figure_label4">
+<img src="img/lecture20/ReLU.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Comparison of sigmoid, tanh, and ReLU activation
+functions</figcaption>
+</figure>
+<h1 data-number="4" id="long-short-term-memory-lstm-networks"><span class="header-section-number">4.</span> Long Short-Term Memory (LSTM)
+Networks</h1>
+<p>Long Short-Term Memory (LSTM) networks are a type of Recurrent Neural
+Network (RNN), proposed by Hochreiter and Schmidhuber, specifically
+designed to address the vanishing gradient problem discussed in
+Section <a data-reference="subsec:rnn-architecture" data-reference-type="ref" href="#subsec:rnn-architecture">3.1</a> <span class="citation" data-cites="3"></span>. By introducing a memory cell and a set of gating
+mechanisms, LSTMs regulate the flow of information through time and
+enable learning of long-term dependencies. Figure <a data-reference="fig:figure_label5" data-reference-type="ref" href="#fig:figure_label5">5</a> illustrates the structure of an
+individual LSTM cell.</p>
+<figure id="fig:figure_label5">
+<img src="img/lecture20/LSTM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>An LSTM cell for one time step</figcaption>
+</figure>
+<h2 data-number="4.1" id="lstm-architecture-and-gates"><span class="header-section-number">4.1</span> LSTM Architecture and
+Gates</h2>
+<p>An LSTM cell augments the standard RNN hidden state with a
+<strong>cell state</strong> that serves as long-term memory. Information
+is regulated through three multiplicative gates that decide what to
+forget, what to store, and what to output at each time step.</p>
+<ul>
+<li><p><strong>Forget Gate</strong> <span class="math inline">\(\mathbf{f}^{(t)}\)</span>: Determines how much of
+the previous cell state should be retained: <span class="math display">\[\mathbf{f}^{(t)}
+    = \sigma(\mathbf{b}^f + \mathbf{U}^f \mathbf{x}^{(t)} + \mathbf{W}^f
+\mathbf{h}^{(t-1)})\]</span></p></li>
+<li><p><strong>Input Gate</strong> <span class="math inline">\(\mathbf{g}^{(t)}\)</span>: Controls how much new
+information should be written to memory: <span class="math display">\[\mathbf{g}^{(t)}
+    = \sigma(\mathbf{b}^g + \mathbf{U}^g \mathbf{x}^{(t)} + \mathbf{W}^g
+\mathbf{h}^{(t-1)})\]</span></p></li>
+<li><p><strong>Output Gate</strong> <span class="math inline">\(\mathbf{o}^{(t)}\)</span>: Determines which parts
+of the memory influence the hidden state: <span class="math display">\[\mathbf{o}^{(t)}
+    = \sigma(\mathbf{b}^o + \mathbf{U}^o \mathbf{x}^{(t)} + \mathbf{W}^o
+\mathbf{h}^{(t-1)})\]</span></p></li>
+</ul>
+<h2 data-number="4.2" id="updating-the-cell-and-hidden-states"><span class="header-section-number">4.2</span> Updating the Cell and Hidden
+States</h2>
+<p>After computing the gates, the LSTM updates its internal memory and
+hidden state in three steps.</p>
+<ul>
+<li><p><strong>Candidate Cell State:</strong> <span class="math display">\[\tilde{\mathbf{s}}^{(t)}
+= \tanh(\mathbf{b}^c + \mathbf{U}^c \mathbf{x}^{(t)} + \mathbf{W}^c
+\mathbf{h}^{(t-1)})\]</span></p></li>
+<li><p><strong>Cell State Update:</strong> <span class="math display">\[\mathbf{s}^{(t)}
+= \mathbf{f}^{(t)} \circ \mathbf{s}^{(t-1)}
++ \mathbf{g}^{(t)} \circ \tilde{\mathbf{s}}^{(t)}\]</span></p></li>
+<li><p><strong>Hidden State Update:</strong> <span class="math display">\[\mathbf{h}^{(t)}
+= \mathbf{o}^{(t)} \circ \tanh(\mathbf{s}^{(t)})\]</span></p></li>
+</ul>
+<p>Here, <span class="math inline">\(\circ\)</span> denotes element-wise
+multiplication. This additive memory update allows gradients to flow
+more easily across time steps, mitigating the vanishing gradient
+problem.</p>
+<h2 data-number="4.3" id="advantages-of-lstms-over-standard-rnns"><span class="header-section-number">4.3</span> Advantages of LSTMs over
+Standard RNNs</h2>
+<p>LSTMs are highly effective for modeling long sequences because their
+gated memory structure allows information to persist across many time
+steps. The additive update of the cell state provides a stable pathway
+for gradients, significantly reducing the vanishing gradient problem
+that affects standard RNNs. As a result, LSTMs can selectively remember
+or forget information, making them well suited for tasks such as natural
+language processing, speech recognition, and time-series
+forecasting.</p>
+<h2 data-number="4.4" id="limitations-of-lstms"><span class="header-section-number">4.4</span> Limitations of LSTMs</h2>
+<p>Despite their strengths, LSTMs also have several practical drawbacks.
+Their gating mechanisms introduce multiple weight matrices, increasing
+computational cost and the number of trainable parameters compared to
+standard RNNs. This can lead to slower training and a greater risk of
+overfitting on smaller datasets. In addition, like all recurrent
+architectures, LSTMs process sequences sequentially, limiting
+opportunities for parallel computation. For large-scale sequence
+modeling, modern Transformer architectures often provide better
+scalability and performance.</p>
+<h1 data-number="5" id="gated-recurrent-units-grus"><span class="header-section-number">5.</span> Gated Recurrent Units (GRUs)</h1>
+<p>Gated Recurrent Units (GRUs) are a simplified alternative to LSTMs
+introduced for sequence modeling and machine translation tasks <span class="citation" data-cites="4"></span>. GRUs capture long-range
+dependencies in sequential data while using fewer parameters and a more
+streamlined structure. This efficiency is achieved by combining the
+forget and input gates of LSTMs into a single update gate and
+eliminating the separate cell state, relying instead on a single hidden
+state.</p>
+<h2 data-number="5.1" id="gru-architecture-and-gates"><span class="header-section-number">5.1</span> GRU Architecture and Gates</h2>
+<p>Each GRU cell contains two gates that regulate information flow:</p>
+<ul>
+<li><p><strong>Update Gate</strong> <span class="math inline">\(\mathbf{z}^{(t)}\)</span>: controls how much of
+the previous hidden state is preserved: <span class="math display">\[\mathbf{z}^{(t)}=\sigma(\mathbf{b}^z+\mathbf{U}^z\mathbf{x}^{(t)}+\mathbf{W}^z\mathbf{h}^{(t-1)})\]</span></p></li>
+<li><p><strong>Reset Gate</strong> <span class="math inline">\(\mathbf{r}^{(t)}\)</span>: determines how much
+past information to forget when forming the candidate state: <span class="math display">\[\mathbf{r}^{(t)}=\sigma(\mathbf{b}^r+\mathbf{U}^r\mathbf{x}^{(t)}+\mathbf{W}^r\mathbf{h}^{(t-1)})\]</span></p></li>
+</ul>
+<h2 data-number="5.2" id="updating-the-hidden-state"><span class="header-section-number">5.2</span> Updating the Hidden State</h2>
+<p>Using these gates, the GRU first computes a candidate hidden state
+<span class="math display">\[\tilde{\mathbf{h}}^{(t)}=\tanh\!\left(\mathbf{b}+\mathbf{U}\mathbf{x}^{(t)}+\mathbf{W}(\mathbf{r}^{(t)}\circ\mathbf{h}^{(t-1)})\right),\]</span>
+which incorporates the reset gate to control how much past information
+is used.</p>
+<p>The final hidden state is then obtained by interpolating between the
+previous hidden state and the candidate state: <span class="math display">\[\mathbf{h}^{(t)}=\mathbf{z}^{(t)}\circ\mathbf{h}^{(t-1)}+(1-\mathbf{z}^{(t)})\circ\tilde{\mathbf{h}}^{(t)}.\]</span></p>
+<p>This gating mechanism enables GRUs to adaptively preserve or update
+memory over time.</p>
+<h2 data-number="5.3" id="advantages-of-grus"><span class="header-section-number">5.3</span> Advantages of GRUs</h2>
+<p>GRUs are computationally efficient due to their simpler architecture
+and reduced number of parameters compared to LSTMs. This often leads to
+faster training and lower memory usage while still capturing long-term
+dependencies in sequential data. In practice, GRUs frequently achieve
+performance comparable to LSTMs on many sequence modeling tasks, making
+them attractive when computational resources are limited.</p>
+<h2 data-number="5.4" id="limitations-of-grus"><span class="header-section-number">5.4</span> Limitations of GRUs</h2>
+<p>Despite their efficiency, GRUs offer less expressive control over
+memory than LSTMs because they lack a separate cell state. For complex
+tasks requiring very long-term memory or fine-grained control of
+information flow, LSTMs may still provide superior performance. As with
+other recurrent models, GRUs also process sequences sequentially,
+limiting parallelization and scalability compared to Transformer
+architectures. For a broader treatment of sequence architectures and
+deep learning models, see <span class="citation" data-cites="5"></span>.</p>
+<h2 data-number="5.5" id="parameter-sharing-in-sequence-modeling"><span class="header-section-number">5.5</span> Parameter Sharing in Sequence
+Modeling</h2>
+<p>A key strength of recurrent models such as RNNs, LSTMs, and GRUs is
+parameter sharing across time steps. The same weight matrices are reused
+at every position in a sequence, allowing the model to process inputs of
+varying lengths without increasing the number of parameters.</p>
+<p>This idea is closely related to parameter sharing in Convolutional
+Neural Networks (CNNs), where the same convolutional kernel is applied
+across different spatial locations. Parameter sharing provides two major
+benefits. First, it enables the detection of patterns regardless of
+their position in the sequence, leading to invariance. Second, it allows
+efficient modeling of variable-length inputs without increasing model
+size.</p>
+<figure id="fig:figure_label6">
+<img src="img/lecture20/RNN_Config.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Various configurations for RNNs and related sequence models.
+Blue boxes denote outputs, red boxes inputs, and green boxes hidden
+states.</figcaption>
+</figure>
+<h1 data-number="7" id="references"><span class="header-section-number">7.</span> References</h1>
+<div class="list">
+<p><span>[]</span><span> </span></p>
+<p>J. L. Elman. Finding structure in time. Cognitive Science,
+14(2):179–211, 1990.</p>
+<p>P. Werbos. Backpropagation through time: what it does and how to do
+it. Proceedings of the IEEE, 78(10):1550–1560, 1990.</p>
+<p>S. Hochreiter and J. Schmidhuber. Long Short-Term Memory. Neural
+Computation, 9(8):1735–1780, 1997.</p>
+<p>K. Cho et al. Learning Phrase Representations using RNN
+Encoder–Decoder. EMNLP, 2014.</p>
+<p>I. Goodfellow, Y. Bengio, and A. Courville. Deep Learning. MIT Press,
+2016.</p>
+</div>
+
+</main>
+</body>
+</html>
