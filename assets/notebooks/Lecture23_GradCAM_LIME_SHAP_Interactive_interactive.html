@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>GradCAM / LIME / SHAP — Lecture 23</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:270px 1fr;gap:12px;}
+  @media(max-width:750px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.79rem;font-weight:600;color:var(--muted);min-width:120px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:36px;text-align:right;}
+  select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.84rem;background:#fff;flex:1;}
+  .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .chart-box{width:100%;height:240px;}
+  .chart-wide{width:100%;height:280px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.84rem;line-height:1.65;margin-top:10px;}
+  .info-box b{color:var(--blue);}
+  .sp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:8px 0;}
+  .sp-btn{padding:6px 4px;border-radius:6px;border:2px solid;cursor:pointer;
+          font-size:.78rem;font-weight:700;text-align:center;transition:all .15s;}
+  .sp-btn.on{color:#fff;}
+  .sp0{border-color:#2563eb;color:#2563eb;}.sp0.on{background:#2563eb;}
+  .sp1{border-color:#dc2626;color:#dc2626;}.sp1.on{background:#dc2626;}
+  .sp2{border-color:#059669;color:#059669;}.sp2.on{background:#059669;}
+  .sp3{border-color:#d97706;color:#d97706;}.sp3.on{background:#d97706;}
+  .sp4{border-color:#7c3aed;color:#7c3aed;}.sp4.on{background:#7c3aed;}
+  .sp5{border-color:#0891b2;color:#0891b2;}.sp5.on{background:#0891b2;}
+  .sp6{border-color:#be185d;color:#be185d;}.sp6.on{background:#be185d;}
+  .sp7{border-color:#65a30d;color:#65a30d;}.sp7.on{background:#65a30d;}
+  .conf-display{font-size:1.3rem;font-weight:800;color:var(--blue);text-align:center;
+                padding:6px;background:#eff6ff;border-radius:8px;margin:8px 0;}
+</style>
+</head>
+<body>
+
+<h2>Sections 5 & 6 — GradCAM, LIME, and SHAP Explanations</h2>
+<p class="subtitle">Explore class activation maps (GradCAM), perturbation-based explanations (LIME), and Shapley value attributions (SHAP).</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-gradcam" onclick="setTab('gradcam')">GradCAM</button>
+  <button class="tab" id="tab-lime"   onclick="setTab('lime')">LIME</button>
+  <button class="tab" id="tab-shap"   onclick="setTab('shap')">SHAP</button>
+</div>
+
+<div class="layout">
+  <!-- Controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">GradCAM Controls</h3>
+
+    <div class="ctrl-row">
+      <label>Input image</label>
+      <select id="img_choice" onchange="render()">
+        <option value="dog">Dog</option>
+        <option value="cat">Cat</option>
+        <option value="car">Car</option>
+      </select>
+    </div>
+    <div class="ctrl-row">
+      <label>Target class</label>
+      <select id="target_class" onchange="render()">
+        <option value="0">Class 0: dog</option>
+        <option value="1">Class 1: cat</option>
+        <option value="2">Class 2: car</option>
+      </select>
+    </div>
+
+    <!-- GradCAM controls -->
+    <div id="ctrl-gradcam">
+      <div class="ctrl-row">
+        <label>Conv layer</label>
+        <select id="conv_layer" onchange="render()">
+          <option value="last">Last conv (fine detail)</option>
+          <option value="mid">Mid conv (semantic)</option>
+          <option value="first">First conv (edges)</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>Overlay α</label>
+        <input type="range" id="alpha_overlay" min="0" max="1" step="0.05" value="0.6"/>
+        <span class="val" id="alpha_overlay_val">0.60</span>
+      </div>
+    </div>
+
+    <!-- LIME controls -->
+    <div id="ctrl-lime" style="display:none">
+      <div style="font-size:.78rem;font-weight:600;color:var(--muted);margin:8px 0 5px;text-transform:uppercase;">
+        Toggle Superpixels (included in explanation)
+      </div>
+      <div class="sp-grid" id="sp-btns"></div>
+      <div class="ctrl-row">
+        <label>N perturbations</label>
+        <input type="range" id="lime_n" min="10" max="200" step="10" value="50"/>
+        <span class="val" id="lime_n_val">50</span>
+      </div>
+      <div>Confidence with selected superpixels:</div>
+      <div class="conf-display" id="lime-conf">—</div>
+    </div>
+
+    <!-- SHAP controls -->
+    <div id="ctrl-shap" style="display:none">
+      <div class="ctrl-row">
+        <label>Model type</label>
+        <select id="shap_model" onchange="render()">
+          <option value="cnn">CNN (pixel SHAP)</option>
+          <option value="tabular">Tabular features</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>N coalition samples</label>
+        <input type="range" id="shap_n" min="10" max="100" step="10" value="50"/>
+        <span class="val" id="shap_n_val">50</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Show top-k features</label>
+        <input type="range" id="shap_k" min="3" max="10" step="1" value="6"/>
+        <span class="val" id="shap_k_val">6</span>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;font-size:.8rem;line-height:1.6;color:var(--muted);" id="side-note"></div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3 id="main-title">Class Activation Map</h3>
+      <div class="chart-row" id="chart-row-top">
+        <div>
+          <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:4px;">Input Image</div>
+          <div id="chart-input" class="chart-box"></div>
+        </div>
+        <div>
+          <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:4px;" id="right-label">GradCAM Overlay</div>
+          <div id="chart-right" class="chart-box"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 id="bottom-title">Feature Importance</h3>
+      <div id="chart-bottom" class="chart-wide"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" id="info-box"></div>
+
+<script>
+// ── Deterministic RNG ──────────────────────────────────────────────────────
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+const rng0=mulberry32(42);
+function randn0(){ const u=rng0(),v=rng0(); return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v); }
+
+const N = 16;  // image size
+
+function makeImage(shape){
+  const g=Array.from({length:N},()=>new Array(N).fill(0.1));
+  if(shape==='dog'){
+    for(let i=8;i<16;i++) for(let j=4;j<12;j++) g[i][j]=0.75+0.15*(rng0()-0.5);
+    for(let i=2;i<7;i++) for(let j=9;j<14;j++) g[i][j]=0.65+0.15*(rng0()-0.5);
+    g[0][8]=g[0][9]=g[1][8]=g[1][9]=0.8;
+    g[0][12]=g[0][13]=g[1][12]=g[1][13]=0.8;
+  } else if(shape==='cat'){
+    for(let i=5;i<13;i++) for(let j=4;j<12;j++){
+      if(Math.sqrt((i-9)**2+(j-8)**2)<4) g[i][j]=0.7+0.12*(rng0()-0.5);
+    }
+    g[2][4]=g[3][5]=0.8; g[2][11]=g[3][10]=0.8;
+  } else {
+    for(let i=9;i<14;i++) for(let j=1;j<15;j++) g[i][j]=0.7+0.12*(rng0()-0.5);
+    for(let i=5;i<9;i++) for(let j=4;j<12;j++) g[i][j]=0.65+0.1*(rng0()-0.5);
+    for(let j=2;j<=4;j++) for(let i=12;i<=15;i++) g[i][j]=0.35;
+    for(let j=11;j<=13;j++) for(let i=12;i<=15;i++) g[i][j]=0.35;
+  }
+  return g;
+}
+const IMAGES={dog:makeImage('dog'),cat:makeImage('cat'),car:makeImage('car')};
+
+// ── GradCAM ────────────────────────────────────────────────────────────────
+// Simulate a 4x4 feature map (conv output) then weight by class gradient
+function gradcam(imgKey, targetClass, layer){
+  const img=IMAGES[imgKey];
+  const F=4;  // feature map size
+  const scale=N/F;
+
+  // For each of K=8 channels, pool image region into feature map
+  const K=8;
+  const featureMaps=[];
+  for(let k=0;k<K;k++){
+    const fm=Array.from({length:F},()=>new Array(F).fill(0));
+    for(let fi=0;fi<F;fi++) for(let fj=0;fj<F;fj++){
+      let s=0,n=0;
+      for(let di=0;di<scale;di++) for(let dj=0;dj<scale;dj++){
+        const pi=fi*scale+di, pj=fj*scale+dj;
+        if(pi<N&&pj<N){
+          // Different channels detect different patterns
+          s+=img[pi][pj]*(0.5+k*0.1*Math.cos(pi*0.8+k))*
+             (layer==='last'?1:layer==='mid'?0.7+0.3*Math.sin(k):0.4+0.2*Math.cos(k+pi));
+          n++;
+        }
+      }
+      fm[fi][fj]=n?s/n:0;
+    }
+    featureMaps.push(fm);
+  }
+
+  // Class-specific weights alpha_k = global average pooling of (d score_c / d A^k)
+  // Simulate: gradient wrt class is higher for certain channels depending on class
+  const classChannelWeights=[
+    [0.9,0.8,0.3,0.2,0.7,0.6,0.1,0.4],  // dog
+    [0.3,0.2,0.9,0.8,0.1,0.4,0.7,0.6],  // cat
+    [0.2,0.4,0.1,0.3,0.6,0.9,0.8,0.7],  // car
+  ][targetClass];
+
+  // Weighted sum: L_c = ReLU(sum_k alpha_k * A^k)
+  const cam=Array.from({length:F},()=>new Array(F).fill(0));
+  for(let k=0;k<K;k++){
+    for(let fi=0;fi<F;fi++) for(let fj=0;fj<F;fj++){
+      cam[fi][fj]+=classChannelWeights[k]*featureMaps[k][fi][fj];
+    }
+  }
+  // ReLU
+  for(let fi=0;fi<F;fi++) for(let fj=0;fj<F;fj++) cam[fi][fj]=Math.max(0,cam[fi][fj]);
+
+  // Upsample to N×N (nearest neighbor)
+  const camUp=Array.from({length:N},()=>new Array(N).fill(0));
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    camUp[i][j]=cam[Math.floor(i/scale)][Math.floor(j/scale)];
+  }
+
+  // Normalize
+  const flat=camUp.flat(), mx=Math.max(...flat)||1;
+  return camUp.map(r=>r.map(v=>v/mx));
+}
+
+// ── LIME ───────────────────────────────────────────────────────────────────
+// 8 superpixels (2x4 grid of 8x4 blocks for 16x16 image)
+const N_SP=8;
+const SP_REGIONS=[];
+for(let si=0;si<2;si++) for(let sj=0;sj<4;sj++){
+  SP_REGIONS.push({ri:si*8,rh:8,rj:sj*4,rw:4});
+}
+const SP_COLORS=['#2563eb','#dc2626','#059669','#d97706','#7c3aed','#0891b2','#be185d','#65a30d'];
+const SP_NAMES=['Top-L','Top-ML','Top-MR','Top-R','Bot-L','Bot-ML','Bot-MR','Bot-R'];
+
+let spEnabled=Array(N_SP).fill(true);
+
+// "Importance" of each superpixel for each class (pre-computed)
+const SP_IMPORTANCE=[
+  [0.85,0.3,0.65,0.7, 0.4,0.8,0.9,0.55],  // dog (body+head important)
+  [0.6, 0.4,0.7,0.8, 0.5,0.6,0.5,0.4 ],  // cat
+  [0.3, 0.5,0.5,0.4, 0.9,0.8,0.7,0.9 ],  // car (body bottom important)
+];
+
+function limeConf(enabledSPs, targetClass){
+  const weights=SP_IMPORTANCE[targetClass];
+  let score=0.1;
+  for(let i=0;i<N_SP;i++) if(enabledSPs[i]) score+=0.1*weights[i];
+  return Math.min(0.99,score);
+}
+
+function limeCoeffs(enabledSPs, targetClass, nPerturb){
+  // Simulate LIME: coefficients of linear model fit to perturbation data
+  const base=SP_IMPORTANCE[targetClass];
+  return base.map((v,i)=>(enabledSPs[i]?v:v*0.3)+0.05*randn0());
+}
+
+// ── SHAP ───────────────────────────────────────────────────────────────────
+function shapValues(imgKey, targetClass, nSamp){
+  // For CNN: pixel-level SHAP values (shown as heatmap)
+  // For tabular: feature-level SHAP bars
+  const img=IMAGES[imgKey];
+  const base=gradcam(imgKey,targetClass,'last');  // use GradCAM as proxy
+  // Add some noise proportional to 1/sqrt(nSamp) to simulate MC variance
+  const noise=1/(Math.sqrt(nSamp)*3);
+  return base.map(r=>r.map(v=>Math.max(0,v+noise*randn0())));
+}
+
+const TAB_FEATURES=['Texture complexity','Color uniformity','Edge density','Roundness',
+                    'Elongation','Brightness','Symmetry','Local contrast'];
+const TAB_BASE_VALS=[
+  [0.72,-0.15, 0.45, 0.68,-0.20, 0.35,-0.10, 0.28],  // dog
+  [0.55, 0.42, 0.30, 0.75,-0.35, 0.28, 0.40,-0.15],  // cat
+  [-0.30,0.15,-0.20,-0.55, 0.80, 0.62,-0.40, 0.55],  // car
+];
+
+// ── Tab state ────────────────────────────────────────────────────────────────
+let currentTab='gradcam';
+
+function setTab(t){
+  currentTab=t;
+  ['gradcam','lime','shap'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active',id===t);
+    if(document.getElementById('ctrl-'+id))
+      document.getElementById('ctrl-'+id).style.display=id===t?'':'none';
+  });
+  render();
+}
+
+function buildSPButtons(){
+  const div=document.getElementById('sp-btns');
+  div.innerHTML=SP_NAMES.map((name,i)=>`
+    <button class="sp-btn sp${i} ${spEnabled[i]?'on':'off'}" onclick="toggleSP(${i})">
+      ${spEnabled[i]?'✓ ':'✗ '}${name}
+    </button>`).join('');
+}
+
+function toggleSP(i){
+  spEnabled[i]=!spEnabled[i];
+  buildSPButtons();
+  render();
+}
+
+function render(){
+  const imgKey    =document.getElementById('img_choice').value;
+  const targetCls =+document.getElementById('target_class').value;
+  const alpha     =+document.getElementById('alpha_overlay')?.value||0.6;
+  const limeN     =+document.getElementById('lime_n')?.value||50;
+  const shapN     =+document.getElementById('shap_n')?.value||50;
+  const shapK     =+document.getElementById('shap_k')?.value||6;
+  const shapModel =document.getElementById('shap_model')?.value||'cnn';
+  const convLayer =document.getElementById('conv_layer')?.value||'last';
+
+  if(document.getElementById('alpha_overlay_val'))
+    document.getElementById('alpha_overlay_val').textContent=alpha.toFixed(2);
+  if(document.getElementById('lime_n_val'))
+    document.getElementById('lime_n_val').textContent=limeN;
+  if(document.getElementById('shap_n_val'))
+    document.getElementById('shap_n_val').textContent=shapN;
+  if(document.getElementById('shap_k_val'))
+    document.getElementById('shap_k_val').textContent=shapK;
+
+  buildSPButtons();
+  const img=IMAGES[imgKey];
+
+  // ── Input image ──────────────────────────────────────────────────────────
+  Plotly.newPlot('chart-input',[{
+    z:img, type:'heatmap', colorscale:'Greys', zmin:0, zmax:1, showscale:false,
+    hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra></extra>'
+  }],{
+    title:{text:{dog:'🐕 Dog',cat:'🐈 Cat',car:'🚗 Car'}[imgKey],font:{size:12},x:0.5},
+    margin:{t:30,b:5,l:5,r:5}, plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    xaxis:{showticklabels:false}, yaxis:{showticklabels:false,autorange:'reversed'}
+  },{responsive:true,displayModeBar:false});
+
+  if(currentTab==='gradcam'){
+    const cam=gradcam(imgKey,targetCls,convLayer);
+    // Overlay: blend input + cam
+    const overlay=img.map((row,i)=>row.map((v,j)=>(1-alpha)*v+alpha*cam[i][j]));
+
+    document.getElementById('right-label').textContent='GradCAM Overlay (class: '+['dog','cat','car'][targetCls]+')';
+    Plotly.newPlot('chart-right',[{
+      z:overlay, type:'heatmap', colorscale:'RdYlBu', reversescale:true,
+      zmin:0, zmax:1, showscale:true,
+      hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra>Overlay</extra>'
+    }],{
+      margin:{t:10,b:5,l:5,r:30}, plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+      xaxis:{showticklabels:false}, yaxis:{showticklabels:false,autorange:'reversed'}
+    },{responsive:true,displayModeBar:false});
+
+    // Channel weights bar
+    const K=8;
+    const classChannelWeights=[
+      [0.9,0.8,0.3,0.2,0.7,0.6,0.1,0.4],
+      [0.3,0.2,0.9,0.8,0.1,0.4,0.7,0.6],
+      [0.2,0.4,0.1,0.3,0.6,0.9,0.8,0.7],
+    ][targetCls];
+    document.getElementById('bottom-title').textContent='Channel Weights α_k (GradCAM)';
+    Plotly.newPlot('chart-bottom',[{
+      x:Array.from({length:K},(_,i)=>'k='+i),
+      y:classChannelWeights,
+      type:'bar',
+      marker:{color:classChannelWeights.map(v=>`rgba(37,99,235,${0.3+0.7*v})`),
+              line:{color:'#fff',width:1}},
+      text:classChannelWeights.map(v=>v.toFixed(2)), textposition:'outside',
+      hovertemplate:'Channel %{x}<br>α = %{y:.2f}<extra></extra>'
+    }],{
+      title:{text:`Global-Average-Pooled Gradient Weights per Channel (class=${['dog','cat','car'][targetCls]})`,
+             font:{size:11},x:0.5},
+      yaxis:{range:[0,1.2],title:'α_k'},
+      margin:{t:40,b:35,l:50,r:10},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+    },{responsive:true,displayModeBar:false});
+
+    document.getElementById('info-box').innerHTML=
+      `<b>GradCAM (Gradient-weighted Class Activation Mapping):</b> Uses the gradient of the class score flowing back to the last conv layer to weight each feature map channel.<br><br>`+
+      `<b>Steps:</b><br>1. Forward pass → compute class score S_c<br>`+
+      `2. Compute ∂S_c/∂A_k for each channel A_k (one backward pass)<br>`+
+      `3. Pool to get α_k = (1/Z) Σ_{i,j} ∂S_c/∂A_k_{ij}<br>`+
+      `4. L_c = ReLU(Σ_k α_k · A^k) → upsample to input size<br><br>`+
+      `<b>Key insight:</b> Heatmap shows which spatial regions the model "looks at" for the predicted class. Red/warm = most discriminative. No model retraining needed.`;
+
+  } else if(currentTab==='lime'){
+    // Show superpixel overlay
+    const limeMap=img.map((row,i)=>row.map((v,j)=>{
+      let sp=-1;
+      for(let s=0;s<N_SP;s++){
+        const r=SP_REGIONS[s];
+        if(i>=r.ri&&i<r.ri+r.rh&&j>=r.rj&&j<r.rj+r.rw){sp=s;break;}
+      }
+      if(sp>=0&&!spEnabled[sp]) return 0.05;  // masked out
+      return v;
+    }));
+
+    // Draw superpixel boundaries + importance
+    const coeffs=limeCoeffs(spEnabled,targetCls,limeN);
+    document.getElementById('right-label').textContent='LIME Superpixels (toggle left)';
+    Plotly.newPlot('chart-right',[{
+      z:limeMap, type:'heatmap', colorscale:'Greys', zmin:0, zmax:1, showscale:false,
+      hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra></extra>'
+    }],{
+      title:{text:'Masked Image (disabled SPs = black)', font:{size:11},x:0.5},
+      margin:{t:30,b:5,l:5,r:5},
+      plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+      xaxis:{showticklabels:false},yaxis:{showticklabels:false,autorange:'reversed'},
+      shapes:SP_REGIONS.map((r,i)=>({
+        type:'rect', xref:'x', yref:'y',
+        x0:r.rj-0.5, x1:r.rj+r.rw-0.5, y0:r.ri-0.5, y1:r.ri+r.rh-0.5,
+        line:{color:SP_COLORS[i],width:1.5}
+      }))
+    },{responsive:true,displayModeBar:false});
+
+    const conf=limeConf(spEnabled,targetCls);
+    document.getElementById('lime-conf').textContent=(conf*100).toFixed(1)+'%';
+
+    // LIME coefficients bar
+    document.getElementById('bottom-title').textContent='LIME Coefficients (local linear model weights)';
+    Plotly.newPlot('chart-bottom',[{
+      x:SP_NAMES, y:coeffs,
+      type:'bar',
+      marker:{color:coeffs.map((v,i)=>spEnabled[i]?SP_COLORS[i]:'#cbd5e1'),
+              line:{color:'#fff',width:1}},
+      hovertemplate:'%{x}<br>w = %{y:.3f}<extra></extra>'
+    }],{
+      title:{text:`Local Linear Model Weights for class: ${['dog','cat','car'][targetCls]}`,font:{size:11},x:0.5},
+      yaxis:{title:'Weight w_i',range:[-0.2,1.2]},
+      margin:{t:35,b:35,l:50,r:10},
+      plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+    },{responsive:true,displayModeBar:false});
+
+    document.getElementById('info-box').innerHTML=
+      `<b>LIME (Local Interpretable Model-agnostic Explanations):</b><br>`+
+      `1. Divide the input into <b>interpretable components</b> (superpixels for images, words for text).<br>`+
+      `2. Generate N=${limeN} <b>perturbed versions</b> by randomly disabling some components.<br>`+
+      `3. Query the black-box model on each perturbed version → get confidence scores.<br>`+
+      `4. Fit a <b>weighted local linear model</b> g(z) ≈ f(x) near the original input x.<br>`+
+      `5. The linear model's coefficients explain which superpixels most influence the prediction.<br><br>`+
+      `<b>Toggle superpixels on/off</b> to simulate individual and combined contributions. Current confidence: ${(conf*100).toFixed(1)}%.`;
+
+  } else {
+    // SHAP
+    const salMap=shapValues(imgKey,targetCls,shapN);
+    document.getElementById('right-label').textContent='SHAP Value Heatmap (pixel-level)';
+    Plotly.newPlot('chart-right',[{
+      z:salMap, type:'heatmap', colorscale:'RdBu', reversescale:true,
+      zmin:0, zmax:1, showscale:true,
+      hovertemplate:'(%{x},%{y}) = %{z:.3f}<extra>SHAP</extra>'
+    }],{
+      margin:{t:10,b:5,l:5,r:30},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff',
+      xaxis:{showticklabels:false},yaxis:{showticklabels:false,autorange:'reversed'}
+    },{responsive:true,displayModeBar:false});
+
+    if(shapModel==='tabular'){
+      // Feature-level SHAP bar chart
+      const vals=TAB_BASE_VALS[targetCls].map((v,i)=>v+0.05*randn0()).slice(0,shapK);
+      const feats=TAB_FEATURES.slice(0,shapK);
+      const sorted=feats.map((f,i)=>({f,v:vals[i]})).sort((a,b)=>b.v-a.v);
+      document.getElementById('bottom-title').textContent='Tabular Feature SHAP Values';
+      Plotly.newPlot('chart-bottom',[{
+        x:sorted.map(d=>d.v), y:sorted.map(d=>d.f),
+        type:'bar', orientation:'h',
+        marker:{color:sorted.map(d=>d.v>0?'#2563eb':'#dc2626'),opacity:0.85,
+                line:{color:'#fff',width:1}},
+        hovertemplate:'%{y}<br>φ = %{x:.3f}<extra></extra>'
+      }],{
+        title:{text:`Top-${shapK} SHAP Feature Values (class: ${['dog','cat','car'][targetCls]})`,
+               font:{size:11},x:0.5},
+        xaxis:{title:'SHAP value φ_i'},
+        shapes:[{type:'line',xref:'x',yref:'paper',x0:0,x1:0,y0:0,y1:1,
+                 line:{color:'#94a3b8',width:1}}],
+        margin:{t:35,b:40,l:110,r:10},
+        plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+      },{responsive:true,displayModeBar:false});
+    } else {
+      // Pixel SHAP: show distribution
+      const flat=salMap.flat();
+      const hist=Array.from({length:20},(_,i)=>i*0.05);
+      const counts=hist.map(v=>flat.filter(x=>x>=v&&x<v+0.05).length);
+      document.getElementById('bottom-title').textContent='Pixel SHAP Value Distribution';
+      Plotly.newPlot('chart-bottom',[{
+        x:hist, y:counts, type:'bar',
+        marker:{color:'#2563eb',opacity:0.8},
+        hovertemplate:'[%.2f–%.2f]: %{y} pixels<extra></extra>'
+      }],{
+        title:{text:'Distribution of per-pixel SHAP values',font:{size:11},x:0.5},
+        xaxis:{title:'SHAP value'}, yaxis:{title:'# pixels'},
+        margin:{t:35,b:40,l:50,r:10},
+        plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+      },{responsive:true,displayModeBar:false});
+    }
+
+    document.getElementById('info-box').innerHTML=
+      `<b>SHAP (SHapley Additive exPlanations):</b> Based on Shapley values from cooperative game theory. Each feature's Shapley value φ_i is its <em>average marginal contribution</em> across all possible coalitions.<br><br>`+
+      `<b>Formula:</b> φ_i = Σ_{S⊆F\\{i}} |S|!(|F|−|S|−1)!/|F|! · [f(S∪{i}) − f(S)]<br><br>`+
+      `<b>Properties:</b> Efficiency (Σφ_i = f(x) − f(∅)), Symmetry, Dummy (zero for irrelevant features), Additivity.<br><br>`+
+      `More N=${shapN} coalition samples → lower variance in φ_i estimates. Use <em>tabular</em> mode to see per-feature bar charts; <em>CNN</em> mode shows pixel-level attribution maps.`;
+  }
+}
+
+['img_choice','target_class','conv_layer','shap_model'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('change',render);
+});
+['alpha_overlay','lime_n','shap_n','shap_k'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('input',render);
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Contrastive & Counterfactual CAM — Lecture 24</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:270px 1fr;gap:12px;}
+  @media(max-width:750px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.79rem;font-weight:600;color:var(--muted);min-width:120px;}
+  select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.84rem;background:#fff;flex:1;}
+  input[type=range]{flex:1;accent-color:var(--blue);}
+  .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:36px;text-align:right;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .chart-sm{width:100%;height:190px;}
+  .chart-md{width:100%;height:250px;}
+  .chart-lg{width:100%;height:280px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.84rem;line-height:1.65;margin-top:10px;}
+  .info-box b{color:var(--blue);}
+  .question-box{background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;
+                padding:10px 14px;font-size:.9rem;font-weight:600;color:#1d4ed8;margin:8px 0;}
+  .pred-bar{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:.8rem;}
+  .pred-fill{height:14px;border-radius:4px;background:var(--blue);transition:width .3s;}
+  .pred-name{min-width:70px;font-weight:600;}
+  .eval-metric{background:#f8fafc;border:1px solid var(--border);border-radius:6px;
+                padding:8px;margin:4px 0;font-size:.8rem;}
+  .eval-metric .lbl{color:var(--muted);font-weight:600;}
+  .eval-metric .val{font-weight:800;color:var(--blue);}
+</style>
+</head>
+<body>
+
+<h2>Sections 2–4 — Contrastive CAM, Counterfactual CAM & XAI Evaluation</h2>
+<p class="subtitle">Ask "Why P?" vs "Why P rather than Q?" and measure explanation faithfulness, sensitivity, and human agreement.</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-contrast" onclick="setTab('contrast')">Contrastive CAM</button>
+  <button class="tab" id="tab-counter"  onclick="setTab('counter')">Counterfactual CAM</button>
+  <button class="tab" id="tab-eval"     onclick="setTab('eval')">XAI Evaluation</button>
+</div>
+
+<div class="layout">
+  <!-- Controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">Controls</h3>
+
+    <div class="ctrl-row">
+      <label>Input image</label>
+      <select id="img_choice" onchange="render()">
+        <option value="dog">Dog (predicted: Bullmastiff)</option>
+        <option value="cat">Cat (predicted: Tabby)</option>
+        <option value="car">Car (predicted: Sports Car)</option>
+      </select>
+    </div>
+
+    <!-- Contrastive controls -->
+    <div id="ctrl-contrast">
+      <div class="ctrl-row">
+        <label>Predicted class P</label>
+        <div id="pred-class-display" style="flex:1;font-size:.83rem;font-weight:700;color:var(--blue);"></div>
+      </div>
+      <div class="ctrl-row">
+        <label>Contrast class Q</label>
+        <select id="contrast_class" onchange="render()">
+          <option value="1">Q = Cat (Boxer)</option>
+          <option value="2">Q = Car (Labrador)</option>
+        </select>
+      </div>
+      <div style="margin:8px 0;font-size:.79rem;font-weight:600;color:var(--muted);text-transform:uppercase;">
+        Predicted probabilities
+      </div>
+      <div id="pred-bars"></div>
+    </div>
+
+    <!-- Counterfactual controls -->
+    <div id="ctrl-counter" style="display:none">
+      <div class="ctrl-row">
+        <label>Removal strength</label>
+        <input type="range" id="cf_strength" min="0.1" max="1.0" step="0.05" value="0.5"/>
+        <span class="val" id="cf_strength_val">0.50</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Show type</label>
+        <select id="cf_type" onchange="render()">
+          <option value="remove">Remove predicted features</option>
+          <option value="add">Add counterfactual features</option>
+        </select>
+      </div>
+      <div id="cf-result" style="margin-top:10px;font-size:.83rem;line-height:1.7;"></div>
+    </div>
+
+    <!-- Eval controls -->
+    <div id="ctrl-eval" style="display:none">
+      <div class="ctrl-row">
+        <label>Eval method</label>
+        <select id="eval_method" onchange="render()">
+          <option value="faithfulness">Faithfulness / AUC-Del</option>
+          <option value="sensitivity">Sensitivity</option>
+          <option value="human">Human Eval (agreement)</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>XAI method</label>
+        <select id="xai_method" onchange="render()">
+          <option value="gradcam">GradCAM</option>
+          <option value="lime">LIME</option>
+          <option value="shap">SHAP</option>
+          <option value="vanilla">Vanilla Grad</option>
+          <option value="guided">Guided Backprop</option>
+        </select>
+      </div>
+      <div class="ctrl-row">
+        <label>% pixels removed</label>
+        <input type="range" id="eval_frac" min="5" max="95" step="5" value="30"/>
+        <span class="val" id="eval_frac_val">30%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3 id="main-title">Contrastive Explanation: Why P rather than Q?</h3>
+      <div class="grid-3" id="chart-row-top">
+        <div>
+          <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:3px;">Input</div>
+          <div id="chart-input" class="chart-sm"></div>
+        </div>
+        <div>
+          <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:3px;" id="label-mid">GradCAM (P)</div>
+          <div id="chart-mid" class="chart-sm"></div>
+        </div>
+        <div>
+          <div style="font-size:.79rem;font-weight:600;color:var(--muted);margin-bottom:3px;" id="label-right">Contrastive (P vs Q)</div>
+          <div id="chart-right" class="chart-sm"></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 id="bottom-title">Why P? vs Why P rather than Q?</h3>
+      <div id="chart-bottom" class="chart-lg"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" id="info-box"></div>
+
+<script>
+// ── Deterministic RNG ──────────────────────────────────────────────────────
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+const rng=mulberry32(55);
+function randn(){ const u=rng(),v=rng(); return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v); }
+
+const N=16;
+function makeImage(shape){
+  const g=Array.from({length:N},()=>new Array(N).fill(0.1));
+  if(shape==='dog'){
+    for(let i=8;i<16;i++) for(let j=4;j<12;j++) g[i][j]=0.75+0.12*(rng()-0.5);
+    for(let i=2;i<7;i++) for(let j=9;j<14;j++) g[i][j]=0.65+0.12*(rng()-0.5);
+    g[0][8]=g[0][9]=g[1][8]=g[1][9]=0.82;
+    g[0][12]=g[0][13]=g[1][12]=g[1][13]=0.82;
+  } else if(shape==='cat'){
+    for(let i=5;i<13;i++) for(let j=4;j<12;j++){
+      if(Math.sqrt((i-9)**2+(j-8)**2)<4) g[i][j]=0.7+0.12*(rng()-0.5);
+    }
+    g[2][4]=g[3][5]=0.82; g[2][11]=g[3][10]=0.82;
+  } else {
+    for(let i=9;i<14;i++) for(let j=1;j<15;j++) g[i][j]=0.7+0.1*(rng()-0.5);
+    for(let i=5;i<9;i++) for(let j=4;j<12;j++) g[i][j]=0.65+0.1*(rng()-0.5);
+    for(let j=2;j<=4;j++) for(let i=12;i<=15;i++) g[i][j]=0.35;
+    for(let j=11;j<=13;j++) for(let i=12;i<=15;i++) g[i][j]=0.35;
+  }
+  return g;
+}
+const IMAGES={dog:makeImage('dog'),cat:makeImage('cat'),car:makeImage('car')};
+
+const CLASS_NAMES={dog:'Bullmastiff',cat:'Tabby Cat',car:'Sports Car'};
+const CLASS_IDS={dog:0,cat:1,car:2};
+const SOFTMAX_LOGITS={dog:[2.8,0.5,0.4],cat:[0.4,2.9,0.3],car:[0.3,0.4,3.1]};
+function softmax(logits){ const m=Math.max(...logits); const e=logits.map(v=>Math.exp(v-m)); const s=e.reduce((a,b)=>a+b,0); return e.map(v=>v/s); }
+
+// GradCAM for class c
+function gradcam(imgKey, c){
+  const img=IMAGES[imgKey];
+  const F=4; const scale=N/F;
+  const K=8;
+  const ccw=[
+    [0.9,0.8,0.3,0.2,0.7,0.6,0.1,0.4],
+    [0.3,0.2,0.9,0.8,0.1,0.4,0.7,0.6],
+    [0.2,0.4,0.1,0.3,0.6,0.9,0.8,0.7],
+  ][c];
+  const fms=[];
+  for(let k=0;k<K;k++){
+    const fm=Array.from({length:F},()=>new Array(F).fill(0));
+    for(let fi=0;fi<F;fi++) for(let fj=0;fj<F;fj++){
+      let s=0,n=0;
+      for(let di=0;di<scale;di++) for(let dj=0;dj<scale;dj++){
+        const pi=fi*scale+di,pj=fj*scale+dj;
+        if(pi<N&&pj<N){s+=img[pi][pj]*(0.5+k*0.1*Math.cos(pi*0.8+k));n++;}
+      }
+      fm[fi][fj]=n?s/n:0;
+    }
+    fms.push(fm);
+  }
+  const cam=Array.from({length:F},()=>new Array(F).fill(0));
+  for(let k=0;k<K;k++) for(let fi=0;fi<F;fi++) for(let fj=0;fj<F;fj++)
+    cam[fi][fj]+=ccw[k]*fms[k][fi][fj];
+  const camUp=Array.from({length:N},()=>new Array(N).fill(0));
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++) camUp[i][j]=Math.max(0,cam[Math.floor(i/scale)][Math.floor(j/scale)]);
+  const flat=camUp.flat(),mx=Math.max(...flat)||1;
+  return camUp.map(r=>r.map(v=>v/mx));
+}
+
+// Contrastive-CAM: L^{P,Q} = L^P - λ·L^Q (highlights features unique to P)
+function contrastiveCam(imgKey, classP, classQ, lambda=1.0){
+  const camP=gradcam(imgKey,classP);
+  const camQ=gradcam(imgKey,classQ);
+  const c=camP.map((r,i)=>r.map((v,j)=>Math.max(0,v-lambda*camQ[i][j])));
+  const flat=c.flat(),mx=Math.max(...flat)||1;
+  return c.map(r=>r.map(v=>v/mx));
+}
+
+// Counterfactual modification: zero out top-ranked pixels from CAM
+function counterfactualMod(imgKey, classP, strength){
+  const cam=gradcam(imgKey,classP);
+  const img=IMAGES[imgKey];
+  const modImg=img.map((r,i)=>r.map((v,j)=>v*(1-strength*cam[i][j])));
+  const flat=modImg.flat(),mx=Math.max(...flat)||0.01;
+  return {modImg:modImg.map(r=>r.map(v=>v/mx)), cam};
+}
+
+// Faithfulness: confidence when removing top-k% pixels ranked by attribution
+function faithfulnessCurve(imgKey, classP, xaiMethod){
+  const cam=gradcam(imgKey,classP);
+  const flat=cam.flat();
+  const sorted=[...flat].sort((a,b)=>b-a);
+  const confs=[];
+  const fracs=Array.from({length:20},(_,i)=>(i+1)*5);
+  for(const frac of fracs){
+    const thresh=sorted[Math.floor(frac/100*flat.length)];
+    // Remove pixels above threshold
+    let remaining=flat.filter((v,i)=>cam[Math.floor(i/N)][i%N]<thresh);
+    const avgRem=remaining.reduce((a,b)=>a+b,0)/(remaining.length||1);
+    // Simulate confidence drop
+    const noise={gradcam:0.05,lime:0.08,shap:0.07,vanilla:0.12,guided:0.09}[xaiMethod];
+    confs.push(Math.max(0,0.9-frac/100*0.85+noise*randn()));
+  }
+  return {fracs,confs};
+}
+
+// ── Tab state ─────────────────────────────────────────────────────────────────
+let currentTab='contrast';
+
+function setTab(t){
+  currentTab=t;
+  ['contrast','counter','eval'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active',id===t);
+    if(document.getElementById('ctrl-'+id))
+      document.getElementById('ctrl-'+id).style.display=id===t?'':'none';
+  });
+  render();
+}
+
+function plotHeatmap(divId, z, title, cs='RdYlBu', rev=true, showscale=false){
+  Plotly.newPlot(divId,[{z,type:'heatmap',colorscale:cs,reversescale:rev,
+    zmin:0,zmax:1,showscale,hovertemplate:'(%{x},%{y})=%{z:.2f}<extra></extra>'}],{
+    title:{text:title,font:{size:10},x:0.5},
+    margin:{t:25,b:5,l:5,r:showscale?30:5},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff',
+    xaxis:{showticklabels:false},yaxis:{showticklabels:false,autorange:'reversed'}
+  },{responsive:true,displayModeBar:false});
+}
+
+function render(){
+  const imgKey    =document.getElementById('img_choice').value;
+  const classP    =CLASS_IDS[imgKey];
+  const classQ    =+document.getElementById('contrast_class')?.value||1;
+  const cfStrength=+document.getElementById('cf_strength')?.value||0.5;
+  const evalMethod=document.getElementById('eval_method')?.value||'faithfulness';
+  const xaiMethod =document.getElementById('xai_method')?.value||'gradcam';
+  const evalFrac  =+document.getElementById('eval_frac')?.value||30;
+
+  if(document.getElementById('cf_strength_val'))
+    document.getElementById('cf_strength_val').textContent=cfStrength.toFixed(2);
+  if(document.getElementById('eval_frac_val'))
+    document.getElementById('eval_frac_val').textContent=evalFrac+'%';
+
+  const confs=softmax(SOFTMAX_LOGITS[imgKey]);
+  if(document.getElementById('pred-class-display'))
+    document.getElementById('pred-class-display').textContent=CLASS_NAMES[imgKey];
+
+  // Prediction bars
+  const clsNames=[CLASS_NAMES.dog,CLASS_NAMES.cat,CLASS_NAMES.car];
+  if(document.getElementById('pred-bars')){
+    document.getElementById('pred-bars').innerHTML=
+      clsNames.map((n,i)=>`<div class="pred-bar">
+        <div class="pred-name" style="color:${i===classP?'var(--blue)':'var(--muted)'}">${n}</div>
+        <div class="pred-fill" style="width:${(confs[i]*100).toFixed(0)}%;background:${i===classP?'var(--blue)':'#cbd5e1'}"></div>
+        <div style="font-size:.78rem;font-weight:700;color:${i===classP?'var(--blue)':'var(--muted)'}">${(confs[i]*100).toFixed(1)}%</div>
+      </div>`).join('');
+  }
+
+  // ── Input image ──────────────────────────────────────────────────────────
+  plotHeatmap('chart-input', IMAGES[imgKey], {dog:'🐕 Dog',cat:'🐈 Cat',car:'🚗 Car'}[imgKey], 'Greys', false);
+
+  if(currentTab==='contrast'){
+    const camP=gradcam(imgKey,classP);
+    const camContrast=contrastiveCam(imgKey,classP,classQ);
+    const clsQname=['Bullmastiff','Tabby Cat','Sports Car'][classQ];
+
+    document.getElementById('main-title').textContent=`Contrastive CAM: Why "${CLASS_NAMES[imgKey]}" rather than "${clsQname}"?`;
+    document.getElementById('label-mid').textContent=`GradCAM (P=${CLASS_NAMES[imgKey]})`;
+    document.getElementById('label-right').textContent=`Contrastive (P vs Q=${clsQname})`;
+
+    plotHeatmap('chart-mid', camP, 'Why '+CLASS_NAMES[imgKey]+'?');
+    plotHeatmap('chart-right', camContrast, 'Why NOT '+clsQname+'?', 'Hot', false, true);
+
+    // Side-by-side row profiles
+    const midRow=camP[8];
+    const contRow=camContrast[8];
+    document.getElementById('bottom-title').textContent='Row-8 Profile: GradCAM(P) vs Contrastive(P−Q)';
+    Plotly.newPlot('chart-bottom',[
+      {x:Array.from({length:N},(_,j)=>j), y:midRow, type:'scatter', mode:'lines+markers',
+       line:{color:'#2563eb',width:2.5}, name:'GradCAM(P)',
+       hovertemplate:'col=%{x}<br>α=%{y:.3f}<extra>GradCAM(P)</extra>'},
+      {x:Array.from({length:N},(_,j)=>j), y:contRow, type:'scatter', mode:'lines+markers',
+       line:{color:'#dc2626',width:2.5,dash:'dash'}, name:'Contrastive(P−Q)',
+       hovertemplate:'col=%{x}<br>α=%{y:.3f}<extra>Contrastive</extra>'}
+    ],{
+      legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+      xaxis:{title:'Column pixel index'},yaxis:{title:'Attribution α',range:[0,1.1]},
+      margin:{t:35,b:40,l:50,r:10},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+    },{responsive:true,displayModeBar:false});
+
+    document.getElementById('info-box').innerHTML=
+      `<b>Contrastive-CAM:</b> L<sup>P,Q</sup> = ReLU(L<sup>P</sup> − λ·L<sup>Q</sup>)<br><br>`+
+      `<b>Standard GradCAM</b> answers "Why ${CLASS_NAMES[imgKey]}?" — highlights features supporting class P.<br>`+
+      `<b>Contrastive-CAM</b> answers "Why ${CLASS_NAMES[imgKey]} rather than ${clsQname}?" — highlights features that support P <em>but not Q</em>. The difference reveals the discriminative boundary between the two classes.<br><br>`+
+      `Compare: GradCAM may highlight the entire object, while Contrastive-CAM highlights only the <em>distinctive</em> parts (e.g., ears vs snout shape, wheel arch vs cat ears).`;
+
+  } else if(currentTab==='counter'){
+    const cfType=document.getElementById('cf_type')?.value||'remove';
+    const {modImg,cam}=counterfactualMod(imgKey,classP,cfStrength);
+
+    document.getElementById('main-title').textContent=`Counterfactual: "What if ${CLASS_NAMES[imgKey]} features were not in the image?"`;
+    document.getElementById('label-mid').textContent=`Original GradCAM (P)`;
+    document.getElementById('label-right').textContent=`Counterfactual Modified Image`;
+
+    plotHeatmap('chart-mid',cam,'GradCAM attribution');
+    plotHeatmap('chart-right',modImg,'After removing top features','Blues',false,true);
+
+    // Confidence change
+    const origConf=confs[classP];
+    const dropFrac=cfStrength;
+    const newConfs=confs.map((c,i)=>i===classP?Math.max(0.01,c-dropFrac*0.6+0.02*randn()):
+                                                  Math.min(0.95,c+dropFrac*0.3+0.01*randn()));
+    const s=newConfs.reduce((a,b)=>a+b,0);
+    const normNew=newConfs.map(v=>v/s);
+
+    document.getElementById('bottom-title').textContent='Confidence Before vs After Counterfactual Modification';
+    Plotly.newPlot('chart-bottom',[
+      {x:clsNames,y:confs,type:'bar',name:'Original',
+       marker:{color:'#2563eb',opacity:0.85},
+       hovertemplate:'%{x}<br>Original: %{y:.3f}<extra></extra>'},
+      {x:clsNames,y:normNew,type:'bar',name:'Counterfactual',
+       marker:{color:'#dc2626',opacity:0.7},
+       hovertemplate:'%{x}<br>Counterfactual: %{y:.3f}<extra></extra>'}
+    ],{
+      barmode:'group',
+      legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+      yaxis:{title:'Confidence',range:[0,1]},
+      margin:{t:35,b:35,l:50,r:10},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+    },{responsive:true,displayModeBar:false});
+
+    const delta=((origConf-normNew[classP])*100).toFixed(1);
+    if(document.getElementById('cf-result'))
+      document.getElementById('cf-result').innerHTML=
+        `Original confidence: <b>${(origConf*100).toFixed(1)}%</b><br>`+
+        `After removing top features (strength=${cfStrength.toFixed(2)}): <b>${(normNew[classP]*100).toFixed(1)}%</b><br>`+
+        `Confidence drop: <b style="color:var(--red)">−${delta}%</b>`;
+
+    document.getElementById('info-box').innerHTML=
+      `<b>Counterfactual Explanation:</b> "What would the image look like if the model had predicted differently?"<br><br>`+
+      `<b>Observed counterfactual:</b> Remove the features identified by GradCAM as most important for class P. If the confidence drops sharply, those features are truly causal for the prediction.<br><br>`+
+      `<b>Strength ${cfStrength.toFixed(2)}:</b> The most-attended pixels (hot regions in GradCAM) are attenuated by a factor proportional to their attribution × strength. This simulates "what if those visual features were absent?"<br><br>`+
+      `Confidence for ${CLASS_NAMES[imgKey]} dropped from ${(origConf*100).toFixed(1)}% → ${(normNew[classP]*100).toFixed(1)}% after removal.`;
+
+  } else {
+    // XAI Evaluation
+    document.getElementById('main-title').textContent='XAI Evaluation Methods';
+    document.getElementById('label-mid').textContent='Attribution Map';
+    document.getElementById('label-right').textContent='After Masking Top '+evalFrac+'%';
+
+    const cam=gradcam(imgKey,classP);
+    plotHeatmap('chart-mid',cam,xaiMethod+' attribution');
+
+    // Masked image
+    const flat=cam.flat();
+    const sorted=[...flat].sort((a,b)=>b-a);
+    const thresh=sorted[Math.floor(evalFrac/100*flat.length)];
+    const masked=IMAGES[imgKey].map((r,i)=>r.map((v,j)=>cam[i][j]>=thresh?0.1:v));
+    plotHeatmap('chart-right',masked,'Masked (top '+evalFrac+'% removed)','Greys',false);
+
+    if(evalMethod==='faithfulness'){
+      // AUC-Deletion curves for multiple methods
+      const methods=['gradcam','lime','shap','vanilla','guided'];
+      const methodColors={'gradcam':'#2563eb','lime':'#dc2626','shap':'#059669',
+                          'vanilla':'#d97706','guided':'#7c3aed'};
+      const traces=methods.map(m=>{
+        const {fracs,confs:cs}=faithfulnessCurve(imgKey,classP,m);
+        return {x:fracs,y:cs,type:'scatter',mode:'lines',
+          line:{color:methodColors[m],width:m===xaiMethod?3:1.5,dash:m===xaiMethod?'solid':'dot'},
+          name:m.toUpperCase(),hovertemplate:'%{x}% removed → conf=%{y:.3f}<extra>'+m+'</extra>'};
+      });
+      document.getElementById('bottom-title').textContent='Faithfulness: AUC-Deletion Curves (lower AUC = more faithful)';
+      Plotly.newPlot('chart-bottom',traces,{
+        legend:{orientation:'h',y:1.1,x:0.5,xanchor:'center'},
+        xaxis:{title:'% pixels removed (ranked by attribution)'},
+        yaxis:{title:'Model confidence',range:[0,1]},
+        margin:{t:35,b:45,l:55,r:10},
+        plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff',
+        hovermode:'x unified'
+      },{responsive:true,displayModeBar:false});
+      document.getElementById('info-box').innerHTML=
+        `<b>Faithfulness / AUC-Deletion:</b> Progressively remove the most-attributed pixels and measure the confidence drop. A <em>faithful</em> explanation should cause a steep early drop (the model really does rely on those pixels).<br><br>`+
+        `<b>AUC of the deletion curve:</b> Lower = more faithful (removes the truly important pixels first). Methods are ranked; highlighted curve is <b>${xaiMethod.toUpperCase()}</b>.<br><br>`+
+        `Currently removing top ${evalFrac}% pixels from the ${xaiMethod.toUpperCase()} attribution map.`;
+    } else if(evalMethod==='sensitivity'){
+      // Sensitivity: std of attribution under small input perturbations
+      const methods=['gradcam','lime','shap','vanilla','guided'];
+      const sensScores={gradcam:0.12,lime:0.22,shap:0.15,vanilla:0.38,guided:0.19};
+      document.getElementById('bottom-title').textContent='Sensitivity: Explanation Variance Under Input Perturbations';
+      Plotly.newPlot('chart-bottom',[{
+        x:methods.map(m=>m.toUpperCase()),
+        y:methods.map(m=>sensScores[m]+0.02*randn()),
+        type:'bar',
+        marker:{color:methods.map(m=>m===xaiMethod?'#2563eb':'#cbd5e1'),
+                line:{color:'#fff',width:1}},
+        hovertemplate:'%{x}<br>Sensitivity = %{y:.3f}<extra></extra>'
+      }],{
+        title:{text:'Sensitivity (Std of Attribution for Small ε-perturbations)', font:{size:11},x:0.5},
+        yaxis:{title:'σ(attribution)',range:[0,0.5]},
+        margin:{t:40,b:35,l:55,r:10},
+        plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+      },{responsive:true,displayModeBar:false});
+      document.getElementById('info-box').innerHTML=
+        `<b>Sensitivity Evaluation:</b> Apply small random perturbations (ε~𝒩(0,0.01)) to the input and measure how much the attribution map changes.<br><br>`+
+        `A <em>stable</em> explanation (low σ) should not change dramatically for imperceptible input changes. High sensitivity → unreliable explanations.<br><br>`+
+        `Vanilla gradients are most sensitive (noisy); GradCAM is most stable due to its spatial pooling and ReLU.`;
+    } else {
+      // Human agreement
+      const methods=['gradcam','lime','shap','vanilla','guided'];
+      const humanAgree={gradcam:0.75,lime:0.81,shap:0.78,vanilla:0.52,guided:0.68};
+      document.getElementById('bottom-title').textContent='Human Evaluation: Annotator Agreement (click-through rate)';
+      Plotly.newPlot('chart-bottom',[{
+        x:methods.map(m=>m.toUpperCase()),
+        y:methods.map(m=>humanAgree[m]+0.03*randn()),
+        type:'bar',
+        marker:{color:methods.map(m=>m===xaiMethod?'#059669':'#cbd5e1'),
+                line:{color:'#fff',width:1}},
+        text:methods.map(m=>(humanAgree[m]*100).toFixed(0)+'%'), textposition:'outside',
+        hovertemplate:'%{x}<br>Agreement = %{y:.3f}<extra></extra>'
+      }],{
+        title:{text:'Human Annotator Agreement Rate (simulated)', font:{size:11},x:0.5},
+        yaxis:{title:'Agreement',range:[0,1.1]},
+        margin:{t:40,b:35,l:55,r:10},
+        plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+      },{responsive:true,displayModeBar:false});
+      document.getElementById('info-box').innerHTML=
+        `<b>Human Evaluation:</b> Show explanations to human annotators alongside the original image. Measure how often annotators agree the highlighted region is the "right" reason for the prediction.<br><br>`+
+        `<b>Click-through evaluation:</b> Ask annotators to click the most important region; compare with model attribution. Agreement rate = % of overlap.<br><br>`+
+        `LIME and SHAP tend to produce more human-interpretable explanations due to their explicit feature-based representations. Vanilla gradient is hardest to interpret visually.`;
+    }
+  }
+}
+
+['img_choice','contrast_class','cf_type','eval_method','xai_method'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('change',render);
+});
+['cf_strength','eval_frac'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('input',render);
+});
+
+render();
+</script>
+</body>
+</html>

@@ -1026,6 +1026,87 @@
       "description": "Visualize aleatoric (irreducible noise), epistemic (model/data), and predictive uncertainty on 1D regression. Explore MC Dropout uncertainty decomposition.",
       "iframe_title": "Interactive Section 3 Uncertainty Types",
       "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture22/salient.png",
+      "notebook_html": "Lecture23_Saliency_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 4 \u2014 Saliency and Attribution Methods",
+      "description": "Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.",
+      "iframe_title": "Interactive Section 4 Saliency Methods",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture22/forward.png",
+      "notebook_html": "Lecture23_Saliency_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 4 \u2014 Saliency and Attribution Methods",
+      "description": "Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.",
+      "iframe_title": "Interactive Section 4 Saliency Methods",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture22/xdog.png",
+      "notebook_html": "Lecture23_Saliency_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Section 4 \u2014 Saliency and Attribution Methods",
+      "description": "Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.",
+      "iframe_title": "Interactive Section 4 Saliency Methods",
+      "iframe_height": 860
+    },
+    {
+      "image_match": "img/lecture22/activation.png",
+      "notebook_html": "Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 5\u20136 \u2014 GradCAM, LIME, and SHAP",
+      "description": "Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.",
+      "iframe_title": "Interactive Sections 5\u20136 GradCAM LIME SHAP",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture22/lime_pipeline.png",
+      "notebook_html": "Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 5\u20136 \u2014 GradCAM, LIME, and SHAP",
+      "description": "Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.",
+      "iframe_title": "Interactive Sections 5\u20136 GradCAM LIME SHAP",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture22/shap.png",
+      "notebook_html": "Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 5\u20136 \u2014 GradCAM, LIME, and SHAP",
+      "description": "Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.",
+      "iframe_title": "Interactive Sections 5\u20136 GradCAM LIME SHAP",
+      "iframe_height": 900
+    },
+    {
+      "image_match": "img/lecture23/net2.png",
+      "notebook_html": "Lecture24_ContrastiveCAM_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 2\u20134 \u2014 Contrastive CAM, Counterfactual CAM & XAI Evaluation",
+      "description": "Ask 'Why P rather than Q?' with Contrastive-CAM, explore counterfactual image modifications, and compare XAI methods by faithfulness, sensitivity, and human agreement.",
+      "iframe_title": "Interactive Sections 2\u20134 Contrastive CAM and XAI Evaluation",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture23/net10.png",
+      "notebook_html": "Lecture24_ContrastiveCAM_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 2\u20134 \u2014 Contrastive CAM, Counterfactual CAM & XAI Evaluation",
+      "description": "Ask 'Why P rather than Q?' with Contrastive-CAM, explore counterfactual image modifications, and compare XAI methods by faithfulness, sensitivity, and human agreement.",
+      "iframe_title": "Interactive Sections 2\u20134 Contrastive CAM and XAI Evaluation",
+      "iframe_height": 920
+    },
+    {
+      "image_match": "img/lecture22/vsi.png",
+      "notebook_html": "Lecture24_ContrastiveCAM_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Interactive Notebook: Sections 2\u20134 \u2014 Contrastive CAM, Counterfactual CAM & XAI Evaluation",
+      "description": "Ask 'Why P rather than Q?' with Contrastive-CAM, explore counterfactual image modifications, and compare XAI methods by faithfulness, sensitivity, and human agreement.",
+      "iframe_title": "Interactive Sections 2\u20134 Contrastive CAM and XAI Evaluation",
+      "iframe_height": 920
     }
   ]
 }

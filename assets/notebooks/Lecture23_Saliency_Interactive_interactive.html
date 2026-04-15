@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Saliency Methods — Lecture 23</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .layout{display:grid;grid-template-columns:270px 1fr;gap:12px;}
+  @media(max-width:750px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.79rem;font-weight:600;color:var(--muted);min-width:120px;}
+  .ctrl-row input[type=range]{flex:1;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:36px;text-align:right;}
+  select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;font-size:.84rem;background:#fff;flex:1;}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .chart-box{width:100%;height:220px;}
+  .chart-box-tall{width:100%;height:300px;}
+  .info-box{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+            padding:12px 16px;font-size:.84rem;line-height:1.65;margin-top:10px;}
+  .info-box b{color:var(--blue);}
+  code{font-family:monospace;font-size:.82rem;background:#f1f5f9;padding:1px 4px;border-radius:3px;}
+  .method-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.78rem;
+               font-weight:700;margin:1px;}
+  .m-vanilla{background:#dbeafe;color:#1e40af;}
+  .m-guided{background:#dcfce7;color:#14532d;}
+  .m-smooth{background:#fef3c7;color:#78350f;}
+  .m-occl{background:#ede9fe;color:#4c1d95;}
+</style>
+</head>
+<body>
+
+<h2>Sections 4 — Saliency and Attribution Methods</h2>
+<p class="subtitle">Compare occlusion, vanilla gradient, guided backpropagation, and SmoothGrad on synthetic input images.</p>
+
+<div class="tabs">
+  <button class="tab active" id="tab-saliency" onclick="setTab('saliency')">Gradient Saliency</button>
+  <button class="tab" id="tab-occl"     onclick="setTab('occl')">Occlusion Saliency</button>
+  <button class="tab" id="tab-compare"  onclick="setTab('compare')">Method Comparison</button>
+</div>
+
+<div class="layout">
+  <!-- Controls -->
+  <div class="panel">
+    <h3 id="ctrl-title">Controls</h3>
+
+    <div class="ctrl-row">
+      <label>Input image</label>
+      <select id="img_choice" onchange="render()">
+        <option value="dog">Dog (class 0)</option>
+        <option value="cat">Cat (class 1)</option>
+        <option value="car">Car (class 2)</option>
+      </select>
+    </div>
+    <div class="ctrl-row">
+      <label>Target class</label>
+      <select id="target_class" onchange="render()">
+        <option value="0">Class 0 (dog)</option>
+        <option value="1">Class 1 (cat)</option>
+        <option value="2">Class 2 (car)</option>
+      </select>
+    </div>
+
+    <!-- Saliency controls -->
+    <div id="ctrl-saliency">
+      <div class="ctrl-row">
+        <label>Method</label>
+        <select id="sal_method" onchange="render()">
+          <option value="vanilla">Vanilla Gradient</option>
+          <option value="abs">|Gradient| (abs)</option>
+          <option value="guided">Guided Backprop</option>
+          <option value="smooth">SmoothGrad</option>
+          <option value="integrated">Integrated Gradients</option>
+        </select>
+      </div>
+      <div class="ctrl-row" id="ctrl-smooth">
+        <label>Noise std (σ)</label>
+        <input type="range" id="smooth_sig" min="0.05" max="0.5" step="0.05" value="0.1"/>
+        <span class="val" id="smooth_sig_val">0.10</span>
+      </div>
+      <div class="ctrl-row" id="ctrl-nsamples">
+        <label>N samples</label>
+        <input type="range" id="n_samples" min="5" max="50" step="5" value="20"/>
+        <span class="val" id="n_samples_val">20</span>
+      </div>
+    </div>
+
+    <!-- Occlusion controls -->
+    <div id="ctrl-occl" style="display:none">
+      <div class="ctrl-row">
+        <label>Window size</label>
+        <input type="range" id="window_size" min="1" max="6" step="1" value="3"/>
+        <span class="val" id="window_size_val">3</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Stride</label>
+        <input type="range" id="occl_stride" min="1" max="4" step="1" value="1"/>
+        <span class="val" id="occl_stride_val">1</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Fill value</label>
+        <select id="fill_val" onchange="render()">
+          <option value="0">0 (black)</option>
+          <option value="0.5">0.5 (gray)</option>
+          <option value="mean">Mean</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;font-size:.8rem;line-height:1.6;color:var(--muted);" id="method-desc">
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div>
+    <div class="panel" style="margin-bottom:10px;">
+      <h3 id="chart-row-title">Input Image vs Saliency Map</h3>
+      <div class="grid-2">
+        <div><div style="font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:4px;">Input Image</div>
+             <div id="chart-input" class="chart-box-tall"></div></div>
+        <div><div style="font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:4px;" id="sal-title">Saliency Map</div>
+             <div id="chart-saliency" class="chart-box-tall"></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Prediction Confidence</h3>
+      <div id="chart-conf" style="width:100%;height:200px;"></div>
+    </div>
+  </div>
+</div>
+
+<div class="info-box" id="info-box"></div>
+
+<script>
+// ── Deterministic RNG ──────────────────────────────────────────────────────
+function mulberry32(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; let t=Math.imul(seed^seed>>>15,1|seed); t=t+Math.imul(t^t>>>7,61|t)^t; return((t^t>>>14)>>>0)/4294967296; }; }
+const rng=mulberry32(77);
+function randn(){ const u=rng(),v=rng(); return Math.sqrt(-2*Math.log(u+1e-12))*Math.cos(2*Math.PI*v); }
+
+// ── Synthetic 16x16 "images" ────────────────────────────────────────────────
+const N = 16;
+
+function makeImage(shape){
+  const g = Array.from({length:N},()=>new Array(N).fill(0.1));
+  if(shape==='dog'){
+    // Blob in lower-center (body)
+    for(let i=8;i<16;i++) for(let j=4;j<12;j++) g[i][j]=0.75+0.2*(rng()-0.5);
+    // Head in upper-right
+    for(let i=2;i<7;i++) for(let j=9;j<14;j++) g[i][j]=0.65+0.2*(rng()-0.5);
+    // Ears
+    for(let i=0;i<3;i++){ g[i][8]=0.8; g[i][9]=0.8; g[i][12]=0.8; g[i][13]=0.8; }
+  } else if(shape==='cat'){
+    // Oval body center
+    for(let i=5;i<13;i++) for(let j=4;j<12;j++){
+      const d=Math.sqrt((i-9)**2+(j-8)**2);
+      if(d<4) g[i][j]=0.7+0.15*(rng()-0.5);
+    }
+    // Pointy ears (cat)
+    g[2][4]=0.85; g[3][5]=0.8; g[4][6]=0.75;
+    g[2][11]=0.85; g[3][10]=0.8; g[4][9]=0.75;
+    // Whiskers (stripes)
+    for(let j=0;j<5;j++) g[9][j]=0.6;
+    for(let j=11;j<16;j++) g[9][j]=0.6;
+  } else {
+    // Car: rectangular body
+    for(let i=9;i<14;i++) for(let j=1;j<15;j++) g[i][j]=0.7+0.15*(rng()-0.5);
+    // Roof
+    for(let i=5;i<9;i++) for(let j=4;j<12;j++) g[i][j]=0.65+0.1*(rng()-0.5);
+    // Wheels
+    for(let j=2;j<=4;j++) for(let i=12;i<=15;i++) g[i][j]=0.3+(rng()-0.5)*0.1;
+    for(let j=11;j<=13;j++) for(let i=12;i<=15;i++) g[i][j]=0.3+(rng()-0.5)*0.1;
+  }
+  return g;
+}
+
+// Pre-compute images once
+const IMAGES = { dog: makeImage('dog'), cat: makeImage('cat'), car: makeImage('car') };
+
+// ── Simple "model" — dot-product with class prototypes ─────────────────────
+// Each class has a "prototype gradient" defining where it's sensitive
+const PROTO = {
+  0: {name:'dog', hotspot:{ri:2,rj:9,rh:6,rw:5, body_ri:8,body_rj:4,body_rh:8,body_rw:8}},
+  1: {name:'cat', hotspot:{ri:2,rj:4,rh:3,rw:8, body_ri:5,body_rj:4,body_rh:8,body_rw:8}},
+  2: {name:'car', hotspot:{ri:9,rj:1,rh:5,rw:14, body_ri:5,body_rj:4,body_rh:4,body_rw:8}}
+};
+
+function classGradient(imgKey, targetClass){
+  // "Gradient" = alignment of image with class prototype
+  const g = Array.from({length:N},()=>new Array(N).fill(0));
+  const p = PROTO[targetClass].hotspot;
+  // High gradient in the hotspot region (feature most diagnostic for this class)
+  for(let i=p.ri;i<Math.min(N,p.ri+p.rh);i++){
+    for(let j=p.rj;j<Math.min(N,p.rj+p.rw);j++){
+      g[i][j] = 0.5 + 0.4*(IMAGES[imgKey][i][j]);
+    }
+  }
+  // Low gradient elsewhere
+  for(let i=0;i<N;i++) for(let j=0;j<N;j++){
+    if(g[i][j]===0) g[i][j] = 0.05*(rng()-0.3);
+  }
+  return g;
+}
+
+function guidedGrad(imgKey, targetClass){
+  const raw = classGradient(imgKey, targetClass);
+  // Guided: zero out negative gradients AND negative pixel activations
+  return raw.map((row,i)=>row.map((v,j)=>v>0&&IMAGES[imgKey][i][j]>0.3?v:0));
+}
+
+function smoothGrad(imgKey, targetClass, sigma, nSamples){
+  // Average of gradients with noise perturbations
+  const sum = Array.from({length:N},()=>new Array(N).fill(0));
+  for(let k=0;k<nSamples;k++){
+    const noisy = IMAGES[imgKey].map(row=>row.map(v=>v+sigma*randn()));
+    const grad = classGradientForImg(noisy, targetClass);
+    for(let i=0;i<N;i++) for(let j=0;j<N;j++) sum[i][j]+=grad[i][j]/nSamples;
+  }
+  return sum;
+}
+
+function classGradientForImg(img, targetClass){
+  const p = PROTO[targetClass].hotspot;
+  const g = Array.from({length:N},()=>new Array(N).fill(0));
+  for(let i=p.ri;i<Math.min(N,p.ri+p.rh);i++)
+    for(let j=p.rj;j<Math.min(N,p.rj+p.rw);j++)
+      g[i][j]=0.5+0.4*img[i][j];
+  return g;
+}
+
+function integratedGrad(imgKey, targetClass, steps=50){
+  // IG: average gradient along path from baseline (zeros) to input
+  const sum = Array.from({length:N},()=>new Array(N).fill(0));
+  for(let k=0;k<=steps;k++){
+    const alpha = k/steps;
+    const scaled = IMAGES[imgKey].map(row=>row.map(v=>alpha*v));
+    const grad = classGradientForImg(scaled, targetClass);
+    for(let i=0;i<N;i++) for(let j=0;j<N;j++) sum[i][j]+=grad[i][j]*(IMAGES[imgKey][i][j])/(steps+1);
+  }
+  return sum;
+}
+
+function occlusionSaliency(imgKey, targetClass, winSize, stride){
+  const baseConf = confidence(IMAGES[imgKey], targetClass);
+  const sal = Array.from({length:N},()=>new Array(N).fill(0));
+  const cnt = Array.from({length:N},()=>new Array(N).fill(0));
+  for(let i=0;i<=N-winSize;i+=stride){
+    for(let j=0;j<=N-winSize;j+=stride){
+      // Occlude window
+      const occImg = IMAGES[imgKey].map(row=>[...row]);
+      for(let di=0;di<winSize;di++) for(let dj=0;dj<winSize;dj++) occImg[i+di][j+dj]=0.1;
+      const conf = confidence(occImg, targetClass);
+      const drop = baseConf - conf;
+      for(let di=0;di<winSize;di++) for(let dj=0;dj<winSize;dj++){
+        sal[i+di][j+dj]+=drop; cnt[i+di][j+dj]++;
+      }
+    }
+  }
+  return sal.map((row,i)=>row.map((v,j)=>cnt[i][j]>0?v/cnt[i][j]:0));
+}
+
+function confidence(img, targetClass){
+  // Dot product of image with class prototype region
+  const p = PROTO[targetClass].hotspot;
+  let s=0, n=0;
+  for(let i=p.ri;i<Math.min(N,p.ri+p.rh);i++)
+    for(let j=p.rj;j<Math.min(N,p.rj+p.rw);j++){s+=img[i][j];n++;}
+  return n>0?s/n:0;
+}
+
+function allConfidences(imgKey){
+  const scores = [0,1,2].map(c=>confidence(IMAGES[imgKey],c));
+  const sum = scores.reduce((a,b)=>a+Math.exp(b*3),0);
+  return scores.map(v=>Math.exp(v*3)/sum);
+}
+
+function normalizeSal(sal){
+  const flat=sal.flat(), mx=Math.max(...flat), mn=Math.min(...flat);
+  const rng=mx-mn||1;
+  return sal.map(row=>row.map(v=>(v-mn)/rng));
+}
+
+// ── Tab state ────────────────────────────────────────────────────────────────
+let currentTab='saliency';
+
+function setTab(t){
+  currentTab=t;
+  ['saliency','occl','compare'].forEach(id=>{
+    document.getElementById('tab-'+id).classList.toggle('active',id===t);
+    if(document.getElementById('ctrl-'+id))
+      document.getElementById('ctrl-'+id).style.display=id===t?'':'none';
+  });
+  if(t==='compare') document.getElementById('ctrl-saliency').style.display='none';
+  else if(t==='saliency') document.getElementById('ctrl-saliency').style.display='';
+  render();
+}
+
+function render(){
+  const imgKey    = document.getElementById('img_choice').value;
+  const targetCls = +document.getElementById('target_class').value;
+  const method    = document.getElementById('sal_method')?.value||'vanilla';
+  const sigma     = +document.getElementById('smooth_sig')?.value||0.1;
+  const nSamp     = +document.getElementById('n_samples')?.value||20;
+  const winSize   = +document.getElementById('window_size')?.value||3;
+  const stride    = +document.getElementById('occl_stride')?.value||1;
+
+  if(document.getElementById('smooth_sig_val'))
+    document.getElementById('smooth_sig_val').textContent=sigma.toFixed(2);
+  if(document.getElementById('n_samples_val'))
+    document.getElementById('n_samples_val').textContent=nSamp;
+  if(document.getElementById('window_size_val'))
+    document.getElementById('window_size_val').textContent=winSize;
+  if(document.getElementById('occl_stride_val'))
+    document.getElementById('occl_stride_val').textContent=stride;
+
+  // Show/hide smooth controls
+  const showSmooth = method==='smooth'||method==='integrated';
+  if(document.getElementById('ctrl-smooth'))
+    document.getElementById('ctrl-smooth').style.display=showSmooth?'':'none';
+  if(document.getElementById('ctrl-nsamples'))
+    document.getElementById('ctrl-nsamples').style.display=method==='smooth'?'':'none';
+
+  const img = IMAGES[imgKey];
+  const confs = allConfidences(imgKey);
+
+  // ── Input image heatmap ──────────────────────────────────────────────────
+  Plotly.newPlot('chart-input',[{
+    z:img, type:'heatmap', colorscale:'Greys', zmin:0, zmax:1, showscale:false,
+    hovertemplate:'(%{x},%{y}) = %{z:.2f}<extra></extra>'
+  }],{
+    title:{text:{dog:'🐕 Dog',cat:'🐈 Cat',car:'🚗 Car'}[imgKey],font:{size:12},x:0.5},
+    margin:{t:35,b:10,l:10,r:10}, plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    xaxis:{showticklabels:false}, yaxis:{showticklabels:false, autorange:'reversed'}
+  },{responsive:true,displayModeBar:false});
+
+  // ── Compute saliency based on tab ────────────────────────────────────────
+  let salMap, salTitle, salColorscale='RdBu', salRev=true;
+
+  if(currentTab==='saliency'){
+    if(method==='vanilla'){
+      salMap=classGradient(imgKey,targetCls);
+      salTitle='Vanilla Gradient';
+    } else if(method==='abs'){
+      salMap=classGradient(imgKey,targetCls).map(r=>r.map(v=>Math.abs(v)));
+      salColorscale='Hot'; salRev=false; salTitle='|Gradient|';
+    } else if(method==='guided'){
+      salMap=guidedGrad(imgKey,targetCls);
+      salColorscale='Greens'; salRev=false; salTitle='Guided Backprop';
+    } else if(method==='smooth'){
+      salMap=smoothGrad(imgKey,targetCls,sigma,nSamp);
+      salTitle='SmoothGrad (σ='+sigma.toFixed(2)+', N='+nSamp+')';
+    } else {
+      salMap=integratedGrad(imgKey,targetCls);
+      salColorscale='Blues'; salRev=false; salTitle='Integrated Gradients';
+    }
+    salMap=normalizeSal(salMap);
+
+    document.getElementById('sal-title').textContent=salTitle+' → Class '+PROTO[targetCls].name;
+    Plotly.newPlot('chart-saliency',[{
+      z:salMap, type:'heatmap',
+      colorscale:salColorscale, reversescale:salRev,
+      zmin:0, zmax:1, showscale:true,
+      hovertemplate:'(%{x},%{y}) = %{z:.3f}<extra></extra>'
+    }],{
+      margin:{t:10,b:10,l:10,r:30},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff',
+      xaxis:{showticklabels:false},yaxis:{showticklabels:false,autorange:'reversed'}
+    },{responsive:true,displayModeBar:false});
+
+  } else if(currentTab==='occl'){
+    salMap=normalizeSal(occlusionSaliency(imgKey,targetCls,winSize,stride));
+    document.getElementById('sal-title').textContent=`Occlusion Saliency (W=${winSize}, S=${stride})`;
+    Plotly.newPlot('chart-saliency',[{
+      z:salMap, type:'heatmap',
+      colorscale:'Hot', reversescale:false, zmin:0, zmax:1, showscale:true,
+      hovertemplate:'(%{x},%{y}) = %{z:.3f} (confidence drop)<extra></extra>'
+    }],{
+      margin:{t:10,b:10,l:10,r:30},
+      plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff',
+      xaxis:{showticklabels:false},yaxis:{showticklabels:false,autorange:'reversed'}
+    },{responsive:true,displayModeBar:false});
+
+  } else {
+    // Compare: 4 methods side-by-side
+    // Re-use chart-saliency for vanilla, create a grid layout
+    const methods=[
+      {m:'vanilla',label:'Vanilla',sal:normalizeSal(classGradient(imgKey,targetCls)),cs:'RdBu',rev:true},
+      {m:'guided', label:'Guided', sal:normalizeSal(guidedGrad(imgKey,targetCls)),cs:'Greens',rev:false},
+      {m:'smooth', label:'SmoothGrad',sal:normalizeSal(smoothGrad(imgKey,targetCls,0.15,15)),cs:'YlOrRd',rev:false},
+      {m:'integrated',label:'Integrated Grad',sal:normalizeSal(integratedGrad(imgKey,targetCls)),cs:'Blues',rev:false}
+    ];
+    document.getElementById('sal-title').textContent='Method Comparison (all → class '+PROTO[targetCls].name+')';
+    // Show as a 2x2 subplot
+    Plotly.newPlot('chart-saliency', methods.map((m,idx)=>({
+      z:m.sal, type:'heatmap', colorscale:m.cs, reversescale:m.rev,
+      zmin:0, zmax:1, showscale:false,
+      xaxis:'x'+(idx+1), yaxis:'y'+(idx+1),
+      name:m.label,
+      hovertemplate:m.label+'<br>(%{x},%{y})=%{z:.2f}<extra></extra>'
+    })), {
+      grid:{rows:2,columns:2,pattern:'independent'},
+      annotations:methods.map((m,idx)=>({
+        xref:'x'+(idx+1)+' domain', yref:'y'+(idx+1)+' domain',
+        x:0.5, y:1.08, text:m.label, font:{size:10}, showarrow:false, xanchor:'center'
+      })),
+      margin:{t:30,b:10,l:10,r:10},
+      plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+      height:290
+    },{responsive:true,displayModeBar:false});
+  }
+
+  // ── Confidence bars ──────────────────────────────────────────────────────
+  Plotly.newPlot('chart-conf',[{
+    x:['Dog (C0)','Cat (C1)','Car (C2)'],
+    y:confs,
+    type:'bar',
+    marker:{color:['#2563eb','#dc2626','#059669'].map((c,i)=>i===targetCls?c+'cc':'#cbd5e1'),
+            line:{color:'#fff',width:1}},
+    text:confs.map(v=>(v*100).toFixed(1)+'%'),textposition:'outside',
+    hovertemplate:'%{x}<br>p = %{y:.3f}<extra></extra>'
+  }],{
+    title:{text:`Predicted Class Probabilities (input: ${imgKey})`,font:{size:12},x:0.5},
+    yaxis:{range:[0,1.15],title:'Prob.'},
+    margin:{t:35,b:35,l:50,r:10},
+    plot_bgcolor:'#f8fafc',paper_bgcolor:'#ffffff'
+  },{responsive:true,displayModeBar:false});
+
+  // ── Info ─────────────────────────────────────────────────────────────────
+  const infos={
+    saliency:{
+      vanilla:'<b>Vanilla Gradient:</b> Computes ∂S_c/∂x — the gradient of class score w.r.t. each input pixel. Highlights pixels where a small change has the largest effect on the target class. Can be noisy.',
+      abs:'<b>|Gradient| (Absolute):</b> Takes the absolute value |∂S_c/∂x|. Shows magnitude of influence regardless of sign. Often smoother and more interpretable than signed gradients.',
+      guided:'<b>Guided Backpropagation:</b> Combines vanilla gradients with deconvNet: backpropagates only through positive gradients AND positive activations. Produces sharper, more feature-specific maps.',
+      smooth:'<b>SmoothGrad:</b> Averages gradients over N noisy copies of the input x+ε, ε~𝒩(0,σ²). Reduces visual noise in the saliency map. More stable attribution.',
+      integrated:'<b>Integrated Gradients:</b> Averages gradients along a linear path from baseline (zeros) to input: IG(x) = (x−x₀)·∫₀¹ ∂S_c/∂x(x₀+α(x−x₀)) dα. Satisfies completeness and sensitivity axioms.'
+    },
+    occl:'<b>Occlusion Saliency:</b> Slides a W×W patch across the image, replaces each region with a fill value, and measures the drop in confidence for the target class. High drop = important region.\n\n<b>Trade-off:</b> Larger window = coarser heatmap but more contextual. Smaller stride = finer resolution but slower (O((N/S)²) forward passes).',
+    compare:'<b>Method comparison:</b> Different attribution methods highlight different aspects of the network\'s reasoning. Vanilla is noisy; guided and integrated are sharper; SmoothGrad reduces noise by averaging over perturbations.'
+  };
+
+  const method_key = currentTab==='saliency'?method:currentTab;
+  document.getElementById('info-box').innerHTML=
+    (infos.saliency[method_key]||infos[method_key]||infos.compare)+
+    `<br><br><b>Predicting class:</b> <b>${PROTO[targetCls].name}</b> (confidence ${(confs[targetCls]*100).toFixed(1)}%). High-intensity regions (bright/warm) = most influential pixels for this prediction.`;
+
+  // Update description sidebar
+  const descs={vanilla:'Signed gradient — raw backprop',abs:'Absolute gradient — magnitude only',
+                guided:'Guided backprop — positive-only flow',smooth:'SmoothGrad — averaged noisy grads',
+                integrated:'Integrated gradients — path-integral'};
+  if(document.getElementById('method-desc')&&method_key in descs)
+    document.getElementById('method-desc').textContent=descs[method_key];
+}
+
+['img_choice','target_class','sal_method','fill_val'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('change',render);
+});
+['smooth_sig','n_samples','window_size','occl_stride'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('input',render);
+});
+
+render();
+</script>
+</body>
+</html>
