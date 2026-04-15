@@ -350,13 +350,7 @@ decreases FPR but may reduce TPR (more missed anomalies).</p></li>
 </ul>
 <p>Figure <a data-reference="fig:anomaly_threshold_tradeoff" data-reference-type="ref" href="#fig:anomaly_threshold_tradeoff">5</a> illustrates how
 changing the decision threshold affects detection.</p>
-<figure id="fig:anomaly_threshold_tradeoff">
-<img src="img/lecture24/Picture24.5.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Effect of the decision threshold on anomaly detection. Lower
-thresholds detect more anomalies but increase false positives, while
-higher thresholds reduce false positives but may miss
-anomalies.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 2–3 — ROC Curve, Threshold Trade-off &amp; Detection Methods</h3><p>Explore how the decision threshold γ controls TPR vs FPR, visualize the ROC curve and AUC, and compare distance-based, Isolation Forest, and density-based anomaly detection on 2D data.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Anomaly Detection: ROC, Threshold and Detection Methods"></iframe></section>
 <h3 data-number="2.5.3" id="combined-performance-metrics"><span class="header-section-number">2.5.3</span> Combined Performance
 Metrics</h3>
 <p>Because TPR and FPR capture different aspects of performance, it is
@@ -405,12 +399,7 @@ random guessing.</p></li>
 anomaly detection methods. Each curve corresponds to a different
 algorithm, and the associated AUC values allow direct quantitative
 comparison.</p>
-<figure id="fig:roc_auc_anomaly">
-<img src="img/lecture24/Picture6.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>ROC curve comparison across anomaly detection methods.
-Curves closer to the top-left corner and with larger AUC values indicate
-superior detection performance.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Sections 2–3 — ROC Curve, Threshold Trade-off &amp; Detection Methods</h3><p>Explore how the decision threshold γ controls TPR vs FPR, visualize the ROC curve and AUC, and compare distance-based, Isolation Forest, and density-based anomaly detection on 2D data.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Anomaly Detection: ROC, Threshold and Detection Methods"></iframe></section>
 <p>Overall, ROC curves and AUC provide a robust and
 threshold-independent framework for evaluating and comparing anomaly
 detection algorithms.</p>
@@ -847,11 +836,7 @@ encoder network <span class="math inline">\(E(\cdot)\)</span> that maps
 an input to a low-dimensional latent representation, and a decoder
 network <span class="math inline">\(D(\cdot)\)</span> that reconstructs
 the input from this representation.</p>
-<figure id="fig:autoencoder">
-<img src="img/lecture24/Picture11.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Structure of an autoencoder used for reconstruction-based
-anomaly detection.</figcaption>
-</figure>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Reconstruction-Based Anomaly Detection</h3><p>Simulate autoencoder reconstruction error for normal vs anomalous patches. Adjust latent dimension and error threshold to see how the bottleneck capacity affects detection sensitivity.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Autoencoder Reconstruction-based Anomaly Detection"></iframe></section>
 <p>During training, the network is optimized to reconstruct all samples
 in the training set. The reconstruction loss over the training data is
 given by <span class="math display">\[L(\mathcal{T}_R)=\sum_{s\in\mathcal{T}_R}\|s-D(E(s))\|_2.\]</span>
