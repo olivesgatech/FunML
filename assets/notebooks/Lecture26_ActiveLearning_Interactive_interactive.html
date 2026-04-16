@@ -131,14 +131,14 @@
 // 30 points in 2D, 2 classes, with a fuzzy boundary near x=0
 const SEED_POINTS = [
   // Class 0 (left)
-  [-2.5,0.3],[−2.1,1.2],[−1.8,−0.6],[−1.5,0.8],[−2.3,−1.1],
-  [−1.9,1.5],[−2.7,0.0],[−1.3,−1.4],[−2.0,0.5],[−1.6,1.1],
+  [-2.5,0.3],[-2.1,1.2],[-1.8,-0.6],[-1.5,0.8],[-2.3,-1.1],
+  [-1.9,1.5],[-2.7,0.0],[-1.3,-1.4],[-2.0,0.5],[-1.6,1.1],
   // Near-boundary (uncertain)
-  [−0.3,0.2],[0.1,0.5],[0.4,−0.3],[−0.2,−0.6],[0.3,0.8],
-  [−0.5,0.3],[0.2,−0.1],[−0.1,0.7],[0.5,0.2],[−0.4,−0.4],
+  [-0.3,0.2],[0.1,0.5],[0.4,-0.3],[-0.2,-0.6],[0.3,0.8],
+  [-0.5,0.3],[0.2,-0.1],[-0.1,0.7],[0.5,0.2],[-0.4,-0.4],
   // Class 1 (right)
-  [1.3,0.4],[1.8,−0.7],[2.1,1.1],[1.5,−1.2],[2.5,0.6],
-  [2.0,0.3],[1.7,1.4],[2.3,−0.5],[1.4,0.9],[2.6,−0.2]
+  [1.3,0.4],[1.8,-0.7],[2.1,1.1],[1.5,-1.2],[2.5,0.6],
+  [2.0,0.3],[1.7,1.4],[2.3,-0.5],[1.4,0.9],[2.6,-0.2]
 ];
 
 // Ground truth labels (0=left, 1=right) — roughly by x position + noise
@@ -352,9 +352,9 @@ function render(){
 
   // ── Info ───────────────────────────────────────────────────────────────────
   const formulas = {
-    entropy: 'H(x) = −Σ p(y|x) log p(y|x)   (max at p=0.5 for binary)',
-    margin:  'M(x) = 1 − |p(y₁|x) − p(y₂|x)|   (max when two top probs tied)',
-    lc:      'LC(x) = 1 − max_y p(y|x)   (max when top class prob is lowest)',
+    entropy: 'H(x) = -Σ p(y|x) log p(y|x)   (max at p=0.5 for binary)',
+    margin:  'M(x) = 1 - |p(y₁|x) - p(y₂|x)|   (max when two top probs tied)',
+    lc:      'LC(x) = 1 - max_y p(y|x)   (max when top class prob is lowest)',
     random:  'U(x) = Uniform random   (baseline, ignores model output)'
   };
   const descriptions = {

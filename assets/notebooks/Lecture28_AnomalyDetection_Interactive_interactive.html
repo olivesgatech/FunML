@@ -443,7 +443,7 @@ function densityScore(pt, normals){
   // Anomaly score = 1 - normalized density
   const maxD=normals.reduce((best,n)=>{
     let s=0;
-    normals.forEach(m=>s+=Math.exp(-Math.hypot(n.x-m.x,n.y-m.y)**2/(2*h*h)));
+    normals.forEach(m=>s+=Math.exp(-(Math.hypot(n.x-m.x,n.y-m.y)**2)/(2*h*h)));
     return Math.max(best,s/(normals.length*2*Math.PI*h*h));
   },0);
   return 1 - Math.min(1, density/(maxD+1e-9));
