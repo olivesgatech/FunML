@@ -1,0 +1,354 @@
+%% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex
+
+
+
+%%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
+\documentclass{article}
+%%%%%Packages Used, add more if necessary%%%%
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage, float}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\usepackage{mdframed}
+\usepackage{multicol}
+\usepackage{microtype}
+\usepackage{hyperref}
+
+%%%%% NO NEED TO EDIT THIS PREAMBLE %%%%%%%%
+%%% PREAMBLE %%%
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+
+      \hbox to 6.28in {
+      {\bf ECE 4252/6252 (FunML) Fundamentals of Machine Learning \hfill 2021--2028} }
+
+      \vspace{2mm}
+      \hbox to 6.28in {
+      {Courses developed by Professor Ghassan AlRegib
+      (\href{https://alregib.ece.gatech.edu/}{alregib.ece.gatech.edu})
+      \hfill For inquiries: \href{mailto:alregib@gatech.edu}{alregib@gatech.edu}} }
+
+      \vspace{3mm}
+      \hbox to 6.28in { {\Large \hfill Lecture #1: #2 \hfill} }
+
+      \vspace{2mm}
+      \hbox to 6.28in { {\it Co-Instructors: #3 \hfill #4} }
+
+      \vspace{2mm}}
+   }
+   \end{center}
+
+   % -------- PEOPLE OUTSIDE BOX --------
+   \vspace{2mm}
+   \noindent{\bf Contributors:} Dr. Ahmad Mustafa, Dr. Motaz Alfarraj, Dr. Ashraf Alattar, Dr. Chen Zhou
+
+   \vspace{1mm}
+   \noindent{\bf Teaching Assistants} with remarkable contributions include: Kuo-Wei Lai, Wuyang Du, Shiva Mahato, Michael Zhou, Ninghan Zhong
+
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+
+   \vspace{2mm}
+\noindent {\bf Disclaimer}:
+{All content of these notes are part of this course at Georgia Tech. Any re-use or distribution is not permitted without pre-approved permission. All these notes belong to, created by, and copyrighted for Ghassan AlRegib and Mohit Prabhushankar, Georgia Tech, 2021--2028.}
+
+\vspace{2mm}
+\noindent {\bf License}:
+{These lecture notes are licensed under the
+\href{https://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.}
+
+   \vspace{2mm}
+   \noindent {\bf Errata}:
+   {\it Please submit any errata you find using the following form:
+   \href{https://forms.office.com/r/fbg9dMWPgY}{Errata Form for FunML Textbook}
+   or visit: \url{https://forms.office.com/r/fbg9dMWPgY}}
+
+   \vspace*{4mm}
+}
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+\newcommand{\challenge}[2]{\noindent \textbf{(Challenge Problem)} \emph{#1}: #2 }
+
+\newcommand{\exercise}[1]{\noindent \textbf{(Exercise)} #1 }
+
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+%%% END_OF_PREAMBLE %%%
+
+
+
+%%%%You may add more \newtheorem if necessary%%%%%%
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+
+\newcommand{\dom}{\mathrm{dom}}
+\begin{document}
+
+\lecture{28}{Large Language Models}{Ghassan AlRegib and Mohit Prabhushankar}{}%
+
+\section{Lecture Objectives}
+
+This lecture introduces Large Language Models (LLMs) as the current frontier of sequence modeling and natural language processing. Building on the Transformer architecture introduced in earlier lectures, we examine how scale --- in data, parameters, and compute --- produces qualitatively new capabilities. We first review the statistical formulation of language modeling as next-token prediction and describe how Transformers are pre-trained on massive text corpora. We then study \emph{scaling laws} that quantify how performance improves predictably with scale, and examine why emergent abilities appear at certain parameter thresholds. We discuss fine-tuning strategies including supervised fine-tuning (SFT) and instruction tuning, and present Reinforcement Learning from Human Feedback (RLHF) as the dominant alignment technique. We introduce in-context learning and prompt engineering as inference-time techniques that require no weight updates, and analyze how chain-of-thought prompting elicits step-by-step reasoning. We close with a discussion of evaluation benchmarks, common failure modes (hallucination, factual errors, sycophancy), and the role of retrieval-augmented generation (RAG) in grounding LLM outputs \cite{1,2,3}.
+
+\section{From Sequence Models to Language Models}
+
+\subsection{The Language Modeling Problem}
+
+A language model assigns a probability to a sequence of tokens $w_1, w_2, \ldots, w_T$ drawn from a vocabulary $\mathcal{V}$. By the chain rule of probability:
+\begin{equation}
+P(w_1, w_2, \ldots, w_T) = \prod_{t=1}^{T} P(w_t \mid w_1, \ldots, w_{t-1}).
+\end{equation}
+Training maximizes the log-likelihood of observed text, which is equivalent to minimizing the cross-entropy loss:
+\begin{equation}
+\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log P(w_t \mid w_1, \ldots, w_{t-1}).
+\end{equation}
+
+This self-supervised objective requires no labeled data --- every document in a text corpus provides training signal. The model is trained to predict the next token given all preceding tokens, a task known as \emph{causal} or \emph{autoregressive} language modeling.
+
+\subsection{Tokenization}
+
+Raw text is converted to integer tokens before being processed by the model. Modern LLMs use \emph{subword tokenization} methods such as Byte-Pair Encoding (BPE) or SentencePiece, which split rare words into smaller units while keeping common words whole. A vocabulary of 32,000--100,000 tokens is typical. Tokenization ensures that the vocabulary is finite and manageable while retaining the ability to represent arbitrary text, including code, mathematical notation, and multilingual content.
+
+Each token $w_t$ is mapped to a dense embedding vector $\mathbf{e}_{w_t} \in \mathbb{R}^d$ via a learned embedding matrix $\mathbf{E} \in \mathbb{R}^{|\mathcal{V}| \times d}$. Positional encodings are added to inject sequence order information, after which the Transformer processes the sequence as described in the previous lecture.
+
+\section{The Transformer as a Language Model}
+
+\subsection{Decoder-Only Architecture}
+
+The most widely deployed LLM architecture is the \emph{decoder-only Transformer}. In this design, the self-attention mechanism applies a \emph{causal mask}: position $t$ can only attend to positions $1, \ldots, t$, preventing the model from seeing future tokens during training and enabling autoregressive generation. This is in contrast to encoder-only models (such as BERT) that attend bidirectionally.
+
+Given input token embeddings $\mathbf{X} \in \mathbb{R}^{T \times d}$, each Transformer layer computes:
+\begin{align}
+\mathbf{Z} &= \mathrm{LayerNorm}\!\left(\mathbf{X} + \mathrm{MultiHeadAttention}(\mathbf{X})\right), \\
+\mathbf{X}' &= \mathrm{LayerNorm}\!\left(\mathbf{Z} + \mathrm{FFN}(\mathbf{Z})\right),
+\end{align}
+where the causal mask ensures that the attention matrix $\mathbf{A}$ is lower-triangular. The final hidden state $\mathbf{h}_T$ is projected via $\mathbf{W}_\text{out} \in \mathbb{R}^{d \times |\mathcal{V}|}$ to produce logits over the vocabulary, followed by a softmax to obtain $P(w_{T+1} \mid w_1, \ldots, w_T)$.
+
+\subsection{From BERT to GPT}
+
+Two contrasting pre-training paradigms emerged early in the LLM era:
+
+\begin{itemize}
+  \item \textbf{Masked Language Modeling (MLM) --- BERT \cite{4}:} An encoder-only model is trained to predict randomly masked tokens from their bidirectional context. BERT and its variants (RoBERTa, DeBERTa) excel at classification, named entity recognition, and question answering tasks where the full context is available.
+
+  \item \textbf{Causal Language Modeling (CLM) --- GPT \cite{3}:} A decoder-only model is trained with next-token prediction. GPT models generalize naturally to open-ended generation, dialogue, and code synthesis. GPT-2 (1.5B), GPT-3 (175B), and GPT-4 demonstrated progressively stronger few-shot capabilities.
+\end{itemize}
+
+The current landscape is dominated by decoder-only models due to their flexibility at inference time. Open-weight models such as LLaMA, Mistral, and Falcon have made large-scale research broadly accessible.
+
+\section{Scaling Laws}
+
+\subsection{Power-Law Behavior}
+
+One of the most important empirical discoveries in LLM research is that test loss decreases smoothly as a power law of model size, dataset size, and compute budget \cite{2}:
+\begin{equation}
+L(N) \approx \left(\frac{N_c}{N}\right)^{\alpha_N},
+\end{equation}
+where $N$ is the number of model parameters, $N_c$ is a constant, and $\alpha_N \approx 0.076$ for language modeling. Similar laws hold with dataset size $D$ and compute $C = 6ND$ (measured in floating-point operations).
+
+These scaling laws enable practitioners to predict the performance of large models before training them by extrapolating from smaller experiments. Crucially, they show that performance improvements are predictable and smooth --- there are no ``cliffs'' or plateaus in loss at any particular scale.
+
+\subsection{Chinchilla Scaling}
+
+The original GPT-3 scaling analysis suggested investing primarily in parameters. Subsequent work by Hoffmann et al.\ (the \emph{Chinchilla} paper) showed that compute is most efficiently used when model size $N$ and dataset size $D$ are scaled proportionally:
+\begin{equation}
+N_\text{opt} \approx \frac{C^{0.5}}{6}, \qquad D_\text{opt} \approx \frac{C^{0.5}}{6} \times 20,
+\end{equation}
+i.e., approximately 20 tokens per parameter. The 70B-parameter Chinchilla model, trained on 1.4 trillion tokens, outperformed the 280B Gopher model despite using four times fewer parameters. This shifted the field toward training smaller models on more data.
+
+\subsection{Emergent Abilities}
+
+Beyond smooth scaling of loss, some capabilities appear abruptly at specific scales. Tasks such as multi-step arithmetic, logical reasoning, and code generation perform at or near chance level in smaller models but jump to substantial accuracy in models above roughly 10--100 billion parameters. These \emph{emergent abilities} are not directly predicted by the loss scaling law and remain an active research topic. One hypothesis is that emergent tasks require the model to compose multiple sub-skills, each of which must independently reach sufficient accuracy, leading to a threshold effect.
+
+\section{Pre-training at Scale}
+
+\subsection{Data Curation}
+
+LLMs are pre-trained on extremely large corpora --- often trillions of tokens --- assembled from web pages (Common Crawl), books, scientific papers, code repositories (GitHub), and conversational data. Raw web data is noisy and requires extensive filtering: deduplication, quality filtering (using classifier-based or heuristic rules), language identification, and removal of toxic or private content.
+
+Data quality has a large impact on downstream model quality. The Falcon and LLaMA datasets demonstrated that carefully curated web data can match the quality of more expensive, manually assembled datasets. The composition of the training corpus also shapes model capabilities: code-heavy corpora improve reasoning, while multilingual data enables cross-lingual transfer.
+
+\subsection{Training Infrastructure}
+
+Training a 70B-parameter model on 2 trillion tokens requires roughly $8 \times 10^{23}$ floating-point operations, which at 100 teraflops per GPU translates to thousands of GPU-months. Modern LLM training uses:
+
+\begin{itemize}
+  \item \textbf{Data parallelism:} Each device processes a different mini-batch; gradients are averaged across devices.
+  \item \textbf{Tensor parallelism:} Individual weight matrices are sharded across devices.
+  \item \textbf{Pipeline parallelism:} Different layers are placed on different devices, with micro-batches flowing through the pipeline.
+  \item \textbf{Mixed precision:} Parameters are stored in 16-bit floating point (BF16/FP16) with a 32-bit master copy for gradient accumulation, reducing memory and increasing throughput.
+\end{itemize}
+
+\section{Fine-Tuning and Alignment}
+
+\subsection{Supervised Fine-Tuning (SFT)}
+
+A pre-trained LLM is a general-purpose next-token predictor. To make it follow user instructions, it is fine-tuned on a dataset of (instruction, response) pairs using the same cross-entropy loss:
+\begin{equation}
+\mathcal{L}_\text{SFT} = -\sum_{t} \log P_\theta(w_t \mid \text{instruction}, w_1, \ldots, w_{t-1}).
+\end{equation}
+The loss is computed only over response tokens (not the instruction). SFT alone can produce a capable instruction-following model but tends to produce outputs that are verbose, sycophantic, or occasionally harmful, motivating further alignment steps.
+
+\subsection{Reinforcement Learning from Human Feedback (RLHF)}
+
+RLHF \cite{5} is the dominant technique for aligning LLMs with human preferences. It consists of three stages:
+
+\begin{enumerate}
+  \item \textbf{Reward Model Training:} Human raters compare pairs of model responses and indicate a preference. A reward model $r_\phi(x, y)$ is trained to predict these preferences via the Bradley-Terry model:
+  \begin{equation}
+    P(y_w \succ y_l \mid x) = \sigma\!\left(r_\phi(x, y_w) - r_\phi(x, y_l)\right),
+  \end{equation}
+  where $y_w$ and $y_l$ are the preferred and rejected responses respectively.
+
+  \item \textbf{RL Fine-Tuning with PPO:} The language model $\pi_\theta$ is updated using Proximal Policy Optimization (PPO) to maximize expected reward, with a KL-divergence penalty to prevent the policy from drifting too far from the SFT baseline:
+  \begin{equation}
+    \mathcal{J}(\theta) = \mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot|x)}\!\left[r_\phi(x,y) - \beta \log \frac{\pi_\theta(y|x)}{\pi_\text{SFT}(y|x)}\right].
+  \end{equation}
+
+  \item \textbf{Iteration:} The process can be iterated by collecting new human feedback on outputs from the updated policy, yielding a progressively better reward model and policy.
+\end{enumerate}
+
+\subsection{Direct Preference Optimization (DPO)}
+
+RLHF with PPO is complex and unstable to train. Direct Preference Optimization (DPO) reformulates the problem as a supervised contrastive objective, showing that the optimal RLHF policy satisfies:
+\begin{equation}
+\mathcal{L}_\text{DPO}(\theta) = -\mathbb{E}\!\left[\log \sigma\!\left(\beta \log \frac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)}\right)\right].
+\end{equation}
+DPO requires no separate reward model and can be applied directly to preference data, making it simpler and more computationally efficient than RLHF. It has become widely adopted for open-weight model alignment.
+
+\subsection{Parameter-Efficient Fine-Tuning}
+
+Full fine-tuning of a 70B-parameter model requires tens of GPU-hours and large memory. Parameter-efficient fine-tuning (PEFT) methods reduce this cost:
+
+\begin{itemize}
+  \item \textbf{LoRA (Low-Rank Adaptation):} Weight updates are constrained to a low-rank factorization: $\Delta \mathbf{W} = \mathbf{A}\mathbf{B}^T$ where $\mathbf{A} \in \mathbb{R}^{d \times r}$, $\mathbf{B} \in \mathbb{R}^{d \times r}$, and rank $r \ll d$. Only $\mathbf{A}$ and $\mathbf{B}$ are trained. With $r = 16$, LoRA reduces trainable parameters by a factor of $d / (2r)$, often more than 1000$\times$.
+
+  \item \textbf{Prefix Tuning / Prompt Tuning:} Soft, trainable tokens are prepended to the input sequence; the main model weights are frozen. This keeps the model completely unmodified and allows different prefixes for different tasks.
+
+  \item \textbf{Adapter Layers:} Small bottleneck feed-forward modules are inserted between Transformer layers; only adapter weights are trained.
+\end{itemize}
+
+\section{In-Context Learning and Prompting}
+
+\subsection{In-Context Learning}
+
+A remarkable property of large LLMs is \emph{in-context learning} (ICL): by including a few input-output examples in the prompt, the model adapts its behavior without any weight updates. Given a prompt:
+\[
+[x_1, y_1], [x_2, y_2], \ldots, [x_k, y_k], x_\text{query},
+\]
+the model generates $y_\text{query}$ by analogy with the demonstrated examples. ICL performance improves with scale and with the number and quality of examples. The mechanism is not fully understood, but evidence suggests that the Transformer implements a form of gradient-based meta-learning within the forward pass.
+
+\subsection{Prompt Engineering}
+
+The wording and structure of the prompt strongly influence LLM outputs. Key techniques include:
+
+\begin{itemize}
+  \item \textbf{Zero-shot prompting:} Pose the task directly with no examples, relying on the model's pre-trained knowledge.
+  \item \textbf{Few-shot prompting:} Provide $k$ labeled examples before the query; typically $k \in \{1, 5, 20\}$.
+  \item \textbf{Chain-of-Thought (CoT) prompting:} Instruct the model to ``think step by step'' or provide examples that include intermediate reasoning steps. CoT dramatically improves performance on multi-step arithmetic and logical reasoning by encouraging the model to generate an explicit intermediate computation trace.
+  \item \textbf{Self-consistency:} Sample multiple reasoning chains and take the majority vote over final answers, reducing variance from individual chain errors.
+  \item \textbf{Instruction following:} Models trained with RLHF respond well to direct natural-language instructions: ``List three advantages of X,'' ``Summarize the following in two sentences.''
+\end{itemize}
+
+\subsection{Retrieval-Augmented Generation (RAG)}
+
+LLMs have a fixed knowledge cutoff date and can hallucinate factual information. Retrieval-Augmented Generation (RAG) addresses this by retrieving relevant documents from an external knowledge base at inference time and including them in the context:
+\begin{equation}
+P(y \mid q) = \sum_{d \in \text{Retrieve}(q)} P(y \mid q, d) \cdot P(d \mid q).
+\end{equation}
+The retrieval step uses dense vector search (embedding the query and documents into a shared space, then finding nearest neighbors) or sparse methods (BM25). RAG allows the model to access up-to-date information, cite sources, and reduce hallucination without retraining.
+
+\section{Evaluation and Limitations}
+
+\subsection{Benchmarks}
+
+LLM capabilities are evaluated on standardized benchmarks:
+
+\begin{itemize}
+  \item \textbf{MMLU} (Massive Multitask Language Understanding): Multiple-choice questions spanning 57 academic subjects at undergraduate and professional level.
+  \item \textbf{HumanEval / MBPP:} Code generation benchmarks requiring the model to implement Python functions from docstrings.
+  \item \textbf{GSM8K / MATH:} Grade-school and competition math problems requiring multi-step reasoning.
+  \item \textbf{HellaSwag / WinoGrande:} Commonsense inference and coreference resolution.
+  \item \textbf{BIG-Bench Hard:} A collection of 23 tasks where models below GPT-4 scale perform below chance.
+\end{itemize}
+
+\subsection{Hallucination}
+
+LLMs frequently generate fluent, confident, but factually incorrect statements --- a phenomenon called \emph{hallucination}. This arises because the training objective optimizes token prediction probability, not factual accuracy. Mitigation strategies include RAG, uncertainty-aware decoding (abstaining when confidence is low), grounded generation (requiring citations), and RLHF with factuality-focused reward signals.
+
+\subsection{Bias and Toxicity}
+
+LLMs trained on large internet corpora inherit societal biases present in the training data, including gender, racial, and political biases. They can also generate toxic or harmful content. Mitigation involves data filtering, RLHF with safety-focused reward models, and Constitutional AI (CAI), in which the model is trained to critique and revise its own outputs according to a set of human-authored principles.
+
+\subsection{Context Length}
+
+Standard Transformers have quadratic $O(T^2)$ attention complexity. Early models (GPT-3) supported 2048-token contexts; modern models support 128K--1M tokens through techniques such as FlashAttention (memory-efficient exact attention), RoPE (rotary positional embeddings enabling extrapolation), and sliding-window attention (Mistral, Longformer).
+
+\section{Summary}
+
+Large Language Models are autoregressive Transformer models pre-trained on massive text corpora via next-token prediction. Scaling laws show that model quality improves predictably with parameters, data, and compute. Fine-tuning via SFT, RLHF, and DPO aligns pre-trained models with human preferences. In-context learning and chain-of-thought prompting are powerful inference-time techniques that require no weight updates. Key limitations include hallucination, bias, and fixed knowledge cutoffs, which motivate retrieval-augmented generation and ongoing alignment research. LLMs now serve as the backbone for a rapidly growing ecosystem of AI applications, from code generation and document summarization to scientific reasoning and dialogue systems.
+
+\section*{Questions and Answers}
+
+\begin{mdframed}
+\textbf{Q: Why is causal masking necessary during training?}
+
+\textbf{A:} During training, the model processes all tokens in a sequence simultaneously for efficiency. Without causal masking, each position could attend to future tokens, making the next-token prediction task trivial (the answer is already in the context). The causal mask enforces the constraint that $P(w_t \mid w_1, \ldots, w_{t-1})$ is computed using only the prefix, which matches the autoregressive generation setting at inference time.
+\end{mdframed}
+
+\begin{mdframed}
+\textbf{Q: How does RLHF differ from standard supervised fine-tuning?}
+
+\textbf{A:} SFT maximizes the likelihood of specific reference responses, which requires high-quality curated demonstrations. RLHF instead learns a scalar reward model from pairwise human preferences (which response is better) and then uses reinforcement learning to optimize the language model policy to maximize this reward. RLHF can capture preferences that are difficult to articulate as explicit demonstrations, such as helpfulness, harmlessness, and calibrated uncertainty. The KL penalty prevents reward hacking by keeping the policy close to the SFT baseline.
+\end{mdframed}
+
+\begin{mdframed}
+\textbf{Q: What is the difference between in-context learning and fine-tuning?}
+
+\textbf{A:} Fine-tuning updates model weights using gradient descent on a training set, permanently changing the model. In-context learning provides examples in the input prompt at inference time without any weight updates --- the model generalizes from the demonstrated examples within a single forward pass. Fine-tuning achieves better performance when sufficient task-specific data is available and computational resources allow it. In-context learning is faster to deploy and more flexible but is limited by context length and is generally less sample-efficient for specialized tasks.
+\end{mdframed}
+
+\begin{mdframed}
+\textbf{Q: What causes hallucination and how can it be mitigated?}
+
+\textbf{A:} Hallucination arises because the cross-entropy pre-training objective rewards fluent, probable token sequences, not factual accuracy. The model learns patterns and associations from text but does not maintain an explicit knowledge base or verify claims. Mitigation strategies include: (1) Retrieval-Augmented Generation (RAG), which grounds generation in retrieved documents; (2) RLHF with factuality-focused reward signals; (3) uncertainty-based abstention, where the model declines to answer when confidence is low; and (4) chain-of-thought prompting, which forces explicit intermediate steps that can be audited for errors.
+\end{mdframed}
+
+\begin{thebibliography}{9}
+\bibitem{1} Vaswani, A., et al. ``Attention Is All You Need.'' \emph{NeurIPS}, 2017.
+\bibitem{2} Hoffmann, J., et al. ``Training Compute-Optimal Large Language Models.'' \emph{arXiv:2203.15556}, 2022.
+\bibitem{3} Brown, T., et al. ``Language Models are Few-Shot Learners.'' \emph{NeurIPS}, 2020.
+\bibitem{4} Devlin, J., et al. ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.'' \emph{NAACL}, 2019.
+\bibitem{5} Ouyang, L., et al. ``Training language models to follow instructions with human feedback.'' \emph{NeurIPS}, 2022.
+\end{thebibliography}
+
+\end{document}
