@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 PROJECT_TITLE = "ECE 4252/6252 – FunML Lecture Notes"
 SCRIPT_ROOT = Path(__file__).resolve().parent
 EXCLUDED_TEX_FILENAMES = {"lect1213_extra.tex"}
-EXCLUDED_TEX_PATH_PARTIALS = {"lect1213_extra", "funml_l12_l13_ext"}
+EXCLUDED_TEX_PATH_PARTIALS = {"lect1213_extra", "funml_l12_l13_ext", "funml_l12_gmmclustering"}
 INCLUDEGRAPHICS_WIDTH_SCALE = 0.60
 
 # A few late-semester note titles map to slide decks with different lecture
@@ -691,8 +691,8 @@ def slides_disabled_for_title(title: str):
 def lecture_dir_sort_key(lec_dir: Path):
   num = lecture_number_from_dir(lec_dir)
   if num:
-    return (0, int(num))
-  return (1, lec_dir.name.lower())
+    return (0, int(num), lec_dir.name.lower())
+  return (1, 0, lec_dir.name.lower())
 
 
 def is_excluded_tex_file(tex_path: Path):

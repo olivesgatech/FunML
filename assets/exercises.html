@@ -1186,7 +1186,7 @@ curvature.</p></li>
 MSE.</p></li>
 </ul></li>
 </ol></section></section>
-<section><h2>Lecture10 - Regularization and Performance Metrics</h2><section><h1>Exercises</h1>
+<section><h2>Lecture11 - Regularization and Performance Metrics</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question 1:</strong></p>
 <p>Which optimization method uses Second-order curvature information of
@@ -1366,7 +1366,7 @@ bias. It cannot capture patterns in the data, leading to high training
 and validation error. This is the definition of
 <strong>underfitting</strong>.</p></li>
 </ol></section></section>
-<section><h2>Lecture11 - K-Means Clustering</h2><section><h1>Exercises</h1>
+<section><h2>Lecture12 - K-Means Clustering</h2><section><h1>Exercises</h1>
 <p>The following table shows the regression outputs from three different
 models on five samples, along with the ground-truth (GT) values. We will
 use this table to build intuition about bias, variance, and
@@ -1493,7 +1493,7 @@ meaning it is too simple and fails to capture the complexity of the
 data. Hence, the correct answer is <strong>(a)
 Underfit</strong>.</p></li>
 </ol></section></section>
-<section><h2>Lecture12 - Clustering</h2><section><h1>Exercises</h1>
+<section><h2>Lecture13 - Clustering</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Given the following centroids for a
 k-means clustering model: <span class="math display">\[M_1 = (2, 3),
@@ -1631,7 +1631,7 @@ Analysis of the k-Means Algorithm</a><a class="footnote-back" href="#fnref1" rol
 of outliers on K-Means algorithm using Python</a><a class="footnote-back" href="#fnref2" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </aside></section></section>
-<section><h2>Lecture13 - GMMs and Performance Evaluation</h2><section><h1>Exercises</h1>
+<section><h2>Lecture15 - Clustering Performance Evaluation</h2><section><h1>Exercises</h1>
 <p>The following table shows the clustering results from two different
 methods on five samples, along with the ground truth (GT) cluster
 assignments.</p>
@@ -1983,7 +1983,7 @@ without needing ground truth labels.</p>
 <p>The correct answer is <strong>(b) Silhouette
 Coefficient</strong>.</p></li>
 </ol></section></section>
-<section><h2>Lecture14 - Convolutional Neural Networks</h2><section><h1>Exercises</h1>
+<section><h2>Lecture16 - Convolutional Neural Networks</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong></p>
 <p>Given an input image of size <span class="math inline">\(64 \times 64
@@ -2046,7 +2046,7 @@ N-F=26\)</span>.</p>
 \frac{26}{4}+1=7.5 \quad \text{invalid}\]</span></p>
 <p>Valid strides: <span class="math inline">\(\boxed{S=1,2}\)</span>.</p></li>
 </ol></section></section>
-<section><h2>Lecture15 - CNN Architectures</h2><section><h1>Exercises</h1>
+<section><h2>Lecture17 - CNN Architectures</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Why is stacking multiple <span class="math inline">\(3\times3\)</span> convolutions preferred over a
 single <span class="math inline">\(7\times7\)</span> convolution?</p>
@@ -2091,7 +2091,7 @@ limitation—<strong>optimization</strong> was. Residual connections
 enabled training of extremely deep networks and achieved super-human
 ImageNet performance.</p></li>
 </ol></section></section>
-<section><h2>Lecture16 - Convolutional Neural Networks: Training</h2><section><h1>Exercises</h1>
+<section><h2>Lecture18 - Convolutional Neural Networks: Training</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question 1:</strong> You are training a Neural Network on
 a dataset with 1 million datapoints. Describe the advantages and
@@ -2188,7 +2188,7 @@ meaningful visual concepts (e.g., wheels or faces). This hierarchical
 feature learning enables CNNs to transform raw pixels into high-level
 representations useful for classification.</p></li>
 </ol></section></section>
-<section><h2>Lecture17 - Best Practices</h2><section><h1>Exercises</h1>
+<section><h2>Lecture19 - Best Practices</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> You are training a model to classify
 images into one of ten categories. The dataset has roughly an equal
@@ -2237,7 +2237,7 @@ updates that destabilize training. Reducing the learning rate helps
 stabilize optimization and prevent divergence. Additional remedies
 include gradient clipping and improved weight initialization.</p></li>
 </ol></section></section>
-<section><h2>Lecture18 - Autoencoders</h2><section><h1>Exercises</h1>
+<section><h2>Lecture20 - Autoencoders</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What is the main objective of an
 autoencoder, and how does it differ from supervised learning?</p>
@@ -2288,7 +2288,7 @@ reconstruct inputs, not to separate classes. Therefore, the latent space
 reflects visual similarity rather than class separability, leading to
 overlapping clusters.</p></li>
 </ol></section></section>
-<section><h2>Lecture19 - Autoencoder Extensions</h2><section><h1>Exercises</h1>
+<section><h2>Lecture21 - Autoencoder Extensions</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Why can a standard autoencoder fail
 when the latent dimension is large?</p>
@@ -2417,7 +2417,7 @@ forming disconnected regions. As a result, nearby points in latent space
 tend to decode into similar outputs, enabling smooth interpolation and
 meaningful sampling.</p></li>
 </ol></section></section>
-<section><h2>Lecture20 - Sequence Modeling</h2><section><h1>Exercises</h1>
+<section><h2>Lecture22 - Sequence Modeling</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Why are standard MLPs poorly suited
 for sequence modeling, especially when sequence lengths vary?</p>
@@ -2495,7 +2495,7 @@ similar performance with fewer parameters and faster training, but
 remain sequential due to recurrence.</p></li>
 </ul></li>
 </ol></section></section>
-<section><h2>Lecture21 - Sequence Modeling II</h2><section><h1>Exercises</h1>
+<section><h2>Lecture23 - Sequence Modeling II</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What makes a Temporal Convolutional
 Network (TCN) <em>causal</em>, and how do dilated convolutions help it
@@ -2560,7 +2560,7 @@ context: <span class="math display">\[\sum_t \log P(w_t\mid
 w_{t-k},\dots,w_{t+k}).\]</span> Skip-Gram works well for rare words;
 CBOW is computationally more efficient.</p></li>
 </ol></section></section>
-<section><h2>Lecture22 - Transformers</h2><section><h1>Exercises</h1>
+<section><h2>Lecture24 - Transformers</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What problem do Transformers solve
 compared to RNNs?</p>
@@ -2721,7 +2721,7 @@ independently while sharing parameters across all positions.</p></li>
 increases representation power within each token. Both are necessary for
 strong performance.</p></li>
 </ol></section></section>
-<section><h2>Lecture23 - Explainability in Neural Networks</h2><section><h1>Exercises</h1>
+<section><h2>Lecture25 - Explainability in Neural Networks</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> Compare occlusion-based saliency and
 gradient-based saliency in terms of faithfulness and computational
@@ -2815,7 +2815,7 @@ efficiency is important, since it typically requires fewer computations
 than SHAP. It may also be preferred when quick local explanations are
 sufficient and theoretical guarantees are less critical.</p></li>
 </ol></section></section>
-<section><h2>Lecture24 - Explainability Paradigms and Evaluation</h2><section><h1>Exercises</h1>
+<section><h2>Lecture26 - Explainability Paradigms and Evaluation</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> In this lecture, we discussed
 <em>indirect</em>, <em>direct</em>, and <em>targeted</em> explanations.
@@ -2919,7 +2919,7 @@ insertion AUC is better</strong>.</p></li>
 <p>Both tests depend on the choice of baseline and may be biased toward
 large or diffuse explanations.</p></li>
 </ol></section></section>
-<section><h2>Lecture25 - Data and Label Efficient Learning I: Self-supervised Learning</h2><section><h1>Exercises</h1>
+<section><h2>Lecture27 - Data and Label Efficient Learning I: Self-supervised Learning</h2><section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question:</strong> What is the main difference between
 <strong>supervised</strong>, <strong>unsupervised</strong>, and
@@ -3008,7 +3008,7 @@ spread, and the covariance term reduces redundancy between features.
 Together, these prevent trivial constant representations without
 requiring negative samples.</p></li>
 </ol></section></section>
-<section><h2>Lecture26 - Data and Label Efficient Learning II – Active Learning</h2><section><h1>Exercises</h1>
+<section><h2>Lecture28 - Data and Label Efficient Learning II – Active Learning</h2><section><h1>Exercises</h1>
 <ol>
 <li><p>Which of the following best describes the main goal of active
 learning?</p>
@@ -3190,7 +3190,7 @@ NFR is a deployment-oriented metric that measures prediction stability
 across model updates. It is useful because overall accuracy may improve
 even while some previously correct predictions are lost.</p></li>
 </ol></section></section>
-<section><h2>Lecture27 - Uncertainty Quantification in Neural Networks</h2><section><h1>Exercises</h1>
+<section><h2>Lecture29 - Uncertainty Quantification in Neural Networks</h2><section><h1>Exercises</h1>
 <ol>
 <li><p>Which of the following best describes the goal of uncertainty
 quantification in neural networks?</p>
@@ -3451,7 +3451,7 @@ improves a downstream task. For example, in active learning, better
 uncertainty estimates should lead to better sample selection and faster
 model improvement.</p></li>
 </ol></section></section>
-<section><h2>Lecture28 - Anomaly Detection</h2><section><h1>Exercises</h1>
+<section><h2>Lecture30 - Anomaly Detection</h2><section><h1>Exercises</h1>
 <ol>
 <li><p>What is the primary challenge in defining anomalies within a
 dataset? <strong>Answer:</strong> The primary challenge is accurately
