@@ -164,7 +164,62 @@ sarcasm in language, or navigate unfamiliar environments with little
 effort, yet these tasks remain challenging for AI systems because they
 require complex perception, context understanding, and generalization
 abilities.</p>
-<h1 data-number="3" id="knowledge"><span class="header-section-number">3.</span> Knowledge</h1>
+<h1 data-number="3" id="data"><span class="header-section-number">3.</span> Data</h1>
+<p>At the core of modern artificial intelligence and machine learning
+lies data. Broadly speaking, data represents all observable facts about
+the world. These facts may originate from physical measurements,
+human-generated content, sensors, or digital systems. Machine learning
+systems do not directly reason about the world itself; instead, they
+learn patterns from data that represents the world.</p>
+<p>Data can take many different forms depending on the domain and the
+type of information being captured. One of the most common forms is
+<strong>tabular data</strong>, where each row corresponds to an
+observation and each column represents a feature. This format is widely
+used in applications such as healthcare records, financial transactions,
+and survey data, where structured attributes describe each instance.</p>
+<p>From a machine learning perspective, data is typically represented in
+structured mathematical form. For example, tabular data is often
+represented as a matrix <span class="math inline">\(X \in \mathbb{R}^{N
+\times d}\)</span>, where <span class="math inline">\(N\)</span> denotes
+the number of samples and <span class="math inline">\(d\)</span> denotes
+the number of features. Similarly, images can be represented as tensors
+of pixel intensities, videos as sequences of image frames, and
+time-series data as ordered sequences indexed over time. This unified
+representation enables machine learning algorithms to process diverse
+data modalities using common mathematical tools, particularly those from
+linear algebra and probability theory.</p>
+<p>Beyond tabular data, modern machine learning systems must handle more
+complex and high-dimensional data types. <strong>Images</strong>
+represent visual information and are typically stored as arrays of pixel
+values. <strong>Videos</strong> extend images by incorporating temporal
+structure, allowing models to capture motion and dynamics over time.
+<strong>Language data</strong>, including text and speech, encodes human
+communication and requires models to capture syntax, semantics, and
+contextual relationships between words and phrases.</p>
+<p>In addition, many real-world applications rely on <strong>sensor
+data</strong>, such as inertial measurement unit (IMU) signals, heart
+rate measurements, and other physiological recordings. These data
+sources are often sequential and time-dependent, requiring models that
+can capture temporal dependencies and evolving patterns. These different
+forms of data are commonly referred to as <strong>data
+modalities</strong>, each of which requires specialized representations
+and modeling approaches.</p>
+<figure id="fig:data_modalities">
+<img src="img/lecture1/data_modalities.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Examples of real-world data sources and modalities in
+machine learning. These include sensor data (smart devices), speech and
+audio signals, visual data (images and video), user interaction data,
+and navigation or trajectory data.</figcaption>
+</figure>
+<p>While data provides raw observations, it is not inherently meaningful
+on its own. The process of analyzing data and extracting patterns leads
+to <strong>information</strong>. When this information becomes
+actionable—meaning it can be used to guide decisions, predictions, or
+reasoning—it is referred to as <strong>knowledge</strong>. This
+progression from data to information to knowledge forms a central theme
+in machine learning, where models are designed to transform raw data
+into useful and actionable insights.</p>
+<h1 data-number="4" id="knowledge"><span class="header-section-number">4.</span> Knowledge</h1>
 <p>Knowledge can generally be categorized into three main types:
 explicit knowledge, implicit knowledge, and tacit knowledge.
 Understanding these distinctions is important in machine learning
@@ -193,7 +248,7 @@ Examples include skills such as swimming, reading social cues, speaking
 fluently in a language, or recognizing faces. Tacit knowledge is
 particularly challenging for artificial intelligence systems because it
 is difficult to fully formalize or encode into explicit rules.</p>
-<h1 data-number="4" id="machine-learning"><span class="header-section-number">4.</span> Machine Learning</h1>
+<h1 data-number="5" id="machine-learning"><span class="header-section-number">5.</span> Machine Learning</h1>
 <p>Machine learning (ML) is a subset of artificial intelligence that
 focuses on developing algorithms that can learn patterns from data and
 improve their performance over time without being explicitly programmed
@@ -228,7 +283,7 @@ unseen data.</p></li>
 <p>Machine learning has enabled major advances across many fields,
 particularly in areas involving large amounts of data. Some of the most
 important application domains are described below.</p>
-<h2 data-number="4.1" id="recommendation-systems"><span class="header-section-number">4.1</span> Recommendation Systems</h2>
+<h2 data-number="5.1" id="recommendation-systems"><span class="header-section-number">5.1</span> Recommendation Systems</h2>
 <p>Recommendation systems are machine learning systems designed to
 suggest relevant items to users based on their preferences, behavior, or
 similarities to other users. These systems are widely used in online
@@ -243,42 +298,88 @@ hybrid approaches that combine both methods.</p>
 preferences from incomplete and noisy data. Machine learning models
 address this by identifying hidden patterns in user interactions and
 learning similarities between users or items.</p>
-<h2 data-number="4.2" id="computer-vision"><span class="header-section-number">4.2</span> Computer Vision</h2>
+<h2 data-number="5.2" id="computer-vision"><span class="header-section-number">5.2</span> Computer Vision</h2>
 <p>Computer vision is a field of machine learning focused on enabling
 machines to interpret and understand visual information such as images
 and videos. This area has seen significant advances due to deep
-learning, particularly through convolutional neural networks (CNNs).</p>
+learning, particularly through convolutional neural networks (CNNs) and,
+more recently, vision transformers.</p>
+<p>At a high level, computer vision tasks involve extracting meaningful
+structure from raw pixel data. Unlike tabular data, images are
+high-dimensional and contain spatial relationships that must be
+preserved during processing. As a result, computer vision models are
+designed to capture both local patterns (such as edges and textures) and
+global structures (such as objects and scenes).</p>
 <p>Common computer vision tasks include image classification, object
-detection, image segmentation, and facial recognition. For example,
-autonomous vehicles rely on computer vision to detect pedestrians and
-traffic signs, medical imaging systems use computer vision to detect
-tumors, and security systems use facial recognition for identity
-verification.</p>
+detection, semantic segmentation, image captioning, and visual question
+answering. These tasks differ in their level of complexity and the type
+of output they produce. For instance, classification assigns a single
+label to an image, while object detection identifies multiple objects
+and their locations, and segmentation assigns a label to each pixel in
+the image.</p>
+<figure id="fig:cv_tasks">
+<img src="img/lecture1/cv_tasks.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
+<figcaption>Examples of common computer vision tasks, including image
+classification, object detection, semantic segmentation, image
+captioning, and visual question answering (VQA) <span class="citation" data-cites="guo2019logic">(Guo et al. 2019)</span>.</figcaption>
+</figure>
+<p>Computer vision plays a critical role in many real-world
+applications. Autonomous vehicles rely on visual perception to detect
+pedestrians, vehicles, and traffic signs. In healthcare, medical imaging
+systems use computer vision to assist in diagnosing diseases such as
+cancer. In security and biometrics, facial recognition systems are used
+for identity verification and access control.</p>
 <p>One of the main challenges in computer vision is dealing with
-variations in lighting, viewpoint, noise, and occlusion. Machine
+variability in real-world data. Images may differ due to changes in
+lighting conditions, viewpoint, scale, noise, and occlusion. Machine
 learning models address these challenges by learning robust feature
-representations directly from large image datasets.</p>
-<h2 data-number="4.3" id="natural-language-processing"><span class="header-section-number">4.3</span> Natural Language
+representations from large datasets, allowing them to generalize across
+diverse visual environments.</p>
+<h2 data-number="5.3" id="natural-language-processing"><span class="header-section-number">5.3</span> Natural Language
 Processing</h2>
 <p>Natural language processing (NLP) focuses on enabling machines to
-understand, interpret, and generate human language. Because human
-language is highly ambiguous and context dependent, NLP remains one of
-the most challenging areas of artificial intelligence.</p>
-<p>Examples of NLP applications include machine translation, chatbots,
-sentiment analysis, speech recognition, and text summarization. Modern
-NLP systems often rely on deep learning architectures such as
-transformers, which power large language models like GPT.</p>
-<p>The main challenge in NLP is enabling machines to capture meaning,
-context, and relationships between words. Machine learning models
-address this by learning statistical representations of language from
-large text corpora, allowing systems to recognize patterns in syntax,
-semantics, and context.</p>
-<p>Together, these application areas demonstrate the broad impact of
-machine learning across technology, science, and society. As
-computational resources and data availability continue to grow, machine
-learning is expected to play an increasingly important role in solving
-complex real-world problems.</p>
-<h1 data-number="5" id="paradigms-of-machine-learning"><span class="header-section-number">5.</span> Paradigms of Machine
+understand, interpret, and generate human language. Language data
+differs fundamentally from visual data in that it is sequential,
+discrete, and highly context-dependent. Words derive meaning not only
+from their individual definitions but also from their relationships with
+other words in a sentence.</p>
+<p>NLP tasks span a wide range of applications, including text
+classification, machine translation, sentiment analysis, and question
+answering <span class="citation" data-cites="mayo2018_nlp_kdnuggets">(Mayo 2018)</span>. More advanced
+systems also perform dialogue generation and reasoning over language.
+Modern NLP has been transformed by deep learning, particularly through
+transformer-based architectures that model long-range dependencies in
+text.</p>
+<p>These diverse tasks are illustrated in Figure <a data-reference="fig:nlp_tasks" data-reference-type="ref" href="#fig:nlp_tasks">3</a>, which highlights several
+representative applications of NLP.</p>
+<figure id="fig:nlp_tasks">
+<img src="img/lecture1/nlp_pipeline.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Examples of common natural language processing tasks,
+including information retrieval, sentiment analysis, information
+extraction, machine translation, and question answering. These tasks
+require models to understand and generate human language across
+different contexts.</figcaption>
+</figure>
+<p>A key challenge in NLP is ambiguity. Words and sentences can have
+multiple meanings depending on context, tone, and structure. In
+addition, language contains complex grammatical patterns and long-range
+dependencies, where the meaning of a word may depend on other words
+appearing far earlier or later in a sentence.</p>
+<p>Machine learning approaches address these challenges by learning
+statistical representations of language from large text corpora. These
+representations capture syntactic structure (how words are arranged),
+semantic meaning (what words represent), and contextual relationships
+(how meaning changes based on surrounding text). As a result, modern NLP
+systems can perform tasks such as generating coherent text, answering
+questions, and translating between languages with high accuracy.</p>
+<p>Together, computer vision and natural language processing illustrate
+how machine learning enables systems to interpret and interact with two
+fundamental forms of human information: visual perception and language.
+While computer vision focuses on understanding the visual world, NLP
+focuses on understanding human communication. These domains will be
+revisited throughout the course, where we will study the underlying
+models and algorithms in greater detail.</p>
+<h1 data-number="6" id="paradigms-of-machine-learning"><span class="header-section-number">6.</span> Paradigms of Machine
 Learning</h1>
 <p>Machine learning algorithms can be broadly categorized based on the
 type of data available during training and how the learning process is
@@ -286,57 +387,136 @@ structured. The three primary paradigms are supervised learning,
 unsupervised learning, and reinforcement learning. Each paradigm differs
 in how information is provided to the model and what objective the model
 attempts to optimize.</p>
-<h2 data-number="5.1" id="supervised-learning"><span class="header-section-number">5.1</span> Supervised Learning</h2>
-<p>Supervised learning is the most common machine learning paradigm and
-involves training a model using labeled data. In this setting, each
-training example consists of an input along with a corresponding correct
-output, often called a label. The goal of supervised learning is to
-learn a mapping from inputs to outputs so that the model can accurately
-predict labels for new, unseen data.</p>
+<h2 data-number="6.1" id="supervised-learning"><span class="header-section-number">6.1</span> Supervised Learning</h2>
+<p>Supervised learning is the most widely used machine learning paradigm
+and involves training models using labeled data. In this setting, each
+training example consists of an input paired with a corresponding
+correct output, often referred to as a label. The goal is to learn a
+mapping from inputs to outputs so that the model can generalize and make
+accurate predictions on new, unseen data.</p>
 <p>For example, in an image classification task, a dataset may contain
-images of cats labeled as 0 and images of dogs labeled as 1. The model
-learns patterns that distinguish these categories and uses those
-patterns to classify new images. Other examples include predicting
-housing prices from property features (regression) or identifying
-whether an email is spam or not (classification).</p>
-<p>Supervised learning problems are typically divided into two major
-categories: regression, where the goal is to predict continuous values,
-and classification, where the goal is to predict discrete
-categories.</p>
-<h2 data-number="5.2" id="unsupervised-learning"><span class="header-section-number">5.2</span> Unsupervised Learning</h2>
+images of cats, horses, and cars along with their corresponding labels.
+By learning patterns that distinguish these categories, the model can
+classify new images based on their visual features. Other common
+applications include predicting housing prices from property attributes
+(regression) and identifying whether an email is spam or not
+(classification).</p>
+<figure id="fig:supervised_learning">
+<img src="img/lecture1/supervised_learning.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Illustration of supervised learning. A model <span class="math inline">\(f(X)\)</span> learns a mapping from input data to
+corresponding labels using labeled training examples, enabling it to
+predict outputs for new inputs.</figcaption>
+</figure>
+<p>As shown in Figure <a data-reference="fig:supervised_learning" data-reference-type="ref" href="#fig:supervised_learning">4</a>, the model is provided
+with labeled examples during training and learns to approximate the
+underlying relationship between inputs and outputs. This explicit
+supervision provides a clear learning signal, making supervised learning
+highly effective in many practical applications, while also requiring
+access to high-quality labeled data.</p>
+<p>Supervised learning problems are commonly categorized into two types:
+regression, where the output is a continuous value, and classification,
+where the output is a discrete category.</p>
+<h2 data-number="6.2" id="unsupervised-learning"><span class="header-section-number">6.2</span> Unsupervised Learning</h2>
 <p>Unsupervised learning involves training models on data that does not
 include labels. Instead of learning a mapping between inputs and
-outputs, the goal is to discover hidden structure or patterns within the
-data itself. This often involves grouping similar data points together
-or identifying meaningful low-dimensional representations of the
-data.</p>
+predefined outputs, the goal is to uncover hidden structure or patterns
+within the data itself. This may involve identifying groups of similar
+data points, detecting anomalies, or learning compact representations
+that capture the most important underlying features.</p>
 <p>For example, given a collection of audio recordings without speaker
-labels, an unsupervised learning algorithm might group recordings
-according to similarities in voice characteristics. Similarly,
-unsupervised learning can be used in customer segmentation, anomaly
-detection, and dimensionality reduction.</p>
-<p>Common unsupervised learning techniques include clustering algorithms
-such as k-means and hierarchical clustering, as well as dimensionality
-reduction methods such as principal component analysis (PCA).</p>
-<h2 data-number="5.3" id="reinforcement-learning"><span class="header-section-number">5.3</span> Reinforcement Learning</h2>
+labels, an unsupervised learning algorithm may group recordings based on
+similarities in voice characteristics. Similarly, unsupervised learning
+is widely used in applications such as customer segmentation, anomaly
+detection, and exploratory data analysis, where the structure of the
+data is not known in advance.</p>
+<figure id="fig:unsupervised_learning">
+<img src="img/lecture1/unsupervised_learning.png" style="width:19.80%; max-width:19.80%; height:auto;"/>
+<figcaption>Illustration of unsupervised learning. Top: raw, unlabeled
+data with no explicit structure provided. Bottom: learned
+representations that reveal underlying patterns, including both simple
+cluster separation and more complex non-linear structures.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:unsupervised_learning" data-reference-type="ref" href="#fig:unsupervised_learning">5</a>, the model is not given
+any labels indicating how the data should be organized. Instead, it must
+infer structure directly from the data itself. This makes unsupervised
+learning particularly powerful for discovering previously unknown
+patterns, but also more challenging, since there is no explicit notion
+of “correct” output to guide the learning process.</p>
+<h2 data-number="6.3" id="reinforcement-learning"><span class="header-section-number">6.3</span> Reinforcement Learning</h2>
 <p>Reinforcement learning differs from supervised and unsupervised
-learning in that the model learns by interacting with an environment
-rather than from a fixed dataset. In this paradigm, an agent takes
-actions within an environment and receives feedback in the form of
-rewards or penalties. The goal of the agent is to learn a strategy,
-called a policy, that maximizes the total cumulative reward over
-time.</p>
+learning in that the model learns through interaction with an
+environment rather than from a fixed dataset. In this paradigm, an
+<strong>agent</strong> observes the current state of the environment,
+takes an action, and receives feedback in the form of a
+<strong>reward</strong> or penalty. Based on this feedback, the agent
+updates its behavior over time. The objective is to learn a strategy,
+known as a <strong>policy</strong>, that maximizes the total cumulative
+reward over a sequence of interactions.</p>
+<figure id="fig:reinforcement_learning">
+<img src="img/lecture1/reinforcement_learning.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Illustration of reinforcement learning. The agent interacts
+with the environment by taking actions based on the current state, and
+receives rewards and updated states in return. This feedback loop
+enables the agent to learn a policy that maximizes long-term reward.
+Adapted from <span class="citation" data-cites="Remman2022">(Remman,
+Strümke, and Lekkas 2022)</span>.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:reinforcement_learning" data-reference-type="ref" href="#fig:reinforcement_learning">6</a>, reinforcement
+learning is fundamentally a feedback-driven process. Unlike supervised
+learning, where correct answers are provided during training, the agent
+must discover which actions are beneficial by observing the rewards it
+receives. This makes reinforcement learning particularly well-suited for
+sequential decision-making problems, where actions have long-term
+consequences.</p>
 <p>For example, in a game such as Tetris, an agent may receive a
 positive reward for clearing rows and a negative reward for creating
 blocked spaces. By repeatedly interacting with the environment and
-observing the consequences of its actions, the agent gradually learns
-which actions lead to better long-term outcomes.</p>
-<p>Reinforcement learning has been successfully applied in robotics,
-game playing, recommendation systems, and autonomous systems. One of the
-key challenges in reinforcement learning is balancing exploration
-(trying new actions to gain information) with exploitation (choosing
-actions known to produce good results).</p>
-<h1 data-number="6" id="tasks-in-machine-learning"><span class="header-section-number">6.</span> Tasks in Machine Learning</h1>
+observing the outcomes of its actions, the agent gradually learns which
+strategies lead to better long-term performance.</p>
+<p>Reinforcement learning has been successfully applied in domains such
+as robotics, game playing, recommendation systems, and autonomous
+control. A central challenge in this paradigm is the trade-off between
+<strong>exploration</strong> and <strong>exploitation</strong>.
+Exploration involves trying new actions to gather information about the
+environment, while exploitation involves selecting actions that are
+already known to yield high rewards. Balancing these two aspects is
+critical for learning an effective policy.</p>
+<h2 data-number="6.4" id="representation-learning"><span class="header-section-number">6.4</span> Representation Learning</h2>
+<p>Beyond the distinction between supervised, unsupervised, and
+reinforcement learning, modern machine learning also emphasizes how
+models learn useful representations of data. Representation learning
+refers to the ability of a model to automatically discover features or
+transformations of the input that make it easier to perform a given
+task.</p>
+<p>In traditional machine learning, feature extraction often requires
+significant domain expertise, where relevant characteristics must be
+manually designed. In contrast, representation learning allows models to
+learn these features directly from raw data. These learned
+representations often capture underlying structure in the data and can
+be reused across multiple tasks.</p>
+<figure id="fig:representation_learning">
+<img src="img/lecture1/representation_learning.png" style="width:27.00%; max-width:27.00%; height:auto;"/>
+<figcaption>Illustration of representation learning. Input data <span class="math inline">\(X\)</span> is transformed into a learned
+representation <span class="math inline">\(Z\)</span>, which captures
+essential structure in the data. This representation can then be used to
+reconstruct the input or support downstream tasks such as prediction or
+classification.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:representation_learning" data-reference-type="ref" href="#fig:representation_learning">7</a>, the model learns an
+intermediate representation <span class="math inline">\(Z\)</span> that
+serves as a compressed or structured encoding of the input data. This
+representation captures the most informative aspects of the data while
+discarding irrelevant variation, enabling more efficient learning and
+generalization.</p>
+<p>Representation learning plays a central role across many machine
+learning paradigms. In supervised settings, models learn representations
+that are predictive of labels. In unsupervised settings, representations
+capture intrinsic structure such as clusters or manifolds. In
+reinforcement learning, representations help encode states in a way that
+facilitates decision-making. This perspective unifies different learning
+approaches and highlights the importance of feature learning as a core
+component of modern machine learning systems.</p>
+<h1 data-number="7" id="tasks-in-machine-learning"><span class="header-section-number">7.</span> Tasks in Machine Learning</h1>
 <p>Machine learning problems can be categorized in two complementary
 ways. Learning paradigms describe how models learn from data (for
 example supervised, unsupervised, or reinforcement learning), while
@@ -349,72 +529,128 @@ the objective of the learning process and determine how model
 performance is evaluated. Some of the most common machine learning tasks
 include regression, classification, clustering, and dimensionality
 reduction.</p>
-<h2 data-number="6.1" id="regression"><span class="header-section-number">6.1</span> Regression</h2>
+<h2 data-number="7.1" id="regression"><span class="header-section-number">7.1</span> Regression</h2>
 <p>Regression refers to predicting a continuous numerical value based on
 one or more input variables. In regression problems, the output variable
 typically represents a measurable quantity such as price, temperature,
-probability, or risk score. The goal of regression is to learn the
-relationship between input variables (independent variables) and the
-output variable (dependent variable) so that accurate predictions can be
-made on unseen data.</p>
+probability, or risk score. The goal of regression is to learn a
+<strong>functional relationship</strong> that maps input variables
+(independent variables) to an output variable (dependent variable),
+enabling accurate predictions on unseen data.</p>
+<figure id="fig:regression">
+<img src="img/lecture1/regression.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Illustration of regression as learning a mapping from inputs
+to continuous outputs. The figure shows examples of both linear and
+nonlinear relationships between variables.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:regression" data-reference-type="ref" href="#fig:regression">8</a>,
+regression can be viewed as fitting a function to data points in order
+to capture the underlying relationship between variables. This
+relationship may be linear or nonlinear, depending on the complexity of
+the data. Once this mapping is learned, the model can predict continuous
+outputs for new inputs.</p>
 <p>For example, a regression model may be used to predict housing prices
 based on features such as square footage, number of bedrooms, and
 location. Other examples include predicting stock prices, estimating
 medical risk scores, forecasting energy consumption, or predicting
-traffic flow. In each case, the model attempts to learn a functional
-relationship between inputs and outputs.</p>
-<p>Common regression models include linear regression, polynomial
-regression, decision trees, and neural networks. Later in this course,
-we will study regression as one of the fundamental problems that
-motivates many machine learning algorithms.</p>
-<h2 data-number="6.2" id="classification"><span class="header-section-number">6.2</span> Classification</h2>
+traffic flow. In each case, the model attempts to approximate an unknown
+function that relates inputs to outputs.</p>
+<p>Common approaches to regression include a wide range of models
+capable of learning different types of functional relationships, from
+simple linear mappings to highly flexible nonlinear functions. Later in
+this course, we will study regression as one of the fundamental problems
+that motivates many machine learning algorithms.</p>
+<h2 data-number="7.2" id="classification"><span class="header-section-number">7.2</span> Classification</h2>
 <p>Classification refers to predicting which category or class a new
 observation belongs to. Unlike regression, where outputs are continuous,
 classification produces discrete outputs representing class membership.
-The goal is to learn decision boundaries that separate different
-categories based on the input features.</p>
+The goal is to learn a <strong>decision boundary</strong> that separates
+different categories based on the input features.</p>
+<figure id="fig:classification_boundary">
+<img src="img/lecture1/classification.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Illustration of classification as learning a decision
+boundary that separates data points from different classes. Data points
+are assigned to categories based on which side of the boundary they fall
+on.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:classification_boundary" data-reference-type="ref" href="#fig:classification_boundary">9</a>, classification can
+be viewed geometrically as partitioning the feature space into distinct
+regions, where each region corresponds to a predicted class. The
+decision boundary divides the space such that similar data points fall
+into the same region, while dissimilar points are separated. New
+observations are classified based on their position relative to this
+boundary.</p>
 <p>For example, classification models can be used to determine whether
 an email is spam or not, whether a medical image contains a tumor,
 whether a handwritten digit corresponds to a particular number, or
 whether a financial transaction is fraudulent. Classification problems
 may be binary (two classes) or multiclass (more than two classes).</p>
-<p>Common classification algorithms include logistic regression,
-decision trees, support vector machines, nearest neighbor methods, and
-neural networks. Many modern artificial intelligence applications rely
-heavily on classification models, particularly in computer vision and
-natural language processing.</p>
-<h2 data-number="6.3" id="clustering"><span class="header-section-number">6.3</span> Clustering</h2>
+<p>Common approaches to classification include a wide range of models
+that learn different types of decision boundaries, from simple linear
+separators to more complex nonlinear structures. Many modern artificial
+intelligence applications rely heavily on classification models,
+particularly in computer vision and natural language processing.</p>
+<h2 data-number="7.3" id="clustering"><span class="header-section-number">7.3</span> Clustering</h2>
 <p>Clustering is an unsupervised learning task that involves dividing
-data into groups, called clusters, such that data points within the same
-group are more similar to each other than to those in other groups.
-Unlike classification, clustering does not require labeled data and
-instead attempts to discover natural structure within the dataset.</p>
+data into groups, called <strong>clusters</strong>, such that data
+points within the same group are more similar to each other than to
+those in other groups. Unlike classification, clustering does not rely
+on labeled data; instead, the goal is to discover intrinsic structure
+directly from the data.</p>
+<figure id="fig:clustering">
+<img src="img/lecture1/clustering.png" style="width:21.00%; max-width:21.00%; height:auto;"/>
+<figcaption>Illustration of clustering as discovering structure in
+unlabeled data. Left: raw data without labels. Right: the same data
+organized into clusters based on similarity.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:clustering" data-reference-type="ref" href="#fig:clustering">10</a>,
+clustering can be viewed as identifying natural groupings within data.
+Initially, the dataset may appear unstructured, but a clustering
+algorithm reveals patterns by assigning data points to different groups
+based on similarity. These groupings help uncover hidden structure that
+is not explicitly provided.</p>
 <p>For example, clustering may be used to segment customers based on
 purchasing behavior, group similar documents together, organize images
-by visual similarity, or identify patterns in biological data. The main
-challenge in clustering is defining what it means for data points to be
-similar and determining the appropriate number of clusters.</p>
-<p>Common clustering methods include k-means clustering, hierarchical
-clustering, Gaussian mixture models, and density-based clustering
-methods. Clustering is often used as an exploratory tool to better
-understand datasets before applying supervised learning methods.</p>
-<h2 data-number="6.4" id="dimensionality-reduction"><span class="header-section-number">6.4</span> Dimensionality Reduction</h2>
+by visual similarity, or identify patterns in biological data. In each
+case, the objective is to uncover meaningful organization in the data
+without prior knowledge of labels.</p>
+<p>A key challenge in clustering is defining what it means for data
+points to be similar and determining how many clusters should be formed.
+Different approaches may produce different groupings depending on how
+similarity is measured and how structure is inferred.</p>
+<p>Common approaches to clustering include a wide range of methods that
+identify structure in different ways, from partitioning data into
+distinct groups to modeling underlying distributions. Clustering is
+often used as an exploratory tool to better understand datasets before
+applying supervised learning methods.</p>
+<h2 data-number="7.4" id="dimensionality-reduction"><span class="header-section-number">7.4</span> Dimensionality Reduction</h2>
 <p>Dimensionality reduction involves reducing the number of features or
 variables in a dataset while preserving as much important information as
-possible. This is often necessary because high-dimensional data can be
-computationally expensive to process and may contain redundant,
-irrelevant, or noisy information.</p>
+possible. This is particularly important because high-dimensional data
+can be computationally expensive to process and may contain redundant,
+irrelevant, or noisy information. The goal is to find a
+lower-dimensional representation that captures the most significant
+structure of the data.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Section 2.2 — PCA</h3><p>Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions and how a linear AE learns the same subspace.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_PCA_Interactive_interactive.html" style="height:820px;" title="Interactive Section 2.2 PCA"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_PCA_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p>As illustrated in Figure <a data-reference="fig:pca_example" data-reference-type="ref" href="#fig:pca_example">11</a>,
+dimensionality reduction can be understood as projecting
+high-dimensional data onto a lower-dimensional space that retains the
+most important patterns. Even though the data originally exists in a
+higher-dimensional space, much of its variability may lie along a
+smaller number of directions, allowing for an efficient representation
+without significant loss of information.</p>
 <p>For example, an image consisting of thousands of pixels may be
 represented using a smaller set of informative features without
-significantly affecting performance. Dimensionality reduction is
-commonly used for data visualization, noise reduction, feature
-extraction, and improving computational efficiency. It also helps
-mitigate the curse of dimensionality, which refers to the challenges
+significantly affecting performance. Dimensionality reduction is widely
+used for data visualization, noise reduction, feature extraction, and
+improving computational efficiency. It also helps mitigate the
+<strong>curse of dimensionality</strong>, which refers to the challenges
 that arise when working with very high-dimensional datasets.</p>
-<p>Common dimensionality reduction techniques include principal
-component analysis (PCA), singular value decomposition (SVD), manifold
-learning methods, and neural network–based approaches such as
-autoencoders.</p>
+<p>Common approaches to dimensionality reduction include a variety of
+methods that identify compact representations of data, ranging from
+linear projections to more complex nonlinear transformations. These
+methods enable models to focus on the most relevant structure in the
+data while discarding unnecessary detail.</p>
 <p>These tasks form the foundation of many machine learning
 applications, and many real-world systems combine multiple tasks
 together. For example, a computer vision system may first reduce
@@ -428,7 +664,7 @@ learning tasks. Reinforcement learning, in contrast, focuses on
 sequential decision-making problems where an agent learns through
 interaction with an environment rather than through static prediction
 tasks.</p>
-<h1 data-number="7" id="deep-learning"><span class="header-section-number">7.</span> Deep Learning</h1>
+<h1 data-number="8" id="deep-learning"><span class="header-section-number">8.</span> Deep Learning</h1>
 <p>Deep learning is a subfield of machine learning that focuses on
 models capable of learning hierarchical representations directly from
 data. These models learn multiple levels of abstraction, allowing
@@ -461,7 +697,7 @@ systems, robotics, and scientific discovery.</p>
 optimization, linear algebra, and probability theory, understanding
 these mathematical foundations is essential for studying modern machine
 learning methods.</p>
-<h1 data-number="8" id="ai-vs-ml-vs-dl"><span class="header-section-number">8.</span> AI vs ML vs DL</h1>
+<h1 data-number="9" id="ai-vs-ml-vs-dl"><span class="header-section-number">9.</span> AI vs ML vs DL</h1>
 <p>Artificial intelligence (AI), machine learning (ML), and deep
 learning (DL) are closely related fields that are often confused.
 Artificial intelligence is the broadest concept and refers to systems
@@ -473,17 +709,17 @@ focuses on neural networks with multiple layers capable of learning
 hierarchical representations.</p>
 <figure id="fig:ai_ml_dl">
 <img src="img/lecture1/AI_ML_DL_circles.jpeg" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Figure 1.1: Relationship between artificial intelligence,
-machine learning, and deep learning. Deep learning is a subset of
-machine learning, which itself is a subset of artificial
+<figcaption>Relationship between artificial intelligence, machine
+learning, and deep learning. Deep learning is a subset of machine
+learning, which itself is a subset of artificial
 intelligence.</figcaption>
 </figure>
-<p>Figure <a data-reference="fig:ai_ml_dl" data-reference-type="ref" href="#fig:ai_ml_dl">1</a> illustrates the relationship between
-these three areas. Machine learning represents a subset of artificial
-intelligence that focuses specifically on data-driven learning methods,
-while deep learning represents a subset of machine learning that uses
-multi-layer neural networks to automatically learn feature
-representations.</p>
+<p>Figure <a data-reference="fig:ai_ml_dl" data-reference-type="ref" href="#fig:ai_ml_dl">12</a> illustrates the relationship
+between these three areas. Machine learning represents a subset of
+artificial intelligence that focuses specifically on data-driven
+learning methods, while deep learning represents a subset of machine
+learning that uses multi-layer neural networks to automatically learn
+feature representations.</p>
 <p>Compared to deep learning, traditional machine learning methods often
 rely more heavily on manually designed features, a process known as
 feature engineering. Designing these features can require significant
@@ -500,175 +736,138 @@ the scope of this course. While artificial intelligence is a broad
 discipline, this course primarily focuses on the mathematical
 foundations of machine learning, including the principles that also
 support modern deep learning systems.</p>
-<h1 data-number="9" id="review-of-linear-algebra"><span class="header-section-number">9.</span> Review of Linear Algebra</h1>
+<h1 data-number="10" id="review-of-linear-algebra"><span class="header-section-number">10.</span> Review of Linear Algebra</h1>
 <p>Linear algebra forms one of the most important mathematical
 foundations of machine learning. Most machine learning models represent
 data, parameters, and predictions using vectors and matrices, and many
 learning algorithms rely heavily on matrix operations and linear
 transformations. In this section, we review the key linear algebra
 concepts that will be used throughout the course.</p>
-<h2 data-number="9.1" id="basic-objects"><span class="header-section-number">9.1</span> Basic objects</h2>
+<h2 data-number="10.1" id="basic-objects"><span class="header-section-number">10.1</span> Basic objects</h2>
 <p>Machine learning models operate on several fundamental mathematical
 objects. The simplest of these is a scalar, which is a single numerical
-value such as <span class="math inline">\(x \in \R\)</span>. Scalars are
-often used to represent individual measurements, parameters, or
-outputs.</p>
+value such as <span class="math inline">\(x \in \mathbb{R}\)</span>.</p>
 <p>A vector is an ordered collection of numbers, typically represented
 as a column vector <span class="math inline">\(\mathbf{x} \in
-\R^{n\times 1}\)</span>. Vectors are commonly used to represent data
-points, feature sets, or parameter collections in machine learning. For
-example, a data sample with <span class="math inline">\(n\)</span>
-features can be represented as a vector containing those feature
-values.</p>
-<p>A matrix is a two-dimensional array of numbers, denoted <span class="math inline">\(A \in \R^{m\times n}\)</span>, where <span class="math inline">\(m\)</span> represents the number of rows and <span class="math inline">\(n\)</span> represents the number of columns.
-Matrices are often used to represent datasets, where rows correspond to
-samples and columns correspond to features. Matrices also represent
-transformations applied to vectors, such as weight matrices in neural
-networks.</p>
-<p>A tensor is a higher-order generalization of vectors and matrices.
-Tensors are multi-dimensional arrays used to store structured data such
-as images, videos, or batches of features. For example, a color image
-may be represented as a three-dimensional tensor (height, width, color
-channels), while a batch of images may be represented as a
-four-dimensional tensor.</p>
-<h2 data-number="9.2" id="why-linear-algebra-matters-in-ml"><span class="header-section-number">9.2</span> Why linear algebra matters in
+\mathbb{R}^{n \times 1}\)</span>. Vectors are commonly used to represent
+data points and feature sets.</p>
+<p>A matrix is a two-dimensional array of numbers, denoted <span class="math inline">\(A \in \mathbb{R}^{m \times n}\)</span>. Matrices
+are used to represent datasets and linear transformations.</p>
+<p>A tensor is a higher-order generalization of vectors and matrices,
+used to represent structured data such as images, videos, and batches of
+features.</p>
+<h2 data-number="10.2" id="geometric-intuition-of-linear-structure"><span class="header-section-number">10.2</span> Geometric intuition of linear
+structure</h2>
+<p>One of the key insights from linear algebra is that data often
+exhibits simple geometric structure.</p>
+<figure id="fig:mmh">
+<img src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>A maximal margin hyperplane separating data points from
+different classes.</figcaption>
+</figure>
+<p>As shown in Figure <a data-reference="fig:mmh" data-reference-type="ref" href="#fig:mmh">13</a>, linear boundaries partition the feature
+space into regions. This idea generalizes to higher dimensions through
+hyperplanes.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 7.4 Linear Subspace Geometry</h3><p>Interact with the 2D subspace spanned by basis vectors and inspect geometric relationships.</p><iframe class="interactive-notebook-frame" data-default-height="700" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_Figure74_interactive.html" style="height:700px;" title="Interactive Notebook - Figure 7.4 Linear Subspace Geometry"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_Figure74.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p>Figure <a data-reference="fig:linear_subspace" data-reference-type="ref" href="#fig:linear_subspace">14</a> illustrates how vectors span
+subspaces. Many machine learning methods rely on the idea that
+high-dimensional data can be approximated using lower-dimensional linear
+structure.</p>
+<h2 data-number="10.3" id="why-linear-algebra-matters-in-ml"><span class="header-section-number">10.3</span> Why linear algebra matters in
 ML</h2>
 <p>Linear algebra provides the language used to describe most machine
-learning models. Data points are typically represented as vectors, model
-parameters are represented as matrices, and predictions are often
-computed using matrix operations.</p>
-<p>For example, consider a linear model that predicts outputs from input
-features. A data sample may be represented as a feature vector <span class="math inline">\(\mathbf{x}_i \in \R^d\)</span>. A linear model may
-then compute a prediction using:</p>
-<p><span class="math display">\[\mathbf{y}_i = W^\top \mathbf{x}_i +
-\mathbf{b},\]</span></p>
-<p>where <span class="math inline">\(W\)</span> is a weight matrix and
-<span class="math inline">\(\mathbf{b}\)</span> is a bias vector. This
-type of linear transformation appears throughout machine learning,
-including regression, classification, and neural networks.</p>
-<p>Because modern machine learning relies heavily on these
-representations, understanding linear algebra is essential for
-understanding how models process data and learn patterns.</p>
-<h2 data-number="9.3" id="essential-operations"><span class="header-section-number">9.3</span> Essential operations</h2>
-<p>Several fundamental linear algebra operations appear repeatedly in
-machine learning algorithms. One important operation is the inner
-product (or dot product), defined as:</p>
+learning models.</p>
+<p>For example, a linear model computes: <span class="math display">\[\mathbf{y}_i = W^\top \mathbf{x}_i +
+\mathbf{b},\]</span> where <span class="math inline">\(\mathbf{x}_i \in
+\mathbb{R}^d\)</span>, <span class="math inline">\(W \in \mathbb{R}^{d
+\times k}\)</span>, and <span class="math inline">\(\mathbf{b} \in
+\mathbb{R}^k\)</span>.</p>
+<p>Such linear transformations appear throughout regression,
+classification, and neural networks.</p>
+<h2 data-number="10.4" id="core-linear-algebra-operations"><span class="header-section-number">10.4</span> Core linear algebra
+operations</h2>
+<p>These operations form the fundamental building blocks used throughout
+machine learning.</p>
+<h3 class="unnumbered" id="inner-product-dot-product">Inner product (dot
+product)</h3>
 <p><span class="math display">\[\langle \mathbf{x}, \mathbf{y} \rangle =
-\mathbf{x}^\top \mathbf{y} = \sum_i x_i y_i.\]</span></p>
-<p>This operation measures similarity between vectors and appears
-frequently in similarity measures, projections, and optimization
-objectives.</p>
-<p>Another important operation is matrix-vector multiplication, written
-as:</p>
-<p><span class="math display">\[A\mathbf{x} = \mathbf{b}.\]</span></p>
-<p>This represents applying a linear transformation to a vector and is
-the core operation used in linear models and neural networks.</p>
-<p>Matrix multiplication is also fundamental:</p>
-<p><span class="math display">\[C = AB, \qquad A \in \R^{m\times n},\; B
-\in \R^{n\times p},\; C \in \R^{m\times p}.\]</span></p>
-<p>This operation allows multiple linear transformations to be composed
-together and is heavily used in deep learning architectures.</p>
-<p>The Hadamard product, written as:</p>
-<p><span class="math display">\[(A \odot B)_{ij} = A_{ij}
-B_{ij},\]</span></p>
-<p>refers to elementwise multiplication and is commonly used in neural
-network operations and attention mechanisms.</p>
-<p>Finally, the transpose operation:</p>
-<p><span class="math display">\[(A^\top)_{ij} = A_{ji}\]</span></p>
-<p>swaps the rows and columns of a matrix and appears frequently in
-optimization and matrix decompositions.</p>
-<h2 data-number="9.4" id="identity-and-inverse"><span class="header-section-number">9.4</span> Identity and inverse</h2>
-<p>The identity matrix <span class="math inline">\(I_n \in \R^{n\times
-n}\)</span> is a special matrix that leaves vectors unchanged when
-multiplied:</p>
-<p><span class="math display">\[I_n \mathbf{x} =
-\mathbf{x}.\]</span></p>
-<p>This matrix plays a role similar to the number 1 in
-multiplication.</p>
-<p>If a matrix <span class="math inline">\(A\)</span> is invertible,
-then there exists another matrix <span class="math inline">\(A^{-1}\)</span> such that:</p>
-<p><span class="math display">\[A^{-1}A = I_n.\]</span></p>
-<p>Matrix inverses appear in many machine learning algorithms,
-particularly in closed-form solutions such as least squares regression.
-However, not all matrices are invertible, and in practice numerical
-methods are often preferred over direct inversion.</p>
-<h2 data-number="9.5" id="norms"><span class="header-section-number">9.5</span> Norms</h2>
-<p>Norms are functions that measure the magnitude or size of vectors and
-matrices. They are commonly used in machine learning to measure error,
-regularization penalties, and distances between data points.</p>
-<p>Some common vector norms include:</p>
+\mathbf{x}^\top \mathbf{y}.\]</span></p>
+<p>The inner product measures alignment between vectors and can be
+interpreted geometrically as projection.</p>
+<h3 class="unnumbered" id="matrix-vector-multiplication">Matrix-vector
+multiplication</h3>
+<p><span class="math display">\[\mathbf{y} = A\mathbf{x}.\]</span></p>
+<p>This operation represents a linear transformation of space.</p>
+<figure id="fig:matrix_transform">
+<img src="img/lecture1/matrix_transform.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>A linear transformation mapping a geometric shape into a new
+shape.</figcaption>
+</figure>
+<h3 class="unnumbered" id="matrix-multiplication">Matrix
+multiplication</h3>
+<p><span class="math display">\[C = AB, \quad A \in \mathbb{R}^{m \times
+n},\; B \in \mathbb{R}^{n \times p}.\]</span></p>
+<p>Matrix multiplication corresponds to the composition of linear
+transformations. If a vector is first transformed by <span class="math inline">\(A\)</span> and then by <span class="math inline">\(B\)</span>, the overall effect is equivalent to
+applying a single transformation given by the product <span class="math inline">\(BA\)</span>.</p>
+<figure id="fig:matrix_composition">
+<img src="img/lecture1/matrix_composition.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Composition of linear transformations. Applying
+transformation <span class="math inline">\(A\)</span> followed by <span class="math inline">\(B\)</span> is equivalent to a single
+transformation given by the matrix product <span class="math inline">\(BA\)</span>.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:matrix_composition" data-reference-type="ref" href="#fig:matrix_composition">16</a>, matrix multiplication
+provides a concise way to represent multiple transformations applied in
+sequence. This idea is fundamental in machine learning, where models
+often consist of many layers that successively transform data.</p>
+<h2 data-number="10.5" id="derived-operations-and-structure"><span class="header-section-number">10.5</span> Derived operations and
+structure</h2>
+<p>These concepts build on the core operations and reveal deeper
+structure in data.</p>
+<h3 class="unnumbered" id="norms">Norms</h3>
 <p><span class="math display">\[\begin{aligned}
 \|\mathbf{x}\|_1 &amp;= \sum_i |x_i|, \\
 \|\mathbf{x}\|_2 &amp;= \left(\sum_i x_i^2\right)^{1/2}, \\
 \|\mathbf{x}\|_p &amp;= \left(\sum_i |x_i|^p\right)^{1/p}.
 \end{aligned}\]</span></p>
-<p>The <span class="math inline">\(\ell_1\)</span> norm is often used in
-sparse modeling, while the <span class="math inline">\(\ell_2\)</span>
-norm appears frequently in optimization and regularization.</p>
-<p>For matrices, a common norm is the Frobenius norm:</p>
-<p><span class="math display">\[\|A\|_F = \left(\sum_{i,j}
-A_{ij}^2\right)^{1/2} = \sqrt{\Tr(AA^\top)}.\]</span></p>
-<p>This norm measures the overall magnitude of a matrix and is often
-used in optimization objectives.</p>
-<h2 data-number="9.6" id="eigenvalues-and-eigenvectors"><span class="header-section-number">9.6</span> Eigenvalues and
-eigenvectors</h2>
-<p>Eigenvalues and eigenvectors describe important structural properties
-of matrices. For a matrix <span class="math inline">\(A\)</span>, an
-eigenvector is a vector whose direction remains unchanged when
-multiplied by the matrix, while the eigenvalue describes how much that
-vector is scaled.</p>
-<p>If a matrix is diagonalizable, it can be written as:</p>
+<p>The Frobenius norm: <span class="math display">\[\|A\|_F =
+\sqrt{\operatorname{Tr}(A A^\top)}.\]</span></p>
+<h3 class="unnumbered" id="eigenvalues-and-eigenvectors">Eigenvalues and
+eigenvectors</h3>
 <p><span class="math display">\[A =
-V\,\mathrm{diag}(\lambda)\,V^{-1},\]</span></p>
-<p>where the columns of <span class="math inline">\(V\)</span> are
-eigenvectors and <span class="math inline">\(\lambda\)</span> contains
-the eigenvalues.</p>
-<p>Eigenvalues and eigenvectors are fundamental in many machine learning
-methods, including principal component analysis (PCA), spectral
-clustering, and stability analysis of learning algorithms.</p>
-<h2 data-number="9.7" id="singular-value-decomposition-svd"><span class="header-section-number">9.7</span> Singular value decomposition
-(SVD)</h2>
-<p>The singular value decomposition (SVD) is one of the most important
-matrix factorizations in machine learning. For any matrix <span class="math inline">\(A \in \R^{m\times n}\)</span>, SVD allows us to
-write:</p>
-<p><span class="math display">\[A = UDV^\top,\]</span></p>
-<p>where:</p>
-<ul>
-<li><p><span class="math inline">\(U\)</span> contains left singular
-vectors,</p></li>
-<li><p><span class="math inline">\(D\)</span> contains singular
-values,</p></li>
-<li><p><span class="math inline">\(V\)</span> contains right singular
-vectors.</p></li>
-</ul>
-<p>SVD provides a way to understand the structure of a matrix and is
-widely used in data analysis, dimensionality reduction, and numerical
-optimization.</p>
-<h3 class="unnumbered" id="why-svd-appears-in-ml">Why SVD appears in
-ML</h3>
-<p>SVD plays an important role in dimensionality reduction. If <span class="math inline">\(X \in \R^{N\times P}\)</span> is a data matrix, we
-can approximate it using only the largest singular values and their
-corresponding vectors. A rank-<span class="math inline">\(q\)</span>
-approximation keeps only the dominant singular directions, reducing
-feature dimension from <span class="math inline">\(P\)</span> to <span class="math inline">\(q\)</span> while preserving most of the important
-information.</p>
-<p>This idea forms the mathematical basis of principal component
-analysis (PCA), which is widely used for feature extraction and
-visualization.</p>
-<h2 data-number="9.8" id="moorepenrose-pseudoinverse"><span class="header-section-number">9.8</span> Moore–Penrose
-pseudoinverse</h2>
-<p>In many machine learning problems, matrices are not square or not
-invertible. In these cases, we use the Moore–Penrose pseudoinverse,
-which generalizes the concept of matrix inversion.</p>
-<p>If <span class="math inline">\(A = UDV^\top\)</span>, then the
-pseudoinverse is defined as:</p>
-<p><span class="math display">\[A^{\dagger} =
-VD^{-1}U^\top,\]</span></p>
-<p>where inversion is applied only to nonzero singular values.</p>
-<p>The pseudoinverse is particularly important in machine learning
-because it provides closed-form solutions for least squares problems and
-appears in many optimization methods.</p>
-<h1 data-number="10" id="review-of-probability-theory"><span class="header-section-number">10.</span> Review of Probability
+V\,\mathrm{diag}(\lambda)\,V^{-1}.\]</span></p>
+<p>Eigenvectors define directions preserved by transformations, and
+eigenvalues determine scaling.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Projection and Residual Orthogonality</h3><p>Adjust vectors and observe projection of y onto the subspace with orthogonal residual y-hat.</p><iframe class="interactive-notebook-frame" data-default-height="700" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture7_Figure75_interactive.html" style="height:700px;" title="Interactive Notebook - Figure 7.5 Projection and Residual Orthogonality"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture7_Figure75.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p>Projection onto important directions (e.g., eigenvectors) yields
+efficient approximations of data.</p>
+<h3 class="unnumbered" id="singular-value-decomposition-svd">Singular
+value decomposition (SVD)</h3>
+<p><span class="math display">\[A = U D V^\top.\]</span></p>
+<p>SVD decomposes a matrix into orthogonal directions that capture its
+structure.</p>
+<h2 data-number="10.6" id="applications-in-machine-learning"><span class="header-section-number">10.6</span> Applications in machine
+learning</h2>
+<p>These concepts are used directly in machine learning algorithms.</p>
+<h3 class="unnumbered" id="low-rank-approximation">Low-rank
+approximation</h3>
+<p><span class="math display">\[X \approx U_q D_q V_q^\top.\]</span></p>
+<p>This approximates data using a lower-dimensional subspace, preserving
+dominant structure.</p>
+<p>As shown in Figure <a data-reference="fig:projection" data-reference-type="ref" href="#fig:projection">17</a>, this
+corresponds to projecting data onto a subspace.</p>
+<h3 class="unnumbered" id="identity-and-inverse">Identity and
+inverse</h3>
+<p>The identity matrix satisfies: <span class="math display">\[I_n
+\mathbf{x} = \mathbf{x}.\]</span></p>
+<p>If invertible: <span class="math display">\[A^{-1}A =
+I_n.\]</span></p>
+<h3 class="unnumbered" id="moorepenrose-pseudoinverse">Moore–Penrose
+pseudoinverse</h3>
+<p>For non-invertible matrices: <span class="math display">\[A^\dagger =
+V D^\dagger U^\top.\]</span></p>
+<p>This provides least-squares solutions: <span class="math display">\[\mathbf{x}^* = A^\dagger \mathbf{b}.\]</span></p>
+<h1 data-number="11" id="review-of-probability-theory"><span class="header-section-number">11.</span> Review of Probability
 Theory</h1>
 <p>Probability theory provides the mathematical framework for reasoning
 about uncertainty. Since machine learning models must make predictions
@@ -678,7 +877,7 @@ Many machine learning algorithms, including regression, classification,
 and deep learning, can be interpreted through a probabilistic lens.</p>
 <p>In this section, we review the core probability concepts that will be
 used throughout the course.</p>
-<h2 data-number="10.1" id="foundational-objects"><span class="header-section-number">10.1</span> Foundational objects</h2>
+<h2 data-number="11.1" id="foundational-objects"><span class="header-section-number">11.1</span> Foundational objects</h2>
 <p>Probability theory begins with three fundamental components. The
 first is the sample space, denoted <span class="math inline">\(\Omega\)</span>, which represents the set of all
 possible outcomes of a random experiment. For example, if we flip a
@@ -693,7 +892,7 @@ The probability measure defines how likely each event is and must obey
 certain mathematical rules.</p>
 <p>Together, <span class="math inline">\((\Omega, \mathcal{F},
 P)\)</span> define a probability space.</p>
-<h2 data-number="10.2" id="axioms-of-probability"><span class="header-section-number">10.2</span> Axioms of probability</h2>
+<h2 data-number="11.2" id="axioms-of-probability"><span class="header-section-number">11.2</span> Axioms of probability</h2>
 <p>Probability is governed by three basic axioms. For any event <span class="math inline">\(A \in \mathcal{F}\)</span>, the probability must
 satisfy:</p>
 <p><span class="math display">\[\begin{aligned}
@@ -710,7 +909,7 @@ simultaneously, then:</p>
 P(A_i).\]</span></p>
 <p>This rule allows probabilities of disjoint outcomes to be added
 together.</p>
-<h2 data-number="10.3" id="useful-rules"><span class="header-section-number">10.3</span> Useful rules</h2>
+<h2 data-number="11.3" id="useful-rules"><span class="header-section-number">11.3</span> Useful rules</h2>
 <p>Several important rules follow directly from the probability axioms.
 For example, if event <span class="math inline">\(A\)</span> is
 contained within event <span class="math inline">\(B\)</span>, then:</p>
@@ -738,10 +937,10 @@ machine learning models.</p>
 <p>Independence plays an important role in simplifying probabilistic
 models and appears frequently in assumptions made by machine learning
 algorithms.</p>
-<h2 data-number="10.4" id="random-variables"><span class="header-section-number">10.4</span> Random variables</h2>
+<h2 data-number="11.4" id="random-variables"><span class="header-section-number">11.4</span> Random variables</h2>
 <p>A random variable is a function that maps outcomes from the sample
 space to real numbers:</p>
-<p><span class="math display">\[X : \Omega \to \R.\]</span></p>
+<p><span class="math display">\[X : \Omega \to \mathbb{R}.\]</span></p>
 <p>Random variables allow us to convert outcomes into numerical
 quantities that can be analyzed mathematically.</p>
 <p>Random variables are typically categorized as either discrete or
@@ -752,7 +951,7 @@ height or temperature.</p>
 <p>Random variables are central to machine learning because they allow
 us to model uncertain quantities such as labels, predictions, and
 noise.</p>
-<h2 data-number="10.5" id="pmf-cdf-and-pdf"><span class="header-section-number">10.5</span> PMF, CDF, and PDF</h2>
+<h2 data-number="11.5" id="pmf-cdf-and-pdf"><span class="header-section-number">11.5</span> PMF, CDF, and PDF</h2>
 <p>The behavior of a random variable is described by its probability
 distribution.</p>
 <p>For a discrete random variable <span class="math inline">\(X\)</span>, the probability mass function (PMF) is
@@ -777,7 +976,7 @@ the probability density function (PDF):</p>
 <p>Unlike discrete probabilities, continuous densities do not directly
 give probabilities at a single point. Instead, probabilities are
 computed over intervals.</p>
-<h2 data-number="10.6" id="joint-distributions-and-the-chain-rule"><span class="header-section-number">10.6</span> Joint distributions and the
+<h2 data-number="11.6" id="joint-distributions-and-the-chain-rule"><span class="header-section-number">11.6</span> Joint distributions and the
 chain rule</h2>
 <p>Machine learning often involves multiple random variables. Their
 relationships are described using joint distributions.</p>
@@ -798,28 +997,31 @@ it allows complex distributions to be broken into simpler conditional
 relationships. Many modern models, including graphical models,
 autoregressive models, and transformers, rely on this factorization
 idea.</p>
-<h2 data-number="10.7" id="expectation-variance-and-covariance"><span class="header-section-number">10.7</span> Expectation, variance, and
+<h2 data-number="11.7" id="expectation-variance-and-covariance"><span class="header-section-number">11.7</span> Expectation, variance, and
 covariance</h2>
 <p>Expectation represents the average value of a random variable. For a
 discrete random variable:</p>
-<p><span class="math display">\[\E[X] = \sum_x x p_X(x),\]</span></p>
+<p><span class="math display">\[\mathbb{E}[X] = \sum_x x
+p_X(x),\]</span></p>
 <p>and for a continuous random variable:</p>
-<p><span class="math display">\[\E[X] = \int_{-\infty}^{\infty} x
-f_X(x)\,dx.\]</span></p>
+<p><span class="math display">\[\mathbb{E}[X] = \int_{-\infty}^{\infty}
+x f_X(x)\,dx.\]</span></p>
 <p>Expectation plays a central role in machine learning because many
 learning objectives involve minimizing expected error.</p>
 <p>Variance measures how spread out a random variable is around its
 mean:</p>
-<p><span class="math display">\[\Var(X) = \E[(X-\E[X])^2].\]</span></p>
+<p><span class="math display">\[\text{Var}(X) =
+\mathbb{E}[(X-\mathbb{E}[X])^2].\]</span></p>
 <p>Covariance measures how two variables vary together:</p>
-<p><span class="math display">\[\Cov(X,Y) =
-\E[(X-\E[X])(Y-\E[Y])].\]</span></p>
+<p><span class="math display">\[\text{Cov}(X,Y) =
+\mathbb{E}[(X-\mathbb{E}[X])(Y-\mathbb{E}[Y])].\]</span></p>
 <p>These quantities are important in machine learning because they
 describe uncertainty, feature relationships, and appear in methods such
 as PCA and Gaussian models.</p>
-<h2 data-number="10.8" id="important-distributions"><span class="header-section-number">10.8</span> Important distributions</h2>
+<h2 data-number="11.8" id="important-distributions"><span class="header-section-number">11.8</span> Important distributions</h2>
 <p>Certain probability distributions appear frequently in machine
-learning.</p>
+learning. These distributions are used to model uncertainty, noise, and
+data-generating processes across many applications.</p>
 <h3 class="unnumbered" id="bernoulli-distribution">Bernoulli
 distribution</h3>
 <p>The Bernoulli distribution models binary outcomes such as
@@ -829,8 +1031,26 @@ P(X=0)=1-q.\]</span></p>
 <p>This can also be written compactly as:</p>
 <p><span class="math display">\[P(X=x)=q^x(1-q)^{1-x}, \qquad
 x\in\{0,1\}.\]</span></p>
-<p>Bernoulli distributions form the basis of binary classification
-models such as logistic regression.</p>
+<figure id="fig:bernoulli">
+<img src="img/lecture1/bernoulli.png" style="width:27.00%; max-width:27.00%; height:auto;"/>
+<figcaption>Example of a Bernoulli distribution, where outcomes are
+binary and probabilities are assigned to each possible
+value.</figcaption>
+</figure>
+<h3 class="unnumbered" id="binomial-distribution">Binomial
+distribution</h3>
+<p>The binomial distribution models the number of successes in a fixed
+number of independent Bernoulli trials. For <span class="math inline">\(X \sim \text{Binomial}(n,p)\)</span>:</p>
+<p><span class="math display">\[P(X=k) = \binom{n}{k} p^k (1-p)^{n-k},
+\qquad k = 0,1,\dots,n.\]</span></p>
+<p>This distribution generalizes the Bernoulli case to multiple trials
+and is commonly used in modeling counts and discrete outcomes.</p>
+<figure id="fig:binomial">
+<img src="img/lecture1/binomial.png" style="width:27.00%; max-width:27.00%; height:auto;"/>
+<figcaption>Example of a binomial distribution showing the probability
+of observing <span class="math inline">\(k\)</span> successes over
+multiple trials.</figcaption>
+</figure>
 <h3 class="unnumbered" id="gaussian-distribution">Gaussian
 distribution</h3>
 <p>The Gaussian (normal) distribution is one of the most important
@@ -841,12 +1061,17 @@ distributions in machine learning. A univariate Gaussian with mean <span class="
 <p>Gaussian distributions are widely used because many natural processes
 approximately follow this distribution and because they have convenient
 mathematical properties.</p>
+<figure id="fig:gaussian">
+<img src="img/lecture1/gaussian.png" style="width:27.00%; max-width:27.00%; height:auto;"/>
+<figcaption>Gaussian (normal) distribution illustrating how probability
+density is concentrated around the mean.</figcaption>
+</figure>
 <h3 class="unnumbered" id="multivariate-gaussian-distribution">Multivariate Gaussian
 distribution</h3>
 <p>The multivariate Gaussian generalizes the Gaussian distribution to
-vectors. For <span class="math inline">\(\mathbf{x} \in \R^n\)</span>
-with mean <span class="math inline">\(\boldsymbol{\mu}\)</span> and
-covariance matrix <span class="math inline">\(\Sigma\)</span>:</p>
+vectors. For <span class="math inline">\(\mathbf{x} \in
+\mathbb{R}^n\)</span> with mean <span class="math inline">\(\boldsymbol{\mu}\)</span> and covariance matrix
+<span class="math inline">\(\Sigma\)</span>:</p>
 <p><span class="math display">\[\mathcal{N}(\mathbf{x};\boldsymbol{\mu},\Sigma)
 =
 \frac{1}{(2\pi)^{n/2}\det(\Sigma)^{1/2}}
@@ -856,10 +1081,15 @@ covariance matrix <span class="math inline">\(\Sigma\)</span>:</p>
 \Sigma^{-1}
 (\mathbf{x}-\boldsymbol{\mu})
 \right).\]</span></p>
-<p>This distribution is fundamental in machine learning because it
-models correlated features and appears in many algorithms such as
-Gaussian mixture models, Bayesian inference, and Kalman filtering.</p>
-<h2 data-number="10.9" id="law-of-total-probability"><span class="header-section-number">10.9</span> Law of total probability</h2>
+<p>This distribution models correlations between variables and appears
+in many machine learning methods.</p>
+<figure id="fig:multivariate_gaussian">
+<img src="img/lecture1/multivariate_gaussian.png" style="width:27.00%; max-width:27.00%; height:auto;"/>
+<figcaption>Contours of a multivariate Gaussian distribution,
+illustrating how covariance determines the shape and orientation of the
+distribution.</figcaption>
+</figure>
+<h2 data-number="11.9" id="law-of-total-probability"><span class="header-section-number">11.9</span> Law of total probability</h2>
 <p>The law of total probability allows us to decompose the probability
 of an event into contributions from mutually exclusive cases. Suppose
 <span class="math inline">\(\{B_1,\dots,B_n\}\)</span> forms a partition
@@ -877,9 +1107,10 @@ P(\text{error} \mid y=0)P(y=0)
 P(\text{error} \mid y=1)P(y=1).\]</span></p>
 <p>This decomposition appears frequently in machine learning when
 analyzing expected loss and classification error.</p>
-<h2 data-number="10.10" id="bayes-rule"><span class="header-section-number">10.10</span> Bayes rule</h2>
-<p>Bayes rule provides a way to reverse conditional probabilities. It
-follows directly from the definition of conditional probability:</p>
+<h2 data-number="11.10" id="bayes-rule"><span class="header-section-number">11.10</span> Bayes rule</h2>
+<p>Bayes rule provides a principled way to reverse conditional
+probabilities and update beliefs in light of new evidence. It follows
+directly from the definition of conditional probability:</p>
 <p><span class="math display">\[P(A \mid B) =
 \frac{P(B \mid A)P(A)}{P(B)}.\]</span></p>
 <p>Using the law of total probability, this can also be written as:</p>
@@ -887,34 +1118,64 @@ follows directly from the definition of conditional probability:</p>
 =
 \frac{P(B \mid A)P(A)}
 {\sum_i P(B \mid A_i)P(A_i)}.\]</span></p>
-<p>Bayes rule is fundamental in machine learning because it provides the
-basis for Bayesian inference and probabilistic classification.</p>
-<p>In machine learning notation, Bayes rule is often written as:</p>
+<p>In machine learning notation, Bayes rule is often expressed as:</p>
 <p><span class="math display">\[P(y \mid x)
 =
 \frac{P(x \mid y)P(y)}{P(x)}.\]</span></p>
-<p>This interpretation is often described as:</p>
-<p><span class="math display">\[\text{posterior} =
+<p>This relationship is commonly interpreted as:</p>
+<p><span class="math display">\[\text{posterior}
+=
 \frac{\text{likelihood} \times \text{prior}}
 {\text{evidence}}.\]</span></p>
-<p>This formula explains how we update our belief about a label <span class="math inline">\(y\)</span> after observing data <span class="math inline">\(x\)</span>. Many models such as Naive Bayes
-classifiers and Bayesian neural networks rely on this principle.</p>
-<h2 data-number="10.11" id="jensens-inequality"><span class="header-section-number">10.11</span> Jensen’s inequality</h2>
+<figure id="fig:bayes_pipeline">
+<img src="img/lecture1/bayes_pipeline.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
+<figcaption>Bayesian inference pipeline. Prior beliefs are combined with
+observed data through the likelihood function to produce an updated
+posterior distribution.</figcaption>
+</figure>
+<p>As illustrated in Figure <a data-reference="fig:bayes_pipeline" data-reference-type="ref" href="#fig:bayes_pipeline">22</a>,
+Bayes rule describes how prior beliefs are updated after observing data.
+The prior encodes what we believe before seeing the data, the likelihood
+measures how compatible the observed data is with a hypothesis, and the
+posterior combines the two to produce an updated belief.</p>
+<figure id="fig:bayes_population">
+<img src="img/lecture1/bayes_population.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Population-based intuition for Bayes rule. A population
+contains both healthy and diseased individuals, and a test produces
+positive or negative outcomes. Bayes rule combines the prior prevalence
+of disease with test accuracy to determine the posterior probability of
+disease given a positive result.</figcaption>
+</figure>
+<p>Figure <a data-reference="fig:bayes_population" data-reference-type="ref" href="#fig:bayes_population">23</a> provides an intuitive
+interpretation of Bayesian updating. Even when a test is fairly
+accurate, the posterior probability depends strongly on the prior
+probability of the condition. For a rare condition, a positive test
+result may still have a substantial chance of being a false positive.
+Bayes rule accounts for this by combining prior probabilities with the
+likelihood of the observed outcome.</p>
+<p>This principle forms the foundation of Bayesian inference and is
+widely used in probabilistic machine learning models, including Naive
+Bayes classifiers, Bayesian neural networks, and probabilistic graphical
+models.</p>
+<h2 data-number="11.11" id="jensens-inequality"><span class="header-section-number">11.11</span> Jensen’s inequality</h2>
 <p>Jensen’s inequality is one of the most important mathematical tools
 in machine learning theory. It describes how convex functions interact
 with expectations.</p>
 <p>If <span class="math inline">\(f\)</span> is a convex function and
 <span class="math inline">\(X\)</span> is a random variable, then:</p>
-<p><span class="math display">\[f(\E[X]) \le \E[f(X)].\]</span></p>
+<p><span class="math display">\[f(\mathbb{E}[X]) \le
+\mathbb{E}[f(X)].\]</span></p>
 <p>If <span class="math inline">\(f\)</span> is concave, the inequality
 reverses:</p>
-<p><span class="math display">\[f(\E[X]) \ge \E[f(X)].\]</span></p>
+<p><span class="math display">\[f(\mathbb{E}[X]) \ge
+\mathbb{E}[f(X)].\]</span></p>
 <p>This result is important because many machine learning loss functions
 are convex, and Jensen’s inequality helps us derive bounds and
 guarantees.</p>
 <p>One particularly important example involves the logarithm function,
 which is concave:</p>
-<p><span class="math display">\[\log(\E[X]) \ge \E[\log X].\]</span></p>
+<p><span class="math display">\[\log(\mathbb{E}[X]) \ge \mathbb{E}[\log
+X].\]</span></p>
 <p>This property appears frequently in machine learning, including:</p>
 <ul>
 <li><p>Log-likelihood optimization</p></li>
@@ -927,11 +1188,154 @@ which is concave:</p>
 transformation before averaging is not the same as applying it after
 averaging. This subtle difference is extremely important in statistical
 learning theory.</p>
+<h1 data-number="12" id="datasets-used-in-this-course"><span class="header-section-number">12.</span> Datasets used in this
+course</h1>
+<p>Throughout the lectures and homeworks, we make use of a range of
+synthetic and real datasets. Synthetic datasets are particularly useful
+for building geometric intuition, while real datasets help connect
+course concepts to practical machine learning applications.</p>
+<h2 data-number="12.1" id="synthetic-datasets"><span class="header-section-number">12.1</span> Synthetic datasets</h2>
+<p>Synthetic datasets used in the course include:</p>
+<ul>
+<li><p>Random Data</p></li>
+<li><p>XOR Data</p></li>
+<li><p>Circles Data</p></li>
+<li><p>Spiral Data</p></li>
+<li><p>Two Moons Data</p></li>
+</ul>
+<p>These datasets are used to build geometric intuition for
+classification, clustering, nonlinearity, and representation
+structure.</p>
+<figure id="fig:synthetic_datasets">
+<img src="img/lecture1/synthetic_datasets_grid.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Examples of synthetic datasets used in the course. These
+datasets illustrate different geometric structures and learning
+challenges, including linear separability, nonlinearity, and clustering
+behavior.</figcaption>
+</figure>
+<h4 data-number="12.1.0.1" id="random-data"><span class="header-section-number">12.1.0.1</span> Random Data</h4>
+<p>A simple unstructured dataset consisting of randomly generated
+points. It is useful for illustrating the absence of meaningful
+structure and serves as a baseline when comparing against more
+structured datasets.</p>
+<h4 data-number="12.1.0.2" id="xor-data"><span class="header-section-number">12.1.0.2</span> XOR Data</h4>
+<p>A classic nonlinear classification dataset in which data points from
+different classes occupy opposite quadrants. This dataset demonstrates
+the limitations of linear models and motivates the need for nonlinear
+decision boundaries.</p>
+<h4 data-number="12.1.0.3" id="circles-data"><span class="header-section-number">12.1.0.3</span> Circles Data</h4>
+<p>A dataset consisting of concentric circles. It highlights the need
+for nonlinear feature transformations and is commonly used to illustrate
+kernel methods and representation learning.</p>
+<h4 data-number="12.1.0.4" id="spiral-data"><span class="header-section-number">12.1.0.4</span> Spiral Data</h4>
+<p>A highly nonlinear dataset where classes form interleaving spiral
+patterns. This dataset is useful for demonstrating the complexity of
+decision boundaries required for certain classification tasks.</p>
+<h4 data-number="12.1.0.5" id="two-moons-data"><span class="header-section-number">12.1.0.5</span> Two Moons Data</h4>
+<p>A dataset with two interleaving crescent-shaped clusters. It is
+commonly used to illustrate nonlinear classification and clustering
+behavior.</p>
+<h2 data-number="12.2" id="real-datasets"><span class="header-section-number">12.2</span> Real datasets</h2>
+<h4 data-number="12.2.0.1" id="iris-data"><span class="header-section-number">12.2.0.1</span> IRIS Data</h4>
+<p>A classic dataset containing measurements of iris flowers from three
+different species. It is widely used for introductory classification
+tasks and visualization <span class="citation" data-cites="fisher1936iris">(Fisher 1936)</span>.</p>
+<h4 data-number="12.2.0.2" id="diabetes-dataset"><span class="header-section-number">12.2.0.2</span> Diabetes dataset</h4>
+<p>A regression dataset used to predict disease progression from
+clinical variables. It is commonly used to demonstrate supervised
+regression methods <span class="citation" data-cites="efron2004least">(Efron et al. 2004)</span>.</p>
+<h4 data-number="12.2.0.3" id="california-housing-data"><span class="header-section-number">12.2.0.3</span> California Housing
+data</h4>
+<p>A real-world regression dataset containing housing information used
+to predict median house values. It is useful for illustrating
+large-scale tabular learning problems <span class="citation" data-cites="pace1997sparse">(Kelley Pace and Barry 1997)</span>.</p>
+<h4 data-number="12.2.0.4" id="digits-dataset-sklearn_digits"><span class="header-section-number">12.2.0.4</span> Digits dataset
+(sklearn_digits)</h4>
+<p>A dataset of handwritten digits represented as small grayscale
+images. It is used in homework assignments to demonstrate image
+classification techniques and is available through the scikit-learn
+library <span class="citation" data-cites="scikit-learn">(Pedregosa et
+al. 2011)</span>.</p>
+<h4 data-number="12.2.0.5" id="mnist"><span class="header-section-number">12.2.0.5</span> MNIST</h4>
+<p>A large-scale handwritten digit dataset widely used as a benchmark
+for image classification and deep learning models <span class="citation" data-cites="lecun-mnisthandwrittendigit-2010 lecun-gradientbased-learning-applied-1998">(LeCun
+and Cortes 2010; LeCun et al. 1998)</span>.</p>
+<h4 data-number="12.2.0.6" id="imagenet"><span class="header-section-number">12.2.0.6</span> ImageNet</h4>
+<p>A large-scale image dataset organized into thousands of object
+categories. It has played a central role in advancing modern computer
+vision and deep learning <span class="citation" data-cites="DenDon09Imagenet">(Deng et al. 2009)</span>.</p>
+<h4 data-number="12.2.0.7" id="cure-or"><span class="header-section-number">12.2.0.7</span> CURE-OR</h4>
+<p>A dataset designed for robust object recognition under real-world
+distortions such as blur, noise, and occlusion. It is used to study
+model robustness and generalization <span class="citation" data-cites="Temel2018_ICMLA Temel2019_ICIP">(Temel, Lee, and AlRegib
+2018, 2019)</span>.</p>
 <h1 class="unnumbered" id="bibliography">References</h1>
 <div class="references csl-bib-body hanging-indent" id="refs" role="list">
+<div class="csl-entry" id="ref-DenDon09Imagenet" role="listitem">
+Deng, Jia, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei.
+2009. <span>“Imagenet: A Large-Scale Hierarchical Image
+Database.”</span> In <em>Computer Vision and Pattern Recognition, 2009.
+CVPR 2009. IEEE Conference on</em>, 248–55. IEEE. <a href="https://ieeexplore.ieee.org/abstract/document/5206848/" rel="noopener noreferrer" target="_blank">https://ieeexplore.ieee.org/abstract/document/5206848/</a>.
+</div>
+<div class="csl-entry" id="ref-efron2004least" role="listitem">
+Efron, Bradley, Trevor Hastie, Iain Johnstone, and Robert Tibshirani.
+2004. <span>“Least Angle Regression.”</span> <em>The Annals of
+Statistics</em> 32 (2): 407–99.
+</div>
+<div class="csl-entry" id="ref-fisher1936iris" role="listitem">
+Fisher, R. A. 1936. <span>“<span>Iris</span>.”</span> UCI Machine
+Learning Repository.
+</div>
+<div class="csl-entry" id="ref-guo2019logic" role="listitem">
+Guo, Qian, Yuhua Qian, Xinyan Liang, Yanhong She, Deyu Li, and Jiye
+Liang. 2019. <span>“Logic Could Be Learned from Images.”</span>
+<em>CoRR</em> abs/1908.01931. <a href="http://arxiv.org/abs/1908.01931" rel="noopener noreferrer" target="_blank">http://arxiv.org/abs/1908.01931</a>.
+</div>
 <div class="csl-entry" id="ref-springboard_ai" role="listitem">
 Gupta, Sakshi. 2021. <span>“Artificial Intelligence Vs. Human
 Intelligence: Who Will Build the Future?”</span> <a class="uri" href="https://www.springboard.com/blog/data-science/artificial-intelligence-vs-human-intelligence/" rel="noopener noreferrer" target="_blank">https://www.springboard.com/blog/data-science/artificial-intelligence-vs-human-intelligence/</a>.
+</div>
+<div class="csl-entry" id="ref-pace1997sparse" role="listitem">
+Kelley Pace, R., and Ronald Barry. 1997. <span>“Sparse Spatial
+Autoregressions.”</span> <em>Statistics &amp; Probability Letters</em>
+33 (3): 291–97. https://doi.org/<a href="https://doi.org/10.1016/S0167-7152(96)00140-X" rel="noopener noreferrer" target="_blank">https://doi.org/10.1016/S0167-7152(96)00140-X</a>.
+</div>
+<div class="csl-entry" id="ref-lecun-gradientbased-learning-applied-1998" role="listitem">
+LeCun, Yann, Léon Bottou, Yoshua Bengio, and Patrick Haffner. 1998.
+<span>“Gradient-Based Learning Applied to Document Recognition.”</span>
+In <em>Proceedings of the IEEE</em>, 86:2278–2324. 11. <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.7665" rel="noopener noreferrer" target="_blank">http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.42.7665</a>.
+</div>
+<div class="csl-entry" id="ref-lecun-mnisthandwrittendigit-2010" role="listitem">
+LeCun, Yann, and Corinna Cortes. 2010. <span>“<span>MNIST</span>
+Handwritten Digit Database.”</span> <a href="http://yann.lecun.com/exdb/mnist/" rel="noopener noreferrer" target="_blank">http://yann.lecun.com/exdb/mnist/</a>.
+</div>
+<div class="csl-entry" id="ref-mayo2018_nlp_kdnuggets" role="listitem">
+Mayo, Matthew. 2018. <span>“The Main Approaches to Natural Language
+Processing Tasks.”</span> <em>KDnuggets</em>. <a href="https://www.kdnuggets.com/2018/10/main-approaches-natural-language-processing-tasks.html" rel="noopener noreferrer" target="_blank">https://www.kdnuggets.com/2018/10/main-approaches-natural-language-processing-tasks.html</a>.
+</div>
+<div class="csl-entry" id="ref-scikit-learn" role="listitem">
+Pedregosa, Fabian, Gaël Varoquaux, Alexandre Gramfort, Vincent Michel,
+Bertrand Thirion, Olivier Grisel, Mathieu Blondel, et al. 2011.
+<span>“Scikit-Learn: Machine Learning in Python.”</span> <em>J. Mach.
+Learn. Res.</em> 12 (null): 2825–30.
+</div>
+<div class="csl-entry" id="ref-Remman2022" role="listitem">
+Remman, Sindre Benjamin, Inga Strümke, and Anastasios M. Lekkas. 2022.
+<span>“Causal Versus Marginal Shapley Values for Robotic Lever
+Manipulation Controlled Using Deep Reinforcement Learning.”</span> In
+<em>2022 American Control Conference (ACC)</em>, 2683–90. <a href="https://doi.org/10.23919/ACC53348.2022.9867807" rel="noopener noreferrer" target="_blank">https://doi.org/10.23919/ACC53348.2022.9867807</a>.
+</div>
+<div class="csl-entry" id="ref-Temel2018_ICMLA" role="listitem">
+Temel, D., J. Lee, and G. AlRegib. 2018. <span>“CURE-OR: Challenging
+Unreal and Real Environments for Object Recognition.”</span> In <em>2018
+17th IEEE International Conference on Machine Learning and Applications
+(ICMLA)</em>.
+</div>
+<div class="csl-entry" id="ref-Temel2019_ICIP" role="listitem">
+———. 2019. <span>“Object Recognition Under Multifarious Conditions: A
+Reliability Analysis and a Feature Similarity-Based Performance
+Estimation.”</span> In <em>IEEE International Conference on Image
+Processing (ICIP)</em>.
 </div>
 </div>
 
