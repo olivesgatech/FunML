@@ -41,15 +41,22 @@
     /* No results */
     .no-results{display:none;padding:24px;text-align:center;color:var(--muted);font-size:13px}
 
-    /* Hidden by search */
-    .card.hidden,.section.empty{display:none}
+    /* Hidden by search or lecture filter */
+    .card.hidden,.section.empty,.section.lec-hidden{display:none}
+
+    /* Back link (shown when lecture-filtered) */
+    .back-link{display:none;margin-bottom:12px}
+    .back-link a{display:inline-block;padding:6px 12px;background:#fff;border:1px solid var(--line);border-radius:6px;color:var(--blue);font-size:12px;font-weight:600;text-decoration:none}
+    .back-link a:hover{border-color:var(--blue);background:var(--tag)}
+    body.filtered .back-link{display:block}
   </style>
 </head>
 <body>
 <div class="page">
+  <div class="back-link"><a href="demos.html">← Back to all demos</a></div>
   <div class="hero">
-    <h1>Interactive Demos</h1>
-    <p>60 interactive notebooks — click <strong>Open</strong> to launch a demo in the viewer.</p>
+    <h1 id="hero-title">Interactive Demos</h1>
+    <p id="hero-desc">60 interactive notebooks — click <strong>Open</strong> to launch a demo in the viewer.</p>
   </div>
 
   <div class="search-wrap">
@@ -59,7 +66,7 @@
   <div id="no-results" class="no-results">No demos match your search.</div>
 
   <!-- ───── Lecture 01–02: Introduction & k-NN ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="1">
     <div class="section-head">
       <span class="lec-badge">Lec 01–02</span>
       <h2 class="section-title">Introduction to Machine Learning</h2>
@@ -79,7 +86,7 @@
   </div>
 
   <!-- ───── Lecture 03: Logistic Regression ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="3">
     <div class="section-head">
       <span class="lec-badge">Lec 03</span>
       <h2 class="section-title">Logistic Regression</h2>
@@ -109,7 +116,7 @@
   </div>
 
   <!-- ───── Lecture 04: Support Vector Machines ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="4">
     <div class="section-head">
       <span class="lec-badge">Lec 04</span>
       <h2 class="section-title">Support Vector Machines</h2>
@@ -134,7 +141,7 @@
   </div>
 
   <!-- ───── Lecture 05: Neural Networks ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="5">
     <div class="section-head">
       <span class="lec-badge">Lec 05</span>
       <h2 class="section-title">Introduction to Neural Networks</h2>
@@ -149,7 +156,7 @@
   </div>
 
   <!-- ───── Lecture 06: Classification Evaluation ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="6">
     <div class="section-head">
       <span class="lec-badge">Lec 06</span>
       <h2 class="section-title">Classification Performance Evaluation</h2>
@@ -164,7 +171,7 @@
   </div>
 
   <!-- ───── Lecture 07: Linear Regression ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="7">
     <div class="section-head">
       <span class="lec-badge">Lec 07</span>
       <h2 class="section-title">Linear Regression</h2>
@@ -189,7 +196,7 @@
   </div>
 
   <!-- ───── Lecture 08: Polynomial Regression & GD ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="8">
     <div class="section-head">
       <span class="lec-badge">Lec 08</span>
       <h2 class="section-title">Polynomial Regression &amp; Gradient Descent</h2>
@@ -234,7 +241,7 @@
   </div>
 
   <!-- ───── Lecture 09: Regularization ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="10">
     <div class="section-head">
       <span class="lec-badge">Lec 09</span>
       <h2 class="section-title">Regularization &amp; Performance Metrics</h2>
@@ -289,7 +296,7 @@
   </div>
 
   <!-- ───── Lectures 10–12: Clustering ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="11,12,13,14">
     <div class="section-head">
       <span class="lec-badge">Lec 10–12</span>
       <h2 class="section-title">Clustering &amp; GMMs</h2>
@@ -329,7 +336,7 @@
   </div>
 
   <!-- ───── Lecture 13: CNNs ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="15">
     <div class="section-head">
       <span class="lec-badge">Lec 13</span>
       <h2 class="section-title">Convolutional Neural Networks</h2>
@@ -364,7 +371,7 @@
   </div>
 
   <!-- ───── Lecture 14: CNN Architectures ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="16">
     <div class="section-head">
       <span class="lec-badge">Lec 14</span>
       <h2 class="section-title">CNN Architectures</h2>
@@ -404,7 +411,7 @@
   </div>
 
   <!-- ───── Lectures 16–17: Training & Optimization ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="17,18">
     <div class="section-head">
       <span class="lec-badge">Lec 16–17</span>
       <h2 class="section-title">CNN Training &amp; Optimization</h2>
@@ -444,7 +451,7 @@
   </div>
 
   <!-- ───── Lectures 18–19: Autoencoders ───── -->
-  <div class="section" data-section>
+  <div class="section" data-section data-lectures="19,20">
     <div class="section-head">
       <span class="lec-badge">Lec 18–19</span>
       <h2 class="section-title">Autoencoders &amp; Generative Models</h2>
@@ -491,10 +498,33 @@
 </div>
 
 <script>
+// Read ?lecture=N from URL and hide sections not matching that lecture.
+(function applyLectureFilter(){
+  const params = new URLSearchParams(location.search);
+  const lec = params.get('lecture');
+  if(!lec) return;
+  document.body.classList.add('filtered');
+  const heroTitle = document.getElementById('hero-title');
+  const heroDesc = document.getElementById('hero-desc');
+  let shownCount = 0;
+  document.querySelectorAll('.section[data-lectures]').forEach(sec => {
+    const lectures = (sec.getAttribute('data-lectures') || '').split(',').map(s => s.trim());
+    const show = lectures.includes(lec);
+    sec.classList.toggle('lec-hidden', !show);
+    if(show) shownCount += sec.querySelectorAll('.card[data-card]').length;
+  });
+  const lectureTitle = params.get('title') || `Lecture ${lec}`;
+  if(heroTitle) heroTitle.textContent = `${lectureTitle} — Demos`;
+  if(heroDesc) heroDesc.innerHTML = shownCount
+    ? `${shownCount} interactive notebook${shownCount === 1 ? '' : 's'} for this lecture — click <strong>Open</strong> to launch in the viewer.`
+    : 'No interactive demos have been published for this lecture yet.';
+})();
+
 function filter(){
   const q = document.getElementById('q').value.toLowerCase().trim();
   let anyVisible = false;
   document.querySelectorAll('.section[data-section]').forEach(sec => {
+    if(sec.classList.contains('lec-hidden')) return;
     let secHas = false;
     sec.querySelectorAll('.card[data-card]').forEach(card => {
       const text = card.textContent.toLowerCase();
@@ -507,6 +537,21 @@ function filter(){
   });
   document.getElementById('no-results').style.display = anyVisible ? 'none' : 'block';
 }
+
+// Tell the parent frame when a demo is opened, so it can show a "back to demos" button.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.open-btn');
+  if(!btn) return;
+  if(window.parent === window) return;
+  try {
+    window.parent.postMessage({
+      type: 'demo-open',
+      notebookUrl: new URL(btn.getAttribute('href'), location.href).href,
+      returnUrl: location.href,
+      title: btn.closest('.card')?.querySelector('.card-title')?.textContent || 'Demo',
+    }, '*');
+  } catch(err) { /* ignore */ }
+});
 </script>
 </body>
 </html>

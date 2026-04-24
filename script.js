@@ -107,6 +107,19 @@ const toExerciseHref = (notesHref) => {
   return match ? `assets/exercises/${match[1]}.html` : '';
 };
 
+const getDisplayLectureNumber = (notesHref) => {
+  const match = (notesHref || '').match(/Lecture(\d+)_/);
+  return match ? match[1] : '';
+};
+
+const toDemosHref = (notesHref, title) => {
+  const lectureNum = getDisplayLectureNumber(notesHref);
+  if (!lectureNum) return 'assets/demos.html';
+  const params = new URLSearchParams({ lecture: lectureNum });
+  if (title) params.set('title', title);
+  return `assets/demos.html?${params.toString()}`;
+};
+
 const getActiveLectureKey = () => {
   const activeItem = getActiveLectureItem();
   const explicitKey = activeItem?.dataset?.lectureKey;
@@ -138,7 +151,8 @@ const updateLectureMedia = () => {
   const localSlide = lectureKey && !itemHasDisabledSlides(activeItem) ? `assets/slides/${lectureKey}.pdf` : '';
   const slideEmbed = media.slide_local || localSlide || (media.slide ? `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(media.slide)}` : '');
   const exerciseHref = toExerciseHref(lectureNotesHref) || (lectureKey ? `assets/exercises/${lectureKey}.html` : '');
-  const demoHref = media.demo || 'assets/demos.html';
+  const lectureLabel = activeItem?.dataset?.title || activeItem?.querySelector('.lecture-title')?.textContent || '';
+  const demoHref = media.demo || toDemosHref(lectureNotesHref, lectureLabel);
 
   updateResourceLink(notesLink, lectureNotesHref, lectureNotesHref ? 'Lecture Notes' : 'No notes');
   updateResourceLink(slidesLink, slideEmbed, slideEmbed ? 'Slides' : 'No slides posted');
@@ -440,3 +454,54 @@ window.addEventListener('keydown', (event) => {
     if (navToggle) navToggle.setAttribute('aria-expanded', 'false');
   }
 });
+
+// --- Demo back-button: shown in viewer when a notebook is opened from demos.html.
+let demoReturnUrl = '';
+
+const createDemoBackButton = () => {
+  const wrap = document.querySelector('.viewer-frame-wrap');
+  if (!wrap || document.getElementById('demo-back-btn')) return document.getElementById('demo-back-btn');
+  const btn = document.createElement('button');
+  btn.id = 'demo-back-btn';
+  btn.type = 'button';
+  btn.textContent = '← Back to Demos';
+  btn.style.cssText = 'display:none;position:absolute;top:12px;left:12px;z-index:10;padding:6px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)';
+  btn.addEventListener('mouseenter', () => { btn.style.background = '#1d4ed8'; });
+  btn.addEventListener('mouseleave', () => { btn.style.background = '#2563eb'; });
+  btn.addEventListener('click', () => {
+    if (!demoReturnUrl) return;
+    if (lectureFrame) lectureFrame.src = demoReturnUrl;
+    hideDemoBackButton();
+  });
+  wrap.style.position = wrap.style.position || 'relative';
+  wrap.appendChild(btn);
+  return btn;
+};
+
+const showDemoBackButton = (returnUrl, demoTitle) => {
+  demoReturnUrl = returnUrl || 'assets/demos.html';
+  const btn = createDemoBackButton();
+  if (btn) btn.style.display = 'inline-block';
+  if (demoTitle && lectureTitle) lectureTitle.textContent = `${demoTitle} - Demo`;
+};
+
+const hideDemoBackButton = () => {
+  demoReturnUrl = '';
+  const btn = document.getElementById('demo-back-btn');
+  if (btn) btn.style.display = 'none';
+};
+
+window.addEventListener('message', (event) => {
+  const data = event.data || {};
+  if (data.type !== 'demo-open') return;
+  showDemoBackButton(data.returnUrl, data.title);
+});
+
+// When the iframe navigates to anything that isn't a notebook (lecture, slides,
+// demos list, etc.), hide the back button. Notebooks keep it visible.
+if (lectureFrame) {
+  lectureFrame.addEventListener('load', () => {
+    const src = lectureFrame.getAttribute('src') || '';
+    if (!src.includes('/notebooks/')) hideDemoBackButton();
+  });
+}
