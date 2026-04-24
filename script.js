@@ -461,40 +461,41 @@ let demoReturnUrl = '';
 const createDemoBackButton = () => {
   const wrap = document.querySelector('.viewer-frame-wrap');
   if (!wrap || document.getElementById('demo-back-btn')) return document.getElementById('demo-back-btn');
-  if (!document.getElementById('demo-back-btn-css')) {
-    const style = document.createElement('style');
-    style.id = 'demo-back-btn-css';
-    style.textContent = `
-      #demo-back-btn{display:none;position:absolute;top:10px;left:10px;z-index:10;padding:5px 11px;background:rgba(255,255,255,.96);color:#1e3a8a;border:1px solid #cbd5e1;border-radius:999px;font:500 12px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.08);backdrop-filter:saturate(140%) blur(2px);transition:background .15s,border-color .15s,color .15s}
-      #demo-back-btn:hover{background:#fff;border-color:#1e3a8a;color:#1e3a8a}
-    `;
-    document.head.appendChild(style);
-  }
+  const bar = document.createElement('div');
+  bar.id = 'demo-return-bar';
+  bar.setAttribute('aria-label', 'Demo navigation');
+
   const btn = document.createElement('button');
   btn.id = 'demo-back-btn';
   btn.type = 'button';
-  btn.textContent = '← Back to Demos';
+  btn.textContent = 'Back to Demos';
   btn.addEventListener('click', () => {
     if (!demoReturnUrl) return;
     if (lectureFrame) lectureFrame.src = demoReturnUrl;
     hideDemoBackButton();
   });
-  wrap.style.position = wrap.style.position || 'relative';
-  wrap.appendChild(btn);
+  bar.appendChild(btn);
+  wrap.prepend(bar);
   return btn;
 };
 
 const showDemoBackButton = (returnUrl, demoTitle) => {
   demoReturnUrl = returnUrl || 'assets/demos.html';
+  document.querySelector('.viewer-frame-wrap')?.classList.add('demo-return-active');
   const btn = createDemoBackButton();
-  if (btn) btn.style.display = 'inline-block';
+  const bar = document.getElementById('demo-return-bar');
+  if (bar) bar.hidden = false;
+  if (btn) btn.hidden = false;
   if (demoTitle && lectureTitle) lectureTitle.textContent = `${demoTitle} - Demo`;
 };
 
 const hideDemoBackButton = () => {
   demoReturnUrl = '';
+  document.querySelector('.viewer-frame-wrap')?.classList.remove('demo-return-active');
+  const bar = document.getElementById('demo-return-bar');
+  if (bar) bar.hidden = true;
   const btn = document.getElementById('demo-back-btn');
-  if (btn) btn.style.display = 'none';
+  if (btn) btn.hidden = true;
 };
 
 window.addEventListener('message', (event) => {
