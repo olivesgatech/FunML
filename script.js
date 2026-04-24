@@ -461,13 +461,19 @@ let demoReturnUrl = '';
 const createDemoBackButton = () => {
   const wrap = document.querySelector('.viewer-frame-wrap');
   if (!wrap || document.getElementById('demo-back-btn')) return document.getElementById('demo-back-btn');
+  if (!document.getElementById('demo-back-btn-css')) {
+    const style = document.createElement('style');
+    style.id = 'demo-back-btn-css';
+    style.textContent = `
+      #demo-back-btn{display:none;position:absolute;top:10px;left:10px;z-index:10;padding:5px 11px;background:rgba(255,255,255,.96);color:#1e3a8a;border:1px solid #cbd5e1;border-radius:999px;font:500 12px/1.2 system-ui,-apple-system,Segoe UI,sans-serif;cursor:pointer;box-shadow:0 1px 3px rgba(15,23,42,.08);backdrop-filter:saturate(140%) blur(2px);transition:background .15s,border-color .15s,color .15s}
+      #demo-back-btn:hover{background:#fff;border-color:#1e3a8a;color:#1e3a8a}
+    `;
+    document.head.appendChild(style);
+  }
   const btn = document.createElement('button');
   btn.id = 'demo-back-btn';
   btn.type = 'button';
   btn.textContent = '← Back to Demos';
-  btn.style.cssText = 'display:none;position:absolute;top:12px;left:12px;z-index:10;padding:6px 12px;background:#2563eb;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15)';
-  btn.addEventListener('mouseenter', () => { btn.style.background = '#1d4ed8'; });
-  btn.addEventListener('mouseleave', () => { btn.style.background = '#2563eb'; });
   btn.addEventListener('click', () => {
     if (!demoReturnUrl) return;
     if (lectureFrame) lectureFrame.src = demoReturnUrl;
