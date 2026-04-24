@@ -145,7 +145,7 @@ to project <span class="math inline">\(\mathbf{X}\)</span> onto a <span class="m
 </p>
 <figure id="fig:enter-label">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%204.36.04%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.1: Autoencoder and Reconstruction</figcaption>
+<figcaption>Autoencoder and Reconstruction</figcaption>
 </figure>
 <h2 data-number="2.2" id="principal-component-analysis-pca"><span class="header-section-number">2.2</span> Principal Component Analysis
 (PCA)</h2>
@@ -198,7 +198,7 @@ this case, the learned representation spans the principal subspace that
 captures the largest variance in the data.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%204.38.07%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.3: Linear AutoEncoders</figcaption>
+<figcaption>Linear AutoEncoders</figcaption>
 </figure>
 <h2 data-number="2.4" id="nonlinear-autoencoders"><span class="header-section-number">2.4</span> Nonlinear Autoencoders</h2>
 <p>Unlike linear autoencoders, which restrict the model to linear
@@ -221,7 +221,7 @@ often lies on curved, lower-dimensional manifolds embedded in
 high-dimensional space.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%204.38.15%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.4: Nonlinear Autoencoders</figcaption>
+<figcaption>Nonlinear Autoencoders</figcaption>
 </figure>
 <h1 data-number="3" id="fully-connected-autoencoders"><span class="header-section-number">3.</span> Fully-connected Autoencoders</h1>
 <p>In fully-connected autoencoders, both the encoder and decoder are
@@ -230,7 +230,7 @@ Figure <a data-reference="fig:fc-ae-structure" data-reference-type="ref" href="
 encoder–decoder structure.</p>
 <figure id="fig:fc-ae-structure">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%204.56.26%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.5: Fully-connected autoencoder encoder–decoder
+<figcaption>Fully-connected autoencoder encoder–decoder
 structure.</figcaption>
 </figure>
 <p>Fully-connected autoencoders can be applied to the MNIST handwritten
@@ -242,8 +242,8 @@ layers with ReLU activations in the hidden layers and a sigmoid
 activation in the output layer to reconstruct pixel intensities.</p>
 <figure id="fig:fc-ae-mnist">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%208.54.57%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.6: Example fully-connected autoencoder
-architecture for MNIST.</figcaption>
+<figcaption>Example fully-connected autoencoder architecture for
+MNIST.</figcaption>
 </figure>
 <p>Let the dataset be <span class="math inline">\(\mathbf{X} \in
 \mathbb{R}^{N \times P}\)</span>, where each input vector <span class="math inline">\(\mathbf{x}_i \in \mathbb{R}^P\)</span> and the
@@ -278,11 +278,11 @@ encode more complex and distributed patterns, illustrating the
 hierarchical nature of representation learning.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%206.55.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.8: 2rd layer</figcaption>
+<figcaption>2rd layer</figcaption>
 </figure>
 <figure id="fig:enter-label">
 <img src="img/lecture18/Screenshot%202024-10-30%20at%206.55.09%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.9: 3rd layer</figcaption>
+<figcaption>3rd layer</figcaption>
 </figure>
 <h1 data-number="4" id="visualization-of-2d-latent-space"><span class="header-section-number">4.</span> Visualization of 2D Latent
 Space</h1>
@@ -294,8 +294,8 @@ the MNIST dataset, where each point corresponds to an input image and is
 color-coded by its true digit label.</p>
 <figure id="fig:2d-latent">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.18%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.10: Two-dimensional latent space learned by a
-fully-connected autoencoder.</figcaption>
+<figcaption>Two-dimensional latent space learned by a fully-connected
+autoencoder.</figcaption>
 </figure>
 <p>By compressing images into a two-dimensional representation, the
 autoencoder enables direct visualization of how the model organizes the
@@ -328,7 +328,7 @@ the decoder reconstructs the image by progressively restoring spatial
 resolution.</p>
 <figure id="fig:conv-autoencoder">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.42%E2%80%AFAM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.11: Overview of convolutional autoencoder
+<figcaption>Overview of convolutional autoencoder
 architecture.</figcaption>
 </figure>
 <p>A more detailed view of the encoder–decoder structure is shown in
@@ -338,7 +338,7 @@ performs upsampling using unpooling and transposed convolution to
 reconstruct the image.</p>
 <figure id="fig:encoder-decoder">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%209.31.52%E2%80%AFAM.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Figure 17.12: Encoder and decoder structure in convolutional
+<figcaption>Encoder and decoder structure in convolutional
 autoencoders.</figcaption>
 </figure>
 <p>It is important to note that the decoder is not a strict mathematical
@@ -374,8 +374,7 @@ layers to reconstruct higher-resolution feature maps in the decoder.</p>
 <h2 data-number="5.2" id="max-unpooling"><span class="header-section-number">5.2</span> Max-unpooling</h2>
 <figure id="fig:max-unpooling">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%209.24.28%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 17.14: Max-unpooling using stored pooling
-indices.</figcaption>
+<figcaption>Max-unpooling using stored pooling indices.</figcaption>
 </figure>
 <p>Max-unpooling is an upsampling technique designed to partially
 reverse the spatial information loss introduced by max-pooling. During
@@ -426,10 +425,10 @@ latent representation and the decoder reconstructs the image from this
 representation.</p>
 <figure id="fig:conv-autoencoder-mnist">
 <img src="img/lecture18/Screenshot%202024-11-02%20at%209.20.33%E2%80%AFPM.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Figure 17.16: <strong>Convolutional autoencoder architecture
-for MNIST.</strong> The encoder progressively reduces spatial resolution
-to form a compact latent representation, while the decoder reconstructs
-the image using transposed convolutions.</figcaption>
+<figcaption><strong>Convolutional autoencoder architecture for
+MNIST.</strong> The encoder progressively reduces spatial resolution to
+form a compact latent representation, while the decoder reconstructs the
+image using transposed convolutions.</figcaption>
 </figure>
 <p><strong>Encoder.</strong> The encoder begins with a convolutional
 layer containing 16 kernels of size <span class="math inline">\(3\times3\)</span> with padding 1 and ReLU

@@ -327,8 +327,12 @@ without understanding the underlying distributions.</p>
 probability of a two-class classifcation problem with a <em>sigmoid</em>
 function. Sigmoid functions, in general, describe <span class="math inline">\(S\)</span>-shaped curves, and we typically want
 them in the range from <span class="math inline">\(0\)</span> to <span class="math inline">\(1\)</span>. In ML, sigmoid functions are usually
-synonymous with the logistic function: <span class="math display">\[\sigma(x)=\frac{1}{1+e^{-x}}\]</span> Notice that
-this function has horizontal asymptotes that bound the <span class="math inline">\(y\)</span>-values 0 and 1, has an <span class="math inline">\(S\)</span>-shape in the sense that there is an
+synonymous with the logistic function: <span class="math display">\[\sigma(x)=\frac{1}{1+e^{-x}}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/logis.png"/></p>
+</div>
+<p>Notice that this function has horizontal asymptotes that bound the
+<span class="math inline">\(y\)</span>-values 0 and 1, has an <span class="math inline">\(S\)</span>-shape in the sense that there is an
 inflection point in the horizontal center, and it is symmetric around
 the inflection point. The logistic function can be generalized by
 parameterizing different properties of the curve, e.g. growth rates,
@@ -541,7 +545,11 @@ penalizing the parameters to prevent overfitting.</p>
 using the sign function: <span class="math display">\[\text{sign}(x)=\begin{cases}
     +1 &amp; x &gt; 0 \\
     -1 &amp; x &lt; 0
-\end{cases}\]</span> Note here that we’re assuming <span class="math inline">\(y_i\in\{-1,1\}\)</span> here instead of <span class="math inline">\(\{0,1\}\)</span> as in the logistic model. Hence
+\end{cases}\]</span></p>
+<div class="center">
+<p><img alt="image" src="img/lecture3/sign.png"/></p>
+</div>
+<p>Note here that we’re assuming <span class="math inline">\(y_i\in\{-1,1\}\)</span> here instead of <span class="math inline">\(\{0,1\}\)</span> as in the logistic model. Hence
 if we attempt to model the decision boundary with a linear model <span class="math inline">\(\theta^T\textbf{x}\)</span>, then we can model the
 data using: <span class="math display">\[\text{sign}(\theta^T\textbf{x})=\begin{cases}
     +1 &amp; \theta^T\textbf{x} &gt; 0 \\

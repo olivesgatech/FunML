@@ -133,8 +133,8 @@ become small or vanish. These properties make optimization significantly
 more difficult.</p>
 <figure id="fig:cnnlosslandscape">
 <img src="img/lecture16/loss_landscape_CNN.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 15.1: Example of a non-convex loss landscape with
-local minima and saddle points.</figcaption>
+<figcaption>Example of a non-convex loss landscape with local minima and
+saddle points.</figcaption>
 </figure>
 <p>In addition to non-convexity, neural network loss surfaces are often
 <strong>ill-conditioned</strong>. The curvature of the loss may vary
@@ -154,9 +154,9 @@ challenges motivate the development of advanced optimization methods
 such as momentum, adaptive learning rates, and Adam.</p>
 <figure id="fig:graddescent">
 <img src="img/lecture16/graddescent.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
-<figcaption>Figure 15.2: Gradient descent and the effect of learning
-rate. Small learning rates lead to slow convergence, while large
-learning rates may cause overshooting or divergence.</figcaption>
+<figcaption>Gradient descent and the effect of learning rate. Small
+learning rates lead to slow convergence, while large learning rates may
+cause overshooting or divergence.</figcaption>
 </figure>
 <h1 data-number="3" id="gradient-descent"><span class="header-section-number">3.</span> Gradient Descent</h1>
 <p>Gradient Descent is a foundational optimization algorithm used to
@@ -191,8 +191,7 @@ and produces stable convergence. However, it is computationally
 expensive and impractical for modern deep learning datasets.</p>
 <figure>
 <img src="img/lecture16/batch_gd.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Figure 15.3: Batch Gradient Descent convergence
-path.</figcaption>
+<figcaption>Batch Gradient Descent convergence path.</figcaption>
 </figure>
 <h3 data-number="3.1.2" id="stochastic-gradient-descent-sgd"><span class="header-section-number">3.1.2</span> Stochastic Gradient Descent
 (SGD)</h3>
@@ -207,8 +206,7 @@ escape saddle points and shallow local minima in non-convex loss
 landscapes.</p>
 <figure>
 <img src="img/lecture16/stochastic_gd.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Figure 15.4: Stochastic Gradient Descent convergence
-path.</figcaption>
+<figcaption>Stochastic Gradient Descent convergence path.</figcaption>
 </figure>
 <h3 data-number="3.1.3" id="mini-batch-gradient-descent-mbgd"><span class="header-section-number">3.1.3</span> Mini-batch Gradient Descent
 (MBGD)</h3>
@@ -220,8 +218,7 @@ remaining computationally efficient. It also allows efficient parallel
 computation on GPUs and modern hardware.</p>
 <figure>
 <img src="img/lecture16/minibatch_gd.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Figure 15.5: Mini-batch Gradient Descent convergence
-path.</figcaption>
+<figcaption>Mini-batch Gradient Descent convergence path.</figcaption>
 </figure>
 <p>Mini-batch gradient descent is the <strong>standard training method
 in deep learning</strong>. It balances computational efficiency,
@@ -257,9 +254,9 @@ easily determine whether it has reached a globally optimal solution or
 merely a locally optimal one.</p>
 <figure id="fig:loss_function_ex">
 <img src="img/lecture16/Loss_function_visual.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 15.6: Loss surfaces may contain many local minima and
-flat regions where gradient descent can slow down or stop, potentially
-leading to suboptimal solutions.</figcaption>
+<figcaption>Loss surfaces may contain many local minima and flat regions
+where gradient descent can slow down or stop, potentially leading to
+suboptimal solutions.</figcaption>
 </figure>
 <h4 data-number="4.2.0.2" id="saddle-points"><span class="header-section-number">4.2.0.2</span> Saddle Points</h4>
 <p>Saddle points are stationary points where the gradient is zero but
@@ -646,8 +643,9 @@ input image, the resulting feature map highlights edge locations and
 captures transitions from light-to-dark and dark-to-light regions.</p>
 <figure id="fig:earlyfilter">
 <img src="img/lecture16/earlylayer.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Figure 15.12: An example convolution of a <span class="math inline">\(17 \times 17 \times 1\)</span> image with a <span class="math inline">\(3 \times 3\)</span> edge-detection
-kernel.</figcaption>
+<figcaption>An example convolution of a <span class="math inline">\(17
+\times 17 \times 1\)</span> image with a <span class="math inline">\(3
+\times 3\)</span> edge-detection kernel.</figcaption>
 </figure>
 <p>As we move deeper into the network, features become increasingly
 abstract. Early layers detect edges and colors, middle layers detect
@@ -665,7 +663,7 @@ layers learn low-level features, while deeper layers combine these
 features to form increasingly complex representations.</p>
 <figure>
 <img src="img/lecture16/alexnet.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
-<figcaption>Figure 15.13: AlexNet architecture. An image of size <span class="math inline">\(224\times224\times3\)</span> is processed through
+<figcaption>AlexNet architecture. An image of size <span class="math inline">\(224\times224\times3\)</span> is processed through
 multiple convolutional layers with progressively smaller
 filters.</figcaption>
 </figure>
@@ -675,7 +673,7 @@ act as edge and color detectors and respond strongly to simple visual
 patterns such as lines, edges, and color contrasts.</p>
 <figure id="fig:alexnet-firstlayer">
 <img src="img/lecture16/alexnet-firstlayer.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Figure 15.14: Filters from the first convolutional layer of
+<figcaption>Filters from the first convolutional layer of
 AlexNet.</figcaption>
 </figure>
 <p>As we progress deeper into the network, filters become less visually
@@ -686,9 +684,8 @@ increases, reflecting the accumulation of features learned from previous
 layers.</p>
 <figure id="fig:deeper-layer-filters">
 <img src="img/lecture16/alexnet-secondthird.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Figure 15.15: Filters from the second and third
-convolutional layers of AlexNet showing more abstract
-patterns.</figcaption>
+<figcaption>Filters from the second and third convolutional layers of
+AlexNet showing more abstract patterns.</figcaption>
 </figure>
 <p>By the final convolutional layer, filters respond to highly specific
 object parts. Figure <a data-reference="fig:final-layer" data-reference-type="ref" href="#fig:final-layer">12</a> shows
@@ -698,9 +695,9 @@ corresponding to wheels, demonstrating how deeper layers learn detectors
 for meaningful object components.</p>
 <figure id="fig:final-layer">
 <img src="img/lecture16/final-filter.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Figure 15.16: Activation maps from the fifth convolutional
-layer of AlexNet. The highlighted filter responds strongly to wheels
-across multiple images.</figcaption>
+<figcaption>Activation maps from the fifth convolutional layer of
+AlexNet. The highlighted filter responds strongly to wheels across
+multiple images.</figcaption>
 </figure>
 <p>These visualizations provide strong evidence that CNNs learn
 hierarchical representations of visual data. Rather than memorizing

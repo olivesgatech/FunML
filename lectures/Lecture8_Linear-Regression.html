@@ -126,9 +126,9 @@ polynomial, though this lecture will focus on linear regressions.</p>
 Example</h2>
 <figure id="fig:bli_scatter_fit">
 <img src="img/lecture7/bli_scatter_fit.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Figure 7.1: Better Life Index example: GDP per capita
-vs. life satisfaction with a linear fit. Training points are used to fit
-the line; test points illustrate generalization.</figcaption>
+<figcaption>Better Life Index example: GDP per capita vs. life
+satisfaction with a linear fit. Training points are used to fit the
+line; test points illustrate generalization.</figcaption>
 </figure>
 <p>It is clear from the inspection of the graph that there is a positive
 linear correlation between the GDP per capita of the country and its
@@ -156,9 +156,9 @@ and whether there are obvious patterns that suggest model mismatch
 <img src="img/lecture7/bli_residuals_scatter.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
 <figcaption>Residuals vs. predictions (train).</figcaption>
 </figure>
-<figcaption>Figure 7.2: Residual diagnostics for the Better Life Index
-linear regression model on the training set. Ideally, residuals are
-roughly centered around zero with no systematic trend versus <span class="math inline">\(\hat{y}\)</span>.</figcaption>
+<figcaption>Residual diagnostics for the Better Life Index linear
+regression model on the training set. Ideally, residuals are roughly
+centered around zero with no systematic trend versus <span class="math inline">\(\hat{y}\)</span>.</figcaption>
 </figure>
 <p>In this example, the residual histogram appears roughly symmetric and
 centered near zero, which supports the assumption that the model does
@@ -506,10 +506,10 @@ variance).</p>
 <figcaption>Lasso (L1): coefficients are driven to exactly zero,
 yielding sparsity.</figcaption>
 </figure>
-<figcaption>Figure 7.7: Regularization coefficient paths (standardized
-features). Ridge shrinks all coefficients continuously, while Lasso
-performs shrinkage plus feature selection by setting some coefficients
-exactly to zero.</figcaption>
+<figcaption>Regularization coefficient paths (standardized features).
+Ridge shrinks all coefficients continuously, while Lasso performs
+shrinkage plus feature selection by setting some coefficients exactly to
+zero.</figcaption>
 </figure>
 <p>The different shapes of the paths reflect the geometry of the
 regularization penalty. Ridge regression uses an <span class="math inline">\(L_2\)</span> penalty, which penalizes large

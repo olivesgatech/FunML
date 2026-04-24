@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>K-Means Clustering</title>
+  <title>Introduction to Clustering</title>
   <link rel="stylesheet" href="../assets/style.css"/>
   <script>
 window.MathJax = {
@@ -202,8 +202,7 @@ with probability <span class="math inline">\(0.3\)</span>, reflecting
 uncertainty or overlap between groups.</p>
 <figure id="clusteringdefs">
 <img src="img/lecture10/clusteringdefinitions.png"/>
-<figcaption>Figure 10.1: Illustration of key clustering
-terminology.</figcaption>
+<figcaption>Illustration of key clustering terminology.</figcaption>
 </figure>
 <h2 data-number="1.4" id="formalization"><span class="header-section-number">1.4</span> Formalization</h2>
 <p>We now describe clustering more formally. Suppose we are given a
@@ -548,8 +547,7 @@ opposite directions</p></li>
 <p>A corresponding distance is often defined as <span class="math display">\[d = 1 - \cos\theta,\]</span> which lies in <span class="math inline">\([0,2]\)</span>.</p>
 <figure>
 <img src="img/lecture10/cosinesimilarity.png"/>
-<figcaption>Figure 10.3: Special cases of cosine
-similarity.</figcaption>
+<figcaption>Special cases of cosine similarity.</figcaption>
 </figure>
 <h4 data-number="2.4.0.1" id="example.-1"><span class="header-section-number">2.4.0.1</span> Example.</h4>
 <p>Cosine similarity is computationally efficient for sparse vectors
@@ -660,8 +658,8 @@ distance reduces to Euclidean distance.</p>
 </ul>
 <figure>
 <img src="img/lecture10/mahalanobisdistance.png"/>
-<figcaption>Figure 10.4: Mahalanobis distance adapts to the covariance
-structure of the data.</figcaption>
+<figcaption>Mahalanobis distance adapts to the covariance structure of
+the data.</figcaption>
 </figure>
 <p>Intuitively, Mahalanobis distance measures how many <em>multivariate
 standard deviations</em> apart two samples are.</p>
@@ -692,7 +690,7 @@ d_M=2.\]</span></p>
 <p><em>Mahalanobis equals Euclidean when the data is spherical.</em></p>
 <figure>
 <img src="img/lecture10/case1_isotropic.png" style="width:28.80%; max-width:28.80%; height:auto;"/>
-<figcaption>Figure 10.5: Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_1)\)</span>. The
+<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_1)\)</span>. The
 highlighted markers denote the fixed points <span class="math inline">\(\mathbf{x}_a=(0,0)\)</span> and <span class="math inline">\(\mathbf{x}_b=(2,0)\)</span>. </figcaption>
 </figure>
 <p><strong>Case 2 — Large Variance in <span class="math inline">\(x\)</span>-direction</strong></p>
@@ -717,7 +715,7 @@ lies inside a wider ellipse, so it corresponds to fewer standard
 deviations.</p>
 <figure>
 <img src="img/lecture10/case2_large_var_x.png" style="width:28.80%; max-width:28.80%; height:auto;"/>
-<figcaption>Figure 10.6: Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_2)\)</span>. High
+<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_2)\)</span>. High
 variance along the <span class="math inline">\(x\)</span>-direction
 stretches the data horizontally.</figcaption>
 </figure>
@@ -740,7 +738,7 @@ d_M=4.\]</span></p>
 distance grows.</em></p>
 <figure>
 <img src="img/lecture10/case3_small_var_x.png" style="width:28.80%; max-width:28.80%; height:auto;"/>
-<figcaption>Figure 10.7: Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_3)\)</span>. Low
+<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_3)\)</span>. Low
 variance along the <span class="math inline">\(x\)</span>-direction
 compresses the data horizontally.</figcaption>
 </figure>
@@ -764,7 +762,7 @@ deviations.</p>
 ellipse.</em></p>
 <figure>
 <img src="img/lecture10/case4_correlated.png" style="width:28.80%; max-width:28.80%; height:auto;"/>
-<figcaption>Figure 10.8: Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_4)\)</span>.
+<figcaption>Samples from <span class="math inline">\(\mathcal{N}(\mathbf{0},\Sigma_4)\)</span>.
 Correlation rotates the principal axes of the distribution.</figcaption>
 </figure>
 <p>The displacement vector <span class="math inline">\((2,0)\)</span> is

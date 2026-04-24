@@ -142,8 +142,8 @@ illustrates how a fully connected neuron must connect to every input
 pixel.</p>
 <figure id="fig:mlp_full_connect">
 <img src="img/lecture14/image1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.1: A fully connected neuron attached to every
-input pixel</figcaption>
+<figcaption>A fully connected neuron attached to every input
+pixel</figcaption>
 </figure>
 <h2 data-number="2.2" id="neural-networks-through-local-connectivity"><span class="header-section-number">2.2</span> Neural Networks through Local
 Connectivity</h2>
@@ -157,8 +157,7 @@ patch. This reduces the number of weights from <span class="math inline">\(40{,}
 dramatic reduction is illustrated in Figure <a data-reference="fig:local_connectivity" data-reference-type="ref" href="#fig:local_connectivity">2</a>.</p>
 <figure id="fig:local_connectivity">
 <img src="img/lecture14/image2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.2: Neurons connected to local image
-patches</figcaption>
+<figcaption>Neurons connected to local image patches</figcaption>
 </figure>
 <p>Locally connected inputs are particularly effective when inputs are
 roughly aligned, such as in face recognition. They are also useful for
@@ -242,8 +241,8 @@ patterns such as edges, textures, or other localized features.</p>
 moves across the input image to produce the output feature map.</p>
 <figure id="fig:2d_discrete_conv">
 <img src="img/lecture14/image3.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.3: Illustration of 2D discrete convolution as a
-sliding kernel operation</figcaption>
+<figcaption>Illustration of 2D discrete convolution as a sliding kernel
+operation</figcaption>
 </figure>
 <h1 data-number="4" id="mechanics-of-2d-discrete-convolution"><span class="header-section-number">4.</span> Mechanics of 2D Discrete
 Convolution</h1>
@@ -275,11 +274,11 @@ positions of the kernel during this sliding process.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 4.1 — 2D Convolution Kernel Demo</h3><p>Adjust the kernel size and values, then step through positions to see how each output value is computed from the element-wise product.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture13_Kernel_Interactive_interactive.html" style="height:900px;" title="Interactive Section 4.1 Convolution Kernel Demo"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture13_Kernel_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure id="fig:kernel_pos2">
 <img src="img/lecture14/image5.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.5: Kernel positioned at <span class="math inline">\(X[1,3]\)</span></figcaption>
+<figcaption>Kernel positioned at <span class="math inline">\(X[1,3]\)</span></figcaption>
 </figure>
 <figure id="fig:kernel_pos3">
 <img src="img/lecture14/image6.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.6: Kernel positioned at <span class="math inline">\(X[3,0]\)</span></figcaption>
+<figcaption>Kernel positioned at <span class="math inline">\(X[3,0]\)</span></figcaption>
 </figure>
 <p>At any spatial position <span class="math inline">\((i,j)\)</span>,
 the output value is computed by summing the element-wise products
@@ -328,8 +327,8 @@ is transforming raw data into <strong>feature maps</strong> that
 emphasize important patterns such as edges, textures, or shapes.</p>
 <figure id="fig:kernel_intuition">
 <img src="img/lecture14/image7.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.7: Example of convolution: each output value is
-the sum of element-wise products between a <span class="math inline">\(3\times3\)</span> kernel and a local input
+<figcaption>Example of convolution: each output value is the sum of
+element-wise products between a <span class="math inline">\(3\times3\)</span> kernel and a local input
 patch.</figcaption>
 </figure>
 <h1 data-number="5" id="convolutional-layer"><span class="header-section-number">5.</span> Convolutional Layer</h1>
@@ -377,9 +376,8 @@ kernel</strong>. This ensures that the filter can simultaneously capture
 relationships across both spatial dimensions and color channels.</p>
 <figure id="fig:conv3d">
 <img src="img/lecture14/image8.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.8: A <span class="math inline">\(32\times32\times3\)</span> RGB image convolved
-with a <span class="math inline">\(5\times5\times3\)</span>
-filter.</figcaption>
+<figcaption>A <span class="math inline">\(32\times32\times3\)</span> RGB
+image convolved with a <span class="math inline">\(5\times5\times3\)</span> filter.</figcaption>
 </figure>
 <p>As in the 2D case, the filter slides spatially across the height and
 width of the image. At each spatial position, the filter performs an
@@ -426,10 +424,10 @@ this volume corresponds to the activation map produced by one
 filter.</p>
 <figure id="fig:featuremaps">
 <img src="img/lecture14/image9.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.9: Six <span class="math inline">\(5\times5\times3\)</span> filters generate six
-<span class="math inline">\(28\times28\)</span> activation maps that are
-stacked to form a <span class="math inline">\(28\times28\times6\)</span>
-output volume.</figcaption>
+<figcaption>Six <span class="math inline">\(5\times5\times3\)</span>
+filters generate six <span class="math inline">\(28\times28\)</span>
+activation maps that are stacked to form a <span class="math inline">\(28\times28\times6\)</span> output
+volume.</figcaption>
 </figure>
 <h1 data-number="6" id="spatial-dimensions-inside-convolutional-layer"><span class="header-section-number">6.</span> Spatial Dimensions Inside
 Convolutional Layer</h1>
@@ -450,9 +448,8 @@ illustrates this horizontal movement of the filter across the first row
 of the image.</p>
 <figure id="fig:conv_row_slide">
 <img src="img/lecture14/image10.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.10: The <span class="math inline">\(3\times3\)</span> filter sliding across the first
-row of the <span class="math inline">\(7\times7\)</span>
-input.</figcaption>
+<figcaption>The <span class="math inline">\(3\times3\)</span> filter
+sliding across the first row of the <span class="math inline">\(7\times7\)</span> input.</figcaption>
 </figure>
 <p>Because the filter has width <span class="math inline">\(3\)</span>,
 it can only be placed where it fully overlaps the input. Along a row of
@@ -463,8 +460,8 @@ contains <span class="math inline">\(5\)</span> columns, as shown in
 Figure <a data-reference="fig:first_row_output" data-reference-type="ref" href="#fig:first_row_output">11</a>.</p>
 <figure id="fig:first_row_output">
 <img src="img/lecture14/11.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.11: After traversing the first row, the output
-contains five columns.</figcaption>
+<figcaption>After traversing the first row, the output contains five
+columns.</figcaption>
 </figure>
 <p>Once the filter reaches the end of the first row, it shifts downward
 by one pixel and repeats the same sliding process across the next row.
@@ -519,8 +516,8 @@ behavior occurs vertically, resulting in a smaller output grid.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 6.3 — Impact of Stride</h3><p>Change the stride to see which positions the filter visits and how skipping positions reduces the output size.</p><iframe class="interactive-notebook-frame" data-default-height="720" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture13_Stride_Interactive_interactive.html" style="height:720px;" title="Interactive Section 6.3 Impact of Stride"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture13_Stride_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure id="fig:stride_rows">
 <img src="img/lecture14/14.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.14: Stride also applies vertically; skipping rows
-produces a <span class="math inline">\(3\times3\)</span> output feature
+<figcaption>Stride also applies vertically; skipping rows produces a
+<span class="math inline">\(3\times3\)</span> output feature
 map.</figcaption>
 </figure>
 <h4 data-number="6.3.0.1" id="when-does-a-stride-value-work"><span class="header-section-number">6.3.0.1</span> When does a stride value
@@ -548,8 +545,8 @@ output dimension. Equivalently, a stride is valid only if <span class="math inli
 visually.</p>
 <figure id="fig:stride_formula">
 <img src="img/lecture14/15.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.15: Example calculations showing valid and invalid
-stride values.</figcaption>
+<figcaption>Example calculations showing valid and invalid stride
+values.</figcaption>
 </figure>
 <h2 data-number="6.4" id="zero-padding"><span class="header-section-number">6.4</span> Zero-Padding</h2>
 <p><strong>Zero-padding</strong> is a technique used to control the
@@ -633,8 +630,8 @@ between the input volume, convolutional kernels, and the resulting
 output volume.</p>
 <figure id="fig:conv_dimensions">
 <img src="img/lecture14/17.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.17: Dimension variables for input, kernels, and
-output volumes.</figcaption>
+<figcaption>Dimension variables for input, kernels, and output
+volumes.</figcaption>
 </figure>
 <h2 data-number="6.6" id="interactions-with-activation-functions"><span class="header-section-number">6.6</span> Interactions with Activation
 Functions</h2>
@@ -665,14 +662,14 @@ fields expand across layers. Figure <a data-reference="fig:cnn_pipeline" data-r
 the full CNN processing pipeline from input to classification.</p>
 <figure id="fig:receptive_field">
 <img src="img/lecture14/18.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.18: Receptive fields expand across layers: <span class="math inline">\(Z_{1,1}\)</span> has a <span class="math inline">\(3\times3\)</span> receptive field, while deeper
+<figcaption>Receptive fields expand across layers: <span class="math inline">\(Z_{1,1}\)</span> has a <span class="math inline">\(3\times3\)</span> receptive field, while deeper
 units capture larger regions.</figcaption>
 </figure>
 <figure id="fig:cnn_pipeline">
 <img src="img/lecture14/19.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 13.19: End-to-end CNN pipeline illustrating
-convolution, activation, pooling, flattening, and fully-connected layers
-that transform raw images into final class predictions.</figcaption>
+<figcaption>End-to-end CNN pipeline illustrating convolution,
+activation, pooling, flattening, and fully-connected layers that
+transform raw images into final class predictions.</figcaption>
 </figure>
 <h1 data-number="7" id="pooling-layer-and-fully-connected-layer"><span class="header-section-number">7.</span> Pooling Layer and Fully-Connected
 Layer</h1>

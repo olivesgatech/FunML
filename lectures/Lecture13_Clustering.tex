@@ -241,7 +241,7 @@ which new data points are assigned to the nearest learned centroid.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.38\linewidth]{img/lecture11/Screenshot 2024-09-29 at 10.43.43 AM.png}
-    \caption{Figure 11.1: k-Means Clustering Standard Algorithm Procedure}
+    \caption{k-Means Clustering Standard Algorithm Procedure}
     \label{fig:enter-label}
 \end{figure}
 
@@ -320,7 +320,7 @@ With the problem statement, standard algorithm, and convergence criteria introdu
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.12.16 AM.png}
-    \caption{Figure 11.2: Data Points}
+    \caption{Data Points}
     \label{fig:enter-label}
 \end{figure}
 
@@ -329,7 +329,7 @@ Step 1 of the algorithm states we will randomly choose k points from all data po
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.14.26 AM.png}
-    \caption{Figure 11.3: Initialized centroids}
+    \caption{Initialized centroids}
     \label{fig:enter-label}
 \end{figure}
 
@@ -342,7 +342,7 @@ Assuming this distance is the smallest, $x_1$ will be assigned to cluster $C_1$.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 11.31.47 AM.png}
-    \caption{Figure 11.4: Assignment of all samples using Euclidean distance}
+    \caption{Assignment of all samples using Euclidean distance}
     \label{fig:enter-label}
 \end{figure}
 
@@ -351,7 +351,7 @@ Step 3 is the update step, where we need to re-estimate centroids (mean) of all 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.07.38 PM.png}
-    \caption{Figure 11.5: centroids move the to the calculated mean of the clusters}
+    \caption{centroids move the to the calculated mean of the clusters}
     \label{fig:enter-label}
 \end{figure}
 
@@ -362,7 +362,7 @@ we reached this plot:
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.10.20 PM.png}
-    \caption{Figure 11.6: Second iteration assignment cluster membership}
+    \caption{Second iteration assignment cluster membership}
     \label{fig:enter-label}
 \end{figure}
 
@@ -370,7 +370,7 @@ Based on the reassigned clusters, we need to update the centroids using the prev
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 12.18.27 PM.png}
-    \caption{Figure 11.7: second iteration update step: Re-estimate centroids}
+    \caption{second iteration update step: Re-estimate centroids}
     \label{fig:enter-label}
 \end{figure}
 
@@ -381,7 +381,7 @@ With the new centroid, we need to reassign the samples to the clusters in the th
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 1.38.32 PM.png}
-    \caption{Figure 11.8: Third iteration assignment step}
+    \caption{Third iteration assignment step}
     \label{fig:enter-label}
 
 
@@ -391,7 +391,7 @@ After the assignment step, we will repeat step 3 to update and re-estimate centr
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 1.41.59 PM.png}
-    \caption{Figure 11.9: Figure 11.8: Third iteration update step}
+    \caption{Third iteration update step}
     \label{fig:enter-label}
 \end{figure}
 \end{figure}
@@ -401,7 +401,7 @@ We will reassign every point. However, since there are no changes in cluster mem
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.01.26 PM.png}
-    \caption{Figure 11.10: Converged Algorithm, and final cluster assignment}
+    \caption{Converged Algorithm, and final cluster assignment}
     \label{fig:enter-label}
 \end{figure}
 
@@ -438,7 +438,7 @@ of the clustering.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.21.34 PM.png}
-    \caption{Figure 11.11: Different choices of $k$ lead to different clustering results.}
+    \caption{Different choices of $k$ lead to different clustering results.}
     \label{fig:k-choice}
 \end{figure}
 
@@ -461,7 +461,7 @@ starting centroids to increase the likelihood of finding a better solution.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.8\linewidth]{img/lecture11/Screenshot 2024-09-29 at 2.23.47 PM.png}
-    \caption{Figure 11.12: Different methods of initializing centroids can change the outcome.}
+    \caption{Different methods of initializing centroids can change the outcome.}
     \label{fig:init-centroids}
 \end{figure}
 
@@ -629,7 +629,7 @@ a single outlier can lead to an undesirable clustering result.
     \includegraphics[width=0.32\linewidth]{img/lecture11/images/Dataset.jpg}
     \includegraphics[width=0.32\linewidth]{img/lecture11/images/Undesirable_clustering.jpg}
     \includegraphics[width=0.32\linewidth]{img/lecture11/images/Ideal_clustering.jpg}
-    \caption{Figure 11.13: Sensitivity of k-means to outliers. Left: original dataset.
+    \caption{Sensitivity of k-means to outliers. Left: original dataset.
     Middle: undesirable clustering influenced by an outlier.
     Right: desirable clustering without the outlier.}
     \label{fig:kmeans-outlier}
@@ -847,7 +847,7 @@ datasets.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.2]{img/lecture11/images/mini_batch_comp.jpg}
-    \caption{Figure 11.14: Mini-batch k-means reduces computation time by using small random
+    \caption{Mini-batch k-means reduces computation time by using small random
     subsets of the data during training.}
     \label{fig:minibatch_speed}
 \end{figure}
@@ -861,7 +861,7 @@ highlights the small differences in assignments between the methods.
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.2]{img/lecture11/images/Mini-batch-k-Means-diff.jpg}
-    \caption{Figure 11.15: Comparison of clustering results from mini-batch k-means and
+    \caption{Comparison of clustering results from mini-batch k-means and
     standard k-means. The solutions are similar but not identical.}
     \label{fig:minibatch_compare}
 \end{figure}
@@ -1058,7 +1058,7 @@ We are provided with the following data set:
 \begin{figure}[H]
     \center
     \includegraphics[scale=0.5]{img/lecture11/images/k_medoids_data.jpg}
-    \caption{Figure 11.16: Dataset and graphical representation}
+    \caption{Dataset and graphical representation}
 \end{figure}
 
 We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algorithm with L-1 norm distance (Manhattan distance) metric.
@@ -1070,7 +1070,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
     \begin{figure}[H]
         \center
         \includegraphics[scale=0.2]{img/lecture11/images/k-med-init-assign.jpg}
-        \caption{Figure 11.17: Initial assignment to clusters}
+        \caption{Initial assignment to clusters}
     \end{figure}
 
     Each data sample is assigned the medoid which is closer to it. The total cost of clustering is computed as the sum of distances of each sample from its assigned cluster medoid.
@@ -1084,7 +1084,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_1_a_table.jpg}
-            \caption{Figure 11.18: Computing alternate center costs}
+            \caption{Computing alternate center costs}
         \end{figure}
 
         Current medoid $\mathbf{x}_4$ has a total cost of 13, which is the minimum cost, so $\mathbf{x}_4$ remains the value of medoid $\mathbf{m}_1$
@@ -1093,7 +1093,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_1_a_split.jpg}
-            \caption{Figure 11.19: Clusters after updating $\mathbf{m}_1$}
+            \caption{Clusters after updating $\mathbf{m}_1$}
         \end{figure}
         
     
@@ -1104,7 +1104,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/k-med-update-1-b-table.jpg}
-            \caption{Figure 11.20: Computing alternate center costs}
+            \caption{Computing alternate center costs}
         \end{figure}
 
         Sample $\mathbf{x}_7$ provides a total cost of 7 which is lower than the total cost of the current medoid $\mathbf{x}_9$ which is 11. Therefore, medoid $\mathbf{m}_2$ moves to $\mathbf{x}_7$.
@@ -1112,7 +1112,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_1_b_split.jpg}
-            \caption{Figure 11.21: Clusters after updating $\mathbf{m}_2$}
+            \caption{Clusters after updating $\mathbf{m}_2$}
         \end{figure}
         
     \end{enumerate}
@@ -1122,7 +1122,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
     \begin{figure}[H]
         \center
         \includegraphics[scale=0.2]{img/lecture11/images/k-med-reassign.jpg}
-        \caption{Figure 11.22: Re-assignment of all samples to clusters}
+        \caption{Re-assignment of all samples to clusters}
     \end{figure}
         
     \item Update Step: Iteration 2
@@ -1133,7 +1133,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_2_a_table.jpg}
-            \caption{Figure 11.23: Computing alternate center costs}
+            \caption{Computing alternate center costs}
         \end{figure}
     
         Current medoid $\mathbf{x}_4$ has a total cost of 9, which is the minimum cost, so $\mathbf{x}_4$ remains the value of medoid $\mathbf{m}_1$
@@ -1141,7 +1141,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/udpate_2_a_graph.jpg}
-            \caption{Figure 11.24: Clusters after updating $\mathbf{m}_1$}
+            \caption{Clusters after updating $\mathbf{m}_1$}
         \end{figure}
 
         
@@ -1151,7 +1151,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_2_b_table.jpg}
-            \caption{Figure 11.25: Computing alternate center costs}
+            \caption{Computing alternate center costs}
         \end{figure}
         
         Current medoid $\mathbf{x}_7$ has a total cost of 10, which is the minimum cost, so $\mathbf{x}_7$ remains the value of medoid $\mathbf{m}_2$
@@ -1159,7 +1159,7 @@ We need to split the data into two clusters (i.e. $k$ = 2) using k-Medoids algor
         \begin{figure}[H]
             \center
             \includegraphics[scale=0.2]{img/lecture11/images/update_2_b_graph.jpg}
-            \caption{Figure 11.26: Clusters after updating $\mathbf{m}_2$}
+            \caption{Clusters after updating $\mathbf{m}_2$}
         \end{figure}
         
     \end{enumerate}

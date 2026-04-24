@@ -710,8 +710,8 @@ positives vs. false negatives) and enables computation of accuracy,
 precision, recall, and F1 score.</p>
 <figure id="fig:cm_binary">
 <img src="img/lecture6/confusion_matrix_binary.png" style="width:37.20%; max-width:37.20%; height:auto;"/>
-<figcaption>Figure 6.1: Confusion matrix for a binary classifier. Rows
-correspond to true labels and columns to predicted labels.</figcaption>
+<figcaption>Confusion matrix for a binary classifier. Rows correspond to
+true labels and columns to predicted labels.</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:lc" data-reference-type="ref" href="#fig:lc">2</a> shows a learning curve (training
 vs. validation accuracy vs. training set size). A persistent gap between
@@ -721,16 +721,16 @@ validation performance typically stabilizes if the model generalizes
 well.</p>
 <figure id="fig:lc">
 <img src="img/lecture6/learning_curve.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Figure 6.2: Learning curve showing training and validation
-accuracy as a function of training set size.</figcaption>
+<figcaption>Learning curve showing training and validation accuracy as a
+function of training set size.</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:roc_binary" data-reference-type="ref" href="#fig:roc_binary">3</a> shows the ROC curve (TPR vs. FPR)
 across all thresholds, with AUC summarizing ranking quality. ROC is
 often most informative when classes are relatively balanced.</p>
 <figure id="fig:roc_binary">
 <img src="img/lecture6/roc_curve_2.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Figure 6.3: ROC curve for binary classification (true
-positive rate vs. false positive rate).</figcaption>
+<figcaption>ROC curve for binary classification (true positive rate
+vs. false positive rate).</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:pr_binary" data-reference-type="ref" href="#fig:pr_binary">4</a> shows the precision–recall (PR)
 curve, which is typically more informative than ROC under class
@@ -738,7 +738,7 @@ imbalance, since it focuses on performance on the positive class
 (precision) while increasing coverage (recall).</p>
 <figure id="fig:pr_binary">
 <img src="img/lecture6/pr_curve.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Figure 6.4: Precision–recall curve for binary
+<figcaption>Precision–recall curve for binary
 classification.</figcaption>
 </figure>
 <p>Figure <a data-reference="fig:thresh_tradeoff" data-reference-type="ref" href="#fig:thresh_tradeoff">5</a> shows how precision and
@@ -752,8 +752,8 @@ Micro-averaging weights classes by frequency, while macro-averaging
 treats all classes equally.</p>
 <figure id="fig:roc_multiclass">
 <img src="img/lecture6/multiclass_roc_ovr.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Figure 6.6: Multi-class ROC curves using a One-vs-Rest
-strategy with micro and macro averages.</figcaption>
+<figcaption>Multi-class ROC curves using a One-vs-Rest strategy with
+micro and macro averages.</figcaption>
 </figure>
 <p>(Details on multi-class ROC construction are discussed in Section <a data-reference="sec:multiroc" data-reference-type="ref" href="#sec:multiroc">6.1</a>.)</p>
 <h1 data-number="6" id="additional-details"><span class="header-section-number">6.</span> Additional Details</h1>

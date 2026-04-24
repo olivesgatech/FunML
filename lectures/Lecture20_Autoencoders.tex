@@ -163,7 +163,7 @@ An autoencoder is a type of model used for unsupervised learning that aims to le
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 4.36.04 PM.png}
-    \caption{Figure 17.1: Autoencoder and Reconstruction}
+    \caption{Autoencoder and Reconstruction}
     \label{fig:enter-label}
 \end{figure}
 
@@ -179,7 +179,7 @@ In many datasets, most of the meaningful variation lies along just a few of thes
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\linewidth]{img/lecture18/output.png}
-    \caption{Figure 17.2: \textbf{Illustration of PCA for dimensionality reduction.}
+    \caption{\textbf{Illustration of PCA for dimensionality reduction.}
     \textbf{Left:} The original dataset in three dimensions. The points lie roughly near a tilted plane, indicating that much of the variation occurs along only a few directions.
     \textbf{Right:} The same dataset after applying PCA and projecting onto the first two principal components. The projection preserves the dominant variance while reducing the dimensionality from 3D to 2D.}
     \label{fig:pca_example}
@@ -210,7 +210,7 @@ When the columns of \( V_K \) are orthonormal and correspond to the top \( K \) 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 4.38.07 PM.png}
-    \caption{Figure 17.3: Linear AutoEncoders}
+    \caption{Linear AutoEncoders}
     \label{fig:enter-label}
 \end{figure}
 
@@ -229,7 +229,7 @@ This added flexibility enables nonlinear autoencoders to capture complex structu
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 4.38.15 PM.png}
-    \caption{Figure 17.4: Nonlinear Autoencoders}
+    \caption{Nonlinear Autoencoders}
     \label{fig:enter-label}
 \end{figure}
 
@@ -241,7 +241,7 @@ In fully-connected autoencoders, both the encoder and decoder are implemented us
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 4.56.26 PM.png}
-    \caption{Figure 17.5: Fully-connected autoencoder encoder–decoder structure.}
+    \caption{Fully-connected autoencoder encoder–decoder structure.}
     \label{fig:fc-ae-structure}
 \end{figure}
 
@@ -250,7 +250,7 @@ Fully-connected autoencoders can be applied to the MNIST handwritten digit datas
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 8.54.57 PM.png}
-    \caption{Figure 17.6: Example fully-connected autoencoder architecture for MNIST.}
+    \caption{Example fully-connected autoencoder architecture for MNIST.}
     \label{fig:fc-ae-mnist}
 \end{figure}
 
@@ -261,7 +261,7 @@ Because MNIST images are flattened into vectors, the network treats each pixel i
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 6.37.17 PM.png}
-    \caption{Figure 17.7: MNIST reconstructions using linear and nonlinear fully-connected autoencoders. Nonlinear models produce sharper reconstructions.}
+    \caption{MNIST reconstructions using linear and nonlinear fully-connected autoencoders. Nonlinear models produce sharper reconstructions.}
     \label{fig:fc-ae-results}
 \end{figure}
 
@@ -274,14 +274,14 @@ Compared to the linear autoencoder, the nonlinear autoencoder tends to use neuro
 \begin{figure}[H]
 \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 6.55.06 PM.png}
-    \caption{Figure 17.8: 2rd layer}
+    \caption{2rd layer}
     \label{fig:enter-label}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-10-30 at 6.55.09 PM.png}
-    \caption{Figure 17.9: 3rd layer}
+    \caption{3rd layer}
     \label{fig:enter-label}
 \end{figure}
 
@@ -292,7 +292,7 @@ To better understand how autoencoders organize data internally, we can restrict 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.31.18 AM.png}
-    \caption{Figure 17.10: Two-dimensional latent space learned by a fully-connected autoencoder.}
+    \caption{Two-dimensional latent space learned by a fully-connected autoencoder.}
     \label{fig:2d-latent}
 \end{figure}
 
@@ -310,7 +310,7 @@ Figure~\ref{fig:conv-autoencoder} illustrates the overall architecture of a conv
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.31.42 AM.png}
-    \caption{Figure 17.11: Overview of convolutional autoencoder architecture.}
+    \caption{Overview of convolutional autoencoder architecture.}
     \label{fig:conv-autoencoder}
 \end{figure}
 
@@ -319,7 +319,7 @@ A more detailed view of the encoder–decoder structure is shown in Figure~\ref{
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.31.52 AM.png}
-    \caption{Figure 17.12: Encoder and decoder structure in convolutional autoencoders.}
+    \caption{Encoder and decoder structure in convolutional autoencoders.}
     \label{fig:encoder-decoder}
 \end{figure}
 
@@ -334,7 +334,7 @@ Two common unpooling strategies are illustrated in Figure~\ref{fig:unpooling}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.41.54 PM.png}
-    \caption{Figure 17.13: \textbf{Unpooling strategies.} 
+    \caption{\textbf{Unpooling strategies.} 
     Left: Nearest-neighbor upsampling duplicates values to increase resolution.
     Right: Bed-of-nails upsampling inserts zeros between original activations.}
     \label{fig:unpooling}
@@ -351,7 +351,7 @@ In practice, unpooling is often combined with learned convolutional layers to re
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.24.28 PM.png}
-    \caption{Figure 17.14: Max-unpooling using stored pooling indices.}
+    \caption{Max-unpooling using stored pooling indices.}
     \label{fig:max-unpooling}
 \end{figure}
 
@@ -364,7 +364,7 @@ Unlike nearest-neighbor or bed-of-nails unpooling, which apply fixed heuristics,
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture18/Screenshot 2024-11-02 at 8.32.21 PM.png}
-    \caption{Figure 17.15: Learnable upsampling using transposed convolution.}
+    \caption{Learnable upsampling using transposed convolution.}
     \label{fig:learnable-upsampling}
 \end{figure}
 
@@ -391,7 +391,7 @@ We now consider a convolutional autoencoder trained on the MNIST handwritten dig
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\linewidth]{img/lecture18/Screenshot 2024-11-02 at 9.20.33 PM.png}
-    \caption{Figure 17.16: \textbf{Convolutional autoencoder architecture for MNIST.} The encoder progressively reduces spatial resolution to form a compact latent representation, while the decoder reconstructs the image using transposed convolutions.}
+    \caption{\textbf{Convolutional autoencoder architecture for MNIST.} The encoder progressively reduces spatial resolution to form a compact latent representation, while the decoder reconstructs the image using transposed convolutions.}
     \label{fig:conv-autoencoder-mnist}
 \end{figure}
 
@@ -406,7 +406,7 @@ Convolutional autoencoders trained on MNIST typically achieve lower reconstructi
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\linewidth]{img/lecture18/Screenshot 2024-11-02 at 8.28.20 PM.png}
-    \caption{Figure 17.17: \textbf{Original vs reconstructed MNIST images.} The autoencoder learns a compact representation that preserves the key structure of the digits.}
+    \caption{\textbf{Original vs reconstructed MNIST images.} The autoencoder learns a compact representation that preserves the key structure of the digits.}
     \label{fig:input-reconstruction}
 \end{figure}
 

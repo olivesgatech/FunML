@@ -149,7 +149,7 @@ An excessively large number of parameters introduces several problems: training 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image1.png}
-    \caption{Figure 13.1: A fully connected neuron attached to every input pixel}
+    \caption{A fully connected neuron attached to every input pixel}
     \label{fig:mlp_full_connect}
 \end{figure}
 
@@ -162,7 +162,7 @@ For example, rather than connecting to a $200 \times 200$ image, a neuron may co
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image2.png}
-    \caption{Figure 13.2: Neurons connected to local image patches}
+    \caption{Neurons connected to local image patches}
     \label{fig:local_connectivity}
 \end{figure}
 
@@ -223,7 +223,7 @@ Figure~\ref{fig:2d_discrete_conv} illustrates how the kernel moves across the in
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image3.png}
-    \caption{Figure 13.3: Illustration of 2D discrete convolution as a sliding kernel operation}
+    \caption{Illustration of 2D discrete convolution as a sliding kernel operation}
     \label{fig:2d_discrete_conv}
 \end{figure}
 
@@ -248,21 +248,21 @@ This process is repeated as the kernel slides across the entire input matrix, pr
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image4.png}
-    \caption{Figure 13.4: Kernel positioned at $X[0,3]$}
+    \caption{Kernel positioned at $X[0,3]$}
     \label{fig:kernel_pos1}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image5.png}
-    \caption{Figure 13.5: Kernel positioned at $X[1,3]$}
+    \caption{Kernel positioned at $X[1,3]$}
     \label{fig:kernel_pos2}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image6.png}
-    \caption{Figure 13.6: Kernel positioned at $X[3,0]$}
+    \caption{Kernel positioned at $X[3,0]$}
     \label{fig:kernel_pos3}
 \end{figure}
 
@@ -301,7 +301,7 @@ From a representation-learning perspective, the output matrix can be viewed as a
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image7.png}
-    \caption{Figure 13.7: Example of convolution: each output value is the sum of element-wise products between a $3\times3$ kernel and a local input patch.}
+    \caption{Example of convolution: each output value is the sum of element-wise products between a $3\times3$ kernel and a local input patch.}
     \label{fig:kernel_intuition}
 \end{figure}
 
@@ -325,7 +325,7 @@ Figure~\ref{fig:conv3d} illustrates how convolution operates on such an input. A
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image8.png}
-    \caption{Figure 13.8: A $32\times32\times3$ RGB image convolved with a $5\times5\times3$ filter.}
+    \caption{A $32\times32\times3$ RGB image convolved with a $5\times5\times3$ filter.}
     \label{fig:conv3d}
 \end{figure}
 
@@ -352,7 +352,7 @@ Figure~\ref{fig:featuremaps} illustrates this process. When six $5\times5\times3
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image9.png}
-    \caption{Figure 13.9: Six $5\times5\times3$ filters generate six $28\times28$ activation maps that are stacked to form a $28\times28\times6$ output volume.}
+    \caption{Six $5\times5\times3$ filters generate six $28\times28$ activation maps that are stacked to form a $28\times28\times6$ output volume.}
     \label{fig:featuremaps}
 \end{figure}
 
@@ -368,7 +368,7 @@ Consider a $7\times7$ input image and a $3\times3$ convolutional filter. The fil
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/image10.png}
-    \caption{Figure 13.10: The $3\times3$ filter sliding across the first row of the $7\times7$ input.}
+    \caption{The $3\times3$ filter sliding across the first row of the $7\times7$ input.}
     \label{fig:conv_row_slide}
 \end{figure}
 
@@ -377,7 +377,7 @@ Because the filter has width $3$, it can only be placed where it fully overlaps 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/11.png}
-    \caption{Figure 13.11: After traversing the first row, the output contains five columns.}
+    \caption{After traversing the first row, the output contains five columns.}
     \label{fig:first_row_output}
 \end{figure}
 
@@ -386,7 +386,7 @@ Once the filter reaches the end of the first row, it shifts downward by one pixe
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/12.png}
-    \caption{Figure 13.12: Final output size after the filter finishes traversing the input.}
+    \caption{Final output size after the filter finishes traversing the input.}
     \label{fig:final_output_size}
 \end{figure}
 
@@ -436,14 +436,14 @@ Figure~\ref{fig:stride_first_row} shows how the filter skips positions along the
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/13.png}
-    \caption{Figure 13.13: With stride $S=2$, the filter skips positions along the first row, producing fewer output columns.}
+    \caption{With stride $S=2$, the filter skips positions along the first row, producing fewer output columns.}
     \label{fig:stride_first_row}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/14.png}
-    \caption{Figure 13.14: Stride also applies vertically; skipping rows produces a $3\times3$ output feature map.}
+    \caption{Stride also applies vertically; skipping rows produces a $3\times3$ output feature map.}
     \label{fig:stride_rows}
 \end{figure}
 
@@ -484,7 +484,7 @@ Figure~\ref{fig:stride_formula} summarizes this calculation visually.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/15.png}
-    \caption{Figure 13.15: Example calculations showing valid and invalid stride values.}
+    \caption{Example calculations showing valid and invalid stride values.}
     \label{fig:stride_formula}
 \end{figure}
 
@@ -507,7 +507,7 @@ Figure~\ref{fig:zero_padding} illustrates how the required padding depends on th
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/16.png}
-    \caption{Figure 13.16: Based on kernel size $k$, the input is padded with $(k-1)/2$ zeros on each side to preserve spatial dimensions.}
+    \caption{Based on kernel size $k$, the input is padded with $(k-1)/2$ zeros on each side to preserve spatial dimensions.}
     \label{fig:zero_padding}
 \end{figure}
 
@@ -609,7 +609,7 @@ and the resulting output volume.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/17.png}
-    \caption{Figure 13.17: Dimension variables for input, kernels, and output volumes.}
+    \caption{Dimension variables for input, kernels, and output volumes.}
     \label{fig:conv_dimensions}
 \end{figure}
 
@@ -630,14 +630,14 @@ Figure~\ref{fig:cnn_pipeline} shows the full CNN processing pipeline from input 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/18.png}
-    \caption{Figure 13.18: Receptive fields expand across layers: $Z_{1,1}$ has a $3\times3$ receptive field, while deeper units capture larger regions.}
+    \caption{Receptive fields expand across layers: $Z_{1,1}$ has a $3\times3$ receptive field, while deeper units capture larger regions.}
     \label{fig:receptive_field}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/19.png}
-    \caption{Figure 13.19: End-to-end CNN pipeline illustrating convolution, activation, pooling, flattening, and fully-connected layers that transform raw images into final class predictions.}
+    \caption{End-to-end CNN pipeline illustrating convolution, activation, pooling, flattening, and fully-connected layers that transform raw images into final class predictions.}
     \label{fig:cnn_pipeline}
 \end{figure}
 
@@ -688,7 +688,7 @@ Figure~\ref{fig:pooling_variants}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\linewidth]{img/lecture14/Im2.png}
-    \caption{Figure 13.20: Common pooling operations used to downsample feature maps.}
+    \caption{Common pooling operations used to downsample feature maps.}
     \label{fig:pooling_variants}
 \end{figure}
 
