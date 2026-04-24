@@ -109,198 +109,62 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture extends the study of Large Language Models to the
-multimodal setting where visual and linguistic signals are jointly
-processed. We begin by formalizing the vision-language alignment problem
-and motivating it with downstream tasks such as image captioning, visual
-question answering, and zero-shot image classification. We study
-contrastive pretraining with CLIP as the foundation for aligning image
-and text representation spaces at scale, and analyze how contrastive
-objectives produce transferable embeddings. We then examine
-architectural designs that bridge a pretrained visual encoder with a
-pretrained language model, including the cross-attention gating approach
-of Flamingo, the projection-based connector of LLaVA, and the Q-Former
-bridge of BLIP-2. We study the Visual Transformer (ViT) in detail as the
-canonical image encoder, discussing how images are patchified and fed
-into a standard Transformer. We discuss multimodal instruction tuning,
-which extends LLM-style SFT and RLHF to image-conditioned settings, and
-survey benchmark tasks used to evaluate VLMs. We close with an analysis
-of failure modes unique to multimodal models, including hallucination of
-visual content, modality imbalance, and challenges in spatial and
-relational reasoning <span class="citation" data-cites="1 2 3 4"></span>.</p>
-<h1 data-number="2" id="motivation-and-problem-setting"><span class="header-section-number">2.</span> Motivation and Problem
-Setting</h1>
-<p>Human perception is inherently multimodal: we seamlessly integrate
-visual, auditory, and linguistic information when understanding the
-world. A Vision-Language Model (VLM) attempts to replicate this
-cross-modal integration in a machine learning system. Formally, a VLM
-takes as input an image <span class="math inline">\(I \in \mathbb{R}^{H
-\times W \times C}\)</span> and a text query <span class="math inline">\(q = (w_1, \ldots, w_T)\)</span>, and produces a
-text response: <span class="math display">\[P(y \mid I, q) = \prod_{t}
-P(y_t \mid I, q, y_1, \ldots, y_{t-1}).\]</span></p>
+<p>This lecture extends the study of Large Language Models to the multimodal setting where visual and linguistic signals are jointly processed. We begin by formalizing the vision-language alignment problem and motivating it with downstream tasks such as image captioning, visual question answering, and zero-shot image classification. We study contrastive pretraining with CLIP as the foundation for aligning image and text representation spaces at scale, and analyze how contrastive objectives produce transferable embeddings. We then examine architectural designs that bridge a pretrained visual encoder with a pretrained language model, including the cross-attention gating approach of Flamingo, the projection-based connector of LLaVA, and the Q-Former bridge of BLIP-2. We study the Visual Transformer (ViT) in detail as the canonical image encoder, discussing how images are patchified and fed into a standard Transformer. We discuss multimodal instruction tuning, which extends LLM-style SFT and RLHF to image-conditioned settings, and survey benchmark tasks used to evaluate VLMs. We close with an analysis of failure modes unique to multimodal models, including hallucination of visual content, modality imbalance, and challenges in spatial and relational reasoning <span class="citation" data-cites="1 2 3 4"></span>.</p>
+<h1 data-number="2" id="motivation-and-problem-setting"><span class="header-section-number">2.</span> Motivation and Problem Setting</h1>
+<p>Human perception is inherently multimodal: we seamlessly integrate visual, auditory, and linguistic information when understanding the world. A Vision-Language Model (VLM) attempts to replicate this cross-modal integration in a machine learning system. Formally, a VLM takes as input an image <span class="math inline">\(I \in \mathbb{R}^{H \times W \times C}\)</span> and a text query <span class="math inline">\(q = (w_1, \ldots, w_T)\)</span>, and produces a text response: <span class="math display">\[P(y \mid I, q) = \prod_{t} P(y_t \mid I, q, y_1, \ldots, y_{t-1}).\]</span></p>
 <p>Downstream applications include:</p>
 <ul>
-<li><p><strong>Image captioning:</strong> Generate a natural-language
-description of an image.</p></li>
-<li><p><strong>Visual Question Answering (VQA):</strong> Answer a
-free-form question about an image.</p></li>
-<li><p><strong>Zero-shot image classification:</strong> Rank candidate
-class names by their compatibility with an image embedding.</p></li>
-<li><p><strong>Optical Character Recognition (OCR) and document
-understanding:</strong> Parse and reason over text embedded in
-images.</p></li>
-<li><p><strong>Grounding:</strong> Localize objects or regions in an
-image referred to by a textual expression.</p></li>
-<li><p><strong>Multimodal instruction following:</strong> Perform
-multi-step visual tasks described in natural language.</p></li>
+<li><p><strong>Image captioning:</strong> Generate a natural-language description of an image.</p></li>
+<li><p><strong>Visual Question Answering (VQA):</strong> Answer a free-form question about an image.</p></li>
+<li><p><strong>Zero-shot image classification:</strong> Rank candidate class names by their compatibility with an image embedding.</p></li>
+<li><p><strong>Optical Character Recognition (OCR) and document understanding:</strong> Parse and reason over text embedded in images.</p></li>
+<li><p><strong>Grounding:</strong> Localize objects or regions in an image referred to by a textual expression.</p></li>
+<li><p><strong>Multimodal instruction following:</strong> Perform multi-step visual tasks described in natural language.</p></li>
 </ul>
 <h1 data-number="3" id="the-vision-transformer-vit"><span class="header-section-number">3.</span> The Vision Transformer (ViT)</h1>
-<h2 data-number="3.1" id="patchification-and-embedding"><span class="header-section-number">3.1</span> Patchification and
-Embedding</h2>
-<p>A Vision Transformer (ViT) <span class="citation" data-cites="5"></span> processes an image by dividing it into a grid of
-non-overlapping patches of size <span class="math inline">\(P \times
-P\)</span> pixels. For an image of resolution <span class="math inline">\(H \times W\)</span>, this yields <span class="math inline">\(N = (H \cdot W) / P^2\)</span> patches. Each patch
-<span class="math inline">\(\mathbf{p}_i \in \mathbb{R}^{P \times P
-\times C}\)</span> is flattened and linearly projected into a <span class="math inline">\(d\)</span>-dimensional embedding: <span class="math display">\[\mathbf{z}_i = \mathbf{W}_\text{patch}\,
-\text{vec}(\mathbf{p}_i) + \mathbf{b},\]</span> where <span class="math inline">\(\mathbf{W}_\text{patch} \in \mathbb{R}^{d \times
-P^2 C}\)</span>. A learnable class token <span class="math inline">\([\text{CLS}]\)</span> is prepended, and 1D
-positional embeddings are added to each patch embedding. The resulting
-sequence of <span class="math inline">\(N+1\)</span> tokens is processed
-by a standard Transformer encoder.</p>
-<h2 data-number="3.2" id="self-attention-over-image-patches"><span class="header-section-number">3.2</span> Self-Attention over Image
-Patches</h2>
-<p>Because ViT uses the same Transformer attention mechanism as text
-models, each patch can attend to every other patch in the image. This
-global receptive field distinguishes ViT from convolutional networks,
-which have a local receptive field that grows with depth. The <span class="math inline">\([\text{CLS}]\)</span> token aggregates information
-from all patches through attention and serves as the global image
-representation used for downstream tasks.</p>
-<p>ViT requires large datasets to achieve strong performance; its lack
-of inductive biases (spatial locality, translation equivariance)
-compared to CNNs is a disadvantage on small datasets but an advantage
-when trained on hundreds of millions of image-text pairs, where the
-model can learn these biases from data.</p>
+<h2 data-number="3.1" id="patchification-and-embedding"><span class="header-section-number">3.1</span> Patchification and Embedding</h2>
+<p>A Vision Transformer (ViT) <span class="citation" data-cites="5"></span> processes an image by dividing it into a grid of non-overlapping patches of size <span class="math inline">\(P \times P\)</span> pixels. For an image of resolution <span class="math inline">\(H \times W\)</span>, this yields <span class="math inline">\(N = (H \cdot W) / P^2\)</span> patches. Each patch <span class="math inline">\(\mathbf{p}_i \in \mathbb{R}^{P \times P \times C}\)</span> is flattened and linearly projected into a <span class="math inline">\(d\)</span>-dimensional embedding: <span class="math display">\[\mathbf{z}_i = \mathbf{W}_\text{patch}\, \text{vec}(\mathbf{p}_i) + \mathbf{b},\]</span> where <span class="math inline">\(\mathbf{W}_\text{patch} \in \mathbb{R}^{d \times P^2 C}\)</span>. A learnable class token <span class="math inline">\([\text{CLS}]\)</span> is prepended, and 1D positional embeddings are added to each patch embedding. The resulting sequence of <span class="math inline">\(N+1\)</span> tokens is processed by a standard Transformer encoder.</p>
+<h2 data-number="3.2" id="self-attention-over-image-patches"><span class="header-section-number">3.2</span> Self-Attention over Image Patches</h2>
+<p>Because ViT uses the same Transformer attention mechanism as text models, each patch can attend to every other patch in the image. This global receptive field distinguishes ViT from convolutional networks, which have a local receptive field that grows with depth. The <span class="math inline">\([\text{CLS}]\)</span> token aggregates information from all patches through attention and serves as the global image representation used for downstream tasks.</p>
+<p>ViT requires large datasets to achieve strong performance; its lack of inductive biases (spatial locality, translation equivariance) compared to CNNs is a disadvantage on small datasets but an advantage when trained on hundreds of millions of image-text pairs, where the model can learn these biases from data.</p>
 <h2 data-number="3.3" id="patch-resolution-and-scale"><span class="header-section-number">3.3</span> Patch Resolution and Scale</h2>
 <p>Common ViT configurations include:</p>
 <ul>
-<li><p><strong>ViT-B/16:</strong> Base model, <span class="math inline">\(16 \times 16\)</span> patches, 86M
-parameters.</p></li>
-<li><p><strong>ViT-L/14:</strong> Large model, <span class="math inline">\(14 \times 14\)</span> patches, 307M
-parameters.</p></li>
-<li><p><strong>ViT-G/14:</strong> Giant model, <span class="math inline">\(14 \times 14\)</span> patches, 1.8B parameters
-(used in CLIP and Flamingo).</p></li>
+<li><p><strong>ViT-B/16:</strong> Base model, <span class="math inline">\(16 \times 16\)</span> patches, 86M parameters.</p></li>
+<li><p><strong>ViT-L/14:</strong> Large model, <span class="math inline">\(14 \times 14\)</span> patches, 307M parameters.</p></li>
+<li><p><strong>ViT-G/14:</strong> Giant model, <span class="math inline">\(14 \times 14\)</span> patches, 1.8B parameters (used in CLIP and Flamingo).</p></li>
 </ul>
-<p>Smaller patch size increases the number of tokens (quadratically
-increasing attention cost) but preserves finer spatial detail.</p>
-<h1 data-number="4" id="contrastive-language-image-pretraining-clip"><span class="header-section-number">4.</span> Contrastive Language-Image
-Pretraining (CLIP)</h1>
+<p>Smaller patch size increases the number of tokens (quadratically increasing attention cost) but preserves finer spatial detail.</p>
+<h1 data-number="4" id="contrastive-language-image-pretraining-clip"><span class="header-section-number">4.</span> Contrastive Language-Image Pretraining (CLIP)</h1>
 <h2 data-number="4.1" id="the-contrastive-objective"><span class="header-section-number">4.1</span> The Contrastive Objective</h2>
-<p>CLIP <span class="citation" data-cites="1"></span> (Contrastive
-Language-Image Pre-Training) learns aligned image and text
-representations by training on 400 million image-text pairs collected
-from the internet. The model consists of two encoders:</p>
+<p>CLIP <span class="citation" data-cites="1"></span> (Contrastive Language-Image Pre-Training) learns aligned image and text representations by training on 400 million image-text pairs collected from the internet. The model consists of two encoders:</p>
 <ul>
-<li><p>An <strong>image encoder</strong> <span class="math inline">\(f_\theta: \mathbb{R}^{H \times W \times 3} \to
-\mathbb{R}^d\)</span> (a ViT or ResNet).</p></li>
-<li><p>A <strong>text encoder</strong> <span class="math inline">\(g_\phi: \mathcal{V}^* \to \mathbb{R}^d\)</span> (a
-Transformer).</p></li>
+<li><p>An <strong>image encoder</strong> <span class="math inline">\(f_\theta: \mathbb{R}^{H \times W \times 3} \to \mathbb{R}^d\)</span> (a ViT or ResNet).</p></li>
+<li><p>A <strong>text encoder</strong> <span class="math inline">\(g_\phi: \mathcal{V}^* \to \mathbb{R}^d\)</span> (a Transformer).</p></li>
 </ul>
-<p>For a batch of <span class="math inline">\(B\)</span> image-text
-pairs <span class="math inline">\(\{(I_i, t_i)\}_{i=1}^B\)</span>, image
-embeddings <span class="math inline">\(\mathbf{v}_i = f_\theta(I_i) /
-\|f_\theta(I_i)\|\)</span> and text embeddings <span class="math inline">\(\mathbf{u}_i = g_\phi(t_i) /
-\|g_\phi(t_i)\|\)</span> are computed. The similarity matrix <span class="math inline">\(\mathbf{S} \in \mathbb{R}^{B \times B}\)</span>
-has entries: <span class="math display">\[S_{ij} = \tau \cdot
-\mathbf{v}_i^\top \mathbf{u}_j,\]</span> where <span class="math inline">\(\tau\)</span> is a learned temperature parameter.
-The training loss is the sum of two symmetric cross-entropy terms: <span class="math display">\[\mathcal{L}_\text{CLIP} =
--\frac{1}{2B}\sum_{i=1}^B \left[\log \frac{e^{S_{ii}}}{\sum_j
-e^{S_{ij}}} + \log \frac{e^{S_{ii}}}{\sum_j e^{S_{ji}}}\right].\]</span>
-Each term treats the matching pair <span class="math inline">\((I_i,
-t_i)\)</span> as a positive and all other <span class="math inline">\(B-1\)</span> pairs as negatives. Training pushes
-matched image-text embeddings together and unmatched embeddings apart in
-the shared <span class="math inline">\(d\)</span>-dimensional space.</p>
-<h2 data-number="4.2" id="zero-shot-classification-with-clip"><span class="header-section-number">4.2</span> Zero-Shot Classification with
-CLIP</h2>
-<p>After training, CLIP can classify images into arbitrary categories
-without any task-specific training. Given a set of class names <span class="math inline">\(\{c_1, c_2, \ldots, c_K\}\)</span>, text prompts
-are constructed (e.g., “a photo of a {class}”) and encoded with the text
-encoder. An image is then classified to the class with highest cosine
-similarity: <span class="math display">\[\hat{y} = \arg\max_{k}
-\mathbf{v}^\top \mathbf{u}_{c_k}.\]</span> On ImageNet, CLIP achieves
-accuracy comparable to supervised ResNet-50 without any labeled training
-examples. This demonstrates that the joint visual-linguistic embedding
-space generalizes well to novel classification tasks.</p>
+<p>For a batch of <span class="math inline">\(B\)</span> image-text pairs <span class="math inline">\(\{(I_i, t_i)\}_{i=1}^B\)</span>, image embeddings <span class="math inline">\(\mathbf{v}_i = f_\theta(I_i) / \|f_\theta(I_i)\|\)</span> and text embeddings <span class="math inline">\(\mathbf{u}_i = g_\phi(t_i) / \|g_\phi(t_i)\|\)</span> are computed. The similarity matrix <span class="math inline">\(\mathbf{S} \in \mathbb{R}^{B \times B}\)</span> has entries: <span class="math display">\[S_{ij} = \tau \cdot \mathbf{v}_i^\top \mathbf{u}_j,\]</span> where <span class="math inline">\(\tau\)</span> is a learned temperature parameter. The training loss is the sum of two symmetric cross-entropy terms: <span class="math display">\[\mathcal{L}_\text{CLIP} = -\frac{1}{2B}\sum_{i=1}^B \left[\log \frac{e^{S_{ii}}}{\sum_j e^{S_{ij}}} + \log \frac{e^{S_{ii}}}{\sum_j e^{S_{ji}}}\right].\]</span> Each term treats the matching pair <span class="math inline">\((I_i, t_i)\)</span> as a positive and all other <span class="math inline">\(B-1\)</span> pairs as negatives. Training pushes matched image-text embeddings together and unmatched embeddings apart in the shared <span class="math inline">\(d\)</span>-dimensional space.</p>
+<h2 data-number="4.2" id="zero-shot-classification-with-clip"><span class="header-section-number">4.2</span> Zero-Shot Classification with CLIP</h2>
+<p>After training, CLIP can classify images into arbitrary categories without any task-specific training. Given a set of class names <span class="math inline">\(\{c_1, c_2, \ldots, c_K\}\)</span>, text prompts are constructed (e.g., “a photo of a {class}”) and encoded with the text encoder. An image is then classified to the class with highest cosine similarity: <span class="math display">\[\hat{y} = \arg\max_{k} \mathbf{v}^\top \mathbf{u}_{c_k}.\]</span> On ImageNet, CLIP achieves accuracy comparable to supervised ResNet-50 without any labeled training examples. This demonstrates that the joint visual-linguistic embedding space generalizes well to novel classification tasks.</p>
 <h2 data-number="4.3" id="clip-as-a-visual-backbone"><span class="header-section-number">4.3</span> CLIP as a Visual Backbone</h2>
-<p>Because CLIP visual encoders are trained on diverse image-text pairs,
-they produce rich, transferable image representations. Modern VLMs
-almost universally use a pretrained CLIP ViT as the visual backbone,
-fine-tuning it lightly or keeping it frozen while training the language
-model interface.</p>
-<h1 data-number="5" id="architectures-for-vision-language-models"><span class="header-section-number">5.</span> Architectures for Vision-Language
-Models</h1>
-<p>A core design decision in building a VLM is how to connect the visual
-encoder to the language model. Three main architectural patterns have
-emerged.</p>
-<h2 data-number="5.1" id="cross-attention-gating-flamingo"><span class="header-section-number">5.1</span> Cross-Attention Gating:
-Flamingo</h2>
-<p>Flamingo <span class="citation" data-cites="2"></span> inserts
-<em>gated cross-attention</em> layers between every layer of a frozen,
-pretrained language model. Each cross-attention layer allows the
-language model’s hidden states <span class="math inline">\(\mathbf{H}\)</span> to attend over visual features
-<span class="math inline">\(\mathbf{V}\)</span> extracted by a frozen
-ViT: <span class="math display">\[\mathbf{H}' = \mathbf{H} +
-\tanh(\alpha) \cdot \text{CrossAttention}(\mathbf{H}, \mathbf{V},
-\mathbf{V}),\]</span> where <span class="math inline">\(\alpha\)</span>
-is a learnable scalar initialized to 0, ensuring that training begins
-with the language model unchanged. A Perceiver Resampler module
-compresses the potentially large set of visual tokens into a fixed
-number of learned query tokens, making the approach efficient for
-high-resolution images and videos.</p>
-<p>Flamingo demonstrates strong few-shot performance on VQA and
-captioning benchmarks when provided with visual-linguistic examples in
-context, analogous to LLM few-shot learning.</p>
-<h2 data-number="5.2" id="projection-connector-llava"><span class="header-section-number">5.2</span> Projection Connector:
-LLaVA</h2>
-<p>LLaVA (Large Language and Vision Assistant) <span class="citation" data-cites="3"></span> takes a simpler approach: a <em>linear
-projection</em> (or small MLP) maps visual features from the CLIP
-encoder directly into the token embedding space of a pretrained language
-model (e.g., LLaMA or Vicuna): <span class="math display">\[\mathbf{H}_v
-= \mathbf{W}\, f_\theta(I),\]</span> where <span class="math inline">\(\mathbf{H}_v \in \mathbb{R}^{N \times
-d_\text{LLM}}\)</span> are the projected visual tokens. These are
-concatenated with the text token embeddings and fed as a single sequence
-into the language model. The LLM is then instruction-tuned on visual
-instruction-following data using standard SFT.</p>
-<p>LLaVA demonstrates that a simple projection layer combined with
-high-quality multimodal instruction data can produce competitive VLMs
-with much lower training cost than architecturally complex
-alternatives.</p>
+<p>Because CLIP visual encoders are trained on diverse image-text pairs, they produce rich, transferable image representations. Modern VLMs almost universally use a pretrained CLIP ViT as the visual backbone, fine-tuning it lightly or keeping it frozen while training the language model interface.</p>
+<h1 data-number="5" id="architectures-for-vision-language-models"><span class="header-section-number">5.</span> Architectures for Vision-Language Models</h1>
+<p>A core design decision in building a VLM is how to connect the visual encoder to the language model. Three main architectural patterns have emerged.</p>
+<h2 data-number="5.1" id="cross-attention-gating-flamingo"><span class="header-section-number">5.1</span> Cross-Attention Gating: Flamingo</h2>
+<p>Flamingo <span class="citation" data-cites="2"></span> inserts <em>gated cross-attention</em> layers between every layer of a frozen, pretrained language model. Each cross-attention layer allows the language model’s hidden states <span class="math inline">\(\mathbf{H}\)</span> to attend over visual features <span class="math inline">\(\mathbf{V}\)</span> extracted by a frozen ViT: <span class="math display">\[\mathbf{H}' = \mathbf{H} + \tanh(\alpha) \cdot \text{CrossAttention}(\mathbf{H}, \mathbf{V}, \mathbf{V}),\]</span> where <span class="math inline">\(\alpha\)</span> is a learnable scalar initialized to 0, ensuring that training begins with the language model unchanged. A Perceiver Resampler module compresses the potentially large set of visual tokens into a fixed number of learned query tokens, making the approach efficient for high-resolution images and videos.</p>
+<p>Flamingo demonstrates strong few-shot performance on VQA and captioning benchmarks when provided with visual-linguistic examples in context, analogous to LLM few-shot learning.</p>
+<h2 data-number="5.2" id="projection-connector-llava"><span class="header-section-number">5.2</span> Projection Connector: LLaVA</h2>
+<p>LLaVA (Large Language and Vision Assistant) <span class="citation" data-cites="3"></span> takes a simpler approach: a <em>linear projection</em> (or small MLP) maps visual features from the CLIP encoder directly into the token embedding space of a pretrained language model (e.g., LLaMA or Vicuna): <span class="math display">\[\mathbf{H}_v = \mathbf{W}\, f_\theta(I),\]</span> where <span class="math inline">\(\mathbf{H}_v \in \mathbb{R}^{N \times d_\text{LLM}}\)</span> are the projected visual tokens. These are concatenated with the text token embeddings and fed as a single sequence into the language model. The LLM is then instruction-tuned on visual instruction-following data using standard SFT.</p>
+<p>LLaVA demonstrates that a simple projection layer combined with high-quality multimodal instruction data can produce competitive VLMs with much lower training cost than architecturally complex alternatives.</p>
 <h2 data-number="5.3" id="q-former-bridge-blip-2"><span class="header-section-number">5.3</span> Q-Former Bridge: BLIP-2</h2>
-<p>BLIP-2 <span class="citation" data-cites="4"></span> introduces a
-<em>Query Transformer (Q-Former)</em>, a lightweight Transformer with
-<span class="math inline">\(K\)</span> learnable query tokens that
-extract information from the frozen visual encoder via cross-attention:
-<span class="math display">\[\mathbf{Q}' =
-\text{QFormer}(\mathbf{Q}, f_\theta(I)),\]</span> where <span class="math inline">\(\mathbf{Q} \in \mathbb{R}^{K \times d}\)</span>
-are the learnable queries and <span class="math inline">\(f_\theta(I)\)</span> are the frozen image
-features. The <span class="math inline">\(K\)</span> output vectors
-(typically <span class="math inline">\(K = 32\)</span>, much smaller
-than the <span class="math inline">\(N\)</span> patch tokens) are
-projected into the LLM embedding space and prepended to the text
-tokens.</p>
-<p>The Q-Former acts as an <em>information bottleneck</em>: it forces
-the <span class="math inline">\(K\)</span> queries to distill the most
-task-relevant visual information from the image features. This
-compression reduces the number of visual tokens fed into the expensive
-LLM, lowering computational cost while retaining key visual details.</p>
-<h2 data-number="5.4" id="comparison-of-architectural-patterns"><span class="header-section-number">5.4</span> Comparison of Architectural
-Patterns</h2>
+<p>BLIP-2 <span class="citation" data-cites="4"></span> introduces a <em>Query Transformer (Q-Former)</em>, a lightweight Transformer with <span class="math inline">\(K\)</span> learnable query tokens that extract information from the frozen visual encoder via cross-attention: <span class="math display">\[\mathbf{Q}' = \text{QFormer}(\mathbf{Q}, f_\theta(I)),\]</span> where <span class="math inline">\(\mathbf{Q} \in \mathbb{R}^{K \times d}\)</span> are the learnable queries and <span class="math inline">\(f_\theta(I)\)</span> are the frozen image features. The <span class="math inline">\(K\)</span> output vectors (typically <span class="math inline">\(K = 32\)</span>, much smaller than the <span class="math inline">\(N\)</span> patch tokens) are projected into the LLM embedding space and prepended to the text tokens.</p>
+<p>The Q-Former acts as an <em>information bottleneck</em>: it forces the <span class="math inline">\(K\)</span> queries to distill the most task-relevant visual information from the image features. This compression reduces the number of visual tokens fed into the expensive LLM, lowering computational cost while retaining key visual details.</p>
+<h2 data-number="5.4" id="comparison-of-architectural-patterns"><span class="header-section-number">5.4</span> Comparison of Architectural Patterns</h2>
 <div class="center">
 <table>
 <thead>
 <tr class="header">
 <th style="text-align: left;"><strong>Approach</strong></th>
-<th style="text-align: center;"><strong>Visual tokens to
-LLM</strong></th>
+<th style="text-align: center;"><strong>Visual tokens to LLM</strong></th>
 <th style="text-align: center;"><strong>LLM frozen?</strong></th>
 <th style="text-align: center;"><strong>Training cost</strong></th>
 </tr>
@@ -327,182 +191,43 @@ LLM</strong></th>
 </tbody>
 </table>
 </div>
-<h1 data-number="6" id="multimodal-instruction-tuning"><span class="header-section-number">6.</span> Multimodal Instruction
-Tuning</h1>
-<p>Pre-trained VLMs that are only trained for captioning or image-text
-matching do not follow free-form instructions well. Multimodal
-instruction tuning fine-tunes the VLM on datasets of the form: <span class="math display">\[(\text{image}, \text{instruction},
-\text{response}),\]</span> using the same SFT objective as for LLMs.
-Data is typically generated by prompting a capable LLM (e.g., GPT-4)
-with image captions and region descriptions to produce diverse
-question-answer pairs that require visual reasoning. Examples
-include:</p>
+<h1 data-number="6" id="multimodal-instruction-tuning"><span class="header-section-number">6.</span> Multimodal Instruction Tuning</h1>
+<p>Pre-trained VLMs that are only trained for captioning or image-text matching do not follow free-form instructions well. Multimodal instruction tuning fine-tunes the VLM on datasets of the form: <span class="math display">\[(\text{image}, \text{instruction}, \text{response}),\]</span> using the same SFT objective as for LLMs. Data is typically generated by prompting a capable LLM (e.g., GPT-4) with image captions and region descriptions to produce diverse question-answer pairs that require visual reasoning. Examples include:</p>
 <ul>
-<li><p>“Describe the relationship between the two people in the
-image.”</p></li>
+<li><p>“Describe the relationship between the two people in the image.”</p></li>
 <li><p>“What is unusual about this scene?”</p></li>
-<li><p>“How many objects of the same color as the chair are in the
-image?”</p></li>
+<li><p>“How many objects of the same color as the chair are in the image?”</p></li>
 </ul>
-<p>LLaVA-Instruct-158K is a widely-used dataset of 158K such examples.
-Models fine-tuned on multimodal instruction data can engage in
-multi-turn visual conversations and perform complex reasoning over
-images.</p>
+<p>LLaVA-Instruct-158K is a widely-used dataset of 158K such examples. Models fine-tuned on multimodal instruction data can engage in multi-turn visual conversations and perform complex reasoning over images.</p>
 <h2 data-number="6.1" id="rlhf-for-vlms"><span class="header-section-number">6.1</span> RLHF for VLMs</h2>
-<p>Reinforcement Learning from Human Feedback can be applied to VLMs in
-the same way as for LLMs, with the reward model conditioned on both the
-image and the text response. This addresses failure modes specific to
-vision-language settings, such as describing objects that are not
-present in the image (visual hallucination). Multimodal RLHF is an
-active research direction; recent work shows that preference feedback on
-visual outputs reduces hallucination rates substantially.</p>
+<p>Reinforcement Learning from Human Feedback can be applied to VLMs in the same way as for LLMs, with the reward model conditioned on both the image and the text response. This addresses failure modes specific to vision-language settings, such as describing objects that are not present in the image (visual hallucination). Multimodal RLHF is an active research direction; recent work shows that preference feedback on visual outputs reduces hallucination rates substantially.</p>
 <h1 data-number="7" id="evaluation-benchmarks"><span class="header-section-number">7.</span> Evaluation Benchmarks</h1>
 <h2 data-number="7.1" id="visual-question-answering"><span class="header-section-number">7.1</span> Visual Question Answering</h2>
-<p><strong>VQA v2</strong> is a standard benchmark with 265K
-question-answer pairs over 200K images. Questions require recognizing
-objects, counting, reading text, and spatial reasoning. Performance is
-measured as accuracy over a pool of 10 human-collected answers per
-question. State-of-the-art VLMs achieve 70–85% on VQA v2.</p>
-<p><strong>GQA</strong> (Graph Question Answering) provides
-compositional visual questions over structured scene graphs, testing
-whether models can perform multi-step reasoning over object attributes
-and relations.</p>
+<p><strong>VQA v2</strong> is a standard benchmark with 265K question-answer pairs over 200K images. Questions require recognizing objects, counting, reading text, and spatial reasoning. Performance is measured as accuracy over a pool of 10 human-collected answers per question. State-of-the-art VLMs achieve 70–85% on VQA v2.</p>
+<p><strong>GQA</strong> (Graph Question Answering) provides compositional visual questions over structured scene graphs, testing whether models can perform multi-step reasoning over object attributes and relations.</p>
 <h2 data-number="7.2" id="image-captioning"><span class="header-section-number">7.2</span> Image Captioning</h2>
-<p><strong>COCO Captions</strong> is evaluated with BLEU, METEOR, ROUGE,
-CIDEr, and SPICE metrics that measure the n-gram overlap and semantic
-similarity between generated and reference captions. BLEU-4 and CIDEr
-are most commonly reported. However, these metrics correlate imperfectly
-with human judgment; recent work uses LLM-based evaluators.</p>
+<p><strong>COCO Captions</strong> is evaluated with BLEU, METEOR, ROUGE, CIDEr, and SPICE metrics that measure the n-gram overlap and semantic similarity between generated and reference captions. BLEU-4 and CIDEr are most commonly reported. However, these metrics correlate imperfectly with human judgment; recent work uses LLM-based evaluators.</p>
 <h2 data-number="7.3" id="multimodal-benchmarks"><span class="header-section-number">7.3</span> Multimodal Benchmarks</h2>
 <ul>
-<li><p><strong>MMBench / MME:</strong> Comprehensive evaluations of VLM
-capabilities across perception, cognition, reasoning, and
-hallucination.</p></li>
-<li><p><strong>ScienceQA:</strong> Multi-choice science questions with
-diagrams, testing scientific reasoning.</p></li>
-<li><p><strong>TextVQA / DocVQA:</strong> Questions about text appearing
-in natural images and scanned documents.</p></li>
-<li><p><strong>POPE:</strong> Probing Object Hallucination Evaluation —
-determines whether a VLM hallucinates objects not present in the
-image.</p></li>
+<li><p><strong>MMBench / MME:</strong> Comprehensive evaluations of VLM capabilities across perception, cognition, reasoning, and hallucination.</p></li>
+<li><p><strong>ScienceQA:</strong> Multi-choice science questions with diagrams, testing scientific reasoning.</p></li>
+<li><p><strong>TextVQA / DocVQA:</strong> Questions about text appearing in natural images and scanned documents.</p></li>
+<li><p><strong>POPE:</strong> Probing Object Hallucination Evaluation — determines whether a VLM hallucinates objects not present in the image.</p></li>
 </ul>
-<h1 data-number="8" id="failure-modes-and-limitations"><span class="header-section-number">8.</span> Failure Modes and
-Limitations</h1>
+<h1 data-number="8" id="failure-modes-and-limitations"><span class="header-section-number">8.</span> Failure Modes and Limitations</h1>
 <h2 data-number="8.1" id="visual-hallucination"><span class="header-section-number">8.1</span> Visual Hallucination</h2>
-<p>The most salient failure mode of VLMs is <em>visual
-hallucination</em>: generating text that is fluent and contextually
-plausible but describes visual content not present in the image. This
-occurs because the language model component has strong textual priors
-from LLM pretraining that can override visual evidence. For example, a
-model trained on many images of kitchens may describe a microwave in an
-image even when none is present.</p>
-<p>Mitigation strategies include: (1) object-level grounding
-supervision, which requires the model to justify descriptions with
-detected regions; (2) RLHF with hallucination-sensitive reward signals;
-and (3) chain-of-thought prompting that forces explicit reference to
-image evidence.</p>
+<p>The most salient failure mode of VLMs is <em>visual hallucination</em>: generating text that is fluent and contextually plausible but describes visual content not present in the image. This occurs because the language model component has strong textual priors from LLM pretraining that can override visual evidence. For example, a model trained on many images of kitchens may describe a microwave in an image even when none is present.</p>
+<p>Mitigation strategies include: (1) object-level grounding supervision, which requires the model to justify descriptions with detected regions; (2) RLHF with hallucination-sensitive reward signals; and (3) chain-of-thought prompting that forces explicit reference to image evidence.</p>
 <h2 data-number="8.2" id="modality-imbalance"><span class="header-section-number">8.2</span> Modality Imbalance</h2>
-<p>During multimodal fine-tuning, the language model component often
-dominates because its weights are pre-trained on far more data than the
-visual component. The model may answer visual questions using only
-textual priors without truly processing the image. Diagnosing modality
-imbalance involves testing model performance when the image is replaced
-with a blank or random image.</p>
-<h2 data-number="8.3" id="spatial-and-relational-reasoning"><span class="header-section-number">8.3</span> Spatial and Relational
-Reasoning</h2>
-<p>VLMs trained primarily on captioning and VQA tend to perform poorly
-on tasks requiring precise spatial reasoning (“Is the red box to the
-left or right of the blue circle?”), counting, and compositional
-attribute binding (“What is the color of the largest object?”). These
-limitations reflect the fact that patch-based Transformer encoders
-aggregate spatial information through attention, losing explicit
-geometric structure.</p>
-<h2 data-number="8.4" id="context-length-and-resolution"><span class="header-section-number">8.4</span> Context Length and
-Resolution</h2>
-<p>High-resolution images produce many patch tokens, quickly filling the
-context window of the language model. Techniques such as dynamic
-resolution (splitting images into tiles), token merging, and Q-Former
-compression help manage context length at the cost of fine-grained
-detail.</p>
+<p>During multimodal fine-tuning, the language model component often dominates because its weights are pre-trained on far more data than the visual component. The model may answer visual questions using only textual priors without truly processing the image. Diagnosing modality imbalance involves testing model performance when the image is replaced with a blank or random image.</p>
+<h2 data-number="8.3" id="spatial-and-relational-reasoning"><span class="header-section-number">8.3</span> Spatial and Relational Reasoning</h2>
+<p>VLMs trained primarily on captioning and VQA tend to perform poorly on tasks requiring precise spatial reasoning (“Is the red box to the left or right of the blue circle?”), counting, and compositional attribute binding (“What is the color of the largest object?”). These limitations reflect the fact that patch-based Transformer encoders aggregate spatial information through attention, losing explicit geometric structure.</p>
+<h2 data-number="8.4" id="context-length-and-resolution"><span class="header-section-number">8.4</span> Context Length and Resolution</h2>
+<p>High-resolution images produce many patch tokens, quickly filling the context window of the language model. Techniques such as dynamic resolution (splitting images into tiles), token merging, and Q-Former compression help manage context length at the cost of fine-grained detail.</p>
 <h1 data-number="9" id="summary"><span class="header-section-number">9.</span> Summary</h1>
-<p>Vision-Language Models combine a pretrained visual encoder (typically
-a ViT trained with CLIP-style contrastive objectives) with a pretrained
-language model through an architectural connector (projection,
-cross-attention gating, or Q-Former). CLIP provides a strong foundation
-by aligning image and text representations in a shared embedding space
-via large-scale contrastive pretraining. Architectural choices in
-connecting modalities involve a trade-off between expressivity,
-computational cost, and the degree of joint fine-tuning. Multimodal
-instruction tuning adapts the pretrained VLM to follow diverse visual
-instructions, and RLHF reduces hallucination. Key open challenges
-include visual hallucination, spatial reasoning, modality imbalance, and
-scaling to higher resolutions and longer contexts.</p>
-<h1 class="unnumbered" id="questions-and-answers">Questions and
-Answers</h1>
-<div class="mdframed">
-<p><strong>Q: Why is contrastive pretraining (CLIP) preferred over
-generative pretraining for the visual encoder?</strong></p>
-<p><strong>A:</strong> Contrastive pretraining aligns image
-representations with language representations directly — the learned
-visual features are structured to be compatible with text descriptors,
-which is precisely the property needed for downstream VQA and
-captioning. Generative visual models (e.g., VAEs, GANs, MAE) optimize
-for reconstructing pixel values and tend to encode low-level visual
-statistics. CLIP-trained encoders encode semantically meaningful,
-language-aligned features that transfer better to vision-language tasks,
-especially in zero-shot and few-shot settings.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: What is the role of the Q-Former in BLIP-2, and why is it
-useful?</strong></p>
-<p><strong>A:</strong> The Q-Former is a Transformer with <span class="math inline">\(K\)</span> learnable query tokens that attend over
-image features via cross-attention. Its role is to compress the <span class="math inline">\(N\)</span> patch tokens from the visual encoder
-into a fixed, small number of <span class="math inline">\(K\)</span>
-output vectors that capture the most task-relevant visual information.
-This is useful for two reasons: (1) it reduces the number of visual
-tokens fed into the language model from <span class="math inline">\(N\)</span> (often 256–1024) to <span class="math inline">\(K\)</span> (typically 32), keeping the LLM’s
-context window manageable; (2) the queries act as an adaptive
-summarization mechanism that can learn to extract different aspects of
-the image depending on the textual context.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: How does zero-shot image classification work with
-CLIP?</strong></p>
-<p><strong>A:</strong> CLIP encodes each candidate class name into a
-text embedding using a prompt template such as “a photo of a [class
-name].” The query image is encoded by the visual encoder. The predicted
-class is the one whose text embedding has the highest cosine similarity
-to the image embedding. No task-specific labeled data is needed. The
-zero-shot capability emerges because CLIP’s training objective forces
-image and text embeddings to be aligned in the same metric space, so an
-image of a cat and the text “a photo of a cat” end up nearby, while “a
-photo of a dog” is farther away.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: What is visual hallucination and how does it differ from
-LLM hallucination?</strong></p>
-<p><strong>A:</strong> Both LLM and VLM hallucination refer to
-generating confident but factually incorrect content. In LLMs,
-hallucination typically concerns factual claims about the world (wrong
-dates, nonexistent citations). In VLMs, visual hallucination
-specifically refers to describing image content that is not present in
-the given image — the model generates plausible visual descriptions
-based on language priors rather than actual visual evidence. Visual
-hallucination is particularly problematic because it is harder to detect
-(the generated text is syntactically correct and contextually plausible)
-and can occur even when the model has correctly encoded the image, if
-the language decoder overrides visual signals.</p>
-</div>
+<p>Vision-Language Models combine a pretrained visual encoder (typically a ViT trained with CLIP-style contrastive objectives) with a pretrained language model through an architectural connector (projection, cross-attention gating, or Q-Former). CLIP provides a strong foundation by aligning image and text representations in a shared embedding space via large-scale contrastive pretraining. Architectural choices in connecting modalities involve a trade-off between expressivity, computational cost, and the degree of joint fine-tuning. Multimodal instruction tuning adapts the pretrained VLM to follow diverse visual instructions, and RLHF reduces hallucination. Key open challenges include visual hallucination, spatial reasoning, modality imbalance, and scaling to higher resolutions and longer contexts.</p>
 <div class="thebibliography">
-<p><span>9</span> Radford, A., et al. “Learning Transferable Visual
-Models From Natural Language Supervision.” <em>ICML</em>, 2021. Alayrac,
-J.-B., et al. “Flamingo: a Visual Language Model for Few-Shot Learning.”
-<em>NeurIPS</em>, 2022. Liu, H., et al. “Visual Instruction Tuning.”
-<em>NeurIPS</em>, 2023. Li, J., et al. “BLIP-2: Bootstrapping
-Language-Image Pre-training with Frozen Image Encoders and Large
-Language Models.” <em>ICML</em>, 2023. Dosovitskiy, A., et al. “An Image
-is Worth 16x16 Words: Transformers for Image Recognition at Scale.”
-<em>ICLR</em>, 2021.</p>
+<p><span>9</span> Radford, A., et al. “Learning Transferable Visual Models From Natural Language Supervision.” <em>ICML</em>, 2021. Alayrac, J.-B., et al. “Flamingo: a Visual Language Model for Few-Shot Learning.” <em>NeurIPS</em>, 2022. Liu, H., et al. “Visual Instruction Tuning.” <em>NeurIPS</em>, 2023. Li, J., et al. “BLIP-2: Bootstrapping Language-Image Pre-training with Frozen Image Encoders and Large Language Models.” <em>ICML</em>, 2023. Dosovitskiy, A., et al. “An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.” <em>ICLR</em>, 2021.</p>
 </div>
 
 </main>

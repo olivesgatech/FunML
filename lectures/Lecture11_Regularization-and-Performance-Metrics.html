@@ -109,118 +109,39 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In the previous lecture, we covered second-order optimization methods
-including Newton’s Method and coordinate-based approaches. In this
-lecture, we study how extbf<span>regularization</span> prevents
-overfitting in linear regression by penalizing large coefficients. We
-cover three techniques: <strong>Ridge</strong> (<span class="math inline">\(\ell_2\)</span>), <strong>Lasso</strong> (<span class="math inline">\(\ell_1\)</span>), and <strong>Elastic
-Net</strong>. We then review key <strong>performance metrics</strong>
-for regression (MSE, RMSE, MAE, <span class="math inline">\(R^2\)</span>) and discuss <strong>model
-validation</strong> using train/validation/test splits, learning curves,
-and cross-validation.</p>
+<p>In the previous lecture, we covered second-order optimization methods including Newton’s Method and coordinate-based approaches. In this lecture, we study how extbf<span>regularization</span> prevents overfitting in linear regression by penalizing large coefficients. We cover three techniques: <strong>Ridge</strong> (<span class="math inline">\(\ell_2\)</span>), <strong>Lasso</strong> (<span class="math inline">\(\ell_1\)</span>), and <strong>Elastic Net</strong>. We then review key <strong>performance metrics</strong> for regression (MSE, RMSE, MAE, <span class="math inline">\(R^2\)</span>) and discuss <strong>model validation</strong> using train/validation/test splits, learning curves, and cross-validation.</p>
 <h1 data-number="2" id="ridge-regularization"><span class="header-section-number">2.</span> Ridge Regularization</h1>
 <h4 data-number="2.0.0.1" id="notation-note."><span class="header-section-number">2.0.0.1</span> Notation note.</h4>
-<p>Some figures in this lecture use the symbol <span class="math inline">\(\gamma\)</span> to denote the regularization
-strength. Throughout the notes, we use <span class="math inline">\(\lambda\)</span> for consistency with the course
-notation. These symbols refer to the same quantity.</p>
+<p>Some figures in this lecture use the symbol <span class="math inline">\(\gamma\)</span> to denote the regularization strength. Throughout the notes, we use <span class="math inline">\(\lambda\)</span> for consistency with the course notation. These symbols refer to the same quantity.</p>
 <h2 data-number="2.1" id="formulation"><span class="header-section-number">2.1</span> Formulation</h2>
-<p>Standard linear regression models attempt to fit data samples by
-minimizing the least squares cost. However, this approach can become
-problematic in practical settings. When features contain noise, the
-learned coefficients may change dramatically, making the model unstable.
-Similarly, when only a small amount of training data is available, the
-model can easily overfit and fail to generalize to new data. These
-issues arise because large coefficients can have a disproportionately
-high impact on model predictions.</p>
-<p><strong>Ridge Regression</strong> (also called <strong>Tikhonov
-regularization</strong>) addresses this problem by shrinking the
-regression coefficients <span class="math inline">\(\boldsymbol{\theta}\)</span>. It does so by
-imposing a penalty on the squared <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\|\boldsymbol{\theta}\|_2^2\)</span>, which
-discourages excessively large parameter values. This penalty is
-incorporated directly into the training objective.</p>
-<p>During training, the regularization term is added to the cost
-function: <span class="math display">\[L(\boldsymbol{\theta})
+<p>Standard linear regression models attempt to fit data samples by minimizing the least squares cost. However, this approach can become problematic in practical settings. When features contain noise, the learned coefficients may change dramatically, making the model unstable. Similarly, when only a small amount of training data is available, the model can easily overfit and fail to generalize to new data. These issues arise because large coefficients can have a disproportionately high impact on model predictions.</p>
+<p><strong>Ridge Regression</strong> (also called <strong>Tikhonov regularization</strong>) addresses this problem by shrinking the regression coefficients <span class="math inline">\(\boldsymbol{\theta}\)</span>. It does so by imposing a penalty on the squared <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\|\boldsymbol{\theta}\|_2^2\)</span>, which discourages excessively large parameter values. This penalty is incorporated directly into the training objective.</p>
+<p>During training, the regularization term is added to the cost function: <span class="math display">\[L(\boldsymbol{\theta})
 =
 \frac{1}{N}\sum_{i=1}^{N}
 \left(\boldsymbol{\theta}^T\mathbf{x}_i - y_i\right)^2
 +
 \frac{\lambda}{N}\|\boldsymbol{\theta}\|_2^2\]</span></p>
-<p><strong>We use <span class="math inline">\(\lambda\)</span> to denote
-the regularization strength to remain consistent with the course
-notation file.</strong></p>
-<p>where <span class="math inline">\(\lambda &gt; 0\)</span> is a
-hyperparameter that controls the strength of the shrinkage. Larger
-values of <span class="math inline">\(\lambda\)</span> lead to stronger
-regularization and smaller coefficients.</p>
-<p>It is important to note that the regularization term is used only
-during training. Once the model has been trained, its performance is
-evaluated using the standard prediction error without including the
-regularization penalty.</p>
+<p><strong>We use <span class="math inline">\(\lambda\)</span> to denote the regularization strength to remain consistent with the course notation file.</strong></p>
+<p>where <span class="math inline">\(\lambda &gt; 0\)</span> is a hyperparameter that controls the strength of the shrinkage. Larger values of <span class="math inline">\(\lambda\)</span> lead to stronger regularization and smaller coefficients.</p>
+<p>It is important to note that the regularization term is used only during training. Once the model has been trained, its performance is evaluated using the standard prediction error without including the regularization penalty.</p>
 <h2 data-number="2.2" id="robustness-to-noise"><span class="header-section-number">2.2</span> Robustness to Noise</h2>
-<p>Standard linear regression can be highly sensitive to noise in the
-training data. When small perturbations or noisy samples are introduced,
-the fitted regression line can change dramatically, resulting in large
-variability in the estimated coefficients. This behavior is illustrated
-in Figure <a data-reference="fig:P9.png" data-reference-type="ref" href="#fig:P9.png">1</a>, where multiple models are trained on
-slightly different noisy datasets. The gray regression lines vary
-widely, demonstrating that ordinary least squares can produce unstable
-parameter estimates when the data contains noise.</p>
-<p>Ridge regression addresses this issue by adding an <span class="math inline">\(L_2\)</span> penalty that discourages large
-coefficient values. By shrinking the parameters toward zero, the model
-becomes less sensitive to fluctuations in the data and produces more
-stable predictions. As shown in Figure <a data-reference="fig:P10.png" data-reference-type="ref" href="#fig:P10.png">2</a>, the fitted
-lines produced by ridge regression exhibit significantly less variation
-across noisy datasets. This reduction in variance highlights one of the
-key benefits of regularization: improved robustness to noise and better
-generalization to unseen data.</p>
+<p>Standard linear regression can be highly sensitive to noise in the training data. When small perturbations or noisy samples are introduced, the fitted regression line can change dramatically, resulting in large variability in the estimated coefficients. This behavior is illustrated in Figure <a data-reference="fig:P9.png" data-reference-type="ref" href="#fig:P9.png">1</a>, where multiple models are trained on slightly different noisy datasets. The gray regression lines vary widely, demonstrating that ordinary least squares can produce unstable parameter estimates when the data contains noise.</p>
+<p>Ridge regression addresses this issue by adding an <span class="math inline">\(L_2\)</span> penalty that discourages large coefficient values. By shrinking the parameters toward zero, the model becomes less sensitive to fluctuations in the data and produces more stable predictions. As shown in Figure <a data-reference="fig:P10.png" data-reference-type="ref" href="#fig:P10.png">2</a>, the fitted lines produced by ridge regression exhibit significantly less variation across noisy datasets. This reduction in variance highlights one of the key benefits of regularization: improved robustness to noise and better generalization to unseen data.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.8 Noise Sensitivity (OLS)</h3><p>Control noise and compare coefficient variability under OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.8 Noise Sensitivity (OLS) Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig98_OLS_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.9 Ridge Under Noise</h3><p>Control noise and compare ridge robustness to OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.9 Ridge Under Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig99_Ridge_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<h2 data-number="2.3" id="reduce-overfitting-to-limited-training-data"><span class="header-section-number">2.3</span> Reduce Overfitting to Limited
-Training Data</h2>
-<p>Overfitting becomes particularly severe when only a small amount of
-training data is available. In such cases, standard linear regression
-tends to fit the training points too closely, capturing random
-fluctuations rather than the underlying trend. This behavior is
-illustrated in Figure <a data-reference="fig:P11.png" data-reference-type="ref" href="#fig:P11.png">3</a>, where the linear regression model
-(red line) fits the limited training samples almost perfectly but fails
-to generalize well to new data.</p>
-<p>Ridge regression mitigates this problem by constraining the magnitude
-of the coefficients. The resulting model (blue line) does not pass
-exactly through the training points but instead captures a smoother and
-more general trend. As a result, it performs better on unseen test
-samples (green dots). This example demonstrates how regularization
-introduces a small amount of bias in exchange for a large reduction in
-variance, ultimately improving predictive performance.</p>
+<h2 data-number="2.3" id="reduce-overfitting-to-limited-training-data"><span class="header-section-number">2.3</span> Reduce Overfitting to Limited Training Data</h2>
+<p>Overfitting becomes particularly severe when only a small amount of training data is available. In such cases, standard linear regression tends to fit the training points too closely, capturing random fluctuations rather than the underlying trend. This behavior is illustrated in Figure <a data-reference="fig:P11.png" data-reference-type="ref" href="#fig:P11.png">3</a>, where the linear regression model (red line) fits the limited training samples almost perfectly but fails to generalize well to new data.</p>
+<p>Ridge regression mitigates this problem by constraining the magnitude of the coefficients. The resulting model (blue line) does not pass exactly through the training points but instead captures a smoother and more general trend. As a result, it performs better on unseen test samples (green dots). This example demonstrates how regularization introduces a small amount of bias in exchange for a large reduction in variance, ultimately improving predictive performance.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.10 Sample Count Effect</h3><p>Control number of data points and inspect fit stability.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig910_SampleCount_interactive.html" style="height:680px;" title="Interactive Figure 9.10 Sample Count Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig910_SampleCount.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="2.4" id="effect-of-lambda-on-boldsymboltheta-magnitudes"><span class="header-section-number">2.4</span> Effect of <span class="math inline">\(\lambda\)</span> on <span class="math inline">\(\boldsymbol{\theta}\)</span> Magnitudes</h2>
-<p>The regularization strength in ridge regression is controlled by the
-hyperparameter <span class="math inline">\(\lambda\)</span>, which
-determines how strongly large coefficients are penalized. When <span class="math inline">\(\lambda\)</span> is very small, the penalty term
-has little influence, and the model behaves similarly to standard linear
-regression. In this regime, the coefficients can take on larger values,
-allowing the model to closely fit the training data.</p>
-<p>As <span class="math inline">\(\lambda\)</span> increases, the
-penalty becomes stronger and the coefficients are increasingly shrunk
-toward zero. This shrinkage reduces model complexity and helps prevent
-overfitting. When <span class="math inline">\(\lambda\)</span> becomes
-very large, the coefficients approach zero and the model converges
-toward a nearly flat line that approximates the mean of the target
-variable. Figures <a data-reference="fig:P12.png" data-reference-type="ref" href="#fig:P12.png">4</a> and <a data-reference="fig:P13.png" data-reference-type="ref" href="#fig:P13.png">5</a> illustrate
-how increasing <span class="math inline">\(\lambda\)</span>
-progressively reduces coefficient magnitudes and simplifies model
-behavior.</p>
-<p>This trade-off between model flexibility and regularization strength
-highlights the bias–variance trade-off: small <span class="math inline">\(\lambda\)</span> values yield low bias but high
-variance, while large <span class="math inline">\(\lambda\)</span>
-values produce higher bias but lower variance.</p>
+<p>The regularization strength in ridge regression is controlled by the hyperparameter <span class="math inline">\(\lambda\)</span>, which determines how strongly large coefficients are penalized. When <span class="math inline">\(\lambda\)</span> is very small, the penalty term has little influence, and the model behaves similarly to standard linear regression. In this regime, the coefficients can take on larger values, allowing the model to closely fit the training data.</p>
+<p>As <span class="math inline">\(\lambda\)</span> increases, the penalty becomes stronger and the coefficients are increasingly shrunk toward zero. This shrinkage reduces model complexity and helps prevent overfitting. When <span class="math inline">\(\lambda\)</span> becomes very large, the coefficients approach zero and the model converges toward a nearly flat line that approximates the mean of the target variable. Figures <a data-reference="fig:P12.png" data-reference-type="ref" href="#fig:P12.png">4</a> and <a data-reference="fig:P13.png" data-reference-type="ref" href="#fig:P13.png">5</a> illustrate how increasing <span class="math inline">\(\lambda\)</span> progressively reduces coefficient magnitudes and simplifies model behavior.</p>
+<p>This trade-off between model flexibility and regularization strength highlights the bias–variance trade-off: small <span class="math inline">\(\lambda\)</span> values yield low bias but high variance, while large <span class="math inline">\(\lambda\)</span> values produce higher bias but lower variance.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.11 Lambda Effect</h3><p>Adjust λ and observe coefficient shrinkage behavior.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" style="height:760px;" title="Interactive Figure 9.11 Lambda Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig911_LambdaEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.12 Lambda vs Model Behavior</h3><p>Adjust λ and inspect resulting model complexity.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" style="height:680px;" title="Interactive Figure 9.12 Lambda vs Model Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig912_LambdaBehavior.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h2 data-number="2.5" id="normal-equation"><span class="header-section-number">2.5</span> Normal Equation</h2>
-<p>The optimal parameter vector for ridge regression can be derived
-analytically using the <strong>normal equation</strong>. Recall that
-ridge regression augments the standard least-squares objective with an
-<span class="math inline">\(L_2\)</span> penalty on the parameter
-vector. In matrix form, the ridge loss function is written as</p>
+<p>The optimal parameter vector for ridge regression can be derived analytically using the <strong>normal equation</strong>. Recall that ridge regression augments the standard least-squares objective with an <span class="math inline">\(L_2\)</span> penalty on the parameter vector. In matrix form, the ridge loss function is written as</p>
 <p><span class="math display">\[L(\boldsymbol{\theta})
 =
 \frac{1}{N}
@@ -228,14 +149,8 @@ vector. In matrix form, the ridge loss function is written as</p>
 (\mathbf{X}\boldsymbol{\theta}-\mathbf{y})
 +
 \frac{\lambda}{N}\boldsymbol{\theta}^T\boldsymbol{\theta}.\]</span></p>
-<p>where <span class="math inline">\(\mathbf{X}\)</span> is the design
-matrix, <span class="math inline">\(\mathbf{y}\)</span> is the target
-vector, and <span class="math inline">\(\lambda &gt; 0\)</span> is the
-regularization hyperparameter that controls the strength of the
-penalty.</p>
-<p>To obtain the optimal parameters, we differentiate the loss with
-respect to <span class="math inline">\(\boldsymbol{\theta}\)</span> and
-set the gradient equal to zero:</p>
+<p>where <span class="math inline">\(\mathbf{X}\)</span> is the design matrix, <span class="math inline">\(\mathbf{y}\)</span> is the target vector, and <span class="math inline">\(\lambda &gt; 0\)</span> is the regularization hyperparameter that controls the strength of the penalty.</p>
+<p>To obtain the optimal parameters, we differentiate the loss with respect to <span class="math inline">\(\boldsymbol{\theta}\)</span> and set the gradient equal to zero:</p>
 <p><span class="math display">\[\nabla_{\boldsymbol{\theta}}L
 =
 2\mathbf{X}^T\mathbf{X}\boldsymbol{\theta}
@@ -245,113 +160,60 @@ set the gradient equal to zero:</p>
 <p><span class="math display">\[(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})\boldsymbol{\theta}
 =
 \mathbf{X}^T\mathbf{y}.\]</span></p>
-<p>where <span class="math inline">\(\mathbf{I}\)</span> is the identity
-matrix. Solving for <span class="math inline">\(\boldsymbol{\theta}\)</span> gives the closed-form
-ridge regression solution</p>
+<p>where <span class="math inline">\(\mathbf{I}\)</span> is the identity matrix. Solving for <span class="math inline">\(\boldsymbol{\theta}\)</span> gives the closed-form ridge regression solution</p>
 <p><span class="math display">\[\boldsymbol{\theta}
 =
 (\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})^{-1}
 \mathbf{X}^T\mathbf{y}.\]</span></p>
-<p>This equation shows how ridge regression stabilizes the solution by
-adding <span class="math inline">\(\lambda \mathbf{I}\)</span> to <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span>. This additional
-term improves numerical stability and ensures the matrix is invertible,
-especially when features are highly correlated or when the dataset is
-small.</p>
+<p>This equation shows how ridge regression stabilizes the solution by adding <span class="math inline">\(\lambda \mathbf{I}\)</span> to <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span>. This additional term improves numerical stability and ensures the matrix is invertible, especially when features are highly correlated or when the dataset is small.</p>
 <h2 data-number="2.6" id="gradient-descent"><span class="header-section-number">2.6</span> Gradient Descent</h2>
-<p>Although ridge regression admits a closed-form solution, in many
-practical machine learning settings the number of parameters is very
-large. Computing a matrix inverse becomes expensive and memory
-intensive. For this reason, ridge regression is often solved using
-<strong>gradient descent</strong>.</p>
-<p>Starting from an initial parameter vector, gradient descent
-iteratively updates the parameters according to</p>
+<p>Although ridge regression admits a closed-form solution, in many practical machine learning settings the number of parameters is very large. Computing a matrix inverse becomes expensive and memory intensive. For this reason, ridge regression is often solved using <strong>gradient descent</strong>.</p>
+<p>Starting from an initial parameter vector, gradient descent iteratively updates the parameters according to</p>
 <p><span class="math display">\[\boldsymbol{\theta}^{(t+1)}
 =
 \boldsymbol{\theta}^{(t)}
 -\alpha \nabla_{\boldsymbol{\theta}}L.\]</span></p>
-<p>where <span class="math inline">\(\alpha\)</span> is the learning
-rate. For ridge regression, the gradient of the loss function is</p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning rate. For ridge regression, the gradient of the loss function is</p>
 <p><span class="math display">\[\nabla_{\boldsymbol{\theta}}L
 =
 -\frac{2}{N}\sum_{i=1}^{N}
 (y_i-\boldsymbol{\theta}^T\mathbf{x}_i)\mathbf{x}_i
 +\frac{2\lambda}{N}\boldsymbol{\theta}.\]</span></p>
-<p>The hyperparameter <span class="math inline">\(\lambda\)</span>
-controls the trade-off between accurately fitting the training data and
-keeping the parameter magnitudes small. A small <span class="math inline">\(\lambda\)</span> produces behavior similar to
-standard linear regression, while a large <span class="math inline">\(\lambda\)</span> increases regularization and
-produces a smoother, lower-variance model.</p>
-<figure id="fig:P14.png">
-<img src="img/lecture9/P14.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Figure 9.13: Gradient Descent Path to Optimal Weights:
-Minimizing Loss in Ridge Regression</figcaption>
+<p>The hyperparameter <span class="math inline">\(\lambda\)</span> controls the trade-off between accurately fitting the training data and keeping the parameter magnitudes small. A small <span class="math inline">\(\lambda\)</span> produces behavior similar to standard linear regression, while a large <span class="math inline">\(\lambda\)</span> increases regularization and produces a smoother, lower-variance model.</p>
+<figure>
+<img alt="Figure 9.13: Gradient Descent Path to Optimal Weights: Minimizing Loss in Ridge Regression" id="fig:P14.png" src="img/lecture9/P14.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.13: Gradient Descent Path to Optimal Weights: Minimizing Loss in Ridge Regression</figcaption>
 </figure>
-<h1 data-number="3" id="lasso-regression-formulation"><span class="header-section-number">3.</span> Lasso Regression:
-Formulation</h1>
+<h1 data-number="3" id="lasso-regression-formulation"><span class="header-section-number">3.</span> Lasso Regression: Formulation</h1>
 <h2 data-number="3.1" id="overview"><span class="header-section-number">3.1</span> Overview</h2>
-<p><strong>Lasso regression</strong> (Least Absolute Shrinkage and
-Selection Operator) is a linear regression technique that incorporates
-<strong>L1 regularization</strong>, which adds a penalty proportional to
-the absolute value of the regression coefficients.</p>
-<p>This approach is particularly useful when working with datasets that
-contain many features, some of which may be irrelevant or only weakly
-related to the target variable. In such settings, ordinary linear
-regression can produce unstable models that overfit the training data.
-Lasso addresses this issue by encouraging simpler models that rely only
-on the most informative features.</p>
+<p><strong>Lasso regression</strong> (Least Absolute Shrinkage and Selection Operator) is a linear regression technique that incorporates <strong>L1 regularization</strong>, which adds a penalty proportional to the absolute value of the regression coefficients.</p>
+<p>This approach is particularly useful when working with datasets that contain many features, some of which may be irrelevant or only weakly related to the target variable. In such settings, ordinary linear regression can produce unstable models that overfit the training data. Lasso addresses this issue by encouraging simpler models that rely only on the most informative features.</p>
 <h2 data-number="3.2" id="l1-regularization"><span class="header-section-number">3.2</span> L1 Regularization</h2>
-<p>The key difference between Lasso regression and ordinary linear
-regression is the addition of an <strong>L1 penalty</strong> to the loss
-function. This penalty is the sum of the absolute values of the
-regression coefficients, which discourages large parameter values and
-promotes sparsity.</p>
+<p>The key difference between Lasso regression and ordinary linear regression is the addition of an <strong>L1 penalty</strong> to the loss function. This penalty is the sum of the absolute values of the regression coefficients, which discourages large parameter values and promotes sparsity.</p>
 <p>The Lasso objective function is given by: <span class="math display">\[L(\boldsymbol{\theta})
 =
 \frac{1}{N}\sum_{i=1}^{N}
 (\boldsymbol{\theta}^T\mathbf{x}_i-y_i)^2
 +
 \lambda\sum_{j=1}^{P}|\theta_j|\]</span></p>
-<p>The regularization parameter <span class="math inline">\(\lambda\)</span> controls the strength of the
-penalty. When <span class="math inline">\(\lambda=0\)</span>, the model
-reduces to standard linear regression. As <span class="math inline">\(\lambda\)</span> increases, the penalty becomes
-stronger, forcing coefficients to shrink toward zero.</p>
+<p>The regularization parameter <span class="math inline">\(\lambda\)</span> controls the strength of the penalty. When <span class="math inline">\(\lambda=0\)</span>, the model reduces to standard linear regression. As <span class="math inline">\(\lambda\)</span> increases, the penalty becomes stronger, forcing coefficients to shrink toward zero.</p>
 <h2 data-number="3.3" id="sparse-model"><span class="header-section-number">3.3</span> Sparse Model</h2>
-<p>A defining property of Lasso regression is that it produces a
-<strong>sparse model</strong>. In a sparse model, many regression
-coefficients become exactly zero.</p>
-<p>This behavior occurs because the L1 penalty introduces sharp
-“corners” in the optimization landscape. During optimization, the
-solution often lands exactly on these corners, causing some coefficients
-to become zero. As a result, Lasso automatically removes features that
-do not meaningfully contribute to predicting the target variable.</p>
-<p>This property makes Lasso especially useful for high-dimensional
-datasets where the number of features is large.</p>
+<p>A defining property of Lasso regression is that it produces a <strong>sparse model</strong>. In a sparse model, many regression coefficients become exactly zero.</p>
+<p>This behavior occurs because the L1 penalty introduces sharp “corners” in the optimization landscape. During optimization, the solution often lands exactly on these corners, causing some coefficients to become zero. As a result, Lasso automatically removes features that do not meaningfully contribute to predicting the target variable.</p>
+<p>This property makes Lasso especially useful for high-dimensional datasets where the number of features is large.</p>
 <h2 data-number="3.4" id="feature-selection"><span class="header-section-number">3.4</span> Feature Selection</h2>
-<p>One of the most important advantages of Lasso over Ridge regression
-(which uses L2 regularization) is its ability to perform
-<strong>automatic feature selection</strong>. Because Lasso can drive
-coefficients to exactly zero, it effectively identifies and retains only
-the most relevant features while discarding irrelevant ones.</p>
+<p>One of the most important advantages of Lasso over Ridge regression (which uses L2 regularization) is its ability to perform <strong>automatic feature selection</strong>. Because Lasso can drive coefficients to exactly zero, it effectively identifies and retains only the most relevant features while discarding irrelevant ones.</p>
 <p>This leads to several practical benefits, including:</p>
 <p>- Improved generalization and reduced overfitting</p>
 <p>- Simpler and more interpretable models</p>
 <p>- Reduced computational cost for downstream tasks</p>
-<p>For datasets with many redundant or noisy features, Lasso provides a
-powerful tool for building compact and interpretable models.</p>
+<p>For datasets with many redundant or noisy features, Lasso provides a powerful tool for building compact and interpretable models.</p>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-21%20at%203.39.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 9.14: As <span class="math inline">\(\lambda\)</span>
-increases, coefficients of less important features shrink to zero before
-those of more important features.</figcaption>
+<img alt="Figure 9.14: As \lambda increases, coefficients of less important features shrink to zero before those of more important features." src="img/lecture9/Screenshot%202024-09-21%20at%203.39.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.14: As <span class="math inline">\(\lambda\)</span> increases, coefficients of less important features shrink to zero before those of more important features.</figcaption>
 </figure>
-<h1 data-number="4" id="lasso-regularization-gradient-descent"><span class="header-section-number">4.</span> Lasso Regularization: Gradient
-Descent</h1>
-<p>Unlike Ridge regression, the L1 penalty used in Lasso is <strong>not
-differentiable at zero</strong>. Therefore, we cannot compute a standard
-gradient. Instead, we use a <strong>subgradient</strong>.</p>
+<h1 data-number="4" id="lasso-regularization-gradient-descent"><span class="header-section-number">4.</span> Lasso Regularization: Gradient Descent</h1>
+<p>Unlike Ridge regression, the L1 penalty used in Lasso is <strong>not differentiable at zero</strong>. Therefore, we cannot compute a standard gradient. Instead, we use a <strong>subgradient</strong>.</p>
 <p>The subgradient of the Lasso objective is:</p>
-<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
-L(\boldsymbol{\theta})
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
 =
 -\frac{2}{N}\sum_{i=1}^{N}
 (y_i-\boldsymbol{\theta}^T\mathbf{x}_i)\mathbf{x}_i
@@ -363,521 +225,214 @@ L(\boldsymbol{\theta})
 -1 &amp; \theta_j&lt;0\\
 [-1,1] &amp; \theta_j=0
 \end{cases}\]</span></p>
-<p>The hyperparameter <span class="math inline">\(\lambda\)</span>
-controls the balance between fitting the training data and encouraging
-sparsity. As <span class="math inline">\(\lambda\)</span> increases, the
-regularization strength increases, pushing more coefficients toward
-zero.</p>
+<p>The hyperparameter <span class="math inline">\(\lambda\)</span> controls the balance between fitting the training data and encouraging sparsity. As <span class="math inline">\(\lambda\)</span> increases, the regularization strength increases, pushing more coefficients toward zero.</p>
 <h1 data-number="5" id="lasso-vs-ridge-regression"><span class="header-section-number">5.</span> Lasso vs Ridge Regression</h1>
-<p>We now summarize the key differences between Lasso (L1) and Ridge
-(L2) regularization:</p>
-<p>The key takeaway is that Lasso and Ridge address overfitting in
-different ways. Ridge regression keeps all features in the model but
-reduces their influence by shrinking coefficients smoothly toward zero.
-In contrast, Lasso regression can eliminate features entirely by forcing
-some coefficients to become exactly zero, producing a simpler and more
-interpretable model.</p>
-<p>In practice, Ridge is often preferred when most features are believed
-to contain useful information but may be noisy or correlated. Lasso is
-particularly useful when the dataset contains many irrelevant or
-redundant features and automatic feature selection is desirable.</p>
+<p>We now summarize the key differences between Lasso (L1) and Ridge (L2) regularization:</p>
+<p>The key takeaway is that Lasso and Ridge address overfitting in different ways. Ridge regression keeps all features in the model but reduces their influence by shrinking coefficients smoothly toward zero. In contrast, Lasso regression can eliminate features entirely by forcing some coefficients to become exactly zero, producing a simpler and more interpretable model.</p>
+<p>In practice, Ridge is often preferred when most features are believed to contain useful information but may be noisy or correlated. Lasso is particularly useful when the dataset contains many irrelevant or redundant features and automatic feature selection is desirable.</p>
 <h1 data-number="6" id="elastic-net-regularization"><span class="header-section-number">6.</span> Elastic Net Regularization</h1>
 <h2 data-number="6.1" id="overview-1"><span class="header-section-number">6.1</span> Overview</h2>
-<p>Elastic Net regularization is a linear regression technique that
-combines two regularization methods: <strong>Lasso (L1)
-regularization</strong> and <strong>Ridge (L2) regularization</strong>.
-It’s used to prevent overfitting by penalizing the magnitude of
-regression coefficients, and it is particularly useful when dealing with
-datasets that have a large number of features or when the features are
-highly correlated (multicollinearity).</p>
+<p>Elastic Net regularization is a linear regression technique that combines two regularization methods: <strong>Lasso (L1) regularization</strong> and <strong>Ridge (L2) regularization</strong>. It’s used to prevent overfitting by penalizing the magnitude of regression coefficients, and it is particularly useful when dealing with datasets that have a large number of features or when the features are highly correlated (multicollinearity).</p>
 <p>The Elastic Net formula is as follows:</p>
 <p><span class="math display">\[L(\boldsymbol{\theta}) =
 \frac{1}{N}\sum_{i=1}^{N}(\boldsymbol{\theta}^T\mathbf{x}_i-y_i)^2
 + \lambda \left(
-r \sum_{j=1}^{P} |\theta_j| + (1 -
-r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
+r \sum_{j=1}^{P} |\theta_j| + (1 - r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
 \right)\]</span></p>
-<p>The hyperparameter <span class="math inline">\(r \in [0,1]\)</span>
-controls the balance between the L1 and L2 penalties. When <span class="math inline">\(r = 1\)</span>, Elastic Net becomes Lasso
-regression. When <span class="math inline">\(r = 0\)</span>, Elastic Net
-becomes Ridge regression. Values between 0 and 1 create a weighted
-combination of both penalties.</p>
-<p>Elastic Net was introduced to address limitations of using Lasso or
-Ridge alone. Lasso can perform feature selection, but it may behave
-unstably when features are highly correlated, often selecting only one
-feature from a correlated group. Ridge regression handles correlated
-features well but cannot remove irrelevant features. Elastic Net
-combines the strengths of both methods by encouraging sparsity while
-also stabilizing coefficient estimates in the presence of
-multicollinearity.</p>
-<h2 data-number="6.2" id="compared-to-lasso-and-ridge"><span class="header-section-number">6.2</span> Compared to Lasso and
-Ridge</h2>
-<p>How does Elastic Net compare to Lasso and Ridge regularization
-separately? To highlight their differences, we consider a fixed MSE loss
-with the following contour plot:</p>
+<p>The hyperparameter <span class="math inline">\(r \in [0,1]\)</span> controls the balance between the L1 and L2 penalties. When <span class="math inline">\(r = 1\)</span>, Elastic Net becomes Lasso regression. When <span class="math inline">\(r = 0\)</span>, Elastic Net becomes Ridge regression. Values between 0 and 1 create a weighted combination of both penalties.</p>
+<p>Elastic Net was introduced to address limitations of using Lasso or Ridge alone. Lasso can perform feature selection, but it may behave unstably when features are highly correlated, often selecting only one feature from a correlated group. Ridge regression handles correlated features well but cannot remove irrelevant features. Elastic Net combines the strengths of both methods by encouraging sparsity while also stabilizing coefficient estimates in the presence of multicollinearity.</p>
+<h2 data-number="6.2" id="compared-to-lasso-and-ridge"><span class="header-section-number">6.2</span> Compared to Lasso and Ridge</h2>
+<p>How does Elastic Net compare to Lasso and Ridge regularization separately? To highlight their differences, we consider a fixed MSE loss with the following contour plot:</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net</h3><p>Explore the L1, L2, and Elastic Net constraint geometry together with their optimization paths.</p><iframe class="interactive-notebook-frame" data-default-height="980" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" style="height:980px;" title="Interactive Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig915_OptimizationPath.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<p>The figure illustrates the geometric intuition behind L1 and L2
-regularization and helps explain why Elastic Net combines the strengths
-of both approaches.</p>
-<p>The contour lines represent level sets of the Mean Squared Error
-(MSE) loss in parameter space. The goal of training is to move toward
-the minimum of this loss surface. The white dots illustrate the path
-taken by gradient descent starting from an initial point (red square)
-and moving toward the optimal solution.</p>
+<p>The figure illustrates the geometric intuition behind L1 and L2 regularization and helps explain why Elastic Net combines the strengths of both approaches.</p>
+<p>The contour lines represent level sets of the Mean Squared Error (MSE) loss in parameter space. The goal of training is to move toward the minimum of this loss surface. The white dots illustrate the path taken by gradient descent starting from an initial point (red square) and moving toward the optimal solution.</p>
 <h4 data-number="6.2.0.1" id="top-left-ell_1-penalty-geometry."><span class="header-section-number">6.2.0.1</span> Top-left: <span class="math inline">\(\ell_1\)</span> penalty geometry.</h4>
-<p>The diamond-shaped constraint region corresponds to the L1 penalty
-used in Lasso. Notice that the corners of the diamond lie on the
-coordinate axes. When the loss contours first touch this constraint
-region, they often intersect at one of these corners. Because corners
-lie on the axes, one of the coefficients becomes exactly zero. This
-explains why Lasso produces <strong>sparse solutions</strong> and
-performs <strong>automatic feature selection</strong>.</p>
-<h4 data-number="6.2.0.2" id="top-right-lasso-optimization-path."><span class="header-section-number">6.2.0.2</span> Top-right: Lasso
-optimization path.</h4>
-<p>The gradient descent trajectory shows that the solution is pulled
-toward the coordinate axes. The final optimum lies on the <span class="math inline">\(\theta_2 = 0\)</span> axis, meaning one parameter
-has been eliminated entirely.</p>
+<p>The diamond-shaped constraint region corresponds to the L1 penalty used in Lasso. Notice that the corners of the diamond lie on the coordinate axes. When the loss contours first touch this constraint region, they often intersect at one of these corners. Because corners lie on the axes, one of the coefficients becomes exactly zero. This explains why Lasso produces <strong>sparse solutions</strong> and performs <strong>automatic feature selection</strong>.</p>
+<h4 data-number="6.2.0.2" id="top-right-lasso-optimization-path."><span class="header-section-number">6.2.0.2</span> Top-right: Lasso optimization path.</h4>
+<p>The gradient descent trajectory shows that the solution is pulled toward the coordinate axes. The final optimum lies on the <span class="math inline">\(\theta_2 = 0\)</span> axis, meaning one parameter has been eliminated entirely.</p>
 <h4 data-number="6.2.0.3" id="bottom-left-ell_2-penalty-geometry."><span class="header-section-number">6.2.0.3</span> Bottom-left: <span class="math inline">\(\ell_2\)</span> penalty geometry.</h4>
-<p>The circular constraint region corresponds to the L2 penalty used in
-Ridge regression. Unlike the diamond shape, the circle has no sharp
-corners. As a result, the loss contours typically touch the constraint
-boundary at a smooth point rather than on an axis. This leads to
-coefficients being <strong>shrunk toward zero</strong> but rarely
-becoming exactly zero.</p>
-<h4 data-number="6.2.0.4" id="bottom-right-ridge-optimization-path."><span class="header-section-number">6.2.0.4</span> Bottom-right: Ridge
-optimization path.</h4>
-<p>The gradient descent path moves smoothly toward the center. The final
-solution lies near the origin, but both parameters remain nonzero. Ridge
-therefore provides <strong>stability and shrinkage</strong> without
-performing feature selection.</p>
-<h4 data-number="6.2.0.5" id="elastic-net-as-a-compromise."><span class="header-section-number">6.2.0.5</span> Elastic Net as a
-compromise.</h4>
-<p>Elastic Net combines both penalties, creating a constraint region
-that lies between the diamond and the circle. This gives it two key
-advantages:</p>
+<p>The circular constraint region corresponds to the L2 penalty used in Ridge regression. Unlike the diamond shape, the circle has no sharp corners. As a result, the loss contours typically touch the constraint boundary at a smooth point rather than on an axis. This leads to coefficients being <strong>shrunk toward zero</strong> but rarely becoming exactly zero.</p>
+<h4 data-number="6.2.0.4" id="bottom-right-ridge-optimization-path."><span class="header-section-number">6.2.0.4</span> Bottom-right: Ridge optimization path.</h4>
+<p>The gradient descent path moves smoothly toward the center. The final solution lies near the origin, but both parameters remain nonzero. Ridge therefore provides <strong>stability and shrinkage</strong> without performing feature selection.</p>
+<h4 data-number="6.2.0.5" id="elastic-net-as-a-compromise."><span class="header-section-number">6.2.0.5</span> Elastic Net as a compromise.</h4>
+<p>Elastic Net combines both penalties, creating a constraint region that lies between the diamond and the circle. This gives it two key advantages:</p>
 <ul>
-<li><p>Like Lasso, it can produce sparse solutions and perform feature
-selection.</p></li>
-<li><p>Like Ridge, it remains stable when features are highly
-correlated, avoiding the instability that Lasso can exhibit in such
-settings.</p></li>
+<li><p>Like Lasso, it can produce sparse solutions and perform feature selection.</p></li>
+<li><p>Like Ridge, it remains stable when features are highly correlated, avoiding the instability that Lasso can exhibit in such settings.</p></li>
 </ul>
-<p>For this reason, Elastic Net is especially useful in high-dimensional
-datasets where the number of features is large relative to the number of
-training samples.</p>
+<p>For this reason, Elastic Net is especially useful in high-dimensional datasets where the number of features is large relative to the number of training samples.</p>
 <h1 data-number="7" id="performance-metrics"><span class="header-section-number">7.</span> Performance Metrics</h1>
-<p>After training a regression model, we need quantitative ways to
-evaluate how well it performs. Performance metrics measure the
-difference between predicted values and the true targets. Different
-metrics emphasize different types of errors, so in practice multiple
-metrics are often reported together.</p>
+<p>After training a regression model, we need quantitative ways to evaluate how well it performs. Performance metrics measure the difference between predicted values and the true targets. Different metrics emphasize different types of errors, so in practice multiple metrics are often reported together.</p>
 <h2 data-number="7.1" id="mean-squared-error-mse"><span class="header-section-number">7.1</span> Mean Squared Error (MSE)</h2>
-<p>The <strong>Mean Squared Error (MSE)</strong> is one of the most
-common metrics for regression. It measures the average squared
-difference between predicted values and true values.</p>
+<p>The <strong>Mean Squared Error (MSE)</strong> is one of the most common metrics for regression. It measures the average squared difference between predicted values and true values.</p>
 <p><span class="math display">\[\text{MSE}(\mathbf{X},\boldsymbol{\theta})=\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2\]</span></p>
-<p>where <span class="math inline">\(\hat{y}_i=\boldsymbol{\theta}^T\mathbf{x}_i\)</span>
-is the predicted value.</p>
+<p>where <span class="math inline">\(\hat{y}_i=\boldsymbol{\theta}^T\mathbf{x}_i\)</span> is the predicted value.</p>
 <p>Squaring the error has two important effects:</p>
 <ul>
-<li><p>Large errors are penalized more heavily than small
-errors.</p></li>
-<li><p>The function is smooth and differentiable, making it convenient
-for optimization.</p></li>
+<li><p>Large errors are penalized more heavily than small errors.</p></li>
+<li><p>The function is smooth and differentiable, making it convenient for optimization.</p></li>
 </ul>
-<p>However, because errors are squared, MSE can be sensitive to
-outliers.</p>
-<h2 data-number="7.2" id="root-mean-squared-error-rmse"><span class="header-section-number">7.2</span> Root Mean Squared Error
-(RMSE)</h2>
-<p>The <strong>Root Mean Squared Error (RMSE)</strong> is the square
-root of the MSE:</p>
+<p>However, because errors are squared, MSE can be sensitive to outliers.</p>
+<h2 data-number="7.2" id="root-mean-squared-error-rmse"><span class="header-section-number">7.2</span> Root Mean Squared Error (RMSE)</h2>
+<p>The <strong>Root Mean Squared Error (RMSE)</strong> is the square root of the MSE:</p>
 <p><span class="math display">\[\text{RMSE}(\mathbf{X},\boldsymbol{\theta})=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2}\]</span></p>
-<p>RMSE has the same units as the target variable, making it easier to
-interpret than MSE. For example, if the target variable is measured in
-dollars, RMSE is also measured in dollars.</p>
+<p>RMSE has the same units as the target variable, making it easier to interpret than MSE. For example, if the target variable is measured in dollars, RMSE is also measured in dollars.</p>
 <h2 data-number="7.3" id="mean-absolute-error-mae"><span class="header-section-number">7.3</span> Mean Absolute Error (MAE)</h2>
-<p>The <strong>Mean Absolute Error (MAE)</strong> measures the average
-magnitude of prediction errors:</p>
+<p>The <strong>Mean Absolute Error (MAE)</strong> measures the average magnitude of prediction errors:</p>
 <p><span class="math display">\[\text{MAE}(\mathbf{X},\boldsymbol{\theta})=\frac{1}{N}\sum_{i=1}^{N}|\hat{y}_i-y_i|\]</span></p>
 <p>Unlike MSE, MAE does not square the error. This makes MAE:</p>
 <ul>
 <li><p>More robust to outliers</p></li>
 <li><p>Less sensitive to large individual errors</p></li>
 </ul>
-<p>In practice, MAE and MSE are often reported together to better
-understand model behavior.</p>
-<h2 data-number="7.4" id="coefficient-of-determination-r2"><span class="header-section-number">7.4</span> Coefficient of Determination
-(<span class="math inline">\(R^2\)</span>)</h2>
-<p>The <strong>Coefficient of Determination</strong> (<span class="math inline">\(R^2\)</span>) measures how well the model explains
-the variance in the target variable. It compares the prediction error of
-the model to the error of a simple baseline model that always predicts
-the mean of the data.</p>
-<p><span class="math display">\[R^2 = 1 -
-\frac{SS_{\text{res}}}{SS_{\text{tot}}}\]</span></p>
+<p>In practice, MAE and MSE are often reported together to better understand model behavior.</p>
+<h2 data-number="7.4" id="coefficient-of-determination-r2"><span class="header-section-number">7.4</span> Coefficient of Determination (<span class="math inline">\(R^2\)</span>)</h2>
+<p>The <strong>Coefficient of Determination</strong> (<span class="math inline">\(R^2\)</span>) measures how well the model explains the variance in the target variable. It compares the prediction error of the model to the error of a simple baseline model that always predicts the mean of the data.</p>
+<p><span class="math display">\[R^2 = 1 - \frac{SS_{\text{res}}}{SS_{\text{tot}}}\]</span></p>
 <p>where</p>
-<p><span class="math display">\[SS_{\text{res}}=\sum_{i=1}^{N}(y_i-\hat{y}_i)^2\]</span>
-<span class="math display">\[SS_{\text{tot}}=\sum_{i=1}^{N}(y_i-\bar{y})^2\]</span></p>
+<p><span class="math display">\[SS_{\text{res}}=\sum_{i=1}^{N}(y_i-\hat{y}_i)^2\]</span> <span class="math display">\[SS_{\text{tot}}=\sum_{i=1}^{N}(y_i-\bar{y})^2\]</span></p>
 <p>Interpretation:</p>
 <ul>
-<li><p><strong><span class="math inline">\(R^2 = 1\)</span></strong>:
-Perfect predictions.</p></li>
-<li><p><strong><span class="math inline">\(R^2 = 0\)</span></strong>:
-Model performs no better than predicting the mean.</p></li>
-<li><p><strong><span class="math inline">\(R^2 &lt; 0\)</span></strong>:
-Model performs worse than the mean predictor.</p></li>
+<li><p><strong><span class="math inline">\(R^2 = 1\)</span></strong>: Perfect predictions.</p></li>
+<li><p><strong><span class="math inline">\(R^2 = 0\)</span></strong>: Model performs no better than predicting the mean.</p></li>
+<li><p><strong><span class="math inline">\(R^2 &lt; 0\)</span></strong>: Model performs worse than the mean predictor.</p></li>
 </ul>
-<p><span class="math inline">\(R^2\)</span> provides a normalized
-measure of performance and is especially useful when comparing different
-models on the same dataset.</p>
+<p><span class="math inline">\(R^2\)</span> provides a normalized measure of performance and is especially useful when comparing different models on the same dataset.</p>
 <h1 data-number="8" id="model-validation"><span class="header-section-number">8.</span> Model Validation</h1>
-<p>Machine learning models must be evaluated carefully to ensure they
-generalize to unseen data. This section introduces the core tools used
-to assess model performance and diagnose common issues such as
-underfitting and overfitting. We discuss dataset splitting, learning
-curves, cross-validation, model complexity, and the bias–variance
-tradeoff.</p>
-<h2 data-number="8.1" id="trainingvalidationtest-split"><span class="header-section-number">8.1</span> Training/Validation/Test
-Split</h2>
-<p>The test set is kept completely separate from model training and
-validation. Its purpose is to evaluate performance on unseen data and
-simulate real-world deployment. By assessing the model on this
-independent dataset, we ensure that reported performance metrics are
-reliable indicators of real-world performance.</p>
-<p>It is critical that the <strong>test set is never used during model
-development</strong>. If the test set influences model design or
-hyperparameter tuning, the evaluation becomes biased and overly
-optimistic. The test set should only be used once, after the final model
-has been selected.</p>
-<p>The training dataset is where the model learns. It’s typically
-divided into two parts:</p>
+<p>Machine learning models must be evaluated carefully to ensure they generalize to unseen data. This section introduces the core tools used to assess model performance and diagnose common issues such as underfitting and overfitting. We discuss dataset splitting, learning curves, cross-validation, model complexity, and the bias–variance tradeoff.</p>
+<h2 data-number="8.1" id="trainingvalidationtest-split"><span class="header-section-number">8.1</span> Training/Validation/Test Split</h2>
+<p>The test set is kept completely separate from model training and validation. Its purpose is to evaluate performance on unseen data and simulate real-world deployment. By assessing the model on this independent dataset, we ensure that reported performance metrics are reliable indicators of real-world performance.</p>
+<p>It is critical that the <strong>test set is never used during model development</strong>. If the test set influences model design or hyperparameter tuning, the evaluation becomes biased and overly optimistic. The test set should only be used once, after the final model has been selected.</p>
+<p>The training dataset is where the model learns. It’s typically divided into two parts:</p>
 <ol>
-<li><p>Training Data: The larger portion used to teach the model by
-adjusting its parameters based on the loss function.</p></li>
-<li><p>Validation Data: A smaller portion used to monitor the model’s
-performance during training. It helps fine-tune hyperparameters and
-assess the risk of overfitting by providing an unbiased
-evaluation.</p></li>
+<li><p>Training Data: The larger portion used to teach the model by adjusting its parameters based on the loss function.</p></li>
+<li><p>Validation Data: A smaller portion used to monitor the model’s performance during training. It helps fine-tune hyperparameters and assess the risk of overfitting by providing an unbiased evaluation.</p></li>
 </ol>
-<p>The validation subset serves as a checkpoint during training. It
-helps identify issues like overfitting and informs adjustments to model
-design and hyperparameters. This ensures that the model remains robust
-and can generalize well to new data. Typically, 20–30% of the dataset is
-reserved for testing, while the remaining data is used for training and
-validation.</p>
+<p>The validation subset serves as a checkpoint during training. It helps identify issues like overfitting and informs adjustments to model design and hyperparameters. This ensures that the model remains robust and can generalize well to new data. Typically, 20–30% of the dataset is reserved for testing, while the remaining data is used for training and validation.</p>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-22%20at%206.02.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 9.16: Visualization of dataset split</figcaption>
+<img alt="Figure 9.16: Visualization of dataset split" src="img/lecture9/Screenshot%202024-09-22%20at%206.02.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.16: Visualization of dataset split</figcaption>
 </figure>
-<h4 data-number="8.1.0.1" id="k-fold-cross-validation-procedure"><span class="header-section-number">8.1.0.1</span> K-fold Cross-Validation
-Procedure</h4>
-<p>A widely used approach for hyperparameter tuning is <span class="math inline">\(k\)</span>-fold cross-validation. The procedure
-is:</p>
+<h4 data-number="8.1.0.1" id="k-fold-cross-validation-procedure"><span class="header-section-number">8.1.0.1</span> K-fold Cross-Validation Procedure</h4>
+<p>A widely used approach for hyperparameter tuning is <span class="math inline">\(k\)</span>-fold cross-validation. The procedure is:</p>
 <ol>
 <li><p>Shuffle the dataset randomly.</p></li>
-<li><p>Split the dataset into <span class="math inline">\(k\)</span>
-roughly equal subsets (folds).</p></li>
+<li><p>Split the dataset into <span class="math inline">\(k\)</span> roughly equal subsets (folds).</p></li>
 <li><p>For each fold:</p>
 <ul>
 <li><p>Use the fold as the validation set.</p></li>
-<li><p>Use the remaining <span class="math inline">\(k-1\)</span> folds
-as the training set.</p></li>
+<li><p>Use the remaining <span class="math inline">\(k-1\)</span> folds as the training set.</p></li>
 <li><p>Train the model and record the validation score.</p></li>
 </ul></li>
 <li><p>Average the validation scores across all folds.</p></li>
 </ol>
-<p>After cross-validation, the model is retrained on the full training
-data before final evaluation on the test set.</p>
+<p>After cross-validation, the model is retrained on the full training data before final evaluation on the test set.</p>
 <figure>
-<img src="img/lecture10/crossvalidation.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Figure 9.17: K-fold cross-validation procedure.</figcaption>
+<img alt="Figure 9.17: K-fold cross-validation procedure." src="img/lecture10/crossvalidation.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.17: K-fold cross-validation procedure.</figcaption>
 </figure>
 <h2 data-number="8.2" id="learning-curves"><span class="header-section-number">8.2</span> Learning Curves</h2>
-<p>When we evaluate a model’s performance, we typically look at two key
-metrics: the training score and the validation score. As we increase the
-size of the training set, these scores can behave differently, providing
-valuable insights into the model’s learning process and its ability to
-generalize.</p>
+<p>When we evaluate a model’s performance, we typically look at two key metrics: the training score and the validation score. As we increase the size of the training set, these scores can behave differently, providing valuable insights into the model’s learning process and its ability to generalize.</p>
 <ol>
-<li><p><strong>Training Score</strong>: The training score indicates how
-well the model fits the training data. As the size of the training set
-increases, the training score usually improves. This is because a larger
-training set provides more examples for the model to learn from,
-allowing it to better capture the underlying patterns in the
-data.</p></li>
-<li><p><strong>Validation Score</strong>: The validation score reflects
-the model’s performance on a separate validation dataset. This score
-helps assess how well the model can generalize to unseen data.
-Initially, as the training set size increases, the validation score may
-also improve, indicating that the model is effectively learning relevant
-features and relationships.</p></li>
+<li><p><strong>Training Score</strong>: The training score indicates how well the model fits the training data. As the size of the training set increases, the training score usually improves. This is because a larger training set provides more examples for the model to learn from, allowing it to better capture the underlying patterns in the data.</p></li>
+<li><p><strong>Validation Score</strong>: The validation score reflects the model’s performance on a separate validation dataset. This score helps assess how well the model can generalize to unseen data. Initially, as the training set size increases, the validation score may also improve, indicating that the model is effectively learning relevant features and relationships.</p></li>
 </ol>
-<p>Learning curves are a powerful diagnostic tool. By comparing training
-and validation errors as the dataset size increases, we can determine
-whether a model is suffering from underfitting (high bias) or
-overfitting (high variance).</p>
-<h4 data-number="8.2.0.1" id="how-learning-curves-are-generated"><span class="header-section-number">8.2.0.1</span> How Learning Curves Are
-Generated</h4>
-<p>To generate learning curves, we repeatedly train the model using
-increasing amounts of training data and evaluate on a fixed validation
-set:</p>
+<p>Learning curves are a powerful diagnostic tool. By comparing training and validation errors as the dataset size increases, we can determine whether a model is suffering from underfitting (high bias) or overfitting (high variance).</p>
+<h4 data-number="8.2.0.1" id="how-learning-curves-are-generated"><span class="header-section-number">8.2.0.1</span> How Learning Curves Are Generated</h4>
+<p>To generate learning curves, we repeatedly train the model using increasing amounts of training data and evaluate on a fixed validation set:</p>
 <ol>
 <li><p>Reserve a validation set of size <span class="math inline">\(v\)</span> from the dataset of size <span class="math inline">\(n\)</span>.</p></li>
-<li><p>For <span class="math inline">\(k = 1, 2, \dots,
-n-v\)</span>:</p>
+<li><p>For <span class="math inline">\(k = 1, 2, \dots, n-v\)</span>:</p>
 <ul>
 <li><p>Train the model using the first <span class="math inline">\(k\)</span> training samples.</p></li>
 <li><p>Evaluate training and validation error.</p></li>
 </ul></li>
 </ol>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.00%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 9.18: Underfit linear regression model</figcaption>
+<img alt="Figure 9.18: Underfit linear regression model" src="img/lecture9/Screenshot%202024-09-22%20at%206.09.00%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.18: Underfit linear regression model</figcaption>
 </figure>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.19%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 9.19: Overfit polynomial regression
-model</figcaption>
+<img alt="Figure 9.19: Overfit polynomial regression model" src="img/lecture9/Screenshot%202024-09-22%20at%206.09.19%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.19: Overfit polynomial regression model</figcaption>
 </figure>
-<p>What we can see from this is that the linear model shows higher error
-rates and plateaus early in training and validation causing
-underfitting. The polynomial model on the other hand has a lower error
-than the linear model but has a wider gap which shows overfitting.</p>
+<p>What we can see from this is that the linear model shows higher error rates and plateaus early in training and validation causing underfitting. The polynomial model on the other hand has a lower error than the linear model but has a wider gap which shows overfitting.</p>
 <h2 data-number="8.3" id="cross-validation"><span class="header-section-number">8.3</span> Cross Validation</h2>
-<p>Cross-validation is a robust statistical technique used in machine
-learning to evaluate how well a model will perform on independent,
-unseen data. By partitioning the data into subsets, cross-validation
-helps ensure that the evaluation of the model is reliable and minimizes
-the risk of overfitting.</p>
-<p>In <span class="math inline">\(k\)</span>-fold cross-validation, the
-dataset is divided into <span class="math inline">\(k\)</span> equal
-parts. The model is trained <span class="math inline">\(k\)</span>
-times, each time using a different subset as the validation set and the
-remaining data for training. The final performance estimate is the
-average across all <span class="math inline">\(k\)</span> runs.</p>
-<h2 data-number="8.4" id="model-complexity-vs-prediction-error"><span class="header-section-number">8.4</span> Model Complexity vs Prediction
-Error</h2>
-<p>Model complexity in machine learning, often measured by degrees of
-freedom, refers to a model’s capacity to fit data, as seen in polynomial
-regression. As model complexity increases, training error typically
-decreases because the model can better fit the training data,
-potentially reaching a point where training error approaches zero,
-indicating it captures even the noise. Initially, testing error may also
-decrease as the model learns relevant patterns, but after a certain
-complexity level, testing error begins to rise due to overfitting—where
-the model learns noise instead of generalizable patterns. This
-highlights the bias-variance tradeoff: low-complexity models may have
-high bias, leading to oversimplified patterns, while high-complexity
-models can suffer from high variance, fitting training data well but
-failing on unseen data. Cross-validation helps identify the optimal
-level of complexity that minimizes generalization error, while
-regularization mitigates overfitting by penalizing excessive
-complexity.</p>
+<p>Cross-validation is a robust statistical technique used in machine learning to evaluate how well a model will perform on independent, unseen data. By partitioning the data into subsets, cross-validation helps ensure that the evaluation of the model is reliable and minimizes the risk of overfitting.</p>
+<p>In <span class="math inline">\(k\)</span>-fold cross-validation, the dataset is divided into <span class="math inline">\(k\)</span> equal parts. The model is trained <span class="math inline">\(k\)</span> times, each time using a different subset as the validation set and the remaining data for training. The final performance estimate is the average across all <span class="math inline">\(k\)</span> runs.</p>
+<h2 data-number="8.4" id="model-complexity-vs-prediction-error"><span class="header-section-number">8.4</span> Model Complexity vs Prediction Error</h2>
+<p>Model complexity in machine learning, often measured by degrees of freedom, refers to a model’s capacity to fit data, as seen in polynomial regression. As model complexity increases, training error typically decreases because the model can better fit the training data, potentially reaching a point where training error approaches zero, indicating it captures even the noise. Initially, testing error may also decrease as the model learns relevant patterns, but after a certain complexity level, testing error begins to rise due to overfitting—where the model learns noise instead of generalizable patterns. This highlights the bias-variance tradeoff: low-complexity models may have high bias, leading to oversimplified patterns, while high-complexity models can suffer from high variance, fitting training data well but failing on unseen data. Cross-validation helps identify the optimal level of complexity that minimizes generalization error, while regularization mitigates overfitting by penalizing excessive complexity.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.20 Model Complexity</h3><p>Adjust model complexity and observe error behavior.</p><iframe class="interactive-notebook-frame" data-default-height="1080" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" style="height:1080px;" title="Interactive Figure 9.20 Model Complexity Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig920_ModelComplexity.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
-<img src="img/lecture10/modelcomplexity.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>Figure 9.21: Model complexity vs training and testing
-error.</figcaption>
+<img alt="Figure 9.21: Model complexity vs training and testing error." src="img/lecture10/modelcomplexity.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.21: Model complexity vs training and testing error.</figcaption>
 </figure>
 <h2 data-number="8.5" id="bias-variance-tradeoff"><span class="header-section-number">8.5</span> Bias-Variance Tradeoff</h2>
-<p>The bias–variance tradeoff provides a theoretical explanation for the
-behavior observed in learning curves and model complexity plots.</p>
-<p>Training a Linear Regression model multiple times with different
-datasets reveals a range of prediction scores, which can provide
-valuable insights into model performance. The average of these scores,
-referred to as bias, indicates how consistently the models perform.
-Models exhibiting high average error are categorized as high-bias, a
-result of low complexity to capture the underlying patterns in the data.
-Such models may cause underfitting. In the context of a high-degree
-Polynomial Regression model, while the bias is significantly reduced due
-to the model’s increased complexity and flexibility, this comes at a
-cost. The predictions for a given test point can vary dramatically
-between different polynomial models, indicating a pronounced sensitivity
-to the training data. This phenomenon, known as variance, arises when
-the model becomes overly tailored to the nuances of the training
-dataset, capturing noise rather than the underlying trend. Consequently,
-high-variance models struggle to generalize effectively to unseen data,
-resulting in substantially higher prediction errors when applied to new
-instances. Moreover, this trade-off highlights the delicate balance
-between bias and variance, underscoring the importance of model
-selection and regularization techniques to mitigate
-overfitting/underfitting while still achieving accurate predictions.</p>
-<h4 data-number="8.5.0.1" id="biasvariance-decomposition"><span class="header-section-number">8.5.0.1</span> Bias–Variance
-Decomposition</h4>
-<p>Let <span class="math inline">\(x\)</span> be a test sample, <span class="math inline">\(f(x)\)</span> the true target, and <span class="math inline">\(\hat{f}(x)\)</span> the model prediction. The
-expected squared error can be decomposed as</p>
+<p>The bias–variance tradeoff provides a theoretical explanation for the behavior observed in learning curves and model complexity plots.</p>
+<p>Training a Linear Regression model multiple times with different datasets reveals a range of prediction scores, which can provide valuable insights into model performance. The average of these scores, referred to as bias, indicates how consistently the models perform. Models exhibiting high average error are categorized as high-bias, a result of low complexity to capture the underlying patterns in the data. Such models may cause underfitting. In the context of a high-degree Polynomial Regression model, while the bias is significantly reduced due to the model’s increased complexity and flexibility, this comes at a cost. The predictions for a given test point can vary dramatically between different polynomial models, indicating a pronounced sensitivity to the training data. This phenomenon, known as variance, arises when the model becomes overly tailored to the nuances of the training dataset, capturing noise rather than the underlying trend. Consequently, high-variance models struggle to generalize effectively to unseen data, resulting in substantially higher prediction errors when applied to new instances. Moreover, this trade-off highlights the delicate balance between bias and variance, underscoring the importance of model selection and regularization techniques to mitigate overfitting/underfitting while still achieving accurate predictions.</p>
+<h4 data-number="8.5.0.1" id="biasvariance-decomposition"><span class="header-section-number">8.5.0.1</span> Bias–Variance Decomposition</h4>
+<p>Let <span class="math inline">\(x\)</span> be a test sample, <span class="math inline">\(f(x)\)</span> the true target, and <span class="math inline">\(\hat{f}(x)\)</span> the model prediction. The expected squared error can be decomposed as</p>
 <p><span class="math display">\[E[(f(x) - \hat{f}(x))^2]
 = \underbrace{(E[\hat{f}(x)] - f(x))^2}_{\text{Bias}^2}
 + \underbrace{E[(\hat{f}(x) - E[\hat{f}(x)])^2]}_{\text{Variance}}
 + \underbrace{\sigma_e^2}_{\text{Irreducible Error}}.\]</span></p>
-<p>This decomposition explains why increasing model complexity can
-reduce bias but increase variance, and motivates the search for an
-optimal tradeoff.</p>
+<p>This decomposition explains why increasing model complexity can reduce bias but increase variance, and motivates the search for an optimal tradeoff.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.21 Model Complexity vs Error</h3><p>Adjust model complexity and inspect bias/variance trends.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" style="height:900px;" title="Interactive Figure 9.21 Model Complexity vs Error Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig921_ComplexityVsError.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-22%20at%206.30.13%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Figure 9.23: Diagram depicting the bias-variance
-tradeoff</figcaption>
+<img alt="Figure 9.23: Diagram depicting the bias-variance tradeoff" src="img/lecture9/Screenshot%202024-09-22%20at%206.30.13%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.23: Diagram depicting the bias-variance tradeoff</figcaption>
 </figure>
 <figure>
-<img src="img/lecture9/Screenshot%202024-09-22%20at%206.41.12%E2%80%AFPM.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Figure 9.24: </figcaption>
+<img alt="Figure 9.24: " src="img/lecture9/Screenshot%202024-09-22%20at%206.41.12%E2%80%AFPM.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.24: </figcaption>
 </figure>
-<p>This decomposition motivates the bias–variance tradeoff: increasing
-model complexity typically reduces bias but increases variance.</p>
+<p>This decomposition motivates the bias–variance tradeoff: increasing model complexity typically reduces bias but increases variance.</p>
 <h1 data-number="9" id="additional-details"><span class="header-section-number">9.</span> Additional Details</h1>
-<p>In this final section, we briefly connect the practical ideas from
-this lecture to deeper theoretical concepts from statistical learning
-theory. The goal is not to develop full theory, but to build intuition
-for why model complexity, data size, and regularization are
-fundamentally linked.</p>
+<p>In this final section, we briefly connect the practical ideas from this lecture to deeper theoretical concepts from statistical learning theory. The goal is not to develop full theory, but to build intuition for why model complexity, data size, and regularization are fundamentally linked.</p>
 <h2 data-number="9.1" id="model-complexity"><span class="header-section-number">9.1</span> Model Complexity</h2>
-<p>So far, we have discussed model complexity intuitively using learning
-curves, regularization, and the bias–variance tradeoff. We now take a
-slightly more formal look at what “model complexity” means.</p>
-<p>In general, <em>model complexity</em> refers to the capacity of a
-model to fit a wide variety of functions or datasets. As discussed
-earlier, a more complex model has a higher capacity to capture intricate
-patterns in the data, but this can also increase the risk of
-overfitting. One way to think about model complexity is in terms of how
-many training samples are needed for the model to learn patterns that
-generalize well to new data, i.e. produce low test error. However, this
-quantity can be difficult to characterize. Here are a few typical
-notions:</p>
+<p>So far, we have discussed model complexity intuitively using learning curves, regularization, and the bias–variance tradeoff. We now take a slightly more formal look at what “model complexity” means.</p>
+<p>In general, <em>model complexity</em> refers to the capacity of a model to fit a wide variety of functions or datasets. As discussed earlier, a more complex model has a higher capacity to capture intricate patterns in the data, but this can also increase the risk of overfitting. One way to think about model complexity is in terms of how many training samples are needed for the model to learn patterns that generalize well to new data, i.e. produce low test error. However, this quantity can be difficult to characterize. Here are a few typical notions:</p>
 <ul>
-<li><p>The degree of the model (e.g., the degree of a polynomial in
-polynomial regression).</p></li>
-<li><p>The number of parameters in the model (e.g., weights in a neural
-network).</p></li>
-<li><p>The flexibility of the <em>hypothesis space</em> the model
-operates within.</p></li>
+<li><p>The degree of the model (e.g., the degree of a polynomial in polynomial regression).</p></li>
+<li><p>The number of parameters in the model (e.g., weights in a neural network).</p></li>
+<li><p>The flexibility of the <em>hypothesis space</em> the model operates within.</p></li>
 </ul>
-<p>The first two are essentially the same in that they describe the
-<em>size</em> of the hypothesis space. In particular, the hypothesis
-space describes the set of all possible functions the model can select
-from, given the available data and parameters. For finite spaces, the
-size is a fair measure of complexity. In fact, in this case we can show
-that the number of samples needed to adequately fit a model is bounded
-by the (log of the) size of the space. However, when the space is
-infinite, as is often the case with continuous models like neural
-networks, then this notion of counting parameters can break down and we
-need a more careful measure of complexity.</p>
-<p>A classical theoretical way to measure model capacity is the <em>VC
-(Vapnik–Chervonenkis) dimension</em>. You do not need to compute this in
-practice, but it provides useful intuition about why complex models
-require more data. The VC dimension is a theoretical tool used to
-quantify the capacity of a model by determining the maximum number of
-points that a model can <em>shatter</em>. Shattering means that for a
-given set of points, the model can perfectly classify all possible
-binary labelings of those points. The higher the VC dimension, the more
-complex the model and the larger the class of functions it can
-represent.</p>
-<p>For example, a linear classifier in 2D (like a linear SVM or
-perceptron) has a VC dimension of 3, meaning it can shatter any set of 3
-points in the plane, but not necessarily 4.</p>
-<p>In practice, models with high VC dimensions are prone to overfitting,
-as they can represent highly complex decision boundaries. However,
-models with a VC dimension that is too low may underfit, failing to
-capture important relationships in the data. The key is to choose a
-model with an appropriate VC dimension for the problem at hand.</p>
-<p>While VC dimension is a powerful theoretical concept, it is not
-always easy to compute for real-world models. Nonetheless, it serves as
-a guiding principle: models with higher capacity (e.g., more parameters,
-higher VC dimension) need more training data to generalize well, and
-regularization becomes crucial to control overfitting in such cases.</p>
-<p>This theoretical perspective reinforces the key message of this
-lecture: as model capacity increases, we must rely on more data,
-cross-validation, and regularization to ensure good generalization.</p>
-<h2 data-number="9.2" id="model-evaluation-under-ambiguous-ground-truth"><span class="header-section-number">9.2</span> Model Evaluation Under
-Ambiguous Ground Truth</h2>
-<p>So far, we have assumed that every training example has a single
-correct label. However, in many real-world datasets the true label is
-not perfectly known. Different annotators may disagree, labels may be
-noisy, and some examples may naturally belong to multiple categories.
-This situation is known as <strong>ambiguous ground truth</strong> or
-<strong>label noise</strong>.</p>
-<h3 data-number="9.2.1" id="why-accuracy-can-be-misleading"><span class="header-section-number">9.2.1</span> Why Accuracy Can Be
-Misleading</h3>
-<p>Standard accuracy assumes that dataset labels are perfectly correct.
-But suppose that a fraction <span class="math inline">\(\epsilon\)</span> of labels are incorrect or
-uncertain. Even a perfect model cannot exceed the accuracy of the noisy
-labels.</p>
+<p>The first two are essentially the same in that they describe the <em>size</em> of the hypothesis space. In particular, the hypothesis space describes the set of all possible functions the model can select from, given the available data and parameters. For finite spaces, the size is a fair measure of complexity. In fact, in this case we can show that the number of samples needed to adequately fit a model is bounded by the (log of the) size of the space. However, when the space is infinite, as is often the case with continuous models like neural networks, then this notion of counting parameters can break down and we need a more careful measure of complexity.</p>
+<p>A classical theoretical way to measure model capacity is the <em>VC (Vapnik–Chervonenkis) dimension</em>. You do not need to compute this in practice, but it provides useful intuition about why complex models require more data. The VC dimension is a theoretical tool used to quantify the capacity of a model by determining the maximum number of points that a model can <em>shatter</em>. Shattering means that for a given set of points, the model can perfectly classify all possible binary labelings of those points. The higher the VC dimension, the more complex the model and the larger the class of functions it can represent.</p>
+<p>For example, a linear classifier in 2D (like a linear SVM or perceptron) has a VC dimension of 3, meaning it can shatter any set of 3 points in the plane, but not necessarily 4.</p>
+<p>In practice, models with high VC dimensions are prone to overfitting, as they can represent highly complex decision boundaries. However, models with a VC dimension that is too low may underfit, failing to capture important relationships in the data. The key is to choose a model with an appropriate VC dimension for the problem at hand.</p>
+<p>While VC dimension is a powerful theoretical concept, it is not always easy to compute for real-world models. Nonetheless, it serves as a guiding principle: models with higher capacity (e.g., more parameters, higher VC dimension) need more training data to generalize well, and regularization becomes crucial to control overfitting in such cases.</p>
+<p>This theoretical perspective reinforces the key message of this lecture: as model capacity increases, we must rely on more data, cross-validation, and regularization to ensure good generalization.</p>
+<h2 data-number="9.2" id="model-evaluation-under-ambiguous-ground-truth"><span class="header-section-number">9.2</span> Model Evaluation Under Ambiguous Ground Truth</h2>
+<p>So far, we have assumed that every training example has a single correct label. However, in many real-world datasets the true label is not perfectly known. Different annotators may disagree, labels may be noisy, and some examples may naturally belong to multiple categories. This situation is known as <strong>ambiguous ground truth</strong> or <strong>label noise</strong>.</p>
+<h3 data-number="9.2.1" id="why-accuracy-can-be-misleading"><span class="header-section-number">9.2.1</span> Why Accuracy Can Be Misleading</h3>
+<p>Standard accuracy assumes that dataset labels are perfectly correct. But suppose that a fraction <span class="math inline">\(\epsilon\)</span> of labels are incorrect or uncertain. Even a perfect model cannot exceed the accuracy of the noisy labels.</p>
 <p><span class="math display">\[\boxed{
 \text{Observed Accuracy} \;\le\; 1 - \epsilon
 }\]</span></p>
-<p>This means a model might appear to plateau at <span class="math inline">\(90\%\)</span> accuracy even if its true
-performance is much higher. In practice, label noise creates uncertainty
-about how measured accuracy relates to the model’s true accuracy <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086 Quesada2025Largescale">(Joshua
-C. Peterson et al. 2019b; Quesada et al. 2025)</span>.</p>
+<p>This means a model might appear to plateau at <span class="math inline">\(90\%\)</span> accuracy even if its true performance is much higher. In practice, label noise creates uncertainty about how measured accuracy relates to the model’s true accuracy <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086 Quesada2025Largescale">(Joshua C. Peterson et al. 2019a; Quesada et al. 2025)</span>.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.25 Measured vs True Accuracy Under Label Noise</h3><p>Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig925_GTNoise_interactive.html" style="height:860px;" title="Interactive Figure 9.25 Measured vs True Accuracy Under Label Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig925_GTNoise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>The shaded region illustrates an important takeaway:</p>
 <blockquote>
-<p>Measured accuracy is not a single number — it represents a <em>range
-of possible true performances</em>.</p>
+<p>Measured accuracy is not a single number — it represents a <em>range of possible true performances</em>.</p>
 </blockquote>
-<p>This relationship between measured and true accuracy under noisy
-labels has been studied extensively in recent work <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086">(Joshua
-C. Peterson et al. 2019b)</span>.</p>
+<p>This relationship between measured and true accuracy under noisy labels has been studied extensively in recent work <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086">(Joshua C. Peterson et al. 2019a)</span>.</p>
 <h3 data-number="9.2.2" id="human-label-disagreement"><span class="header-section-number">9.2.2</span> Human Label Disagreement</h3>
-<p>In many tasks, disagreement between humans is not a mistake — it is a
-signal of inherent ambiguity in the data. For example, an image might
-contain features of both a dog and a wolf, or a handwritten digit might
-look like both a 3 and an 8.</p>
-<p>Recent research shows that training models using
-<strong>distributions of human labels</strong> instead of single “hard”
-labels can improve generalization and robustness <span class="citation" data-cites="cifar10h">(Joshua C. Peterson et al. 2019a)</span>.</p>
-<figure id="fig:human_cnn_uncertainty">
-<img src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
-<figcaption>Figure 9.26: <strong>Humans and neural networks disagree in
-their uncertainty.</strong> Top: examples where humans are confident but
-CNN predictions are uncertain. Middle: examples where humans are
-uncertain but CNN predictions are confident. Bottom: examples where both
-distributions diverge. This highlights that label disagreement contains
-useful information about ambiguity in the data.</figcaption>
+<p>In many tasks, disagreement between humans is not a mistake — it is a signal of inherent ambiguity in the data. For example, an image might contain features of both a dog and a wolf, or a handwritten digit might look like both a 3 and an 8.</p>
+<p>Recent research shows that training models using <strong>distributions of human labels</strong> instead of single “hard” labels can improve generalization and robustness <span class="citation" data-cites="cifar10h">(Joshua C. Peterson et al. 2019b)</span>.</p>
+<figure>
+<img alt="Figure 9.26: Humans and neural networks disagree in their uncertainty. Top: examples where humans are confident but CNN predictions are uncertain. Middle: examples where humans are uncertain but CNN predictions are confident. Bottom: examples where both distributions diverge. This highlights that label disagreement contains useful information about ambiguity in the data." id="fig:human_cnn_uncertainty" src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.26: <strong>Humans and neural networks disagree in their uncertainty.</strong> Top: examples where humans are confident but CNN predictions are uncertain. Middle: examples where humans are uncertain but CNN predictions are confident. Bottom: examples where both distributions diverge. This highlights that label disagreement contains useful information about ambiguity in the data.</figcaption>
 </figure>
-<p>Rather than treating disagreement as noise, we can treat it as
-<strong>information about uncertainty</strong>.</p>
+<p>Rather than treating disagreement as noise, we can treat it as <strong>information about uncertainty</strong>.</p>
 <h3 data-number="9.2.3" id="practical-implications"><span class="header-section-number">9.2.3</span> Practical Implications</h3>
-<p>When labels are noisy or ambiguous, model evaluation becomes more
-subtle. Standard accuracy may <strong>underestimate true model
-performance</strong> because the model is being judged against imperfect
-labels. At the same time, models can <strong>overfit to label
-noise</strong>, memorizing incorrect annotations rather than learning
-generalizable patterns. For this reason, techniques such as
-<strong>cross-validation</strong> become even more important, and
-<strong>regularization</strong> plays a key role in preventing models
-from memorizing incorrect labels.</p>
-<p>These challenges motivate the use of more robust training and
-evaluation strategies. In practice, modern machine learning often relies
-on <strong>robust evaluation metrics</strong>, <strong>label
-smoothing</strong>, and <strong>probabilistic (soft) labels</strong>
-that represent uncertainty in annotations rather than assuming a single
-perfectly correct label. These ideas have become increasingly important
-in modern machine learning, where large-scale datasets often contain
-imperfect or ambiguous annotations <span class="citation" data-cites="Quesada2025Largescale cifar10h">(Quesada et al. 2025; Joshua
-C. Peterson et al. 2019a)</span>.</p>
+<p>When labels are noisy or ambiguous, model evaluation becomes more subtle. Standard accuracy may <strong>underestimate true model performance</strong> because the model is being judged against imperfect labels. At the same time, models can <strong>overfit to label noise</strong>, memorizing incorrect annotations rather than learning generalizable patterns. For this reason, techniques such as <strong>cross-validation</strong> become even more important, and <strong>regularization</strong> plays a key role in preventing models from memorizing incorrect labels.</p>
+<p>These challenges motivate the use of more robust training and evaluation strategies. In practice, modern machine learning often relies on <strong>robust evaluation metrics</strong>, <strong>label smoothing</strong>, and <strong>probabilistic (soft) labels</strong> that represent uncertainty in annotations rather than assuming a single perfectly correct label. These ideas have become increasingly important in modern machine learning, where large-scale datasets often contain imperfect or ambiguous annotations <span class="citation" data-cites="Quesada2025Largescale cifar10h">(Quesada et al. 2025; Joshua C. Peterson et al. 2019b)</span>.</p>
 <p><br/>
 <br/>
-<strong>Key takeaway:</strong> Modern machine learning increasingly
-treats labels as <em>probabilistic</em> rather than perfectly
-correct.</p>
+<strong>Key takeaway:</strong> Modern machine learning increasingly treats labels as <em>probabilistic</em> rather than perfectly correct.</p>
 <h1 class="unnumbered" id="bibliography">References</h1>
-<div class="references csl-bib-body hanging-indent" id="refs" role="list">
-<div class="csl-entry" id="ref-cifar10h" role="listitem">
-Peterson, Joshua C.., Ruth M. Battleday, Thomas L. Griffiths, and Olga
-Russakovsky. 2019a. <span>“Human Uncertainty Makes Classification More
-Robust.”</span> <em>arXiv Preprint arXiv:1908.07086</em>.
+<div class="references csl-bib-body hanging-indent" id="refs" role="doc-bibliography">
+<div class="csl-entry" id="ref-DBLP:journals/corr/abs-1908-07086" role="doc-biblioentry">
+Peterson, Joshua C., Ruairidh M. Battleday, Thomas L. Griffiths, and Olga Russakovsky. 2019a. <span>“Human Uncertainty Makes Classification More Robust.”</span> <em>CoRR</em> abs/1908.07086. <a href="http://arxiv.org/abs/1908.07086" rel="noopener noreferrer" target="_blank">http://arxiv.org/abs/1908.07086</a>.
 </div>
-<div class="csl-entry" id="ref-DBLP:journals/corr/abs-1908-07086" role="listitem">
-Peterson, Joshua C., Ruairidh M. Battleday, Thomas L. Griffiths, and
-Olga Russakovsky. 2019b. <span>“Human Uncertainty Makes Classification
-More Robust.”</span> <em>CoRR</em> abs/1908.07086. <a href="http://arxiv.org/abs/1908.07086" rel="noopener noreferrer" target="_blank">http://arxiv.org/abs/1908.07086</a>.
+<div class="csl-entry" id="ref-cifar10h" role="doc-biblioentry">
+Peterson, Joshua C.., Ruth M. Battleday, Thomas L. Griffiths, and Olga Russakovsky. 2019b. <span>“Human Uncertainty Makes Classification More Robust.”</span> <em>arXiv Preprint arXiv:1908.07086</em>.
 </div>
-<div class="csl-entry" id="ref-Quesada2025Largescale" role="listitem">
-Quesada, J., C. Zhou, P.Chowdhury, M. Alotaibi, A. Mustafa, Y. Kumakov,
-M. Prabhushankar, and G. AlRegib. 2025. <span>“A Large-Scale Benchmark
-on Geological Fault Delineation Models: Domain Shift, Training Dynamics,
-Generalizability, Evaluation and Inferential Behavior.”</span> <em>IEEE
-Access</em>.
+<div class="csl-entry" id="ref-Quesada2025Largescale" role="doc-biblioentry">
+Quesada, J., C. Zhou, P.Chowdhury, M. Alotaibi, A. Mustafa, Y. Kumakov, M. Prabhushankar, and G. AlRegib. 2025. <span>“A Large-Scale Benchmark on Geological Fault Delineation Models: Domain Shift, Training Dynamics, Generalizability, Evaluation and Inferential Behavior.”</span> <em>IEEE Access</em>.
 </div>
 </div>
 

@@ -24,7 +24,23 @@ window.MathJax = {
 </head>
 <body>
 <main>
-  <p>No exercises posted for this lecture yet.</p>
+  <section><h1 class="unnumbered">Exercises</h1>
+<div class="mdframed">
+<p><strong>Q: Why is contrastive pretraining (CLIP) preferred over generative pretraining for the visual encoder?</strong></p>
+<p><strong>A:</strong> Contrastive pretraining aligns image representations with language representations directly — the learned visual features are structured to be compatible with text descriptors, which is precisely the property needed for downstream VQA and captioning. Generative visual models (e.g., VAEs, GANs, MAE) optimize for reconstructing pixel values and tend to encode low-level visual statistics. CLIP-trained encoders encode semantically meaningful, language-aligned features that transfer better to vision-language tasks, especially in zero-shot and few-shot settings.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: What is the role of the Q-Former in BLIP-2, and why is it useful?</strong></p>
+<p><strong>A:</strong> The Q-Former is a Transformer with <span class="math inline">\(K\)</span> learnable query tokens that attend over image features via cross-attention. Its role is to compress the <span class="math inline">\(N\)</span> patch tokens from the visual encoder into a fixed, small number of <span class="math inline">\(K\)</span> output vectors that capture the most task-relevant visual information. This is useful for two reasons: (1) it reduces the number of visual tokens fed into the language model from <span class="math inline">\(N\)</span> (often 256–1024) to <span class="math inline">\(K\)</span> (typically 32), keeping the LLM’s context window manageable; (2) the queries act as an adaptive summarization mechanism that can learn to extract different aspects of the image depending on the textual context.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: How does zero-shot image classification work with CLIP?</strong></p>
+<p><strong>A:</strong> CLIP encodes each candidate class name into a text embedding using a prompt template such as “a photo of a [class name].” The query image is encoded by the visual encoder. The predicted class is the one whose text embedding has the highest cosine similarity to the image embedding. No task-specific labeled data is needed. The zero-shot capability emerges because CLIP’s training objective forces image and text embeddings to be aligned in the same metric space, so an image of a cat and the text “a photo of a cat” end up nearby, while “a photo of a dog” is farther away.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: What is visual hallucination and how does it differ from LLM hallucination?</strong></p>
+<p><strong>A:</strong> Both LLM and VLM hallucination refer to generating confident but factually incorrect content. In LLMs, hallucination typically concerns factual claims about the world (wrong dates, nonexistent citations). In VLMs, visual hallucination specifically refers to describing image content that is not present in the given image — the model generates plausible visual descriptions based on language priors rather than actual visual evidence. Visual hallucination is particularly problematic because it is harder to detect (the generated text is syntactically correct and contextually plausible) and can occur even when the model has correctly encoded the image, if the language decoder overrides visual signals.</p>
+</div></section>
 </main>
 </body>
 </html>

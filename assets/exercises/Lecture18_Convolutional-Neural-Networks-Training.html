@@ -26,100 +26,48 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question 1:</strong> You are training a Neural Network on
-a dataset with 1 million datapoints. Describe the advantages and
-disadvantages of using SGD, MBGD, and BGD? <strong>Answer:</strong></p>
+<li><p><strong>Question 1:</strong> You are training a Neural Network on a dataset with 1 million datapoints. Describe the advantages and disadvantages of using SGD, MBGD, and BGD? <strong>Answer:</strong></p>
 <ul>
 <li><p>SGD</p>
 <ul>
-<li><p>Advantages: Very memory efficient due to weight and bias updates
-from each datapoint. Can help escape local minima due to high update
-variance.</p></li>
-<li><p>Disadvantages: High variance in update steps can lead to slower
-and less stable convergence paths.</p></li>
+<li><p>Advantages: Very memory efficient due to weight and bias updates from each datapoint. Can help escape local minima due to high update variance.</p></li>
+<li><p>Disadvantages: High variance in update steps can lead to slower and less stable convergence paths.</p></li>
 </ul></li>
 <li><p>MBGD</p>
 <ul>
-<li><p>Advantages: Balances stability and efficiency by calculating
-gradients over small batches. Allows for a faster convergence than BGD,
-but also a smoother convergence path than SGD.</p></li>
-<li><p>Disadvantages: Variable sizes of batches can affect the speed and
-stability of training.</p></li>
+<li><p>Advantages: Balances stability and efficiency by calculating gradients over small batches. Allows for a faster convergence than BGD, but also a smoother convergence path than SGD.</p></li>
+<li><p>Disadvantages: Variable sizes of batches can affect the speed and stability of training.</p></li>
 </ul></li>
 <li><p>BGD</p>
 <ul>
-<li><p>Advantages: Most stable updates and smoothes convergence path due
-to gradient updates from then entire dataset.</p></li>
-<li><p>Disadvantages: Significantly expensive computationally due to the
-requirement of processing every datapoint, and almost never implemented
-in practice.</p></li>
+<li><p>Advantages: Most stable updates and smoothes convergence path due to gradient updates from then entire dataset.</p></li>
+<li><p>Disadvantages: Significantly expensive computationally due to the requirement of processing every datapoint, and almost never implemented in practice.</p></li>
 </ul></li>
 </ul></li>
-<li><p><strong>Question 2:</strong> You are tasked with training a
-Neural Network on a large dataset consisting of sparse and dense
-features. You need to choose an appropriate optimizer to ensure stable
-convergence and adaptability to varying feature importance. Discuss the
-advantages and disadvantages of Adagrad, RMSprop, and Adam.
-<strong>Answer:</strong></p>
+<li><p><strong>Question 2:</strong> You are tasked with training a Neural Network on a large dataset consisting of sparse and dense features. You need to choose an appropriate optimizer to ensure stable convergence and adaptability to varying feature importance. Discuss the advantages and disadvantages of Adagrad, RMSprop, and Adam. <strong>Answer:</strong></p>
 <ul>
 <li><p>Adagrad</p>
 <ul>
-<li><p>Advantages: Suitable for sparse data since it changes the
-learning rates per parameter.</p></li>
-<li><p>Disadvantages: Experiences rapid learning decay, which is less
-ideal for long-term training on dense features.</p></li>
+<li><p>Advantages: Suitable for sparse data since it changes the learning rates per parameter.</p></li>
+<li><p>Disadvantages: Experiences rapid learning decay, which is less ideal for long-term training on dense features.</p></li>
 </ul></li>
 <li><p>RMSprop</p>
 <ul>
-<li><p>Advantages: Improves upon Adagrad’s rapid decay issue by
-utilizing a moving average of squared gradients. This stabilizes the
-learning rate.</p></li>
-<li><p>Disadvantages: Can be sensitive to the choice of learning rate.
-It does not include momentum, which can limit its convergence speed. Due
-to the moving average of squared gradients, RMS prop may also struggle
-with sparse gradients as the moving average may diminsh.</p></li>
+<li><p>Advantages: Improves upon Adagrad’s rapid decay issue by utilizing a moving average of squared gradients. This stabilizes the learning rate.</p></li>
+<li><p>Disadvantages: Can be sensitive to the choice of learning rate. It does not include momentum, which can limit its convergence speed. Due to the moving average of squared gradients, RMS prop may also struggle with sparse gradients as the moving average may diminsh.</p></li>
 </ul></li>
 <li><p>Adam</p>
 <ul>
-<li><p>Advantages: Improves upon RMSprop by incorporating momentum,
-allowing for smoother convergence and adaptation to varying feature
-importance..</p></li>
-<li><p>Disadvantages: Can sometimes lead to poorer performance compared
-to SGD with momentum because adaptive learning rates can cause the
-optimizer to settle in sharp minima of the loss function.</p></li>
+<li><p>Advantages: Improves upon RMSprop by incorporating momentum, allowing for smoother convergence and adaptation to varying feature importance..</p></li>
+<li><p>Disadvantages: Can sometimes lead to poorer performance compared to SGD with momentum because adaptive learning rates can cause the optimizer to settle in sharp minima of the loss function.</p></li>
 </ul></li>
 </ul></li>
-<li><p><strong>Question 3:</strong> Explain why ill-conditioned loss
-surfaces cause gradient descent to converge slowly. How do adaptive
-optimizers help address this issue?</p>
-<p><strong>Answer:</strong> Ill-conditioned loss surfaces have very
-different curvature in different directions. This creates a long, narrow
-valley where the loss changes rapidly in one direction and slowly in
-another. Gradient descent must use a small learning rate to avoid
-overshooting in steep directions, which leads to slow progress along
-flat directions and a zig-zag optimization path. Adaptive optimizers
-rescale updates for each parameter based on gradient history, allowing
-larger steps in flat directions and smaller steps in steep directions,
-improving convergence speed.</p></li>
-<li><p><strong>Question 4:</strong> Why is Mini-batch Gradient Descent
-the standard training method in deep learning?</p>
-<p><strong>Answer:</strong> Mini-batch Gradient Descent provides a
-balance between the stability of Batch Gradient Descent and the
-efficiency of Stochastic Gradient Descent. It reduces computational cost
-while maintaining a relatively low-variance gradient estimate.
-Additionally, mini-batches allow efficient parallel computation on GPUs
-and introduce a small amount of stochasticity that helps escape saddle
-points and local minima. For these reasons, it is the default
-optimization strategy in modern deep learning.</p></li>
-<li><p><strong>Question 5:</strong> Describe how the features learned by
-CNN filters change as we move from early layers to deeper layers.</p>
-<p><strong>Answer:</strong> Early convolutional layers learn low-level
-features such as edges, gradients, and color contrasts. Middle layers
-combine these features to detect textures, shapes, and patterns. Deeper
-layers learn high-level semantic features such as object parts and
-meaningful visual concepts (e.g., wheels or faces). This hierarchical
-feature learning enables CNNs to transform raw pixels into high-level
-representations useful for classification.</p></li>
+<li><p><strong>Question 3:</strong> Explain why ill-conditioned loss surfaces cause gradient descent to converge slowly. How do adaptive optimizers help address this issue?</p>
+<p><strong>Answer:</strong> Ill-conditioned loss surfaces have very different curvature in different directions. This creates a long, narrow valley where the loss changes rapidly in one direction and slowly in another. Gradient descent must use a small learning rate to avoid overshooting in steep directions, which leads to slow progress along flat directions and a zig-zag optimization path. Adaptive optimizers rescale updates for each parameter based on gradient history, allowing larger steps in flat directions and smaller steps in steep directions, improving convergence speed.</p></li>
+<li><p><strong>Question 4:</strong> Why is Mini-batch Gradient Descent the standard training method in deep learning?</p>
+<p><strong>Answer:</strong> Mini-batch Gradient Descent provides a balance between the stability of Batch Gradient Descent and the efficiency of Stochastic Gradient Descent. It reduces computational cost while maintaining a relatively low-variance gradient estimate. Additionally, mini-batches allow efficient parallel computation on GPUs and introduce a small amount of stochasticity that helps escape saddle points and local minima. For these reasons, it is the default optimization strategy in modern deep learning.</p></li>
+<li><p><strong>Question 5:</strong> Describe how the features learned by CNN filters change as we move from early layers to deeper layers.</p>
+<p><strong>Answer:</strong> Early convolutional layers learn low-level features such as edges, gradients, and color contrasts. Middle layers combine these features to detect textures, shapes, and patterns. Deeper layers learn high-level semantic features such as object parts and meaningful visual concepts (e.g., wheels or faces). This hierarchical feature learning enables CNNs to transform raw pixels into high-level representations useful for classification.</p></li>
 </ol></section>
 </main>
 </body>

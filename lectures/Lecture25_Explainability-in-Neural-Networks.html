@@ -109,780 +109,259 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In this lecture, we introduce visualization-based techniques for
-interpreting deep neural networks. We examine why modern models are
-often difficult to interpret and how visualization methods can help
-translate internal representations into human-understandable insights.
-We study perturbation-based and gradient-based saliency methods,
-including Vanilla Backpropagation, Deconvnet, and Guided
-Backpropagation, and discuss how these techniques reveal which input
-regions influence a model’s prediction. We then introduce Grad-CAM, a
-method that produces class-discriminative and spatially meaningful
-explanations by leveraging gradients in the final convolutional layer.
-Finally, we introduce model-agnostic explanation methods including Local
-Interpretable Model-agnostic Explanations (LIME) and SHapley Additive
-exPlanations (SHAP), which provide feature-level explanations applicable
-to a wide range of machine learning models. Together, these tools
-provide a foundation for understanding how neural networks make visual
-decisions.</p>
+<p>In this lecture, we introduce visualization-based techniques for interpreting deep neural networks. We examine why modern models are often difficult to interpret and how visualization methods can help translate internal representations into human-understandable insights. We study perturbation-based and gradient-based saliency methods, including Vanilla Backpropagation, Deconvnet, and Guided Backpropagation, and discuss how these techniques reveal which input regions influence a model’s prediction. We then introduce Grad-CAM, a method that produces class-discriminative and spatially meaningful explanations by leveraging gradients in the final convolutional layer. Finally, we introduce model-agnostic explanation methods including Local Interpretable Model-agnostic Explanations (LIME) and SHapley Additive exPlanations (SHAP), which provide feature-level explanations applicable to a wide range of machine learning models. Together, these tools provide a foundation for understanding how neural networks make visual decisions.</p>
 <h1 data-number="2" id="explainability"><span class="header-section-number">2.</span> Explainability</h1>
 <h2 data-number="2.1" id="definition"><span class="header-section-number">2.1</span> Definition</h2>
-<p><strong>Explainability</strong> refers to the ability of a machine
-learning model to clearly describe, justify, or provide
-human-understandable reasons for its predictions or decisions. In other
-words, an explainable model allows a human user to understand
-<em>why</em> a particular output was produced for a given input.</p>
-<p>Explainability helps bridge the gap between complex mathematical
-models and human interpretation by translating internal model behavior
-into meaningful insights that can be interpreted, trusted, and
-verified.</p>
-<h2 data-number="2.2" id="why-do-we-choose-explainability"><span class="header-section-number">2.2</span> Why do we choose
-explainability</h2>
-<p>Explainability in deep learning systems is crucial for building
-<strong>trust, transparency, and accountability</strong>. Modern neural
-networks often achieve high predictive accuracy, but they typically
-operate as <em>black-box models</em>, meaning their internal reasoning
-is not directly interpretable.</p>
-<p>Explainable models are particularly valuable in high-stakes domains
-such as healthcare, where they assist doctors in diagnosis and treatment
-decisions; seismic interpretation, where they help experts label and
-analyze geological data; and autonomous systems, where they increase
-safety and reliability by clarifying why specific actions are taken.</p>
-<p>Without explainability, models simply map inputs to outputs (e.g.,
-class scores) without providing insight into the reasoning behind those
-predictions. This lack of transparency limits adoption, debugging, and
-responsible deployment of machine learning systems.</p>
+<p><strong>Explainability</strong> refers to the ability of a machine learning model to clearly describe, justify, or provide human-understandable reasons for its predictions or decisions. In other words, an explainable model allows a human user to understand <em>why</em> a particular output was produced for a given input.</p>
+<p>Explainability helps bridge the gap between complex mathematical models and human interpretation by translating internal model behavior into meaningful insights that can be interpreted, trusted, and verified.</p>
+<h2 data-number="2.2" id="why-do-we-choose-explainability"><span class="header-section-number">2.2</span> Why do we choose explainability</h2>
+<p>Explainability in deep learning systems is crucial for building <strong>trust, transparency, and accountability</strong>. Modern neural networks often achieve high predictive accuracy, but they typically operate as <em>black-box models</em>, meaning their internal reasoning is not directly interpretable.</p>
+<p>Explainable models are particularly valuable in high-stakes domains such as healthcare, where they assist doctors in diagnosis and treatment decisions; seismic interpretation, where they help experts label and analyze geological data; and autonomous systems, where they increase safety and reliability by clarifying why specific actions are taken.</p>
+<p>Without explainability, models simply map inputs to outputs (e.g., class scores) without providing insight into the reasoning behind those predictions. This lack of transparency limits adoption, debugging, and responsible deployment of machine learning systems.</p>
 <h2 data-number="2.3" id="explainability-in-cnns"><span class="header-section-number">2.3</span> Explainability in CNNs</h2>
-<p>We begin by examining a classical convolutional neural network (CNN)
-architecture, AlexNet <span class="citation" data-cites="1"></span>.
-Understanding the structure of CNNs is important because many
-explainability techniques analyze how information flows through these
-layers and which layers contribute most to the final prediction.</p>
-<h4 data-number="2.3.0.1" id="a-brief-look-at-alexnet"><span class="header-section-number">2.3.0.1</span> A brief look at
-AlexNet</h4>
-<figure id="fig:Architecture of AlexNet">
-<img src="img/lecture22/01.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>Different layers in a CNN</figcaption>
+<p>We begin by examining a classical convolutional neural network (CNN) architecture, AlexNet <span class="citation" data-cites="1"></span>. Understanding the structure of CNNs is important because many explainability techniques analyze how information flows through these layers and which layers contribute most to the final prediction.</p>
+<h4 data-number="2.3.0.1" id="a-brief-look-at-alexnet"><span class="header-section-number">2.3.0.1</span> A brief look at AlexNet</h4>
+<figure>
+<img alt="Different layers in a CNN" id="fig:Architecture of AlexNet" src="img/lecture22/01.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Different layers in a CNN</figcaption>
 </figure>
 <h4 data-number="2.3.0.2" id="section"><span class="header-section-number">2.3.0.2</span> </h4>
 <p>AlexNet contains eight learnable layers <span class="citation" data-cites="1"></span>:</p>
 <ul>
-<li><p><strong>Input:</strong> <span class="math inline">\(227\times227\times3\)</span> images. (The paper
-sometimes mentions <span class="math inline">\(224\times224\times3\)</span>; in practice this
-size is padded to 227 before the first convolution.)</p></li>
-<li><p><strong>1st Convolutional Layer:</strong> Two groups of 48
-kernels of size <span class="math inline">\(11\times11\times3\)</span>
-(stride 4, padding 0). Output: <span class="math inline">\(55\times55\times48\)</span> feature maps per
-group. Followed by <span class="math inline">\(3\times3\)</span>
-overlapping max pooling (stride 2) → <span class="math inline">\(27\times27\times48\)</span>. Then Local Response
-Normalization (LRN).</p></li>
-<li><p><strong>2nd Convolutional Layer:</strong> Two groups of 128
-kernels of size <span class="math inline">\(5\times5\times48\)</span>
-(stride 1, padding 2). Output: <span class="math inline">\(27\times27\times128\)</span>. Followed by <span class="math inline">\(3\times3\)</span> overlapping max pooling → <span class="math inline">\(13\times13\times128\)</span>. Then Local Response
-Normalization.</p></li>
-<li><p><strong>3rd Convolutional Layer:</strong> Two groups of 192
-kernels of size <span class="math inline">\(3\times3\times256\)</span>
-(stride 1, padding 1). Output: <span class="math inline">\(13\times13\times192\)</span>.</p></li>
-<li><p><strong>4th Convolutional Layer:</strong> Two groups of 192
-kernels of size <span class="math inline">\(3\times3\times192\)</span>
-(stride 1, padding 1). Output: <span class="math inline">\(13\times13\times192\)</span>.</p></li>
-<li><p><strong>5th Convolutional Layer:</strong> 256 kernels of size
-<span class="math inline">\(3\times3\times192\)</span> (stride 1,
-padding 1). Output: <span class="math inline">\(13\times13\times256\)</span>. Followed by <span class="math inline">\(3\times3\)</span> overlapping max pooling → <span class="math inline">\(6\times6\times256\)</span>.</p></li>
-<li><p><strong>6th Fully Connected Layer:</strong> 4096
-neurons.</p></li>
-<li><p><strong>7th Fully Connected Layer:</strong> 4096
-neurons.</p></li>
-<li><p><strong>8th Fully Connected Layer:</strong> 1000 output neurons
-(ImageNet classes). Softmax is used for classification.</p></li>
+<li><p><strong>Input:</strong> <span class="math inline">\(227\times227\times3\)</span> images. (The paper sometimes mentions <span class="math inline">\(224\times224\times3\)</span>; in practice this size is padded to 227 before the first convolution.)</p></li>
+<li><p><strong>1st Convolutional Layer:</strong> Two groups of 48 kernels of size <span class="math inline">\(11\times11\times3\)</span> (stride 4, padding 0). Output: <span class="math inline">\(55\times55\times48\)</span> feature maps per group. Followed by <span class="math inline">\(3\times3\)</span> overlapping max pooling (stride 2) → <span class="math inline">\(27\times27\times48\)</span>. Then Local Response Normalization (LRN).</p></li>
+<li><p><strong>2nd Convolutional Layer:</strong> Two groups of 128 kernels of size <span class="math inline">\(5\times5\times48\)</span> (stride 1, padding 2). Output: <span class="math inline">\(27\times27\times128\)</span>. Followed by <span class="math inline">\(3\times3\)</span> overlapping max pooling → <span class="math inline">\(13\times13\times128\)</span>. Then Local Response Normalization.</p></li>
+<li><p><strong>3rd Convolutional Layer:</strong> Two groups of 192 kernels of size <span class="math inline">\(3\times3\times256\)</span> (stride 1, padding 1). Output: <span class="math inline">\(13\times13\times192\)</span>.</p></li>
+<li><p><strong>4th Convolutional Layer:</strong> Two groups of 192 kernels of size <span class="math inline">\(3\times3\times192\)</span> (stride 1, padding 1). Output: <span class="math inline">\(13\times13\times192\)</span>.</p></li>
+<li><p><strong>5th Convolutional Layer:</strong> 256 kernels of size <span class="math inline">\(3\times3\times192\)</span> (stride 1, padding 1). Output: <span class="math inline">\(13\times13\times256\)</span>. Followed by <span class="math inline">\(3\times3\)</span> overlapping max pooling → <span class="math inline">\(6\times6\times256\)</span>.</p></li>
+<li><p><strong>6th Fully Connected Layer:</strong> 4096 neurons.</p></li>
+<li><p><strong>7th Fully Connected Layer:</strong> 4096 neurons.</p></li>
+<li><p><strong>8th Fully Connected Layer:</strong> 1000 output neurons (ImageNet classes). Softmax is used for classification.</p></li>
 </ul>
-<p><strong>Key takeaway:</strong> AlexNet contains approximately
-<strong>60 million parameters</strong> <span class="citation" data-cites="1"></span>, highlighting the complexity of modern CNNs and
-motivating the need for explainability methods.</p>
+<p><strong>Key takeaway:</strong> AlexNet contains approximately <strong>60 million parameters</strong> <span class="citation" data-cites="1"></span>, highlighting the complexity of modern CNNs and motivating the need for explainability methods.</p>
 <h1 data-number="3" id="visualizing-cnns"><span class="header-section-number">3.</span> Visualizing CNNs</h1>
-<p>In convolutional neural networks (CNNs), filters can be viewed as
-learnable weight tensors that detect specific visual patterns from input
-images. Each filter spans the full depth of the input volume (e.g., 3
-channels for RGB images) and produces an activation map indicating where
-that pattern is detected.</p>
-<p>Visualizing these filters helps us understand <em>what types of
-features</em> the network learns at different layers, which is an
-important step toward explainability.</p>
-<h2 data-number="3.1" id="visualizing-filters-in-first-layers"><span class="header-section-number">3.1</span> Visualizing Filters in First
-Layers</h2>
+<p>In convolutional neural networks (CNNs), filters can be viewed as learnable weight tensors that detect specific visual patterns from input images. Each filter spans the full depth of the input volume (e.g., 3 channels for RGB images) and produces an activation map indicating where that pattern is detected.</p>
+<p>Visualizing these filters helps us understand <em>what types of features</em> the network learns at different layers, which is an important step toward explainability.</p>
+<h2 data-number="3.1" id="visualizing-filters-in-first-layers"><span class="header-section-number">3.1</span> Visualizing Filters in First Layers</h2>
 <h3 data-number="3.1.1" id="alexnet"><span class="header-section-number">3.1.1</span> AlexNet</h3>
-<figure id="fig:The sequence of convolutional layers of AlexNet">
-<img src="img/lecture22/AlexNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>The sequence of convolutional layers of AlexNet</figcaption>
+<figure>
+<img alt="The sequence of convolutional layers of AlexNet" id="fig:The sequence of convolutional layers of AlexNet" src="img/lecture22/AlexNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">The sequence of convolutional layers of AlexNet</figcaption>
 </figure>
 <ul>
 <li><p>64 filters in the first convolutional layer.</p></li>
-<li><p>Filter size: <span class="math inline">\(11 \times 11 \times
-3\)</span> (visualized as RGB images).</p></li>
-<li><p>These filters typically detect low-level features such as
-oriented edges, color blobs, textures, and simple patterns.</p></li>
+<li><p>Filter size: <span class="math inline">\(11 \times 11 \times 3\)</span> (visualized as RGB images).</p></li>
+<li><p>These filters typically detect low-level features such as oriented edges, color blobs, textures, and simple patterns.</p></li>
 </ul>
 <h3 data-number="3.1.2" id="resnet"><span class="header-section-number">3.1.2</span> ResNet</h3>
-<figure id="fig:The sequence of convolutional layers of ResNet">
-<img src="img/lecture22/ResNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
-<figcaption>The sequence of convolutional layers of ResNet</figcaption>
+<figure>
+<img alt="The sequence of convolutional layers of ResNet" id="fig:The sequence of convolutional layers of ResNet" src="img/lecture22/ResNet.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">The sequence of convolutional layers of ResNet</figcaption>
 </figure>
 <ul>
-<li><p>Uses deeper architectures with identity shortcuts and
-convolutional blocks to enable training of very deep networks <span class="citation" data-cites="3"></span>.</p></li>
-<li><p>First-layer filter size: <span class="math inline">\(7 \times 7
-\times 3\)</span> (visualized as RGB images).</p></li>
+<li><p>Uses deeper architectures with identity shortcuts and convolutional blocks to enable training of very deep networks <span class="citation" data-cites="3"></span>.</p></li>
+<li><p>First-layer filter size: <span class="math inline">\(7 \times 7 \times 3\)</span> (visualized as RGB images).</p></li>
 <li><p>64 filters in the first convolutional layer.</p></li>
 </ul>
 <h3 data-number="3.1.3" id="summary"><span class="header-section-number">3.1.3</span> Summary</h3>
-<p>Despite architectural differences between AlexNet and ResNet, the
-filters learned in the first convolutional layers tend to capture very
-similar low-level visual patterns. These commonly include edge
-detectors, color transitions, and simple textures.</p>
-<p>This consistency across architectures suggests that early layers
-learn generic visual primitives, while deeper layers progressively build
-more complex and class-specific representations.</p>
-<h2 data-number="3.2" id="visualizing-filters-in-intermediate-layers"><span class="header-section-number">3.2</span> Visualizing Filters in
-Intermediate Layers</h2>
-<p>As we move deeper into a CNN, the learned representations become
-increasingly abstract and harder to interpret directly <span class="citation" data-cites="2"></span>. While first-layer filters often
-resemble simple edge or color detectors, intermediate layers combine
-these primitive features into more complex and semantically meaningful
-patterns.</p>
+<p>Despite architectural differences between AlexNet and ResNet, the filters learned in the first convolutional layers tend to capture very similar low-level visual patterns. These commonly include edge detectors, color transitions, and simple textures.</p>
+<p>This consistency across architectures suggests that early layers learn generic visual primitives, while deeper layers progressively build more complex and class-specific representations.</p>
+<h2 data-number="3.2" id="visualizing-filters-in-intermediate-layers"><span class="header-section-number">3.2</span> Visualizing Filters in Intermediate Layers</h2>
+<p>As we move deeper into a CNN, the learned representations become increasingly abstract and harder to interpret directly <span class="citation" data-cites="2"></span>. While first-layer filters often resemble simple edge or color detectors, intermediate layers combine these primitive features into more complex and semantically meaningful patterns.</p>
 <h3 data-number="3.2.1" id="layer-specific-details"><span class="header-section-number">3.2.1</span> Layer-specific Details</h3>
-<figure id="fig:Layer-specific Outputs">
-<img src="img/lecture22/layers.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Layer-specific Outputs</figcaption>
+<figure>
+<img alt="Layer-specific Outputs" id="fig:Layer-specific Outputs" src="img/lecture22/layers.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Layer-specific Outputs</figcaption>
 </figure>
-<p>In the initial layers (e.g., Conv1), weights can be visualized as RGB
-images and are relatively interpretable, capturing basic structures such
-as edges, corners, and textures. In contrast, higher layers (e.g., Conv2
-and Conv3) produce weights that appear as more abstract grayscale
-patterns. These filters represent increasingly complex combinations of
-lower-level features, making them less interpretable in raw form but
-more powerful in representation.</p>
-<h3 data-number="3.2.2" id="activation-specificity-in-conv5-layer"><span class="header-section-number">3.2.2</span> Activation Specificity in
-Conv5 Layer</h3>
-<p>Deeper convolutional layers begin to respond to <strong>object
-parts</strong> and higher-level semantic concepts rather than simple
-edges <span class="citation" data-cites="2"></span>. For example, the
-fifth convolutional layer (Conv5) in networks such as AlexNet is
-particularly sensitive to specific object components, such as wheels.
-This selectivity is visualized through activation maps, which highlight
-spatial regions where a filter responds most strongly. These activation
-maps reveal which parts of the image contribute most to the network’s
-internal representation and ultimately influence the final
-prediction.</p>
-<figure id="fig:Conv5 of AlexNet">
-<img src="img/lecture22/conv5.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
-<figcaption>Conv5 of AlexNet</figcaption>
+<p>In the initial layers (e.g., Conv1), weights can be visualized as RGB images and are relatively interpretable, capturing basic structures such as edges, corners, and textures. In contrast, higher layers (e.g., Conv2 and Conv3) produce weights that appear as more abstract grayscale patterns. These filters represent increasingly complex combinations of lower-level features, making them less interpretable in raw form but more powerful in representation.</p>
+<h3 data-number="3.2.2" id="activation-specificity-in-conv5-layer"><span class="header-section-number">3.2.2</span> Activation Specificity in Conv5 Layer</h3>
+<p>Deeper convolutional layers begin to respond to <strong>object parts</strong> and higher-level semantic concepts rather than simple edges <span class="citation" data-cites="2"></span>. For example, the fifth convolutional layer (Conv5) in networks such as AlexNet is particularly sensitive to specific object components, such as wheels. This selectivity is visualized through activation maps, which highlight spatial regions where a filter responds most strongly. These activation maps reveal which parts of the image contribute most to the network’s internal representation and ultimately influence the final prediction.</p>
+<figure>
+<img alt="Conv5 of AlexNet" id="fig:Conv5 of AlexNet" src="img/lecture22/conv5.png" style="width:36.00%; max-width:36.00%; height:auto;"/><figcaption aria-hidden="true">Conv5 of AlexNet</figcaption>
 </figure>
-<h2 data-number="3.3" id="maximally-activating-patches"><span class="header-section-number">3.3</span> Maximally Activating
-Patches</h2>
-<p>Beyond visualizing intermediate activations, we can analyze which
-specific regions of input images cause the strongest responses in
-individual neurons. <strong>Maximally activating patches</strong> refer
-to image regions that trigger the highest activation values for a
-particular filter within a network <span class="citation" data-cites="2"></span>. By identifying these regions, we gain insight
-into what visual patterns a neuron is most sensitive to and what
-semantic features it has learned to detect.</p>
-<h3 data-number="3.3.1" id="procedure-for-obtaining-maximally-activating-patches"><span class="header-section-number">3.3.1</span> Procedure for Obtaining
-Maximally Activating Patches</h3>
-<p>To obtain maximally activating patches, we first select a specific
-layer and channel (for example, channel 17 in the Conv5 layer). We then
-pass a large collection of images through the network and record the
-activation values for that selected channel. Finally, we identify and
-extract the image regions corresponding to the highest activation
-values. Visualizing these patches reveals which patterns most strongly
-excite that neuron.</p>
-<h3 data-number="3.3.2" id="characteristics-of-maximally-activating-patches"><span class="header-section-number">3.3.2</span> Characteristics of Maximally
-Activating Patches</h3>
-<p>Maximally activating patches often display consistent visual
-structures across different images. For instance, a particular neuron
-may respond strongly to faces, text, wheels, or other object parts. When
-visualized row-by-row (each row corresponding to a specific neuron), we
-typically observe that each neuron specializes in detecting a distinct
-category of visual patterns. This specialization highlights how deeper
-CNN layers develop structured and semantically meaningful feature
-representations.</p>
-<h2 data-number="3.4" id="visualizing-last-layer-activations"><span class="header-section-number">3.4</span> Visualizing Last Layer
-Activations</h2>
-<p>The last layer activations of a CNN are high-dimensional feature
-vectors (e.g., 4096-dimensional in AlexNet) extracted just before the
-final classifier. These embeddings summarize the entire input image
-rather than localized patches, capturing the most abstract and
-semantically meaningful information learned by the network. Analyzing
-these representations helps us understand how the model organizes images
-in its learned feature space.</p>
-<h3 data-number="3.4.1" id="purpose-of-last-layer-visualizations"><span class="header-section-number">3.4.1</span> Purpose of Last Layer
-Visualizations</h3>
-<p>Images that produce similar last layer activations can be grouped
-together in the feature space. This similarity indicates that the
-network perceives them as sharing common semantic characteristics, even
-if their pixel-level appearance differs. Such grouping is useful for
-tasks like image retrieval, clustering, and measuring content
-similarity.</p>
-<p>By examining these embeddings, we can also explore how different
-inputs activate the network in comparable ways, revealing which patterns
-or concepts the CNN considers related.</p>
+<h2 data-number="3.3" id="maximally-activating-patches"><span class="header-section-number">3.3</span> Maximally Activating Patches</h2>
+<p>Beyond visualizing intermediate activations, we can analyze which specific regions of input images cause the strongest responses in individual neurons. <strong>Maximally activating patches</strong> refer to image regions that trigger the highest activation values for a particular filter within a network <span class="citation" data-cites="2"></span>. By identifying these regions, we gain insight into what visual patterns a neuron is most sensitive to and what semantic features it has learned to detect.</p>
+<h3 data-number="3.3.1" id="procedure-for-obtaining-maximally-activating-patches"><span class="header-section-number">3.3.1</span> Procedure for Obtaining Maximally Activating Patches</h3>
+<p>To obtain maximally activating patches, we first select a specific layer and channel (for example, channel 17 in the Conv5 layer). We then pass a large collection of images through the network and record the activation values for that selected channel. Finally, we identify and extract the image regions corresponding to the highest activation values. Visualizing these patches reveals which patterns most strongly excite that neuron.</p>
+<h3 data-number="3.3.2" id="characteristics-of-maximally-activating-patches"><span class="header-section-number">3.3.2</span> Characteristics of Maximally Activating Patches</h3>
+<p>Maximally activating patches often display consistent visual structures across different images. For instance, a particular neuron may respond strongly to faces, text, wheels, or other object parts. When visualized row-by-row (each row corresponding to a specific neuron), we typically observe that each neuron specializes in detecting a distinct category of visual patterns. This specialization highlights how deeper CNN layers develop structured and semantically meaningful feature representations.</p>
+<h2 data-number="3.4" id="visualizing-last-layer-activations"><span class="header-section-number">3.4</span> Visualizing Last Layer Activations</h2>
+<p>The last layer activations of a CNN are high-dimensional feature vectors (e.g., 4096-dimensional in AlexNet) extracted just before the final classifier. These embeddings summarize the entire input image rather than localized patches, capturing the most abstract and semantically meaningful information learned by the network. Analyzing these representations helps us understand how the model organizes images in its learned feature space.</p>
+<h3 data-number="3.4.1" id="purpose-of-last-layer-visualizations"><span class="header-section-number">3.4.1</span> Purpose of Last Layer Visualizations</h3>
+<p>Images that produce similar last layer activations can be grouped together in the feature space. This similarity indicates that the network perceives them as sharing common semantic characteristics, even if their pixel-level appearance differs. Such grouping is useful for tasks like image retrieval, clustering, and measuring content similarity.</p>
+<p>By examining these embeddings, we can also explore how different inputs activate the network in comparable ways, revealing which patterns or concepts the CNN considers related.</p>
 <h3 data-number="3.4.2" id="operational-methodology"><span class="header-section-number">3.4.2</span> Operational Methodology</h3>
-<p>To visualize last layer activations, a large set of images is first
-passed through the network to extract their final-layer feature vectors.
-These embeddings are then analyzed—typically by grouping similar vectors
-or applying dimensionality reduction—to display images that occupy
-nearby positions in the learned feature space. This process provides a
-macro-level view of the network’s internal representation structure.</p>
-<h2 data-number="3.5" id="visualizing-last-layer-activations-via-dimensionality-reduction"><span class="header-section-number">3.5</span> Visualizing Last Layer
-Activations via Dimensionality Reduction</h2>
+<p>To visualize last layer activations, a large set of images is first passed through the network to extract their final-layer feature vectors. These embeddings are then analyzed—typically by grouping similar vectors or applying dimensionality reduction—to display images that occupy nearby positions in the learned feature space. This process provides a macro-level view of the network’s internal representation structure.</p>
+<h2 data-number="3.5" id="visualizing-last-layer-activations-via-dimensionality-reduction"><span class="header-section-number">3.5</span> Visualizing Last Layer Activations via Dimensionality Reduction</h2>
 <h3 data-number="3.5.1" id="last-layer-embedding"><span class="header-section-number">3.5.1</span> Last Layer Embedding</h3>
-<p>The last layer embedding is a high-dimensional feature vector (e.g.,
-4096 dimensions in AlexNet) extracted just before the final
-classification layer. This vector summarizes the most important features
-of the image that the network uses to make its prediction. However,
-because humans cannot directly visualize thousands of dimensions, we
-require techniques that project these embeddings into lower-dimensional
-spaces.</p>
-<h3 data-number="3.5.2" id="dimensionality-reduction-for-visualization"><span class="header-section-number">3.5.2</span> Dimensionality Reduction for
-Visualization</h3>
-<p>To make these high-dimensional representations interpretable,
-dimensionality reduction techniques are applied. Common approaches
-include Principal Component Analysis (PCA), Isomap, Uniform Manifold
-Approximation and Projection (UMAP), and t-Distributed Stochastic
-Neighbor Embedding (t-SNE) <span class="citation" data-cites="4"></span>. These methods project the feature vectors from
-thousands of dimensions down to 2D or 3D, enabling visualization of the
-learned feature space where each point corresponds to one image.</p>
-<h3 data-number="3.5.3" id="visualizing-feature-space"><span class="header-section-number">3.5.3</span> Visualizing Feature
-Space</h3>
-<p>After dimensionality reduction, each image is represented as a point
-in a 2D or 3D space. Images that appear close together in this space
-have similar feature representations, meaning the CNN considers them
-semantically related. This visualization provides insight into how the
-network organizes and separates different classes internally.</p>
-<h3 data-number="3.5.4" id="application-example-with-t-sne"><span class="header-section-number">3.5.4</span> Application Example with
-t-SNE</h3>
-<p>t-SNE is particularly effective for visualization because it
-preserves <strong>local neighborhood relationships</strong> <span class="citation" data-cites="4"></span>. As a result, images that share
-similar visual features form clear clusters in the projected space.
-These clusters often correspond to semantic categories, making it easier
-to interpret the structure of the dataset and the behavior of the
-model.</p>
-<figure id="fig:Exaample usage of TSNE">
-<img src="img/lecture22/tsne%20ex.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>t-SNE visualization of MNIST</figcaption>
+<p>The last layer embedding is a high-dimensional feature vector (e.g., 4096 dimensions in AlexNet) extracted just before the final classification layer. This vector summarizes the most important features of the image that the network uses to make its prediction. However, because humans cannot directly visualize thousands of dimensions, we require techniques that project these embeddings into lower-dimensional spaces.</p>
+<h3 data-number="3.5.2" id="dimensionality-reduction-for-visualization"><span class="header-section-number">3.5.2</span> Dimensionality Reduction for Visualization</h3>
+<p>To make these high-dimensional representations interpretable, dimensionality reduction techniques are applied. Common approaches include Principal Component Analysis (PCA), Isomap, Uniform Manifold Approximation and Projection (UMAP), and t-Distributed Stochastic Neighbor Embedding (t-SNE) <span class="citation" data-cites="4"></span>. These methods project the feature vectors from thousands of dimensions down to 2D or 3D, enabling visualization of the learned feature space where each point corresponds to one image.</p>
+<h3 data-number="3.5.3" id="visualizing-feature-space"><span class="header-section-number">3.5.3</span> Visualizing Feature Space</h3>
+<p>After dimensionality reduction, each image is represented as a point in a 2D or 3D space. Images that appear close together in this space have similar feature representations, meaning the CNN considers them semantically related. This visualization provides insight into how the network organizes and separates different classes internally.</p>
+<h3 data-number="3.5.4" id="application-example-with-t-sne"><span class="header-section-number">3.5.4</span> Application Example with t-SNE</h3>
+<p>t-SNE is particularly effective for visualization because it preserves <strong>local neighborhood relationships</strong> <span class="citation" data-cites="4"></span>. As a result, images that share similar visual features form clear clusters in the projected space. These clusters often correspond to semantic categories, making it easier to interpret the structure of the dataset and the behavior of the model.</p>
+<figure>
+<img alt="t-SNE visualization of MNIST" id="fig:Exaample usage of TSNE" src="img/lecture22/tsne%20ex.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">t-SNE visualization of MNIST</figcaption>
 </figure>
-<h2 data-number="3.6" id="summary-of-visualizing-cnns"><span class="header-section-number">3.6</span> Summary of Visualizing
-CNNs</h2>
-<h3 data-number="3.6.1" id="maximally-activating-patches-1"><span class="header-section-number">3.6.1</span> Maximally Activating
-Patches</h3>
-<p>Maximally activating patches correspond to regions of input images
-that produce the strongest responses in specific filters. This
-visualization helps reveal the types of visual patterns each neuron has
-learned to detect and provides insight into feature specialization
-within the network.</p>
-<h3 data-number="3.6.2" id="nearest-neighbor-images-in-feature-space"><span class="header-section-number">3.6.2</span> Nearest Neighbor Images in
-Feature Space</h3>
-<p>By examining images that lie closest to one another in the learned
-feature space, we can understand how the network groups visually and
-semantically similar inputs. This reveals how the CNN organizes images
-based on learned representations rather than raw pixel similarity.</p>
+<h2 data-number="3.6" id="summary-of-visualizing-cnns"><span class="header-section-number">3.6</span> Summary of Visualizing CNNs</h2>
+<h3 data-number="3.6.1" id="maximally-activating-patches-1"><span class="header-section-number">3.6.1</span> Maximally Activating Patches</h3>
+<p>Maximally activating patches correspond to regions of input images that produce the strongest responses in specific filters. This visualization helps reveal the types of visual patterns each neuron has learned to detect and provides insight into feature specialization within the network.</p>
+<h3 data-number="3.6.2" id="nearest-neighbor-images-in-feature-space"><span class="header-section-number">3.6.2</span> Nearest Neighbor Images in Feature Space</h3>
+<p>By examining images that lie closest to one another in the learned feature space, we can understand how the network groups visually and semantically similar inputs. This reveals how the CNN organizes images based on learned representations rather than raw pixel similarity.</p>
 <h3 data-number="3.6.3" id="last-layer-embeddings"><span class="header-section-number">3.6.3</span> Last Layer Embeddings</h3>
-<p>Visualizing last layer embeddings shows how images are positioned
-relative to each other in the high-level feature space. This perspective
-is useful for tasks such as clustering, image retrieval, and anomaly
-detection, and provides a global view of the network’s learned
-representation structure.</p>
-<p>Together, these visualization techniques provide complementary
-insights into how CNNs learn hierarchical features, organize visual
-information, and make predictions.</p>
+<p>Visualizing last layer embeddings shows how images are positioned relative to each other in the high-level feature space. This perspective is useful for tasks such as clustering, image retrieval, and anomaly detection, and provides a global view of the network’s learned representation structure.</p>
+<p>Together, these visualization techniques provide complementary insights into how CNNs learn hierarchical features, organize visual information, and make predictions.</p>
 <h1 data-number="4" id="saliency-methods"><span class="header-section-number">4.</span> Saliency Methods</h1>
-<p>Saliency methods aim to identify which regions of an input image are
-most important for a model’s prediction. One intuitive and widely used
-approach is <strong>occlusion-based saliency</strong>, which measures
-how the prediction changes when parts of the image are deliberately
-hidden <span class="citation" data-cites="2"></span>. By observing how
-the model’s confidence varies as different regions are masked, we can
-infer which areas are most influential for the decision.</p>
+<p>Saliency methods aim to identify which regions of an input image are most important for a model’s prediction. One intuitive and widely used approach is <strong>occlusion-based saliency</strong>, which measures how the prediction changes when parts of the image are deliberately hidden <span class="citation" data-cites="2"></span>. By observing how the model’s confidence varies as different regions are masked, we can infer which areas are most influential for the decision.</p>
 <h2 data-number="4.1" id="saliency-via-occlusion"><span class="header-section-number">4.1</span> Saliency via Occlusion</h2>
-<p>Occlusion-based saliency generates heatmaps that visualize how
-blocking portions of an image affects the predicted class probabilities.
-For example, when key regions of an image containing an elephant are
-occluded, the model’s confidence in predicting the class “elephant”
-drops significantly. This behavior reveals which spatial regions the
-network relies on most when forming its prediction.</p>
-<p>This approach highlights the <strong>network’s sensitivity</strong>
-to specific visual regions. Rather than treating the image as a whole,
-the neural network focuses on particular structures that are strongly
-associated with the target class. The resulting heatmaps provide an
-intuitive and faithful explanation of the model’s decision-making
-process.</p>
-<p>A major drawback of occlusion-based methods is their
-<strong>computational cost</strong> <span class="citation" data-cites="2"></span>. To evaluate the importance of different regions,
-many occluded versions of the image must be processed by the network.
-For high-resolution images, this requires a large number of forward
-passes, making the method expensive in practice.</p>
-<h3 class="unnumbered" id="connection-to-feature-importance-in-logistic-regression">Connection
-to Feature Importance in Logistic Regression</h3>
-<p>The intuition behind saliency maps is closely related to feature
-importance in linear models such as logistic regression: <span class="math display">\[P(y = 1|x) = \sigma(\mathbf{w}^T x + b), \qquad
+<p>Occlusion-based saliency generates heatmaps that visualize how blocking portions of an image affects the predicted class probabilities. For example, when key regions of an image containing an elephant are occluded, the model’s confidence in predicting the class “elephant” drops significantly. This behavior reveals which spatial regions the network relies on most when forming its prediction.</p>
+<p>This approach highlights the <strong>network’s sensitivity</strong> to specific visual regions. Rather than treating the image as a whole, the neural network focuses on particular structures that are strongly associated with the target class. The resulting heatmaps provide an intuitive and faithful explanation of the model’s decision-making process.</p>
+<p>A major drawback of occlusion-based methods is their <strong>computational cost</strong> <span class="citation" data-cites="2"></span>. To evaluate the importance of different regions, many occluded versions of the image must be processed by the network. For high-resolution images, this requires a large number of forward passes, making the method expensive in practice.</p>
+<h3 class="unnumbered" id="connection-to-feature-importance-in-logistic-regression">Connection to Feature Importance in Logistic Regression</h3>
+<p>The intuition behind saliency maps is closely related to feature importance in linear models such as logistic regression: <span class="math display">\[P(y = 1|x) = \sigma(\mathbf{w}^T x + b), \qquad 
 P(y = 0|x) = 1 - \sigma(\mathbf{w}^T x + b)\]</span></p>
-<p>In logistic regression, each weight <span class="math inline">\(w_i\)</span> represents the importance of feature
-<span class="math inline">\(x_i\)</span> in determining the prediction.
-Large positive or negative weights indicate strong influence on the
-output probability. Similarly, saliency methods estimate how important
-each <em>pixel region</em> is to the CNN’s prediction.</p>
-<figure id="fig:Demonstartion">
-<img src="img/lecture22/wi.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Occlusion-based saliency heatmaps</figcaption>
+<p>In logistic regression, each weight <span class="math inline">\(w_i\)</span> represents the importance of feature <span class="math inline">\(x_i\)</span> in determining the prediction. Large positive or negative weights indicate strong influence on the output probability. Similarly, saliency methods estimate how important each <em>pixel region</em> is to the CNN’s prediction.</p>
+<figure>
+<img alt="Occlusion-based saliency heatmaps" id="fig:Demonstartion" src="img/lecture22/wi.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Occlusion-based saliency heatmaps</figcaption>
 </figure>
 <h2 data-number="4.2" id="saliency-via-gradients"><span class="header-section-number">4.2</span> Saliency via Gradients</h2>
-<p>Gradient-based saliency provides a more efficient alternative to
-occlusion methods for estimating pixel importance <span class="citation" data-cites="5"></span>. Instead of masking parts of the image
-repeatedly, we compute how sensitive the model’s prediction is to small
-changes in each input pixel. The resulting gradient-based saliency map
-highlights which pixels most strongly influence the output.</p>
-<h3 data-number="4.2.1" id="non-linear-mapping-function"><span class="header-section-number">4.2.1</span> Non-linear Mapping
-Function</h3>
-<p>A deep neural network can be viewed as a highly non-linear function
-that maps an input image <span class="math inline">\(x\)</span> to a
-prediction <span class="math inline">\(\hat{y}\)</span> through multiple
-layers:</p>
-<p><span class="math display">\[\hat{y} = \phi \left( \cdots \phi \left(
-\phi \left( x \cdot w^{(1)} + b^{(1)} \right) \cdot w^{(2)} + b^{(2)}
-\right) \cdots \right)\]</span></p>
-<p>Here, <span class="math inline">\(\phi\)</span> represents activation
-functions (such as ReLU or sigmoid) that introduce non-linearity, while
-<span class="math inline">\(w^{(i)}\)</span> and <span class="math inline">\(b^{(i)}\)</span> denote the weights and biases of
-layer <span class="math inline">\(i\)</span>. This composition of many
-non-linear transformations allows deep networks to model complex
-relationships between the input image and the predicted output.</p>
-<h3 data-number="4.2.2" id="linearization-using-taylor-approximation"><span class="header-section-number">4.2.2</span> Linearization Using Taylor
-Approximation</h3>
-<p>Although the full network is highly non-linear, we can understand its
-local behavior using a first-order Taylor approximation around a
-specific input <span class="citation" data-cites="5"></span>:</p>
-<p><span class="math display">\[\hat{y} \approx \mathbf{w}^T x +
-b\]</span></p>
-<p>This approximation shows that, near a given input, the model behaves
-like a linear function. The gradient of the prediction with respect to
-the input,</p>
-<p><span class="math display">\[\nabla_x \hat{y} = \frac{\partial
-\hat{y}}{\partial x},\]</span></p>
-<p>measures how sensitive the prediction is to each input pixel. Pixels
-with large gradient magnitudes have the greatest influence on the output
-and are therefore considered most important.</p>
-<p>A key advantage of gradient-based saliency is computational
-efficiency <span class="citation" data-cites="5"></span>. Gradients can
-be computed using backpropagation in a single forward–backward pass,
-making the method practical even for high-dimensional images.</p>
-<figure id="Highly non-linear mapping function">
-<img src="img/lecture22/a.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Highly non-linear mapping function</figcaption>
+<p>Gradient-based saliency provides a more efficient alternative to occlusion methods for estimating pixel importance <span class="citation" data-cites="5"></span>. Instead of masking parts of the image repeatedly, we compute how sensitive the model’s prediction is to small changes in each input pixel. The resulting gradient-based saliency map highlights which pixels most strongly influence the output.</p>
+<h3 data-number="4.2.1" id="non-linear-mapping-function"><span class="header-section-number">4.2.1</span> Non-linear Mapping Function</h3>
+<p>A deep neural network can be viewed as a highly non-linear function that maps an input image <span class="math inline">\(x\)</span> to a prediction <span class="math inline">\(\hat{y}\)</span> through multiple layers:</p>
+<p><span class="math display">\[\hat{y} = \phi \left( \cdots \phi \left( \phi \left( x \cdot w^{(1)} + b^{(1)} \right) \cdot w^{(2)} + b^{(2)} \right) \cdots \right)\]</span></p>
+<p>Here, <span class="math inline">\(\phi\)</span> represents activation functions (such as ReLU or sigmoid) that introduce non-linearity, while <span class="math inline">\(w^{(i)}\)</span> and <span class="math inline">\(b^{(i)}\)</span> denote the weights and biases of layer <span class="math inline">\(i\)</span>. This composition of many non-linear transformations allows deep networks to model complex relationships between the input image and the predicted output.</p>
+<h3 data-number="4.2.2" id="linearization-using-taylor-approximation"><span class="header-section-number">4.2.2</span> Linearization Using Taylor Approximation</h3>
+<p>Although the full network is highly non-linear, we can understand its local behavior using a first-order Taylor approximation around a specific input <span class="citation" data-cites="5"></span>:</p>
+<p><span class="math display">\[\hat{y} \approx \mathbf{w}^T x + b\]</span></p>
+<p>This approximation shows that, near a given input, the model behaves like a linear function. The gradient of the prediction with respect to the input,</p>
+<p><span class="math display">\[\nabla_x \hat{y} = \frac{\partial \hat{y}}{\partial x},\]</span></p>
+<p>measures how sensitive the prediction is to each input pixel. Pixels with large gradient magnitudes have the greatest influence on the output and are therefore considered most important.</p>
+<p>A key advantage of gradient-based saliency is computational efficiency <span class="citation" data-cites="5"></span>. Gradients can be computed using backpropagation in a single forward–backward pass, making the method practical even for high-dimensional images.</p>
+<figure>
+<img alt="Highly non-linear mapping function" id="Highly non-linear mapping function" src="img/lecture22/a.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Highly non-linear mapping function</figcaption>
 </figure>
-<h3 data-number="4.2.3" id="computing-gradient-based-saliency-maps"><span class="header-section-number">4.2.3</span> Computing Gradient-Based
-Saliency Maps</h3>
-<p>We now illustrate how gradient-based saliency maps are generated in
-practice. The goal is to determine which pixels most influence the
-prediction for a chosen class.</p>
+<h3 data-number="4.2.3" id="computing-gradient-based-saliency-maps"><span class="header-section-number">4.2.3</span> Computing Gradient-Based Saliency Maps</h3>
+<p>We now illustrate how gradient-based saliency maps are generated in practice. The goal is to determine which pixels most influence the prediction for a chosen class.</p>
 <h4 data-number="4.2.3.1" id="step-1-forward-pass"><span class="header-section-number">4.2.3.1</span> Step 1: Forward Pass</h4>
-<p>An input image is first passed through the neural network to compute
-class probabilities. For example, suppose the network outputs</p>
-<p><span class="math display">\[\hat{y} = \begin{bmatrix} 0.05 &amp;
-0.10 &amp; 0.85 \end{bmatrix},\]</span></p>
-<p>where the highest probability corresponds to the class <em>Dog</em>.
-This predicted class becomes the target for saliency analysis.</p>
+<p>An input image is first passed through the neural network to compute class probabilities. For example, suppose the network outputs</p>
+<p><span class="math display">\[\hat{y} = \begin{bmatrix} 0.05 &amp; 0.10 &amp; 0.85 \end{bmatrix},\]</span></p>
+<p>where the highest probability corresponds to the class <em>Dog</em>. This predicted class becomes the target for saliency analysis.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Saliency and Attribution Methods</h3><p>Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_Saliency_Interactive_interactive.html" style="height:860px;" title="Interactive Section 4 Saliency Methods"></iframe></section>
 <h4 data-number="4.2.3.2" id="step-2-backward-pass"><span class="header-section-number">4.2.3.2</span> Step 2: Backward Pass</h4>
-<p>Next, we compute the gradient of the selected class score with
-respect to the input image:</p>
-<p><span class="math display">\[\frac{\partial
-\hat{y}_{\text{dog}}}{\partial x}.\]</span></p>
-<p>This gradient measures how sensitive the predicted score is to small
-changes in each pixel. Pixels with large gradient magnitude have the
-strongest influence on the prediction.</p>
-<p>In practice, this gradient is efficiently computed using
-backpropagation in a single backward pass through the network.</p>
-<h4 data-number="4.2.3.3" id="step-3-constructing-the-saliency-map"><span class="header-section-number">4.2.3.3</span> Step 3: Constructing the
-Saliency Map</h4>
-<p>To visualize the importance of each pixel, we compute the maximum
-absolute gradient across the RGB channels. The resulting saliency map
-highlights image regions that most strongly affect the class score.
-Bright regions in the map correspond to pixels that are most critical
-for the network’s decision.</p>
+<p>Next, we compute the gradient of the selected class score with respect to the input image:</p>
+<p><span class="math display">\[\frac{\partial \hat{y}_{\text{dog}}}{\partial x}.\]</span></p>
+<p>This gradient measures how sensitive the predicted score is to small changes in each pixel. Pixels with large gradient magnitude have the strongest influence on the prediction.</p>
+<p>In practice, this gradient is efficiently computed using backpropagation in a single backward pass through the network.</p>
+<h4 data-number="4.2.3.3" id="step-3-constructing-the-saliency-map"><span class="header-section-number">4.2.3.3</span> Step 3: Constructing the Saliency Map</h4>
+<p>To visualize the importance of each pixel, we compute the maximum absolute gradient across the RGB channels. The resulting saliency map highlights image regions that most strongly affect the class score. Bright regions in the map correspond to pixels that are most critical for the network’s decision.</p>
 <h4 data-number="4.2.3.4" id="example-interpretation"><span class="header-section-number">4.2.3.4</span> Example Interpretation</h4>
-<p>Consider applying the gradient-based saliency procedure to several
-images from different classes. For each image, the network first
-predicts the most likely class and then computes the gradient of that
-class score with respect to the input pixels. The resulting saliency
-maps highlight the regions that most strongly influence the
-prediction.</p>
-<p>For instance, in an image of a dog, the saliency map typically
-emphasizes the head, ears, and body contours rather than the background.
-Similarly, for objects such as boats or fruits, the highlighted regions
-correspond to the most distinctive visual features of the object. Across
-different examples, these maps consistently reveal that the network
-focuses on semantically meaningful structures rather than irrelevant
-background pixels.</p>
-<p>This example interpretation demonstrates how gradient-based saliency
-provides an intuitive visual explanation of the model’s decision-making
-process.</p>
-<h2 data-number="4.3" id="saliency-methods-weakly-supervised-segmentation"><span class="header-section-number">4.3</span> Saliency Methods:
-Weakly-Supervised Segmentation</h2>
-<p>Saliency maps are not only useful for model interpretability but also
-serve as a practical tool for <strong>weakly-supervised semantic
-segmentation</strong> <span class="citation" data-cites="5 7"></span>.
-In many real-world scenarios, obtaining pixel-level segmentation labels
-is expensive and time-consuming. Saliency maps provide an alternative by
-highlighting the regions of an image that most strongly influence the
-model’s prediction, offering a coarse localization of objects without
-requiring detailed annotations.</p>
-<p>By computing gradients with respect to input pixels, the network
-identifies visually meaningful regions that correspond to objects or
-regions of interest. These highlighted regions can then be used as
-pseudo-labels to guide segmentation algorithms. Although the resulting
-segmentations may be coarse, they significantly reduce the need for
-fully labeled training data.</p>
-<p>The visualizations below demonstrate how saliency-based segmentation
-reveals the network’s focus on different objects within an image, such
-as animals or foreground objects, while suppressing irrelevant
-background regions.</p>
+<p>Consider applying the gradient-based saliency procedure to several images from different classes. For each image, the network first predicts the most likely class and then computes the gradient of that class score with respect to the input pixels. The resulting saliency maps highlight the regions that most strongly influence the prediction.</p>
+<p>For instance, in an image of a dog, the saliency map typically emphasizes the head, ears, and body contours rather than the background. Similarly, for objects such as boats or fruits, the highlighted regions correspond to the most distinctive visual features of the object. Across different examples, these maps consistently reveal that the network focuses on semantically meaningful structures rather than irrelevant background pixels.</p>
+<p>This example interpretation demonstrates how gradient-based saliency provides an intuitive visual explanation of the model’s decision-making process.</p>
+<h2 data-number="4.3" id="saliency-methods-weakly-supervised-segmentation"><span class="header-section-number">4.3</span> Saliency Methods: Weakly-Supervised Segmentation</h2>
+<p>Saliency maps are not only useful for model interpretability but also serve as a practical tool for <strong>weakly-supervised semantic segmentation</strong> <span class="citation" data-cites="5 7"></span>. In many real-world scenarios, obtaining pixel-level segmentation labels is expensive and time-consuming. Saliency maps provide an alternative by highlighting the regions of an image that most strongly influence the model’s prediction, offering a coarse localization of objects without requiring detailed annotations.</p>
+<p>By computing gradients with respect to input pixels, the network identifies visually meaningful regions that correspond to objects or regions of interest. These highlighted regions can then be used as pseudo-labels to guide segmentation algorithms. Although the resulting segmentations may be coarse, they significantly reduce the need for fully labeled training data.</p>
+<p>The visualizations below demonstrate how saliency-based segmentation reveals the network’s focus on different objects within an image, such as animals or foreground objects, while suppressing irrelevant background regions.</p>
 <figure>
-<img src="img/lecture22/Picture3.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Examples of weakly-supervised segmentation using saliency
-maps.</figcaption>
+<img alt="Examples of weakly-supervised segmentation using saliency maps." src="img/lecture22/Picture3.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Examples of weakly-supervised segmentation using saliency maps.</figcaption>
 </figure>
 <h2 data-number="4.4" id="uncovering-biases"><span class="header-section-number">4.4</span> Uncovering Biases</h2>
-<p>Saliency maps are not only useful for understanding <em>how</em> a
-neural network makes a prediction, but also for diagnosing <em>why it
-may fail</em>. In practice, deep models often learn spurious
-correlations present in the training data instead of the true semantic
-concepts we intend them to learn. Saliency visualization provides a
-powerful tool for uncovering these hidden biases by revealing which
-pixels most strongly influence a model’s decision.</p>
-<p>A classic example involves training a classifier to distinguish
-wolves from dogs. Suppose that many wolf images in the training dataset
-contain snow in the background, while most dog images do not. Instead of
-learning the visual characteristics of wolves (such as facial structure
-or fur patterns), the model may learn that <em>snow is a strong
-indicator of the “wolf” class</em>. As a result, when the network
-encounters an image of a husky standing in snow, it may confidently
-misclassify the dog as a wolf.</p>
-<p>Figure <a data-reference="fig:wolf" data-reference-type="ref" href="#fig:wolf">[fig:wolf]</a> shows an example of such a
-failure case. The model predicts the class <em>wolf</em> for a husky
-image. However, the corresponding saliency map in Figure <a data-reference="fig:salient" data-reference-type="ref" href="#fig:salient">10</a> reveals that the highest gradient
-magnitudes are concentrated on the snowy background rather than the
-animal itself. This indicates that the model is relying on contextual
-background cues instead of the object of interest. In other words, the
-classifier has unintentionally become a <em>snow vs. no-snow
-classifier</em> rather than a true wolf vs. dog classifier.</p>
-<p>This example highlights an important role of explainability methods
-in machine learning: they help practitioners detect dataset bias,
-diagnose model weaknesses, and guide improvements in data collection and
-model design. By revealing when a model is focusing on the wrong
-features, saliency methods provide actionable insights for building more
-robust and trustworthy systems.</p>
+<p>Saliency maps are not only useful for understanding <em>how</em> a neural network makes a prediction, but also for diagnosing <em>why it may fail</em>. In practice, deep models often learn spurious correlations present in the training data instead of the true semantic concepts we intend them to learn. Saliency visualization provides a powerful tool for uncovering these hidden biases by revealing which pixels most strongly influence a model’s decision.</p>
+<p>A classic example involves training a classifier to distinguish wolves from dogs. Suppose that many wolf images in the training dataset contain snow in the background, while most dog images do not. Instead of learning the visual characteristics of wolves (such as facial structure or fur patterns), the model may learn that <em>snow is a strong indicator of the “wolf” class</em>. As a result, when the network encounters an image of a husky standing in snow, it may confidently misclassify the dog as a wolf.</p>
+<p>Figure <a data-reference="fig:wolf" data-reference-type="ref" href="#fig:wolf">[fig:wolf]</a> shows an example of such a failure case. The model predicts the class <em>wolf</em> for a husky image. However, the corresponding saliency map in Figure <a data-reference="fig:salient" data-reference-type="ref" href="#fig:salient">11</a> reveals that the highest gradient magnitudes are concentrated on the snowy background rather than the animal itself. This indicates that the model is relying on contextual background cues instead of the object of interest. In other words, the classifier has unintentionally become a <em>snow vs. no-snow classifier</em> rather than a true wolf vs. dog classifier.</p>
+<p>This example highlights an important role of explainability methods in machine learning: they help practitioners detect dataset bias, diagnose model weaknesses, and guide improvements in data collection and model design. By revealing when a model is focusing on the wrong features, saliency methods provide actionable insights for building more robust and trustworthy systems.</p>
+<figure>
+<img alt="Saliency map highlighting snow as the dominant feature." id="fig:salient" src="img/lecture22/wolf.png" style="width:60.00%; max-width:60.00%; height:auto;"/><figcaption aria-hidden="true">Saliency map highlighting snow as the dominant feature.</figcaption>
+</figure>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Saliency and Attribution Methods</h3><p>Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_Saliency_Interactive_interactive.html" style="height:860px;" title="Interactive Section 4 Saliency Methods"></iframe></section>
 <h1 data-number="5" id="gradient-based-explanations"><span class="header-section-number">5.</span> Gradient-Based Explanations</h1>
-<p>Gradient-based explanations provide insights into neural network
-decisions by identifying which parts of the input image most influence
-the model’s output. These methods rely on gradients computed during
-backpropagation to estimate how sensitive the prediction is to each
-input pixel. The resulting saliency maps visually highlight regions that
-strongly affect the output score.</p>
-<p>A key advantage of gradient-based methods is their computational
-efficiency. Unlike occlusion-based approaches, which require repeatedly
-evaluating the model on modified inputs, gradients can be computed in a
-single backward pass. However, these explanations are only a local
-linear approximation of a highly non-linear model and therefore may not
-perfectly reflect the true decision-making process. In addition, raw
-gradients can sometimes lack class discriminativity and may highlight
-edges or textures that are not uniquely associated with the predicted
-class.</p>
+<p>Gradient-based explanations provide insights into neural network decisions by identifying which parts of the input image most influence the model’s output. These methods rely on gradients computed during backpropagation to estimate how sensitive the prediction is to each input pixel. The resulting saliency maps visually highlight regions that strongly affect the output score.</p>
+<p>A key advantage of gradient-based methods is their computational efficiency. Unlike occlusion-based approaches, which require repeatedly evaluating the model on modified inputs, gradients can be computed in a single backward pass. However, these explanations are only a local linear approximation of a highly non-linear model and therefore may not perfectly reflect the true decision-making process. In addition, raw gradients can sometimes lack class discriminativity and may highlight edges or textures that are not uniquely associated with the predicted class.</p>
 <h2 data-number="5.1" id="vanilla-backpropagation"><span class="header-section-number">5.1</span> Vanilla Backpropagation</h2>
-<p>Vanilla backpropagation is the most direct approach for generating
-saliency maps <span class="citation" data-cites="5"></span>. Given an
-input image and a target class score, we compute the gradient of the
-score with respect to the input pixels. The magnitude of this gradient
-indicates how strongly small changes in each pixel would affect the
-prediction.</p>
-<p>In practice, the resulting saliency maps can be noisy and difficult
-to interpret. One reason is the presence of non-linear activation
-functions such as ReLU. During the backward pass, gradients are
-propagated only through neurons with positive activations, while
-negative activations are suppressed. This selective propagation
-emphasizes features that positively contribute to the prediction,
-helping highlight regions that are most relevant to the model’s
-decision.</p>
-<p>Although simple, vanilla backpropagation forms the foundation for
-many improved gradient-based visualization techniques that aim to
-produce clearer and more stable explanations.</p>
+<p>Vanilla backpropagation is the most direct approach for generating saliency maps <span class="citation" data-cites="5"></span>. Given an input image and a target class score, we compute the gradient of the score with respect to the input pixels. The magnitude of this gradient indicates how strongly small changes in each pixel would affect the prediction.</p>
+<p>In practice, the resulting saliency maps can be noisy and difficult to interpret. One reason is the presence of non-linear activation functions such as ReLU. During the backward pass, gradients are propagated only through neurons with positive activations, while negative activations are suppressed. This selective propagation emphasizes features that positively contribute to the prediction, helping highlight regions that are most relevant to the model’s decision.</p>
+<p>Although simple, vanilla backpropagation forms the foundation for many improved gradient-based visualization techniques that aim to produce clearer and more stable explanations.</p>
 <h2 data-number="5.2" id="deconvnet-backpropagation"><span class="header-section-number">5.2</span> Deconvnet Backpropagation</h2>
-<p>Deconvnet backpropagation is a modified gradient-based visualization
-method designed to produce clearer and more interpretable saliency maps
-than vanilla backpropagation <span class="citation" data-cites="2"></span>. The key idea is to change how gradients are
-propagated through ReLU non-linearities during the backward pass.</p>
-<h3 data-number="5.2.1" id="handling-relu-non-linearities"><span class="header-section-number">5.2.1</span> Handling ReLU
-Non-linearities</h3>
-<p>Recall that in the forward pass of a ReLU layer, <span class="math display">\[h^{l+1} = \max(0, h^l).\]</span> In standard
-backpropagation, gradients are propagated through ReLU units based on
-whether the *forward activation* was positive. Deconvnet modifies this
-rule by allowing gradients to flow only through neurons that have
-positive activations, effectively suppressing contributions from
-inactive regions.</p>
-<h3 data-number="5.2.2" id="backward-pass-and-mathematical-formulation"><span class="header-section-number">5.2.2</span> Backward Pass and
-Mathematical Formulation</h3>
-<p>During the backward pass, the gradient propagation rule becomes <span class="math display">\[\Delta h^l = \mathbf{1}(h^l &gt; 0)\,\Delta
-h^{l+1},\]</span> where the indicator function <span class="math inline">\(\mathbf{1}(h^l &gt; 0)\)</span> ensures that
-gradients are zeroed out whenever the forward activation is negative.
-This rectification removes noisy gradient signals and focuses the
-visualization on features that positively contribute to the
-prediction.</p>
-<h3 data-number="5.2.3" id="interpretation-and-intuition"><span class="header-section-number">5.2.3</span> Interpretation and
-Intuition</h3>
-<p>By restricting gradient flow to regions with positive activations,
-deconvnet backpropagation produces sharper and more localized saliency
-maps than vanilla backpropagation. In practice, this leads to clearer
-highlighting of edges, textures, and object parts that strongly activate
-the network. The reduction in noise makes the resulting explanations
-easier to interpret, representing an important step toward more refined
-gradient-based explanation techniques.</p>
-<h2 data-number="5.3" id="forward-and-backward-pass-details"><span class="header-section-number">5.3</span> Forward and Backward Pass
-Details</h2>
-<p>Figure <a data-reference="fig:ReLU Activation Forward and Backward Pass Illustration" data-reference-type="ref" href="#fig:ReLU Activation Forward and Backward Pass Illustration">11</a>
-illustrates how ReLU nonlinearities affect both the forward and backward
-passes of a neural network. Understanding this behavior is essential for
-interpreting gradient-based saliency methods, since these methods rely
-directly on the gradients propagated through the network.</p>
-<figure id="fig:ReLU Activation Forward and Backward Pass Illustration">
-<img src="img/lecture22/Details.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>ReLU activation in the forward and backward
-pass.</figcaption>
+<p>Deconvnet backpropagation is a modified gradient-based visualization method designed to produce clearer and more interpretable saliency maps than vanilla backpropagation <span class="citation" data-cites="2"></span>. The key idea is to change how gradients are propagated through ReLU non-linearities during the backward pass.</p>
+<h3 data-number="5.2.1" id="handling-relu-non-linearities"><span class="header-section-number">5.2.1</span> Handling ReLU Non-linearities</h3>
+<p>Recall that in the forward pass of a ReLU layer, <span class="math display">\[h^{l+1} = \max(0, h^l).\]</span> In standard backpropagation, gradients are propagated through ReLU units based on whether the *forward activation* was positive. Deconvnet modifies this rule by allowing gradients to flow only through neurons that have positive activations, effectively suppressing contributions from inactive regions.</p>
+<h3 data-number="5.2.2" id="backward-pass-and-mathematical-formulation"><span class="header-section-number">5.2.2</span> Backward Pass and Mathematical Formulation</h3>
+<p>During the backward pass, the gradient propagation rule becomes <span class="math display">\[\Delta h^l = \mathbf{1}(h^l &gt; 0)\,\Delta h^{l+1},\]</span> where the indicator function <span class="math inline">\(\mathbf{1}(h^l &gt; 0)\)</span> ensures that gradients are zeroed out whenever the forward activation is negative. This rectification removes noisy gradient signals and focuses the visualization on features that positively contribute to the prediction.</p>
+<h3 data-number="5.2.3" id="interpretation-and-intuition"><span class="header-section-number">5.2.3</span> Interpretation and Intuition</h3>
+<p>By restricting gradient flow to regions with positive activations, deconvnet backpropagation produces sharper and more localized saliency maps than vanilla backpropagation. In practice, this leads to clearer highlighting of edges, textures, and object parts that strongly activate the network. The reduction in noise makes the resulting explanations easier to interpret, representing an important step toward more refined gradient-based explanation techniques.</p>
+<h2 data-number="5.3" id="forward-and-backward-pass-details"><span class="header-section-number">5.3</span> Forward and Backward Pass Details</h2>
+<p>Figure <a data-reference="fig:ReLU Activation Forward and Backward Pass Illustration" data-reference-type="ref" href="#fig:ReLU Activation Forward and Backward Pass Illustration">12</a> illustrates how ReLU nonlinearities affect both the forward and backward passes of a neural network. Understanding this behavior is essential for interpreting gradient-based saliency methods, since these methods rely directly on the gradients propagated through the network.</p>
+<figure>
+<img alt="ReLU activation in the forward and backward pass." id="fig:ReLU Activation Forward and Backward Pass Illustration" src="img/lecture22/Details.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">ReLU activation in the forward and backward pass.</figcaption>
 </figure>
-<h3 data-number="5.3.1" id="relu-nonlinearities-and-backpropagation"><span class="header-section-number">5.3.1</span> ReLU Nonlinearities and
-Backpropagation</h3>
-<p>During the forward pass, the ReLU activation function performs a
-simple element-wise operation that sets all negative activations to
-zero: <span class="math display">\[h^{l+1} = \max(0, h^l).\]</span> This
-operation introduces sparsity in the activations and allows the network
-to model non-linear relationships.</p>
-<p>During the backward pass, this nonlinearity plays an equally
-important role in determining how gradients flow through the network.
-Because ReLU outputs zero for negative inputs, gradients are propagated
-only through neurons that were active during the forward pass.
-Mathematically, the gradient with respect to the previous layer is given
-by <span class="math display">\[\frac{\partial L}{\partial h^l}
-= \mathbf{1}[h^l &gt; 0] \cdot \frac{\partial L}{\partial
-h^{l+1}},\]</span> where the indicator function <span class="math inline">\(\mathbf{1}[h^l &gt; 0]\)</span> blocks gradients
-at locations where the forward activation was negative. As a result,
-neurons that were inactive during the forward pass receive no gradient
-signal during backpropagation.</p>
-<p>This gating behavior is crucial for saliency methods because it
-determines which spatial regions of the image can influence the gradient
-signal used to generate saliency maps.</p>
-<h3 data-number="5.3.2" id="deconvnet-backpropagation-1"><span class="header-section-number">5.3.2</span> Deconvnet
-Backpropagation</h3>
-<p>Deconvnet backpropagation modifies the standard backward pass by
-further restricting gradient flow. In addition to the forward-pass
-gating described above, this method propagates only *positive gradients*
-from the higher layer. Intuitively, this rectification step emphasizes
-features that positively contribute to the activation of the target
-class while suppressing noisy or irrelevant signals.</p>
+<h3 data-number="5.3.1" id="relu-nonlinearities-and-backpropagation"><span class="header-section-number">5.3.1</span> ReLU Nonlinearities and Backpropagation</h3>
+<p>During the forward pass, the ReLU activation function performs a simple element-wise operation that sets all negative activations to zero: <span class="math display">\[h^{l+1} = \max(0, h^l).\]</span> This operation introduces sparsity in the activations and allows the network to model non-linear relationships.</p>
+<p>During the backward pass, this nonlinearity plays an equally important role in determining how gradients flow through the network. Because ReLU outputs zero for negative inputs, gradients are propagated only through neurons that were active during the forward pass. Mathematically, the gradient with respect to the previous layer is given by <span class="math display">\[\frac{\partial L}{\partial h^l}
+= \mathbf{1}[h^l &gt; 0] \cdot \frac{\partial L}{\partial h^{l+1}},\]</span> where the indicator function <span class="math inline">\(\mathbf{1}[h^l &gt; 0]\)</span> blocks gradients at locations where the forward activation was negative. As a result, neurons that were inactive during the forward pass receive no gradient signal during backpropagation.</p>
+<p>This gating behavior is crucial for saliency methods because it determines which spatial regions of the image can influence the gradient signal used to generate saliency maps.</p>
+<h3 data-number="5.3.2" id="deconvnet-backpropagation-1"><span class="header-section-number">5.3.2</span> Deconvnet Backpropagation</h3>
+<p>Deconvnet backpropagation modifies the standard backward pass by further restricting gradient flow. In addition to the forward-pass gating described above, this method propagates only *positive gradients* from the higher layer. Intuitively, this rectification step emphasizes features that positively contribute to the activation of the target class while suppressing noisy or irrelevant signals.</p>
 <p>Formally, gradient propagation for layer <span class="math inline">\(l\)</span> can be written as <span class="math display">\[\frac{\partial L}{\partial h^l}
-= \mathbf{1}[h^l &gt; 0] \cdot \frac{\partial L}{\partial
-h^{l+1}},\]</span> with the additional constraint that only positive
-gradient values from the later layer are allowed to pass. This
-modification leads to sharper and more interpretable visualizations.</p>
-<p>In practice, the combination of forward-pass gating and gradient
-rectification produces saliency maps that are significantly cleaner than
-those obtained with vanilla backpropagation. The resulting
-visualizations better highlight edges, textures, and object parts that
-strongly influence the network’s predictions.</p>
+= \mathbf{1}[h^l &gt; 0] \cdot \frac{\partial L}{\partial h^{l+1}},\]</span> with the additional constraint that only positive gradient values from the later layer are allowed to pass. This modification leads to sharper and more interpretable visualizations.</p>
+<p>In practice, the combination of forward-pass gating and gradient rectification produces saliency maps that are significantly cleaner than those obtained with vanilla backpropagation. The resulting visualizations better highlight edges, textures, and object parts that strongly influence the network’s predictions.</p>
 <h2 data-number="5.4" id="guided-backpropagation"><span class="header-section-number">5.4</span> Guided Backpropagation</h2>
-<p>Guided backpropagation further refines gradient-based saliency by
-combining the ideas of standard backpropagation and Deconvnet
-backpropagation <span class="citation" data-cites="6"></span>. Recall
-that standard backpropagation allows gradients to pass only through
-neurons that were active during the forward pass, while Deconvnet
-backpropagation additionally restricts gradients to be positive. Guided
-backpropagation merges both constraints, allowing gradients to flow only
-when **both the forward activation and the backward gradient are
-positive**.</p>
-<p>During the forward pass, the ReLU activation behaves as usual: <span class="math display">\[h^{l+1} = \max\{0, h^l\}.\]</span> However,
-during the backward pass, the gradient propagation rule becomes more
-restrictive: <span class="math display">\[\frac{\partial L}{\partial
-h^l}
+<p>Guided backpropagation further refines gradient-based saliency by combining the ideas of standard backpropagation and Deconvnet backpropagation <span class="citation" data-cites="6"></span>. Recall that standard backpropagation allows gradients to pass only through neurons that were active during the forward pass, while Deconvnet backpropagation additionally restricts gradients to be positive. Guided backpropagation merges both constraints, allowing gradients to flow only when **both the forward activation and the backward gradient are positive**.</p>
+<p>During the forward pass, the ReLU activation behaves as usual: <span class="math display">\[h^{l+1} = \max\{0, h^l\}.\]</span> However, during the backward pass, the gradient propagation rule becomes more restrictive: <span class="math display">\[\frac{\partial L}{\partial h^l}
 = \mathbf{1}[h^l &gt; 0]\;
   \mathbf{1}\!\left[\frac{\partial L}{\partial h^{l+1}} &gt; 0\right]
   \frac{\partial L}{\partial h^{l+1}}.\]</span></p>
-<p>This equation shows that gradient signals are allowed to pass only
-when two conditions are satisfied:</p>
+<p>This equation shows that gradient signals are allowed to pass only when two conditions are satisfied:</p>
 <ul>
-<li><p>The neuron was positively activated during the forward
-pass.</p></li>
+<li><p>The neuron was positively activated during the forward pass.</p></li>
 <li><p>The gradient coming from the higher layer is positive.</p></li>
 </ul>
-<p>By enforcing both constraints simultaneously, guided backpropagation
-suppresses noisy gradient signals and emphasizes features that
-positively contribute to the target class. In practice, this produces
-sharper and more visually interpretable saliency maps than either
-vanilla backpropagation or Deconvnet backpropagation. The resulting
-visualizations often highlight fine-grained structures such as edges,
-textures, and object boundaries, making guided backpropagation one of
-the most widely used gradient-based explanation techniques.</p>
-<h2 data-number="5.5" id="vanilla-vs.-deconvnet-vs.-guided-backpropagation"><span class="header-section-number">5.5</span> Vanilla vs. Deconvnet
-vs. Guided Backpropagation</h2>
-<p>The three gradient-based visualization methods discussed so far
-differ primarily in how they handle gradient flow through ReLU
-nonlinearities during the backward pass. These differences directly
-affect the quality and interpretability of the resulting saliency
-maps.</p>
-<p><strong>Vanilla backpropagation</strong> allows gradients to pass
-through ReLU units only when the corresponding neuron was active during
-the forward pass. Although this produces useful feature-importance maps,
-the resulting visualizations are often noisy and diffuse, making it
-difficult to clearly identify the most important image regions.</p>
-<p><strong>Deconvnet backpropagation</strong> improves upon this by
-additionally restricting gradients to be positive during the backward
-pass. This suppresses many irrelevant signals and produces sharper and
-more localized saliency maps that better highlight edges, textures, and
-object parts.</p>
-<p><strong>Guided backpropagation</strong> combines both constraints:
-gradients are allowed to flow only when the forward activation is
-positive <em>and</em> the backward gradient is positive. This dual
-rectification removes a large portion of the noise present in earlier
-methods, typically producing the cleanest and most visually
-interpretable saliency maps among the three approaches.</p>
-<p>Overall, these methods illustrate how small changes in gradient
-propagation rules can significantly improve the clarity of neural
-network explanations.</p>
-<h2 data-number="5.6" id="problems-with-guided-backpropagation"><span class="header-section-number">5.6</span> Problems with Guided
-Backpropagation</h2>
-<p>Although guided backpropagation produces visually appealing and sharp
-saliency maps, it has several important limitations <span class="citation" data-cites="6 8"></span>. In particular, the method
-often lacks <strong>class discriminativity</strong> and may highlight
-image structures that are not truly responsible for the model’s
-prediction.</p>
-<h4 data-number="5.6.0.1" id="issue-1-lack-of-class-discriminativity"><span class="header-section-number">5.6.0.1</span> Issue 1: Lack of class
-discriminativity</h4>
-<p>A key limitation is that guided backpropagation does not reliably
-distinguish between different output classes. In practice, saliency maps
-generated for different classes can appear surprisingly similar, even
-when the predicted categories are very different.</p>
-<p>For example, consider generating guided backpropagation maps for the
-classes <em>“airliner”</em> and <em>“bus”</em>. Ideally, the explanation
-for each class should highlight class-specific features such as wings
-for airplanes or wheels and windows for buses. However, guided
-backpropagation often highlights generic edges, textures, and contours
-that appear in both images. This suggests that the method is emphasizing
-low-level image structure rather than class-specific semantic
-features.</p>
-<p>This observation indicates that guided backpropagation is not always
-tightly coupled to the network’s final decision-making process. Instead,
-it often behaves like a generic edge detector influenced by the
-network’s learned filters.</p>
-<h4 data-number="5.6.0.2" id="issue-2-noise-and-ambiguity-in-class-specific-saliency"><span class="header-section-number">5.6.0.2</span> Issue 2: Noise and
-ambiguity in class-specific saliency</h4>
-<p>Another limitation is that gradient-based saliency maps can still be
-noisy and difficult to interpret. Even when guided backpropagation
-improves visual sharpness, it may fail to clearly differentiate between
-similar classes.</p>
-<p>Consider saliency maps generated for images of a <em>cat</em> and a
-<em>dog</em>. Vanilla backpropagation typically produces noisy maps that
-highlight many irrelevant regions. Guided backpropagation reduces some
-of this noise, but the resulting maps may still highlight similar edges
-and textures in both images. As a result, the explanations may not
-clearly indicate why the network prefers one class over another.</p>
-<p>Figure <a data-reference="fig:Example of backdrop" data-reference-type="ref" href="#fig:Example of backdrop">12</a> illustrates this
-phenomenon: saliency maps for different classes often look visually
-similar, revealing that the method does not strongly encode
-class-specific reasoning.</p>
-<p>These limitations motivate the development of more advanced
-techniques (such as Grad-CAM) that explicitly incorporate class
-information when generating explanations.</p>
+<p>By enforcing both constraints simultaneously, guided backpropagation suppresses noisy gradient signals and emphasizes features that positively contribute to the target class. In practice, this produces sharper and more visually interpretable saliency maps than either vanilla backpropagation or Deconvnet backpropagation. The resulting visualizations often highlight fine-grained structures such as edges, textures, and object boundaries, making guided backpropagation one of the most widely used gradient-based explanation techniques.</p>
+<h2 data-number="5.5" id="vanilla-vs.-deconvnet-vs.-guided-backpropagation"><span class="header-section-number">5.5</span> Vanilla vs. Deconvnet vs. Guided Backpropagation</h2>
+<p>The three gradient-based visualization methods discussed so far differ primarily in how they handle gradient flow through ReLU nonlinearities during the backward pass. These differences directly affect the quality and interpretability of the resulting saliency maps.</p>
+<p><strong>Vanilla backpropagation</strong> allows gradients to pass through ReLU units only when the corresponding neuron was active during the forward pass. Although this produces useful feature-importance maps, the resulting visualizations are often noisy and diffuse, making it difficult to clearly identify the most important image regions.</p>
+<p><strong>Deconvnet backpropagation</strong> improves upon this by additionally restricting gradients to be positive during the backward pass. This suppresses many irrelevant signals and produces sharper and more localized saliency maps that better highlight edges, textures, and object parts.</p>
+<p><strong>Guided backpropagation</strong> combines both constraints: gradients are allowed to flow only when the forward activation is positive <em>and</em> the backward gradient is positive. This dual rectification removes a large portion of the noise present in earlier methods, typically producing the cleanest and most visually interpretable saliency maps among the three approaches.</p>
+<p>Overall, these methods illustrate how small changes in gradient propagation rules can significantly improve the clarity of neural network explanations.</p>
+<h2 data-number="5.6" id="problems-with-guided-backpropagation"><span class="header-section-number">5.6</span> Problems with Guided Backpropagation</h2>
+<p>Although guided backpropagation produces visually appealing and sharp saliency maps, it has several important limitations <span class="citation" data-cites="6 8"></span>. In particular, the method often lacks <strong>class discriminativity</strong> and may highlight image structures that are not truly responsible for the model’s prediction.</p>
+<h4 data-number="5.6.0.1" id="issue-1-lack-of-class-discriminativity"><span class="header-section-number">5.6.0.1</span> Issue 1: Lack of class discriminativity</h4>
+<p>A key limitation is that guided backpropagation does not reliably distinguish between different output classes. In practice, saliency maps generated for different classes can appear surprisingly similar, even when the predicted categories are very different.</p>
+<p>For example, consider generating guided backpropagation maps for the classes <em>“airliner”</em> and <em>“bus”</em>. Ideally, the explanation for each class should highlight class-specific features such as wings for airplanes or wheels and windows for buses. However, guided backpropagation often highlights generic edges, textures, and contours that appear in both images. This suggests that the method is emphasizing low-level image structure rather than class-specific semantic features.</p>
+<p>This observation indicates that guided backpropagation is not always tightly coupled to the network’s final decision-making process. Instead, it often behaves like a generic edge detector influenced by the network’s learned filters.</p>
+<h4 data-number="5.6.0.2" id="issue-2-noise-and-ambiguity-in-class-specific-saliency"><span class="header-section-number">5.6.0.2</span> Issue 2: Noise and ambiguity in class-specific saliency</h4>
+<p>Another limitation is that gradient-based saliency maps can still be noisy and difficult to interpret. Even when guided backpropagation improves visual sharpness, it may fail to clearly differentiate between similar classes.</p>
+<p>Consider saliency maps generated for images of a <em>cat</em> and a <em>dog</em>. Vanilla backpropagation typically produces noisy maps that highlight many irrelevant regions. Guided backpropagation reduces some of this noise, but the resulting maps may still highlight similar edges and textures in both images. As a result, the explanations may not clearly indicate why the network prefers one class over another.</p>
+<p>Figure <a data-reference="fig:Example of backdrop" data-reference-type="ref" href="#fig:Example of backdrop">13</a> illustrates this phenomenon: saliency maps for different classes often look visually similar, revealing that the method does not strongly encode class-specific reasoning.</p>
+<p>These limitations motivate the development of more advanced techniques (such as Grad-CAM) that explicitly incorporate class information when generating explanations.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Saliency and Attribution Methods</h3><p>Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_Saliency_Interactive_interactive.html" style="height:860px;" title="Interactive Section 4 Saliency Methods"></iframe></section>
 <h2 data-number="5.7" id="summary-of-saliency-maps"><span class="header-section-number">5.7</span> Summary of Saliency Maps</h2>
-<p>Saliency methods can be broadly divided into two categories:
-<em>intervention-based</em> methods and <em>gradient-based</em> methods.
-Although both aim to identify which parts of an input most influence a
-model’s prediction, they differ significantly in methodology and
-computational cost.</p>
-<h3 data-number="5.7.1" id="intervention-based-methods"><span class="header-section-number">5.7.1</span> Intervention-Based
-Methods</h3>
-<p>Intervention-based methods estimate feature importance by explicitly
-perturbing pixels (or regions) of the input and observing how the
-model’s output changes. By measuring the impact of each modification,
-these approaches provide an intuitive and often reliable estimate of
-which regions are critical for prediction.</p>
-<p>However, this direct strategy comes with substantial drawbacks.
-Because each perturbation requires a separate forward pass through the
-network, these methods are computationally expensive. In practice,
-generating high-resolution saliency maps may require many iterative
-perturbations, making them slow and difficult to scale.</p>
-<h3 class="unnumbered" id="gradient-based-methods">Gradient-Based
-Methods</h3>
-<p>Gradient-based methods take a different approach by approximating
-feature importance using backpropagation. Instead of repeatedly
-modifying the input, these methods compute the gradient of the output
-with respect to the input in a single backward pass. This makes them
-significantly more computationally efficient than intervention-based
-approaches.</p>
-<p>While gradient-based methods are fast and easy to implement, they
-rely on local linear approximations and may suffer from noise or lack of
-class discriminativity. Nevertheless, their efficiency and simplicity
-make them widely used in practice, especially for large-scale
-models.</p>
-<p>Overall, the trade-off between intervention-based and gradient-based
-saliency methods reflects a broader theme in explainability: accuracy
-and interpretability often come at the cost of computational
-efficiency.</p>
-<h1 data-number="6" id="gradient-based-class-activation-map-grad-cam"><span class="header-section-number">6.</span> Gradient-Based Class Activation
-Map (Grad-CAM)</h1>
+<p>Saliency methods can be broadly divided into two categories: <em>intervention-based</em> methods and <em>gradient-based</em> methods. Although both aim to identify which parts of an input most influence a model’s prediction, they differ significantly in methodology and computational cost.</p>
+<h3 data-number="5.7.1" id="intervention-based-methods"><span class="header-section-number">5.7.1</span> Intervention-Based Methods</h3>
+<p>Intervention-based methods estimate feature importance by explicitly perturbing pixels (or regions) of the input and observing how the model’s output changes. By measuring the impact of each modification, these approaches provide an intuitive and often reliable estimate of which regions are critical for prediction.</p>
+<p>However, this direct strategy comes with substantial drawbacks. Because each perturbation requires a separate forward pass through the network, these methods are computationally expensive. In practice, generating high-resolution saliency maps may require many iterative perturbations, making them slow and difficult to scale.</p>
+<h3 class="unnumbered" id="gradient-based-methods">Gradient-Based Methods</h3>
+<p>Gradient-based methods take a different approach by approximating feature importance using backpropagation. Instead of repeatedly modifying the input, these methods compute the gradient of the output with respect to the input in a single backward pass. This makes them significantly more computationally efficient than intervention-based approaches.</p>
+<p>While gradient-based methods are fast and easy to implement, they rely on local linear approximations and may suffer from noise or lack of class discriminativity. Nevertheless, their efficiency and simplicity make them widely used in practice, especially for large-scale models.</p>
+<p>Overall, the trade-off between intervention-based and gradient-based saliency methods reflects a broader theme in explainability: accuracy and interpretability often come at the cost of computational efficiency.</p>
+<h1 data-number="6" id="gradient-based-class-activation-map-grad-cam"><span class="header-section-number">6.</span> Gradient-Based Class Activation Map (Grad-CAM)</h1>
 <h2 data-number="6.1" id="motivation"><span class="header-section-number">6.1</span> Motivation</h2>
-<p>Pixel-level saliency maps highlight regions that influence a
-prediction, but they often suffer from noise and poor class
-discriminativity. Grad-CAM was introduced to produce
-<em>class-specific</em> visual explanations that are both interpretable
-and spatially meaningful <span class="citation" data-cites="8"></span>.</p>
-<p>The objective of Grad-CAM is to identify which internal feature maps
-in a convolutional neural network are most responsible for predicting a
-particular class. For these explanations to be useful, the resulting
-activations must satisfy two key requirements. First, they must be
-<strong>class-discriminative</strong>, meaning that the highlighted
-regions directly reflect the network’s reasoning for a chosen class.
-Second, they must <strong>preserve spatial information</strong>, so that
-the explanation can be mapped back onto the original image and
-interpreted visually.</p>
-<p>A key design decision is the choice of network layer to analyze.
-Early convolutional layers retain high spatial resolution but capture
-only low-level features such as edges and textures. Fully connected
-layers capture high-level semantics but discard spatial structure. The
-<strong>last convolutional layer</strong> provides the ideal compromise:
-it encodes rich semantic information while still maintaining coarse
-spatial structure. Grad-CAM therefore operates on this layer to produce
-meaningful localization maps.</p>
+<p>Pixel-level saliency maps highlight regions that influence a prediction, but they often suffer from noise and poor class discriminativity. Grad-CAM was introduced to produce <em>class-specific</em> visual explanations that are both interpretable and spatially meaningful <span class="citation" data-cites="8"></span>.</p>
+<p>The objective of Grad-CAM is to identify which internal feature maps in a convolutional neural network are most responsible for predicting a particular class. For these explanations to be useful, the resulting activations must satisfy two key requirements. First, they must be <strong>class-discriminative</strong>, meaning that the highlighted regions directly reflect the network’s reasoning for a chosen class. Second, they must <strong>preserve spatial information</strong>, so that the explanation can be mapped back onto the original image and interpreted visually.</p>
+<p>A key design decision is the choice of network layer to analyze. Early convolutional layers retain high spatial resolution but capture only low-level features such as edges and textures. Fully connected layers capture high-level semantics but discard spatial structure. The <strong>last convolutional layer</strong> provides the ideal compromise: it encodes rich semantic information while still maintaining coarse spatial structure. Grad-CAM therefore operates on this layer to produce meaningful localization maps.</p>
 <h2 data-number="6.2" id="method"><span class="header-section-number">6.2</span> Method</h2>
-<p>Grad-CAM computes a class-specific heatmap by combining feature maps
-using weights derived from gradients of the target class score <span class="citation" data-cites="8"></span>.</p>
+<p>Grad-CAM computes a class-specific heatmap by combining feature maps using weights derived from gradients of the target class score <span class="citation" data-cites="8"></span>.</p>
 <ol>
 <li><p><strong>Forward Pass</strong></p>
 <ul>
 <li><p>Input an image into the CNN.</p></li>
-<li><p>Extract feature maps <span class="math inline">\(A^k\)</span>
-from the last convolutional layer.</p></li>
-<li><p>Compute the class score <span class="math inline">\(y^c\)</span>
-(logit) for the target class <span class="math inline">\(c\)</span>.</p></li>
+<li><p>Extract feature maps <span class="math inline">\(A^k\)</span> from the last convolutional layer.</p></li>
+<li><p>Compute the class score <span class="math inline">\(y^c\)</span> (logit) for the target class <span class="math inline">\(c\)</span>.</p></li>
 </ul></li>
 <li><p><strong>Backward Pass (Class-Specific Gradients)</strong></p>
 <ul>
-<li><p>Backpropagate gradients from the class score <span class="math inline">\(y^c\)</span> to the last convolutional
-layer.</p></li>
+<li><p>Backpropagate gradients from the class score <span class="math inline">\(y^c\)</span> to the last convolutional layer.</p></li>
 <li><p>Compute importance weights for each feature map: <span class="math display">\[\alpha_k^c = \frac{1}{Z}\sum_i\sum_j
-    \frac{\partial y^c}{\partial A_{ij}^k},\]</span> where <span class="math inline">\(Z\)</span> is the number of spatial
-locations.</p></li>
+    \frac{\partial y^c}{\partial A_{ij}^k},\]</span> where <span class="math inline">\(Z\)</span> is the number of spatial locations.</p></li>
 </ul></li>
 <li><p><strong>Compute the Class Activation Map</strong> <span class="math display">\[L_{\text{Grad-CAM}}^c =
-  \mathrm{ReLU}\left(\sum_k \alpha_k^c A^k\right).\]</span> This
-produces a coarse heatmap highlighting regions that positively influence
-the class prediction.</p></li>
+  \mathrm{ReLU}\left(\sum_k \alpha_k^c A^k\right).\]</span> This produces a coarse heatmap highlighting regions that positively influence the class prediction.</p></li>
 <li><p><strong>Visualization</strong></p>
 <ul>
 <li><p>Upsample the heatmap to the input image resolution.</p></li>
@@ -890,177 +369,63 @@ the class prediction.</p></li>
 </ul></li>
 </ol>
 <section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–6 — GradCAM, LIME, and SHAP</h3><p>Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html" style="height:900px;" title="Interactive Sections 5–6 GradCAM LIME SHAP"></iframe></section>
-<figure id="fig:gradcam_process_l22">
-<img src="img/lecture23/net15.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>Grad-CAM computation pipeline: forward pass, gradient
-backpropagation, global-average pooling of gradients, and weighted
-combination of feature maps.</figcaption>
+<figure>
+<img alt="Grad-CAM computation pipeline: forward pass, gradient backpropagation, global-average pooling of gradients, and weighted combination of feature maps." id="fig:gradcam_process_l22" src="img/lecture23/net15.png" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">Grad-CAM computation pipeline: forward pass, gradient backpropagation, global-average pooling of gradients, and weighted combination of feature maps.</figcaption>
 </figure>
-<p>Together, these steps allow Grad-CAM to connect internal feature
-representations to human-interpretable image regions <span class="citation" data-cites="8"></span>. Compared to Guided
-Backpropagation, which often highlights edges and textures, Grad-CAM
-focuses on high-level semantic regions responsible for the
-prediction.</p>
-<h2 data-number="6.3" id="interpretation-and-practical-insights"><span class="header-section-number">6.3</span> Interpretation and Practical
-Insights</h2>
-<p>Grad-CAM provides clearer and more class-discriminative explanations
-than gradient-only saliency methods. In practice, Guided Backpropagation
-often highlights fine edges and textures throughout the image, including
-background details that are not directly responsible for the model’s
-prediction.</p>
-<p>Grad-CAM, in contrast, focuses on <strong>semantic regions</strong>
-that contribute most strongly to the predicted class. This difference
-makes Grad-CAM particularly useful for understanding <em>where</em> the
-network is looking when making a decision, rather than simply which
-pixels produce large gradients.</p>
-<p>This property makes Grad-CAM an effective tool for debugging models,
-detecting failure modes, and building trust in neural network
-predictions <span class="citation" data-cites="8"></span>.</p>
-<h1 data-number="7" id="model-agnostic-explanation-methods"><span class="header-section-number">7.</span> Model-Agnostic Explanation
-Methods</h1>
-<p>While visualization methods such as saliency maps and Grad-CAM are
-primarily designed for convolutional neural networks, many
-explainability techniques are designed to work with any machine learning
-model. These are known as <strong>model-agnostic explanation
-methods</strong>. Two widely used approaches in this category are LIME
-and SHAP.</p>
-<h2 data-number="7.1" id="local-interpretable-model-agnostic-explanations-lime"><span class="header-section-number">7.1</span> Local Interpretable
-Model-agnostic Explanations (LIME)</h2>
-<p><strong>LIME</strong> (Local Interpretable Model-agnostic
-Explanations) is an explainability technique that approximates a complex
-model locally using a simpler interpretable model such as a linear model
-<span class="citation" data-cites="9"></span>. The key idea is that
-while a global model may be highly complex, its behavior around a single
-prediction can often be approximated by a simple surrogate model.</p>
+<p>Together, these steps allow Grad-CAM to connect internal feature representations to human-interpretable image regions <span class="citation" data-cites="8"></span>. Compared to Guided Backpropagation, which often highlights edges and textures, Grad-CAM focuses on high-level semantic regions responsible for the prediction.</p>
+<h2 data-number="6.3" id="interpretation-and-practical-insights"><span class="header-section-number">6.3</span> Interpretation and Practical Insights</h2>
+<p>Grad-CAM provides clearer and more class-discriminative explanations than gradient-only saliency methods. In practice, Guided Backpropagation often highlights fine edges and textures throughout the image, including background details that are not directly responsible for the model’s prediction.</p>
+<p>Grad-CAM, in contrast, focuses on <strong>semantic regions</strong> that contribute most strongly to the predicted class. This difference makes Grad-CAM particularly useful for understanding <em>where</em> the network is looking when making a decision, rather than simply which pixels produce large gradients.</p>
+<p>This property makes Grad-CAM an effective tool for debugging models, detecting failure modes, and building trust in neural network predictions <span class="citation" data-cites="8"></span>.</p>
+<h1 data-number="7" id="model-agnostic-explanation-methods"><span class="header-section-number">7.</span> Model-Agnostic Explanation Methods</h1>
+<p>While visualization methods such as saliency maps and Grad-CAM are primarily designed for convolutional neural networks, many explainability techniques are designed to work with any machine learning model. These are known as <strong>model-agnostic explanation methods</strong>. Two widely used approaches in this category are LIME and SHAP.</p>
+<h2 data-number="7.1" id="local-interpretable-model-agnostic-explanations-lime"><span class="header-section-number">7.1</span> Local Interpretable Model-agnostic Explanations (LIME)</h2>
+<p><strong>LIME</strong> (Local Interpretable Model-agnostic Explanations) is an explainability technique that approximates a complex model locally using a simpler interpretable model such as a linear model <span class="citation" data-cites="9"></span>. The key idea is that while a global model may be highly complex, its behavior around a single prediction can often be approximated by a simple surrogate model.</p>
 <h3 data-number="7.1.1" id="key-idea"><span class="header-section-number">7.1.1</span> Key Idea</h3>
-<p>LIME explains a prediction by perturbing the input data and observing
-how the prediction changes. A simple interpretable model is then trained
-on these perturbed samples to approximate the behavior of the original
-model locally. This allows the method to identify which features were
-most influential for that specific prediction.</p>
-<p>The process typically involves selecting an instance to explain,
-generating perturbed samples near that instance, obtaining predictions
-from the original model, and weighting samples based on their similarity
-to the original input. A simple interpretable model such as linear
-regression is then fit to this locally weighted dataset to estimate
-feature importance. This process is illustrated in Figure <a data-reference="fig:lime" data-reference-type="ref" href="#fig:lime">15</a>.</p>
+<p>LIME explains a prediction by perturbing the input data and observing how the prediction changes. A simple interpretable model is then trained on these perturbed samples to approximate the behavior of the original model locally. This allows the method to identify which features were most influential for that specific prediction.</p>
+<p>The process typically involves selecting an instance to explain, generating perturbed samples near that instance, obtaining predictions from the original model, and weighting samples based on their similarity to the original input. A simple interpretable model such as linear regression is then fit to this locally weighted dataset to estimate feature importance. This process is illustrated in Figure <a data-reference="fig:lime" data-reference-type="ref" href="#fig:lime">16</a>.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–6 — GradCAM, LIME, and SHAP</h3><p>Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html" style="height:900px;" title="Interactive Sections 5–6 GradCAM LIME SHAP"></iframe></section>
 <h3 data-number="7.1.2" id="method-1"><span class="header-section-number">7.1.2</span> Method</h3>
-<p>Given an input instance <span class="math inline">\(x\)</span> to be
-explained, LIME constructs a local approximation of the model by
-generating a dataset of perturbed samples around <span class="math inline">\(x\)</span>. These samples are obtained by randomly
-modifying features of the input, such as removing words in text data or
-masking regions in images.</p>
-<p>Each perturbed sample is then passed through the original black-box
-model to obtain predictions. To ensure that the explanation focuses on
-the local neighborhood of <span class="math inline">\(x\)</span>, LIME
-assigns higher weights to samples that are closer to the original input
-and lower weights to those that are farther away.</p>
-<p>Using this weighted dataset, LIME fits a simple interpretable model,
-typically a sparse linear model, to approximate the behavior of the
-black-box model in the vicinity of <span class="math inline">\(x\)</span>. The coefficients of this surrogate
-model are then used as feature importance scores, providing an
-explanation for the prediction at <span class="math inline">\(x\)</span>.</p>
-<p>This procedure is illustrated in Figure <a data-reference="fig:lime" data-reference-type="ref" href="#fig:lime">15</a>.</p>
-<h3 data-number="7.1.3" id="advantages-and-limitations"><span class="header-section-number">7.1.3</span> Advantages and
-Limitations</h3>
-<p>One advantage of LIME is that it can be applied to any machine
-learning model without requiring access to internal model parameters. It
-also produces intuitive feature importance scores that can help
-practitioners understand and debug model behavior.</p>
-<p>However, LIME explanations are only locally valid and may not
-generalize to the model’s global behavior. Additionally, results may
-vary depending on the sampling procedure, and the need to generate many
-perturbations can increase computational cost.</p>
-<h2 data-number="7.2" id="shapley-additive-explanations-shap"><span class="header-section-number">7.2</span> SHapley Additive exPlanations
-(SHAP)</h2>
-<p><strong>SHAP</strong> (SHapley Additive exPlanations) is a unified
-framework for explainability based on Shapley values from cooperative
-game theory <span class="citation" data-cites="10"></span>. SHAP assigns
-an importance value to each feature by measuring its contribution to the
-prediction relative to a baseline expectation.</p>
+<p>Given an input instance <span class="math inline">\(x\)</span> to be explained, LIME constructs a local approximation of the model by generating a dataset of perturbed samples around <span class="math inline">\(x\)</span>. These samples are obtained by randomly modifying features of the input, such as removing words in text data or masking regions in images.</p>
+<p>Each perturbed sample is then passed through the original black-box model to obtain predictions. To ensure that the explanation focuses on the local neighborhood of <span class="math inline">\(x\)</span>, LIME assigns higher weights to samples that are closer to the original input and lower weights to those that are farther away.</p>
+<p>Using this weighted dataset, LIME fits a simple interpretable model, typically a sparse linear model, to approximate the behavior of the black-box model in the vicinity of <span class="math inline">\(x\)</span>. The coefficients of this surrogate model are then used as feature importance scores, providing an explanation for the prediction at <span class="math inline">\(x\)</span>.</p>
+<p>This procedure is illustrated in Figure <a data-reference="fig:lime" data-reference-type="ref" href="#fig:lime">16</a>.</p>
+<h3 data-number="7.1.3" id="advantages-and-limitations"><span class="header-section-number">7.1.3</span> Advantages and Limitations</h3>
+<p>One advantage of LIME is that it can be applied to any machine learning model without requiring access to internal model parameters. It also produces intuitive feature importance scores that can help practitioners understand and debug model behavior.</p>
+<p>However, LIME explanations are only locally valid and may not generalize to the model’s global behavior. Additionally, results may vary depending on the sampling procedure, and the need to generate many perturbations can increase computational cost.</p>
+<h2 data-number="7.2" id="shapley-additive-explanations-shap"><span class="header-section-number">7.2</span> SHapley Additive exPlanations (SHAP)</h2>
+<p><strong>SHAP</strong> (SHapley Additive exPlanations) is a unified framework for explainability based on Shapley values from cooperative game theory <span class="citation" data-cites="10"></span>. SHAP assigns an importance value to each feature by measuring its contribution to the prediction relative to a baseline expectation.</p>
 <h3 data-number="7.2.1" id="key-idea-1"><span class="header-section-number">7.2.1</span> Key Idea</h3>
-<p>SHAP treats each feature as a player in a cooperative game and
-computes how much each feature contributes to the final prediction by
-averaging its marginal contribution across all possible feature subsets.
-This produces theoretically grounded feature importance values with
-desirable consistency properties.</p>
+<p>SHAP treats each feature as a player in a cooperative game and computes how much each feature contributes to the final prediction by averaging its marginal contribution across all possible feature subsets. This produces theoretically grounded feature importance values with desirable consistency properties.</p>
 <p>The SHAP explanation model can be written as:</p>
-<p><span class="math display">\[f(x) = \phi_0 + \sum_{i=1}^{M}
-\phi_i\]</span></p>
-<p>where <span class="math inline">\(\phi_i\)</span> represents the
-contribution of feature <span class="math inline">\(i\)</span>, <span class="math inline">\(\phi_0\)</span> represents the base prediction,
-and <span class="math inline">\(M\)</span> is the number of
-features.</p>
-<p>This process is illustrated in Figure <a data-reference="fig:shap" data-reference-type="ref" href="#fig:shap">16</a>.</p>
+<p><span class="math display">\[f(x) = \phi_0 + \sum_{i=1}^{M} \phi_i\]</span></p>
+<p>where <span class="math inline">\(\phi_i\)</span> represents the contribution of feature <span class="math inline">\(i\)</span>, <span class="math inline">\(\phi_0\)</span> represents the base prediction, and <span class="math inline">\(M\)</span> is the number of features.</p>
+<p>This process is illustrated in Figure <a data-reference="fig:shap" data-reference-type="ref" href="#fig:shap">17</a>.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–6 — GradCAM, LIME, and SHAP</h3><p>Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html" style="height:900px;" title="Interactive Sections 5–6 GradCAM LIME SHAP"></iframe></section>
 <h3 data-number="7.2.2" id="method-2"><span class="header-section-number">7.2.2</span> Method</h3>
-<p>Given an input <span class="math inline">\(x\)</span>, SHAP computes
-the contribution of each feature by evaluating how the prediction
-changes when that feature is added to different subsets of features. For
-each feature, the method considers all possible subsets of the remaining
-features and measures the marginal contribution of including that
-feature.</p>
-<p>These contributions are then averaged across all subsets to obtain
-the Shapley value for each feature. This value represents the expected
-contribution of the feature to the prediction, ensuring a fair
-allocation of importance across all features.</p>
-<p>Because evaluating all possible feature subsets is computationally
-expensive, practical implementations of SHAP rely on approximation
-methods or model-specific optimizations to efficiently estimate these
-values.</p>
-<p>This additive decomposition is illustrated in Figure <a data-reference="fig:shap" data-reference-type="ref" href="#fig:shap">16</a>.</p>
-<h3 data-number="7.2.3" id="advantages-and-limitations-1"><span class="header-section-number">7.2.3</span> Advantages and
-Limitations</h3>
-<p>SHAP has a strong theoretical foundation and provides consistent
-feature attribution, making it attractive for both local and global
-explanation tasks. It also provides a unified framework connecting
-several existing explanation methods.</p>
-<p>However, exact computation of Shapley values is computationally
-expensive, particularly for models with many features. As a result,
-practical implementations typically rely on approximations.</p>
+<p>Given an input <span class="math inline">\(x\)</span>, SHAP computes the contribution of each feature by evaluating how the prediction changes when that feature is added to different subsets of features. For each feature, the method considers all possible subsets of the remaining features and measures the marginal contribution of including that feature.</p>
+<p>These contributions are then averaged across all subsets to obtain the Shapley value for each feature. This value represents the expected contribution of the feature to the prediction, ensuring a fair allocation of importance across all features.</p>
+<p>Because evaluating all possible feature subsets is computationally expensive, practical implementations of SHAP rely on approximation methods or model-specific optimizations to efficiently estimate these values.</p>
+<p>This additive decomposition is illustrated in Figure <a data-reference="fig:shap" data-reference-type="ref" href="#fig:shap">17</a>.</p>
+<h3 data-number="7.2.3" id="advantages-and-limitations-1"><span class="header-section-number">7.2.3</span> Advantages and Limitations</h3>
+<p>SHAP has a strong theoretical foundation and provides consistent feature attribution, making it attractive for both local and global explanation tasks. It also provides a unified framework connecting several existing explanation methods.</p>
+<p>However, exact computation of Shapley values is computationally expensive, particularly for models with many features. As a result, practical implementations typically rely on approximations.</p>
 <h2 data-number="7.3" id="lime-vs-shap"><span class="header-section-number">7.3</span> LIME vs SHAP</h2>
-<p>Both LIME and SHAP provide feature-level explanations for black-box
-models but differ in their methodology. LIME approximates model behavior
-locally using surrogate models, while SHAP computes feature
-contributions using a theoretically grounded game-theoretic framework.
-In practice, LIME is often faster and simpler to apply, while SHAP
-provides more consistent and theoretically justified explanations.</p>
-<p>Together, these approaches provide powerful tools for interpreting
-complex machine learning models and improving model transparency and
-trust.</p>
+<p>Both LIME and SHAP provide feature-level explanations for black-box models but differ in their methodology. LIME approximates model behavior locally using surrogate models, while SHAP computes feature contributions using a theoretically grounded game-theoretic framework. In practice, LIME is often faster and simpler to apply, while SHAP provides more consistent and theoretically justified explanations.</p>
+<p>Together, these approaches provide powerful tools for interpreting complex machine learning models and improving model transparency and trust.</p>
 <h1 data-number="9" id="references"><span class="header-section-number">9.</span> References</h1>
 <div class="list">
 <p><span>[]</span><span> </span></p>
-<p>A. Krizhevsky, I. Sutskever, and G. E. Hinton. ImageNet
-classification with deep convolutional neural networks. In Advances in
-Neural Information Processing Systems (NeurIPS), 2012.</p>
-<p>M. D. Zeiler and R. Fergus. Visualizing and understanding
-convolutional networks. In European Conference on Computer Vision
-(ECCV), 2014.</p>
-<p>K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning for image
-recognition. In IEEE Conference on Computer Vision and Pattern
-Recognition (CVPR), 2016.</p>
-<p>L. van der Maaten and G. Hinton. Visualizing data using t-SNE.
-Journal of Machine Learning Research, 9(Nov):2579–2605, 2008.</p>
-<p>K. Simonyan, A. Vedaldi, and A. Zisserman. Deep inside convolutional
-networks: Visualising image classification models and saliency maps.
-arXiv preprint arXiv:1312.6034, 2013.</p>
-<p>J. T. Springenberg, A. Dosovitskiy, T. Brox, and M. Riedmiller.
-Striving for simplicity: The all convolutional net. In ICLR Workshop,
-2015.</p>
-<p>B. Zhou, A. Khosla, A. Lapedriza, A. Oliva, and A. Torralba. Learning
-deep features for discriminative localization. In IEEE Conference on
-Computer Vision and Pattern Recognition (CVPR), 2016.</p>
-<p>R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh, and D.
-Batra. Grad-CAM: Visual explanations from deep networks via
-gradient-based localization. In IEEE International Conference on
-Computer Vision (ICCV), 2017.</p>
-<p>M. T. Ribeiro, S. Singh, and C. Guestrin. "Why should I trust you?":
-Explaining the predictions of any classifier. In ACM SIGKDD, 2016.</p>
-<p>S. Lundberg and S. Lee. A unified approach to interpreting model
-predictions. In Advances in Neural Information Processing Systems
-(NeurIPS), 2017.</p>
+<p>A. Krizhevsky, I. Sutskever, and G. E. Hinton. ImageNet classification with deep convolutional neural networks. In Advances in Neural Information Processing Systems (NeurIPS), 2012.</p>
+<p>M. D. Zeiler and R. Fergus. Visualizing and understanding convolutional networks. In European Conference on Computer Vision (ECCV), 2014.</p>
+<p>K. He, X. Zhang, S. Ren, and J. Sun. Deep residual learning for image recognition. In IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.</p>
+<p>L. van der Maaten and G. Hinton. Visualizing data using t-SNE. Journal of Machine Learning Research, 9(Nov):2579–2605, 2008.</p>
+<p>K. Simonyan, A. Vedaldi, and A. Zisserman. Deep inside convolutional networks: Visualising image classification models and saliency maps. arXiv preprint arXiv:1312.6034, 2013.</p>
+<p>J. T. Springenberg, A. Dosovitskiy, T. Brox, and M. Riedmiller. Striving for simplicity: The all convolutional net. In ICLR Workshop, 2015.</p>
+<p>B. Zhou, A. Khosla, A. Lapedriza, A. Oliva, and A. Torralba. Learning deep features for discriminative localization. In IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2016.</p>
+<p>R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh, and D. Batra. Grad-CAM: Visual explanations from deep networks via gradient-based localization. In IEEE International Conference on Computer Vision (ICCV), 2017.</p>
+<p>M. T. Ribeiro, S. Singh, and C. Guestrin. "Why should I trust you?": Explaining the predictions of any classifier. In ACM SIGKDD, 2016.</p>
+<p>S. Lundberg and S. Lee. A unified approach to interpreting model predictions. In Advances in Neural Information Processing Systems (NeurIPS), 2017.</p>
 </div>
 
 </main>

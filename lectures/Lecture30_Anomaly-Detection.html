@@ -109,230 +109,73 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture introduces anomaly detection as a machine learning
-framework for identifying rare, unusual, or unexpected patterns relative
-to a learned notion of normal behavior. We formalize anomaly detection
-in a statistical framework by defining anomalies via normal and
-anomalous data-generating distributions, and by presenting the two core
-components of a detector: a statistic (or anomaly score) and a decision
-rule (typically thresholding). We then develop evaluation methodology
-for anomaly detection under class imbalance, including TPR, FPR,
-precision, ROC curves, and AUC, and we analyze how the decision
-threshold controls the trade-off between missed detections and false
-alarms. Next, we study two practical learning settings—semi-supervised
-(novelty detection) and unsupervised anomaly detection—highlighting
-their assumptions and representative techniques such as density-based
-detection, distance-based methods, and Isolation Forest. Finally, we
-focus on image anomaly detection methods, including patch-based
-statistical modeling, adjacent pixel-value correlation structure, and
-neural network-based confidence scoring via Maximum Softmax Probability
-(MSP), and we connect these ideas to the manifold hypothesis and
-reconstruction-based approaches (e.g., autoencoders), including
-gradient-based regularization such as GradCON and hybrid/ensemble
-strategies for robust detection in high-dimensional settings <span class="citation" data-cites="5 7"></span>.</p>
+<p>This lecture introduces anomaly detection as a machine learning framework for identifying rare, unusual, or unexpected patterns relative to a learned notion of normal behavior. We formalize anomaly detection in a statistical framework by defining anomalies via normal and anomalous data-generating distributions, and by presenting the two core components of a detector: a statistic (or anomaly score) and a decision rule (typically thresholding). We then develop evaluation methodology for anomaly detection under class imbalance, including TPR, FPR, precision, ROC curves, and AUC, and we analyze how the decision threshold controls the trade-off between missed detections and false alarms. Next, we study two practical learning settings—semi-supervised (novelty detection) and unsupervised anomaly detection—highlighting their assumptions and representative techniques such as density-based detection, distance-based methods, and Isolation Forest. Finally, we focus on image anomaly detection methods, including patch-based statistical modeling, adjacent pixel-value correlation structure, and neural network-based confidence scoring via Maximum Softmax Probability (MSP), and we connect these ideas to the manifold hypothesis and reconstruction-based approaches (e.g., autoencoders), including gradient-based regularization such as GradCON and hybrid/ensemble strategies for robust detection in high-dimensional settings <span class="citation" data-cites="5 7"></span>.</p>
 <h1 data-number="2" id="anomaly-detection"><span class="header-section-number">2.</span> Anomaly Detection</h1>
-<p>Anomaly detection refers to a class of machine learning techniques
-designed to identify rare, unusual, or unexpected patterns that deviate
-from a learned notion of normal behavior. Rather than focusing on
-predicting predefined labels, anomaly detection aims to model what is
-considered “normal” and then flag observations that significantly differ
-from this model. Although anomaly detection is not a standalone
-application domain, it plays a crucial role across many fields,
-including fraud detection, medical diagnosis, cybersecurity, industrial
-monitoring, and fault detection. In this lecture, we introduce the
-anomaly detection framework and discuss its core components, including
-the formal definition of anomalies, problem formulation, evaluation
-metrics, different anomaly detection settings, statistical approaches,
-reconstruction-based approaches, and the GradCON method <span class="citation" data-cites="1"></span>.</p>
+<p>Anomaly detection refers to a class of machine learning techniques designed to identify rare, unusual, or unexpected patterns that deviate from a learned notion of normal behavior. Rather than focusing on predicting predefined labels, anomaly detection aims to model what is considered “normal” and then flag observations that significantly differ from this model. Although anomaly detection is not a standalone application domain, it plays a crucial role across many fields, including fraud detection, medical diagnosis, cybersecurity, industrial monitoring, and fault detection. In this lecture, we introduce the anomaly detection framework and discuss its core components, including the formal definition of anomalies, problem formulation, evaluation metrics, different anomaly detection settings, statistical approaches, reconstruction-based approaches, and the GradCON method <span class="citation" data-cites="1"></span>.</p>
 <h2 data-number="2.1" id="definition"><span class="header-section-number">2.1</span> Definition</h2>
-<p>An anomaly (also referred to as an outlier or novelty) is a data
-point or pattern that deviates significantly from the expected
-distribution of normal data. More formally, anomaly detection involves
-learning a model of normal data and identifying samples that have low
-likelihood or high deviation relative to this learned model. The central
-challenge lies in defining and modeling “normality,” since anomalies are
-inherently rare and often diverse in nature.</p>
-<p>In a probabilistic framework, we assume that normal data are
-generated from an underlying distribution <span class="math inline">\(P_N\)</span>. Anomalies can then be interpreted as
-observations that are unlikely under <span class="math inline">\(P_N\)</span>, or equivalently, as samples that may
-originate from a different distribution <span class="math inline">\(P_A\)</span>, where <span class="math inline">\(P_A \neq P_N\)</span>. Importantly, anomalies do
-not necessarily arise from non-stationary processes; rather, they
-correspond to deviations from the dominant data-generating process. In
-many practical settings, <span class="math inline">\(P_A\)</span> is
-unknown, poorly sampled, or highly heterogeneous, which makes anomaly
-detection particularly challenging.</p>
-<p>In time-series contexts, normal behavior is sometimes modeled as a
-stationary process (with stable statistical properties such as mean and
-variance). However, anomalies may appear either as rare realizations
-within a stationary system or as changes in the underlying generating
-mechanism. Therefore, anomaly detection is fundamentally about
-distinguishing rare or structurally inconsistent observations from the
-learned representation of normal data, regardless of whether the
-deviation arises from distributional shift, structural corruption, or
-unexpected dynamics.</p>
-<h2 data-number="2.2" id="examples-of-anomaly-detection"><span class="header-section-number">2.2</span> Examples of Anomaly
-Detection</h2>
-<p>Anomaly detection appears in a wide range of real-world applications
-where rare but critical events must be identified within large volumes
-of normal data. One common example is fraud detection in financial
-systems, where the goal is to identify suspicious transactions within
-streams of otherwise normal credit card activity. Another important
-application arises in healthcare, where anomaly detection is used to
-identify arrhythmias in electrocardiogram (ECG) signals that deviate
-from typical heart rhythms. In computer vision, anomaly detection can be
-used to locate defective regions in images that do not conform to a
-reference pattern, such as manufacturing defects in materials or
-unexpected objects in surveillance footage.</p>
-<p>A key observation across these domains is that anomalies often appear
-as spurious or irregular elements embedded within structured data.
-Although anomalous samples are typically rare, they are often the most
-informative and valuable data points in a dataset because they highlight
-unusual behavior, critical failures, or events of interest that require
-further investigation.</p>
-<p>Figure <a data-reference="fig:anomaly_material_example" data-reference-type="ref" href="#fig:anomaly_material_example">1</a> illustrates an
-example of structural anomalies within a material, where irregular
-regions deviate from an otherwise consistent pattern. Such defects are
-often subtle and difficult to detect manually, motivating automated
-anomaly detection techniques.</p>
-<figure id="fig:anomaly_material_example">
-<img src="img/lecture24/image1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Example of anomalous structures within a structured
-material.</figcaption>
+<p>An anomaly (also referred to as an outlier or novelty) is a data point or pattern that deviates significantly from the expected distribution of normal data. More formally, anomaly detection involves learning a model of normal data and identifying samples that have low likelihood or high deviation relative to this learned model. The central challenge lies in defining and modeling “normality,” since anomalies are inherently rare and often diverse in nature.</p>
+<p>In a probabilistic framework, we assume that normal data are generated from an underlying distribution <span class="math inline">\(P_N\)</span>. Anomalies can then be interpreted as observations that are unlikely under <span class="math inline">\(P_N\)</span>, or equivalently, as samples that may originate from a different distribution <span class="math inline">\(P_A\)</span>, where <span class="math inline">\(P_A \neq P_N\)</span>. Importantly, anomalies do not necessarily arise from non-stationary processes; rather, they correspond to deviations from the dominant data-generating process. In many practical settings, <span class="math inline">\(P_A\)</span> is unknown, poorly sampled, or highly heterogeneous, which makes anomaly detection particularly challenging.</p>
+<p>In time-series contexts, normal behavior is sometimes modeled as a stationary process (with stable statistical properties such as mean and variance). However, anomalies may appear either as rare realizations within a stationary system or as changes in the underlying generating mechanism. Therefore, anomaly detection is fundamentally about distinguishing rare or structurally inconsistent observations from the learned representation of normal data, regardless of whether the deviation arises from distributional shift, structural corruption, or unexpected dynamics.</p>
+<h2 data-number="2.2" id="examples-of-anomaly-detection"><span class="header-section-number">2.2</span> Examples of Anomaly Detection</h2>
+<p>Anomaly detection appears in a wide range of real-world applications where rare but critical events must be identified within large volumes of normal data. One common example is fraud detection in financial systems, where the goal is to identify suspicious transactions within streams of otherwise normal credit card activity. Another important application arises in healthcare, where anomaly detection is used to identify arrhythmias in electrocardiogram (ECG) signals that deviate from typical heart rhythms. In computer vision, anomaly detection can be used to locate defective regions in images that do not conform to a reference pattern, such as manufacturing defects in materials or unexpected objects in surveillance footage.</p>
+<p>A key observation across these domains is that anomalies often appear as spurious or irregular elements embedded within structured data. Although anomalous samples are typically rare, they are often the most informative and valuable data points in a dataset because they highlight unusual behavior, critical failures, or events of interest that require further investigation.</p>
+<p>Figure <a data-reference="fig:anomaly_material_example" data-reference-type="ref" href="#fig:anomaly_material_example">1</a> illustrates an example of structural anomalies within a material, where irregular regions deviate from an otherwise consistent pattern. Such defects are often subtle and difficult to detect manually, motivating automated anomaly detection techniques.</p>
+<figure>
+<img alt="Example of anomalous structures within a structured material." id="fig:anomaly_material_example" src="img/lecture24/image1.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Example of anomalous structures within a structured material.</figcaption>
 </figure>
-<p>Anomaly detection is also widely used in public safety and
-surveillance scenarios. Figure <a data-reference="fig:anomaly_surveillance_example" data-reference-type="ref" href="#fig:anomaly_surveillance_example">2</a> shows an example
-in which an unusual individual is detected within a crowd. In such
-settings, anomaly detection systems help identify unusual or suspicious
-behavior in large-scale visual data.</p>
-<figure id="fig:anomaly_surveillance_example">
-<img src="img/lecture24/Picture2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Anomaly detection scenario in a public setting.</figcaption>
+<p>Anomaly detection is also widely used in public safety and surveillance scenarios. Figure <a data-reference="fig:anomaly_surveillance_example" data-reference-type="ref" href="#fig:anomaly_surveillance_example">2</a> shows an example in which an unusual individual is detected within a crowd. In such settings, anomaly detection systems help identify unusual or suspicious behavior in large-scale visual data.</p>
+<figure>
+<img alt="Anomaly detection scenario in a public setting." id="fig:anomaly_surveillance_example" src="img/lecture24/Picture2.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Anomaly detection scenario in a public setting.</figcaption>
 </figure>
-<h2 data-number="2.3" id="anomaly-detection-in-images"><span class="header-section-number">2.3</span> Anomaly Detection in
-Images</h2>
-<p>To study anomaly detection in images, we first formulate the problem
-mathematically. Let <span class="math inline">\(s\)</span> denote an
-image defined over a discrete pixel domain <span class="math inline">\(x
-\in \mathbb{Z}^2\)</span>. For a specific pixel location <span class="math inline">\(c \in x\)</span>, the value <span class="math inline">\(s(c)\)</span> represents the image intensity (or
-feature value) at that pixel.</p>
-<p>The goal of image anomaly detection is to identify pixels or regions
-that deviate from normal image structure. This task can be expressed
-through the estimation of an anomaly mask <span class="math inline">\(\Omega\)</span>, which assigns a binary label to
-each pixel: <span class="math display">\[\Omega(c)=
+<h2 data-number="2.3" id="anomaly-detection-in-images"><span class="header-section-number">2.3</span> Anomaly Detection in Images</h2>
+<p>To study anomaly detection in images, we first formulate the problem mathematically. Let <span class="math inline">\(s\)</span> denote an image defined over a discrete pixel domain <span class="math inline">\(x \in \mathbb{Z}^2\)</span>. For a specific pixel location <span class="math inline">\(c \in x\)</span>, the value <span class="math inline">\(s(c)\)</span> represents the image intensity (or feature value) at that pixel.</p>
+<p>The goal of image anomaly detection is to identify pixels or regions that deviate from normal image structure. This task can be expressed through the estimation of an anomaly mask <span class="math inline">\(\Omega\)</span>, which assigns a binary label to each pixel: <span class="math display">\[\Omega(c)=
   \begin{cases}
     0, &amp; \text{if pixel $c$ belongs to a normal region},\\
     1, &amp; \text{if pixel $c$ belongs to an anomalous region}.
   \end{cases}\]</span></p>
-<p>While this formulation focuses on images, anomaly detection is often
-studied in a more general setting where observations are collected over
-time. Consider a set of data samples represented as <span class="math inline">\(\{x(t)\}_{t=t_0}^{T}\)</span>, where each
-observation <span class="math inline">\(x(t) \in \mathbb{R}^d\)</span>.
-These samples are assumed to be generated by an underlying probabilistic
-process. In the normal case, data are drawn from a distribution <span class="math inline">\(\phi_0\)</span>, which represents typical or
-expected behavior.</p>
-<p>Anomaly detection then reduces to identifying observations that
-deviate significantly from this normal distribution. A simple generative
-model assumes that each observation is produced by one of two
-distributions: <span class="math display">\[x(t) \sim
+<p>While this formulation focuses on images, anomaly detection is often studied in a more general setting where observations are collected over time. Consider a set of data samples represented as <span class="math inline">\(\{x(t)\}_{t=t_0}^{T}\)</span>, where each observation <span class="math inline">\(x(t) \in \mathbb{R}^d\)</span>. These samples are assumed to be generated by an underlying probabilistic process. In the normal case, data are drawn from a distribution <span class="math inline">\(\phi_0\)</span>, which represents typical or expected behavior.</p>
+<p>Anomaly detection then reduces to identifying observations that deviate significantly from this normal distribution. A simple generative model assumes that each observation is produced by one of two distributions: <span class="math display">\[x(t) \sim
   \begin{cases}
     \phi_0, &amp; \text{if $x(t)$ belongs to normal data},\\
     \phi_1, &amp; \text{if $x(t)$ belongs to anomalous data}.
   \end{cases}\]</span></p>
-<p>Under this perspective, anomaly detection becomes the task of
-distinguishing samples generated by the normal distribution <span class="math inline">\(\phi_0\)</span> from those generated by an
-alternative distribution <span class="math inline">\(\phi_1\)</span>.
-This probabilistic view unifies anomaly detection across images, time
-series, and high-dimensional data.</p>
-<h2 data-number="2.4" id="anomaly-detection-in-a-statistical-framework"><span class="header-section-number">2.4</span> Anomaly Detection in a
-Statistical Framework</h2>
-<p>A classical approach to anomaly detection is based on statistical
-hypothesis testing. The core idea is to monitor data using a
-<em>statistic</em> that behaves predictably under normal conditions and
-to trigger an alarm when the statistic deviates significantly from this
-expected behavior.</p>
-<p>In this framework, anomaly detection consists of two fundamental
-components: (1) a statistic that summarizes the behavior of the data,
-and (2) a decision rule that determines whether the observed behavior is
-considered normal or anomalous.</p>
-<p>Figure <a data-reference="fig:anomaly_timeseries_process" data-reference-type="ref" href="#fig:anomaly_timeseries_process">3</a> illustrates this
-idea for a time-series signal: most observations are generated by a
-normal process <span class="math inline">\(\phi_0\)</span>, while
-occasional samples arise from an anomalous process <span class="math inline">\(\phi_1\)</span>.</p>
-<figure id="fig:anomaly_timeseries_process">
-<img src="img/lecture24/Picture3.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Process of detecting anomalies in a time-series signal <span class="math inline">\(x(t)\)</span></figcaption>
+<p>Under this perspective, anomaly detection becomes the task of distinguishing samples generated by the normal distribution <span class="math inline">\(\phi_0\)</span> from those generated by an alternative distribution <span class="math inline">\(\phi_1\)</span>. This probabilistic view unifies anomaly detection across images, time series, and high-dimensional data.</p>
+<h2 data-number="2.4" id="anomaly-detection-in-a-statistical-framework"><span class="header-section-number">2.4</span> Anomaly Detection in a Statistical Framework</h2>
+<p>A classical approach to anomaly detection is based on statistical hypothesis testing. The core idea is to monitor data using a <em>statistic</em> that behaves predictably under normal conditions and to trigger an alarm when the statistic deviates significantly from this expected behavior.</p>
+<p>In this framework, anomaly detection consists of two fundamental components: (1) a statistic that summarizes the behavior of the data, and (2) a decision rule that determines whether the observed behavior is considered normal or anomalous.</p>
+<p>Figure <a data-reference="fig:anomaly_timeseries_process" data-reference-type="ref" href="#fig:anomaly_timeseries_process">3</a> illustrates this idea for a time-series signal: most observations are generated by a normal process <span class="math inline">\(\phi_0\)</span>, while occasional samples arise from an anomalous process <span class="math inline">\(\phi_1\)</span>.</p>
+<figure>
+<img alt="Process of detecting anomalies in a time-series signal x(t)" id="fig:anomaly_timeseries_process" src="img/lecture24/Picture3.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Process of detecting anomalies in a time-series signal <span class="math inline">\(x(t)\)</span></figcaption>
 </figure>
 <h3 data-number="2.4.1" id="statistics"><span class="header-section-number">2.4.1</span> Statistics</h3>
-<p>A <em>statistic</em> is a numerical quantity computed from data that
-summarizes its behavior. Under normal operating conditions, the
-statistic follows a predictable distribution, and significant deviations
-from this expected behavior may indicate anomalous data.</p>
-<p>Typical statistics used in anomaly detection include the sample mean
-or moving average, the sample variance or signal energy, log-likelihood
-values under a probabilistic model, classifier confidence scores, and
-learned <em>anomaly scores</em> designed specifically to highlight
-deviations from normal patterns.</p>
-<p>The key objective is to select a statistic that remains stable for
-normal data while being sensitive to unusual or unexpected
-observations.</p>
+<p>A <em>statistic</em> is a numerical quantity computed from data that summarizes its behavior. Under normal operating conditions, the statistic follows a predictable distribution, and significant deviations from this expected behavior may indicate anomalous data.</p>
+<p>Typical statistics used in anomaly detection include the sample mean or moving average, the sample variance or signal energy, log-likelihood values under a probabilistic model, classifier confidence scores, and learned <em>anomaly scores</em> designed specifically to highlight deviations from normal patterns.</p>
+<p>The key objective is to select a statistic that remains stable for normal data while being sensitive to unusual or unexpected observations.</p>
 <h3 data-number="2.4.2" id="decision-rule"><span class="header-section-number">2.4.2</span> Decision Rule</h3>
-<p>The <em>decision rule</em> converts the statistic into a binary
-decision: <span class="math display">\[\text{Normal} \quad \text{vs.}
-\quad \text{Anomalous}.\]</span> This is typically done by comparing the
-statistic to a threshold or confidence region derived from normal
-data.</p>
+<p>The <em>decision rule</em> converts the statistic into a binary decision: <span class="math display">\[\text{Normal} \quad \text{vs.} \quad \text{Anomalous}.\]</span> This is typically done by comparing the statistic to a threshold or confidence region derived from normal data.</p>
 <p>Two common decision strategies are:</p>
 <ul>
-<li><p><strong>Threshold-based detection:</strong> An observation is
-flagged as anomalous if the statistic exceeds a threshold <span class="math inline">\(\gamma\)</span>, i.e., <span class="math display">\[S(x) &gt; \gamma.\]</span></p></li>
-<li><p><strong>Confidence-region detection:</strong> Normal data are
-assumed to lie within a region of high probability under the normal
-model. Observations outside this region are considered
-anomalies.</p></li>
+<li><p><strong>Threshold-based detection:</strong> An observation is flagged as anomalous if the statistic exceeds a threshold <span class="math inline">\(\gamma\)</span>, i.e., <span class="math display">\[S(x) &gt; \gamma.\]</span></p></li>
+<li><p><strong>Confidence-region detection:</strong> Normal data are assumed to lie within a region of high probability under the normal model. Observations outside this region are considered anomalies.</p></li>
 </ul>
-<p>Figure <a data-reference="fig:statistical_anomaly_detection" data-reference-type="ref" href="#fig:statistical_anomaly_detection">4</a> illustrates the
-<em>threshold-based detection</em> strategy. As the statistic evolves
-over time, an anomaly is declared when it crosses the decision threshold
-<span class="math inline">\(\gamma\)</span>.</p>
-<figure id="fig:statistical_anomaly_detection">
-<img src="img/lecture24/Picture4.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Threshold-based anomaly detection: an evolving statistic
-crosses the decision threshold <span class="math inline">\(\gamma\)</span>, triggering an anomaly
-alarm.</figcaption>
+<p>Figure <a data-reference="fig:statistical_anomaly_detection" data-reference-type="ref" href="#fig:statistical_anomaly_detection">4</a> illustrates the <em>threshold-based detection</em> strategy. As the statistic evolves over time, an anomaly is declared when it crosses the decision threshold <span class="math inline">\(\gamma\)</span>.</p>
+<figure>
+<img alt="Threshold-based anomaly detection: an evolving statistic crosses the decision threshold \gamma, triggering an anomaly alarm." id="fig:statistical_anomaly_detection" src="img/lecture24/Picture4.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Threshold-based anomaly detection: an evolving statistic crosses the decision threshold <span class="math inline">\(\gamma\)</span>, triggering an anomaly alarm.</figcaption>
 </figure>
 <h2 data-number="2.5" id="performance-metrics"><span class="header-section-number">2.5</span> Performance Metrics</h2>
-<p>When applying anomaly detection, it is essential to clearly define
-the evaluation objective. In many real-world scenarios, anomaly
-detection is formulated as a <strong>binary classification
-problem</strong> in which each sample is classified as either
-<em>normal</em> or <em>anomalous</em>. In contrast to standard
-classification settings, anomaly detection typically involves
-<strong>extreme class imbalance</strong>, since anomalous events are
-rare compared to normal observations. As a result, accuracy alone is
-often insufficient, and specialized metrics are required to properly
-evaluate performance.</p>
-<h3 data-number="2.5.1" id="true-positive-rate-and-false-positive-rate"><span class="header-section-number">2.5.1</span> True Positive Rate and False
-Positive Rate</h3>
-<p>Two fundamental performance measures are the <strong>True Positive
-Rate (TPR)</strong> and the <strong>False Positive Rate
-(FPR)</strong>.</p>
-<p>The <strong>True Positive Rate</strong> measures how many anomalies
-are correctly detected:</p>
-<p><span class="math display">\[\text{TPR} = \frac{\text{number of
-anomalies correctly detected}}
+<p>When applying anomaly detection, it is essential to clearly define the evaluation objective. In many real-world scenarios, anomaly detection is formulated as a <strong>binary classification problem</strong> in which each sample is classified as either <em>normal</em> or <em>anomalous</em>. In contrast to standard classification settings, anomaly detection typically involves <strong>extreme class imbalance</strong>, since anomalous events are rare compared to normal observations. As a result, accuracy alone is often insufficient, and specialized metrics are required to properly evaluate performance.</p>
+<h3 data-number="2.5.1" id="true-positive-rate-and-false-positive-rate"><span class="header-section-number">2.5.1</span> True Positive Rate and False Positive Rate</h3>
+<p>Two fundamental performance measures are the <strong>True Positive Rate (TPR)</strong> and the <strong>False Positive Rate (FPR)</strong>.</p>
+<p>The <strong>True Positive Rate</strong> measures how many anomalies are correctly detected:</p>
+<p><span class="math display">\[\text{TPR} = \frac{\text{number of anomalies correctly detected}}
 {\text{total number of anomalies}}\]</span></p>
-<p>TPR is also known as <em>recall</em>, <em>sensitivity</em>, or the
-<em>hit rate</em>. It reflects the ability of the algorithm to
-successfully identify anomalous samples.</p>
-<p>The <strong>False Positive Rate</strong> measures how often normal
-data are incorrectly flagged as anomalies:</p>
-<p><span class="math display">\[\text{FPR} = \frac{\text{number of
-normal samples incorrectly flagged as anomalies}}
+<p>TPR is also known as <em>recall</em>, <em>sensitivity</em>, or the <em>hit rate</em>. It reflects the ability of the algorithm to successfully identify anomalous samples.</p>
+<p>The <strong>False Positive Rate</strong> measures how often normal data are incorrectly flagged as anomalies:</p>
+<p><span class="math display">\[\text{FPR} = \frac{\text{number of normal samples incorrectly flagged as anomalies}}
 {\text{total number of normal samples}}\]</span></p>
-<p>A high FPR indicates many false alarms, which may be costly or
-disruptive in practice.</p>
-<p>From previous lectures, recall that the remaining related metrics
-are</p>
+<p>A high FPR indicates many false alarms, which may be costly or disruptive in practice.</p>
+<p>From previous lectures, recall that the remaining related metrics are</p>
 <p><span class="math display">\[\text{FNR} = 1 - \text{TPR}, \qquad
 \text{TNR} = 1 - \text{FPR}.\]</span></p>
 <p>We also define the <strong>precision on anomalies</strong> as</p>
@@ -340,556 +183,203 @@ are</p>
 \frac{\text{number of anomalies correctly detected}}
 {\text{total number of detected anomalies}}.\]</span></p>
 <h3 data-number="2.5.2" id="threshold-trade-off"><span class="header-section-number">2.5.2</span> Threshold Trade-off</h3>
-<p>Most anomaly detection systems rely on a decision threshold <span class="math inline">\(\gamma\)</span> applied to a statistic <span class="math inline">\(S(x)\)</span>. Changing this threshold directly
-affects performance.</p>
+<p>Most anomaly detection systems rely on a decision threshold <span class="math inline">\(\gamma\)</span> applied to a statistic <span class="math inline">\(S(x)\)</span>. Changing this threshold directly affects performance.</p>
 <ul>
-<li><p>Lower threshold <span class="math inline">\(\gamma\)</span>:
-increases TPR but may increase FPR (more false alarms).</p></li>
-<li><p>Higher threshold <span class="math inline">\(\gamma\)</span>:
-decreases FPR but may reduce TPR (more missed anomalies).</p></li>
+<li><p>Lower threshold <span class="math inline">\(\gamma\)</span>: increases TPR but may increase FPR (more false alarms).</p></li>
+<li><p>Higher threshold <span class="math inline">\(\gamma\)</span>: decreases FPR but may reduce TPR (more missed anomalies).</p></li>
 </ul>
-<p>Figure <a data-reference="fig:anomaly_threshold_tradeoff" data-reference-type="ref" href="#fig:anomaly_threshold_tradeoff">5</a> illustrates how
-changing the decision threshold affects detection.</p>
+<p>Figure <a data-reference="fig:anomaly_threshold_tradeoff" data-reference-type="ref" href="#fig:anomaly_threshold_tradeoff">5</a> illustrates how changing the decision threshold affects detection.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Sections 2–3 — ROC Curve, Threshold Trade-off &amp; Detection Methods</h3><p>Explore how the decision threshold γ controls TPR vs FPR, visualize the ROC curve and AUC, and compare distance-based, Isolation Forest, and density-based anomaly detection on 2D data.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Anomaly Detection: ROC, Threshold and Detection Methods"></iframe></section>
-<h3 data-number="2.5.3" id="combined-performance-metrics"><span class="header-section-number">2.5.3</span> Combined Performance
-Metrics</h3>
-<p>Because TPR and FPR capture different aspects of performance, it is
-common to use metrics that combine multiple quantities.</p>
+<h3 data-number="2.5.3" id="combined-performance-metrics"><span class="header-section-number">2.5.3</span> Combined Performance Metrics</h3>
+<p>Because TPR and FPR capture different aspects of performance, it is common to use metrics that combine multiple quantities.</p>
 <h4 data-number="2.5.3.1" id="accuracy"><span class="header-section-number">2.5.3.1</span> Accuracy</h4>
 <p><span class="math display">\[\text{Accuracy} =
 \frac{\text{TP} + \text{TN}}{\text{Total samples}}\]</span></p>
-<p>Accuracy measures overall correctness, but can be misleading when
-anomalies are rare.</p>
+<p>Accuracy measures overall correctness, but can be misleading when anomalies are rare.</p>
 <h4 data-number="2.5.3.2" id="f1-score"><span class="header-section-number">2.5.3.2</span> F1 Score</h4>
 <p><span class="math display">\[\text{F1} =
 \frac{2 \cdot \text{Precision} \cdot \text{Recall}}
 {\text{Precision} + \text{Recall}}\]</span></p>
-<p>The F1 score balances precision and recall and is widely used in
-anomaly detection because it accounts for both missed anomalies and
-false alarms.</p>
-<p>In an ideal detector, all anomalies are detected with no false
-positives, resulting in maximum values for both accuracy and F1
-score.</p>
-<h3 data-number="2.5.4" id="area-under-the-curve-auc"><span class="header-section-number">2.5.4</span> Area Under the Curve
-(AUC)</h3>
-<p>Comparing anomaly detection algorithms using a single threshold can
-be misleading, since different applications may require different
-trade-offs between missed anomalies and false alarms. To evaluate
-performance across all possible decision thresholds, we use the
-<em>Receiver Operating Characteristic (ROC) curve</em> <span class="citation" data-cites="4"></span>.</p>
-<p>The ROC curve plots the <em>True Positive Rate (TPR)</em> against the
-<em>False Positive Rate (FPR)</em> while sweeping the decision threshold
-<span class="math inline">\(\gamma\)</span>. Each point on the curve
-corresponds to a specific threshold choice.</p>
-<p>An ideal detector would achieve <span class="math display">\[\text{FPR} = 0, \qquad \text{TPR} = 1,\]</span>
-which corresponds to the top-left corner of the ROC plot. In practice, a
-detector is considered better when its ROC curve lies closer to this
-corner.</p>
-<p>The <em>Area Under the Curve (AUC)</em> summarizes the ROC curve into
-a single scalar value:</p>
+<p>The F1 score balances precision and recall and is widely used in anomaly detection because it accounts for both missed anomalies and false alarms.</p>
+<p>In an ideal detector, all anomalies are detected with no false positives, resulting in maximum values for both accuracy and F1 score.</p>
+<h3 data-number="2.5.4" id="area-under-the-curve-auc"><span class="header-section-number">2.5.4</span> Area Under the Curve (AUC)</h3>
+<p>Comparing anomaly detection algorithms using a single threshold can be misleading, since different applications may require different trade-offs between missed anomalies and false alarms. To evaluate performance across all possible decision thresholds, we use the <em>Receiver Operating Characteristic (ROC) curve</em> <span class="citation" data-cites="4"></span>.</p>
+<p>The ROC curve plots the <em>True Positive Rate (TPR)</em> against the <em>False Positive Rate (FPR)</em> while sweeping the decision threshold <span class="math inline">\(\gamma\)</span>. Each point on the curve corresponds to a specific threshold choice.</p>
+<p>An ideal detector would achieve <span class="math display">\[\text{FPR} = 0, \qquad \text{TPR} = 1,\]</span> which corresponds to the top-left corner of the ROC plot. In practice, a detector is considered better when its ROC curve lies closer to this corner.</p>
+<p>The <em>Area Under the Curve (AUC)</em> summarizes the ROC curve into a single scalar value:</p>
 <ul>
-<li><p>A higher AUC indicates better overall discrimination between
-normal and anomalous data.</p></li>
-<li><p>An AUC of <span class="math inline">\(1\)</span> represents
-perfect detection.</p></li>
-<li><p>An AUC of <span class="math inline">\(0.5\)</span> corresponds to
-random guessing.</p></li>
+<li><p>A higher AUC indicates better overall discrimination between normal and anomalous data.</p></li>
+<li><p>An AUC of <span class="math inline">\(1\)</span> represents perfect detection.</p></li>
+<li><p>An AUC of <span class="math inline">\(0.5\)</span> corresponds to random guessing.</p></li>
 </ul>
-<p>Figure <a data-reference="fig:roc_auc_anomaly" data-reference-type="ref" href="#fig:roc_auc_anomaly">6</a> shows ROC curves for several
-anomaly detection methods. Each curve corresponds to a different
-algorithm, and the associated AUC values allow direct quantitative
-comparison.</p>
+<p>Figure <a data-reference="fig:roc_auc_anomaly" data-reference-type="ref" href="#fig:roc_auc_anomaly">6</a> shows ROC curves for several anomaly detection methods. Each curve corresponds to a different algorithm, and the associated AUC values allow direct quantitative comparison.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Sections 2–3 — ROC Curve, Threshold Trade-off &amp; Detection Methods</h3><p>Explore how the decision threshold γ controls TPR vs FPR, visualize the ROC curve and AUC, and compare distance-based, Isolation Forest, and density-based anomaly detection on 2D data.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Anomaly Detection: ROC, Threshold and Detection Methods"></iframe></section>
-<p>Overall, ROC curves and AUC provide a robust and
-threshold-independent framework for evaluating and comparing anomaly
-detection algorithms.</p>
+<p>Overall, ROC curves and AUC provide a robust and threshold-independent framework for evaluating and comparing anomaly detection algorithms.</p>
 <h1 data-number="3" id="anomaly-detection-settings"><span class="header-section-number">3.</span> Anomaly Detection Settings</h1>
-<p>Anomaly detection can be formulated under three primary learning
-settings, depending on the availability of labeled data.</p>
-<p>In the <strong>semi-supervised</strong> setting, the training data
-consists primarily of normal examples, and the model learns a
-representation of normal behavior in order to flag deviations at test
-time.</p>
-<p>In the <strong>unsupervised</strong> setting, no labels are available
-at all; the algorithm must discover unusual patterns directly from the
-data distribution, which may contain a mixture of normal and anomalous
-samples.</p>
-<p>In the <strong>supervised</strong> setting, labeled examples of both
-normal and anomalous data are provided, allowing the task to be treated
-as a standard binary classification problem.</p>
-<h2 data-number="3.1" id="semi-supervised-anomaly-detection"><span class="header-section-number">3.1</span> Semi-supervised Anomaly
-Detection</h2>
-<p>Semi-supervised anomaly detection assumes that the training set
-contains primarily <em>normal</em> data. The goal is therefore to learn
-a model of normal behavior and detect deviations at test time.</p>
+<p>Anomaly detection can be formulated under three primary learning settings, depending on the availability of labeled data.</p>
+<p>In the <strong>semi-supervised</strong> setting, the training data consists primarily of normal examples, and the model learns a representation of normal behavior in order to flag deviations at test time.</p>
+<p>In the <strong>unsupervised</strong> setting, no labels are available at all; the algorithm must discover unusual patterns directly from the data distribution, which may contain a mixture of normal and anomalous samples.</p>
+<p>In the <strong>supervised</strong> setting, labeled examples of both normal and anomalous data are provided, allowing the task to be treated as a standard binary classification problem.</p>
+<h2 data-number="3.1" id="semi-supervised-anomaly-detection"><span class="header-section-number">3.1</span> Semi-supervised Anomaly Detection</h2>
+<p>Semi-supervised anomaly detection assumes that the training set contains primarily <em>normal</em> data. The goal is therefore to learn a model of normal behavior and detect deviations at test time.</p>
 <h3 data-number="3.1.1" id="context-and-assumptions"><span class="header-section-number">3.1.1</span> Context and Assumptions</h3>
-<p>Let the training set be <span class="math display">\[\mathcal{T}_R =
-\{x(t)\mid x(t)\sim \phi_0,\; t &lt; t_0\},\]</span> where <span class="math inline">\(\phi_0\)</span> denotes the distribution of normal
-data.</p>
-<p>This setting relies on several key assumptions. First, normal data
-are abundant and relatively easy to collect. In contrast, anomalous data
-are rare, costly, and difficult to label, making it unrealistic to
-obtain a representative set of all possible anomalies. Consequently, the
-training set may contain little or no anomalous data. For this reason,
-semi-supervised anomaly detection is often referred to as <em>novelty
-detection</em>.</p>
+<p>Let the training set be <span class="math display">\[\mathcal{T}_R = \{x(t)\mid x(t)\sim \phi_0,\; t &lt; t_0\},\]</span> where <span class="math inline">\(\phi_0\)</span> denotes the distribution of normal data.</p>
+<p>This setting relies on several key assumptions. First, normal data are abundant and relatively easy to collect. In contrast, anomalous data are rare, costly, and difficult to label, making it unrealistic to obtain a representative set of all possible anomalies. Consequently, the training set may contain little or no anomalous data. For this reason, semi-supervised anomaly detection is often referred to as <em>novelty detection</em>.</p>
 <h3 data-number="3.1.2" id="density-based-detection"><span class="header-section-number">3.1.2</span> Density-based Detection</h3>
-<p>A natural strategy is to model what <em>normal data look like</em>
-and treat unlikely observations as anomalies. This leads to
-density-based methods, which estimate the probability density of normal
-data and monitor how likely new observations are under this model.</p>
+<p>A natural strategy is to model what <em>normal data look like</em> and treat unlikely observations as anomalies. This leads to density-based methods, which estimate the probability density of normal data and monitor how likely new observations are under this model.</p>
 <h4 data-number="3.1.2.1" id="training-phase."><span class="header-section-number">3.1.2.1</span> Training phase.</h4>
-<p>Estimate the probability density function <span class="math inline">\(\phi_0\)</span> using the normal training data. A
-typical choice is a Gaussian Mixture Model (GMM), which represents the
-distribution as a weighted combination of Gaussian components <span class="citation" data-cites="2"></span>.</p>
+<p>Estimate the probability density function <span class="math inline">\(\phi_0\)</span> using the normal training data. A typical choice is a Gaussian Mixture Model (GMM), which represents the distribution as a weighted combination of Gaussian components <span class="citation" data-cites="2"></span>.</p>
 <h4 data-number="3.1.2.2" id="testing-phase."><span class="header-section-number">3.1.2.2</span> Testing phase.</h4>
-<p>For each incoming sample, compute its log-likelihood under the
-learned model: <span class="math display">\[L(x(t))=\log
-\phi_0(x(t)).\]</span> The sequence <span class="math inline">\(\{L(x(t))\}_{t=1}^{\infty}\)</span> is then
-monitored over time. Samples with unusually low likelihood are flagged
-as anomalies.</p>
+<p>For each incoming sample, compute its log-likelihood under the learned model: <span class="math display">\[L(x(t))=\log \phi_0(x(t)).\]</span> The sequence <span class="math inline">\(\{L(x(t))\}_{t=1}^{\infty}\)</span> is then monitored over time. Samples with unusually low likelihood are flagged as anomalies.</p>
 <p>In practice, this is implemented by comparing <span class="math inline">\(L(x(t))\)</span> to a threshold <span class="math inline">\(\gamma\)</span>, declaring an anomaly when <span class="math inline">\(L(x(t)) &lt; \gamma\)</span>.</p>
-<p>If anomalous data receive high likelihood under the model, this
-indicates that the chosen statistic or density model is not sufficiently
-discriminative.</p>
-<h3 data-number="3.1.3" id="advantages-and-limitations"><span class="header-section-number">3.1.3</span> Advantages and
-Limitations</h3>
+<p>If anomalous data receive high likelihood under the model, this indicates that the chosen statistic or density model is not sufficiently discriminative.</p>
+<h3 data-number="3.1.3" id="advantages-and-limitations"><span class="header-section-number">3.1.3</span> Advantages and Limitations</h3>
 <h4 data-number="3.1.3.1" id="advantages."><span class="header-section-number">3.1.3.1</span> Advantages.</h4>
-<p>The learned density <span class="math inline">\(\phi_0\)</span>
-provides a probabilistic confidence measure, analogous to a p-value.
-Robust estimators can tolerate a small fraction of anomalies in the
-training set.</p>
+<p>The learned density <span class="math inline">\(\phi_0\)</span> provides a probabilistic confidence measure, analogous to a p-value. Robust estimators can tolerate a small fraction of anomalies in the training set.</p>
 <h4 data-number="3.1.3.2" id="limitations."><span class="header-section-number">3.1.3.2</span> Limitations.</h4>
-<p>Density estimation becomes challenging in high-dimensional spaces due
-to the curse of dimensionality, leading to high computational cost and
-risk of overfitting <span class="citation" data-cites="2"></span>.</p>
-<h2 data-number="3.2" id="unsupervised-anomaly-detection"><span class="header-section-number">3.2</span> Unsupervised Anomaly
-Detection</h2>
-<p>Unsupervised anomaly detection assumes that no labels are available
-during training. In contrast to semi-supervised settings, the training
-set may contain both normal and anomalous samples, but their identities
-are unknown. The goal is therefore to identify observations that deviate
-from the dominant structure of the data without prior knowledge of what
-constitutes an anomaly.</p>
+<p>Density estimation becomes challenging in high-dimensional spaces due to the curse of dimensionality, leading to high computational cost and risk of overfitting <span class="citation" data-cites="2"></span>.</p>
+<h2 data-number="3.2" id="unsupervised-anomaly-detection"><span class="header-section-number">3.2</span> Unsupervised Anomaly Detection</h2>
+<p>Unsupervised anomaly detection assumes that no labels are available during training. In contrast to semi-supervised settings, the training set may contain both normal and anomalous samples, but their identities are unknown. The goal is therefore to identify observations that deviate from the dominant structure of the data without prior knowledge of what constitutes an anomaly.</p>
 <h3 data-number="3.2.1" id="context-and-assumptions-1"><span class="header-section-number">3.2.1</span> Context and Assumptions</h3>
-<p>Let the training set be <span class="math display">\[\mathcal{T}_R =
-\{x(t) \mid t &lt; t_0\},\]</span> where <span class="math inline">\(x(t)\)</span> denotes an observation collected at
-time <span class="math inline">\(t\)</span>.</p>
-<p>In this setting, both normal and anomalous samples may be present in
-<span class="math inline">\(\mathcal{T}_R\)</span>, but no labels are
-provided. A central assumption underlying most unsupervised methods is
-that anomalies are rare relative to normal data. Consequently, the
-majority of observations reflect regular behavior, while anomalies
-appear as statistical or structural deviations from this majority.</p>
-<p>Because no labeled validation data are available, many unsupervised
-algorithms produce continuous <em>anomaly scores</em> rather than binary
-decisions. Final anomaly labels are obtained by applying a threshold to
-these scores, making unsupervised anomaly detection naturally formulated
-as a ranking problem.</p>
+<p>Let the training set be <span class="math display">\[\mathcal{T}_R = \{x(t) \mid t &lt; t_0\},\]</span> where <span class="math inline">\(x(t)\)</span> denotes an observation collected at time <span class="math inline">\(t\)</span>.</p>
+<p>In this setting, both normal and anomalous samples may be present in <span class="math inline">\(\mathcal{T}_R\)</span>, but no labels are provided. A central assumption underlying most unsupervised methods is that anomalies are rare relative to normal data. Consequently, the majority of observations reflect regular behavior, while anomalies appear as statistical or structural deviations from this majority.</p>
+<p>Because no labeled validation data are available, many unsupervised algorithms produce continuous <em>anomaly scores</em> rather than binary decisions. Final anomaly labels are obtained by applying a threshold to these scores, making unsupervised anomaly detection naturally formulated as a ranking problem.</p>
 <h3 data-number="3.2.2" id="detection-strategies"><span class="header-section-number">3.2.2</span> Detection Strategies</h3>
-<p>Without labeled normal data, the strategy shifts from explicitly
-modeling normality to identifying structural irregularities in the
-dataset. Broadly speaking, unsupervised methods rely on one of the
-following principles:</p>
-<p>Normal data tend to cluster together, occupy dense regions of the
-feature space, and require many operations to isolate. In contrast,
-anomalous samples often lie far from dense clusters, reside in sparse
-regions, or are easier to separate from the rest of the data.</p>
+<p>Without labeled normal data, the strategy shifts from explicitly modeling normality to identifying structural irregularities in the dataset. Broadly speaking, unsupervised methods rely on one of the following principles:</p>
+<p>Normal data tend to cluster together, occupy dense regions of the feature space, and require many operations to isolate. In contrast, anomalous samples often lie far from dense clusters, reside in sparse regions, or are easier to separate from the rest of the data.</p>
 <p>We discuss two widely used approaches below.</p>
 <h3 data-number="3.2.3" id="distance-based-methods"><span class="header-section-number">3.2.3</span> Distance-Based Methods</h3>
-<p>Distance-based methods assume that normal observations lie in dense
-neighborhoods, whereas anomalies are relatively distant from their
-nearest neighbors.</p>
-<figure id="fig:distance_based">
-<img src="img/lecture24/Picture1.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Distance-based anomaly detection: anomalies lie far from
-dense clusters.</figcaption>
+<p>Distance-based methods assume that normal observations lie in dense neighborhoods, whereas anomalies are relatively distant from their nearest neighbors.</p>
+<figure>
+<img alt="Distance-based anomaly detection: anomalies lie far from dense clusters." id="fig:distance_based" src="img/lecture24/Picture1.png" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Distance-based anomaly detection: anomalies lie far from dense clusters.</figcaption>
 </figure>
-<p>Under this approach, each data point is assigned an anomaly score
-based on its distance to nearby samples.</p>
+<p>Under this approach, each data point is assigned an anomaly score based on its distance to nearby samples.</p>
 <h4 data-number="3.2.3.1" id="algorithm-overview."><span class="header-section-number">3.2.3.1</span> Algorithm overview.</h4>
 <ol>
 <li><p>For each data point, compute its distance to the <span class="math inline">\(k\)</span> nearest neighbors.</p></li>
 <li><p>Estimate local sparsity by aggregating these distances.</p></li>
-<li><p>Assign larger anomaly scores to points with unusually large
-distances.</p></li>
+<li><p>Assign larger anomaly scores to points with unusually large distances.</p></li>
 <li><p>Declare anomalies by thresholding the resulting scores.</p></li>
 </ol>
-<p>The performance of distance-based methods depends strongly on the
-choice of distance metric and the parameter <span class="math inline">\(k\)</span>. These approaches may become
-computationally expensive for large datasets and can suffer in
-high-dimensional spaces where distances become less informative.</p>
+<p>The performance of distance-based methods depends strongly on the choice of distance metric and the parameter <span class="math inline">\(k\)</span>. These approaches may become computationally expensive for large datasets and can suffer in high-dimensional spaces where distances become less informative.</p>
 <h3 data-number="3.2.4" id="isolation-forest"><span class="header-section-number">3.2.4</span> Isolation Forest</h3>
-<p>Isolation Forest adopts a different perspective based on the
-observation that anomalies are both rare and different, making them
-easier to isolate <span class="citation" data-cites="3"></span>.</p>
-<p>Instead of measuring distances or densities, the algorithm constructs
-an ensemble of randomly generated binary trees that recursively
-partition the feature space. Because anomalous samples are unusual, they
-tend to be isolated in fewer partitioning steps than normal data
-points.</p>
-<figure id="fig:isolation_forest">
-<img src="img/lecture24/Picture8.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Isolation Forest: anomalies are isolated in fewer
-splits.</figcaption>
+<p>Isolation Forest adopts a different perspective based on the observation that anomalies are both rare and different, making them easier to isolate <span class="citation" data-cites="3"></span>.</p>
+<p>Instead of measuring distances or densities, the algorithm constructs an ensemble of randomly generated binary trees that recursively partition the feature space. Because anomalous samples are unusual, they tend to be isolated in fewer partitioning steps than normal data points.</p>
+<figure>
+<img alt="Isolation Forest: anomalies are isolated in fewer splits." id="fig:isolation_forest" src="img/lecture24/Picture8.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Isolation Forest: anomalies are isolated in fewer splits.</figcaption>
 </figure>
 <h4 data-number="3.2.4.1" id="algorithm-overview.-1"><span class="header-section-number">3.2.4.1</span> Algorithm overview.</h4>
 <ol>
-<li><p>Randomly select a feature and a split value within its
-range.</p></li>
+<li><p>Randomly select a feature and a split value within its range.</p></li>
 <li><p>Recursively partition the data to form isolation trees.</p></li>
 <li><p>Measure the path length required to isolate each sample.</p></li>
-<li><p>Assign higher anomaly scores to samples with shorter path
-lengths.</p></li>
+<li><p>Assign higher anomaly scores to samples with shorter path lengths.</p></li>
 </ol>
-<p>Isolation Forest is computationally efficient, scales well to
-high-dimensional datasets, and requires relatively few assumptions about
-the underlying data distribution.</p>
-<h3 data-number="3.2.5" id="advantages-and-limitations-1"><span class="header-section-number">3.2.5</span> Advantages and
-Limitations</h3>
+<p>Isolation Forest is computationally efficient, scales well to high-dimensional datasets, and requires relatively few assumptions about the underlying data distribution.</p>
+<h3 data-number="3.2.5" id="advantages-and-limitations-1"><span class="header-section-number">3.2.5</span> Advantages and Limitations</h3>
 <h4 data-number="3.2.5.1" id="advantages.-1"><span class="header-section-number">3.2.5.1</span> Advantages.</h4>
-<p>Unsupervised methods do not require labeled data, making them
-practical in domains where anomalies are rare or difficult to annotate.
-They are flexible and can be applied across a wide range of
-applications, including cybersecurity, industrial monitoring, and
-financial fraud detection.</p>
+<p>Unsupervised methods do not require labeled data, making them practical in domains where anomalies are rare or difficult to annotate. They are flexible and can be applied across a wide range of applications, including cybersecurity, industrial monitoring, and financial fraud detection.</p>
 <h4 data-number="3.2.5.2" id="limitations.-1"><span class="header-section-number">3.2.5.2</span> Limitations.</h4>
-<p>Because no labels are available, model selection and hyperparameter
-tuning are more challenging than in supervised settings. Many methods
-rely on the assumption that anomalies are rare, which may not always
-hold. In addition, high-dimensional data can degrade performance due to
-the curse of dimensionality. Finally, interpreting anomaly scores and
-explaining why a sample is considered anomalous remains a significant
-challenge.</p>
+<p>Because no labels are available, model selection and hyperparameter tuning are more challenging than in supervised settings. Many methods rely on the assumption that anomalies are rare, which may not always hold. In addition, high-dimensional data can degrade performance due to the curse of dimensionality. Finally, interpreting anomaly scores and explaining why a sample is considered anomalous remains a significant challenge.</p>
 <h1 data-number="4" id="statistical-methods"><span class="header-section-number">4.</span> Statistical Methods</h1>
-<p>Image-based anomaly detection aims to identify regions of an image
-that deviate from expected visual patterns. In many practical
-applications, anomalies are localized rather than global. For example, a
-manufacturing defect may appear as a small scratch on a surface, and a
-medical abnormality may occupy only a small region of a scan. Treating
-the entire image as a single data point may therefore hide subtle but
-important irregularities.</p>
-<p>To address this limitation, statistical approaches often operate at
-the level of <em>image patches</em>. By analyzing smaller regions
-independently, the model can detect localized deviations while still
-capturing the global distribution of normal visual patterns.</p>
+<p>Image-based anomaly detection aims to identify regions of an image that deviate from expected visual patterns. In many practical applications, anomalies are localized rather than global. For example, a manufacturing defect may appear as a small scratch on a surface, and a medical abnormality may occupy only a small region of a scan. Treating the entire image as a single data point may therefore hide subtle but important irregularities.</p>
+<p>To address this limitation, statistical approaches often operate at the level of <em>image patches</em>. By analyzing smaller regions independently, the model can detect localized deviations while still capturing the global distribution of normal visual patterns.</p>
 <h2 data-number="4.1" id="patch-based-image-analysis"><span class="header-section-number">4.1</span> Patch-based Image Analysis</h2>
-<p>Patch-based image analysis divides each image into smaller regions,
-called <em>patches</em>. These patches may be non-overlapping or
-overlapping depending on the desired spatial resolution. Each patch is
-treated as an individual sample drawn from the distribution of normal
-image regions.</p>
-<p>This approach converts the anomaly detection problem into a
-statistical density estimation task: learn the distribution of normal
-patches during training, and identify patches that are unlikely under
-this learned distribution during testing.</p>
+<p>Patch-based image analysis divides each image into smaller regions, called <em>patches</em>. These patches may be non-overlapping or overlapping depending on the desired spatial resolution. Each patch is treated as an individual sample drawn from the distribution of normal image regions.</p>
+<p>This approach converts the anomaly detection problem into a statistical density estimation task: learn the distribution of normal patches during training, and identify patches that are unlikely under this learned distribution during testing.</p>
 <h3 data-number="4.1.1" id="training-process"><span class="header-section-number">4.1.1</span> Training Process</h3>
-<p>During training, the model observes only normal images and learns the
-statistical distribution of their patches.</p>
+<p>During training, the model observes only normal images and learns the statistical distribution of their patches.</p>
 <ol>
-<li><p>Normal training images are divided into patches <span class="math inline">\(s\)</span> of fixed size (for example <span class="math inline">\(4\times4\)</span> or <span class="math inline">\(8\times8\)</span> pixels). Each patch is reshaped
-into a feature vector.</p></li>
-<li><p>The distribution of normal patches is modeled using a
-multivariate Gaussian distribution <span class="math display">\[\phi_0(s) = \mathcal{N}(\mu,\Sigma),\]</span>
-where <span class="math inline">\(\mu\)</span> is the mean vector and
-<span class="math inline">\(\Sigma\)</span> is the covariance matrix
-estimated from all normal training patches.</p></li>
-<li><p>The learned distribution <span class="math inline">\(\phi_0\)</span> provides a probabilistic model of
-what normal image regions look like and allows us to evaluate how likely
-a new patch is under normal conditions.</p></li>
+<li><p>Normal training images are divided into patches <span class="math inline">\(s\)</span> of fixed size (for example <span class="math inline">\(4\times4\)</span> or <span class="math inline">\(8\times8\)</span> pixels). Each patch is reshaped into a feature vector.</p></li>
+<li><p>The distribution of normal patches is modeled using a multivariate Gaussian distribution <span class="math display">\[\phi_0(s) = \mathcal{N}(\mu,\Sigma),\]</span> where <span class="math inline">\(\mu\)</span> is the mean vector and <span class="math inline">\(\Sigma\)</span> is the covariance matrix estimated from all normal training patches.</p></li>
+<li><p>The learned distribution <span class="math inline">\(\phi_0\)</span> provides a probabilistic model of what normal image regions look like and allows us to evaluate how likely a new patch is under normal conditions.</p></li>
 </ol>
 <h3 data-number="4.1.2" id="testing-process"><span class="header-section-number">4.1.2</span> Testing Process</h3>
-<p>During inference, new images are analyzed patch-by-patch and compared
-to the learned normal distribution.</p>
+<p>During inference, new images are analyzed patch-by-patch and compared to the learned normal distribution.</p>
 <ol>
-<li><p>Each test image is divided into patches using the same procedure
-as in training.</p></li>
-<li><p>For every patch <span class="math inline">\(s\)</span>, the
-likelihood <span class="math inline">\(\phi_0(s)\)</span> (or
-equivalently the log-likelihood <span class="math inline">\(\log\phi_0(s)\)</span>) is computed.</p></li>
-<li><p>Patches whose likelihood falls below a predefined threshold are
-classified as anomalous.</p></li>
+<li><p>Each test image is divided into patches using the same procedure as in training.</p></li>
+<li><p>For every patch <span class="math inline">\(s\)</span>, the likelihood <span class="math inline">\(\phi_0(s)\)</span> (or equivalently the log-likelihood <span class="math inline">\(\log\phi_0(s)\)</span>) is computed.</p></li>
+<li><p>Patches whose likelihood falls below a predefined threshold are classified as anomalous.</p></li>
 </ol>
-<p>By aggregating anomaly scores across patches, a heatmap can be
-produced that highlights anomalous regions within the image.</p>
+<p>By aggregating anomaly scores across patches, a heatmap can be produced that highlights anomalous regions within the image.</p>
 <h3 data-number="4.1.3" id="challenges"><span class="header-section-number">4.1.3</span> Challenges</h3>
-<p>Although conceptually simple, patch-based Gaussian modeling faces
-several practical challenges.</p>
-<p>First, increasing the patch size dramatically increases the
-dimensionality of the feature space. A patch of size <span class="math inline">\(k\times k\)</span> produces a <span class="math inline">\(k^2\)</span>-dimensional vector, making covariance
-estimation difficult and computationally expensive. This phenomenon is a
-manifestation of the <em>curse of dimensionality</em>.</p>
-<p>Second, neighboring patches in real images are not independent.
-Natural images contain spatial structure and correlations that simple
-Gaussian models fail to capture. Ignoring these dependencies can reduce
-detection accuracy.</p>
-<p>Finally, modeling raw pixel intensities assumes that pixel
-distributions are approximately Gaussian, which is often unrealistic.
-Modern approaches therefore extend this framework using learned feature
-representations from deep neural networks, which provide more robust and
-semantically meaningful patch descriptors.</p>
-<h2 data-number="4.2" id="adjacent-pixel-value-distribution"><span class="header-section-number">4.2</span> Adjacent Pixel-value
-Distribution</h2>
-<p>While patch-based Gaussian modeling treats each patch as a vector of
-pixel intensities, it often ignores an important property of natural
-images: <em>spatial correlation</em>. Adjacent pixels in real-world
-images are not independent. Instead, they exhibit strong dependencies
-due to smooth transitions, edges, textures, and structured patterns.</p>
-<p>Understanding these spatial relationships is crucial for effective
-anomaly detection, as anomalies often disrupt the natural correlation
-structure of an image.</p>
-<h3 data-number="4.2.1" id="correlation-in-spatial-data"><span class="header-section-number">4.2.1</span> Correlation in Spatial
-Data</h3>
-<p>In natural images, neighboring pixel intensities tend to vary
-gradually rather than abruptly. This smoothness creates strong
-correlations between adjacent pixels. For example, in a uniform region,
-neighboring pixels typically have similar intensity values, while along
-edges, structured directional changes appear.</p>
-<p>Modeling such dependencies using simple probabilistic
-assumptions—such as a multivariate Gaussian distribution with
-independent components—is often insufficient. Even when covariance
-matrices are included, Gaussian models may struggle to capture the
-complex, nonlinear relationships present in spatial image data.</p>
+<p>Although conceptually simple, patch-based Gaussian modeling faces several practical challenges.</p>
+<p>First, increasing the patch size dramatically increases the dimensionality of the feature space. A patch of size <span class="math inline">\(k\times k\)</span> produces a <span class="math inline">\(k^2\)</span>-dimensional vector, making covariance estimation difficult and computationally expensive. This phenomenon is a manifestation of the <em>curse of dimensionality</em>.</p>
+<p>Second, neighboring patches in real images are not independent. Natural images contain spatial structure and correlations that simple Gaussian models fail to capture. Ignoring these dependencies can reduce detection accuracy.</p>
+<p>Finally, modeling raw pixel intensities assumes that pixel distributions are approximately Gaussian, which is often unrealistic. Modern approaches therefore extend this framework using learned feature representations from deep neural networks, which provide more robust and semantically meaningful patch descriptors.</p>
+<h2 data-number="4.2" id="adjacent-pixel-value-distribution"><span class="header-section-number">4.2</span> Adjacent Pixel-value Distribution</h2>
+<p>While patch-based Gaussian modeling treats each patch as a vector of pixel intensities, it often ignores an important property of natural images: <em>spatial correlation</em>. Adjacent pixels in real-world images are not independent. Instead, they exhibit strong dependencies due to smooth transitions, edges, textures, and structured patterns.</p>
+<p>Understanding these spatial relationships is crucial for effective anomaly detection, as anomalies often disrupt the natural correlation structure of an image.</p>
+<h3 data-number="4.2.1" id="correlation-in-spatial-data"><span class="header-section-number">4.2.1</span> Correlation in Spatial Data</h3>
+<p>In natural images, neighboring pixel intensities tend to vary gradually rather than abruptly. This smoothness creates strong correlations between adjacent pixels. For example, in a uniform region, neighboring pixels typically have similar intensity values, while along edges, structured directional changes appear.</p>
+<p>Modeling such dependencies using simple probabilistic assumptions—such as a multivariate Gaussian distribution with independent components—is often insufficient. Even when covariance matrices are included, Gaussian models may struggle to capture the complex, nonlinear relationships present in spatial image data.</p>
 <h3 data-number="4.2.2" id="statistical-insights"><span class="header-section-number">4.2.2</span> Statistical Insights</h3>
-<p>One way to visualize spatial dependencies is through histograms and
-scatter plots of adjacent pixel intensities. For instance, plotting the
-intensity of a pixel against that of its neighbor often reveals
-concentrated patterns along structured regions, reflecting underlying
-correlations.</p>
-<p>In normal images, these scatter plots exhibit consistent structures.
-Anomalies, however, tend to distort these patterns, appearing as
-deviations from the typical distribution of neighboring pixel
-values.</p>
-<p>This observation highlights a limitation of simple Gaussian patch
-models: as patch dimensionality increases, covariance estimation becomes
-unstable and insufficient to capture the full complexity of spatial
-dependencies, particularly in highly textured or structured regions.</p>
-<h3 data-number="4.2.3" id="implications-for-anomaly-detection"><span class="header-section-number">4.2.3</span> Implications for Anomaly
-Detection</h3>
-<p>Because pixel correlations encode important structural information,
-ignoring them can reduce detection sensitivity. Anomalies may not
-significantly change individual pixel intensities, but they can disrupt
-local spatial consistency.</p>
-<p>Effective anomaly detection methods therefore need to account for
-local pixel interactions. This motivates more advanced techniques—such
-as convolutional filters in neural networks—that explicitly model
-spatial structure and learn hierarchical representations of texture and
-shape.</p>
-<p>Incorporating adjacent pixel relationships enhances robustness and
-improves the ability to detect subtle, localized anomalies that may not
-be evident from independent pixel statistics alone.</p>
-<h2 data-number="4.3" id="maximum-softmax-probability-msp"><span class="header-section-number">4.3</span> Maximum Softmax Probability
-(MSP)</h2>
-<p>Maximum Softmax Probability (MSP) is a simple yet influential neural
-network–based technique for anomaly detection and out-of-distribution
-(OOD) detection. Rather than building a separate anomaly detector, MSP
-leverages the probability outputs of an existing classification model.
-The key intuition is that a well-trained classifier should produce
-confident predictions for in-distribution samples and lower confidence
-for unfamiliar or anomalous inputs <span class="citation" data-cites="6"></span>.</p>
-<figure id="fig:msp">
-<img src="img/lecture24/Picture10.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Using a trained convolutional neural network for anomaly
-detection via softmax confidence.</figcaption>
+<p>One way to visualize spatial dependencies is through histograms and scatter plots of adjacent pixel intensities. For instance, plotting the intensity of a pixel against that of its neighbor often reveals concentrated patterns along structured regions, reflecting underlying correlations.</p>
+<p>In normal images, these scatter plots exhibit consistent structures. Anomalies, however, tend to distort these patterns, appearing as deviations from the typical distribution of neighboring pixel values.</p>
+<p>This observation highlights a limitation of simple Gaussian patch models: as patch dimensionality increases, covariance estimation becomes unstable and insufficient to capture the full complexity of spatial dependencies, particularly in highly textured or structured regions.</p>
+<h3 data-number="4.2.3" id="implications-for-anomaly-detection"><span class="header-section-number">4.2.3</span> Implications for Anomaly Detection</h3>
+<p>Because pixel correlations encode important structural information, ignoring them can reduce detection sensitivity. Anomalies may not significantly change individual pixel intensities, but they can disrupt local spatial consistency.</p>
+<p>Effective anomaly detection methods therefore need to account for local pixel interactions. This motivates more advanced techniques—such as convolutional filters in neural networks—that explicitly model spatial structure and learn hierarchical representations of texture and shape.</p>
+<p>Incorporating adjacent pixel relationships enhances robustness and improves the ability to detect subtle, localized anomalies that may not be evident from independent pixel statistics alone.</p>
+<h2 data-number="4.3" id="maximum-softmax-probability-msp"><span class="header-section-number">4.3</span> Maximum Softmax Probability (MSP)</h2>
+<p>Maximum Softmax Probability (MSP) is a simple yet influential neural network–based technique for anomaly detection and out-of-distribution (OOD) detection. Rather than building a separate anomaly detector, MSP leverages the probability outputs of an existing classification model. The key intuition is that a well-trained classifier should produce confident predictions for in-distribution samples and lower confidence for unfamiliar or anomalous inputs <span class="citation" data-cites="6"></span>.</p>
+<figure>
+<img alt="Using a trained convolutional neural network for anomaly detection via softmax confidence." id="fig:msp" src="img/lecture24/Picture10.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Using a trained convolutional neural network for anomaly detection via softmax confidence.</figcaption>
 </figure>
 <h3 data-number="4.3.1" id="concept-and-motivation"><span class="header-section-number">4.3.1</span> Concept and Motivation</h3>
-<p>Modern neural networks trained for classification typically end with
-a <em>softmax layer</em> that converts logits into class probabilities:
-<span class="math display">\[p(y=c \mid x)=\frac{\exp(z_c)}{\sum_j
-\exp(z_j)}.\]</span> These probabilities represent the model’s
-confidence that an input belongs to each class.</p>
-<p>The central idea behind MSP is that the <em>maximum</em> softmax
-probability reflects the model’s confidence in its prediction: <span class="math display">\[\text{MSP}(x)=\max_c p(y=c\mid x).\]</span> For
-inputs drawn from the training distribution, the model typically assigns
-a high probability to one class. In contrast, anomalous or OOD inputs
-often lead to uncertain predictions, resulting in lower maximum softmax
-probabilities.</p>
-<p>Therefore, anomaly detection can be reframed as a <em>confidence
-estimation</em> problem.</p>
+<p>Modern neural networks trained for classification typically end with a <em>softmax layer</em> that converts logits into class probabilities: <span class="math display">\[p(y=c \mid x)=\frac{\exp(z_c)}{\sum_j \exp(z_j)}.\]</span> These probabilities represent the model’s confidence that an input belongs to each class.</p>
+<p>The central idea behind MSP is that the <em>maximum</em> softmax probability reflects the model’s confidence in its prediction: <span class="math display">\[\text{MSP}(x)=\max_c p(y=c\mid x).\]</span> For inputs drawn from the training distribution, the model typically assigns a high probability to one class. In contrast, anomalous or OOD inputs often lead to uncertain predictions, resulting in lower maximum softmax probabilities.</p>
+<p>Therefore, anomaly detection can be reframed as a <em>confidence estimation</em> problem.</p>
 <h3 data-number="4.3.2" id="methodology"><span class="header-section-number">4.3.2</span> Methodology</h3>
-<p>MSP performs anomaly detection by applying thresholding to the
-confidence score produced by the classifier. After training a model on
-in-distribution data, the maximum softmax probability is computed for
-each test sample. A threshold <span class="math inline">\(\gamma\)</span> is then chosen to separate normal
-and anomalous inputs: <span class="math display">\[\text{Declare anomaly
-if } \text{MSP}(x) &lt; \gamma.\]</span></p>
-<p>This procedure does not require retraining or modifying the
-classifier. Instead, anomaly detection is implemented as a lightweight
-post-processing step. In practice, the threshold is selected using
-validation data to balance false positives and false negatives.</p>
-<p>The method implicitly distinguishes between <em>in-distribution</em>
-and <em>out-of-distribution</em> samples. In-distribution inputs
-typically produce a peaked probability distribution dominated by one
-class, whereas OOD inputs tend to produce flatter distributions because
-the network has not learned representations for them.</p>
+<p>MSP performs anomaly detection by applying thresholding to the confidence score produced by the classifier. After training a model on in-distribution data, the maximum softmax probability is computed for each test sample. A threshold <span class="math inline">\(\gamma\)</span> is then chosen to separate normal and anomalous inputs: <span class="math display">\[\text{Declare anomaly if } \text{MSP}(x) &lt; \gamma.\]</span></p>
+<p>This procedure does not require retraining or modifying the classifier. Instead, anomaly detection is implemented as a lightweight post-processing step. In practice, the threshold is selected using validation data to balance false positives and false negatives.</p>
+<p>The method implicitly distinguishes between <em>in-distribution</em> and <em>out-of-distribution</em> samples. In-distribution inputs typically produce a peaked probability distribution dominated by one class, whereas OOD inputs tend to produce flatter distributions because the network has not learned representations for them.</p>
 <h3 data-number="4.3.3" id="advantages"><span class="header-section-number">4.3.3</span> Advantages</h3>
-<p>MSP is widely used because of its simplicity and practicality. It can
-be applied to any trained classifier without changing the training
-procedure or network architecture. This makes it computationally
-efficient and easy to deploy in real-world systems. The method is also
-model-agnostic and can be applied to convolutional networks,
-transformers, and other modern architectures.</p>
-<p>Despite its simplicity, MSP often provides a surprisingly strong
-baseline for OOD detection and is commonly used as a benchmark when
-evaluating more advanced methods.</p>
-<h3 data-number="4.3.4" id="limitations-and-challenges"><span class="header-section-number">4.3.4</span> Limitations and
-Challenges</h3>
-<p>Although effective, MSP has important limitations. Neural networks
-can be <em>overconfident</em> on unfamiliar inputs, sometimes assigning
-high softmax probabilities to samples that are clearly out of
-distribution. This phenomenon is related to the calibration of neural
-networks and their tendency to produce poorly calibrated probability
-estimates.</p>
-<p>Performance also depends strongly on the choice of threshold, which
-may vary across datasets and deployment environments. Furthermore, MSP
-relies solely on output probabilities and does not exploit internal
-feature representations of the network, which can contain richer
-information for anomaly detection.</p>
-<p>These limitations have motivated the development of more advanced
-techniques, such as temperature scaling, energy-based models, and
-feature-based OOD detection methods.</p>
-<h2 data-number="4.4" id="manifolds-in-natural-images"><span class="header-section-number">4.4</span> Manifolds in Natural
-Images</h2>
-<p>A fundamental insight underlying modern anomaly detection in vision
-is the <em>manifold hypothesis</em>. Although images are represented in
-very high-dimensional spaces—for example, a <span class="math inline">\(256\times256\)</span> RGB image lies in <span class="math inline">\(\mathbb{R}^{196{,}608}\)</span>—natural images do
-not occupy this space uniformly. Instead, they concentrate near a much
-lower-dimensional structure known as a <em>data manifold</em>.</p>
-<p>Intuitively, natural images are governed by underlying physical and
-semantic constraints: lighting conditions, object shapes, textures, and
-spatial continuity. These constraints dramatically reduce the degrees of
-freedom of valid images. As a result, normal image patches lie close to
-a low-dimensional manifold embedded in the ambient high-dimensional
-pixel space.</p>
-<p>Anomalies, in contrast, correspond to samples that deviate from this
-manifold. They may violate structural consistency, introduce unusual
-textures, or break the statistical regularities that characterize normal
-data. In geometric terms, anomalous samples lie farther away from the
-learned manifold of normal images.</p>
+<p>MSP is widely used because of its simplicity and practicality. It can be applied to any trained classifier without changing the training procedure or network architecture. This makes it computationally efficient and easy to deploy in real-world systems. The method is also model-agnostic and can be applied to convolutional networks, transformers, and other modern architectures.</p>
+<p>Despite its simplicity, MSP often provides a surprisingly strong baseline for OOD detection and is commonly used as a benchmark when evaluating more advanced methods.</p>
+<h3 data-number="4.3.4" id="limitations-and-challenges"><span class="header-section-number">4.3.4</span> Limitations and Challenges</h3>
+<p>Although effective, MSP has important limitations. Neural networks can be <em>overconfident</em> on unfamiliar inputs, sometimes assigning high softmax probabilities to samples that are clearly out of distribution. This phenomenon is related to the calibration of neural networks and their tendency to produce poorly calibrated probability estimates.</p>
+<p>Performance also depends strongly on the choice of threshold, which may vary across datasets and deployment environments. Furthermore, MSP relies solely on output probabilities and does not exploit internal feature representations of the network, which can contain richer information for anomaly detection.</p>
+<p>These limitations have motivated the development of more advanced techniques, such as temperature scaling, energy-based models, and feature-based OOD detection methods.</p>
+<h2 data-number="4.4" id="manifolds-in-natural-images"><span class="header-section-number">4.4</span> Manifolds in Natural Images</h2>
+<p>A fundamental insight underlying modern anomaly detection in vision is the <em>manifold hypothesis</em>. Although images are represented in very high-dimensional spaces—for example, a <span class="math inline">\(256\times256\)</span> RGB image lies in <span class="math inline">\(\mathbb{R}^{196{,}608}\)</span>—natural images do not occupy this space uniformly. Instead, they concentrate near a much lower-dimensional structure known as a <em>data manifold</em>.</p>
+<p>Intuitively, natural images are governed by underlying physical and semantic constraints: lighting conditions, object shapes, textures, and spatial continuity. These constraints dramatically reduce the degrees of freedom of valid images. As a result, normal image patches lie close to a low-dimensional manifold embedded in the ambient high-dimensional pixel space.</p>
+<p>Anomalies, in contrast, correspond to samples that deviate from this manifold. They may violate structural consistency, introduce unusual textures, or break the statistical regularities that characterize normal data. In geometric terms, anomalous samples lie farther away from the learned manifold of normal images.</p>
 <h3 data-number="4.4.1" id="geometric-interpretation"><span class="header-section-number">4.4.1</span> Geometric Interpretation</h3>
-<p>Let <span class="math inline">\(\mathcal{M}\)</span> denote the
-manifold representing normal image data. Under the manifold hypothesis,
-in-distribution samples satisfy <span class="math display">\[x \approx
-\mathcal{M},\]</span> meaning they lie near the manifold. Anomalies
-satisfy <span class="math display">\[\text{dist}(x, \mathcal{M}) \text{
-is large},\]</span> where <span class="math inline">\(\text{dist}(\cdot,\mathcal{M})\)</span> measures
-the distance to the manifold.</p>
-<p>Anomaly detection can therefore be interpreted as estimating how far
-a sample deviates from the learned low-dimensional structure of normal
-data.</p>
-<h3 data-number="4.4.2" id="connection-to-neural-networks"><span class="header-section-number">4.4.2</span> Connection to Neural
-Networks</h3>
-<p>Deep neural networks, particularly Convolutional Neural Networks
-(CNNs), implicitly learn representations that capture this manifold
-structure. Instead of operating directly in raw pixel space, CNNs map
-images into lower-dimensional latent feature spaces where normal samples
-tend to cluster together.</p>
-<p>In these latent spaces, the manifold structure becomes more explicit.
-Normal data form compact clusters or smooth regions, while anomalous
-inputs often appear as outliers. This explains why feature-based anomaly
-detection methods—such as reconstruction error in autoencoders or
-distance-based methods in embedding space—are often more effective than
-methods applied directly to pixels.</p>
-<p>By leveraging learned feature representations, modern anomaly
-detection systems approximate the underlying manifold and identify
-deviations from it. This geometric perspective provides both
-interpretability and improved detection precision in complex,
-high-dimensional datasets.</p>
-<h2 data-number="4.5" id="hybrid-and-reconstruction-based-methods"><span class="header-section-number">4.5</span> Hybrid and Reconstruction-Based
-Methods</h2>
-<p>The methods presented so far each capture different aspects of
-abnormal behavior. In practice, modern anomaly detection systems often
-combine statistical modeling, manifold learning, and deep learning in
-order to overcome the limitations of individual approaches. A
-particularly important family of techniques is based on
-<em>reconstruction</em>, which assumes that a model trained only on
-normal data will learn to accurately reproduce normal patterns while
-failing to reconstruct anomalous inputs.</p>
-<h3 data-number="4.5.1" id="reconstruction-based-detection"><span class="header-section-number">4.5.1</span> Reconstruction-Based
-Detection</h3>
-<p>Reconstruction-based methods learn a model <span class="math inline">\(\mu\)</span> that captures the structure of normal
-observations. Instead of directly modeling anomaly likelihood, the
-approach detects anomalies through the <em>reconstruction error</em>,
-i.e., the difference between an input and its reconstruction. The key
-intuition is that a model trained exclusively on normal data can
-reconstruct normal samples well, whereas anomalous inputs produce large
-residual errors.</p>
+<p>Let <span class="math inline">\(\mathcal{M}\)</span> denote the manifold representing normal image data. Under the manifold hypothesis, in-distribution samples satisfy <span class="math display">\[x \approx \mathcal{M},\]</span> meaning they lie near the manifold. Anomalies satisfy <span class="math display">\[\text{dist}(x, \mathcal{M}) \text{ is large},\]</span> where <span class="math inline">\(\text{dist}(\cdot,\mathcal{M})\)</span> measures the distance to the manifold.</p>
+<p>Anomaly detection can therefore be interpreted as estimating how far a sample deviates from the learned low-dimensional structure of normal data.</p>
+<h3 data-number="4.4.2" id="connection-to-neural-networks"><span class="header-section-number">4.4.2</span> Connection to Neural Networks</h3>
+<p>Deep neural networks, particularly Convolutional Neural Networks (CNNs), implicitly learn representations that capture this manifold structure. Instead of operating directly in raw pixel space, CNNs map images into lower-dimensional latent feature spaces where normal samples tend to cluster together.</p>
+<p>In these latent spaces, the manifold structure becomes more explicit. Normal data form compact clusters or smooth regions, while anomalous inputs often appear as outliers. This explains why feature-based anomaly detection methods—such as reconstruction error in autoencoders or distance-based methods in embedding space—are often more effective than methods applied directly to pixels.</p>
+<p>By leveraging learned feature representations, modern anomaly detection systems approximate the underlying manifold and identify deviations from it. This geometric perspective provides both interpretability and improved detection precision in complex, high-dimensional datasets.</p>
+<h2 data-number="4.5" id="hybrid-and-reconstruction-based-methods"><span class="header-section-number">4.5</span> Hybrid and Reconstruction-Based Methods</h2>
+<p>The methods presented so far each capture different aspects of abnormal behavior. In practice, modern anomaly detection systems often combine statistical modeling, manifold learning, and deep learning in order to overcome the limitations of individual approaches. A particularly important family of techniques is based on <em>reconstruction</em>, which assumes that a model trained only on normal data will learn to accurately reproduce normal patterns while failing to reconstruct anomalous inputs.</p>
+<h3 data-number="4.5.1" id="reconstruction-based-detection"><span class="header-section-number">4.5.1</span> Reconstruction-Based Detection</h3>
+<p>Reconstruction-based methods learn a model <span class="math inline">\(\mu\)</span> that captures the structure of normal observations. Instead of directly modeling anomaly likelihood, the approach detects anomalies through the <em>reconstruction error</em>, i.e., the difference between an input and its reconstruction. The key intuition is that a model trained exclusively on normal data can reconstruct normal samples well, whereas anomalous inputs produce large residual errors.</p>
 <h4 data-number="4.5.1.1" id="training-phase.-1"><span class="header-section-number">4.5.1.1</span> Training phase.</h4>
-<p>Given a training dataset <span class="math inline">\(\mathcal{T}_R\)</span> consisting of normal
-samples, the model <span class="math inline">\(\mu\)</span> is trained
-to encode and reconstruct the input signal. The objective is to minimize
-a reconstruction loss that encourages the model to capture the dominant
-structure of the normal data distribution.</p>
+<p>Given a training dataset <span class="math inline">\(\mathcal{T}_R\)</span> consisting of normal samples, the model <span class="math inline">\(\mu\)</span> is trained to encode and reconstruct the input signal. The objective is to minimize a reconstruction loss that encourages the model to capture the dominant structure of the normal data distribution.</p>
 <h4 data-number="4.5.1.2" id="testing-phase.-1"><span class="header-section-number">4.5.1.2</span> Testing phase.</h4>
-<p>At test time, each new observation <span class="math inline">\(s\)</span> is passed through the trained model to
-produce a reconstruction <span class="math inline">\(\hat{s}=\mu(s)\)</span>. The anomaly score is
-computed from the residual error <span class="math display">\[\mathrm{err}(s)=\|s-\mu(s)\|.\]</span> Samples
-with unusually large reconstruction errors are flagged as anomalies. In
-practice, detection is performed by comparing the reconstruction error
-to a threshold <span class="math inline">\(\gamma\)</span> learned from
-validation data.</p>
-<h3 data-number="4.5.2" id="autoencoders-as-a-canonical-example"><span class="header-section-number">4.5.2</span> Autoencoders as a Canonical
-Example</h3>
-<p>Autoencoders provide one of the most widely used implementations of
-reconstruction-based anomaly detection. An autoencoder consists of an
-encoder network <span class="math inline">\(E(\cdot)\)</span> that maps
-an input to a low-dimensional latent representation, and a decoder
-network <span class="math inline">\(D(\cdot)\)</span> that reconstructs
-the input from this representation.</p>
+<p>At test time, each new observation <span class="math inline">\(s\)</span> is passed through the trained model to produce a reconstruction <span class="math inline">\(\hat{s}=\mu(s)\)</span>. The anomaly score is computed from the residual error <span class="math display">\[\mathrm{err}(s)=\|s-\mu(s)\|.\]</span> Samples with unusually large reconstruction errors are flagged as anomalies. In practice, detection is performed by comparing the reconstruction error to a threshold <span class="math inline">\(\gamma\)</span> learned from validation data.</p>
+<h3 data-number="4.5.2" id="autoencoders-as-a-canonical-example"><span class="header-section-number">4.5.2</span> Autoencoders as a Canonical Example</h3>
+<p>Autoencoders provide one of the most widely used implementations of reconstruction-based anomaly detection. An autoencoder consists of an encoder network <span class="math inline">\(E(\cdot)\)</span> that maps an input to a low-dimensional latent representation, and a decoder network <span class="math inline">\(D(\cdot)\)</span> that reconstructs the input from this representation.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Reconstruction-Based Anomaly Detection</h3><p>Simulate autoencoder reconstruction error for normal vs anomalous patches. Adjust latent dimension and error threshold to see how the bottleneck capacity affects detection sensitivity.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_AnomalyDetection_Interactive_interactive.html" style="height:880px;" title="Interactive Autoencoder Reconstruction-based Anomaly Detection"></iframe></section>
-<p>During training, the network is optimized to reconstruct all samples
-in the training set. The reconstruction loss over the training data is
-given by <span class="math display">\[L(\mathcal{T}_R)=\sum_{s\in\mathcal{T}_R}\|s-D(E(s))\|_2.\]</span>
-Training is performed using standard backpropagation and stochastic
-gradient descent. After training, anomalies are detected by identifying
-samples whose reconstruction error is significantly larger than that
-observed on the normal training data.</p>
-<h3 data-number="4.5.3" id="gradient-based-regularization"><span class="header-section-number">4.5.3</span> Gradient-Based
-Regularization</h3>
-<p>Recent work has shown that reconstruction alone may not always
-guarantee strong separation between normal and anomalous data.
-Gradient-based regularization techniques address this issue by
-constraining how the model behaves in regions of the input space that
-are likely to contain anomalies.</p>
-<p>One example is Gradient Constrained Optimization (GradCON), which
-penalizes model updates that reduce reconstruction error for samples
-suspected to be anomalous. Intuitively, this encourages the model to
-remain highly specialized for normal data and prevents it from
-generalizing too well to abnormal inputs. Such regularization improves
-the separability of reconstruction errors and leads to more reliable
-anomaly detection.</p>
-<h3 data-number="4.5.4" id="ensemble-and-multi-scale-detection"><span class="header-section-number">4.5.4</span> Ensemble and Multi-Scale
-Detection</h3>
-<p>In real-world systems, anomaly detection often benefits from
-combining multiple complementary signals. Ensemble approaches integrate
-reconstruction-based scores with methods such as Maximum Softmax
-Probability, patch-based analysis, and manifold learning. By aggregating
-anomaly scores across multiple feature scales and modeling assumptions,
-these systems achieve improved robustness and reduced false positive
-rates.</p>
-<p>Hybrid pipelines that combine statistical models, deep neural
-networks, and ensemble scoring represent the current state of the art in
-large-scale anomaly detection systems.</p>
+<p>During training, the network is optimized to reconstruct all samples in the training set. The reconstruction loss over the training data is given by <span class="math display">\[L(\mathcal{T}_R)=\sum_{s\in\mathcal{T}_R}\|s-D(E(s))\|_2.\]</span> Training is performed using standard backpropagation and stochastic gradient descent. After training, anomalies are detected by identifying samples whose reconstruction error is significantly larger than that observed on the normal training data.</p>
+<h3 data-number="4.5.3" id="gradient-based-regularization"><span class="header-section-number">4.5.3</span> Gradient-Based Regularization</h3>
+<p>Recent work has shown that reconstruction alone may not always guarantee strong separation between normal and anomalous data. Gradient-based regularization techniques address this issue by constraining how the model behaves in regions of the input space that are likely to contain anomalies.</p>
+<p>One example is Gradient Constrained Optimization (GradCON), which penalizes model updates that reduce reconstruction error for samples suspected to be anomalous. Intuitively, this encourages the model to remain highly specialized for normal data and prevents it from generalizing too well to abnormal inputs. Such regularization improves the separability of reconstruction errors and leads to more reliable anomaly detection.</p>
+<h3 data-number="4.5.4" id="ensemble-and-multi-scale-detection"><span class="header-section-number">4.5.4</span> Ensemble and Multi-Scale Detection</h3>
+<p>In real-world systems, anomaly detection often benefits from combining multiple complementary signals. Ensemble approaches integrate reconstruction-based scores with methods such as Maximum Softmax Probability, patch-based analysis, and manifold learning. By aggregating anomaly scores across multiple feature scales and modeling assumptions, these systems achieve improved robustness and reduced false positive rates.</p>
+<p>Hybrid pipelines that combine statistical models, deep neural networks, and ensemble scoring represent the current state of the art in large-scale anomaly detection systems.</p>
 <h1 data-number="5" id="related-problem-formulations"><span class="header-section-number">5.</span> Related Problem Formulations</h1>
-<p>While anomaly detection is a broad and widely used framework, several
-closely related problem formulations exist in the literature. These
-include novelty detection, out-of-distribution (OOD) detection,
-misprediction detection, adversarial detection, and open set
-recognition. Although these problems share the goal of identifying
-unusual or unreliable inputs, they differ in their assumptions about
-training data, deployment conditions, and the nature of “unknown”
-samples.</p>
-<p>Understanding these distinctions is important, as methods designed
-for one setting may not generalize well to others.</p>
+<p>While anomaly detection is a broad and widely used framework, several closely related problem formulations exist in the literature. These include novelty detection, out-of-distribution (OOD) detection, misprediction detection, adversarial detection, and open set recognition. Although these problems share the goal of identifying unusual or unreliable inputs, they differ in their assumptions about training data, deployment conditions, and the nature of “unknown” samples.</p>
+<p>Understanding these distinctions is important, as methods designed for one setting may not generalize well to others.</p>
 <div id="tab:anomaly_related_tasks">
 <table>
-<caption>Comparison of anomaly detection and related problem
-formulations.</caption>
+<caption>Comparison of anomaly detection and related problem formulations.</caption>
 <thead>
 <tr class="header">
 <th style="text-align: left;"><strong>Problem</strong></th>
-<th style="text-align: left;"><strong>Training Data
-Assumption</strong></th>
+<th style="text-align: left;"><strong>Training Data Assumption</strong></th>
 <th style="text-align: left;"><strong>Goal</strong></th>
 <th style="text-align: left;"><strong>Key Characteristic</strong></th>
 </tr>
@@ -897,88 +387,54 @@ Assumption</strong></th>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;"><strong>Anomaly Detection</strong></td>
-<td style="text-align: left;">Normal data with possible contamination or
-unlabeled data</td>
-<td style="text-align: left;">Detect rare deviations from normal
-patterns</td>
-<td style="text-align: left;">Broad umbrella setting; anomalies may be
-diverse and partially observed</td>
+<td style="text-align: left;">Normal data with possible contamination or unlabeled data</td>
+<td style="text-align: left;">Detect rare deviations from normal patterns</td>
+<td style="text-align: left;">Broad umbrella setting; anomalies may be diverse and partially observed</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>Novelty Detection</strong></td>
-<td style="text-align: left;">Only normal data available during
-training</td>
-<td style="text-align: left;">Detect new but consistent deviations from
-normal</td>
-<td style="text-align: left;">Assumes anomalies are not seen during
-training</td>
+<td style="text-align: left;">Only normal data available during training</td>
+<td style="text-align: left;">Detect new but consistent deviations from normal</td>
+<td style="text-align: left;">Assumes anomalies are not seen during training</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>Out-of-Distribution (OOD)
-Detection</strong></td>
-<td style="text-align: left;">Labeled training data from known
-classes</td>
-<td style="text-align: left;">Detect inputs outside training
-distribution</td>
-<td style="text-align: left;">Focus on distribution shift relative to
-training data</td>
+<td style="text-align: left;"><strong>Out-of-Distribution (OOD) Detection</strong></td>
+<td style="text-align: left;">Labeled training data from known classes</td>
+<td style="text-align: left;">Detect inputs outside training distribution</td>
+<td style="text-align: left;">Focus on distribution shift relative to training data</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><strong>Misprediction
-Detection</strong></td>
+<td style="text-align: left;"><strong>Misprediction Detection</strong></td>
 <td style="text-align: left;">Fully supervised model</td>
-<td style="text-align: left;">Detect when model predictions are likely
-incorrect</td>
-<td style="text-align: left;">Relies on model confidence or uncertainty
-estimates</td>
+<td style="text-align: left;">Detect when model predictions are likely incorrect</td>
+<td style="text-align: left;">Relies on model confidence or uncertainty estimates</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><strong>Adversarial
-Detection</strong></td>
+<td style="text-align: left;"><strong>Adversarial Detection</strong></td>
 <td style="text-align: left;">Standard training data (clean inputs)</td>
 <td style="text-align: left;">Detect maliciously perturbed inputs</td>
-<td style="text-align: left;">Inputs are intentionally crafted to fool
-the model</td>
+<td style="text-align: left;">Inputs are intentionally crafted to fool the model</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>Open Set Recognition</strong></td>
 <td style="text-align: left;">Labeled known classes</td>
-<td style="text-align: left;">Classify known classes while rejecting
-unknown ones</td>
-<td style="text-align: left;">Combines classification with rejection of
-unseen classes</td>
+<td style="text-align: left;">Classify known classes while rejecting unknown ones</td>
+<td style="text-align: left;">Combines classification with rejection of unseen classes</td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>From this comparison, we observe that anomaly detection and novelty
-detection primarily focus on modeling normality, differing mainly in
-whether anomalous samples are present during training. In contrast, OOD
-detection and open set recognition arise naturally in supervised
-learning settings, where the goal is to handle distributional shift or
-previously unseen classes at test time. Misprediction detection and
-adversarial detection further extend this perspective by focusing on
-model reliability, aiming to identify when predictions cannot be trusted
-due to uncertainty or malicious perturbations. In practice, these
-problem formulations are often interconnected, and modern systems
-increasingly combine multiple approaches to achieve robust and reliable
-performance in real-world environments.</p>
+<p>From this comparison, we observe that anomaly detection and novelty detection primarily focus on modeling normality, differing mainly in whether anomalous samples are present during training. In contrast, OOD detection and open set recognition arise naturally in supervised learning settings, where the goal is to handle distributional shift or previously unseen classes at test time. Misprediction detection and adversarial detection further extend this perspective by focusing on model reliability, aiming to identify when predictions cannot be trusted due to uncertainty or malicious perturbations. In practice, these problem formulations are often interconnected, and modern systems increasingly combine multiple approaches to achieve robust and reliable performance in real-world environments.</p>
 <h1 data-number="7" id="references"><span class="header-section-number">7.</span> References</h1>
 <div class="list">
 <p><span>[]</span><span> </span></p>
-<p>V. Chandola, A. Banerjee, V. Kumar. Anomaly Detection: A Survey. ACM
-Computing Surveys, 41(3), 2009.</p>
-<p>C. M. Bishop. Pattern Recognition and Machine Learning. Springer,
-2006.</p>
+<p>V. Chandola, A. Banerjee, V. Kumar. Anomaly Detection: A Survey. ACM Computing Surveys, 41(3), 2009.</p>
+<p>C. M. Bishop. Pattern Recognition and Machine Learning. Springer, 2006.</p>
 <p>F. T. Liu, K. M. Ting, Z. Zhou. Isolation Forest. ICDM, 2008.</p>
-<p>T. Fawcett. An Introduction to ROC Analysis. Pattern Recognition
-Letters, 2006.</p>
-<p>I. Goodfellow, Y. Bengio, A. Courville. Deep Learning. MIT Press,
-2016.</p>
-<p>D. Hendrycks, K. Gimpel. A Baseline for Detecting Misclassified and
-Out-of-Distribution Examples in Neural Networks. ICLR, 2017.</p>
-<p>D. P. Kingma, M. Welling. Auto-Encoding Variational Bayes. ICLR,
-2014.</p>
+<p>T. Fawcett. An Introduction to ROC Analysis. Pattern Recognition Letters, 2006.</p>
+<p>I. Goodfellow, Y. Bengio, A. Courville. Deep Learning. MIT Press, 2016.</p>
+<p>D. Hendrycks, K. Gimpel. A Baseline for Detecting Misclassified and Out-of-Distribution Examples in Neural Networks. ICLR, 2017.</p>
+<p>D. P. Kingma, M. Welling. Auto-Encoding Variational Bayes. ICLR, 2014.</p>
 </div>
 
 </main>

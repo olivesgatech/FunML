@@ -24,7 +24,23 @@ window.MathJax = {
 </head>
 <body>
 <main>
-  <p>No exercises posted for this lecture yet.</p>
+  <section><h1 class="unnumbered">Exercises</h1>
+<div class="mdframed">
+<p><strong>Q: Why is causal masking necessary during training?</strong></p>
+<p><strong>A:</strong> During training, the model processes all tokens in a sequence simultaneously for efficiency. Without causal masking, each position could attend to future tokens, making the next-token prediction task trivial (the answer is already in the context). The causal mask enforces the constraint that <span class="math inline">\(P(w_t \mid w_1, \ldots, w_{t-1})\)</span> is computed using only the prefix, which matches the autoregressive generation setting at inference time.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: How does RLHF differ from standard supervised fine-tuning?</strong></p>
+<p><strong>A:</strong> SFT maximizes the likelihood of specific reference responses, which requires high-quality curated demonstrations. RLHF instead learns a scalar reward model from pairwise human preferences (which response is better) and then uses reinforcement learning to optimize the language model policy to maximize this reward. RLHF can capture preferences that are difficult to articulate as explicit demonstrations, such as helpfulness, harmlessness, and calibrated uncertainty. The KL penalty prevents reward hacking by keeping the policy close to the SFT baseline.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: What is the difference between in-context learning and fine-tuning?</strong></p>
+<p><strong>A:</strong> Fine-tuning updates model weights using gradient descent on a training set, permanently changing the model. In-context learning provides examples in the input prompt at inference time without any weight updates — the model generalizes from the demonstrated examples within a single forward pass. Fine-tuning achieves better performance when sufficient task-specific data is available and computational resources allow it. In-context learning is faster to deploy and more flexible but is limited by context length and is generally less sample-efficient for specialized tasks.</p>
+</div>
+<div class="mdframed">
+<p><strong>Q: What causes hallucination and how can it be mitigated?</strong></p>
+<p><strong>A:</strong> Hallucination arises because the cross-entropy pre-training objective rewards fluent, probable token sequences, not factual accuracy. The model learns patterns and associations from text but does not maintain an explicit knowledge base or verify claims. Mitigation strategies include: (1) Retrieval-Augmented Generation (RAG), which grounds generation in retrieved documents; (2) RLHF with factuality-focused reward signals; (3) uncertainty-based abstention, where the model declines to answer when confidence is low; and (4) chain-of-thought prompting, which forces explicit intermediate steps that can be audited for errors.</p>
+</div></section>
 </main>
 </body>
 </html>

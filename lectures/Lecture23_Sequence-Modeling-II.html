@@ -109,431 +109,98 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture continues sequence modeling by introducing
-convolution-based temporal models and attention-based encoder–decoder
-models. We study Temporal Convolutional Networks (TCNs), including
-causal and dilated convolutions, residual connections, and
-normalization. We then introduce Seq2Seq architectures, word embeddings
-(Word2Vec, Skip-Gram, CBOW), and attention mechanisms that address the
-fixed-context bottleneck. Finally, we examine attention-based
-encoder–decoder models, including global and local attention mechanisms
-for improving sequence alignment.</p>
-<h1 data-number="2" id="temporal-convolutional-networks-tcns"><span class="header-section-number">2.</span> Temporal Convolutional Networks
-(TCNs)</h1>
-<p>Temporal Convolutional Networks (TCNs) are convolution-based
-architectures for sequence modeling that replace recurrence with
-one-dimensional convolutions applied along the temporal axis <span class="citation" data-cites="10"></span>. Unlike RNNs (and their gated
-variants such as LSTMs and GRUs), which process sequences sequentially
-through an evolving hidden state, TCNs compute sequence representations
-using convolutional filters that can be applied to all time steps in
-parallel. This design preserves temporal ordering while enabling
-efficient training and inference, particularly for long sequences.</p>
+<p>This lecture continues sequence modeling by introducing convolution-based temporal models and attention-based encoder–decoder models. We study Temporal Convolutional Networks (TCNs), including causal and dilated convolutions, residual connections, and normalization. We then introduce Seq2Seq architectures, word embeddings (Word2Vec, Skip-Gram, CBOW), and attention mechanisms that address the fixed-context bottleneck. Finally, we examine attention-based encoder–decoder models, including global and local attention mechanisms for improving sequence alignment.</p>
+<h1 data-number="2" id="temporal-convolutional-networks-tcns"><span class="header-section-number">2.</span> Temporal Convolutional Networks (TCNs)</h1>
+<p>Temporal Convolutional Networks (TCNs) are convolution-based architectures for sequence modeling that replace recurrence with one-dimensional convolutions applied along the temporal axis <span class="citation" data-cites="10"></span>. Unlike RNNs (and their gated variants such as LSTMs and GRUs), which process sequences sequentially through an evolving hidden state, TCNs compute sequence representations using convolutional filters that can be applied to all time steps in parallel. This design preserves temporal ordering while enabling efficient training and inference, particularly for long sequences.</p>
 <h2 data-number="2.1" id="causal-convolutions"><span class="header-section-number">2.1</span> Causal Convolutions</h2>
-<p>A core requirement for sequence prediction and forecasting is
-<strong>causality</strong>: the model output at time <span class="math inline">\(t\)</span> must depend only on inputs up to time
-<span class="math inline">\(t\)</span>, never on future inputs. TCNs
-enforce this property using <strong>causal convolutions</strong>. For a
-1D convolution with kernel size <span class="math inline">\(k\)</span>
-and stride <span class="math inline">\(1\)</span>, the output at time
-<span class="math inline">\(t\)</span> is computed from the current and
-previous inputs: <span class="math display">\[y^{(t)} = \sum_{i=0}^{k-1}
-w_i \, x^{(t-i)}.\]</span> To ensure the output sequence has the same
-length as the input while maintaining causality, the input is padded
-with <span class="math inline">\((k-1)\)</span> zeros on the
-<strong>left</strong> (past side) only. This left-padding guarantees
-that the convolution never accesses indices larger than <span class="math inline">\(t\)</span>, preventing leakage of future
-information into the present.</p>
-<h2 data-number="2.2" id="dilated-convolutions-and-long-range-dependencies"><span class="header-section-number">2.2</span> Dilated Convolutions and
-Long-Range Dependencies</h2>
-<p>While causal convolutions preserve temporal ordering, modeling
-<em>long-range</em> dependencies can require a large receptive field.
-Stacking standard (non-dilated) convolutions increases the receptive
-field only linearly with depth, which can become inefficient for very
-long sequences. TCNs address this using <strong>dilated
-convolutions</strong>, which introduce gaps between sampled input
-positions. A dilated causal convolution with dilation factor <span class="math inline">\(d\)</span> and kernel size <span class="math inline">\(k\)</span> is: <span class="math display">\[y^{(t)} = \sum_{i=0}^{k-1} w_i \, x^{(t-i
-d)}.\]</span> Here, the filter accesses <span class="math inline">\(x^{(t)}, x^{(t-d)}, x^{(t-2d)}, \dots,
-x^{(t-(k-1)d)}\)</span>, allowing the model to incorporate a wider
-temporal context without increasing the number of parameters. To
-preserve sequence length under causality, the required
-<strong>left-padding</strong> becomes <span class="math inline">\(d\,(k-1)\)</span> zeros.</p>
-<p>A common TCN design grows dilation factors exponentially across
-layers (e.g., <span class="math inline">\(d=1,2,4,8,\dots\)</span>)
-<span class="citation" data-cites="10"></span>, which expands the
-receptive field rapidly. For a stack of <span class="math inline">\(L\)</span> dilated causal convolution layers
-(stride <span class="math inline">\(1\)</span>), each with kernel size
-<span class="math inline">\(k\)</span> and dilation factors <span class="math inline">\(\{d_\ell\}_{\ell=1}^L\)</span>, a convenient
-expression for the receptive field length is: <span class="math display">\[R \;=\; 1 + \sum_{\ell=1}^{L}
-(k-1)\,d_\ell,\]</span> meaning the output at time <span class="math inline">\(t\)</span> in the final layer can depend on inputs
-from <span class="math inline">\(t, t-1, \dots, t-(R-1)\)</span>.</p>
-<h2 data-number="2.3" id="residual-blocks-and-stable-optimization"><span class="header-section-number">2.3</span> Residual Blocks and Stable
-Optimization</h2>
-<p>Modern TCNs are typically built from <strong>residual blocks</strong>
-to enable stable training at depth <span class="citation" data-cites="10"></span>. Each residual block contains one or more
-(dilated) causal convolution layers, nonlinearities (often ReLU), and
-regularization (often dropout), together with a skip connection that
-adds the block input to its output. A simplified residual form can be
-written as: <span class="math display">\[\mathbf{h}^{(t)} =
-\mathbf{x}^{(t)} + \phi\!\left(W_2 \, \phi\!\left(W_1 \mathbf{x}^{(t)} +
-\mathbf{b}_1\right) + \mathbf{b}_2\right),\]</span> where <span class="math inline">\(\phi(\cdot)\)</span> denotes an element-wise
-nonlinearity such as ReLU. The skip pathway helps gradients propagate
-through many layers, mitigating optimization difficulties (e.g.,
-degradation with depth) and allowing deeper stacks to achieve very large
-receptive fields.</p>
-<p>In practice, when the number of channels changes across layers, a
-<span class="math inline">\(1 \times 1\)</span> convolution is often
-used on the skip connection to match dimensions before addition.</p>
+<p>A core requirement for sequence prediction and forecasting is <strong>causality</strong>: the model output at time <span class="math inline">\(t\)</span> must depend only on inputs up to time <span class="math inline">\(t\)</span>, never on future inputs. TCNs enforce this property using <strong>causal convolutions</strong>. For a 1D convolution with kernel size <span class="math inline">\(k\)</span> and stride <span class="math inline">\(1\)</span>, the output at time <span class="math inline">\(t\)</span> is computed from the current and previous inputs: <span class="math display">\[y^{(t)} = \sum_{i=0}^{k-1} w_i \, x^{(t-i)}.\]</span> To ensure the output sequence has the same length as the input while maintaining causality, the input is padded with <span class="math inline">\((k-1)\)</span> zeros on the <strong>left</strong> (past side) only. This left-padding guarantees that the convolution never accesses indices larger than <span class="math inline">\(t\)</span>, preventing leakage of future information into the present.</p>
+<h2 data-number="2.2" id="dilated-convolutions-and-long-range-dependencies"><span class="header-section-number">2.2</span> Dilated Convolutions and Long-Range Dependencies</h2>
+<p>While causal convolutions preserve temporal ordering, modeling <em>long-range</em> dependencies can require a large receptive field. Stacking standard (non-dilated) convolutions increases the receptive field only linearly with depth, which can become inefficient for very long sequences. TCNs address this using <strong>dilated convolutions</strong>, which introduce gaps between sampled input positions. A dilated causal convolution with dilation factor <span class="math inline">\(d\)</span> and kernel size <span class="math inline">\(k\)</span> is: <span class="math display">\[y^{(t)} = \sum_{i=0}^{k-1} w_i \, x^{(t-i d)}.\]</span> Here, the filter accesses <span class="math inline">\(x^{(t)}, x^{(t-d)}, x^{(t-2d)}, \dots, x^{(t-(k-1)d)}\)</span>, allowing the model to incorporate a wider temporal context without increasing the number of parameters. To preserve sequence length under causality, the required <strong>left-padding</strong> becomes <span class="math inline">\(d\,(k-1)\)</span> zeros.</p>
+<p>A common TCN design grows dilation factors exponentially across layers (e.g., <span class="math inline">\(d=1,2,4,8,\dots\)</span>) <span class="citation" data-cites="10"></span>, which expands the receptive field rapidly. For a stack of <span class="math inline">\(L\)</span> dilated causal convolution layers (stride <span class="math inline">\(1\)</span>), each with kernel size <span class="math inline">\(k\)</span> and dilation factors <span class="math inline">\(\{d_\ell\}_{\ell=1}^L\)</span>, a convenient expression for the receptive field length is: <span class="math display">\[R \;=\; 1 + \sum_{\ell=1}^{L} (k-1)\,d_\ell,\]</span> meaning the output at time <span class="math inline">\(t\)</span> in the final layer can depend on inputs from <span class="math inline">\(t, t-1, \dots, t-(R-1)\)</span>.</p>
+<h2 data-number="2.3" id="residual-blocks-and-stable-optimization"><span class="header-section-number">2.3</span> Residual Blocks and Stable Optimization</h2>
+<p>Modern TCNs are typically built from <strong>residual blocks</strong> to enable stable training at depth <span class="citation" data-cites="10"></span>. Each residual block contains one or more (dilated) causal convolution layers, nonlinearities (often ReLU), and regularization (often dropout), together with a skip connection that adds the block input to its output. A simplified residual form can be written as: <span class="math display">\[\mathbf{h}^{(t)} = \mathbf{x}^{(t)} + \phi\!\left(W_2 \, \phi\!\left(W_1 \mathbf{x}^{(t)} + \mathbf{b}_1\right) + \mathbf{b}_2\right),\]</span> where <span class="math inline">\(\phi(\cdot)\)</span> denotes an element-wise nonlinearity such as ReLU. The skip pathway helps gradients propagate through many layers, mitigating optimization difficulties (e.g., degradation with depth) and allowing deeper stacks to achieve very large receptive fields.</p>
+<p>In practice, when the number of channels changes across layers, a <span class="math inline">\(1 \times 1\)</span> convolution is often used on the skip connection to match dimensions before addition.</p>
 <h2 data-number="2.4" id="weight-normalization"><span class="header-section-number">2.4</span> Weight Normalization</h2>
-<p>TCNs commonly use <strong>weight normalization</strong> as an
-alternative to batch normalization, since batch statistics can be
-unstable or inconvenient in some sequence settings (e.g., small batch
-sizes or strict causal evaluation) <span class="citation" data-cites="10 9"></span>. Weight normalization reparameterizes a weight
-vector <span class="math inline">\(\mathbf{w}\)</span> as: <span class="math display">\[\mathbf{w} =
-\frac{g}{\|\mathbf{v}\|}\mathbf{v},\]</span> where <span class="math inline">\(\mathbf{v}\)</span> is the direction parameter and
-<span class="math inline">\(g\)</span> is a learnable scalar controlling
-magnitude. This decoupling can improve conditioning and stabilize
-optimization in deep convolutional stacks.</p>
-<h2 data-number="2.5" id="computational-complexity-and-parallelization"><span class="header-section-number">2.5</span> Computational Complexity and
-Parallelization</h2>
-<p>A key practical advantage of TCNs over recurrent models is
-<strong>parallelization across time</strong>. Because convolutional
-layers apply the same kernel to all positions, computations for all time
-steps can be performed simultaneously on modern hardware. For a sequence
-length <span class="math inline">\(T\)</span>, kernel size <span class="math inline">\(k\)</span>, and <span class="math inline">\(F\)</span> filters, a single convolutional layer
-typically costs on the order of <span class="math inline">\(\mathcal{O}(T k F)\)</span> operations, but it can
-be executed efficiently using highly optimized convolution kernels. By
-contrast, RNNs must update hidden states sequentially across time steps,
-creating a strict dependency chain that limits parallelism and can slow
-training on long sequences.</p>
-<h2 data-number="2.6" id="advantages-and-limitations-of-tcns"><span class="header-section-number">2.6</span> Advantages and Limitations of
-TCNs</h2>
-<p>TCNs offer several important benefits for sequence modeling. First,
-causal convolutions enforce correct temporal ordering, making TCNs
-suitable for forecasting and real-time prediction. Second, dilations
-provide an efficient mechanism to model long-range dependencies by
-expanding the receptive field without increasing parameter count
-dramatically. Third, convolutional computation enables strong
-parallelism, often leading to faster training and inference than
-recurrent architectures on long sequences. Finally, residual connections
-and normalization techniques support stable optimization of deep
-models.</p>
-<p>However, TCNs also have limitations. The effective context length is
-determined by architecture choices (kernel size, number of layers, and
-dilation schedule), so extremely long dependencies may require deeper
-networks or carefully designed dilation patterns. Additionally, some
-tasks may benefit from the adaptive, input-dependent memory behavior of
-gated recurrent models, whereas TCNs rely on fixed filters and a fixed
-receptive field structure once the architecture is set.</p>
-<h1 data-number="3" id="encoder-decoder-architectures"><span class="header-section-number">3.</span> Encoder-Decoder
-Architectures</h1>
-<p><strong>Encoder–Decoder models</strong> are widely used for
-sequence-to-sequence tasks in which the input and output sequences may
-differ in length, such as machine translation, speech recognition, and
-text summarization <span class="citation" data-cites="6 5"></span>. The
-central idea is to decompose the problem into two components. The
-<strong>Encoder</strong> reads the input sequence and compresses its
-information into a vector representation called the <em>context
-vector</em>. The <strong>Decoder</strong> then uses this representation
-to generate the output sequence one element at a time.</p>
-<h2 data-number="3.1" id="encoder-and-decoder-mechanisms"><span class="header-section-number">3.1</span> Encoder and Decoder
-Mechanisms</h2>
-<p>Let the input sequence be a sequence of tokens <span class="math display">\[\mathbf{x} = (x_1, x_2, \dots, x_T).\]</span> The
-<strong>Encoder</strong> processes the sequence sequentially and
-produces a hidden state at each time step. In practice, the encoder is
-often implemented using an RNN, LSTM, or GRU. At time step <span class="math inline">\(t\)</span>, the encoder updates its hidden state
-according to <span class="math display">\[\mathbf{h}_t =
-f_{\text{enc}}(\mathbf{x}_t, \mathbf{h}_{t-1};
-\theta_{\text{enc}}),\]</span> where <span class="math inline">\(f_{\text{enc}}(\cdot)\)</span> denotes the encoder
-transition function and <span class="math inline">\(\theta_{\text{enc}}\)</span> represents the
-encoder parameters. After the final input token is processed, the last
-hidden state summarizes the entire sequence and becomes the <em>context
-vector</em> <span class="math display">\[\mathbf{c} =
-\mathbf{h}_T.\]</span> This vector serves as a compact representation of
-the input sequence and is passed to the <strong>Decoder</strong>.</p>
-<p>The <strong>Decoder</strong> generates the output sequence
-autoregressively. It initializes its hidden state using the context
-vector and then produces one token at a time. At decoding step <span class="math inline">\(t\)</span>, the hidden state evolves according to
-<span class="math display">\[\mathbf{s}_t = f_{\text{dec}}(y_{t-1},
-\mathbf{s}_{t-1}, \mathbf{c}; \theta_{\text{dec}}),\]</span> where <span class="math inline">\(y_{t-1}\)</span> is the previously generated
-token, <span class="math inline">\(f_{\text{dec}}(\cdot)\)</span> is the
-decoder transition function, and <span class="math inline">\(\theta_{\text{dec}}\)</span> are the decoder
-parameters. The probability distribution for the next token is then
-computed using a softmax layer: <span class="math display">\[P(y_t \mid
-y_{&lt;t}, \mathbf{c}) = \text{softmax}(\mathbf{W}\mathbf{s}_t +
-\mathbf{b}),\]</span> where <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\mathbf{b}\)</span> are learnable parameters. The
-decoder repeats this process until a special end-of-sequence token is
-produced.</p>
-<p>This Encoder–Decoder framework enables flexible mapping between
-sequences of different lengths, making it a foundational architecture
-for modern sequence modeling systems.</p>
-<h2 data-number="3.2" id="word-embeddings-for-encoder-decoder-models"><span class="header-section-number">3.2</span> Word Embeddings for
-Encoder-Decoder Models</h2>
+<p>TCNs commonly use <strong>weight normalization</strong> as an alternative to batch normalization, since batch statistics can be unstable or inconvenient in some sequence settings (e.g., small batch sizes or strict causal evaluation) <span class="citation" data-cites="10 9"></span>. Weight normalization reparameterizes a weight vector <span class="math inline">\(\mathbf{w}\)</span> as: <span class="math display">\[\mathbf{w} = \frac{g}{\|\mathbf{v}\|}\mathbf{v},\]</span> where <span class="math inline">\(\mathbf{v}\)</span> is the direction parameter and <span class="math inline">\(g\)</span> is a learnable scalar controlling magnitude. This decoupling can improve conditioning and stabilize optimization in deep convolutional stacks.</p>
+<h2 data-number="2.5" id="computational-complexity-and-parallelization"><span class="header-section-number">2.5</span> Computational Complexity and Parallelization</h2>
+<p>A key practical advantage of TCNs over recurrent models is <strong>parallelization across time</strong>. Because convolutional layers apply the same kernel to all positions, computations for all time steps can be performed simultaneously on modern hardware. For a sequence length <span class="math inline">\(T\)</span>, kernel size <span class="math inline">\(k\)</span>, and <span class="math inline">\(F\)</span> filters, a single convolutional layer typically costs on the order of <span class="math inline">\(\mathcal{O}(T k F)\)</span> operations, but it can be executed efficiently using highly optimized convolution kernels. By contrast, RNNs must update hidden states sequentially across time steps, creating a strict dependency chain that limits parallelism and can slow training on long sequences.</p>
+<h2 data-number="2.6" id="advantages-and-limitations-of-tcns"><span class="header-section-number">2.6</span> Advantages and Limitations of TCNs</h2>
+<p>TCNs offer several important benefits for sequence modeling. First, causal convolutions enforce correct temporal ordering, making TCNs suitable for forecasting and real-time prediction. Second, dilations provide an efficient mechanism to model long-range dependencies by expanding the receptive field without increasing parameter count dramatically. Third, convolutional computation enables strong parallelism, often leading to faster training and inference than recurrent architectures on long sequences. Finally, residual connections and normalization techniques support stable optimization of deep models.</p>
+<p>However, TCNs also have limitations. The effective context length is determined by architecture choices (kernel size, number of layers, and dilation schedule), so extremely long dependencies may require deeper networks or carefully designed dilation patterns. Additionally, some tasks may benefit from the adaptive, input-dependent memory behavior of gated recurrent models, whereas TCNs rely on fixed filters and a fixed receptive field structure once the architecture is set.</p>
+<h1 data-number="3" id="encoder-decoder-architectures"><span class="header-section-number">3.</span> Encoder-Decoder Architectures</h1>
+<p><strong>Encoder–Decoder models</strong> are widely used for sequence-to-sequence tasks in which the input and output sequences may differ in length, such as machine translation, speech recognition, and text summarization <span class="citation" data-cites="6 5"></span>. The central idea is to decompose the problem into two components. The <strong>Encoder</strong> reads the input sequence and compresses its information into a vector representation called the <em>context vector</em>. The <strong>Decoder</strong> then uses this representation to generate the output sequence one element at a time.</p>
+<h2 data-number="3.1" id="encoder-and-decoder-mechanisms"><span class="header-section-number">3.1</span> Encoder and Decoder Mechanisms</h2>
+<p>Let the input sequence be a sequence of tokens <span class="math display">\[\mathbf{x} = (x_1, x_2, \dots, x_T).\]</span> The <strong>Encoder</strong> processes the sequence sequentially and produces a hidden state at each time step. In practice, the encoder is often implemented using an RNN, LSTM, or GRU. At time step <span class="math inline">\(t\)</span>, the encoder updates its hidden state according to <span class="math display">\[\mathbf{h}_t = f_{\text{enc}}(\mathbf{x}_t, \mathbf{h}_{t-1}; \theta_{\text{enc}}),\]</span> where <span class="math inline">\(f_{\text{enc}}(\cdot)\)</span> denotes the encoder transition function and <span class="math inline">\(\theta_{\text{enc}}\)</span> represents the encoder parameters. After the final input token is processed, the last hidden state summarizes the entire sequence and becomes the <em>context vector</em> <span class="math display">\[\mathbf{c} = \mathbf{h}_T.\]</span> This vector serves as a compact representation of the input sequence and is passed to the <strong>Decoder</strong>.</p>
+<p>The <strong>Decoder</strong> generates the output sequence autoregressively. It initializes its hidden state using the context vector and then produces one token at a time. At decoding step <span class="math inline">\(t\)</span>, the hidden state evolves according to <span class="math display">\[\mathbf{s}_t = f_{\text{dec}}(y_{t-1}, \mathbf{s}_{t-1}, \mathbf{c}; \theta_{\text{dec}}),\]</span> where <span class="math inline">\(y_{t-1}\)</span> is the previously generated token, <span class="math inline">\(f_{\text{dec}}(\cdot)\)</span> is the decoder transition function, and <span class="math inline">\(\theta_{\text{dec}}\)</span> are the decoder parameters. The probability distribution for the next token is then computed using a softmax layer: <span class="math display">\[P(y_t \mid y_{&lt;t}, \mathbf{c}) = \text{softmax}(\mathbf{W}\mathbf{s}_t + \mathbf{b}),\]</span> where <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\mathbf{b}\)</span> are learnable parameters. The decoder repeats this process until a special end-of-sequence token is produced.</p>
+<p>This Encoder–Decoder framework enables flexible mapping between sequences of different lengths, making it a foundational architecture for modern sequence modeling systems.</p>
+<h2 data-number="3.2" id="word-embeddings-for-encoder-decoder-models"><span class="header-section-number">3.2</span> Word Embeddings for Encoder-Decoder Models</h2>
 <h4 data-number="3.2.0.1" id="section"><span class="header-section-number">3.2.0.1</span> </h4>
-<p>Before sequences can be processed by the Encoder–Decoder
-architecture, discrete tokens must be converted into numerical
-representations. This is achieved using <em>word embeddings</em>, which
-project meaningful elements, such as words in NLP, into a continuous
-vector space that captures syntactic and semantic relationships <span class="citation" data-cites="1 2"></span>. These embeddings position
-contextually similar words close together, preserving relationships such
-as “king” to “queen” (Male–Female), “walking” to “walked” (Verb Tense),
-and “Canada” to “Ottawa” (Country–Capital), as illustrated in Figure <a data-reference="fig:word_embeddings" data-reference-type="ref" href="#fig:word_embeddings">1</a>.</p>
-<figure id="fig:word_embeddings">
-<img src="img/lecture21/1_SYiW1MUZul1NvL1kc1RxwQ.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
-<figcaption>Linear Relationships between Words.</figcaption>
+<p>Before sequences can be processed by the Encoder–Decoder architecture, discrete tokens must be converted into numerical representations. This is achieved using <em>word embeddings</em>, which project meaningful elements, such as words in NLP, into a continuous vector space that captures syntactic and semantic relationships <span class="citation" data-cites="1 2"></span>. These embeddings position contextually similar words close together, preserving relationships such as “king” to “queen” (Male–Female), “walking” to “walked” (Verb Tense), and “Canada” to “Ottawa” (Country–Capital), as illustrated in Figure <a data-reference="fig:word_embeddings" data-reference-type="ref" href="#fig:word_embeddings">1</a>.</p>
+<figure>
+<img alt="Linear Relationships between Words." id="fig:word_embeddings" src="img/lecture21/1_SYiW1MUZul1NvL1kc1RxwQ.png" style="width:57.00%; max-width:57.00%; height:auto;"/><figcaption aria-hidden="true">Linear Relationships between Words.</figcaption>
 </figure>
-<p>Encoder–Decoder architectures leverage these embeddings to create
-contextual representations of word sequences, enabling tasks such as
-machine translation. By embedding tokens in a continuous space, the
-Encoder can capture syntactic and semantic relationships in the input
-sequence, while the Decoder uses these learned representations to
-generate coherent and meaningful outputs. Unlike autoencoders,
-Encoder–Decoder models focus on transforming input sequences into
-context-rich outputs, making them essential for sequence-to-sequence
-applications.</p>
+<p>Encoder–Decoder architectures leverage these embeddings to create contextual representations of word sequences, enabling tasks such as machine translation. By embedding tokens in a continuous space, the Encoder can capture syntactic and semantic relationships in the input sequence, while the Decoder uses these learned representations to generate coherent and meaningful outputs. Unlike autoencoders, Encoder–Decoder models focus on transforming input sequences into context-rich outputs, making them essential for sequence-to-sequence applications.</p>
 <h2 data-number="3.3" id="word2vec"><span class="header-section-number">3.3</span> Word2Vec</h2>
-<p>A widely used approach for learning word embeddings from large text
-corpora is the Word2Vec framework <span class="citation" data-cites="2 3"></span>. Word2Vec learns vector representations by
-exploiting the idea that words appearing in similar contexts tend to
-have similar meanings, a concept rooted in the distributional hypothesis
-<span class="citation" data-cites="4"></span>. Unlike traditional
-bag-of-words (BoW) representations, which encode word counts in sparse
-vectors without preserving semantic similarity, Word2Vec learns dense
-distributed representations in which similar words occupy nearby
-locations in embedding space. Instead of manually designing features,
-the model learns embeddings by solving a prediction task based on word
-co-occurrence. Two main training objectives are commonly used <span class="citation" data-cites="2"></span>: the <strong>Skip-Gram</strong>
-model and the <strong>Continuous Bag-of-Words (CBOW)</strong> model.</p>
-<p>For completeness, consider first the simplified <em>one-word
-context</em> setting, where a single input word is mapped from a
-high-dimensional one-hot vector <span class="math inline">\(X \in
-\mathbb{R}^P\)</span> to a lower-dimensional embedding <span class="math inline">\(Z \in \mathbb{R}^K\)</span> with <span class="math inline">\(K &lt; P\)</span>. This simplified formulation
-illustrates the basic mechanism by which embeddings are learned, but it
-is rarely used in practice because meaningful context typically depends
-on multiple surrounding words.</p>
-<p>Word2Vec models typically learn embeddings using one of two
-architectures.</p>
+<p>A widely used approach for learning word embeddings from large text corpora is the Word2Vec framework <span class="citation" data-cites="2 3"></span>. Word2Vec learns vector representations by exploiting the idea that words appearing in similar contexts tend to have similar meanings, a concept rooted in the distributional hypothesis <span class="citation" data-cites="4"></span>. Unlike traditional bag-of-words (BoW) representations, which encode word counts in sparse vectors without preserving semantic similarity, Word2Vec learns dense distributed representations in which similar words occupy nearby locations in embedding space. Instead of manually designing features, the model learns embeddings by solving a prediction task based on word co-occurrence. Two main training objectives are commonly used <span class="citation" data-cites="2"></span>: the <strong>Skip-Gram</strong> model and the <strong>Continuous Bag-of-Words (CBOW)</strong> model.</p>
+<p>For completeness, consider first the simplified <em>one-word context</em> setting, where a single input word is mapped from a high-dimensional one-hot vector <span class="math inline">\(X \in \mathbb{R}^P\)</span> to a lower-dimensional embedding <span class="math inline">\(Z \in \mathbb{R}^K\)</span> with <span class="math inline">\(K &lt; P\)</span>. This simplified formulation illustrates the basic mechanism by which embeddings are learned, but it is rarely used in practice because meaningful context typically depends on multiple surrounding words.</p>
+<p>Word2Vec models typically learn embeddings using one of two architectures.</p>
 <h3 class="unnumbered" id="skip-gram-model">Skip-Gram Model</h3>
-<p>The <strong>Skip-Gram</strong> model learns embeddings by predicting
-surrounding context words given a target word <span class="citation" data-cites="2"></span>. For a word sequence <span class="math inline">\(\{w_t\}_{t=1}^T\)</span> and a context window of
-size <span class="math inline">\(k\)</span>, the Skip-Gram objective
-maximizes the probability of observing neighboring words <span class="math inline">\(w_{t-k}, \ldots, w_{t+k}\)</span> (excluding the
-center word) given the target word <span class="math inline">\(w_t\)</span>: <span class="math display">\[\sum_{t=1}^{T} \sum_{\substack{-k \le j \le k \\
-j \neq 0}}
-\log P(w_{t+j}\mid w_t).\]</span> The conditional probability is
-computed using a softmax over the dot product of learned word
-embeddings. Intuitively, the model adjusts embeddings so that words
-appearing in similar contexts obtain similar vector representations.</p>
-<h3 class="unnumbered" id="continuous-bag-of-words-cbow">Continuous
-Bag-of-Words (CBOW)</h3>
-<p>The <strong>Continuous Bag-of-Words (CBOW)</strong> model reverses
-the Skip-Gram prediction task <span class="citation" data-cites="2"></span>. Instead of predicting surrounding words from a
-target word, CBOW predicts the target word from its surrounding context.
-The embeddings of the context words within a window are summed or
-averaged to form a single representation, which is then used to predict
-the center word: <span class="math display">\[\sum_{t=1}^{T} \log P(w_t
-\mid w_{t-k}, \ldots, w_{t+k}).\]</span> This objective encourages the
-model to learn embeddings that capture shared semantic and syntactic
-properties across context words.</p>
-<figure id="fig:skipgram_cbow">
-<img src="img/lecture21/skipgram-vs-cbow-continuous-bag-of-words-word2vec-word-representation-2048x1075.png" style="width:44.40%; max-width:44.40%; height:auto;"/>
-<figcaption>Difference between Skip-Gram and CBOW training
-architectures.</figcaption>
+<p>The <strong>Skip-Gram</strong> model learns embeddings by predicting surrounding context words given a target word <span class="citation" data-cites="2"></span>. For a word sequence <span class="math inline">\(\{w_t\}_{t=1}^T\)</span> and a context window of size <span class="math inline">\(k\)</span>, the Skip-Gram objective maximizes the probability of observing neighboring words <span class="math inline">\(w_{t-k}, \ldots, w_{t+k}\)</span> (excluding the center word) given the target word <span class="math inline">\(w_t\)</span>: <span class="math display">\[\sum_{t=1}^{T} \sum_{\substack{-k \le j \le k \\ j \neq 0}} 
+\log P(w_{t+j}\mid w_t).\]</span> The conditional probability is computed using a softmax over the dot product of learned word embeddings. Intuitively, the model adjusts embeddings so that words appearing in similar contexts obtain similar vector representations.</p>
+<h3 class="unnumbered" id="continuous-bag-of-words-cbow">Continuous Bag-of-Words (CBOW)</h3>
+<p>The <strong>Continuous Bag-of-Words (CBOW)</strong> model reverses the Skip-Gram prediction task <span class="citation" data-cites="2"></span>. Instead of predicting surrounding words from a target word, CBOW predicts the target word from its surrounding context. The embeddings of the context words within a window are summed or averaged to form a single representation, which is then used to predict the center word: <span class="math display">\[\sum_{t=1}^{T} \log P(w_t \mid w_{t-k}, \ldots, w_{t+k}).\]</span> This objective encourages the model to learn embeddings that capture shared semantic and syntactic properties across context words.</p>
+<figure>
+<img alt="Difference between Skip-Gram and CBOW training architectures." id="fig:skipgram_cbow" src="img/lecture21/skipgram-vs-cbow-continuous-bag-of-words-word2vec-word-representation-2048x1075.png" style="width:44.40%; max-width:44.40%; height:auto;"/><figcaption aria-hidden="true">Difference between Skip-Gram and CBOW training architectures.</figcaption>
 </figure>
-<p>Both Skip-Gram and CBOW produce embeddings that capture semantic
-relationships and serve as foundational representations for many modern
-NLP architectures. These learned embeddings form the foundation for
-Encoder–Decoder architectures, enabling models to represent words in a
-continuous vector space and generate contextually meaningful sequences
-for applications such as machine translation and text summarization.</p>
-<h2 data-number="3.4" id="sequence-to-sequence-seq2seq-model"><span class="header-section-number">3.4</span> Sequence-to-Sequence (Seq2Seq)
-Model</h2>
-<p>The <strong>Sequence-to-Sequence (Seq2Seq)</strong> model is a
-practical implementation of the Encoder–Decoder framework designed to
-handle variable-length input and output sequences, such as in machine
-translation <span class="citation" data-cites="6"></span>. The
-<strong>Encoder</strong> processes an input sentence word by word and
-produces a sequence of hidden states, with the final hidden state
-summarizing the entire input sequence into a context vector.</p>
-<figure id="fig:seq2seq_model">
-<img src="img/lecture21/ezgif-5-d49a166959.jpg" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<figcaption>LSTM-based Seq2Seq Encoder–Decoder Architecture</figcaption>
+<p>Both Skip-Gram and CBOW produce embeddings that capture semantic relationships and serve as foundational representations for many modern NLP architectures. These learned embeddings form the foundation for Encoder–Decoder architectures, enabling models to represent words in a continuous vector space and generate contextually meaningful sequences for applications such as machine translation and text summarization.</p>
+<h2 data-number="3.4" id="sequence-to-sequence-seq2seq-model"><span class="header-section-number">3.4</span> Sequence-to-Sequence (Seq2Seq) Model</h2>
+<p>The <strong>Sequence-to-Sequence (Seq2Seq)</strong> model is a practical implementation of the Encoder–Decoder framework designed to handle variable-length input and output sequences, such as in machine translation <span class="citation" data-cites="6"></span>. The <strong>Encoder</strong> processes an input sentence word by word and produces a sequence of hidden states, with the final hidden state summarizing the entire input sequence into a context vector.</p>
+<figure>
+<img alt="LSTM-based Seq2Seq Encoder–Decoder Architecture" id="fig:seq2seq_model" src="img/lecture21/ezgif-5-d49a166959.jpg" style="width:48.00%; max-width:48.00%; height:auto;"/><figcaption aria-hidden="true">LSTM-based Seq2Seq Encoder–Decoder Architecture</figcaption>
 </figure>
-<p>As illustrated in Figure <a data-reference="fig:seq2seq_model" data-reference-type="ref" href="#fig:seq2seq_model">3</a>, let
-<span class="math inline">\(x_i\)</span> denote the input token at
-position <span class="math inline">\(i\)</span>, and let <span class="math inline">\(h_i\)</span> denote the corresponding encoder
-hidden state. When the Encoder is implemented using Long Short-Term
-Memory (LSTM) units, the hidden state evolves as <span class="math display">\[h_i = \text{LSTM}(x_i, h_{i-1}),\]</span> where
-<span class="math inline">\(h_{i-1}\)</span> is the previous hidden
-state. After the full input sequence has been processed, the final
-hidden state <span class="math inline">\(h_T\)</span> becomes the
-context vector <span class="math display">\[c = h_T,\]</span> which
-summarizes the entire input sentence.</p>
-<p>The <strong>Decoder</strong> generates the output sequence
-autoregressively, producing one token at a time. At decoding step <span class="math inline">\(j\)</span>, the Decoder uses the previously
-generated token <span class="math inline">\(y_{j-1}\)</span>, the
-previous hidden state <span class="math inline">\(s_{j-1}\)</span>, and
-the context vector <span class="math inline">\(c\)</span> to update its
-hidden state: <span class="math display">\[s_j = \text{LSTM}(y_{j-1},
-s_{j-1}, c).\]</span> The probability distribution over the next output
-token is then obtained by applying a softmax layer to <span class="math inline">\(s_j\)</span>. This process repeats until an
-end-of-sequence token is produced, allowing the model to generate output
-sequences of arbitrary length.</p>
-<p>Seq2Seq models form the foundation of many modern sequence generation
-systems and paved the way for attention-based and Transformer
-architectures introduced later.</p>
+<p>As illustrated in Figure <a data-reference="fig:seq2seq_model" data-reference-type="ref" href="#fig:seq2seq_model">3</a>, let <span class="math inline">\(x_i\)</span> denote the input token at position <span class="math inline">\(i\)</span>, and let <span class="math inline">\(h_i\)</span> denote the corresponding encoder hidden state. When the Encoder is implemented using Long Short-Term Memory (LSTM) units, the hidden state evolves as <span class="math display">\[h_i = \text{LSTM}(x_i, h_{i-1}),\]</span> where <span class="math inline">\(h_{i-1}\)</span> is the previous hidden state. After the full input sequence has been processed, the final hidden state <span class="math inline">\(h_T\)</span> becomes the context vector <span class="math display">\[c = h_T,\]</span> which summarizes the entire input sentence.</p>
+<p>The <strong>Decoder</strong> generates the output sequence autoregressively, producing one token at a time. At decoding step <span class="math inline">\(j\)</span>, the Decoder uses the previously generated token <span class="math inline">\(y_{j-1}\)</span>, the previous hidden state <span class="math inline">\(s_{j-1}\)</span>, and the context vector <span class="math inline">\(c\)</span> to update its hidden state: <span class="math display">\[s_j = \text{LSTM}(y_{j-1}, s_{j-1}, c).\]</span> The probability distribution over the next output token is then obtained by applying a softmax layer to <span class="math inline">\(s_j\)</span>. This process repeats until an end-of-sequence token is produced, allowing the model to generate output sequences of arbitrary length.</p>
+<p>Seq2Seq models form the foundation of many modern sequence generation systems and paved the way for attention-based and Transformer architectures introduced later.</p>
 <h2 data-number="3.5" id="dot-product-attention"><span class="header-section-number">3.5</span> Dot-Product Attention</h2>
-<p>Although the Seq2Seq model performs well on short sequences, it
-struggles with longer inputs because the entire sentence must be
-compressed into a single fixed-size context vector, creating an
-information bottleneck <span class="citation" data-cites="7 8"></span>.
-This bottleneck limits the model’s ability to retain detailed
-information. To address this limitation, <strong>Dot-Product
-Attention</strong> allows the Decoder to dynamically focus on different
-parts of the input sequence at each decoding step.</p>
-<p>Instead of using a single context vector for all output steps,
-attention computes a <em>new context vector</em> for every decoder step.
-At decoding step <span class="math inline">\(j\)</span>, the model
-measures how well the decoder hidden state <span class="math inline">\(s_j\)</span> aligns with each encoder hidden state
-<span class="math inline">\(h_i\)</span>. This alignment score is
-computed using the dot product: <span class="math display">\[e_{j,i} =
-s_j^{\top} h_i.\]</span></p>
-<p>These alignment scores are converted into attention weights using a
-softmax function: <span class="math display">\[\alpha_{j,i} =
+<p>Although the Seq2Seq model performs well on short sequences, it struggles with longer inputs because the entire sentence must be compressed into a single fixed-size context vector, creating an information bottleneck <span class="citation" data-cites="7 8"></span>. This bottleneck limits the model’s ability to retain detailed information. To address this limitation, <strong>Dot-Product Attention</strong> allows the Decoder to dynamically focus on different parts of the input sequence at each decoding step.</p>
+<p>Instead of using a single context vector for all output steps, attention computes a <em>new context vector</em> for every decoder step. At decoding step <span class="math inline">\(j\)</span>, the model measures how well the decoder hidden state <span class="math inline">\(s_j\)</span> aligns with each encoder hidden state <span class="math inline">\(h_i\)</span>. This alignment score is computed using the dot product: <span class="math display">\[e_{j,i} = s_j^{\top} h_i.\]</span></p>
+<p>These alignment scores are converted into attention weights using a softmax function: <span class="math display">\[\alpha_{j,i} = 
 \frac{\exp(e_{j,i})}
-{\sum_{k=1}^{T} \exp(e_{j,k})}.\]</span> The attention weight <span class="math inline">\(\alpha_{j,i}\)</span> represents how much
-importance the Decoder assigns to encoder state <span class="math inline">\(h_i\)</span> when generating the <span class="math inline">\(j\)</span>-th output token.</p>
-<p>The step-specific context vector is then computed as a weighted sum
-of the encoder hidden states: <span class="math display">\[c_j =
-\sum_{i=1}^{T} \alpha_{j,i} h_i.\]</span></p>
-<p>This dynamically computed context vector <span class="math inline">\(c_j\)</span> replaces the single fixed context
-vector used in basic Seq2Seq models. The Decoder uses <span class="math inline">\(c_j\)</span> together with its hidden state to
-generate the next output token. By recomputing the context at each step,
-attention enables the model to selectively focus on the most relevant
-parts of the input sequence, significantly improving performance on long
-sequences.</p>
-<p>Dot-product attention forms the basis for modern attention-based
-models and serves as the foundation for Transformer architectures
-introduced later <span class="citation" data-cites="8 11"></span>.</p>
-<h1 data-number="4" id="attention-based-encoderdecoder-models"><span class="header-section-number">4.</span> Attention-Based Encoder–Decoder
-Models</h1>
-<p>While dot-product attention improves the basic Seq2Seq framework by
-allowing the decoder to focus on different encoder states at each output
-step, more structured attention mechanisms can further improve alignment
-quality and translation performance. In particular, Luong et
-al. proposed two broad classes of attention-based models: <em>global
-attention</em>, which attends to all encoder hidden states, and
-<em>local attention</em>, which restricts attention to a smaller window
-of source positions <span class="citation" data-cites="8"></span>. These
-two variants differ in how the context vector is computed and in the
-trade-off they make between computational cost and alignment
-flexibility.</p>
-<p>At decoder step <span class="math inline">\(t\)</span>, let the
-decoder hidden state be <span class="math inline">\(\mathbf{s}_t\)</span>, and let the encoder produce
-source-side hidden states <span class="math inline">\(\mathbf{h}_1,
-\mathbf{h}_2, \dots, \mathbf{h}_T\)</span>. In both global and local
-attention, the goal is to construct a context vector <span class="math inline">\(\mathbf{c}_t\)</span> that summarizes the source
-information most relevant for predicting the current output token. This
-context vector is then combined with the decoder hidden state to form an
-attentional hidden representation: <span class="math display">\[\tilde{\mathbf{s}}_t =
-\tanh\!\left(\mathbf{W}_c[\mathbf{c}_t;\mathbf{s}_t]\right),\]</span>
-which is then used to produce the output distribution: <span class="math display">\[P(y_t \mid y_{&lt;t}, x) =
-\text{softmax}(\mathbf{W}_s \tilde{\mathbf{s}}_t).\]</span></p>
+{\sum_{k=1}^{T} \exp(e_{j,k})}.\]</span> The attention weight <span class="math inline">\(\alpha_{j,i}\)</span> represents how much importance the Decoder assigns to encoder state <span class="math inline">\(h_i\)</span> when generating the <span class="math inline">\(j\)</span>-th output token.</p>
+<p>The step-specific context vector is then computed as a weighted sum of the encoder hidden states: <span class="math display">\[c_j = \sum_{i=1}^{T} \alpha_{j,i} h_i.\]</span></p>
+<p>This dynamically computed context vector <span class="math inline">\(c_j\)</span> replaces the single fixed context vector used in basic Seq2Seq models. The Decoder uses <span class="math inline">\(c_j\)</span> together with its hidden state to generate the next output token. By recomputing the context at each step, attention enables the model to selectively focus on the most relevant parts of the input sequence, significantly improving performance on long sequences.</p>
+<p>Dot-product attention forms the basis for modern attention-based models and serves as the foundation for Transformer architectures introduced later <span class="citation" data-cites="8 11"></span>.</p>
+<h1 data-number="4" id="attention-based-encoderdecoder-models"><span class="header-section-number">4.</span> Attention-Based Encoder–Decoder Models</h1>
+<p>While dot-product attention improves the basic Seq2Seq framework by allowing the decoder to focus on different encoder states at each output step, more structured attention mechanisms can further improve alignment quality and translation performance. In particular, Luong et al. proposed two broad classes of attention-based models: <em>global attention</em>, which attends to all encoder hidden states, and <em>local attention</em>, which restricts attention to a smaller window of source positions <span class="citation" data-cites="8"></span>. These two variants differ in how the context vector is computed and in the trade-off they make between computational cost and alignment flexibility.</p>
+<p>At decoder step <span class="math inline">\(t\)</span>, let the decoder hidden state be <span class="math inline">\(\mathbf{s}_t\)</span>, and let the encoder produce source-side hidden states <span class="math inline">\(\mathbf{h}_1, \mathbf{h}_2, \dots, \mathbf{h}_T\)</span>. In both global and local attention, the goal is to construct a context vector <span class="math inline">\(\mathbf{c}_t\)</span> that summarizes the source information most relevant for predicting the current output token. This context vector is then combined with the decoder hidden state to form an attentional hidden representation: <span class="math display">\[\tilde{\mathbf{s}}_t = \tanh\!\left(\mathbf{W}_c[\mathbf{c}_t;\mathbf{s}_t]\right),\]</span> which is then used to produce the output distribution: <span class="math display">\[P(y_t \mid y_{&lt;t}, x) = \text{softmax}(\mathbf{W}_s \tilde{\mathbf{s}}_t).\]</span></p>
 <h2 data-number="4.1" id="global-attention"><span class="header-section-number">4.1</span> Global Attention</h2>
-<p>In the global attention model, the decoder considers <em>all</em>
-encoder hidden states when forming the context vector <span class="citation" data-cites="8"></span>. At decoding step <span class="math inline">\(t\)</span>, an alignment score is computed between
-the current decoder hidden state <span class="math inline">\(\mathbf{s}_t\)</span> and each encoder hidden
-state <span class="math inline">\(\mathbf{h}_i\)</span>. In the simplest
-dot-product form, the score is <span class="math display">\[e_{t,i} =
-\mathbf{s}_t^\top \mathbf{h}_i.\]</span> These scores are normalized
-with a softmax to form attention weights: <span class="math display">\[\alpha_{t,i} =
-\frac{\exp(e_{t,i})}{\sum_{k=1}^{T}\exp(e_{t,k})}.\]</span> The context
-vector is then computed as a weighted sum of all encoder hidden states:
-<span class="math display">\[\mathbf{c}_t = \sum_{i=1}^{T}
-\alpha_{t,i}\mathbf{h}_i.\]</span></p>
-<p>The key advantage of global attention is that it allows the decoder
-to examine the entire source sequence at every output step. This can
-yield strong alignment quality because the model is free to attend to
-any input position when generating the next token. However, this
-flexibility also comes with higher computational cost, especially for
-long input sequences, since attention weights must be computed over all
-encoder states at every decoding step.</p>
+<p>In the global attention model, the decoder considers <em>all</em> encoder hidden states when forming the context vector <span class="citation" data-cites="8"></span>. At decoding step <span class="math inline">\(t\)</span>, an alignment score is computed between the current decoder hidden state <span class="math inline">\(\mathbf{s}_t\)</span> and each encoder hidden state <span class="math inline">\(\mathbf{h}_i\)</span>. In the simplest dot-product form, the score is <span class="math display">\[e_{t,i} = \mathbf{s}_t^\top \mathbf{h}_i.\]</span> These scores are normalized with a softmax to form attention weights: <span class="math display">\[\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{k=1}^{T}\exp(e_{t,k})}.\]</span> The context vector is then computed as a weighted sum of all encoder hidden states: <span class="math display">\[\mathbf{c}_t = \sum_{i=1}^{T} \alpha_{t,i}\mathbf{h}_i.\]</span></p>
+<p>The key advantage of global attention is that it allows the decoder to examine the entire source sequence at every output step. This can yield strong alignment quality because the model is free to attend to any input position when generating the next token. However, this flexibility also comes with higher computational cost, especially for long input sequences, since attention weights must be computed over all encoder states at every decoding step.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Local vs Global Attention</h3><p>Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture21_Attention_Interactive_interactive.html" style="height:900px;" title="Interactive Section 3 Local vs Global Attention"></iframe></section>
 <h2 data-number="4.2" id="local-attention"><span class="header-section-number">4.2</span> Local Attention</h2>
-<p>Local attention reduces the computational burden of global attention
-by restricting the decoder to attend only to a small subset of encoder
-states <span class="citation" data-cites="8"></span>. Instead of
-computing attention over the full source sequence, the model first
-predicts an aligned source position <span class="math inline">\(p_t\)</span> for the current decoding step and
-then attends only to encoder states within a window centered at that
-position.</p>
-<p>If the attention window has radius <span class="math inline">\(D\)</span>, the context vector is computed over
-the limited range <span class="math display">\[i \in [p_t - D,\; p_t +
-D].\]</span> Thus, the local context vector takes the form <span class="math display">\[\mathbf{c}_t = \sum_{i=p_t-D}^{p_t+D}
-\alpha_{t,i}\mathbf{h}_i,\]</span> where the attention weights are
-computed only within this window.</p>
-<p>This restriction makes local attention more efficient than global
-attention, since the model no longer needs to compare the decoder state
-with every encoder state. At the same time, it preserves
-differentiability and usually retains strong alignment performance. In
-practice, local attention often provides a useful compromise: it is
-cheaper than global attention while still allowing the model to focus on
-the most relevant part of the source sequence. Luong et al. report that
-local attention can achieve performance comparable to, and in some cases
-better than, the global approach <span class="citation" data-cites="8"></span>.</p>
+<p>Local attention reduces the computational burden of global attention by restricting the decoder to attend only to a small subset of encoder states <span class="citation" data-cites="8"></span>. Instead of computing attention over the full source sequence, the model first predicts an aligned source position <span class="math inline">\(p_t\)</span> for the current decoding step and then attends only to encoder states within a window centered at that position.</p>
+<p>If the attention window has radius <span class="math inline">\(D\)</span>, the context vector is computed over the limited range <span class="math display">\[i \in [p_t - D,\; p_t + D].\]</span> Thus, the local context vector takes the form <span class="math display">\[\mathbf{c}_t = \sum_{i=p_t-D}^{p_t+D} \alpha_{t,i}\mathbf{h}_i,\]</span> where the attention weights are computed only within this window.</p>
+<p>This restriction makes local attention more efficient than global attention, since the model no longer needs to compare the decoder state with every encoder state. At the same time, it preserves differentiability and usually retains strong alignment performance. In practice, local attention often provides a useful compromise: it is cheaper than global attention while still allowing the model to focus on the most relevant part of the source sequence. Luong et al. report that local attention can achieve performance comparable to, and in some cases better than, the global approach <span class="citation" data-cites="8"></span>.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 3 — Local vs Global Attention</h3><p>Click any token as the query and compare global (all-positions) vs local (window D) attention scores. See the full NxN attention heatmap for both modes.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture21_Attention_Interactive_interactive.html" style="height:900px;" title="Interactive Section 3 Local vs Global Attention"></iframe></section>
 <h2 data-number="4.3" id="discussion"><span class="header-section-number">4.3</span> Discussion</h2>
-<p>Both global and local attention address the main limitation of the
-basic Seq2Seq model, namely the fixed-context bottleneck. Instead of
-relying on a single encoder summary vector for the entire output
-sequence, the decoder computes a new context vector at each step. Global
-attention provides maximum flexibility by considering all source
-positions, whereas local attention improves efficiency by narrowing the
-search to a neighborhood around a predicted alignment point. These ideas
-laid important groundwork for later attention-based models and helped
-motivate the transition from recurrent Seq2Seq architectures toward
-fully attention-based Transformer models <span class="citation" data-cites="8 11"></span>.</p>
-<figure id="fig:attention">
-<img src="img/lecture21/%E5%9C%96%E7%89%87%201.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Scaled dot-product attention (left) and multi-head attention
-(right) used in transformer architectures.</figcaption>
+<p>Both global and local attention address the main limitation of the basic Seq2Seq model, namely the fixed-context bottleneck. Instead of relying on a single encoder summary vector for the entire output sequence, the decoder computes a new context vector at each step. Global attention provides maximum flexibility by considering all source positions, whereas local attention improves efficiency by narrowing the search to a neighborhood around a predicted alignment point. These ideas laid important groundwork for later attention-based models and helped motivate the transition from recurrent Seq2Seq architectures toward fully attention-based Transformer models <span class="citation" data-cites="8 11"></span>.</p>
+<figure>
+<img alt="Scaled dot-product attention (left) and multi-head attention (right) used in transformer architectures." id="fig:attention" src="img/lecture21/%E5%9C%96%E7%89%87%201.png" style="width:42.00%; max-width:42.00%; height:auto;"/><figcaption aria-hidden="true">Scaled dot-product attention (left) and multi-head attention (right) used in transformer architectures.</figcaption>
 </figure>
 <h1 data-number="6" id="references"><span class="header-section-number">6.</span> References</h1>
 <div class="list">
 <p><span>[]</span><span> </span></p>
-<p>Y. Bengio, R. Ducharme, P. Vincent, and C. Janvin. A neural
-probabilistic language model. Journal of Machine Learning Research,
-3:1137–1155, 2003.</p>
-<p>T. Mikolov, K. Chen, G. Corrado, and J. Dean. Efficient estimation of
-word representations in vector space. arXiv preprint arXiv:1301.3781,
-2013.</p>
-<p>T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean.
-Distributed representations of words and phrases and their
-compositionality. Advances in Neural Information Processing Systems
-(NeurIPS), 2013.</p>
-<p>Z. S. Harris. Distributional structure. Word, 10(2–3):146–162,
-1954.</p>
-<p>K. Cho, B. van Merriënboer, D. Bahdanau, and Y. Bengio. On the
-properties of neural machine translation: Encoder–decoder approaches.
-SSST-8, Eighth Workshop on Syntax, Semantics and Structure in
-Statistical Translation, 2014.</p>
-<p>I. Sutskever, O. Vinyals, and Q. V. Le. Sequence to sequence learning
-with neural networks. Advances in Neural Information Processing Systems
-(NeurIPS), 2014.</p>
-<p>D. Bahdanau, K. Cho, and Y. Bengio. Neural machine translation by
-jointly learning to align and translate. International Conference on
-Learning Representations (ICLR), 2015.</p>
-<p>M.-T. Luong, H. Pham, and C. D. Manning. Effective approaches to
-attention-based neural machine translation. Proceedings of EMNLP,
-2015.</p>
-<p>T. Salimans and D. P. Kingma. Weight normalization: A simple
-reparameterization to accelerate training of deep neural networks.
-Advances in Neural Information Processing Systems (NeurIPS), 2016.</p>
-<p>S. Bai, J. Z. Kolter, and V. Koltun. An empirical evaluation of
-generic convolutional and recurrent networks for sequence modeling.
-arXiv preprint arXiv:1803.01271, 2018.</p>
-<p>A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N.
-Gomez, L. Kaiser, and I. Polosukhin. Attention is all you need. Advances
-in Neural Information Processing Systems (NeurIPS), 2017.</p>
+<p>Y. Bengio, R. Ducharme, P. Vincent, and C. Janvin. A neural probabilistic language model. Journal of Machine Learning Research, 3:1137–1155, 2003.</p>
+<p>T. Mikolov, K. Chen, G. Corrado, and J. Dean. Efficient estimation of word representations in vector space. arXiv preprint arXiv:1301.3781, 2013.</p>
+<p>T. Mikolov, I. Sutskever, K. Chen, G. Corrado, and J. Dean. Distributed representations of words and phrases and their compositionality. Advances in Neural Information Processing Systems (NeurIPS), 2013.</p>
+<p>Z. S. Harris. Distributional structure. Word, 10(2–3):146–162, 1954.</p>
+<p>K. Cho, B. van Merriënboer, D. Bahdanau, and Y. Bengio. On the properties of neural machine translation: Encoder–decoder approaches. SSST-8, Eighth Workshop on Syntax, Semantics and Structure in Statistical Translation, 2014.</p>
+<p>I. Sutskever, O. Vinyals, and Q. V. Le. Sequence to sequence learning with neural networks. Advances in Neural Information Processing Systems (NeurIPS), 2014.</p>
+<p>D. Bahdanau, K. Cho, and Y. Bengio. Neural machine translation by jointly learning to align and translate. International Conference on Learning Representations (ICLR), 2015.</p>
+<p>M.-T. Luong, H. Pham, and C. D. Manning. Effective approaches to attention-based neural machine translation. Proceedings of EMNLP, 2015.</p>
+<p>T. Salimans and D. P. Kingma. Weight normalization: A simple reparameterization to accelerate training of deep neural networks. Advances in Neural Information Processing Systems (NeurIPS), 2016.</p>
+<p>S. Bai, J. Z. Kolter, and V. Koltun. An empirical evaluation of generic convolutional and recurrent networks for sequence modeling. arXiv preprint arXiv:1803.01271, 2018.</p>
+<p>A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin. Attention is all you need. Advances in Neural Information Processing Systems (NeurIPS), 2017.</p>
 </div>
 
 </main>

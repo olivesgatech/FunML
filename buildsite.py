@@ -941,6 +941,8 @@ def rewrite_links_for_exercises(section_html: str, lectures_prefix: str):
       return True
     if "qanda" in marker_text_norm or "qasection" in marker_text_norm:
       return True
+    if "questionsandanswers" in marker_id_norm or "questionsandanswers" in marker_text_norm:
+      return True
     if re.search(r"\bq\s*(?:&|and)\s*a\b", marker_text.lower()):
       return True
     return False
@@ -1608,6 +1610,8 @@ def clean_lecture_body(
       return True
     if "qanda" in marker_text_norm or "qasection" in marker_text_norm:
       return True
+    if "questionsandanswers" in marker_id_norm or "questionsandanswers" in marker_text_norm:
+      return True
     if re.search(r"\bq\s*(?:&|and)\s*a\b", marker_text.lower()):
       return True
     return False
@@ -1638,6 +1642,11 @@ def clean_lecture_body(
     node = heading.next_sibling
     while node is not None:
       next_node = node.next_sibling
+      if (
+        getattr(node, "name", None) == "div"
+        and "thebibliography" in (node.get("class") or [])
+      ):
+        break
       if getattr(node, "name", None) and re.match(r"^h[1-6]$", node.name):
         if int(node.name[1]) <= heading_level:
           break

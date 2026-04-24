@@ -26,52 +26,29 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> You are training a model to classify
-images into one of ten categories. The dataset has roughly an equal
-number of samples for each category. Select the most suitable loss
-function.</p>
+<li><p><strong>Question:</strong> You are training a model to classify images into one of ten categories. The dataset has roughly an equal number of samples for each category. Select the most suitable loss function.</p>
 <ul>
 <li><p>A. Mean Squared Error (MSE) Loss</p></li>
 <li><p>B. Cross-Entropy Loss</p></li>
 <li><p>C. L1 Loss</p></li>
 <li><p>D. Weighted Cross-Entropy Loss</p></li>
 </ul>
-<p><strong>Solution:</strong> <strong>B. Cross-Entropy Loss.</strong>
-For multi-class classification with balanced classes, standard
-cross-entropy loss is the most appropriate choice because it directly
-optimizes predicted class probabilities. MSE and L1 are primarily used
-for regression tasks, and weighted cross-entropy is unnecessary when the
-dataset is balanced.</p></li>
-<li><p><strong>Question:</strong> You are working on a medical image
-segmentation task where the goal is to identify tumor regions in MRI
-scans. Tumor pixels are far fewer than non-tumor pixels. Select the most
-suitable loss function.</p>
+<p><strong>Solution:</strong> <strong>B. Cross-Entropy Loss.</strong> For multi-class classification with balanced classes, standard cross-entropy loss is the most appropriate choice because it directly optimizes predicted class probabilities. MSE and L1 are primarily used for regression tasks, and weighted cross-entropy is unnecessary when the dataset is balanced.</p></li>
+<li><p><strong>Question:</strong> You are working on a medical image segmentation task where the goal is to identify tumor regions in MRI scans. Tumor pixels are far fewer than non-tumor pixels. Select the most suitable loss function.</p>
 <ul>
 <li><p>A. Cross-Entropy Loss</p></li>
 <li><p>B. Weighted Cross-Entropy Loss</p></li>
 <li><p>C. MSE Loss</p></li>
 <li><p>D. Focal Loss</p></li>
 </ul>
-<p><strong>Solution:</strong> <strong>D. Focal Loss.</strong> Severe
-class imbalance is common in medical segmentation tasks. Focal loss
-down-weights easy background examples and focuses training on hard,
-minority-class examples. While weighted cross-entropy can help, focal
-loss is typically more effective when the imbalance is extreme.</p></li>
-<li><p><strong>Question:</strong> The activation histogram slope
-increases in each successive layer, with values extending to large
-magnitudes, suggesting exploding gradients. What is the most appropriate
-corrective action?</p>
+<p><strong>Solution:</strong> <strong>D. Focal Loss.</strong> Severe class imbalance is common in medical segmentation tasks. Focal loss down-weights easy background examples and focuses training on hard, minority-class examples. While weighted cross-entropy can help, focal loss is typically more effective when the imbalance is extreme.</p></li>
+<li><p><strong>Question:</strong> The activation histogram slope increases in each successive layer, with values extending to large magnitudes, suggesting exploding gradients. What is the most appropriate corrective action?</p>
 <ul>
 <li><p>A. Increase the learning rate</p></li>
 <li><p>B. Decrease the learning rate</p></li>
-<li><p>C. Change the activation function to a more aggressive variant
-like ReLU</p></li>
+<li><p>C. Change the activation function to a more aggressive variant like ReLU</p></li>
 </ul>
-<p><strong>Solution:</strong> <strong>B. Decrease the learning
-rate.</strong> Exploding gradients cause excessively large parameter
-updates that destabilize training. Reducing the learning rate helps
-stabilize optimization and prevent divergence. Additional remedies
-include gradient clipping and improved weight initialization.</p></li>
+<p><strong>Solution:</strong> <strong>B. Decrease the learning rate.</strong> Exploding gradients cause excessively large parameter updates that destabilize training. Reducing the learning rate helps stabilize optimization and prevent divergence. Additional remedies include gradient clipping and improved weight initialization.</p></li>
 </ol></section>
 </main>
 </body>

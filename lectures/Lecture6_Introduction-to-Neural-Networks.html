@@ -146,8 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
 <td style="text-align: left;">Non-Linear</td>
 <td style="text-align: left;">N/A</td>
 <td style="text-align: left;">Discrim-inative</td>
-<td style="text-align: left;">Non-parametric (but has hyperparameter
-K)</td>
+<td style="text-align: left;">Non-parametric (but has hyperparameter K)</td>
 <td style="text-align: left;">With small K</td>
 </tr>
 <tr class="even">
@@ -185,177 +184,79 @@ K)</td>
 </tr>
 </tbody>
 </table>
-<p>Up until this point, we have learned about 4 different types of
-classifiers, as well as a few activation functions. Most of these
-classifiers have been fairly simple, and can be easy to implement.
-Special characteristics of these classifiers noted here:</p>
+<p>Up until this point, we have learned about 4 different types of classifiers, as well as a few activation functions. Most of these classifiers have been fairly simple, and can be easy to implement. Special characteristics of these classifiers noted here:</p>
 <ol>
-<li><p>Logistic Regression: A discriminative probabilistic classifier
-that models <span class="math inline">\(P(y\mid x)\)</span>. It is
-commonly used for binary classification, and can be extended to
-multi-class classification via multinomial (softmax) logistic regression
-or one-vs-rest strategies.</p></li>
-<li><p>K-Nearest Neighbors: Many objects with known classes are placed
-on a graph, and the highest occurring class over the “k” nearest objects
-from the unknown class is the prediction.</p></li>
-<li><p>Decision Trees: A tree with each node being a yes/no or
-qualitative scenario to pick from. The final node in a chain is the
-final “output” or class that is being predicted. Generally mimics human
-reasoning.</p></li>
-<li><p>Support Vector Machines: A discriminative classifier that finds a
-<strong>maximum-margin</strong> separating hyperplane between classes.
-With the kernel trick, SVMs can learn non-linear decision boundaries by
-implicitly operating in a higher-dimensional feature space.</p></li>
-<li><p>Naive Bayes: Assumes that features are conditionally independent
-given the class label. The model estimates class-conditional likelihoods
-<span class="math inline">\(P(x_j \mid y)\)</span> from training data
-(often using frequency counts or simple parametric distributions), and
-combines them using Bayes’ rule to compute the posterior <span class="math inline">\(P(y \mid x)\)</span>. Despite the strong
-independence assumption, Naive Bayes often performs well in practice,
-especially in high-dimensional settings such as text
-classification.</p></li>
+<li><p>Logistic Regression: A discriminative probabilistic classifier that models <span class="math inline">\(P(y\mid x)\)</span>. It is commonly used for binary classification, and can be extended to multi-class classification via multinomial (softmax) logistic regression or one-vs-rest strategies.</p></li>
+<li><p>K-Nearest Neighbors: Many objects with known classes are placed on a graph, and the highest occurring class over the “k” nearest objects from the unknown class is the prediction.</p></li>
+<li><p>Decision Trees: A tree with each node being a yes/no or qualitative scenario to pick from. The final node in a chain is the final “output” or class that is being predicted. Generally mimics human reasoning.</p></li>
+<li><p>Support Vector Machines: A discriminative classifier that finds a <strong>maximum-margin</strong> separating hyperplane between classes. With the kernel trick, SVMs can learn non-linear decision boundaries by implicitly operating in a higher-dimensional feature space.</p></li>
+<li><p>Naive Bayes: Assumes that features are conditionally independent given the class label. The model estimates class-conditional likelihoods <span class="math inline">\(P(x_j \mid y)\)</span> from training data (often using frequency counts or simple parametric distributions), and combines them using Bayes’ rule to compute the posterior <span class="math inline">\(P(y \mid x)\)</span>. Despite the strong independence assumption, Naive Bayes often performs well in practice, especially in high-dimensional settings such as text classification.</p></li>
 </ol>
-<h1 data-number="2" id="overview-of-artificial-neural-networks"><span class="header-section-number">2.</span> Overview of Artificial Neural
-Networks</h1>
-<p>Artificial Neural Networks (ANNs) are structured networks that
-consist of multiple layers, each of which consists of artificial
-neurons. Each layer has its neurons connected to the neurons of the
-previous and subsequent layers thus loosely modeling the networking
-construct that connects biological neurons via synapses in the
-brain.</p>
+<h1 data-number="2" id="overview-of-artificial-neural-networks"><span class="header-section-number">2.</span> Overview of Artificial Neural Networks</h1>
+<p>Artificial Neural Networks (ANNs) are structured networks that consist of multiple layers, each of which consists of artificial neurons. Each layer has its neurons connected to the neurons of the previous and subsequent layers thus loosely modeling the networking construct that connects biological neurons via synapses in the brain.</p>
 <div class="mdframed">
 <p><strong>Key Intuition: Why stack neurons in layers?</strong></p>
-<p>A single neuron corresponds to a linear separator after thresholding
-/ monotone nonlinearity: <span class="math display">\[y = \sigma(w^Tx +
-b),\]</span> which corresponds to a linear decision boundary in the
-input space. Stacking neurons in layers composes functions: <span class="math display">\[\text{output} = f_L(f_{L-1}(\dots
-f_1(x)\dots)),\]</span> allowing the network to build progressively more
-abstract representations. Early layers detect simple patterns; deeper
-layers combine them into complex structure.</p>
+<p>A single neuron corresponds to a linear separator after thresholding / monotone nonlinearity: <span class="math display">\[y = \sigma(w^Tx + b),\]</span> which corresponds to a linear decision boundary in the input space. Stacking neurons in layers composes functions: <span class="math display">\[\text{output} = f_L(f_{L-1}(\dots f_1(x)\dots)),\]</span> allowing the network to build progressively more abstract representations. Early layers detect simple patterns; deeper layers combine them into complex structure.</p>
 </div>
-<p>This layered composition is inspired (loosely) by biological neural
-circuits, motivating the neuron model we introduce next.</p>
-<h2 data-number="2.1" id="modeling-biological-neurons-to-artificial-neurons"><span class="header-section-number">2.1</span> Modeling biological neurons to
-artificial neurons</h2>
-<p>Artificial neurons used in neural networks are mathematical models
-that were inspired by biological neurons. Biological neurons work by
-taking in electrical signals sent by other neurons through its dendrites
-and then sending a response through its axon based on whether the sum of
-the signals from its dendrites exceed a certain voltage threshold. This
-inspired various portions of artificial neurons which work by taking in
-multiple numerical inputs and then uses a summation of these inputs
-multiplied with a respective weight and lastly added with a bias
-(similar to the accumulation of signals sent from dendrites) which is
-then passed through an activation function to determine the output of
-the artificial neuron (similar to action potentials firing, or
-activating, through a biological neuron’s axon).</p>
-<h2 data-number="2.2" id="components-of-an-artificial-neuron"><span class="header-section-number">2.2</span> Components of an artificial
-neuron</h2>
-<p>An artificial neuron is a computational unit that consists of
-multiple components including multiple inputs, corresponding input
-weights, a bias input, an activation function and an output. Below is an
-image along with a brief description of the components and their
-function. Everything below will be covered in more depth in other
-sections of this document.</p>
+<p>This layered composition is inspired (loosely) by biological neural circuits, motivating the neuron model we introduce next.</p>
+<h2 data-number="2.1" id="modeling-biological-neurons-to-artificial-neurons"><span class="header-section-number">2.1</span> Modeling biological neurons to artificial neurons</h2>
+<p>Artificial neurons used in neural networks are mathematical models that were inspired by biological neurons. Biological neurons work by taking in electrical signals sent by other neurons through its dendrites and then sending a response through its axon based on whether the sum of the signals from its dendrites exceed a certain voltage threshold. This inspired various portions of artificial neurons which work by taking in multiple numerical inputs and then uses a summation of these inputs multiplied with a respective weight and lastly added with a bias (similar to the accumulation of signals sent from dendrites) which is then passed through an activation function to determine the output of the artificial neuron (similar to action potentials firing, or activating, through a biological neuron’s axon).</p>
+<h2 data-number="2.2" id="components-of-an-artificial-neuron"><span class="header-section-number">2.2</span> Components of an artificial neuron</h2>
+<p>An artificial neuron is a computational unit that consists of multiple components including multiple inputs, corresponding input weights, a bias input, an activation function and an output. Below is an image along with a brief description of the components and their function. Everything below will be covered in more depth in other sections of this document.</p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/artificial_neuron.png" style="width:12cm"/></p>
 </div>
 <ul>
-<li><p>Multiple Inputs: Represents input values for various input
-features.</p></li>
-<li><p>Input Weights: Multiple weights which are multiplied by their
-respective input feature in order to increase or decrease the
-significance of an input in the result of the summation in the
-neuron.</p></li>
-<li><p>Bias Input: Takes in a bias value which is added to the summation
-of the multiplication of the inputs and their respective input weights
-in order to potentially shift the value of the summation prior to it
-entering the activation function.</p></li>
-<li><p>Activation function: A function that transforms the input given
-to it (the summation of the inputs <span class="math inline">\(\times\)</span> their respective weights + the
-bias) and turns it into an output.</p></li>
-<li><p>Single Output: A singular output that outputs the value
-calculated using the activation function.</p></li>
+<li><p>Multiple Inputs: Represents input values for various input features.</p></li>
+<li><p>Input Weights: Multiple weights which are multiplied by their respective input feature in order to increase or decrease the significance of an input in the result of the summation in the neuron.</p></li>
+<li><p>Bias Input: Takes in a bias value which is added to the summation of the multiplication of the inputs and their respective input weights in order to potentially shift the value of the summation prior to it entering the activation function.</p></li>
+<li><p>Activation function: A function that transforms the input given to it (the summation of the inputs <span class="math inline">\(\times\)</span> their respective weights + the bias) and turns it into an output.</p></li>
+<li><p>Single Output: A singular output that outputs the value calculated using the activation function.</p></li>
 </ul>
-<h2 data-number="2.3" id="using-artificial-neurons-to-construct-an-ann-artificial-neural-network"><span class="header-section-number">2.3</span> Using artificial neurons to
-construct an ANN (Artificial Neural Network)</h2>
-<p>The artificial neurons described above can be connected in multiple
-layers in order to create an artificial neural network (ANN). This ANN
-can consist of up to <span class="math inline">\(k\)</span> layers where
-the input layer is the first layer (i.e. layer 1), and the output layer
-is the last layer (i.e. layer <span class="math inline">\(k\)</span>)
-with all the layers in between being hidden layers which will be
-discussed more in depth in section <a data-reference="sec:hidden" data-reference-type="ref" href="#sec:hidden">5.2</a>. While
-hidden layers aren’t necessarily required, they are needed to classify
-non-linearly separable data. An example of an ANN is shown below where
-there are <span class="math inline">\(n\)</span> hidden layers between
-the input and output layers.</p>
+<h2 data-number="2.3" id="using-artificial-neurons-to-construct-an-ann-artificial-neural-network"><span class="header-section-number">2.3</span> Using artificial neurons to construct an ANN (Artificial Neural Network)</h2>
+<p>The artificial neurons described above can be connected in multiple layers in order to create an artificial neural network (ANN). This ANN can consist of up to <span class="math inline">\(k\)</span> layers where the input layer is the first layer (i.e. layer 1), and the output layer is the last layer (i.e. layer <span class="math inline">\(k\)</span>) with all the layers in between being hidden layers which will be discussed more in depth in section <a data-reference="sec:hidden" data-reference-type="ref" href="#sec:hidden">5.2</a>. While hidden layers aren’t necessarily required, they are needed to classify non-linearly separable data. An example of an ANN is shown below where there are <span class="math inline">\(n\)</span> hidden layers between the input and output layers.</p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/Artificial-neural-network.png" style="width:10cm"/></p>
 </div>
 <h1 data-number="3" id="sec:activations"><span class="header-section-number">3.</span> Activation Functions</h1>
-<p>Activation functions are mathematical operations that are applied to
-single inputs and produce a single output. These are used in the neurons
-of ANNs, and the outputs of the functions can be used to transform the
-input of a neuron to have larger meaning. There are many types of
-activation functions, but all serve the following purposes:</p>
+<p>Activation functions are mathematical operations that are applied to single inputs and produce a single output. These are used in the neurons of ANNs, and the outputs of the functions can be used to transform the input of a neuron to have larger meaning. There are many types of activation functions, but all serve the following purposes:</p>
 <ol>
 <li><p>Linearity and/or Non-linearity of Prediction:</p>
 <ul>
-<li><p>When predicting an outcome or class based on the features of an
-item, an easy way to assist in the creation of the output is by plotting
-a feature on a function. We are then able to use this output to help
-mathematically classify the inputs.</p></li>
-<li><p>Not all features or inputs can be plotted on a simple line with
-varying slope/intercepts. In many cases it may make sense to plot on a
-non-linear function or even a discontinuous or non-differentiable
-function.</p></li>
+<li><p>When predicting an outcome or class based on the features of an item, an easy way to assist in the creation of the output is by plotting a feature on a function. We are then able to use this output to help mathematically classify the inputs.</p></li>
+<li><p>Not all features or inputs can be plotted on a simple line with varying slope/intercepts. In many cases it may make sense to plot on a non-linear function or even a discontinuous or non-differentiable function.</p></li>
 </ul></li>
 <li><p>Decision Thresholds:</p>
 <ul>
-<li><p>In classification problems, activation functions help to define
-complex decision boundaries. In a program that is classifying data
-points that are not linearly separable, a non-linear curve may help
-separate points better. The non-linearity can be used to emphasize much
-smaller differences into much larger divided descriptions.</p></li>
+<li><p>In classification problems, activation functions help to define complex decision boundaries. In a program that is classifying data points that are not linearly separable, a non-linear curve may help separate points better. The non-linearity can be used to emphasize much smaller differences into much larger divided descriptions.</p></li>
 </ul></li>
 </ol>
 <div class="mdframed">
 <p><strong>Why activation functions matter for learning</strong></p>
-<p>Training neural networks relies on gradient-based optimization.
-Activation functions must be differentiable (or almost everywhere
-differentiable) so gradients can be propagated backward through layers
-during backpropagation. Nonlinear activations are essential — without
-them, multiple layers collapse into a single linear model.</p>
+<p>Training neural networks relies on gradient-based optimization. Activation functions must be differentiable (or almost everywhere differentiable) so gradients can be propagated backward through layers during backpropagation. Nonlinear activations are essential — without them, multiple layers collapse into a single linear model.</p>
 </div>
 <h2 data-number="3.1" id="sec:sigmoid"><span class="header-section-number">3.1</span> Sigmoid</h2>
-<p><span class="math display">\[\sigma(x) = \frac{1}{1 +
-e^{-x}}\]</span></p>
+<p><span class="math display">\[\sigma(x) = \frac{1}{1 + e^{-x}}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/Sigmoid.png" style="width:8cm"/></p>
 </div>
 <p>Characteristics of the function:</p>
 <ul>
 <li><p>Output Range: (0,1)</p></li>
-<li><p>Curve is S-shaped, and outputs between (0,1), which is helpful
-for predicting probabilities.</p></li>
+<li><p>Curve is S-shaped, and outputs between (0,1), which is helpful for predicting probabilities.</p></li>
 </ul>
 <h2 data-number="3.2" id="tanh-hyperbolic-tangent"><span class="header-section-number">3.2</span> Tanh (Hyperbolic Tangent)</h2>
-<p><span class="math display">\[\tanh(x) = \frac{e^x - e^{-x}}{e^x +
-e^{-x}}\]</span></p>
+<p><span class="math display">\[\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/TanH.png" style="width:8cm"/></p>
 </div>
 <p>Characteristics of the function:</p>
 <ul>
 <li><p>Output Range: (-1,1)</p></li>
-<li><p>Zero-centered, which can help with many things, especially during
-the learning process.</p></li>
-<li><p>Functionally similar to the Sigmoid function, however instead of
-strictly positive, it is between (-1, 1).</p></li>
+<li><p>Zero-centered, which can help with many things, especially during the learning process.</p></li>
+<li><p>Functionally similar to the Sigmoid function, however instead of strictly positive, it is between (-1, 1).</p></li>
 </ul>
-<h2 data-number="3.3" id="relu-rectified-linear-unit"><span class="header-section-number">3.3</span> ReLU (Rectified Linear
-Unit)</h2>
+<h2 data-number="3.3" id="relu-rectified-linear-unit"><span class="header-section-number">3.3</span> ReLU (Rectified Linear Unit)</h2>
 <p><span class="math display">\[f(x) = \max(0,x)\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/ReLU.png" style="width:8cm"/></p>
@@ -363,8 +264,7 @@ Unit)</h2>
 <p>Characteristics of the function:</p>
 <ul>
 <li><p>Range: [0, <span class="math inline">\(\infty\)</span>)</p></li>
-<li><p>Extremely computationally simple, but can hinder algorithms when
-stuck outputting zero.</p></li>
+<li><p>Extremely computationally simple, but can hinder algorithms when stuck outputting zero.</p></li>
 </ul>
 <h2 data-number="3.4" id="leaky-relu"><span class="header-section-number">3.4</span> Leaky ReLU</h2>
 <p><span class="math display">\[f(x) = \max(.1x, x)\]</span></p>
@@ -374,19 +274,14 @@ stuck outputting zero.</p></li>
 <p>Characteristics of the function:</p>
 <ul>
 <li><p>Range: (-<span class="math inline">\(\infty\)</span>, <span class="math inline">\(\infty\)</span>)</p></li>
-<li><p>Just as computationally simple as the normal ReLU, but avoids the
-issue of getting stuck outputting zero.</p></li>
+<li><p>Just as computationally simple as the normal ReLU, but avoids the issue of getting stuck outputting zero.</p></li>
 </ul>
 <h2 data-number="3.5" id="maxout"><span class="header-section-number">3.5</span> Maxout</h2>
-<p><span class="math display">\[f(x) = \max(w_1^T x + b_1, w_2^T x +
-b_2)\]</span></p>
+<p><span class="math display">\[f(x) = \max(w_1^T x + b_1, w_2^T x + b_2)\]</span></p>
 <p>Characteristics of the function:</p>
 <ul>
-<li><p>Dependent on <span class="math inline">\(w_1,
-w_2...w_n\)</span><span class="math inline">\(b_1,
-b_2...b_n\)</span></p></li>
-<li><p>Able to combine many different linear functions into one overall
-function.</p></li>
+<li><p>Dependent on <span class="math inline">\(w_1, w_2...w_n\)</span><span class="math inline">\(b_1, b_2...b_n\)</span></p></li>
+<li><p>Able to combine many different linear functions into one overall function.</p></li>
 </ul>
 <h2 data-number="3.6" id="softplus"><span class="header-section-number">3.6</span> SoftPlus</h2>
 <p><span class="math display">\[f(x) = \ln(1 + e^x)\]</span></p>
@@ -396,151 +291,53 @@ function.</p></li>
 <p>Characteristics of the function:</p>
 <ul>
 <li><p>Range: (0, <span class="math inline">\(\infty\)</span>)</p></li>
-<li><p>Similar to leaky ReLU, however it is differentiable throughout
-the entire curve.</p></li>
+<li><p>Similar to leaky ReLU, however it is differentiable throughout the entire curve.</p></li>
 </ul>
-<h2 data-number="3.7" id="activation-function---comparisons"><span class="header-section-number">3.7</span> Activation Function -
-Comparisons</h2>
-<p>All of the above activation functions vary both graphically as well
-as when they are generally used. The Sigmoid and Tanh functions both
-have smooth curves, and have a clamped range. The ReLU and Leaky ReLU
-functions provide easily computed outputs, with the Leaky ReLU having a
-different behavior with negative X-inputs. Maxout in some instances can
-be treated the same as either ReLU or Leaky ReLU, dependent on the <span class="math inline">\(w_n\)</span> inputs. The SoftPlus function is very
-similar to ReLU, however it is differentiable throughout the entire
-curve, with the main function being non-linear similar to the Sigmoid
-and TanH functions.</p>
-<h2 data-number="3.8" id="slp-usage-of-activation-function"><span class="header-section-number">3.8</span> SLP usage of activation
-function</h2>
-<p>Single layer perceptrons use the activation function to determine the
-output of a single-layer perceptron which is covered in more depth in
-Section <a data-reference="single-layer-perceptron-section" data-reference-type="ref" href="#single-layer-perceptron-section">4.1</a>. The activation
-function takes as input the summation of the input vector multiplied
-with its corresponding weights and lastly added with the bias. After
-running the activation function with the given input, the function will
-in turn drive the output of the perceptron. The simplest version of
-perceptrons uses linear activation such that the outputs are binary, for
-example <span class="math inline">\(y \in \{-1, 1\}\)</span>, though
-this would only work when classifying linearly separable data. In order
-to classify non-linearly separable data multi-layer ANNs would be needed
-(covered in Section <a data-reference="mlp-section" data-reference-type="ref" href="#mlp-section">[mlp-section]</a>).</p>
+<h2 data-number="3.7" id="activation-function---comparisons"><span class="header-section-number">3.7</span> Activation Function - Comparisons</h2>
+<p>All of the above activation functions vary both graphically as well as when they are generally used. The Sigmoid and Tanh functions both have smooth curves, and have a clamped range. The ReLU and Leaky ReLU functions provide easily computed outputs, with the Leaky ReLU having a different behavior with negative X-inputs. Maxout in some instances can be treated the same as either ReLU or Leaky ReLU, dependent on the <span class="math inline">\(w_n\)</span> inputs. The SoftPlus function is very similar to ReLU, however it is differentiable throughout the entire curve, with the main function being non-linear similar to the Sigmoid and TanH functions.</p>
+<h2 data-number="3.8" id="slp-usage-of-activation-function"><span class="header-section-number">3.8</span> SLP usage of activation function</h2>
+<p>Single layer perceptrons use the activation function to determine the output of a single-layer perceptron which is covered in more depth in Section <a data-reference="single-layer-perceptron-section" data-reference-type="ref" href="#single-layer-perceptron-section">4.1</a>. The activation function takes as input the summation of the input vector multiplied with its corresponding weights and lastly added with the bias. After running the activation function with the given input, the function will in turn drive the output of the perceptron. The simplest version of perceptrons uses linear activation such that the outputs are binary, for example <span class="math inline">\(y \in \{-1, 1\}\)</span>, though this would only work when classifying linearly separable data. In order to classify non-linearly separable data multi-layer ANNs would be needed (covered in Section <a data-reference="mlp-section" data-reference-type="ref" href="#mlp-section">[mlp-section]</a>).</p>
 <h1 data-number="4" id="perceptron-network"><span class="header-section-number">4.</span> Perceptron Network</h1>
-<h2 data-number="4.1" id="single-layer-perceptron-section"><span class="header-section-number">4.1</span> The Single-layer
-Perceptron</h2>
-<p>The single layer perceptron works as briefly outlined above. To
-begin, the perceptron takes 3 inputs: the input vector, the inputs
-corresponding weights, and a bias. The input vector can be defined as
-input vector <span class="math inline">\(x_i=[x_{i0},...,x_{iP}]\)</span>. The
-corresponding weights are then given in a vector which we will define as
-the vector <span class="math inline">\(w_1^{(1)}=[w_{11}^{(1)},...,w_{1P}^{(1)}]\)</span>.
-Lastly the bias is given as a vector which we will define as <span class="math inline">\(b_1^{(1)}\)</span>. Taking these 3 inputs, the
-perceptron will perform the function <span class="math inline">\(h_{i1}^{(1)}\)</span> as defined below where the
-values of the input vector are multiplied by their corresponding
-weights, then summed, and lastly added with the bias. <span class="math display">\[h_{i1}^{(1)} = (w_1^{(1)})^{T}x_i +
-b_1^{(1)}\]</span> Following the calculation of the weighted input to
-the neuron, the output of the function <span class="math inline">\(h_{i1}^{(1)}\)</span> will be used as the input to
-the activation function of the perceptron. The output of the perceptron
-will in turn be driven by the result of this activation function. For
-example, if we define the output as <span class="math inline">\(y_{i1}^{(1)}\)</span> and we choose to have a
-sigmoid activation function as defined in section <a data-reference="sec:sigmoid" data-reference-type="ref" href="#sec:sigmoid">3.1</a>, then
-<span class="math inline">\(y_{i1}^{(1)}=\sigma(h_{i1}^{(1)})\)</span>.
-Thus the output of the perceptron given in terms of its inputs in this
-example can be given as <span class="math inline">\(y_{i1}^{(1)}=\sigma((w_1^{(1)})^{T}x_i +
-b_1^{(1)})\)</span>.</p>
+<h2 data-number="4.1" id="single-layer-perceptron-section"><span class="header-section-number">4.1</span> The Single-layer Perceptron</h2>
+<p>The single layer perceptron works as briefly outlined above. To begin, the perceptron takes 3 inputs: the input vector, the inputs corresponding weights, and a bias. The input vector can be defined as input vector <span class="math inline">\(x_i=[x_{i0},...,x_{iP}]\)</span>. The corresponding weights are then given in a vector which we will define as the vector <span class="math inline">\(w_1^{(1)}=[w_{11}^{(1)},...,w_{1P}^{(1)}]\)</span>. Lastly the bias is given as a vector which we will define as <span class="math inline">\(b_1^{(1)}\)</span>. Taking these 3 inputs, the perceptron will perform the function <span class="math inline">\(h_{i1}^{(1)}\)</span> as defined below where the values of the input vector are multiplied by their corresponding weights, then summed, and lastly added with the bias. <span class="math display">\[h_{i1}^{(1)} = (w_1^{(1)})^{T}x_i + b_1^{(1)}\]</span> Following the calculation of the weighted input to the neuron, the output of the function <span class="math inline">\(h_{i1}^{(1)}\)</span> will be used as the input to the activation function of the perceptron. The output of the perceptron will in turn be driven by the result of this activation function. For example, if we define the output as <span class="math inline">\(y_{i1}^{(1)}\)</span> and we choose to have a sigmoid activation function as defined in section <a data-reference="sec:sigmoid" data-reference-type="ref" href="#sec:sigmoid">3.1</a>, then <span class="math inline">\(y_{i1}^{(1)}=\sigma(h_{i1}^{(1)})\)</span>. Thus the output of the perceptron given in terms of its inputs in this example can be given as <span class="math inline">\(y_{i1}^{(1)}=\sigma((w_1^{(1)})^{T}x_i + b_1^{(1)})\)</span>.</p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/Single-Layer-Perceptron-SLP.png" style="width:10cm"/></p>
 </div>
 <h2 data-number="4.2" id="linear-separability"><span class="header-section-number">4.2</span> Linear Separability</h2>
-<p>Linear separability is when there are given classes that have N
-quantifiable features, that using these features, there is a way to
-visibly separate the classes into 2 (or more) groups using an
-N-dimensional line or plane. If the classes can be separated, but using
-a non-linear function, that means they are separable but non-linearly.
-An example of 2-D linear separability is below:</p>
-<figure id="fig:enter-label">
-<img src="img/lecture5/LinSep.png" style="width:7cm"/>
-<figcaption>Linearly Separable Graph</figcaption>
+<p>Linear separability is when there are given classes that have N quantifiable features, that using these features, there is a way to visibly separate the classes into 2 (or more) groups using an N-dimensional line or plane. If the classes can be separated, but using a non-linear function, that means they are separable but non-linearly. An example of 2-D linear separability is below:</p>
+<figure>
+<img alt="Linearly Separable Graph" id="fig:enter-label" src="img/lecture5/LinSep.png" style="width:7cm"/><figcaption aria-hidden="true">Linearly Separable Graph</figcaption>
 </figure>
-<p>This graph shows 2 classes, “Red” and “Blue”. Both classes share the
-same features, those being quantitatively displayed on the x and y-axis.
-A dividing line is shown in the middle, with the best-case estimation on
-how the classes can be separated.</p>
-<p>Note that this is still possible using more than 2 dimensions, where
-in 3-D the separation would be by using a plane, and so on.</p>
-<p>The “best” linear separation function is the one that leaves the most
-space between the two closest objects of any class. This is because it
-is best to avoid placing the separation line very close to any object,
-as we are unsure of the classifications of objects in between the set
-boundaries. All else equal, a separator with a larger margin is more
-robust; if the classes are very close, small noise can flip labels and
-performance degrades.</p>
-<figure id="fig:enter-label">
-<p><img alt="image" src="img/lecture5/NonLinSep.png" style="width:8cm"/> <img alt="image" src="img/lecture5/NonLinNonSep.png" style="width:8cm"/></p>
-<figcaption><em>Left</em>: Non-linear, Separable Graph; <em>Right</em>:
-Non-Separable Graph</figcaption>
-</figure>
-<p>Above are 2 graphs, showing 2 classes “Red” and “Blue”. Figure 5.2
-(left) shows a graph that the Red/Blue points can be separated
-quantitatively, but not linearly. This requires a function such as a
-circle or an oval. Figure 5.2 (right) shows a graph that the Red/Blue
-points cannot be separated at all.</p>
-<h2 data-number="4.3" id="the-slp-perceptron-learning-algorithm"><span class="header-section-number">4.3</span> The SLP Perceptron Learning
-Algorithm</h2>
-<p>Single-layer perceptrons (SLPs) learn a linear decision boundary.
-There are multiple common training rules for an SLP. The classic
-<em>perceptron algorithm</em> uses a hard threshold/sign activation and
-a mistake-driven update. In this section we present a simple supervised
-<em>error-based</em> update rule (often called a delta-style rule) and
-later illustrate it using a sigmoid output for smoother predictions.</p>
+<p>This graph shows 2 classes, “Red” and “Blue”. Both classes share the same features, those being quantitatively displayed on the x and y-axis. A dividing line is shown in the middle, with the best-case estimation on how the classes can be separated.</p>
+<p>Note that this is still possible using more than 2 dimensions, where in 3-D the separation would be by using a plane, and so on.</p>
+<p>The “best” linear separation function is the one that leaves the most space between the two closest objects of any class. This is because it is best to avoid placing the separation line very close to any object, as we are unsure of the classifications of objects in between the set boundaries. All else equal, a separator with a larger margin is more robust; if the classes are very close, small noise can flip labels and performance degrades.</p>
+<p><img alt="Left: Non-linear, Separable Graph; Right: Non-Separable Graph" id="fig:enter-label" src="img/lecture5/NonLinSep.png" style="width:8cm" title="fig:"/> <img alt="Left: Non-linear, Separable Graph; Right: Non-Separable Graph" id="fig:enter-label" src="img/lecture5/NonLinNonSep.png" style="width:8cm" title="fig:"/></p>
+<p>Above are 2 graphs, showing 2 classes “Red” and “Blue”. Figure 5.2 (left) shows a graph that the Red/Blue points can be separated quantitatively, but not linearly. This requires a function such as a circle or an oval. Figure 5.2 (right) shows a graph that the Red/Blue points cannot be separated at all.</p>
+<h2 data-number="4.3" id="the-slp-perceptron-learning-algorithm"><span class="header-section-number">4.3</span> The SLP Perceptron Learning Algorithm</h2>
+<p>Single-layer perceptrons (SLPs) learn a linear decision boundary. There are multiple common training rules for an SLP. The classic <em>perceptron algorithm</em> uses a hard threshold/sign activation and a mistake-driven update. In this section we present a simple supervised <em>error-based</em> update rule (often called a delta-style rule) and later illustrate it using a sigmoid output for smoother predictions.</p>
 <ol>
 <li><p>Weight Initialization</p>
 <ul>
-<li><p>To begin training, all weights in the weight vector <span class="math inline">\(w\)</span> which includes values in the range
-<span class="math inline">\([w_1,w_P]\)</span> are set to random values
-to begin training as the significance of each input is not yet known and
-therefore can’t be reflected accurately in the weight vector
-yet.</p></li>
+<li><p>To begin training, all weights in the weight vector <span class="math inline">\(w\)</span> which includes values in the range <span class="math inline">\([w_1,w_P]\)</span> are set to random values to begin training as the significance of each input is not yet known and therefore can’t be reflected accurately in the weight vector yet.</p></li>
 </ul></li>
 <li><p>Neuron Activation</p>
 <ul>
-<li><p>Neuron activation consists of the calculation of the neuron’s
-output. This includes both the summation of inputs in the form <span class="math inline">\(h=w^Tx+b\)</span> and the subsequent activation
-function which uses the result of <span class="math inline">\(h\)</span>
-as its input.</p></li>
+<li><p>Neuron activation consists of the calculation of the neuron’s output. This includes both the summation of inputs in the form <span class="math inline">\(h=w^Tx+b\)</span> and the subsequent activation function which uses the result of <span class="math inline">\(h\)</span> as its input.</p></li>
 </ul></li>
 <li><p>Weight Update</p>
 <ul>
-<li><p>In this step the weights are updated using the learning rule
-which is defined below: <span class="math display">\[w^{(t+1)} = w^{(t)}
-+ \alpha\, x^{(t)}\, e^{(t)},
+<li><p>In this step the weights are updated using the learning rule which is defined below: <span class="math display">\[w^{(t+1)} = w^{(t)} + \alpha\, x^{(t)}\, e^{(t)},
     \qquad
-    e^{(t)} = y^{(t)} - \hat{y}^{(t)}, \quad \hat{y}^{(t)} =
-\sigma(w^{(t)\top}x^{(t)} + b^{(t)}).\]</span> where <span class="math inline">\(\hat{y}^t\)</span> is the neuron output (e.g.,
-<span class="math inline">\(\hat{y}^t=\sigma(w^{t\top}x^t+b^t)\)</span>)
-and <span class="math inline">\(e^t = y^t-\hat{y}^t\)</span>. In this
-equation <span class="math inline">\(\alpha\)</span> represents the
-<span class="math inline">\(learning\)</span> <span class="math inline">\(rate\)</span> which is constant between 0 and 1
-and <span class="math inline">\(e\)</span> is the difference between the
-calculated output from step 2 and the desired output. The necessity of
-the desired output for this step is what makes the SLP perceptron
-learning algorithm a supervised learning algorithm.</p></li>
+    e^{(t)} = y^{(t)} - \hat{y}^{(t)}, \quad \hat{y}^{(t)} = \sigma(w^{(t)\top}x^{(t)} + b^{(t)}).\]</span> where <span class="math inline">\(\hat{y}^t\)</span> is the neuron output (e.g., <span class="math inline">\(\hat{y}^t=\sigma(w^{t\top}x^t+b^t)\)</span>) and <span class="math inline">\(e^t = y^t-\hat{y}^t\)</span>. In this equation <span class="math inline">\(\alpha\)</span> represents the <span class="math inline">\(learning\)</span> <span class="math inline">\(rate\)</span> which is constant between 0 and 1 and <span class="math inline">\(e\)</span> is the difference between the calculated output from step 2 and the desired output. The necessity of the desired output for this step is what makes the SLP perceptron learning algorithm a supervised learning algorithm.</p></li>
 </ul></li>
 <li><p>Iteration</p>
 <ul>
-<li><p>In the iteration stage the next training sample is added as the
-input and the algorithm goes back to iterating between steps 2 and 3
-until the learning algorithm converges.</p></li>
+<li><p>In the iteration stage the next training sample is added as the input and the algorithm goes back to iterating between steps 2 and 3 until the learning algorithm converges.</p></li>
 </ul></li>
 </ol>
-<p><strong>Important insight:</strong> A single-layer perceptron can
-only learn linearly separable problems. Any dataset requiring a curved
-boundary (like XOR) cannot be solved regardless of training time. This
-limitation is architectural, not algorithmic.</p>
-<h2 data-number="4.4" id="slp-perceptron-example"><span class="header-section-number">4.4</span> Example: Training a
-single-layer neuron on the AND gate (sigmoid output)</h2>
-<p>We will demonstrate the SLP perceptron algorithm using a simple
-dataset that represents the AND gate in <span class="math inline">\(\mathbb{R}^2\)</span>. The AND gate has the
-following truth table:</p>
+<p><strong>Important insight:</strong> A single-layer perceptron can only learn linearly separable problems. Any dataset requiring a curved boundary (like XOR) cannot be solved regardless of training time. This limitation is architectural, not algorithmic.</p>
+<h2 data-number="4.4" id="slp-perceptron-example"><span class="header-section-number">4.4</span> Example: Training a single-layer neuron on the AND gate (sigmoid output)</h2>
+<p>We will demonstrate the SLP perceptron algorithm using a simple dataset that represents the AND gate in <span class="math inline">\(\mathbb{R}^2\)</span>. The AND gate has the following truth table:</p>
 <div class="center">
 <table>
 <thead>
@@ -579,108 +376,61 @@ following truth table:</p>
 </div>
 <p>Let’s define the notation and hyperparameters we will use:</p>
 <ul>
-<li><p>Input vector <span class="math inline">\(x_i = [x_{i1},
-x_{i2}]^T\)</span></p></li>
-<li><p>For simplicity, we will put the bias into the weight vector to
-form a single “parameter” vector: <span class="math inline">\(w^{(t)} =
-[w_1^{(t)}, w_2^{(t)}, b^{(t)}]^T\)</span>. With this, the activation
-calculation can be thought of as <span class="math inline">\(y_i=\sigma(w^{(t)T}[x_{i1},x_{i2},1])\)</span>.</p></li>
-<li><p>Learning rate <span class="math inline">\(\alpha =
-0.2\)</span></p></li>
+<li><p>Input vector <span class="math inline">\(x_i = [x_{i1}, x_{i2}]^T\)</span></p></li>
+<li><p>For simplicity, we will put the bias into the weight vector to form a single “parameter” vector: <span class="math inline">\(w^{(t)} = [w_1^{(t)}, w_2^{(t)}, b^{(t)}]^T\)</span>. With this, the activation calculation can be thought of as <span class="math inline">\(y_i=\sigma(w^{(t)T}[x_{i1},x_{i2},1])\)</span>.</p></li>
+<li><p>Learning rate <span class="math inline">\(\alpha = 0.2\)</span></p></li>
 <li><p>Activation function is the sigmoid <span class="math inline">\(\sigma(z) = \frac{1}{1 + e^{-z}}\)</span></p></li>
 </ul>
 <p>Now we execute the SLP algorithm:</p>
 <ol>
-<li><p>Weight Initialization: we randomly initialize the weights and
-bias. <span class="math display">\[w^{(0)} = \begin{bmatrix} 0.892 \\
-0.626 \\ -0.396 \end{bmatrix}\]</span></p>
+<li><p>Weight Initialization: we randomly initialize the weights and bias. <span class="math display">\[w^{(0)} = \begin{bmatrix} 0.892 \\ 0.626 \\ -0.396 \end{bmatrix}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/slpex-iter0.png"/></p>
 </div></li>
 </ol>
 <p><strong>Iteration 1</strong></p>
 <ol start="2">
-<li><p>Neuron activation: We first consider <span class="math inline">\(x_1=[0,0]\)</span> with <span class="math inline">\(y_1=0\)</span>. The predicted <span class="math inline">\(y_1\)</span> value is: <span class="math display">\[\hat{y}_1=\sigma([0.892,0.626,-0.396] \cdot
-[0,0,1])=\sigma(-0.396)\approx 0.402\]</span></p></li>
-<li><p>Weight update: First, the error is <span class="math inline">\(y_1-\hat{y}_1=-0.402\)</span>. Then the weight
-update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892
-\\ 0.626 \\ -0.396 \end{bmatrix} + 0.2 \cdot (-0.402) \cdot
-\begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.892 \\
-0.626 \\ -0.476 \end{bmatrix}\]</span></p>
+<li><p>Neuron activation: We first consider <span class="math inline">\(x_1=[0,0]\)</span> with <span class="math inline">\(y_1=0\)</span>. The predicted <span class="math inline">\(y_1\)</span> value is: <span class="math display">\[\hat{y}_1=\sigma([0.892,0.626,-0.396] \cdot [0,0,1])=\sigma(-0.396)\approx 0.402\]</span></p></li>
+<li><p>Weight update: First, the error is <span class="math inline">\(y_1-\hat{y}_1=-0.402\)</span>. Then the weight update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892 \\ 0.626 \\ -0.396 \end{bmatrix} + 0.2 \cdot (-0.402) \cdot \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.892 \\ 0.626 \\ -0.476 \end{bmatrix}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/slpex-iter1.png"/></p>
 </div></li>
 </ol>
 <p><strong>Iteration 2</strong></p>
 <ol start="2">
-<li><p>Neuron activation: Next, consider <span class="math inline">\(x_2=[0,1]\)</span> with <span class="math inline">\(y_2=0\)</span>. The predicted <span class="math inline">\(y_2\)</span> value is: <span class="math display">\[\hat{y}_2=\sigma([0.892,0.626,-0.476] \cdot
-[0,1,1])=\sigma(0.15)\approx 0.537\]</span></p></li>
-<li><p>Weight update: First, the error is <span class="math inline">\(y_2-\hat{y}_2=-0.537\)</span>. Then the weight
-update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892
-\\ 0.626 \\ -0.476 \end{bmatrix} + 0.2 \cdot (-0.537) \cdot
-\begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.892 \\
-0.518 \\ -0.584 \end{bmatrix}\]</span></p>
+<li><p>Neuron activation: Next, consider <span class="math inline">\(x_2=[0,1]\)</span> with <span class="math inline">\(y_2=0\)</span>. The predicted <span class="math inline">\(y_2\)</span> value is: <span class="math display">\[\hat{y}_2=\sigma([0.892,0.626,-0.476] \cdot [0,1,1])=\sigma(0.15)\approx 0.537\]</span></p></li>
+<li><p>Weight update: First, the error is <span class="math inline">\(y_2-\hat{y}_2=-0.537\)</span>. Then the weight update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892 \\ 0.626 \\ -0.476 \end{bmatrix} + 0.2 \cdot (-0.537) \cdot \begin{bmatrix} 0 \\ 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.892 \\ 0.518 \\ -0.584 \end{bmatrix}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/slpex-iter2.png"/></p>
 </div></li>
 </ol>
 <p><strong>Iteration 3</strong></p>
 <ol start="2">
-<li><p>Neuron activation: Next, consider <span class="math inline">\(x_3=[1,0]\)</span> with <span class="math inline">\(y_3=0\)</span>. The predicted <span class="math inline">\(y_3\)</span> value is: <span class="math display">\[\hat{y}_3=\sigma([0.892,0.518,-0.584] \cdot
-[1,0,1])=\sigma(0.308)\approx 0.576\]</span></p></li>
-<li><p>Weight update: First, the error is <span class="math inline">\(y_3-\hat{y}_3=-0.576\)</span>. Then the weight
-update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892
-\\ 0.518 \\ -0.584 \end{bmatrix} + 0.2 \cdot (-0.576) \cdot
-\begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.777 \\
-0.518 \\ -0.699 \end{bmatrix}\]</span></p>
+<li><p>Neuron activation: Next, consider <span class="math inline">\(x_3=[1,0]\)</span> with <span class="math inline">\(y_3=0\)</span>. The predicted <span class="math inline">\(y_3\)</span> value is: <span class="math display">\[\hat{y}_3=\sigma([0.892,0.518,-0.584] \cdot [1,0,1])=\sigma(0.308)\approx 0.576\]</span></p></li>
+<li><p>Weight update: First, the error is <span class="math inline">\(y_3-\hat{y}_3=-0.576\)</span>. Then the weight update is: <span class="math display">\[w^{(t+1)}= \begin{bmatrix} 0.892 \\ 0.518 \\ -0.584 \end{bmatrix} + 0.2 \cdot (-0.576) \cdot \begin{bmatrix} 1 \\ 0 \\ 1 \end{bmatrix} = \begin{bmatrix} 0.777 \\ 0.518 \\ -0.699 \end{bmatrix}\]</span></p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/slpex-iter3.png"/></p>
 </div></li>
 </ol>
 <p>This will continue for a few iterations:</p>
-<figure>
-<img src="img/lecture5/slpex-iter4.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<img src="img/lecture5/slpex-iter5.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-</figure>
-<figure>
-<img src="img/lecture5/slpex-iter6.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-<img src="img/lecture5/slpex-iter7.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-</figure>
-<p>At this point, the decision boundary separates the training data
-well, so the learning dynamics appear to have <em>converged</em> in the
-practical sense that the parameter updates become small and predictions
-stabilize. <strong>Note:</strong> the classic <em>perceptron convergence
-theorem</em> (finite-time convergence on linearly separable data)
-applies to the perceptron with a <em>hard threshold/sign</em> activation
-and its standard mistake-driven update. In this example we used a
-sigmoid output for illustration, so the classic finite-time convergence
-guarantee does not directly apply; instead, we typically use a stopping
-rule such as a maximum number of iterations, small change in loss, or
-small change in parameters.</p>
+<p><img alt="image" src="img/lecture5/slpex-iter4.png" style="width:48.00%; max-width:48.00%; height:auto;"/></p>
+<p><img alt="image" src="img/lecture5/slpex-iter5.png" style="width:48.00%; max-width:48.00%; height:auto;"/></p>
+<p><img alt="image" src="img/lecture5/slpex-iter6.png" style="width:48.00%; max-width:48.00%; height:auto;"/></p>
+<p><img alt="image" src="img/lecture5/slpex-iter7.png" style="width:48.00%; max-width:48.00%; height:auto;"/></p>
+<p>At this point, the decision boundary separates the training data well, so the learning dynamics appear to have <em>converged</em> in the practical sense that the parameter updates become small and predictions stabilize. <strong>Note:</strong> the classic <em>perceptron convergence theorem</em> (finite-time convergence on linearly separable data) applies to the perceptron with a <em>hard threshold/sign</em> activation and its standard mistake-driven update. In this example we used a sigmoid output for illustration, so the classic finite-time convergence guarantee does not directly apply; instead, we typically use a stopping rule such as a maximum number of iterations, small change in loss, or small change in parameters.</p>
 <h1 data-number="5" id="sec:mlp"><span class="header-section-number">5.</span> Multi-Layer ANN</h1>
-<p><span id="mlp-section" label="mlp-section"></span> A multi-layer ANN
-(or multi-layer perceptron, MLP) is a neural network architecture that
-is composed of multiple layers of neurons which each performs a
-computation and then passes the result to the subsequent layer in the
-network. Multi-layer ANNs can contain hidden layers as described more in
-depth in section <a data-reference="sec:hidden" data-reference-type="ref" href="#sec:hidden">5.2</a> and can be used to classify
-non-linearly separable data which is not possible without multiple
-layers as shown in section <a data-reference="subsec:xor" data-reference-type="ref" href="#subsec:xor">5.1</a> and <a data-reference="sec:solvingxor" data-reference-type="ref" href="#sec:solvingxor">5.3</a>.</p>
+<p><span id="mlp-section" label="mlp-section">[mlp-section]</span> A multi-layer ANN (or multi-layer perceptron, MLP) is a neural network architecture that is composed of multiple layers of neurons which each performs a computation and then passes the result to the subsequent layer in the network. Multi-layer ANNs can contain hidden layers as described more in depth in section <a data-reference="sec:hidden" data-reference-type="ref" href="#sec:hidden">5.2</a> and can be used to classify non-linearly separable data which is not possible without multiple layers as shown in section <a data-reference="subsec:xor" data-reference-type="ref" href="#subsec:xor">5.1</a> and <a data-reference="sec:solvingxor" data-reference-type="ref" href="#sec:solvingxor">5.3</a>.</p>
 <h2 data-number="5.1" id="subsec:xor"><span class="header-section-number">5.1</span> The XOR problem</h2>
-<p>The XOR problem is a classic problem in ANN research which represents
-the problem that occurs when trying to classify the result of an XOR
-(exclusive or) gate given two binary inputs. Given the graph and the
-truth table shown below, it can clearly be seen that there is no way to
-draw a straight line to separate the results.</p>
-<figure id="fig:example">
-<img src="img/lecture5/xor_graph.png" style="width:6cm"/>
+<p>The XOR problem is a classic problem in ANN research which represents the problem that occurs when trying to classify the result of an XOR (exclusive or) gate given two binary inputs. Given the graph and the truth table shown below, it can clearly be seen that there is no way to draw a straight line to separate the results.</p>
+<figure>
+<img alt=" Truth Table for XOR (Exclusive OR)" id="fig:example" src="img/lecture5/xor_graph.png" style="width:6cm"/><figcaption aria-hidden="true"> Truth Table for XOR (Exclusive OR)</figcaption>
+</figure>
 <table>
 <thead>
 <tr class="header">
 <th style="text-align: center;"><span class="math inline">\(A\)</span></th>
 <th style="text-align: center;"><span class="math inline">\(B\)</span></th>
-<th style="text-align: center;"><span class="math inline">\(A \oplus
-B\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(A \oplus B\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -706,166 +456,48 @@ B\)</span></th>
 </tr>
 </tbody>
 </table>
-<figcaption> Truth Table for XOR (Exclusive OR)</figcaption>
-</figure>
-<p>As can be seen above, the results of the XOR gates are not linearly
-separable using a single neuron (i.e. the results can’t be separated
-using a line hyperplane). In order to resolve this issue, a decision
-plane must be added in the form of a hidden layer or multiple hidden
-layers (Multi-layer Perceptron(s)) as described in the following
-section.</p>
+<p>As can be seen above, the results of the XOR gates are not linearly separable using a single neuron (i.e. the results can’t be separated using a line hyperplane). In order to resolve this issue, a decision plane must be added in the form of a hidden layer or multiple hidden layers (Multi-layer Perceptron(s)) as described in the following section.</p>
 <h2 data-number="5.2" id="sec:hidden"><span class="header-section-number">5.2</span> Hidden Layers</h2>
-<p>As seen in the XOR problem in <a data-reference="subsec:xor" data-reference-type="ref" href="#subsec:xor">5.1</a>,
-non-linearly separable datasets can’t be classified by single neurons
-with linear activation. In order to solve this problem we need the
-addition of non-linear activation functions along with multi-layer
-networks of neurons, the latter of which can be achieved using hidden
-layers. Hidden layers are layers in between the input layer and output
-layer whose inputs are set by the previous layer of neurons and whose
-outputs become the input of the subsequent layer of neurons. Each hidden
-layer gives the ability to apply an additional transformation to the
-input data by allowing for the application of additional weights and
-biases. By giving the ability to perform series of subsequent
-transformations, hidden layers allow ANNs to capture more complex
-patterns and help with solving the problem of classifying non-linearly
-separable data as shown in the example in section <a data-reference="sec:solvingxor" data-reference-type="ref" href="#sec:solvingxor">5.3</a>.</p>
-<h2 data-number="5.3" id="sec:solvingxor"><span class="header-section-number">5.3</span> Solving XOR problem with hidden
-layers</h2>
-<p>The XOR problem can be solved using an ANN, as it is unable to be
-solved using a singular linear separating line. Given the figures above
-of the graph and table for the XOR problem, we can create an ANN like
-below:</p>
+<p>As seen in the XOR problem in <a data-reference="subsec:xor" data-reference-type="ref" href="#subsec:xor">5.1</a>, non-linearly separable datasets can’t be classified by single neurons with linear activation. In order to solve this problem we need the addition of non-linear activation functions along with multi-layer networks of neurons, the latter of which can be achieved using hidden layers. Hidden layers are layers in between the input layer and output layer whose inputs are set by the previous layer of neurons and whose outputs become the input of the subsequent layer of neurons. Each hidden layer gives the ability to apply an additional transformation to the input data by allowing for the application of additional weights and biases. By giving the ability to perform series of subsequent transformations, hidden layers allow ANNs to capture more complex patterns and help with solving the problem of classifying non-linearly separable data as shown in the example in section <a data-reference="sec:solvingxor" data-reference-type="ref" href="#sec:solvingxor">5.3</a>.</p>
+<h2 data-number="5.3" id="sec:solvingxor"><span class="header-section-number">5.3</span> Solving XOR problem with hidden layers</h2>
+<p>The XOR problem can be solved using an ANN, as it is unable to be solved using a singular linear separating line. Given the figures above of the graph and table for the XOR problem, we can create an ANN like below:</p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/ann.png" style="width:8cm"/></p>
 </div>
-<p>The nodes <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are the inputs to the XOR gate. The
-nodes <span class="math inline">\(h_1\)</span> and <span class="math inline">\(h_2\)</span> are the hidden layer nodes used to
-compute. The values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are the bias values for the
-individual nodes. Lastly, the y node is the final output to classify the
-outcome of the XOR problem.</p>
-<p>We can characterize this network using <em>pre-activations</em>
-(linear parts) and <em>activations</em> (after applying the sigmoid).
-Let <span class="math display">\[h_1 = 20x_1 + 20x_2 - 10,\qquad a_1 =
-\sigma(h_1),\]</span> <span class="math display">\[h_2 = -20x_1 - 20x_2
-+ 30,\qquad a_2 = \sigma(h_2).\]</span> Then the output neuron computes
-a pre-activation <span class="math display">\[h_{\text{out}} = 20a_1 +
-20a_2 - 30,\]</span> and applies a sigmoid to produce the final output
-<span class="math display">\[\hat{y} = \sigma(h_{\text{out}}).\]</span>
-To obtain a binary classification, we threshold the <em>sigmoid
-outputs</em> at <span class="math inline">\(0.5\)</span>: we predict
-class <span class="math inline">\(1\)</span> if <span class="math inline">\(\hat{y}\ge 0.5\)</span> and class <span class="math inline">\(0\)</span> otherwise. (Equivalently, since <span class="math inline">\(\sigma(\cdot)\)</span> is monotone, <span class="math inline">\(\hat{y}\ge 0.5\)</span> is the same as <span class="math inline">\(h_{\text{out}} \ge 0\)</span>.) With these
-equations, we can check the four XOR inputs. Because the sigmoid becomes
-very steep for these large weights, we can treat <span class="math inline">\(\sigma(z)\)</span> as <span class="math inline">\(\approx 1\)</span> when <span class="math inline">\(z\)</span> is large and positive, and <span class="math inline">\(\approx 0\)</span> when <span class="math inline">\(z\)</span> is large and negative.</p>
+<p>The nodes <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are the inputs to the XOR gate. The nodes <span class="math inline">\(h_1\)</span> and <span class="math inline">\(h_2\)</span> are the hidden layer nodes used to compute. The values <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_2\)</span> are the bias values for the individual nodes. Lastly, the y node is the final output to classify the outcome of the XOR problem.</p>
+<p>We can characterize this network using <em>pre-activations</em> (linear parts) and <em>activations</em> (after applying the sigmoid). Let <span class="math display">\[h_1 = 20x_1 + 20x_2 - 10,\qquad a_1 = \sigma(h_1),\]</span> <span class="math display">\[h_2 = -20x_1 - 20x_2 + 30,\qquad a_2 = \sigma(h_2).\]</span> Then the output neuron computes a pre-activation <span class="math display">\[h_{\text{out}} = 20a_1 + 20a_2 - 30,\]</span> and applies a sigmoid to produce the final output <span class="math display">\[\hat{y} = \sigma(h_{\text{out}}).\]</span> To obtain a binary classification, we threshold the <em>sigmoid outputs</em> at <span class="math inline">\(0.5\)</span>: we predict class <span class="math inline">\(1\)</span> if <span class="math inline">\(\hat{y}\ge 0.5\)</span> and class <span class="math inline">\(0\)</span> otherwise. (Equivalently, since <span class="math inline">\(\sigma(\cdot)\)</span> is monotone, <span class="math inline">\(\hat{y}\ge 0.5\)</span> is the same as <span class="math inline">\(h_{\text{out}} \ge 0\)</span>.) With these equations, we can check the four XOR inputs. Because the sigmoid becomes very steep for these large weights, we can treat <span class="math inline">\(\sigma(z)\)</span> as <span class="math inline">\(\approx 1\)</span> when <span class="math inline">\(z\)</span> is large and positive, and <span class="math inline">\(\approx 0\)</span> when <span class="math inline">\(z\)</span> is large and negative.</p>
 <p><span class="math display">\[\begin{array}{c|c|c|c|c}
-(x_1,x_2) &amp; h_1 &amp; a_1=\sigma(h_1) &amp; a_2=\sigma(h_2) &amp;
-h_{\text{out}}=20a_1+20a_2-30 \\
+(x_1,x_2) &amp; h_1 &amp; a_1=\sigma(h_1) &amp; a_2=\sigma(h_2) &amp; h_{\text{out}}=20a_1+20a_2-30 \\
 \hline
-(0,0) &amp; -10 &amp; \approx 0 &amp; \approx 1 &amp;
-20(0)+20(1)-30=-10\;\Rightarrow\;\hat{y}\approx 0 \\
-(1,0) &amp; 10  &amp; \approx 1 &amp; \approx 1 &amp;
-20(1)+20(1)-30=10\;\Rightarrow\;\hat{y}\approx 1 \\
-(0,1) &amp; 10  &amp; \approx 1 &amp; \approx 1 &amp;
-20(1)+20(1)-30=10\;\Rightarrow\;\hat{y}\approx 1 \\
-(1,1) &amp; 30  &amp; \approx 1 &amp; \approx 0 &amp;
-20(1)+20(0)-30=-10\;\Rightarrow\;\hat{y}\approx 0 \\
-\end{array}\]</span> We omit listing <span class="math inline">\(h_2\)</span> explicitly since only <span class="math inline">\(a_2 = \sigma(h_2)\)</span> is needed. Intuitively,
-the two hidden units create two linear separators, and the output unit
-combines them so that points on the two “off-diagonal” corners <span class="math inline">\((1,0)\)</span> and <span class="math inline">\((0,1)\)</span> yield a positive <span class="math inline">\(h_{\text{out}}\)</span>, while <span class="math inline">\((0,0)\)</span> and <span class="math inline">\((1,1)\)</span> yield a negative <span class="math inline">\(h_{\text{out}}\)</span>. This is how a network
-with a hidden layer can represent a non-linearly separable pattern like
-XOR. While the weights above are proven to work for this XOR problem,
-there are an infinite number of weights and biases that would work for
-this problem. These functions can be displayed linearly like below:</p>
+(0,0) &amp; -10 &amp; \approx 0 &amp; \approx 1 &amp; 20(0)+20(1)-30=-10\;\Rightarrow\;\hat{y}\approx 0 \\
+(1,0) &amp; 10  &amp; \approx 1 &amp; \approx 1 &amp; 20(1)+20(1)-30=10\;\Rightarrow\;\hat{y}\approx 1 \\
+(0,1) &amp; 10  &amp; \approx 1 &amp; \approx 1 &amp; 20(1)+20(1)-30=10\;\Rightarrow\;\hat{y}\approx 1 \\
+(1,1) &amp; 30  &amp; \approx 1 &amp; \approx 0 &amp; 20(1)+20(0)-30=-10\;\Rightarrow\;\hat{y}\approx 0 \\
+\end{array}\]</span> We omit listing <span class="math inline">\(h_2\)</span> explicitly since only <span class="math inline">\(a_2 = \sigma(h_2)\)</span> is needed. Intuitively, the two hidden units create two linear separators, and the output unit combines them so that points on the two “off-diagonal” corners <span class="math inline">\((1,0)\)</span> and <span class="math inline">\((0,1)\)</span> yield a positive <span class="math inline">\(h_{\text{out}}\)</span>, while <span class="math inline">\((0,0)\)</span> and <span class="math inline">\((1,1)\)</span> yield a negative <span class="math inline">\(h_{\text{out}}\)</span>. This is how a network with a hidden layer can represent a non-linearly separable pattern like XOR. While the weights above are proven to work for this XOR problem, there are an infinite number of weights and biases that would work for this problem. These functions can be displayed linearly like below:</p>
 <div class="center">
 <p><img alt="image" src="img/lecture5/xorprob.png" style="width:4cm"/></p>
 </div>
-<p>This shows how an ANN can be used to model a group of classes that
-are not able to be separated using a single line. In this case, 2 lines
-must be used with defined positive/negative sides, with a function
-(<span class="math inline">\(    y_{out}\)</span>) that culminates the
-outputs of both lines.</p>
+<p>This shows how an ANN can be used to model a group of classes that are not able to be separated using a single line. In this case, 2 lines must be used with defined positive/negative sides, with a function (<span class="math inline">\(    y_{out}\)</span>) that culminates the outputs of both lines.</p>
 <div class="mdframed">
 <p><strong>Geometric interpretation of the XOR solution</strong></p>
-<p>Each hidden neuron defines a linear boundary in the input space.
-Together, hidden neurons partition the space into regions. The output
-neuron then assigns labels to these regions, effectively creating a
-nonlinear decision boundary. This shows how hidden layers enable
-piecewise-linear or curved decision surfaces.</p>
+<p>Each hidden neuron defines a linear boundary in the input space. Together, hidden neurons partition the space into regions. The output neuron then assigns labels to these regions, effectively creating a nonlinear decision boundary. This shows how hidden layers enable piecewise-linear or curved decision surfaces.</p>
 </div>
 <h1 data-number="6" id="additional-details"><span class="header-section-number">6.</span> Additional Details</h1>
-<h2 data-number="6.1" id="representational-power-of-neural-networks"><span class="header-section-number">6.1</span> Representational Power of
-Neural Networks</h2>
-<p>Ultimately, neural networks are just function models with a specific
-structure (the composition of units in a graph). There really isn’t
-anything special, at least at first glance, about this choice of
-structure. There is the similarity with biological neural networks, but
-this only serves as a source of motivation, and even then it’s not the
-best model for biological networks (c.f. Spiking Neural Networks).
-Nonetheless, neural networks have proven to be extremely versatile and
-standard for a wide range of machine learning tasks.</p>
-<p>While representational capacity is well understood in many settings,
-explaining optimization and generalization in modern overparameterized
-networks remains an active research area. Here, by representation we
-mean a neural network’s ability to approximate a function (e.g., one
-that maps inputs to outputs or models a data distribution). Several
-classic results motivated early study of neural networks, e.g.</p>
+<h2 data-number="6.1" id="representational-power-of-neural-networks"><span class="header-section-number">6.1</span> Representational Power of Neural Networks</h2>
+<p>Ultimately, neural networks are just function models with a specific structure (the composition of units in a graph). There really isn’t anything special, at least at first glance, about this choice of structure. There is the similarity with biological neural networks, but this only serves as a source of motivation, and even then it’s not the best model for biological networks (c.f. Spiking Neural Networks). Nonetheless, neural networks have proven to be extremely versatile and standard for a wide range of machine learning tasks.</p>
+<p>While representational capacity is well understood in many settings, explaining optimization and generalization in modern overparameterized networks remains an active research area. Here, by representation we mean a neural network’s ability to approximate a function (e.g., one that maps inputs to outputs or models a data distribution). Several classic results motivated early study of neural networks, e.g.</p>
 <ol>
-<li><p>The first question that might arise is: what kinds of functions
-can we even represent using a neural network? It turns out that a neural
-network with one hidden layer and sigmoid activation can approximate
-<em>any continuous function on a compact domain (or bounded closed
-set)</em> to arbitrary precision [<a href="https://doi.org/10.1007/BF02551274" rel="noopener noreferrer" target="_blank">Universal Approximation
-Theorem, Cybenko 1989</a>]. Similar results exist for other activation
-functions, e.g. any “squashing function” [<a href="https://doi.org/10.1016/0893-6080(89)90020-8" rel="noopener noreferrer" target="_blank">Hornick et al.,
-1989</a>], ReLU [<a href="https://doi.org/10.1016/S0893-6080(05)80131-5" rel="noopener noreferrer" target="_blank">Leshno et al.
-1993</a>][<a href="https://www.mdpi.com/2227-7390/7/10/992" rel="noopener noreferrer" target="_blank">Hanin,
-2019</a>] , etc.</p></li>
-<li><p>While incorporating a single hidden layer is sufficient for
-representing any function, the number of hidden units in that layer
-(i.e. the <em>width</em> of the network), may be unreasonably large
-(e.g. for binary functions, it will be exponential in the inputs). This
-forms the motivation for deep neural networks: in many cases increasing
-the number of hidden layers (the <em>depth</em> of the network) can
-mitigate the need for an unreasonably large width. For instance, in the
-case of ReLU networks, a deep network can represent functions that would
-otherwise require an exponential number of hidden units with a
-single-hidden-layer (aka <em>shallow</em>) network [<a href="https://arxiv.org/abs/1402.1869" rel="noopener noreferrer" target="_blank">Montúfar et al.,
-2014</a>].</p></li>
+<li><p>The first question that might arise is: what kinds of functions can we even represent using a neural network? It turns out that a neural network with one hidden layer and sigmoid activation can approximate <em>any continuous function on a compact domain (or bounded closed set)</em> to arbitrary precision [<a href="https://doi.org/10.1007/BF02551274" rel="noopener noreferrer" target="_blank">Universal Approximation Theorem, Cybenko 1989</a>]. Similar results exist for other activation functions, e.g. any “squashing function” [<a href="https://doi.org/10.1016/0893-6080(89)90020-8" rel="noopener noreferrer" target="_blank">Hornick et al., 1989</a>], ReLU [<a href="https://doi.org/10.1016/S0893-6080(05)80131-5" rel="noopener noreferrer" target="_blank">Leshno et al. 1993</a>][<a href="https://www.mdpi.com/2227-7390/7/10/992" rel="noopener noreferrer" target="_blank">Hanin, 2019</a>] , etc.</p></li>
+<li><p>While incorporating a single hidden layer is sufficient for representing any function, the number of hidden units in that layer (i.e. the <em>width</em> of the network), may be unreasonably large (e.g. for binary functions, it will be exponential in the inputs). This forms the motivation for deep neural networks: in many cases increasing the number of hidden layers (the <em>depth</em> of the network) can mitigate the need for an unreasonably large width. For instance, in the case of ReLU networks, a deep network can represent functions that would otherwise require an exponential number of hidden units with a single-hidden-layer (aka <em>shallow</em>) network [<a href="https://arxiv.org/abs/1402.1869" rel="noopener noreferrer" target="_blank">Montúfar et al., 2014</a>].</p></li>
 </ol>
 <h2 data-number="6.2" id="backpropagation"><span class="header-section-number">6.2</span> Backpropagation</h2>
-<p>We saw how MLPs are more representative and capable than SLPs. But
-how do we train an MLP? We’ve covered a standard training algorithm for
-SLPs, but things get trickier once we add layers. In the early days of
-MLP research, training was done by handcrafting weights (similar to the
-XOR problem above) or using heuristic methods, but these approaches were
-time-consuming and often resulted in suboptimal models.</p>
-<p>A standard and theoretically supported method is gradient descent,
-which involves iteratively updating the weights by their gradients to
-minimize the cost function. There are other optimization algorithms that
-rely on higher-order derivatives, e.g. Newton’s method, but first-order
-gradient descent has dominated deep learning.</p>
-<p>The general paradigm is to propagate signals through the network to
-generate an output (<strong>forward propagation</strong>) and then
-update the weights based on the gradient of the loss function. Hence the
-problem becomes how best to calculate the gradient of the loss function
-with respect to the weights. Given the ground truth label, we can easily
-compute the error at the end of the network once we generate an output.
-The idea is then to leverage the chain rule to propagate the error
-backwards, a process called <strong>backward propagation</strong> or
-simply <em>backpropagation</em>. Backpropagation has proven to be an
-effective and efficient method for computing gradients and executing
-gradient descent.</p>
-<figure>
-<img src="img/lecture5/ffd_inpt_data.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
-<img src="img/lecture5/back.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
-</figure>
-<h3 class="unnumbered" id="mini-example-why-sigmoid-gradients-can-vanish">Mini Example: Why
-sigmoid gradients can vanish</h3>
-<p>For large positive or negative inputs, sigmoid saturates: <span class="math display">\[\sigma(10) \approx 0.99995, \quad \sigma(-10)
-\approx 0.00005.\]</span> Its derivative <span class="math display">\[\sigma'(x) = \sigma(x)(1-\sigma(x))\]</span>
-becomes extremely small in these regions. This means gradients flowing
-backward through many sigmoid layers shrink rapidly, making training
-deep networks difficult (the vanishing gradient problem). This is one
-motivation for ReLU-type activations.</p>
+<p>We saw how MLPs are more representative and capable than SLPs. But how do we train an MLP? We’ve covered a standard training algorithm for SLPs, but things get trickier once we add layers. In the early days of MLP research, training was done by handcrafting weights (similar to the XOR problem above) or using heuristic methods, but these approaches were time-consuming and often resulted in suboptimal models.</p>
+<p>A standard and theoretically supported method is gradient descent, which involves iteratively updating the weights by their gradients to minimize the cost function. There are other optimization algorithms that rely on higher-order derivatives, e.g. Newton’s method, but first-order gradient descent has dominated deep learning.</p>
+<p>The general paradigm is to propagate signals through the network to generate an output (<strong>forward propagation</strong>) and then update the weights based on the gradient of the loss function. Hence the problem becomes how best to calculate the gradient of the loss function with respect to the weights. Given the ground truth label, we can easily compute the error at the end of the network once we generate an output. The idea is then to leverage the chain rule to propagate the error backwards, a process called <strong>backward propagation</strong> or simply <em>backpropagation</em>. Backpropagation has proven to be an effective and efficient method for computing gradients and executing gradient descent.</p>
+<p><img alt="image" src="img/lecture5/ffd_inpt_data.png" style="width:54.00%; max-width:54.00%; height:auto;"/></p>
+<p><img alt="image" src="img/lecture5/back.png" style="width:48.00%; max-width:48.00%; height:auto;"/></p>
+<h3 class="unnumbered" id="mini-example-why-sigmoid-gradients-can-vanish">Mini Example: Why sigmoid gradients can vanish</h3>
+<p>For large positive or negative inputs, sigmoid saturates: <span class="math display">\[\sigma(10) \approx 0.99995, \quad \sigma(-10) \approx 0.00005.\]</span> Its derivative <span class="math display">\[\sigma'(x) = \sigma(x)(1-\sigma(x))\]</span> becomes extremely small in these regions. This means gradients flowing backward through many sigmoid layers shrink rapidly, making training deep networks difficult (the vanishing gradient problem). This is one motivation for ReLU-type activations.</p>
 
 </main>
 </body>
