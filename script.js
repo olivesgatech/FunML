@@ -514,3 +514,133 @@ if (lectureFrame) {
     if (!url.includes('/notebooks/')) hideDemoBackButton();
   });
 }
+
+// --- Global lecture search.
+const searchInput = document.getElementById('global-search');
+const searchResults = document.getElementById('global-search-results');
+let searchIndex = null;
+let searchDebounce = null;
+
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildSnippet = (text, query) => {
+  const lower = text.toLowerCase();
+  const idx = lower.indexOf(query.toLowerCase());
+  if (idx === -1) return text.slice(0, 160);
+  const start = Math.max(0, idx - 60);
+  const end = Math.min(text.length, idx + query.length + 100);
+  return (start > 0 ? '… ' : '') + text.slice(start, end) + (end < text.length ? ' …' : '');
+};
+
+const highlight = (text, query) => {
+  const re = new RegExp(`(${escapeRegExp(query)})`, 'ig');
+  return escapeHtml(text).replace(re, '<mark>$1</mark>');
+};
+
+const renderSearchResults = (query, matches) => {
+  if (!searchResults) return;
+  if (!query) {
+    searchResults.classList.remove('open');
+    searchResults.innerHTML = '';
+    return;
+  }
+  if (!matches.length) {
+    searchResults.innerHTML = '<div class="gs-empty">No matches in any lecture.</div>';
+    searchResults.classList.add('open');
+    return;
+  }
+  // Group by lecture file.
+  const groups = new Map();
+  for (const m of matches) {
+    if (!groups.has(m.file)) groups.set(m.file, { lec: m, hits: [] });
+    groups.get(m.file).hits.push(m);
+  }
+  const html = Array.from(groups.values()).map((group) => {
+    const lec = group.lec;
+    const hitsHtml = group.hits.slice(0, 4).map((h) => {
+      const anchor = h.id ? `lectures/${h.file}#${h.id}` : `lectures/${h.file}`;
+      return `<a class="gs-hit" data-file="${escapeHtml(h.file)}" data-anchor="${escapeHtml(h.id || '')}" href="${escapeHtml(anchor)}">
+          <p class="gs-hit-heading">${highlight(h.heading || '(section)', query)}</p>
+          <p class="gs-hit-snippet">${highlight(buildSnippet(h.text || '', query), query)}</p>
+        </a>`;
+    }).join('');
+    return `<div class="gs-lecture">
+      <div class="gs-lecture-head">Lec ${escapeHtml(lec.num)} — ${escapeHtml(lec.title)} (${group.hits.length} match${group.hits.length === 1 ? '' : 'es'})</div>
+      ${hitsHtml}
+    </div>`;
+  }).join('');
+  searchResults.innerHTML = html;
+  searchResults.classList.add('open');
+};
+
+const runSearch = (query) => {
+  if (!searchIndex) return;
+  query = query.trim();
+  if (query.length < 2) {
+    renderSearchResults('', []);
+    return;
+  }
+  const q = query.toLowerCase();
+  const matches = [];
+  for (const lec of searchIndex.lectures) {
+    for (const sec of lec.sections) {
+      const inHeading = sec.heading && sec.heading.toLowerCase().includes(q);
+      const inText = sec.text && sec.text.toLowerCase().includes(q);
+      if (!inHeading && !inText) continue;
+      matches.push({
+        file: lec.file,
+        num: lec.num,
+        title: lec.title,
+        heading: sec.heading,
+        id: sec.id,
+        text: sec.text,
+        score: (inHeading ? 10 : 0) + (inText ? 1 : 0),
+      });
+    }
+  }
+  matches.sort((a, b) => b.score - a.score || (a.num - b.num));
+  renderSearchResults(query, matches.slice(0, 60));
+};
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounce);
+    const value = searchInput.value;
+    searchDebounce = setTimeout(() => runSearch(value), 120);
+  });
+  searchInput.addEventListener('focus', () => {
+    if (searchInput.value.trim().length >= 2) runSearch(searchInput.value);
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      renderSearchResults('', []);
+      searchInput.blur();
+    }
+  });
+}
+
+if (searchResults) {
+  searchResults.addEventListener('click', (e) => {
+    const hit = e.target.closest('.gs-hit');
+    if (!hit) return;
+    e.preventDefault();
+    const file = hit.dataset.file;
+    const anchor = hit.dataset.anchor;
+    const item = Array.from(lectureItems).find((it) => (it.dataset.lecture || '').endsWith(`/${file}`));
+    if (item) setActiveLecture(item);
+    if (lectureFrame) lectureFrame.src = `lectures/${file}${anchor ? `#${anchor}` : ''}`;
+    searchResults.classList.remove('open');
+  });
+}
+
+document.addEventListener('click', (e) => {
+  if (!searchInput || !searchResults) return;
+  if (e.target === searchInput || searchResults.contains(e.target)) return;
+  searchResults.classList.remove('open');
+});
+
+fetch('assets/search-index.json')
+  .then((r) => (r.ok ? r.json() : null))
+  .then((data) => { searchIndex = data; })
+  .catch(() => { searchIndex = null; });

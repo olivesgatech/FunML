@@ -148,6 +148,112 @@ body.landing-page-active .viewer-actions {
   border-color: rgba(195, 172, 104, 0.75);
 }
 
+.global-search {
+  position: relative;
+  margin-left: 6px;
+}
+
+.global-search input {
+  width: 220px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.global-search input::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.global-search input:focus {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(195, 172, 104, 0.75);
+}
+
+.global-search-results {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(520px, 90vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+  z-index: 1000;
+}
+
+.global-search-results.open {
+  display: block;
+}
+
+.gs-empty {
+  padding: 18px 16px;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+}
+
+.gs-lecture {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.gs-lecture:last-child {
+  border-bottom: none;
+}
+
+.gs-lecture-head {
+  padding: 8px 14px;
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.gs-hit {
+  display: block;
+  padding: 8px 14px;
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.gs-hit:hover,
+.gs-hit:focus {
+  background: #eff6ff;
+  outline: none;
+}
+
+.gs-hit-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 2px;
+}
+
+.gs-hit-snippet {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.gs-hit-snippet mark {
+  background: #fef08a;
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 .dropdown {
   position: relative;
 }
@@ -749,6 +855,28 @@ button {
   .dropdown-toggle {
     color: var(--ink);
     border-color: rgba(0, 48, 87, 0.2);
+  }
+
+  .global-search {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .global-search input {
+    width: 100%;
+    background: #fff;
+    color: var(--ink);
+    border-color: rgba(0, 48, 87, 0.2);
+  }
+
+  .global-search input::placeholder {
+    color: rgba(15, 23, 42, 0.55);
+  }
+
+  .global-search-results {
+    right: auto;
+    left: 0;
+    width: 100%;
   }
 
   .hero-text h1 {

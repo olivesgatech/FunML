@@ -1840,10 +1840,73 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
 
     (out_root / "index.html").write_text(index_html)
 
+  # Build a flat search index over lecture section bodies.
+  build_search_index(out_root / "lectures", out_root / "assets", lecture_pages)
+
   # Keep the portal-style landing page synchronized with the latest lectures.
   synced = sync_portal_index(out_root / "index.html", lecture_pages)
   if not synced and write_index:
     print("Warning: portal landing page not found; wrote minimal index instead.")
+
+
+def build_search_index(lectures_dir: Path, assets_dir: Path, lecture_pages):
+  """Walk each lecture HTML and emit assets/search-index.json.
+
+  Each entry is a section: lecture file, display number, lecture title,
+  section heading, anchor id, and trimmed body text. The client searches
+  this JSON to surface matches across all lectures.
+  """
+  if not lectures_dir.exists():
+    return
+  out = []
+  for display_idx, (title, filename, _media_key) in enumerate(lecture_pages, start=1):
+    html_path = lectures_dir / filename
+    if not html_path.exists():
+      continue
+    try:
+      soup = BeautifulSoup(html_path.read_text(), "html.parser")
+    except Exception:
+      continue
+    body = soup.find("body") or soup
+    # Drop noisy script/style tags before extracting text.
+    for tag in body.find_all(["script", "style", "iframe"]):
+      tag.decompose()
+    sections = []
+    current = {"heading": title, "id": "", "parts": []}
+    for el in body.find_all(["h1", "h2", "h3", "h4", "p", "li"], recursive=True):
+      if el.name in ("h1", "h2", "h3", "h4"):
+        if current["parts"]:
+          sections.append(current)
+        anchor = el.get("id", "") or ""
+        heading_text = re.sub(r"^\s*\d+(\.\d+)*\.?\s*", "", el.get_text(" ", strip=True))
+        current = {"heading": heading_text, "id": anchor, "parts": []}
+      else:
+        text = el.get_text(" ", strip=True)
+        if text:
+          current["parts"].append(text)
+    if current["parts"]:
+      sections.append(current)
+    indexed_sections = []
+    for sec in sections:
+      body_text = " ".join(sec["parts"])
+      body_text = re.sub(r"\s+", " ", body_text).strip()
+      if not body_text and not sec["heading"]:
+        continue
+      indexed_sections.append({
+        "heading": sec["heading"][:120],
+        "id": sec["id"],
+        "text": body_text[:1500],
+      })
+    out.append({
+      "file": filename,
+      "num": str(display_idx),
+      "title": title,
+      "sections": indexed_sections,
+    })
+  assets_dir.mkdir(parents=True, exist_ok=True)
+  (assets_dir / "search-index.json").write_text(
+    json.dumps({"lectures": out}, ensure_ascii=False, separators=(",", ":"))
+  )
 
 
 def main():
