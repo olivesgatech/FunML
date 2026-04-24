@@ -497,11 +497,13 @@ window.addEventListener('message', (event) => {
   showDemoBackButton(data.returnUrl, data.title);
 });
 
-// When the iframe navigates to anything that isn't a notebook (lecture, slides,
-// demos list, etc.), hide the back button. Notebooks keep it visible.
+// Hide the back button when the iframe navigates to anything that isn't a
+// notebook. We read contentWindow.location.href (not getAttribute('src'))
+// because target="lecture-frame" links don't update the src attribute.
 if (lectureFrame) {
   lectureFrame.addEventListener('load', () => {
-    const src = lectureFrame.getAttribute('src') || '';
-    if (!src.includes('/notebooks/')) hideDemoBackButton();
+    let url = '';
+    try { url = lectureFrame.contentWindow.location.href; } catch (e) {}
+    if (!url.includes('/notebooks/')) hideDemoBackButton();
   });
 }
