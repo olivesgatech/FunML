@@ -26,9 +26,11 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p>Which of the following best describes the goal of uncertainty quantification in neural networks?</p>
+<li><p>Which of the following best describes the goal of uncertainty
+quantification in neural networks?</p>
 <ol>
-<li><p>To improve training speed by reducing the number of model parameters</p></li>
+<li><p>To improve training speed by reducing the number of model
+parameters</p></li>
 <li><p>To measure how confident a model is in its predictions</p></li>
 <li><p>To eliminate all noise in the data</p></li>
 <li><p>To replace model evaluation metrics such as accuracy</p></li>
@@ -36,8 +38,14 @@ window.MathJax = {
 <p><strong>Solution:</strong><br/>
 b) To measure how confident a model is in its predictions</p>
 <p><strong>Explanation:</strong><br/>
-Uncertainty quantification is used to estimate how reliable or confident a model is about its prediction. This is especially important in safety-critical tasks, where a prediction alone may not be sufficient. A model that can identify when it is uncertain is often more trustworthy than a model that always outputs confident predictions.</p></li>
-<li><p>Suppose a model is trained to classify road signs, but at test time it encounters a completely new object that never appeared in training. Which type of uncertainty is most directly involved?</p>
+Uncertainty quantification is used to estimate how reliable or confident
+a model is about its prediction. This is especially important in
+safety-critical tasks, where a prediction alone may not be sufficient. A
+model that can identify when it is uncertain is often more trustworthy
+than a model that always outputs confident predictions.</p></li>
+<li><p>Suppose a model is trained to classify road signs, but at test
+time it encounters a completely new object that never appeared in
+training. Which type of uncertainty is most directly involved?</p>
 <ol>
 <li><p>Aleatoric uncertainty</p></li>
 <li><p>Epistemic uncertainty</p></li>
@@ -47,41 +55,76 @@ Uncertainty quantification is used to estimate how reliable or confident a model
 <p><strong>Solution:</strong><br/>
 b) Epistemic uncertainty</p>
 <p><strong>Explanation:</strong><br/>
-Epistemic uncertainty arises when the model lacks sufficient knowledge about the input space. If the test sample is out-of-distribution or not well represented in training data, the model may not know how to respond reliably. This type of uncertainty can often be reduced by collecting more diverse training data.</p></li>
-<li><p>Which statement best distinguishes aleatoric uncertainty from epistemic uncertainty?</p>
+Epistemic uncertainty arises when the model lacks sufficient knowledge
+about the input space. If the test sample is out-of-distribution or not
+well represented in training data, the model may not know how to respond
+reliably. This type of uncertainty can often be reduced by collecting
+more diverse training data.</p></li>
+<li><p>Which statement best distinguishes aleatoric uncertainty from
+epistemic uncertainty?</p>
 <ol>
-<li><p>Aleatoric uncertainty is always larger than epistemic uncertainty</p></li>
-<li><p>Aleatoric uncertainty arises from noisy or ambiguous data, while epistemic uncertainty arises from limited model knowledge</p></li>
-<li><p>Aleatoric uncertainty only applies to regression, while epistemic uncertainty only applies to classification</p></li>
-<li><p>Aleatoric uncertainty can always be removed with enough training data</p></li>
+<li><p>Aleatoric uncertainty is always larger than epistemic
+uncertainty</p></li>
+<li><p>Aleatoric uncertainty arises from noisy or ambiguous data, while
+epistemic uncertainty arises from limited model knowledge</p></li>
+<li><p>Aleatoric uncertainty only applies to regression, while epistemic
+uncertainty only applies to classification</p></li>
+<li><p>Aleatoric uncertainty can always be removed with enough training
+data</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Aleatoric uncertainty arises from noisy or ambiguous data, while epistemic uncertainty arises from limited model knowledge</p>
+b) Aleatoric uncertainty arises from noisy or ambiguous data, while
+epistemic uncertainty arises from limited model knowledge</p>
 <p><strong>Explanation:</strong><br/>
-Aleatoric uncertainty is associated with the data itself, such as measurement noise, occlusion, or ambiguous inputs. Epistemic uncertainty, in contrast, reflects the model’s lack of knowledge and can often be reduced by improving the model or expanding the training dataset.</p></li>
-<li><p>Why are deep ensembles considered an iterative uncertainty estimation method?</p>
+Aleatoric uncertainty is associated with the data itself, such as
+measurement noise, occlusion, or ambiguous inputs. Epistemic
+uncertainty, in contrast, reflects the model’s lack of knowledge and can
+often be reduced by improving the model or expanding the training
+dataset.</p></li>
+<li><p>Why are deep ensembles considered an iterative uncertainty
+estimation method?</p>
 <ol>
-<li><p>Because the same network is trained once and evaluated once</p></li>
-<li><p>Because they iteratively modify the labels of the dataset</p></li>
-<li><p>Because they generate multiple predictions from independently trained models and combine them</p></li>
-<li><p>Because they remove uncertain samples during preprocessing</p></li>
+<li><p>Because the same network is trained once and evaluated
+once</p></li>
+<li><p>Because they iteratively modify the labels of the
+dataset</p></li>
+<li><p>Because they generate multiple predictions from independently
+trained models and combine them</p></li>
+<li><p>Because they remove uncertain samples during
+preprocessing</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-c) Because they generate multiple predictions from independently trained models and combine them</p>
+c) Because they generate multiple predictions from independently trained
+models and combine them</p>
 <p><strong>Explanation:</strong><br/>
-Deep ensembles estimate uncertainty by training multiple models with different initializations and aggregating their predictions. The variation across these predictions provides information about model uncertainty. Since multiple models or passes are involved, this falls under iterative uncertainty estimation.</p></li>
+Deep ensembles estimate uncertainty by training multiple models with
+different initializations and aggregating their predictions. The
+variation across these predictions provides information about model
+uncertainty. Since multiple models or passes are involved, this falls
+under iterative uncertainty estimation.</p></li>
 <li><p>What is the main idea behind Monte Carlo dropout?</p>
 <ol>
-<li><p>Use dropout only during training and disable it at test time</p></li>
-<li><p>Apply dropout during both training and inference, and average multiple stochastic predictions</p></li>
-<li><p>Replace dropout with batch normalization during inference</p></li>
+<li><p>Use dropout only during training and disable it at test
+time</p></li>
+<li><p>Apply dropout during both training and inference, and average
+multiple stochastic predictions</p></li>
+<li><p>Replace dropout with batch normalization during
+inference</p></li>
 <li><p>Train many fully independent models from scratch</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Apply dropout during both training and inference, and average multiple stochastic predictions</p>
+b) Apply dropout during both training and inference, and average
+multiple stochastic predictions</p>
 <p><strong>Explanation:</strong><br/>
-Monte Carlo dropout keeps dropout active during inference so that each forward pass produces a slightly different prediction. These stochastic predictions can be averaged to form a final prediction, and their variability can be used to estimate uncertainty. This gives a computationally cheaper approximation to ensemble-style uncertainty estimation.</p></li>
-<li><p>In the decomposition <span class="math display">\[U_{total} = U_{epistemic} + U_{aleatoric},\]</span> which component is typically reducible with more data or better modeling?</p>
+Monte Carlo dropout keeps dropout active during inference so that each
+forward pass produces a slightly different prediction. These stochastic
+predictions can be averaged to form a final prediction, and their
+variability can be used to estimate uncertainty. This gives a
+computationally cheaper approximation to ensemble-style uncertainty
+estimation.</p></li>
+<li><p>In the decomposition <span class="math display">\[U_{total} =
+U_{epistemic} + U_{aleatoric},\]</span> which component is typically
+reducible with more data or better modeling?</p>
 <ol>
 <li><p>Aleatoric uncertainty only</p></li>
 <li><p>Epistemic uncertainty only</p></li>
@@ -91,52 +134,87 @@ Monte Carlo dropout keeps dropout active during inference so that each forward p
 <p><strong>Solution:</strong><br/>
 b) Epistemic uncertainty only</p>
 <p><strong>Explanation:</strong><br/>
-Epistemic uncertainty comes from incomplete model knowledge and can often be reduced by collecting more data, improving the architecture, or better exploring the parameter space. Aleatoric uncertainty is tied to the inherent ambiguity or noise in the data and is generally not removable by modeling alone.</p></li>
-<li><p>In a segmentation task, where would aleatoric uncertainty most likely be highest?</p>
+Epistemic uncertainty comes from incomplete model knowledge and can
+often be reduced by collecting more data, improving the architecture, or
+better exploring the parameter space. Aleatoric uncertainty is tied to
+the inherent ambiguity or noise in the data and is generally not
+removable by modeling alone.</p></li>
+<li><p>In a segmentation task, where would aleatoric uncertainty most
+likely be highest?</p>
 <ol>
-<li><p>In regions where the model has seen many similar training examples</p></li>
-<li><p>Along object or class boundaries where labels are inherently ambiguous</p></li>
+<li><p>In regions where the model has seen many similar training
+examples</p></li>
+<li><p>Along object or class boundaries where labels are inherently
+ambiguous</p></li>
 <li><p>Only in background regions</p></li>
 <li><p>Only when the training loss is zero</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Along object or class boundaries where labels are inherently ambiguous</p>
+b) Along object or class boundaries where labels are inherently
+ambiguous</p>
 <p><strong>Explanation:</strong><br/>
-Aleatoric uncertainty is typically highest where the input itself is ambiguous. In segmentation, this often occurs near class boundaries, where neighboring pixels may belong to different classes and image resolution or noise makes the correct label less certain.</p></li>
-<li><p>Why can single-pass uncertainty estimation be attractive in practice?</p>
+Aleatoric uncertainty is typically highest where the input itself is
+ambiguous. In segmentation, this often occurs near class boundaries,
+where neighboring pixels may belong to different classes and image
+resolution or noise makes the correct label less certain.</p></li>
+<li><p>Why can single-pass uncertainty estimation be attractive in
+practice?</p>
 <ol>
 <li><p>It completely removes the need for a trained model</p></li>
-<li><p>It avoids the computational cost of multiple forward passes or multiple models</p></li>
-<li><p>It guarantees better uncertainty estimates than deep ensembles</p></li>
+<li><p>It avoids the computational cost of multiple forward passes or
+multiple models</p></li>
+<li><p>It guarantees better uncertainty estimates than deep
+ensembles</p></li>
 <li><p>It requires no assumptions about the feature space</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) It avoids the computational cost of multiple forward passes or multiple models</p>
+b) It avoids the computational cost of multiple forward passes or
+multiple models</p>
 <p><strong>Explanation:</strong><br/>
-Single-pass methods estimate uncertainty from one forward pass, making them more efficient in time-sensitive or resource-constrained environments. Their main tradeoff is that they often rely on additional assumptions and may produce less reliable uncertainty estimates than iterative methods.</p></li>
-<li><p>Why can difficulty-based single-pass uncertainty methods become poorly calibrated?</p>
+Single-pass methods estimate uncertainty from one forward pass, making
+them more efficient in time-sensitive or resource-constrained
+environments. Their main tradeoff is that they often rely on additional
+assumptions and may produce less reliable uncertainty estimates than
+iterative methods.</p></li>
+<li><p>Why can difficulty-based single-pass uncertainty methods become
+poorly calibrated?</p>
 <ol>
 <li><p>Because they only work for linear models</p></li>
-<li><p>Because uncertainty is estimated in latent feature space, which may not preserve the true geometry of the input space</p></li>
+<li><p>Because uncertainty is estimated in latent feature space, which
+may not preserve the true geometry of the input space</p></li>
 <li><p>Because they require ground-truth labels at test time</p></li>
 <li><p>Because they eliminate all outliers before inference</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Because uncertainty is estimated in latent feature space, which may not preserve the true geometry of the input space</p>
+b) Because uncertainty is estimated in latent feature space, which may
+not preserve the true geometry of the input space</p>
 <p><strong>Explanation:</strong><br/>
-If the learned feature space distorts relationships between samples, then distance- or confidence-based uncertainty estimates may no longer reflect actual ambiguity in the original input space. This can lead to calibration problems, especially for outliers or underrepresented samples.</p></li>
-<li><p>What is the purpose of imposing a Bi-Lipschitz constraint in distance-preservation methods?</p>
+If the learned feature space distorts relationships between samples,
+then distance- or confidence-based uncertainty estimates may no longer
+reflect actual ambiguity in the original input space. This can lead to
+calibration problems, especially for outliers or underrepresented
+samples.</p></li>
+<li><p>What is the purpose of imposing a Bi-Lipschitz constraint in
+distance-preservation methods?</p>
 <ol>
-<li><p>To ensure that all feature vectors collapse to the same point</p></li>
-<li><p>To preserve meaningful distances between inputs and their latent representations</p></li>
+<li><p>To ensure that all feature vectors collapse to the same
+point</p></li>
+<li><p>To preserve meaningful distances between inputs and their latent
+representations</p></li>
 <li><p>To eliminate epistemic uncertainty completely</p></li>
 <li><p>To convert classification into regression</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) To preserve meaningful distances between inputs and their latent representations</p>
+b) To preserve meaningful distances between inputs and their latent
+representations</p>
 <p><strong>Explanation:</strong><br/>
-A Bi-Lipschitz constraint helps ensure that distances in input space are not excessively compressed or expanded in feature space. This improves the reliability of uncertainty estimates derived from latent representations because nearby samples remain nearby and distinct samples remain distinguishable.</p></li>
-<li><p>Which of the following is a <em>per-sample</em> uncertainty evaluation metric?</p>
+A Bi-Lipschitz constraint helps ensure that distances in input space are
+not excessively compressed or expanded in feature space. This improves
+the reliability of uncertainty estimates derived from latent
+representations because nearby samples remain nearby and distinct
+samples remain distinguishable.</p></li>
+<li><p>Which of the following is a <em>per-sample</em> uncertainty
+evaluation metric?</p>
 <ol>
 <li><p>Area Under the Accuracy Curve (AUAC)</p></li>
 <li><p>Open-set recognition accuracy</p></li>
@@ -146,40 +224,66 @@ A Bi-Lipschitz constraint helps ensure that distances in input space are not exc
 <p><strong>Solution:</strong><br/>
 c) Negative Log-Likelihood (NLL)</p>
 <p><strong>Explanation:</strong><br/>
-Per-sample metrics evaluate the quality of uncertainty for individual predictions, usually when ground-truth labels are known. NLL and Brier score are common examples. In contrast, AUAC and active learning performance are dataset- or application-level measures.</p></li>
+Per-sample metrics evaluate the quality of uncertainty for individual
+predictions, usually when ground-truth labels are known. NLL and Brier
+score are common examples. In contrast, AUAC and active learning
+performance are dataset- or application-level measures.</p></li>
 <li><p>What does a lower Brier score indicate?</p>
 <ol>
 <li><p>Worse calibration of predicted probabilities</p></li>
-<li><p>Better agreement between predicted probabilities and true outcomes</p></li>
+<li><p>Better agreement between predicted probabilities and true
+outcomes</p></li>
 <li><p>Higher computational cost</p></li>
 <li><p>Greater epistemic uncertainty</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Better agreement between predicted probabilities and true outcomes</p>
+b) Better agreement between predicted probabilities and true
+outcomes</p>
 <p><strong>Explanation:</strong><br/>
-The Brier score measures the mean squared difference between predicted probabilities and the true labels. Lower values indicate better calibrated and more accurate probabilistic predictions, while higher values indicate larger mismatch between confidence and correctness.</p></li>
-<li><p>In misprediction detection, what should a good uncertainty estimator do?</p>
+The Brier score measures the mean squared difference between predicted
+probabilities and the true labels. Lower values indicate better
+calibrated and more accurate probabilistic predictions, while higher
+values indicate larger mismatch between confidence and
+correctness.</p></li>
+<li><p>In misprediction detection, what should a good uncertainty
+estimator do?</p>
 <ol>
 <li><p>Assign low uncertainty to all predictions</p></li>
-<li><p>Rank incorrect predictions as more uncertain than correct predictions</p></li>
+<li><p>Rank incorrect predictions as more uncertain than correct
+predictions</p></li>
 <li><p>Maximize entropy for every sample</p></li>
-<li><p>Produce identical uncertainty scores for the entire dataset</p></li>
+<li><p>Produce identical uncertainty scores for the entire
+dataset</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-b) Rank incorrect predictions as more uncertain than correct predictions</p>
+b) Rank incorrect predictions as more uncertain than correct
+predictions</p>
 <p><strong>Explanation:</strong><br/>
-A useful uncertainty estimator should help distinguish reliable predictions from unreliable ones. In dataset-level evaluation, this means that incorrect predictions should generally receive higher uncertainty scores than correct predictions. This behavior leads to stronger misprediction detection performance.</p></li>
-<li><p>Why is uncertainty often evaluated through downstream applications such as active learning?</p>
+A useful uncertainty estimator should help distinguish reliable
+predictions from unreliable ones. In dataset-level evaluation, this
+means that incorrect predictions should generally receive higher
+uncertainty scores than correct predictions. This behavior leads to
+stronger misprediction detection performance.</p></li>
+<li><p>Why is uncertainty often evaluated through downstream
+applications such as active learning?</p>
 <ol>
-<li><p>Because uncertainty has no relationship to model performance</p></li>
-<li><p>Because uncertainty is only meaningful in theoretical settings</p></li>
-<li><p>Because the practical value of uncertainty is often best measured by how much it improves decision-making</p></li>
+<li><p>Because uncertainty has no relationship to model
+performance</p></li>
+<li><p>Because uncertainty is only meaningful in theoretical
+settings</p></li>
+<li><p>Because the practical value of uncertainty is often best measured
+by how much it improves decision-making</p></li>
 <li><p>Because per-sample metrics are always unavailable</p></li>
 </ol>
 <p><strong>Solution:</strong><br/>
-c) Because the practical value of uncertainty is often best measured by how much it improves decision-making</p>
+c) Because the practical value of uncertainty is often best measured by
+how much it improves decision-making</p>
 <p><strong>Explanation:</strong><br/>
-In many real-world settings, the usefulness of an uncertainty estimate is not judged only by a standalone numerical metric, but by whether it improves a downstream task. For example, in active learning, better uncertainty estimates should lead to better sample selection and faster model improvement.</p></li>
+In many real-world settings, the usefulness of an uncertainty estimate
+is not judged only by a standalone numerical metric, but by whether it
+improves a downstream task. For example, in active learning, better
+uncertainty estimates should lead to better sample selection and faster
+model improvement.</p></li>
 </ol></section>
 </main>
 </body>

@@ -109,58 +109,175 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture dives into different forms of autoencoders and their applications, specifically focusing on <strong>regularized autoencoders</strong>, including <strong>sparse autoencoders</strong>, <strong>denoising autoencoders</strong>, and <strong>variational autoencoders</strong>. Regularized autoencoders gain distinct properties by introducing constraints through various forms of regularization, enhancing their versatility for tasks such as data compression, feature extraction, noise removal, and new content generation.</p>
-<p>First, we examine <strong>sparse autoencoders</strong>, which encourage only a few neurons to activate for each input, resulting in compact representations that highlight essential data features. Another example is <strong>denoising autoencoders</strong>, designed to reconstruct clean data from noisy inputs, making them effective for tasks like noise removal. Finally, we explore <strong>variational autoencoders</strong>, which employ probabilistic techniques to create smooth, flexible data representations, enabling the generation of new samples with characteristics similar to the original data.</p>
+<p>This lecture dives into different forms of autoencoders and their
+applications, specifically focusing on <strong>regularized
+autoencoders</strong>, including <strong>sparse autoencoders</strong>,
+<strong>denoising autoencoders</strong>, and <strong>variational
+autoencoders</strong>. Regularized autoencoders gain distinct properties
+by introducing constraints through various forms of regularization,
+enhancing their versatility for tasks such as data compression, feature
+extraction, noise removal, and new content generation.</p>
+<p>First, we examine <strong>sparse autoencoders</strong>, which
+encourage only a few neurons to activate for each input, resulting in
+compact representations that highlight essential data features. Another
+example is <strong>denoising autoencoders</strong>, designed to
+reconstruct clean data from noisy inputs, making them effective for
+tasks like noise removal. Finally, we explore <strong>variational
+autoencoders</strong>, which employ probabilistic techniques to create
+smooth, flexible data representations, enabling the generation of new
+samples with characteristics similar to the original data.</p>
 <h1 data-number="2" id="regularized-autoencoders"><span class="header-section-number">2.</span> Regularized Autoencoders</h1>
-<p>While basic autoencoders are effective at learning compressed representations, they often struggle with overfitting and may learn trivial identity mappings when the model has sufficient capacity. As neural networks became larger and more expressive, these limitations motivated the development of <strong>regularized autoencoder variants</strong>.</p>
-<p>Regularized autoencoders introduce additional constraints that encourage the model to learn meaningful and robust features rather than simply memorizing the training data. In this section, we explore several important extensions, including <strong>sparse autoencoders</strong>, <strong>denoising autoencoders</strong>, and <strong>variational autoencoders</strong>, which improve generalization and enable autoencoders to handle more complex real-world tasks.</p>
-<h2 data-number="2.1" id="regularized-autoencoders-overview"><span class="header-section-number">2.1</span> Regularized Autoencoders Overview</h2>
-<p>Basic autoencoders rely on a low-dimensional bottleneck to force the network to learn compressed representations of the data. However, modern neural networks often have enough capacity to bypass this constraint and learn a trivial identity mapping, simply copying the input to the output without extracting meaningful structure. Regularized autoencoders address this limitation by encouraging the model to learn informative representations through explicit constraints on the learning process rather than relying solely on dimensionality reduction.</p>
-<p>The key idea is that <strong>compression is enforced through regularization instead of a small latent space</strong>. This allows the latent representation <span class="math inline">\(Z\)</span> to be high-dimensional while still capturing useful and generalizable features. By constraining how the encoder and decoder learn, the model is encouraged to discover structure in the data rather than memorize the training set. In this lecture, we study three major regularization strategies: <strong>sparse autoencoders</strong>, <strong>denoising autoencoders</strong>, and <strong>variational autoencoders</strong>.</p>
-<p>The objective of regularization is to prevent the encoder–decoder network from learning a direct 1:1 mapping between the input and the output. Without regularization, a high-capacity autoencoder can “cheat” by memorizing the training data instead of learning meaningful patterns. This is analogous to memorizing answers for an exam without understanding the underlying concepts. Regularization forces the model to extract structure and learn features that generalize to new data.</p>
-<figure>
-<img alt="Regularization prevents the undesirable identity mapping and encourages the model to learn meaningful patterns." id="fig:enter-label" src="img/lecture19/121mapping1.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Regularization prevents the undesirable identity mapping and encourages the model to learn meaningful patterns.</figcaption>
+<p>While basic autoencoders are effective at learning compressed
+representations, they often struggle with overfitting and may learn
+trivial identity mappings when the model has sufficient capacity. As
+neural networks became larger and more expressive, these limitations
+motivated the development of <strong>regularized autoencoder
+variants</strong>.</p>
+<p>Regularized autoencoders introduce additional constraints that
+encourage the model to learn meaningful and robust features rather than
+simply memorizing the training data. In this section, we explore several
+important extensions, including <strong>sparse autoencoders</strong>,
+<strong>denoising autoencoders</strong>, and <strong>variational
+autoencoders</strong>, which improve generalization and enable
+autoencoders to handle more complex real-world tasks.</p>
+<h2 data-number="2.1" id="regularized-autoencoders-overview"><span class="header-section-number">2.1</span> Regularized Autoencoders
+Overview</h2>
+<p>Basic autoencoders rely on a low-dimensional bottleneck to force the
+network to learn compressed representations of the data. However, modern
+neural networks often have enough capacity to bypass this constraint and
+learn a trivial identity mapping, simply copying the input to the output
+without extracting meaningful structure. Regularized autoencoders
+address this limitation by encouraging the model to learn informative
+representations through explicit constraints on the learning process
+rather than relying solely on dimensionality reduction.</p>
+<p>The key idea is that <strong>compression is enforced through
+regularization instead of a small latent space</strong>. This allows the
+latent representation <span class="math inline">\(Z\)</span> to be
+high-dimensional while still capturing useful and generalizable
+features. By constraining how the encoder and decoder learn, the model
+is encouraged to discover structure in the data rather than memorize the
+training set. In this lecture, we study three major regularization
+strategies: <strong>sparse autoencoders</strong>, <strong>denoising
+autoencoders</strong>, and <strong>variational
+autoencoders</strong>.</p>
+<p>The objective of regularization is to prevent the encoder–decoder
+network from learning a direct 1:1 mapping between the input and the
+output. Without regularization, a high-capacity autoencoder can “cheat”
+by memorizing the training data instead of learning meaningful patterns.
+This is analogous to memorizing answers for an exam without
+understanding the underlying concepts. Regularization forces the model
+to extract structure and learn features that generalize to new data.</p>
+<figure id="fig:enter-label">
+<img src="img/lecture19/121mapping1.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Regularization prevents the undesirable identity mapping and
+encourages the model to learn meaningful patterns.</figcaption>
 </figure>
 <h4 data-number="2.1.0.1" id="key-takeaways"><span class="header-section-number">2.1.0.1</span> Key Takeaways</h4>
 <ul>
-<li><p>Regularized autoencoders can use <strong>high-dimensional latent spaces</strong>. Representation quality is enforced by regularization rather than by a dimensional bottleneck.</p></li>
-<li><p>Regularization discourages redundant or trivial features and improves the model’s ability to <strong>generalize to unseen data</strong>.</p></li>
+<li><p>Regularized autoencoders can use <strong>high-dimensional latent
+spaces</strong>. Representation quality is enforced by regularization
+rather than by a dimensional bottleneck.</p></li>
+<li><p>Regularization discourages redundant or trivial features and
+improves the model’s ability to <strong>generalize to unseen
+data</strong>.</p></li>
 </ul>
 <h2 data-number="2.2" id="sparse-autoencoders"><span class="header-section-number">2.2</span> Sparse Autoencoders</h2>
-<p>Sparse autoencoders encourage the network to activate only a small subset of neurons for any given input. Instead of forcing compression through a small latent dimension, sparsity forces the model to represent each input using only a few active features. This encourages the network to discover distinctive and interpretable patterns in the data.</p>
-<p>The key idea is that even if the latent space is large, the model is restricted in how many neurons it can use at once. As a result, the autoencoder cannot simply copy the input using all available neurons and must instead learn a compact set of meaningful features.</p>
+<p>Sparse autoencoders encourage the network to activate only a small
+subset of neurons for any given input. Instead of forcing compression
+through a small latent dimension, sparsity forces the model to represent
+each input using only a few active features. This encourages the network
+to discover distinctive and interpretable patterns in the data.</p>
+<p>The key idea is that even if the latent space is large, the model is
+restricted in how many neurons it can use at once. As a result, the
+autoencoder cannot simply copy the input using all available neurons and
+must instead learn a compact set of meaningful features.</p>
 <h4 data-number="2.2.0.1" id="motivation."><span class="header-section-number">2.2.0.1</span> Motivation.</h4>
-<p>Sparse representations are widely used in machine learning and neuroscience because they tend to capture the most informative structure in data. By activating only a subset of neurons during each forward pass, the model is prevented from memorizing the input and is encouraged to learn reusable features that are useful for downstream tasks such as classification and clustering.</p>
+<p>Sparse representations are widely used in machine learning and
+neuroscience because they tend to capture the most informative structure
+in data. By activating only a subset of neurons during each forward
+pass, the model is prevented from memorizing the input and is encouraged
+to learn reusable features that are useful for downstream tasks such as
+classification and clustering.</p>
 <figure>
-<img alt="Sparse autoencoders activate only a subset of neurons for any given input." src="img/lecture19/SparseMapping.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Sparse autoencoders activate only a subset of neurons for any given input.</figcaption>
+<img src="img/lecture19/SparseMapping.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Sparse autoencoders activate only a subset of neurons for
+any given input.</figcaption>
 </figure>
-<h4 data-number="2.2.0.2" id="how-sparsity-is-enforced."><span class="header-section-number">2.2.0.2</span> How sparsity is enforced.</h4>
-<p>Sparse autoencoders introduce a regularization term into the loss function: <span class="math display">\[\mathcal{L}_{\text{total}}
+<h4 data-number="2.2.0.2" id="how-sparsity-is-enforced."><span class="header-section-number">2.2.0.2</span> How sparsity is
+enforced.</h4>
+<p>Sparse autoencoders introduce a regularization term into the loss
+function: <span class="math display">\[\mathcal{L}_{\text{total}}
 =
 \mathcal{L}_{\text{reconstruction}}
 +
-\lambda \, \Omega(Z)\]</span> Here, <span class="math inline">\(\mathcal{L}_{\text{reconstruction}}\)</span> measures how accurately the decoder reconstructs the input, <span class="math inline">\(\Omega(Z)\)</span> is a sparsity-promoting penalty applied to the latent representation <span class="math inline">\(Z\)</span>, and <span class="math inline">\(\lambda &gt; 0\)</span> controls the tradeoff between reconstruction quality and sparsity. A larger value of <span class="math inline">\(\lambda\)</span> places more emphasis on sparsity, while a smaller value prioritizes reconstruction accuracy.</p>
-<p>In other words, the model is no longer rewarded only for reconstructing well. It is also penalized if too many latent units are active. This prevents the latent representation from becoming a dense copy of the input and instead encourages the network to encode the input using only a small set of informative features.</p>
+\lambda \, \Omega(Z)\]</span> Here, <span class="math inline">\(\mathcal{L}_{\text{reconstruction}}\)</span>
+measures how accurately the decoder reconstructs the input, <span class="math inline">\(\Omega(Z)\)</span> is a sparsity-promoting penalty
+applied to the latent representation <span class="math inline">\(Z\)</span>, and <span class="math inline">\(\lambda &gt; 0\)</span> controls the tradeoff
+between reconstruction quality and sparsity. A larger value of <span class="math inline">\(\lambda\)</span> places more emphasis on sparsity,
+while a smaller value prioritizes reconstruction accuracy.</p>
+<p>In other words, the model is no longer rewarded only for
+reconstructing well. It is also penalized if too many latent units are
+active. This prevents the latent representation from becoming a dense
+copy of the input and instead encourages the network to encode the input
+using only a small set of informative features.</p>
 <figure>
-<img alt="Sparse autoencoders add a regularization term to the reconstruction loss." src="img/lecture19/LossFunction4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Sparse autoencoders add a regularization term to the reconstruction loss.</figcaption>
+<img src="img/lecture19/LossFunction4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Sparse autoencoders add a regularization term to the
+reconstruction loss.</figcaption>
 </figure>
-<p>Figure 18.3 illustrates this idea visually, but the key mathematical point is that sparsity is enforced by augmenting the reconstruction objective with an additional penalty term. Two common techniques are used to define <span class="math inline">\(\Omega(Z)\)</span>.</p>
-<h4 data-number="2.2.0.3" id="l1-regularization-on-activations."><span class="header-section-number">2.2.0.3</span> L1 Regularization on Activations.</h4>
-<p>One simple method is to apply an <span class="math inline">\(L_1\)</span> penalty directly to the latent activations: <span class="math display">\[\Omega(Z) = \sum_{i=1}^{d} |z_i|\]</span> where <span class="math inline">\(d\)</span> is the latent dimension and <span class="math inline">\(z_i\)</span> is the <span class="math inline">\(i\)</span>-th latent activation for a given input. This regularizer measures the total absolute magnitude of the latent activations.</p>
+<p>Figure 18.3 illustrates this idea visually, but the key mathematical
+point is that sparsity is enforced by augmenting the reconstruction
+objective with an additional penalty term. Two common techniques are
+used to define <span class="math inline">\(\Omega(Z)\)</span>.</p>
+<h4 data-number="2.2.0.3" id="l1-regularization-on-activations."><span class="header-section-number">2.2.0.3</span> L1 Regularization on
+Activations.</h4>
+<p>One simple method is to apply an <span class="math inline">\(L_1\)</span> penalty directly to the latent
+activations: <span class="math display">\[\Omega(Z) = \sum_{i=1}^{d}
+|z_i|\]</span> where <span class="math inline">\(d\)</span> is the
+latent dimension and <span class="math inline">\(z_i\)</span> is the
+<span class="math inline">\(i\)</span>-th latent activation for a given
+input. This regularizer measures the total absolute magnitude of the
+latent activations.</p>
 <p>Substituting this into the sparse autoencoder objective gives: <span class="math display">\[\mathcal{L}_{\text{total}}
 =
 \mathcal{L}_{\text{reconstruction}}
 +
 \lambda \sum_{i=1}^{d} |z_i|\]</span></p>
-<p>This equation shows that the model is penalized whenever many latent coordinates are active or when their magnitudes become too large. The <span class="math inline">\(L_1\)</span> norm is well known for encouraging sparsity, so the network learns to keep most activations close to zero and rely on only a few neurons for each input. As a result, the learned representation becomes compact and selective rather than dense and redundant.</p>
+<p>This equation shows that the model is penalized whenever many latent
+coordinates are active or when their magnitudes become too large. The
+<span class="math inline">\(L_1\)</span> norm is well known for
+encouraging sparsity, so the network learns to keep most activations
+close to zero and rely on only a few neurons for each input. As a
+result, the learned representation becomes compact and selective rather
+than dense and redundant.</p>
 <figure>
-<img alt="L1 regularization encourages many latent activations to become zero." src="img/lecture19/L1norm.JPG" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">L1 regularization encourages many latent activations to become zero.</figcaption>
+<img src="img/lecture19/L1norm.JPG" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption>L1 regularization encourages many latent activations to
+become zero.</figcaption>
 </figure>
-<p>Figure 18.4 provides the geometric intuition behind the <span class="math inline">\(L_1\)</span> penalty. In the sparse autoencoder setting, the practical consequence is that different inputs activate different small subsets of latent units rather than spreading information across all neurons.</p>
-<h4 data-number="2.2.0.4" id="kl-divergence-sparsity-constraint."><span class="header-section-number">2.2.0.4</span> KL-Divergence Sparsity Constraint.</h4>
-<p>Another common approach is to control the <em>average activation</em> of each neuron across the training set. Let <span class="math display">\[\hat{\rho}_j = \frac{1}{N}\sum_{n=1}^{N} a_j\!\left(x^{(n)}\right)\]</span> denote the empirical average activation of latent neuron <span class="math inline">\(j\)</span>, where <span class="math inline">\(a_j(x^{(n)})\)</span> is the activation of neuron <span class="math inline">\(j\)</span> for the <span class="math inline">\(n\)</span>-th training example and <span class="math inline">\(N\)</span> is the number of training samples.</p>
-<p>We then choose a small target sparsity level <span class="math inline">\(\rho\)</span> (for example, <span class="math inline">\(\rho = 0.05\)</span>) and encourage each neuron to satisfy <span class="math display">\[\hat{\rho}_j \approx \rho.\]</span> Here, <span class="math inline">\(\rho\)</span> is the desired average activation level, while <span class="math inline">\(\hat{\rho}_j\)</span> is the actual average activation observed during training. If <span class="math inline">\(\hat{\rho}_j\)</span> becomes much larger than <span class="math inline">\(\rho\)</span>, then neuron <span class="math inline">\(j\)</span> is being used too frequently and should be penalized.</p>
-<p>This can be enforced using a KL-divergence penalty: <span class="math display">\[\Omega(Z) = \sum_{j=1}^{d} D_{KL}(\rho \,\|\, \hat{\rho}_j)\]</span> where <span class="math display">\[D_{KL}(\rho \,\|\, \hat{\rho}_j)
+<p>Figure 18.4 provides the geometric intuition behind the <span class="math inline">\(L_1\)</span> penalty. In the sparse autoencoder
+setting, the practical consequence is that different inputs activate
+different small subsets of latent units rather than spreading
+information across all neurons.</p>
+<h4 data-number="2.2.0.4" id="kl-divergence-sparsity-constraint."><span class="header-section-number">2.2.0.4</span> KL-Divergence Sparsity
+Constraint.</h4>
+<p>Another common approach is to control the <em>average activation</em>
+of each neuron across the training set. Let <span class="math display">\[\hat{\rho}_j = \frac{1}{N}\sum_{n=1}^{N}
+a_j\!\left(x^{(n)}\right)\]</span> denote the empirical average
+activation of latent neuron <span class="math inline">\(j\)</span>,
+where <span class="math inline">\(a_j(x^{(n)})\)</span> is the
+activation of neuron <span class="math inline">\(j\)</span> for the
+<span class="math inline">\(n\)</span>-th training example and <span class="math inline">\(N\)</span> is the number of training samples.</p>
+<p>We then choose a small target sparsity level <span class="math inline">\(\rho\)</span> (for example, <span class="math inline">\(\rho = 0.05\)</span>) and encourage each neuron to
+satisfy <span class="math display">\[\hat{\rho}_j \approx \rho.\]</span>
+Here, <span class="math inline">\(\rho\)</span> is the desired average
+activation level, while <span class="math inline">\(\hat{\rho}_j\)</span> is the actual average
+activation observed during training. If <span class="math inline">\(\hat{\rho}_j\)</span> becomes much larger than
+<span class="math inline">\(\rho\)</span>, then neuron <span class="math inline">\(j\)</span> is being used too frequently and should
+be penalized.</p>
+<p>This can be enforced using a KL-divergence penalty: <span class="math display">\[\Omega(Z) = \sum_{j=1}^{d} D_{KL}(\rho \,\|\,
+\hat{\rho}_j)\]</span> where <span class="math display">\[D_{KL}(\rho
+\,\|\, \hat{\rho}_j)
 =
 \rho \log\frac{\rho}{\hat{\rho}_j}
 +
@@ -170,138 +287,369 @@ window.addEventListener("DOMContentLoaded", () => {
 \mathcal{L}_{\text{reconstruction}}
 +
 \lambda \sum_{j=1}^{d} D_{KL}(\rho \,\|\, \hat{\rho}_j).\]</span></p>
-<p>This equation penalizes the model when the average activation of a latent neuron deviates too far from the desired sparsity level. Unlike the <span class="math inline">\(L_1\)</span> penalty, which acts directly on the activations of each individual input, the KL-based penalty acts on the <em>average behavior</em> of each neuron across the dataset. This encourages neurons to be active only rarely, which leads to specialization and a sparse but still distributed representation.</p>
+<p>This equation penalizes the model when the average activation of a
+latent neuron deviates too far from the desired sparsity level. Unlike
+the <span class="math inline">\(L_1\)</span> penalty, which acts
+directly on the activations of each individual input, the KL-based
+penalty acts on the <em>average behavior</em> of each neuron across the
+dataset. This encourages neurons to be active only rarely, which leads
+to specialization and a sparse but still distributed representation.</p>
 <figure>
-<img alt="KL divergence penalizes neurons that activate too frequently." src="img/lecture19/KL.JPG" style="width:54.00%; max-width:54.00%; height:auto;"/><figcaption aria-hidden="true">KL divergence penalizes neurons that activate too frequently.</figcaption>
+<img src="img/lecture19/KL.JPG" style="width:54.00%; max-width:54.00%; height:auto;"/>
+<figcaption>KL divergence penalizes neurons that activate too
+frequently.</figcaption>
 </figure>
-<p>Figure 18.5 provides the intuition for the KL penalty. In practice, this encourages each latent neuron to specialize in detecting only certain structures or patterns, resulting in a sparse but still distributed representation.</p>
+<p>Figure 18.5 provides the intuition for the KL penalty. In practice,
+this encourages each latent neuron to specialize in detecting only
+certain structures or patterns, resulting in a sparse but still
+distributed representation.</p>
 <h4 data-number="2.2.0.5" id="training."><span class="header-section-number">2.2.0.5</span> Training.</h4>
-<p>During training, the reconstruction loss and sparsity penalty are optimized jointly. The strength of the sparsity constraint is controlled by the hyperparameter <span class="math inline">\(\lambda\)</span>, which determines how strongly sparsity is enforced.</p>
+<p>During training, the reconstruction loss and sparsity penalty are
+optimized jointly. The strength of the sparsity constraint is controlled
+by the hyperparameter <span class="math inline">\(\lambda\)</span>,
+which determines how strongly sparsity is enforced.</p>
 <figure>
-<img alt="Sparse autoencoders represent inputs using only a few active features." src="img/lecture19/Sparse4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Sparse autoencoders represent inputs using only a few active features.</figcaption>
+<img src="img/lecture19/Sparse4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Sparse autoencoders represent inputs using only a few active
+features.</figcaption>
 </figure>
 <h4 data-number="2.2.0.6" id="key-takeaways-1"><span class="header-section-number">2.2.0.6</span> Key Takeaways:</h4>
 <ul>
-<li><p>Sparse autoencoders learn representations using only a small number of active neurons.</p></li>
-<li><p>Sparsity encourages feature discovery, noise reduction, and better generalization.</p></li>
-<li><p>Sparsity can be enforced using <span class="math inline">\(L_1\)</span> penalties or KL-divergence constraints on activations.</p></li>
+<li><p>Sparse autoencoders learn representations using only a small
+number of active neurons.</p></li>
+<li><p>Sparsity encourages feature discovery, noise reduction, and
+better generalization.</p></li>
+<li><p>Sparsity can be enforced using <span class="math inline">\(L_1\)</span> penalties or KL-divergence
+constraints on activations.</p></li>
 </ul>
 <h2 data-number="2.3" id="denoising-autoencoders"><span class="header-section-number">2.3</span> Denoising Autoencoders</h2>
-<p>Denoising autoencoders learn robust representations by training the model to reconstruct clean inputs from corrupted versions. Instead of simply copying the input, the network must learn the underlying structure of the data in order to remove noise. This encourages the encoder to capture stable and meaningful features that are useful even when the input is partially corrupted.</p>
+<p>Denoising autoencoders learn robust representations by training the
+model to reconstruct clean inputs from corrupted versions. Instead of
+simply copying the input, the network must learn the underlying
+structure of the data in order to remove noise. This encourages the
+encoder to capture stable and meaningful features that are useful even
+when the input is partially corrupted.</p>
 <h4 data-number="2.3.0.1" id="objective"><span class="header-section-number">2.3.0.1</span> Objective</h4>
-<p>The goal of a denoising autoencoder is to learn features that can remove noise from corrupted data. During training, noise is intentionally added to the input, and the model is asked to reconstruct the original clean version. Because the model never sees the clean input directly, it must learn the true structure of the data rather than memorizing pixel-level details.</p>
+<p>The goal of a denoising autoencoder is to learn features that can
+remove noise from corrupted data. During training, noise is
+intentionally added to the input, and the model is asked to reconstruct
+the original clean version. Because the model never sees the clean input
+directly, it must learn the true structure of the data rather than
+memorizing pixel-level details.</p>
 <figure>
-<img alt="Denoising autoencoder: corrupted inputs are mapped back to clean outputs." src="img/lecture19/DeNoiseManifold.JPG" style="width:39.00%; max-width:39.00%; height:auto;"/><figcaption aria-hidden="true">Denoising autoencoder: corrupted inputs are mapped back to clean outputs.</figcaption>
+<img src="img/lecture19/DeNoiseManifold.JPG" style="width:39.00%; max-width:39.00%; height:auto;"/>
+<figcaption>Denoising autoencoder: corrupted inputs are mapped back to
+clean outputs.</figcaption>
 </figure>
-<p>A useful way to understand denoising autoencoders is through the concept of a <em>data manifold</em>. Real-world data often lies on a lower-dimensional, smooth manifold embedded in a high-dimensional space. Clean data points lie on this manifold, while noisy or corrupted inputs are pushed away from it. The denoising autoencoder learns to map corrupted inputs back to the nearest point on the learned manifold, effectively pulling noisy samples toward the region where true data lives.</p>
+<p>A useful way to understand denoising autoencoders is through the
+concept of a <em>data manifold</em>. Real-world data often lies on a
+lower-dimensional, smooth manifold embedded in a high-dimensional space.
+Clean data points lie on this manifold, while noisy or corrupted inputs
+are pushed away from it. The denoising autoencoder learns to map
+corrupted inputs back to the nearest point on the learned manifold,
+effectively pulling noisy samples toward the region where true data
+lives.</p>
 <h4 data-number="2.3.0.2" id="training-process"><span class="header-section-number">2.3.0.2</span> Training Process</h4>
-<p>During training, the input <span class="math inline">\(X\)</span> is first corrupted to produce a noisy version <span class="math inline">\(\tilde{X}\)</span>. The encoder receives <span class="math inline">\(\tilde{X}\)</span>, not <span class="math inline">\(X\)</span>, and the decoder is trained to reconstruct the original clean input: <span class="math display">\[\hat{X} = G_\phi(E_\theta(\tilde{X})).\]</span> Here, <span class="math inline">\(E_\theta(\cdot)\)</span> denotes the encoder with parameters <span class="math inline">\(\theta\)</span>, <span class="math inline">\(G_\phi(\cdot)\)</span> denotes the decoder with parameters <span class="math inline">\(\phi\)</span>, <span class="math inline">\(\tilde{X}\)</span> is the corrupted input, and <span class="math inline">\(\hat{X}\)</span> is the reconstruction of the original clean sample <span class="math inline">\(X\)</span>.</p>
-<p>A more complete way to write this is to introduce a corruption process <span class="math inline">\(q_D(\tilde{X}\mid X)\)</span>, which defines how noise is added to the clean input. The denoising autoencoder then minimizes the expected reconstruction loss: <span class="math display">\[\mathcal{L}_{\text{DAE}}
+<p>During training, the input <span class="math inline">\(X\)</span> is
+first corrupted to produce a noisy version <span class="math inline">\(\tilde{X}\)</span>. The encoder receives <span class="math inline">\(\tilde{X}\)</span>, not <span class="math inline">\(X\)</span>, and the decoder is trained to
+reconstruct the original clean input: <span class="math display">\[\hat{X} = G_\phi(E_\theta(\tilde{X})).\]</span>
+Here, <span class="math inline">\(E_\theta(\cdot)\)</span> denotes the
+encoder with parameters <span class="math inline">\(\theta\)</span>,
+<span class="math inline">\(G_\phi(\cdot)\)</span> denotes the decoder
+with parameters <span class="math inline">\(\phi\)</span>, <span class="math inline">\(\tilde{X}\)</span> is the corrupted input, and
+<span class="math inline">\(\hat{X}\)</span> is the reconstruction of
+the original clean sample <span class="math inline">\(X\)</span>.</p>
+<p>A more complete way to write this is to introduce a corruption
+process <span class="math inline">\(q_D(\tilde{X}\mid X)\)</span>, which
+defines how noise is added to the clean input. The denoising autoencoder
+then minimizes the expected reconstruction loss: <span class="math display">\[\mathcal{L}_{\text{DAE}}
 =
 \mathbb{E}_{\tilde{X}\sim q_D(\tilde{X}\mid X)}
 \left[
 \|X-\hat{X}\|_2^2
-\right]\]</span> with <span class="math display">\[\hat{X} = G_\phi(E_\theta(\tilde{X})).\]</span></p>
-<p>In this objective, the expectation is taken over corrupted versions of the same clean input. The squared error term <span class="math inline">\(\|X-\hat{X}\|_2^2\)</span> measures how closely the decoder recovers the original clean sample from its noisy version. Thus, the model is trained not to reproduce what it sees, but to infer the underlying clean structure from a corrupted observation.</p>
+\right]\]</span> with <span class="math display">\[\hat{X} =
+G_\phi(E_\theta(\tilde{X})).\]</span></p>
+<p>In this objective, the expectation is taken over corrupted versions
+of the same clean input. The squared error term <span class="math inline">\(\|X-\hat{X}\|_2^2\)</span> measures how closely
+the decoder recovers the original clean sample from its noisy version.
+Thus, the model is trained not to reproduce what it sees, but to infer
+the underlying clean structure from a corrupted observation.</p>
 <figure>
-<img alt="Loss function used to train a denoising autoencoder." src="img/lecture19/NoiseLoss.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Loss function used to train a denoising autoencoder.</figcaption>
+<img src="img/lecture19/NoiseLoss.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Loss function used to train a denoising
+autoencoder.</figcaption>
 </figure>
-<p>Figure 18.8 shows this objective visually. The important mathematical idea is that the network is not rewarded for simply reproducing its input. Instead, it must infer the clean underlying structure from a corrupted observation. This is why denoising acts as a form of regularization and leads to more robust latent features.</p>
+<p>Figure 18.8 shows this objective visually. The important mathematical
+idea is that the network is not rewarded for simply reproducing its
+input. Instead, it must infer the clean underlying structure from a
+corrupted observation. This is why denoising acts as a form of
+regularization and leads to more robust latent features.</p>
 <h4 data-number="2.3.0.3" id="why-denoising-works"><span class="header-section-number">2.3.0.3</span> Why Denoising Works</h4>
-<p>By learning to remove noise, the model is forced to capture stable patterns that are shared across many examples. This acts as a powerful form of regularization. The learned representation becomes robust to perturbations, small variations, and measurement errors.</p>
-<h4 data-number="2.3.0.4" id="use-cases-and-limitations"><span class="header-section-number">2.3.0.4</span> Use Cases and Limitations</h4>
-<p>Denoising autoencoders are widely used in image restoration, signal processing, and representation learning for noisy datasets. They are especially useful when real-world data is imperfect or corrupted.</p>
-<p>However, denoising autoencoders do not impose strong structure on the latent space. If we randomly sample points from the latent space, there is no guarantee that they will decode into realistic data. This limitation motivates the development of <em>variational autoencoders</em>, which explicitly structure the latent space for generative modeling.</p>
+<p>By learning to remove noise, the model is forced to capture stable
+patterns that are shared across many examples. This acts as a powerful
+form of regularization. The learned representation becomes robust to
+perturbations, small variations, and measurement errors.</p>
+<h4 data-number="2.3.0.4" id="use-cases-and-limitations"><span class="header-section-number">2.3.0.4</span> Use Cases and
+Limitations</h4>
+<p>Denoising autoencoders are widely used in image restoration, signal
+processing, and representation learning for noisy datasets. They are
+especially useful when real-world data is imperfect or corrupted.</p>
+<p>However, denoising autoencoders do not impose strong structure on the
+latent space. If we randomly sample points from the latent space, there
+is no guarantee that they will decode into realistic data. This
+limitation motivates the development of <em>variational
+autoencoders</em>, which explicitly structure the latent space for
+generative modeling.</p>
 <h2 data-number="2.4" id="variational-autoencoders"><span class="header-section-number">2.4</span> Variational Autoencoders</h2>
-<p>Variational Autoencoders (VAEs) extend traditional autoencoders by combining representation learning with generative modeling. While standard autoencoders learn how to compress and reconstruct data, they do not impose structure on the latent space. As a result, randomly sampling from the latent space often produces unrealistic outputs. VAEs solve this problem by learning a <em>probabilistic</em> latent space that is continuous, smooth, and suitable for generation.</p>
-<h4 data-number="2.4.0.1" id="probabilistic-latent-space"><span class="header-section-number">2.4.0.1</span> Probabilistic Latent Space</h4>
-<p>Instead of encoding each input as a single point in latent space, a VAE encodes each input as a <em>distribution</em>. The encoder outputs the mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> of a Gaussian distribution that represents where the data point is likely to lie in the latent space.</p>
+<p>Variational Autoencoders (VAEs) extend traditional autoencoders by
+combining representation learning with generative modeling. While
+standard autoencoders learn how to compress and reconstruct data, they
+do not impose structure on the latent space. As a result, randomly
+sampling from the latent space often produces unrealistic outputs. VAEs
+solve this problem by learning a <em>probabilistic</em> latent space
+that is continuous, smooth, and suitable for generation.</p>
+<h4 data-number="2.4.0.1" id="probabilistic-latent-space"><span class="header-section-number">2.4.0.1</span> Probabilistic Latent
+Space</h4>
+<p>Instead of encoding each input as a single point in latent space, a
+VAE encodes each input as a <em>distribution</em>. The encoder outputs
+the mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> of a Gaussian distribution that
+represents where the data point is likely to lie in the latent
+space.</p>
 <figure>
-<img alt="Structure of a variational autoencoder. The encoder maps an input X to the parameters \mu and \sigma of the approximate posterior q_\theta(Z|X). A latent code Z is sampled from this distribution and passed through the decoder p_\phi(X|Z) to reconstruct the input." src="img/lecture19/Structure-of-the-variational-autoencoder-VAE.png" style="width:30.00%; max-width:30.00%; height:auto;"/><figcaption aria-hidden="true">Structure of a variational autoencoder. The encoder maps an input <span class="math inline">\(X\)</span> to the parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> of the approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>. A latent code <span class="math inline">\(Z\)</span> is sampled from this distribution and passed through the decoder <span class="math inline">\(p_\phi(X|Z)\)</span> to reconstruct the input.</figcaption>
+<img src="img/lecture19/Structure-of-the-variational-autoencoder-VAE.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Structure of a variational autoencoder. The encoder maps an
+input <span class="math inline">\(X\)</span> to the parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> of the approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>. A latent code <span class="math inline">\(Z\)</span> is sampled from this distribution and
+passed through the decoder <span class="math inline">\(p_\phi(X|Z)\)</span> to reconstruct the
+input.</figcaption>
 </figure>
-<p>Sampling from these distributions produces latent points that are close to one another in a continuous manner. This continuity allows smooth interpolation between data points and enables the model to generate realistic new samples.</p>
-<h4 data-number="2.4.0.2" id="generative-modeling-view"><span class="header-section-number">2.4.0.2</span> Generative Modeling View</h4>
-<p>VAEs model the data using a latent-variable generative process. First, a latent code is sampled from a prior distribution: <span class="math display">\[Z \sim p(Z),\]</span> and then an observation is generated from the decoder likelihood: <span class="math display">\[X \sim p_\phi(X|Z).\]</span></p>
-<p>Equivalently, the joint distribution can be written as <span class="math display">\[p_\phi(X,Z)=p(Z)\,p_\phi(X|Z).\]</span> Here, <span class="math inline">\(p(Z)\)</span> is the prior distribution over latent variables, <span class="math inline">\(p_\phi(X|Z)\)</span> is the decoder likelihood that describes how data is generated from a latent code, and <span class="math inline">\(p_\phi(X,Z)\)</span> is the joint probability of simultaneously observing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span>.</p>
-<p>The prior <span class="math inline">\(p(Z)\)</span> is usually chosen to be a standard Gaussian: <span class="math display">\[p(Z)=\mathcal{N}(0,I),\]</span> because it is simple to sample from and encourages a smooth latent space.</p>
-<p>To evaluate how likely an observed data point <span class="math inline">\(X\)</span> is under the model, we marginalize over all possible latent variables: <span class="math display">\[p_\phi(X)=\int p_\phi(X,Z)\,dZ
+<p>Sampling from these distributions produces latent points that are
+close to one another in a continuous manner. This continuity allows
+smooth interpolation between data points and enables the model to
+generate realistic new samples.</p>
+<h4 data-number="2.4.0.2" id="generative-modeling-view"><span class="header-section-number">2.4.0.2</span> Generative Modeling
+View</h4>
+<p>VAEs model the data using a latent-variable generative process.
+First, a latent code is sampled from a prior distribution: <span class="math display">\[Z \sim p(Z),\]</span> and then an observation is
+generated from the decoder likelihood: <span class="math display">\[X
+\sim p_\phi(X|Z).\]</span></p>
+<p>Equivalently, the joint distribution can be written as <span class="math display">\[p_\phi(X,Z)=p(Z)\,p_\phi(X|Z).\]</span> Here,
+<span class="math inline">\(p(Z)\)</span> is the prior distribution over
+latent variables, <span class="math inline">\(p_\phi(X|Z)\)</span> is
+the decoder likelihood that describes how data is generated from a
+latent code, and <span class="math inline">\(p_\phi(X,Z)\)</span> is the
+joint probability of simultaneously observing both <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span>.</p>
+<p>The prior <span class="math inline">\(p(Z)\)</span> is usually chosen
+to be a standard Gaussian: <span class="math display">\[p(Z)=\mathcal{N}(0,I),\]</span> because it is
+simple to sample from and encourages a smooth latent space.</p>
+<p>To evaluate how likely an observed data point <span class="math inline">\(X\)</span> is under the model, we marginalize over
+all possible latent variables: <span class="math display">\[p_\phi(X)=\int p_\phi(X,Z)\,dZ
 =
 \int p(Z)\,p_\phi(X|Z)\,dZ.\]</span></p>
-<p>This equation says that the probability of observing <span class="math inline">\(X\)</span> is obtained by summing, or more precisely integrating, over all latent codes <span class="math inline">\(Z\)</span> that could have generated it. This marginal likelihood is the quantity we would ideally like to maximize during training, because doing so encourages the model to assign high probability to the observed data and thus learn to generate realistic samples.</p>
-<h4 data-number="2.4.0.3" id="why-direct-likelihood-is-intractable"><span class="header-section-number">2.4.0.3</span> Why Direct Likelihood is Intractable</h4>
-<p>The main difficulty is that the marginal likelihood <span class="math display">\[p_\phi(X)=\int p(Z)\,p_\phi(X|Z)\,dZ\]</span> requires us to integrate over <em>all possible</em> latent values <span class="math inline">\(Z\)</span> that could explain the observed data point <span class="math inline">\(X\)</span>. In other words, even for a single input <span class="math inline">\(X\)</span>, there is not just one possible latent explanation. There may be infinitely many candidate latent codes <span class="math inline">\(Z\)</span> that could plausibly generate the same observation.</p>
-<p>This is similar in spirit to the intuition behind Figure 18.2, where multiple possible feature activations may contribute to a representation. Here, however, the issue is probabilistic: instead of choosing one latent code, we must consider <em>every possible</em> latent code and weigh how likely each one is under the prior <span class="math inline">\(p(Z)\)</span> and the decoder likelihood <span class="math inline">\(p_\phi(X|Z)\)</span>.</p>
-<p>In low-dimensional settings, such an integral may sometimes be manageable, but in high-dimensional latent spaces there are infinitely many candidate latent configurations, and the integral typically has no closed-form solution. Therefore, directly computing <span class="math display">\[p_\phi(X)=\int p(Z)\,p_\phi(X|Z)\,dZ\]</span> is generally intractable.</p>
-<p>This also makes the true posterior distribution difficult to compute: <span class="math display">\[p_\phi(Z|X)=\frac{p_\phi(X|Z)p(Z)}{p_\phi(X)}.\]</span> The denominator <span class="math inline">\(p_\phi(X)\)</span> is exactly the same intractable marginal likelihood above. Therefore, if we cannot compute <span class="math inline">\(p_\phi(X)\)</span>, then we also cannot compute the exact posterior efficiently.</p>
-<p>VAEs address this problem by introducing an approximate posterior distribution <span class="math inline">\(q_\theta(Z|X)\)</span> and replacing exact inference with a tractable optimization procedure called <em>variational inference</em>.</p>
-<h4 data-number="2.4.0.4" id="variational-inference-and-the-elbo"><span class="header-section-number">2.4.0.4</span> Variational Inference and the ELBO</h4>
-<p>Since the true posterior <span class="math inline">\(p_\phi(Z|X)\)</span> is intractable, VAEs introduce an approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>, parameterized by the encoder. This approximation is chosen from a simpler family of distributions, and the goal is to make it as close as possible to the true posterior.</p>
-<p>This idea is called <strong>variational inference</strong>. Instead of trying to compute the exact posterior <span class="math inline">\(p_\phi(Z|X)\)</span> directly, variational inference replaces it with a simpler distribution <span class="math inline">\(q_\theta(Z|X)\)</span> and then optimizes the parameters of that distribution so that it approximates the true posterior as closely as possible.</p>
-<p>Rather than maximizing <span class="math inline">\(\log p_\phi(X)\)</span> directly, we maximize a tractable lower bound called the <em>Evidence Lower Bound (ELBO)</em>: <span class="math display">\[\mathcal{L}_{\text{ELBO}}(X)
+<p>This equation says that the probability of observing <span class="math inline">\(X\)</span> is obtained by summing, or more
+precisely integrating, over all latent codes <span class="math inline">\(Z\)</span> that could have generated it. This
+marginal likelihood is the quantity we would ideally like to maximize
+during training, because doing so encourages the model to assign high
+probability to the observed data and thus learn to generate realistic
+samples.</p>
+<h4 data-number="2.4.0.3" id="why-direct-likelihood-is-intractable"><span class="header-section-number">2.4.0.3</span> Why Direct Likelihood is
+Intractable</h4>
+<p>The main difficulty is that the marginal likelihood <span class="math display">\[p_\phi(X)=\int p(Z)\,p_\phi(X|Z)\,dZ\]</span>
+requires us to integrate over <em>all possible</em> latent values <span class="math inline">\(Z\)</span> that could explain the observed data
+point <span class="math inline">\(X\)</span>. In other words, even for a
+single input <span class="math inline">\(X\)</span>, there is not just
+one possible latent explanation. There may be infinitely many candidate
+latent codes <span class="math inline">\(Z\)</span> that could plausibly
+generate the same observation.</p>
+<p>This is similar in spirit to the intuition behind Figure 18.2, where
+multiple possible feature activations may contribute to a
+representation. Here, however, the issue is probabilistic: instead of
+choosing one latent code, we must consider <em>every possible</em>
+latent code and weigh how likely each one is under the prior <span class="math inline">\(p(Z)\)</span> and the decoder likelihood <span class="math inline">\(p_\phi(X|Z)\)</span>.</p>
+<p>In low-dimensional settings, such an integral may sometimes be
+manageable, but in high-dimensional latent spaces there are infinitely
+many candidate latent configurations, and the integral typically has no
+closed-form solution. Therefore, directly computing <span class="math display">\[p_\phi(X)=\int p(Z)\,p_\phi(X|Z)\,dZ\]</span> is
+generally intractable.</p>
+<p>This also makes the true posterior distribution difficult to compute:
+<span class="math display">\[p_\phi(Z|X)=\frac{p_\phi(X|Z)p(Z)}{p_\phi(X)}.\]</span>
+The denominator <span class="math inline">\(p_\phi(X)\)</span> is
+exactly the same intractable marginal likelihood above. Therefore, if we
+cannot compute <span class="math inline">\(p_\phi(X)\)</span>, then we
+also cannot compute the exact posterior efficiently.</p>
+<p>VAEs address this problem by introducing an approximate posterior
+distribution <span class="math inline">\(q_\theta(Z|X)\)</span> and
+replacing exact inference with a tractable optimization procedure called
+<em>variational inference</em>.</p>
+<h4 data-number="2.4.0.4" id="variational-inference-and-the-elbo"><span class="header-section-number">2.4.0.4</span> Variational Inference and
+the ELBO</h4>
+<p>Since the true posterior <span class="math inline">\(p_\phi(Z|X)\)</span> is intractable, VAEs
+introduce an approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>, parameterized by the
+encoder. This approximation is chosen from a simpler family of
+distributions, and the goal is to make it as close as possible to the
+true posterior.</p>
+<p>This idea is called <strong>variational inference</strong>. Instead
+of trying to compute the exact posterior <span class="math inline">\(p_\phi(Z|X)\)</span> directly, variational
+inference replaces it with a simpler distribution <span class="math inline">\(q_\theta(Z|X)\)</span> and then optimizes the
+parameters of that distribution so that it approximates the true
+posterior as closely as possible.</p>
+<p>Rather than maximizing <span class="math inline">\(\log
+p_\phi(X)\)</span> directly, we maximize a tractable lower bound called
+the <em>Evidence Lower Bound (ELBO)</em>: <span class="math display">\[\mathcal{L}_{\text{ELBO}}(X)
 =
 \mathbb{E}_{q_\theta(Z|X)}[\log p_\phi(X|Z)]
 -
 D_{KL}\!\left(q_\theta(Z|X)\|p(Z)\right).\]</span></p>
-<p>Here, <span class="math inline">\(q_\theta(Z|X)\)</span> is the encoder distribution, <span class="math inline">\(p_\phi(X|Z)\)</span> is the decoder likelihood, and <span class="math inline">\(p(Z)\)</span> is the latent prior. The expectation <span class="math inline">\(\mathbb{E}_{q_\theta(Z|X)}[\cdot]\)</span> means that the reconstruction quality is averaged over latent samples drawn from the encoder distribution.</p>
+<p>Here, <span class="math inline">\(q_\theta(Z|X)\)</span> is the
+encoder distribution, <span class="math inline">\(p_\phi(X|Z)\)</span>
+is the decoder likelihood, and <span class="math inline">\(p(Z)\)</span>
+is the latent prior. The expectation <span class="math inline">\(\mathbb{E}_{q_\theta(Z|X)}[\cdot]\)</span> means
+that the reconstruction quality is averaged over latent samples drawn
+from the encoder distribution.</p>
 <figure>
-<img alt="Evidence Lower Bound (ELBO) objective." src="img/lecture19/ELBO2.JPG" style="width:42.00%; max-width:42.00%; height:auto;"/><figcaption aria-hidden="true">Evidence Lower Bound (ELBO) objective.</figcaption>
+<img src="img/lecture19/ELBO2.JPG" style="width:42.00%; max-width:42.00%; height:auto;"/>
+<figcaption>Evidence Lower Bound (ELBO) objective.</figcaption>
 </figure>
-<p>Unlike a standard autoencoder that maps each input to a single latent vector, a VAE maps each input to a distribution in latent space, meaning that one observed sample can have many plausible latent explanations.</p>
+<p>Unlike a standard autoencoder that maps each input to a single latent
+vector, a VAE maps each input to a distribution in latent space, meaning
+that one observed sample can have many plausible latent
+explanations.</p>
 <p>This objective has two components: <span class="math display">\[\mathcal{L}_{\text{ELBO}}(X)
 =
-\underbrace{\mathbb{E}_{q_\theta(Z|X)}[\log p_\phi(X|Z)]}_{\text{reconstruction / likelihood term}}
+\underbrace{\mathbb{E}_{q_\theta(Z|X)}[\log
+p_\phi(X|Z)]}_{\text{reconstruction / likelihood term}}
 -
-\underbrace{D_{KL}\!\left(q_\theta(Z|X)\|p(Z)\right)}_{\text{regularization term}}.\]</span></p>
-<p>The first term is the <strong>reconstruction term</strong>, which is also the decoder <strong>likelihood function</strong>. This plays a role similar to likelihood functions studied earlier in probabilistic models such as Naive Bayes, where we evaluate how probable the observed data is under a model. Here, the decoder learns to assign high likelihood to the observed data <span class="math inline">\(X\)</span> given the latent variable <span class="math inline">\(Z\)</span>, which encourages accurate reconstruction.</p>
-<p>The second term is the <strong>regularization term</strong>, which is a KL divergence. This connects to earlier discussions of KL divergence as a measure of how different two distributions are, such as in clustering and distribution comparison. Here, the KL term forces the encoder distribution <span class="math inline">\(q_\theta(Z|X)\)</span> to remain close to the prior <span class="math inline">\(p(Z)\)</span>. This prevents the latent space from becoming irregular or fragmented and instead encourages a smooth and well-structured latent representation.</p>
-<p>Thus, the ELBO can be interpreted as balancing two goals: maximizing likelihood (good reconstruction) while minimizing distribution mismatch (good latent structure). In this way, variational inference turns an intractable probabilistic inference problem into an optimization problem: instead of computing the exact posterior, we optimize the ELBO so that <span class="math inline">\(q_\theta(Z|X)\)</span> becomes a useful approximation to <span class="math inline">\(p_\phi(Z|X)\)</span>.</p>
-<h4 data-number="2.4.0.5" id="reparameterization-trick"><span class="header-section-number">2.4.0.5</span> Reparameterization Trick</h4>
-<p>Training VAEs requires gradients to pass through the sampling step. However, direct sampling <span class="math display">\[Z \sim \mathcal{N}(\mu,\sigma^2)\]</span> introduces stochasticity in a way that prevents standard backpropagation through <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>. Here, <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma^2\)</span> are the mean and variance predicted by the encoder for a given input.</p>
-<p>To resolve this, VAEs use the <em>reparameterization trick</em>, rewriting the latent sample as <span class="math display">\[Z = \mu + \sigma \odot \epsilon,
+\underbrace{D_{KL}\!\left(q_\theta(Z|X)\|p(Z)\right)}_{\text{regularization
+term}}.\]</span></p>
+<p>The first term is the <strong>reconstruction term</strong>, which is
+also the decoder <strong>likelihood function</strong>. This plays a role
+similar to likelihood functions studied earlier in probabilistic models
+such as Naive Bayes, where we evaluate how probable the observed data is
+under a model. Here, the decoder learns to assign high likelihood to the
+observed data <span class="math inline">\(X\)</span> given the latent
+variable <span class="math inline">\(Z\)</span>, which encourages
+accurate reconstruction.</p>
+<p>The second term is the <strong>regularization term</strong>, which is
+a KL divergence. This connects to earlier discussions of KL divergence
+as a measure of how different two distributions are, such as in
+clustering and distribution comparison. Here, the KL term forces the
+encoder distribution <span class="math inline">\(q_\theta(Z|X)\)</span>
+to remain close to the prior <span class="math inline">\(p(Z)\)</span>.
+This prevents the latent space from becoming irregular or fragmented and
+instead encourages a smooth and well-structured latent
+representation.</p>
+<p>Thus, the ELBO can be interpreted as balancing two goals: maximizing
+likelihood (good reconstruction) while minimizing distribution mismatch
+(good latent structure). In this way, variational inference turns an
+intractable probabilistic inference problem into an optimization
+problem: instead of computing the exact posterior, we optimize the ELBO
+so that <span class="math inline">\(q_\theta(Z|X)\)</span> becomes a
+useful approximation to <span class="math inline">\(p_\phi(Z|X)\)</span>.</p>
+<h4 data-number="2.4.0.5" id="reparameterization-trick"><span class="header-section-number">2.4.0.5</span> Reparameterization
+Trick</h4>
+<p>Training VAEs requires gradients to pass through the sampling step.
+However, direct sampling <span class="math display">\[Z \sim
+\mathcal{N}(\mu,\sigma^2)\]</span> introduces stochasticity in a way
+that prevents standard backpropagation through <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>. Here, <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma^2\)</span> are the mean and variance
+predicted by the encoder for a given input.</p>
+<p>To resolve this, VAEs use the <em>reparameterization trick</em>,
+rewriting the latent sample as <span class="math display">\[Z = \mu +
+\sigma \odot \epsilon,
 \qquad
-\epsilon \sim \mathcal{N}(0,I),\]</span> where <span class="math inline">\(\epsilon\)</span> contains the randomness and <span class="math inline">\(\mu,\sigma\)</span> are deterministic outputs of the encoder.</p>
-<p>In this form, the randomness is isolated in <span class="math inline">\(\epsilon\)</span>, while <span class="math inline">\(Z\)</span> becomes a differentiable function of <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>. This allows gradients to flow through the encoder parameters during training, making end-to-end optimization with backpropagation possible.</p>
+\epsilon \sim \mathcal{N}(0,I),\]</span> where <span class="math inline">\(\epsilon\)</span> contains the randomness and
+<span class="math inline">\(\mu,\sigma\)</span> are deterministic
+outputs of the encoder.</p>
+<p>In this form, the randomness is isolated in <span class="math inline">\(\epsilon\)</span>, while <span class="math inline">\(Z\)</span> becomes a differentiable function of
+<span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>. This allows gradients to flow
+through the encoder parameters during training, making end-to-end
+optimization with backpropagation possible.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 2.4 — VAE Training (ELBO &amp; Reparameterization)</h3><p>Adjust μ and σ to see how the posterior q(z|x) compares to the prior N(0,1). The KL divergence measures their distance. See the reparameterization trick z=μ+σε and the full ELBO as a function of μ.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture19_VAETraining_Interactive_interactive.html" style="height:900px;" title="Interactive Section 2.4 VAE Training"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture19_VAETraining_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<h4 data-number="2.4.0.6" id="reconstruction-and-generation-modes"><span class="header-section-number">2.4.0.6</span> Reconstruction and Generation Modes</h4>
-<p>Because the latent space is probabilistic and structured, VAEs support two modes of operation. During reconstruction, an input is encoded into a distribution and decoded back to recreate the original data. During generation, we bypass the encoder and directly sample from the latent prior to create new data.</p>
+<h4 data-number="2.4.0.6" id="reconstruction-and-generation-modes"><span class="header-section-number">2.4.0.6</span> Reconstruction and
+Generation Modes</h4>
+<p>Because the latent space is probabilistic and structured, VAEs
+support two modes of operation. During reconstruction, an input is
+encoded into a distribution and decoded back to recreate the original
+data. During generation, we bypass the encoder and directly sample from
+the latent prior to create new data.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Section 2.4 — VAE Latent Space Explorer</h3><p>Click anywhere in the 2D latent space to decode z directly into a digit — no encoder needed. Explore how different regions generate different digits and interpolate smoothly between them.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture19_VAEInference_Interactive_interactive.html" style="height:860px;" title="Interactive Section 2.4 VAE Inference"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture19_VAEInference_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<h4 data-number="2.4.0.7" id="smooth-interpolation-in-latent-space"><span class="header-section-number">2.4.0.7</span> Smooth Interpolation in Latent Space</h4>
-<p>The Gaussian prior encourages nearby latent points to decode into similar outputs. Moving smoothly through latent space therefore produces gradual and realistic changes in generated data.</p>
+<h4 data-number="2.4.0.7" id="smooth-interpolation-in-latent-space"><span class="header-section-number">2.4.0.7</span> Smooth Interpolation in
+Latent Space</h4>
+<p>The Gaussian prior encourages nearby latent points to decode into
+similar outputs. Moving smoothly through latent space therefore produces
+gradual and realistic changes in generated data.</p>
 <figure>
-<img alt="Smooth transitions in VAE latent space." src="img/lecture19/VAEMorphing1.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/><figcaption aria-hidden="true">Smooth transitions in VAE latent space.</figcaption>
+<img src="img/lecture19/VAEMorphing1.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Smooth transitions in VAE latent space.</figcaption>
 </figure>
 <h4 data-number="2.4.0.8" id="key-advantages"><span class="header-section-number">2.4.0.8</span> Key Advantages</h4>
-<p>VAEs provide a principled framework for learning meaningful latent representations while enabling realistic data generation. They support interpolation, anomaly detection, and unsupervised representation learning, making them a powerful extension of traditional autoencoders.</p>
+<p>VAEs provide a principled framework for learning meaningful latent
+representations while enabling realistic data generation. They support
+interpolation, anomaly detection, and unsupervised representation
+learning, making them a powerful extension of traditional
+autoencoders.</p>
 <h1 data-number="3" id="summary"><span class="header-section-number">3.</span> Summary</h1>
-<p>Regularized autoencoders extend basic autoencoders by introducing constraints that prevent trivial identity mapping and encourage meaningful feature learning.</p>
+<p>Regularized autoencoders extend basic autoencoders by introducing
+constraints that prevent trivial identity mapping and encourage
+meaningful feature learning.</p>
 <h4 data-number="3.0.0.1" id="key-takeaways-2"><span class="header-section-number">3.0.0.1</span> Key Takeaways</h4>
 <ul>
-<li><p>Basic autoencoders rely on dimensional bottlenecks, while regularized autoencoders enforce structure through additional loss terms.</p></li>
-<li><p><strong>Sparse autoencoders</strong> encourage feature discovery by activating only a small subset of neurons.</p></li>
-<li><p><strong>Denoising autoencoders</strong> learn robust representations by reconstructing clean data from corrupted inputs.</p></li>
-<li><p><strong>Variational autoencoders (VAEs)</strong> introduce a probabilistic latent space, enabling generation of new data and smooth interpolation.</p></li>
-<li><p>Regularized autoencoders are widely used for representation learning, dimensionality reduction, anomaly detection, and generative modeling.</p></li>
+<li><p>Basic autoencoders rely on dimensional bottlenecks, while
+regularized autoencoders enforce structure through additional loss
+terms.</p></li>
+<li><p><strong>Sparse autoencoders</strong> encourage feature discovery
+by activating only a small subset of neurons.</p></li>
+<li><p><strong>Denoising autoencoders</strong> learn robust
+representations by reconstructing clean data from corrupted
+inputs.</p></li>
+<li><p><strong>Variational autoencoders (VAEs)</strong> introduce a
+probabilistic latent space, enabling generation of new data and smooth
+interpolation.</p></li>
+<li><p>Regularized autoencoders are widely used for representation
+learning, dimensionality reduction, anomaly detection, and generative
+modeling.</p></li>
 </ul>
 <h1 data-number="5" id="references"><span class="header-section-number">5.</span> References</h1>
 <ul>
-<li><p>See Figure 18.1 for the image adapted from Yadav, S. (n.d.). Overfitting and regularization in machine learning. Towards Data Science. <a href="https://towardsdatascience.com/over-fitting-and-regularization-64d16100f45c" rel="noopener noreferrer" target="_blank">https://towardsdatascience.com/over-fitting-and-regularization-64d16100f45c</a></p></li>
-<li><p>See Figures 18.2 and 18.3 for the image adapted from Data School. (n.d.). Autoencoders in deep learning [Video]. YouTube. <a href="https://www.youtube.com/watch?v=CiexUMrNtBQ" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=CiexUMrNtBQ</a></p></li>
-<li><p>See Figure 18.4 for the image adapted from StatQuest with Josh Starmer. (n.d.). Regularization and overfitting [Video]. YouTube. <a href="https://www.youtube.com/watch?v=xwrzh4e8DLs" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=xwrzh4e8DLs</a></p></li>
-<li><p>See Figure 18.5 for the image adapted from Chorri, M. (n.d.). Difference between KL divergence and PSI. Medium. <a href="https://medium.com/@mumbaiyachori/difference-between-kl-divergence-and-psi-e7d9aa0ade12" rel="noopener noreferrer" target="_blank">https://medium.com/@mumbaiyachori/difference-between-kl-divergence-and-psi-e7d9aa0ade12</a></p></li>
-<li><p>See Figure 18.6 for the image adapted from Saturn Cloud. (n.d.). Sparse autoencoders. <a href="https://saturncloud.io/glossary/sparse-autoencoders/" rel="noopener noreferrer" target="_blank">https://saturncloud.io/glossary/sparse-autoencoders/</a></p></li>
-<li><p>See Figures 18.7 and 18.8 for the image adapted from 3Blue1Brown. (n.d.). Neural networks: How they work [Video]. YouTube. <a href="https://www.youtube.com/watch?v=aircAruvnKk" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=aircAruvnKk</a></p></li>
-<li><p>See Figure 18.9 for the image adapted from Abdelli, K., Griesser, H., Neumeyr, C., et al. (2022, November). <em>Degradation Prediction of Semiconductor Lasers using Conditional Variational Autoencoder</em> (preprint available via ResearchGate). <a href="https://www.researchgate.net/figure/Structure-of-the-variational-autoencoder-VAE_fig1_365190062" rel="noopener noreferrer" target="_blank">https://www.researchgate.net/figure/Structure-of-the-variational-autoencoder-VAE_fig1_365190062</a></p></li>
-<li><p>See Figures 18.10 and 18.11 for the image adapted from Krasser, F. (2018). Latent space optimization. <a href="https://krasserm.github.io/2018/04/07/latent-space-optimization/" rel="noopener noreferrer" target="_blank">https://krasserm.github.io/2018/04/07/latent-space-optimization/</a></p></li>
-<li><p>See Figure 18.12 for the image adapted from Bose, S. (n.d.). Comparison of autoencoders vs. variational autoencoders. Medium. <a href="https://medium.com/@jwbtmf/comparison-of-autoencoders-vs-variational-autoencoders-7993442bb377" rel="noopener noreferrer" target="_blank">https://medium.com/@jwbtmf/comparison-of-autoencoders-vs-variational-autoencoders-7993442bb377</a></p></li>
-<li><p>See Figure 18.13 for the image adapted from Van Rensburg, E. (n.d.). Generating the intuition behind variational autoencoders (VAEs). Medium. <a href="https://medium.com/@elzettevanrensburg/generating-the-intuition-behind-variational-auto-encoders-vaes-c7d2f8631a87" rel="noopener noreferrer" target="_blank">https://medium.com/@elzettevanrensburg/generating-the-intuition-behind-variational-auto-encoders-vaes-c7d2f8631a87</a></p></li>
-<li><p>Schafer, A. (n.d.). L1 norm, regularization, and sparsity explained for dummies. ML Review. <a href="https://blog.mlreview.com/l1-norm-regularization-and-sparsity-explained-for-dummies-5b0e4be3938a" rel="noopener noreferrer" target="_blank">https://blog.mlreview.com/l1-norm-regularization-and-sparsity-explained-for-dummies-5b0e4be3938a</a></p></li>
-<li><p>Rathi, M. (n.d.). Neural network terminology explained. Mukul Rathi. <a href="https://mukulrathi.com/demystifying-deep-learning/neural-network-terminology-explained/" rel="noopener noreferrer" target="_blank">https://mukulrathi.com/demystifying-deep-learning/neural-network-terminology-explained/</a></p></li>
-<li><p>Two Minute Papers. (n.d.). The future of deep learning research [Video]. YouTube. <a href="https://www.youtube.com/watch?v=b8AzCgY1gZI" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=b8AzCgY1gZI</a></p></li>
-<li><p>deeplearning.ai. (n.d.). Deep learning explained [Video]. YouTube. <a href="https://www.youtube.com/watch?v=2859tNY-G5E" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=2859tNY-G5E</a></p></li>
-<li><p>Mandal, S. (n.d.). Difference between overfitting and underfitting in machine learning. Medium. <a href="https://medium.com/@soumallya160/difference-of-overfitting-underfitting-7f0bd08fb8a6" rel="noopener noreferrer" target="_blank">https://medium.com/@soumallya160/difference-of-overfitting-underfitting-7f0bd08fb8a6</a></p></li>
-<li><p>Kingma, D. P., and Welling, M. (2014). Auto-Encoding Variational Bayes. <em>International Conference on Learning Representations (ICLR)</em>. <a href="https://arxiv.org/abs/1312.6114" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1312.6114</a></p></li>
-<li><p>Murphy, K. P. (2022). <em>Probabilistic Machine Learning: An Introduction</em>. MIT Press.</p></li>
-<li><p>Bishop, C. M. (2006). <em>Pattern Recognition and Machine Learning</em>. Springer.</p></li>
+<li><p>See Figure 18.1 for the image adapted from Yadav, S. (n.d.).
+Overfitting and regularization in machine learning. Towards Data
+Science. <a class="uri" href="https://towardsdatascience.com/over-fitting-and-regularization-64d16100f45c" rel="noopener noreferrer" target="_blank">https://towardsdatascience.com/over-fitting-and-regularization-64d16100f45c</a></p></li>
+<li><p>See Figures 18.2 and 18.3 for the image adapted from Data School.
+(n.d.). Autoencoders in deep learning [Video]. YouTube. <a class="uri" href="https://www.youtube.com/watch?v=CiexUMrNtBQ" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=CiexUMrNtBQ</a></p></li>
+<li><p>See Figure 18.4 for the image adapted from StatQuest with Josh
+Starmer. (n.d.). Regularization and overfitting [Video]. YouTube. <a class="uri" href="https://www.youtube.com/watch?v=xwrzh4e8DLs" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=xwrzh4e8DLs</a></p></li>
+<li><p>See Figure 18.5 for the image adapted from Chorri, M. (n.d.).
+Difference between KL divergence and PSI. Medium. <a class="uri" href="https://medium.com/@mumbaiyachori/difference-between-kl-divergence-and-psi-e7d9aa0ade12" rel="noopener noreferrer" target="_blank">https://medium.com/@mumbaiyachori/difference-between-kl-divergence-and-psi-e7d9aa0ade12</a></p></li>
+<li><p>See Figure 18.6 for the image adapted from Saturn Cloud. (n.d.).
+Sparse autoencoders. <a class="uri" href="https://saturncloud.io/glossary/sparse-autoencoders/" rel="noopener noreferrer" target="_blank">https://saturncloud.io/glossary/sparse-autoencoders/</a></p></li>
+<li><p>See Figures 18.7 and 18.8 for the image adapted from 3Blue1Brown.
+(n.d.). Neural networks: How they work [Video]. YouTube. <a class="uri" href="https://www.youtube.com/watch?v=aircAruvnKk" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=aircAruvnKk</a></p></li>
+<li><p>See Figure 18.9 for the image adapted from Abdelli, K., Griesser,
+H., Neumeyr, C., et al. (2022, November). <em>Degradation Prediction of
+Semiconductor Lasers using Conditional Variational Autoencoder</em>
+(preprint available via ResearchGate). <a class="uri" href="https://www.researchgate.net/figure/Structure-of-the-variational-autoencoder-VAE_fig1_365190062" rel="noopener noreferrer" target="_blank">https://www.researchgate.net/figure/Structure-of-the-variational-autoencoder-VAE_fig1_365190062</a></p></li>
+<li><p>See Figures 18.10 and 18.11 for the image adapted from Krasser,
+F. (2018). Latent space optimization. <a class="uri" href="https://krasserm.github.io/2018/04/07/latent-space-optimization/" rel="noopener noreferrer" target="_blank">https://krasserm.github.io/2018/04/07/latent-space-optimization/</a></p></li>
+<li><p>See Figure 18.12 for the image adapted from Bose, S. (n.d.).
+Comparison of autoencoders vs. variational autoencoders. Medium. <a class="uri" href="https://medium.com/@jwbtmf/comparison-of-autoencoders-vs-variational-autoencoders-7993442bb377" rel="noopener noreferrer" target="_blank">https://medium.com/@jwbtmf/comparison-of-autoencoders-vs-variational-autoencoders-7993442bb377</a></p></li>
+<li><p>See Figure 18.13 for the image adapted from Van Rensburg, E.
+(n.d.). Generating the intuition behind variational autoencoders (VAEs).
+Medium. <a class="uri" href="https://medium.com/@elzettevanrensburg/generating-the-intuition-behind-variational-auto-encoders-vaes-c7d2f8631a87" rel="noopener noreferrer" target="_blank">https://medium.com/@elzettevanrensburg/generating-the-intuition-behind-variational-auto-encoders-vaes-c7d2f8631a87</a></p></li>
+<li><p>Schafer, A. (n.d.). L1 norm, regularization, and sparsity
+explained for dummies. ML Review. <a class="uri" href="https://blog.mlreview.com/l1-norm-regularization-and-sparsity-explained-for-dummies-5b0e4be3938a" rel="noopener noreferrer" target="_blank">https://blog.mlreview.com/l1-norm-regularization-and-sparsity-explained-for-dummies-5b0e4be3938a</a></p></li>
+<li><p>Rathi, M. (n.d.). Neural network terminology explained. Mukul
+Rathi. <a class="uri" href="https://mukulrathi.com/demystifying-deep-learning/neural-network-terminology-explained/" rel="noopener noreferrer" target="_blank">https://mukulrathi.com/demystifying-deep-learning/neural-network-terminology-explained/</a></p></li>
+<li><p>Two Minute Papers. (n.d.). The future of deep learning research
+[Video]. YouTube. <a class="uri" href="https://www.youtube.com/watch?v=b8AzCgY1gZI" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=b8AzCgY1gZI</a></p></li>
+<li><p>deeplearning.ai. (n.d.). Deep learning explained [Video].
+YouTube. <a class="uri" href="https://www.youtube.com/watch?v=2859tNY-G5E" rel="noopener noreferrer" target="_blank">https://www.youtube.com/watch?v=2859tNY-G5E</a></p></li>
+<li><p>Mandal, S. (n.d.). Difference between overfitting and
+underfitting in machine learning. Medium. <a class="uri" href="https://medium.com/@soumallya160/difference-of-overfitting-underfitting-7f0bd08fb8a6" rel="noopener noreferrer" target="_blank">https://medium.com/@soumallya160/difference-of-overfitting-underfitting-7f0bd08fb8a6</a></p></li>
+<li><p>Kingma, D. P., and Welling, M. (2014). Auto-Encoding Variational
+Bayes. <em>International Conference on Learning Representations
+(ICLR)</em>. <a class="uri" href="https://arxiv.org/abs/1312.6114" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1312.6114</a></p></li>
+<li><p>Murphy, K. P. (2022). <em>Probabilistic Machine Learning: An
+Introduction</em>. MIT Press.</p></li>
+<li><p>Bishop, C. M. (2006). <em>Pattern Recognition and Machine
+Learning</em>. Springer.</p></li>
 </ul>
 
 </main>

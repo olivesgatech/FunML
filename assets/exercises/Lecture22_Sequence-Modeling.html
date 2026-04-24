@@ -26,29 +26,80 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Why are standard MLPs poorly suited for sequence modeling, especially when sequence lengths vary?</p>
-<p><strong>Solution:</strong> MLPs assume <em>fixed-size</em> inputs and outputs, so they do not naturally handle variable-length sequences. More importantly, an MLP processes inputs as independent feature vectors, so it does not encode temporal order and cannot capture dependencies across time. Modeling long sequences with an MLP typically requires a large number of parameters (e.g., by concatenating many time steps into one huge input), which increases memory/computation and often leads to overfitting when data is limited.</p></li>
-<li><p><strong>Question:</strong> Write the forward-pass equations of a basic RNN (with bias terms) that produces a probability vector at each time step.</p>
-<p><strong>Solution:</strong> A standard RNN computes, for each time step <span class="math inline">\(t\)</span>: <span class="math display">\[\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t),
+<li><p><strong>Question:</strong> Why are standard MLPs poorly suited
+for sequence modeling, especially when sequence lengths vary?</p>
+<p><strong>Solution:</strong> MLPs assume <em>fixed-size</em> inputs and
+outputs, so they do not naturally handle variable-length sequences. More
+importantly, an MLP processes inputs as independent feature vectors, so
+it does not encode temporal order and cannot capture dependencies across
+time. Modeling long sequences with an MLP typically requires a large
+number of parameters (e.g., by concatenating many time steps into one
+huge input), which increases memory/computation and often leads to
+overfitting when data is limited.</p></li>
+<li><p><strong>Question:</strong> Write the forward-pass equations of a
+basic RNN (with bias terms) that produces a probability vector at each
+time step.</p>
+<p><strong>Solution:</strong> A standard RNN computes, for each time
+step <span class="math inline">\(t\)</span>: <span class="math display">\[\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t),
     \qquad
-    \mathbf{h}(t)=\tanh(\mathbf{a}(t)),\]</span> then outputs logits and probabilities: <span class="math display">\[\mathbf{o}(t)=\mathbf{c}+\mathbf{V}\mathbf{h}(t),
+    \mathbf{h}(t)=\tanh(\mathbf{a}(t)),\]</span> then outputs logits and
+probabilities: <span class="math display">\[\mathbf{o}(t)=\mathbf{c}+\mathbf{V}\mathbf{h}(t),
     \qquad
     \mathbf{y}(t)=\mathrm{softmax}(\mathbf{o}(t)).\]</span></p></li>
-<li><p><strong>Question:</strong> In Backpropagation Through Time (BPTT), why can gradients <em>vanish</em> as the sequence length grows? Give the key product form that explains this behavior.</p>
-<p><strong>Solution:</strong> In BPTT, the dependence of a later hidden state on an earlier hidden state contains a product of Jacobians: <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial \mathbf{h}(0)}
-    =\prod_{k=1}^{t}\frac{\partial \mathbf{h}(k)}{\partial \mathbf{h}(k-1)}.\]</span> For the RNN update <span class="math inline">\(\mathbf{h}(t)=\sigma(\mathbf{a}(t))\)</span> with <span class="math inline">\(\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t)\)</span>, <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial \mathbf{h}(t-1)}=\mathbf{J}(t)\mathbf{W}^T,
-    \quad \text{where } \mathbf{J}(t)=\mathrm{diag}(\sigma'(\mathbf{a}(t))).\]</span> Thus, <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial \mathbf{h}(0)}
-    =\mathbf{J}(t)\mathbf{W}^T\mathbf{J}(t-1)\mathbf{W}^T\cdots \mathbf{J}(1)\mathbf{W}^T.\]</span> If the relevant singular values/eigenvalues of <span class="math inline">\(\mathbf{W}\)</span> and typical magnitudes of <span class="math inline">\(\sigma'(\cdot)\)</span> are <span class="math inline">\(&lt;1\)</span>, repeated multiplication shrinks the gradient exponentially toward <span class="math inline">\(0\)</span>, making early time steps contribute very little to learning.</p></li>
-<li><p><strong>Question:</strong> State the LSTM gate equations (forget, input, output), and the update equations for the cell state and hidden state. What is the key structural reason LSTMs reduce vanishing gradients?</p>
+<li><p><strong>Question:</strong> In Backpropagation Through Time
+(BPTT), why can gradients <em>vanish</em> as the sequence length grows?
+Give the key product form that explains this behavior.</p>
+<p><strong>Solution:</strong> In BPTT, the dependence of a later hidden
+state on an earlier hidden state contains a product of Jacobians: <span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+    =\prod_{k=1}^{t}\frac{\partial \mathbf{h}(k)}{\partial
+\mathbf{h}(k-1)}.\]</span> For the RNN update <span class="math inline">\(\mathbf{h}(t)=\sigma(\mathbf{a}(t))\)</span> with
+<span class="math inline">\(\mathbf{a}(t)=\mathbf{b}+\mathbf{W}\mathbf{h}(t-1)+\mathbf{U}\mathbf{x}(t)\)</span>,
+<span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(t-1)}=\mathbf{J}(t)\mathbf{W}^T,
+    \quad \text{where }
+\mathbf{J}(t)=\mathrm{diag}(\sigma'(\mathbf{a}(t))).\]</span> Thus,
+<span class="math display">\[\frac{\partial \mathbf{h}(t)}{\partial
+\mathbf{h}(0)}
+    =\mathbf{J}(t)\mathbf{W}^T\mathbf{J}(t-1)\mathbf{W}^T\cdots
+\mathbf{J}(1)\mathbf{W}^T.\]</span> If the relevant singular
+values/eigenvalues of <span class="math inline">\(\mathbf{W}\)</span>
+and typical magnitudes of <span class="math inline">\(\sigma'(\cdot)\)</span> are <span class="math inline">\(&lt;1\)</span>, repeated multiplication shrinks
+the gradient exponentially toward <span class="math inline">\(0\)</span>, making early time steps contribute
+very little to learning.</p></li>
+<li><p><strong>Question:</strong> State the LSTM gate equations (forget,
+input, output), and the update equations for the cell state and hidden
+state. What is the key structural reason LSTMs reduce vanishing
+gradients?</p>
 <p><strong>Solution:</strong> The gates are: <span class="math display">\[\mathbf{f}^{(t)}=\sigma(\mathbf{b}^f+\mathbf{U}^f\mathbf{x}^{(t)}+\mathbf{W}^f\mathbf{h}^{(t-1)}),\quad
-    \mathbf{g}^{(t)}=\sigma(\mathbf{b}^g+\mathbf{U}^g\mathbf{x}^{(t)}+\mathbf{W}^g\mathbf{h}^{(t-1)}),\]</span> <span class="math display">\[\mathbf{o}^{(t)}=\sigma(\mathbf{b}^o+\mathbf{U}^o\mathbf{x}^{(t)}+\mathbf{W}^o\mathbf{h}^{(t-1)}).\]</span> Candidate cell state, cell update, and hidden update: <span class="math display">\[\tilde{\mathbf{s}}^{(t)}=\tanh(\mathbf{b}^c+\mathbf{U}^c\mathbf{x}^{(t)}+\mathbf{W}^c\mathbf{h}^{(t-1)}),\]</span> <span class="math display">\[\mathbf{s}^{(t)}=\mathbf{f}^{(t)}\circ \mathbf{s}^{(t-1)}+\mathbf{g}^{(t)}\circ \tilde{\mathbf{s}}^{(t)},\quad
-    \mathbf{h}^{(t)}=\mathbf{o}^{(t)}\circ\tanh(\mathbf{s}^{(t)}).\]</span> Key reason: the cell state update is <em>additive</em> (a controlled “skip” pathway through time), which provides a more stable route for gradient flow compared to repeatedly multiplying by <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\sigma'(\cdot)\)</span> at every step.</p></li>
-<li><p><strong>Question:</strong> Compare <strong>RNNs</strong>, <strong>LSTMs</strong> and <strong>GRUs</strong> in terms of (i) ability to model long-range dependencies, (ii) parameter/computational cost, and (iii) parallelizability.</p>
+    \mathbf{g}^{(t)}=\sigma(\mathbf{b}^g+\mathbf{U}^g\mathbf{x}^{(t)}+\mathbf{W}^g\mathbf{h}^{(t-1)}),\]</span>
+<span class="math display">\[\mathbf{o}^{(t)}=\sigma(\mathbf{b}^o+\mathbf{U}^o\mathbf{x}^{(t)}+\mathbf{W}^o\mathbf{h}^{(t-1)}).\]</span>
+Candidate cell state, cell update, and hidden update: <span class="math display">\[\tilde{\mathbf{s}}^{(t)}=\tanh(\mathbf{b}^c+\mathbf{U}^c\mathbf{x}^{(t)}+\mathbf{W}^c\mathbf{h}^{(t-1)}),\]</span>
+<span class="math display">\[\mathbf{s}^{(t)}=\mathbf{f}^{(t)}\circ
+\mathbf{s}^{(t-1)}+\mathbf{g}^{(t)}\circ \tilde{\mathbf{s}}^{(t)},\quad
+    \mathbf{h}^{(t)}=\mathbf{o}^{(t)}\circ\tanh(\mathbf{s}^{(t)}).\]</span>
+Key reason: the cell state update is <em>additive</em> (a controlled
+“skip” pathway through time), which provides a more stable route for
+gradient flow compared to repeatedly multiplying by <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\sigma'(\cdot)\)</span> at every
+step.</p></li>
+<li><p><strong>Question:</strong> Compare <strong>RNNs</strong>,
+<strong>LSTMs</strong> and <strong>GRUs</strong> in terms of (i) ability
+to model long-range dependencies, (ii) parameter/computational cost, and
+(iii) parallelizability.</p>
 <p><strong>Solution:</strong></p>
 <ul>
-<li><p><strong>RNNs:</strong> The simplest recurrent models. They often struggle with long-range dependencies due to vanishing/exploding gradients. They use fewer parameters than gated variants but process sequences sequentially, limiting parallelism across time.</p></li>
-<li><p><strong>LSTMs:</strong> Introduce a separate cell state and multiple gates to stabilize gradient flow and improve long-range modeling. They require more parameters and computational cost than vanilla RNNs and still operate sequentially.</p></li>
-<li><p><strong>GRUs:</strong> A streamlined alternative to LSTMs that combines gates and removes the separate cell state. They often achieve similar performance with fewer parameters and faster training, but remain sequential due to recurrence.</p></li>
+<li><p><strong>RNNs:</strong> The simplest recurrent models. They often
+struggle with long-range dependencies due to vanishing/exploding
+gradients. They use fewer parameters than gated variants but process
+sequences sequentially, limiting parallelism across time.</p></li>
+<li><p><strong>LSTMs:</strong> Introduce a separate cell state and
+multiple gates to stabilize gradient flow and improve long-range
+modeling. They require more parameters and computational cost than
+vanilla RNNs and still operate sequentially.</p></li>
+<li><p><strong>GRUs:</strong> A streamlined alternative to LSTMs that
+combines gates and removes the separate cell state. They often achieve
+similar performance with fewer parameters and faster training, but
+remain sequential due to recurrence.</p></li>
 </ul></li>
 </ol></section>
 </main>

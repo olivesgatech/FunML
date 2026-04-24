@@ -109,100 +109,333 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture introduces Large Language Models (LLMs) as the current frontier of sequence modeling and natural language processing. Building on the Transformer architecture introduced in earlier lectures, we examine how scale — in data, parameters, and compute — produces qualitatively new capabilities. We first review the statistical formulation of language modeling as next-token prediction and describe how Transformers are pre-trained on massive text corpora. We then study <em>scaling laws</em> that quantify how performance improves predictably with scale, and examine why emergent abilities appear at certain parameter thresholds. We discuss fine-tuning strategies including supervised fine-tuning (SFT) and instruction tuning, and present Reinforcement Learning from Human Feedback (RLHF) as the dominant alignment technique. We introduce in-context learning and prompt engineering as inference-time techniques that require no weight updates, and analyze how chain-of-thought prompting elicits step-by-step reasoning. We close with a discussion of evaluation benchmarks, common failure modes (hallucination, factual errors, sycophancy), and the role of retrieval-augmented generation (RAG) in grounding LLM outputs <span class="citation" data-cites="1 2 3"></span>.</p>
-<h1 data-number="2" id="from-sequence-models-to-language-models"><span class="header-section-number">2.</span> From Sequence Models to Language Models</h1>
-<h2 data-number="2.1" id="the-language-modeling-problem"><span class="header-section-number">2.1</span> The Language Modeling Problem</h2>
-<p>A language model assigns a probability to a sequence of tokens <span class="math inline">\(w_1, w_2, \ldots, w_T\)</span> drawn from a vocabulary <span class="math inline">\(\mathcal{V}\)</span>. By the chain rule of probability: <span class="math display">\[P(w_1, w_2, \ldots, w_T) = \prod_{t=1}^{T} P(w_t \mid w_1, \ldots, w_{t-1}).\]</span> Training maximizes the log-likelihood of observed text, which is equivalent to minimizing the cross-entropy loss: <span class="math display">\[\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log P(w_t \mid w_1, \ldots, w_{t-1}).\]</span></p>
-<p>This self-supervised objective requires no labeled data — every document in a text corpus provides training signal. The model is trained to predict the next token given all preceding tokens, a task known as <em>causal</em> or <em>autoregressive</em> language modeling.</p>
+<p>This lecture introduces Large Language Models (LLMs) as the current
+frontier of sequence modeling and natural language processing. Building
+on the Transformer architecture introduced in earlier lectures, we
+examine how scale — in data, parameters, and compute — produces
+qualitatively new capabilities. We first review the statistical
+formulation of language modeling as next-token prediction and describe
+how Transformers are pre-trained on massive text corpora. We then study
+<em>scaling laws</em> that quantify how performance improves predictably
+with scale, and examine why emergent abilities appear at certain
+parameter thresholds. We discuss fine-tuning strategies including
+supervised fine-tuning (SFT) and instruction tuning, and present
+Reinforcement Learning from Human Feedback (RLHF) as the dominant
+alignment technique. We introduce in-context learning and prompt
+engineering as inference-time techniques that require no weight updates,
+and analyze how chain-of-thought prompting elicits step-by-step
+reasoning. We close with a discussion of evaluation benchmarks, common
+failure modes (hallucination, factual errors, sycophancy), and the role
+of retrieval-augmented generation (RAG) in grounding LLM outputs <span class="citation" data-cites="1 2 3"></span>.</p>
+<h1 data-number="2" id="from-sequence-models-to-language-models"><span class="header-section-number">2.</span> From Sequence Models to Language
+Models</h1>
+<h2 data-number="2.1" id="the-language-modeling-problem"><span class="header-section-number">2.1</span> The Language Modeling
+Problem</h2>
+<p>A language model assigns a probability to a sequence of tokens <span class="math inline">\(w_1, w_2, \ldots, w_T\)</span> drawn from a
+vocabulary <span class="math inline">\(\mathcal{V}\)</span>. By the
+chain rule of probability: <span class="math display">\[P(w_1, w_2,
+\ldots, w_T) = \prod_{t=1}^{T} P(w_t \mid w_1, \ldots,
+w_{t-1}).\]</span> Training maximizes the log-likelihood of observed
+text, which is equivalent to minimizing the cross-entropy loss: <span class="math display">\[\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log
+P(w_t \mid w_1, \ldots, w_{t-1}).\]</span></p>
+<p>This self-supervised objective requires no labeled data — every
+document in a text corpus provides training signal. The model is trained
+to predict the next token given all preceding tokens, a task known as
+<em>causal</em> or <em>autoregressive</em> language modeling.</p>
 <h2 data-number="2.2" id="tokenization"><span class="header-section-number">2.2</span> Tokenization</h2>
-<p>Raw text is converted to integer tokens before being processed by the model. Modern LLMs use <em>subword tokenization</em> methods such as Byte-Pair Encoding (BPE) or SentencePiece, which split rare words into smaller units while keeping common words whole. A vocabulary of 32,000–100,000 tokens is typical. Tokenization ensures that the vocabulary is finite and manageable while retaining the ability to represent arbitrary text, including code, mathematical notation, and multilingual content.</p>
-<p>Each token <span class="math inline">\(w_t\)</span> is mapped to a dense embedding vector <span class="math inline">\(\mathbf{e}_{w_t} \in \mathbb{R}^d\)</span> via a learned embedding matrix <span class="math inline">\(\mathbf{E} \in \mathbb{R}^{|\mathcal{V}| \times d}\)</span>. Positional encodings are added to inject sequence order information, after which the Transformer processes the sequence as described in the previous lecture.</p>
-<h1 data-number="3" id="the-transformer-as-a-language-model"><span class="header-section-number">3.</span> The Transformer as a Language Model</h1>
+<p>Raw text is converted to integer tokens before being processed by the
+model. Modern LLMs use <em>subword tokenization</em> methods such as
+Byte-Pair Encoding (BPE) or SentencePiece, which split rare words into
+smaller units while keeping common words whole. A vocabulary of
+32,000–100,000 tokens is typical. Tokenization ensures that the
+vocabulary is finite and manageable while retaining the ability to
+represent arbitrary text, including code, mathematical notation, and
+multilingual content.</p>
+<p>Each token <span class="math inline">\(w_t\)</span> is mapped to a
+dense embedding vector <span class="math inline">\(\mathbf{e}_{w_t} \in
+\mathbb{R}^d\)</span> via a learned embedding matrix <span class="math inline">\(\mathbf{E} \in \mathbb{R}^{|\mathcal{V}| \times
+d}\)</span>. Positional encodings are added to inject sequence order
+information, after which the Transformer processes the sequence as
+described in the previous lecture.</p>
+<h1 data-number="3" id="the-transformer-as-a-language-model"><span class="header-section-number">3.</span> The Transformer as a Language
+Model</h1>
 <h2 data-number="3.1" id="decoder-only-architecture"><span class="header-section-number">3.1</span> Decoder-Only Architecture</h2>
-<p>The most widely deployed LLM architecture is the <em>decoder-only Transformer</em>. In this design, the self-attention mechanism applies a <em>causal mask</em>: position <span class="math inline">\(t\)</span> can only attend to positions <span class="math inline">\(1, \ldots, t\)</span>, preventing the model from seeing future tokens during training and enabling autoregressive generation. This is in contrast to encoder-only models (such as BERT) that attend bidirectionally.</p>
-<p>Given input token embeddings <span class="math inline">\(\mathbf{X} \in \mathbb{R}^{T \times d}\)</span>, each Transformer layer computes: <span class="math display">\[\begin{aligned}
-\mathbf{Z} &amp;= \mathrm{LayerNorm}\!\left(\mathbf{X} + \mathrm{MultiHeadAttention}(\mathbf{X})\right), \\
-\mathbf{X}' &amp;= \mathrm{LayerNorm}\!\left(\mathbf{Z} + \mathrm{FFN}(\mathbf{Z})\right),\end{aligned}\]</span> where the causal mask ensures that the attention matrix <span class="math inline">\(\mathbf{A}\)</span> is lower-triangular. The final hidden state <span class="math inline">\(\mathbf{h}_T\)</span> is projected via <span class="math inline">\(\mathbf{W}_\text{out} \in \mathbb{R}^{d \times |\mathcal{V}|}\)</span> to produce logits over the vocabulary, followed by a softmax to obtain <span class="math inline">\(P(w_{T+1} \mid w_1, \ldots, w_T)\)</span>.</p>
+<p>The most widely deployed LLM architecture is the <em>decoder-only
+Transformer</em>. In this design, the self-attention mechanism applies a
+<em>causal mask</em>: position <span class="math inline">\(t\)</span>
+can only attend to positions <span class="math inline">\(1, \ldots,
+t\)</span>, preventing the model from seeing future tokens during
+training and enabling autoregressive generation. This is in contrast to
+encoder-only models (such as BERT) that attend bidirectionally.</p>
+<p>Given input token embeddings <span class="math inline">\(\mathbf{X}
+\in \mathbb{R}^{T \times d}\)</span>, each Transformer layer computes:
+<span class="math display">\[\begin{aligned}
+\mathbf{Z} &amp;= \mathrm{LayerNorm}\!\left(\mathbf{X} +
+\mathrm{MultiHeadAttention}(\mathbf{X})\right), \\
+\mathbf{X}' &amp;= \mathrm{LayerNorm}\!\left(\mathbf{Z} +
+\mathrm{FFN}(\mathbf{Z})\right),
+\end{aligned}\]</span> where the causal mask ensures that the attention
+matrix <span class="math inline">\(\mathbf{A}\)</span> is
+lower-triangular. The final hidden state <span class="math inline">\(\mathbf{h}_T\)</span> is projected via <span class="math inline">\(\mathbf{W}_\text{out} \in \mathbb{R}^{d \times
+|\mathcal{V}|}\)</span> to produce logits over the vocabulary, followed
+by a softmax to obtain <span class="math inline">\(P(w_{T+1} \mid w_1,
+\ldots, w_T)\)</span>.</p>
 <h2 data-number="3.2" id="from-bert-to-gpt"><span class="header-section-number">3.2</span> From BERT to GPT</h2>
-<p>Two contrasting pre-training paradigms emerged early in the LLM era:</p>
+<p>Two contrasting pre-training paradigms emerged early in the LLM
+era:</p>
 <ul>
-<li><p><strong>Masked Language Modeling (MLM) — BERT <span class="citation" data-cites="4"></span>:</strong> An encoder-only model is trained to predict randomly masked tokens from their bidirectional context. BERT and its variants (RoBERTa, DeBERTa) excel at classification, named entity recognition, and question answering tasks where the full context is available.</p></li>
-<li><p><strong>Causal Language Modeling (CLM) — GPT <span class="citation" data-cites="3"></span>:</strong> A decoder-only model is trained with next-token prediction. GPT models generalize naturally to open-ended generation, dialogue, and code synthesis. GPT-2 (1.5B), GPT-3 (175B), and GPT-4 demonstrated progressively stronger few-shot capabilities.</p></li>
+<li><p><strong>Masked Language Modeling (MLM) — BERT <span class="citation" data-cites="4"></span>:</strong> An encoder-only model
+is trained to predict randomly masked tokens from their bidirectional
+context. BERT and its variants (RoBERTa, DeBERTa) excel at
+classification, named entity recognition, and question answering tasks
+where the full context is available.</p></li>
+<li><p><strong>Causal Language Modeling (CLM) — GPT <span class="citation" data-cites="3"></span>:</strong> A decoder-only model
+is trained with next-token prediction. GPT models generalize naturally
+to open-ended generation, dialogue, and code synthesis. GPT-2 (1.5B),
+GPT-3 (175B), and GPT-4 demonstrated progressively stronger few-shot
+capabilities.</p></li>
 </ul>
-<p>The current landscape is dominated by decoder-only models due to their flexibility at inference time. Open-weight models such as LLaMA, Mistral, and Falcon have made large-scale research broadly accessible.</p>
+<p>The current landscape is dominated by decoder-only models due to
+their flexibility at inference time. Open-weight models such as LLaMA,
+Mistral, and Falcon have made large-scale research broadly
+accessible.</p>
 <h1 data-number="4" id="scaling-laws"><span class="header-section-number">4.</span> Scaling Laws</h1>
 <h2 data-number="4.1" id="power-law-behavior"><span class="header-section-number">4.1</span> Power-Law Behavior</h2>
-<p>One of the most important empirical discoveries in LLM research is that test loss decreases smoothly as a power law of model size, dataset size, and compute budget <span class="citation" data-cites="2"></span>: <span class="math display">\[L(N) \approx \left(\frac{N_c}{N}\right)^{\alpha_N},\]</span> where <span class="math inline">\(N\)</span> is the number of model parameters, <span class="math inline">\(N_c\)</span> is a constant, and <span class="math inline">\(\alpha_N \approx 0.076\)</span> for language modeling. Similar laws hold with dataset size <span class="math inline">\(D\)</span> and compute <span class="math inline">\(C = 6ND\)</span> (measured in floating-point operations).</p>
-<p>These scaling laws enable practitioners to predict the performance of large models before training them by extrapolating from smaller experiments. Crucially, they show that performance improvements are predictable and smooth — there are no “cliffs” or plateaus in loss at any particular scale.</p>
+<p>One of the most important empirical discoveries in LLM research is
+that test loss decreases smoothly as a power law of model size, dataset
+size, and compute budget <span class="citation" data-cites="2"></span>:
+<span class="math display">\[L(N) \approx
+\left(\frac{N_c}{N}\right)^{\alpha_N},\]</span> where <span class="math inline">\(N\)</span> is the number of model parameters,
+<span class="math inline">\(N_c\)</span> is a constant, and <span class="math inline">\(\alpha_N \approx 0.076\)</span> for language
+modeling. Similar laws hold with dataset size <span class="math inline">\(D\)</span> and compute <span class="math inline">\(C = 6ND\)</span> (measured in floating-point
+operations).</p>
+<p>These scaling laws enable practitioners to predict the performance of
+large models before training them by extrapolating from smaller
+experiments. Crucially, they show that performance improvements are
+predictable and smooth — there are no “cliffs” or plateaus in loss at
+any particular scale.</p>
 <h2 data-number="4.2" id="chinchilla-scaling"><span class="header-section-number">4.2</span> Chinchilla Scaling</h2>
-<p>The original GPT-3 scaling analysis suggested investing primarily in parameters. Subsequent work by Hoffmann et al. (the <em>Chinchilla</em> paper) showed that compute is most efficiently used when model size <span class="math inline">\(N\)</span> and dataset size <span class="math inline">\(D\)</span> are scaled proportionally: <span class="math display">\[N_\text{opt} \approx \frac{C^{0.5}}{6}, \qquad D_\text{opt} \approx \frac{C^{0.5}}{6} \times 20,\]</span> i.e., approximately 20 tokens per parameter. The 70B-parameter Chinchilla model, trained on 1.4 trillion tokens, outperformed the 280B Gopher model despite using four times fewer parameters. This shifted the field toward training smaller models on more data.</p>
+<p>The original GPT-3 scaling analysis suggested investing primarily in
+parameters. Subsequent work by Hoffmann et al. (the <em>Chinchilla</em>
+paper) showed that compute is most efficiently used when model size
+<span class="math inline">\(N\)</span> and dataset size <span class="math inline">\(D\)</span> are scaled proportionally: <span class="math display">\[N_\text{opt} \approx \frac{C^{0.5}}{6}, \qquad
+D_\text{opt} \approx \frac{C^{0.5}}{6} \times 20,\]</span> i.e.,
+approximately 20 tokens per parameter. The 70B-parameter Chinchilla
+model, trained on 1.4 trillion tokens, outperformed the 280B Gopher
+model despite using four times fewer parameters. This shifted the field
+toward training smaller models on more data.</p>
 <h2 data-number="4.3" id="emergent-abilities"><span class="header-section-number">4.3</span> Emergent Abilities</h2>
-<p>Beyond smooth scaling of loss, some capabilities appear abruptly at specific scales. Tasks such as multi-step arithmetic, logical reasoning, and code generation perform at or near chance level in smaller models but jump to substantial accuracy in models above roughly 10–100 billion parameters. These <em>emergent abilities</em> are not directly predicted by the loss scaling law and remain an active research topic. One hypothesis is that emergent tasks require the model to compose multiple sub-skills, each of which must independently reach sufficient accuracy, leading to a threshold effect.</p>
+<p>Beyond smooth scaling of loss, some capabilities appear abruptly at
+specific scales. Tasks such as multi-step arithmetic, logical reasoning,
+and code generation perform at or near chance level in smaller models
+but jump to substantial accuracy in models above roughly 10–100 billion
+parameters. These <em>emergent abilities</em> are not directly predicted
+by the loss scaling law and remain an active research topic. One
+hypothesis is that emergent tasks require the model to compose multiple
+sub-skills, each of which must independently reach sufficient accuracy,
+leading to a threshold effect.</p>
 <h1 data-number="5" id="pre-training-at-scale"><span class="header-section-number">5.</span> Pre-training at Scale</h1>
 <h2 data-number="5.1" id="data-curation"><span class="header-section-number">5.1</span> Data Curation</h2>
-<p>LLMs are pre-trained on extremely large corpora — often trillions of tokens — assembled from web pages (Common Crawl), books, scientific papers, code repositories (GitHub), and conversational data. Raw web data is noisy and requires extensive filtering: deduplication, quality filtering (using classifier-based or heuristic rules), language identification, and removal of toxic or private content.</p>
-<p>Data quality has a large impact on downstream model quality. The Falcon and LLaMA datasets demonstrated that carefully curated web data can match the quality of more expensive, manually assembled datasets. The composition of the training corpus also shapes model capabilities: code-heavy corpora improve reasoning, while multilingual data enables cross-lingual transfer.</p>
+<p>LLMs are pre-trained on extremely large corpora — often trillions of
+tokens — assembled from web pages (Common Crawl), books, scientific
+papers, code repositories (GitHub), and conversational data. Raw web
+data is noisy and requires extensive filtering: deduplication, quality
+filtering (using classifier-based or heuristic rules), language
+identification, and removal of toxic or private content.</p>
+<p>Data quality has a large impact on downstream model quality. The
+Falcon and LLaMA datasets demonstrated that carefully curated web data
+can match the quality of more expensive, manually assembled datasets.
+The composition of the training corpus also shapes model capabilities:
+code-heavy corpora improve reasoning, while multilingual data enables
+cross-lingual transfer.</p>
 <h2 data-number="5.2" id="training-infrastructure"><span class="header-section-number">5.2</span> Training Infrastructure</h2>
-<p>Training a 70B-parameter model on 2 trillion tokens requires roughly <span class="math inline">\(8 \times 10^{23}\)</span> floating-point operations, which at 100 teraflops per GPU translates to thousands of GPU-months. Modern LLM training uses:</p>
+<p>Training a 70B-parameter model on 2 trillion tokens requires roughly
+<span class="math inline">\(8 \times 10^{23}\)</span> floating-point
+operations, which at 100 teraflops per GPU translates to thousands of
+GPU-months. Modern LLM training uses:</p>
 <ul>
-<li><p><strong>Data parallelism:</strong> Each device processes a different mini-batch; gradients are averaged across devices.</p></li>
-<li><p><strong>Tensor parallelism:</strong> Individual weight matrices are sharded across devices.</p></li>
-<li><p><strong>Pipeline parallelism:</strong> Different layers are placed on different devices, with micro-batches flowing through the pipeline.</p></li>
-<li><p><strong>Mixed precision:</strong> Parameters are stored in 16-bit floating point (BF16/FP16) with a 32-bit master copy for gradient accumulation, reducing memory and increasing throughput.</p></li>
+<li><p><strong>Data parallelism:</strong> Each device processes a
+different mini-batch; gradients are averaged across devices.</p></li>
+<li><p><strong>Tensor parallelism:</strong> Individual weight matrices
+are sharded across devices.</p></li>
+<li><p><strong>Pipeline parallelism:</strong> Different layers are
+placed on different devices, with micro-batches flowing through the
+pipeline.</p></li>
+<li><p><strong>Mixed precision:</strong> Parameters are stored in 16-bit
+floating point (BF16/FP16) with a 32-bit master copy for gradient
+accumulation, reducing memory and increasing throughput.</p></li>
 </ul>
 <h1 data-number="6" id="fine-tuning-and-alignment"><span class="header-section-number">6.</span> Fine-Tuning and Alignment</h1>
-<h2 data-number="6.1" id="supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning (SFT)</h2>
-<p>A pre-trained LLM is a general-purpose next-token predictor. To make it follow user instructions, it is fine-tuned on a dataset of (instruction, response) pairs using the same cross-entropy loss: <span class="math display">\[\mathcal{L}_\text{SFT} = -\sum_{t} \log P_\theta(w_t \mid \text{instruction}, w_1, \ldots, w_{t-1}).\]</span> The loss is computed only over response tokens (not the instruction). SFT alone can produce a capable instruction-following model but tends to produce outputs that are verbose, sycophantic, or occasionally harmful, motivating further alignment steps.</p>
-<h2 data-number="6.2" id="reinforcement-learning-from-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning from Human Feedback (RLHF)</h2>
-<p>RLHF <span class="citation" data-cites="5"></span> is the dominant technique for aligning LLMs with human preferences. It consists of three stages:</p>
+<h2 data-number="6.1" id="supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning
+(SFT)</h2>
+<p>A pre-trained LLM is a general-purpose next-token predictor. To make
+it follow user instructions, it is fine-tuned on a dataset of
+(instruction, response) pairs using the same cross-entropy loss: <span class="math display">\[\mathcal{L}_\text{SFT} = -\sum_{t} \log
+P_\theta(w_t \mid \text{instruction}, w_1, \ldots, w_{t-1}).\]</span>
+The loss is computed only over response tokens (not the instruction).
+SFT alone can produce a capable instruction-following model but tends to
+produce outputs that are verbose, sycophantic, or occasionally harmful,
+motivating further alignment steps.</p>
+<h2 data-number="6.2" id="reinforcement-learning-from-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning from
+Human Feedback (RLHF)</h2>
+<p>RLHF <span class="citation" data-cites="5"></span> is the dominant
+technique for aligning LLMs with human preferences. It consists of three
+stages:</p>
 <ol>
-<li><p><strong>Reward Model Training:</strong> Human raters compare pairs of model responses and indicate a preference. A reward model <span class="math inline">\(r_\phi(x, y)\)</span> is trained to predict these preferences via the Bradley-Terry model: <span class="math display">\[P(y_w \succ y_l \mid x) = \sigma\!\left(r_\phi(x, y_w) - r_\phi(x, y_l)\right),\]</span> where <span class="math inline">\(y_w\)</span> and <span class="math inline">\(y_l\)</span> are the preferred and rejected responses respectively.</p></li>
-<li><p><strong>RL Fine-Tuning with PPO:</strong> The language model <span class="math inline">\(\pi_\theta\)</span> is updated using Proximal Policy Optimization (PPO) to maximize expected reward, with a KL-divergence penalty to prevent the policy from drifting too far from the SFT baseline: <span class="math display">\[\mathcal{J}(\theta) = \mathbb{E}_{x \sim \mathcal{D},\, y \sim \pi_\theta(\cdot|x)}\!\left[r_\phi(x,y) - \beta \log \frac{\pi_\theta(y|x)}{\pi_\text{SFT}(y|x)}\right].\]</span></p></li>
-<li><p><strong>Iteration:</strong> The process can be iterated by collecting new human feedback on outputs from the updated policy, yielding a progressively better reward model and policy.</p></li>
+<li><p><strong>Reward Model Training:</strong> Human raters compare
+pairs of model responses and indicate a preference. A reward model <span class="math inline">\(r_\phi(x, y)\)</span> is trained to predict these
+preferences via the Bradley-Terry model: <span class="math display">\[P(y_w \succ y_l \mid x) = \sigma\!\left(r_\phi(x,
+y_w) - r_\phi(x, y_l)\right),\]</span> where <span class="math inline">\(y_w\)</span> and <span class="math inline">\(y_l\)</span> are the preferred and rejected
+responses respectively.</p></li>
+<li><p><strong>RL Fine-Tuning with PPO:</strong> The language model
+<span class="math inline">\(\pi_\theta\)</span> is updated using
+Proximal Policy Optimization (PPO) to maximize expected reward, with a
+KL-divergence penalty to prevent the policy from drifting too far from
+the SFT baseline: <span class="math display">\[\mathcal{J}(\theta) =
+\mathbb{E}_{x \sim \mathcal{D},\, y \sim
+\pi_\theta(\cdot|x)}\!\left[r_\phi(x,y) - \beta \log
+\frac{\pi_\theta(y|x)}{\pi_\text{SFT}(y|x)}\right].\]</span></p></li>
+<li><p><strong>Iteration:</strong> The process can be iterated by
+collecting new human feedback on outputs from the updated policy,
+yielding a progressively better reward model and policy.</p></li>
 </ol>
-<h2 data-number="6.3" id="direct-preference-optimization-dpo"><span class="header-section-number">6.3</span> Direct Preference Optimization (DPO)</h2>
-<p>RLHF with PPO is complex and unstable to train. Direct Preference Optimization (DPO) reformulates the problem as a supervised contrastive objective, showing that the optimal RLHF policy satisfies: <span class="math display">\[\mathcal{L}_\text{DPO}(\theta) = -\mathbb{E}\!\left[\log \sigma\!\left(\beta \log \frac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)}\right)\right].\]</span> DPO requires no separate reward model and can be applied directly to preference data, making it simpler and more computationally efficient than RLHF. It has become widely adopted for open-weight model alignment.</p>
-<h2 data-number="6.4" id="parameter-efficient-fine-tuning"><span class="header-section-number">6.4</span> Parameter-Efficient Fine-Tuning</h2>
-<p>Full fine-tuning of a 70B-parameter model requires tens of GPU-hours and large memory. Parameter-efficient fine-tuning (PEFT) methods reduce this cost:</p>
+<h2 data-number="6.3" id="direct-preference-optimization-dpo"><span class="header-section-number">6.3</span> Direct Preference Optimization
+(DPO)</h2>
+<p>RLHF with PPO is complex and unstable to train. Direct Preference
+Optimization (DPO) reformulates the problem as a supervised contrastive
+objective, showing that the optimal RLHF policy satisfies: <span class="math display">\[\mathcal{L}_\text{DPO}(\theta) =
+-\mathbb{E}\!\left[\log \sigma\!\left(\beta \log
+\frac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \beta \log
+\frac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)}\right)\right].\]</span>
+DPO requires no separate reward model and can be applied directly to
+preference data, making it simpler and more computationally efficient
+than RLHF. It has become widely adopted for open-weight model
+alignment.</p>
+<h2 data-number="6.4" id="parameter-efficient-fine-tuning"><span class="header-section-number">6.4</span> Parameter-Efficient
+Fine-Tuning</h2>
+<p>Full fine-tuning of a 70B-parameter model requires tens of GPU-hours
+and large memory. Parameter-efficient fine-tuning (PEFT) methods reduce
+this cost:</p>
 <ul>
-<li><p><strong>LoRA (Low-Rank Adaptation):</strong> Weight updates are constrained to a low-rank factorization: <span class="math inline">\(\Delta \mathbf{W} = \mathbf{A}\mathbf{B}^T\)</span> where <span class="math inline">\(\mathbf{A} \in \mathbb{R}^{d \times r}\)</span>, <span class="math inline">\(\mathbf{B} \in \mathbb{R}^{d \times r}\)</span>, and rank <span class="math inline">\(r \ll d\)</span>. Only <span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span> are trained. With <span class="math inline">\(r = 16\)</span>, LoRA reduces trainable parameters by a factor of <span class="math inline">\(d / (2r)\)</span>, often more than 1000<span class="math inline">\(\times\)</span>.</p></li>
-<li><p><strong>Prefix Tuning / Prompt Tuning:</strong> Soft, trainable tokens are prepended to the input sequence; the main model weights are frozen. This keeps the model completely unmodified and allows different prefixes for different tasks.</p></li>
-<li><p><strong>Adapter Layers:</strong> Small bottleneck feed-forward modules are inserted between Transformer layers; only adapter weights are trained.</p></li>
+<li><p><strong>LoRA (Low-Rank Adaptation):</strong> Weight updates are
+constrained to a low-rank factorization: <span class="math inline">\(\Delta \mathbf{W} =
+\mathbf{A}\mathbf{B}^T\)</span> where <span class="math inline">\(\mathbf{A} \in \mathbb{R}^{d \times r}\)</span>,
+<span class="math inline">\(\mathbf{B} \in \mathbb{R}^{d \times
+r}\)</span>, and rank <span class="math inline">\(r \ll d\)</span>. Only
+<span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span> are trained. With <span class="math inline">\(r = 16\)</span>, LoRA reduces trainable parameters
+by a factor of <span class="math inline">\(d / (2r)\)</span>, often more
+than 1000<span class="math inline">\(\times\)</span>.</p></li>
+<li><p><strong>Prefix Tuning / Prompt Tuning:</strong> Soft, trainable
+tokens are prepended to the input sequence; the main model weights are
+frozen. This keeps the model completely unmodified and allows different
+prefixes for different tasks.</p></li>
+<li><p><strong>Adapter Layers:</strong> Small bottleneck feed-forward
+modules are inserted between Transformer layers; only adapter weights
+are trained.</p></li>
 </ul>
-<h1 data-number="7" id="in-context-learning-and-prompting"><span class="header-section-number">7.</span> In-Context Learning and Prompting</h1>
+<h1 data-number="7" id="in-context-learning-and-prompting"><span class="header-section-number">7.</span> In-Context Learning and
+Prompting</h1>
 <h2 data-number="7.1" id="in-context-learning"><span class="header-section-number">7.1</span> In-Context Learning</h2>
-<p>A remarkable property of large LLMs is <em>in-context learning</em> (ICL): by including a few input-output examples in the prompt, the model adapts its behavior without any weight updates. Given a prompt: <span class="math display">\[[x_1, y_1], [x_2, y_2], \ldots, [x_k, y_k], x_\text{query},\]</span> the model generates <span class="math inline">\(y_\text{query}\)</span> by analogy with the demonstrated examples. ICL performance improves with scale and with the number and quality of examples. The mechanism is not fully understood, but evidence suggests that the Transformer implements a form of gradient-based meta-learning within the forward pass.</p>
+<p>A remarkable property of large LLMs is <em>in-context learning</em>
+(ICL): by including a few input-output examples in the prompt, the model
+adapts its behavior without any weight updates. Given a prompt: <span class="math display">\[[x_1, y_1], [x_2, y_2], \ldots, [x_k, y_k],
+x_\text{query},\]</span> the model generates <span class="math inline">\(y_\text{query}\)</span> by analogy with the
+demonstrated examples. ICL performance improves with scale and with the
+number and quality of examples. The mechanism is not fully understood,
+but evidence suggests that the Transformer implements a form of
+gradient-based meta-learning within the forward pass.</p>
 <h2 data-number="7.2" id="prompt-engineering"><span class="header-section-number">7.2</span> Prompt Engineering</h2>
-<p>The wording and structure of the prompt strongly influence LLM outputs. Key techniques include:</p>
+<p>The wording and structure of the prompt strongly influence LLM
+outputs. Key techniques include:</p>
 <ul>
-<li><p><strong>Zero-shot prompting:</strong> Pose the task directly with no examples, relying on the model’s pre-trained knowledge.</p></li>
-<li><p><strong>Few-shot prompting:</strong> Provide <span class="math inline">\(k\)</span> labeled examples before the query; typically <span class="math inline">\(k \in \{1, 5, 20\}\)</span>.</p></li>
-<li><p><strong>Chain-of-Thought (CoT) prompting:</strong> Instruct the model to “think step by step” or provide examples that include intermediate reasoning steps. CoT dramatically improves performance on multi-step arithmetic and logical reasoning by encouraging the model to generate an explicit intermediate computation trace.</p></li>
-<li><p><strong>Self-consistency:</strong> Sample multiple reasoning chains and take the majority vote over final answers, reducing variance from individual chain errors.</p></li>
-<li><p><strong>Instruction following:</strong> Models trained with RLHF respond well to direct natural-language instructions: “List three advantages of X,” “Summarize the following in two sentences.”</p></li>
+<li><p><strong>Zero-shot prompting:</strong> Pose the task directly with
+no examples, relying on the model’s pre-trained knowledge.</p></li>
+<li><p><strong>Few-shot prompting:</strong> Provide <span class="math inline">\(k\)</span> labeled examples before the query;
+typically <span class="math inline">\(k \in \{1, 5,
+20\}\)</span>.</p></li>
+<li><p><strong>Chain-of-Thought (CoT) prompting:</strong> Instruct the
+model to “think step by step” or provide examples that include
+intermediate reasoning steps. CoT dramatically improves performance on
+multi-step arithmetic and logical reasoning by encouraging the model to
+generate an explicit intermediate computation trace.</p></li>
+<li><p><strong>Self-consistency:</strong> Sample multiple reasoning
+chains and take the majority vote over final answers, reducing variance
+from individual chain errors.</p></li>
+<li><p><strong>Instruction following:</strong> Models trained with RLHF
+respond well to direct natural-language instructions: “List three
+advantages of X,” “Summarize the following in two sentences.”</p></li>
 </ul>
-<h2 data-number="7.3" id="retrieval-augmented-generation-rag"><span class="header-section-number">7.3</span> Retrieval-Augmented Generation (RAG)</h2>
-<p>LLMs have a fixed knowledge cutoff date and can hallucinate factual information. Retrieval-Augmented Generation (RAG) addresses this by retrieving relevant documents from an external knowledge base at inference time and including them in the context: <span class="math display">\[P(y \mid q) = \sum_{d \in \text{Retrieve}(q)} P(y \mid q, d) \cdot P(d \mid q).\]</span> The retrieval step uses dense vector search (embedding the query and documents into a shared space, then finding nearest neighbors) or sparse methods (BM25). RAG allows the model to access up-to-date information, cite sources, and reduce hallucination without retraining.</p>
+<h2 data-number="7.3" id="retrieval-augmented-generation-rag"><span class="header-section-number">7.3</span> Retrieval-Augmented Generation
+(RAG)</h2>
+<p>LLMs have a fixed knowledge cutoff date and can hallucinate factual
+information. Retrieval-Augmented Generation (RAG) addresses this by
+retrieving relevant documents from an external knowledge base at
+inference time and including them in the context: <span class="math display">\[P(y \mid q) = \sum_{d \in \text{Retrieve}(q)} P(y
+\mid q, d) \cdot P(d \mid q).\]</span> The retrieval step uses dense
+vector search (embedding the query and documents into a shared space,
+then finding nearest neighbors) or sparse methods (BM25). RAG allows the
+model to access up-to-date information, cite sources, and reduce
+hallucination without retraining.</p>
 <h1 data-number="8" id="evaluation-and-limitations"><span class="header-section-number">8.</span> Evaluation and Limitations</h1>
 <h2 data-number="8.1" id="benchmarks"><span class="header-section-number">8.1</span> Benchmarks</h2>
 <p>LLM capabilities are evaluated on standardized benchmarks:</p>
 <ul>
-<li><p><strong>MMLU</strong> (Massive Multitask Language Understanding): Multiple-choice questions spanning 57 academic subjects at undergraduate and professional level.</p></li>
-<li><p><strong>HumanEval / MBPP:</strong> Code generation benchmarks requiring the model to implement Python functions from docstrings.</p></li>
-<li><p><strong>GSM8K / MATH:</strong> Grade-school and competition math problems requiring multi-step reasoning.</p></li>
-<li><p><strong>HellaSwag / WinoGrande:</strong> Commonsense inference and coreference resolution.</p></li>
-<li><p><strong>BIG-Bench Hard:</strong> A collection of 23 tasks where models below GPT-4 scale perform below chance.</p></li>
+<li><p><strong>MMLU</strong> (Massive Multitask Language Understanding):
+Multiple-choice questions spanning 57 academic subjects at undergraduate
+and professional level.</p></li>
+<li><p><strong>HumanEval / MBPP:</strong> Code generation benchmarks
+requiring the model to implement Python functions from
+docstrings.</p></li>
+<li><p><strong>GSM8K / MATH:</strong> Grade-school and competition math
+problems requiring multi-step reasoning.</p></li>
+<li><p><strong>HellaSwag / WinoGrande:</strong> Commonsense inference
+and coreference resolution.</p></li>
+<li><p><strong>BIG-Bench Hard:</strong> A collection of 23 tasks where
+models below GPT-4 scale perform below chance.</p></li>
 </ul>
 <h2 data-number="8.2" id="hallucination"><span class="header-section-number">8.2</span> Hallucination</h2>
-<p>LLMs frequently generate fluent, confident, but factually incorrect statements — a phenomenon called <em>hallucination</em>. This arises because the training objective optimizes token prediction probability, not factual accuracy. Mitigation strategies include RAG, uncertainty-aware decoding (abstaining when confidence is low), grounded generation (requiring citations), and RLHF with factuality-focused reward signals.</p>
+<p>LLMs frequently generate fluent, confident, but factually incorrect
+statements — a phenomenon called <em>hallucination</em>. This arises
+because the training objective optimizes token prediction probability,
+not factual accuracy. Mitigation strategies include RAG,
+uncertainty-aware decoding (abstaining when confidence is low), grounded
+generation (requiring citations), and RLHF with factuality-focused
+reward signals.</p>
 <h2 data-number="8.3" id="bias-and-toxicity"><span class="header-section-number">8.3</span> Bias and Toxicity</h2>
-<p>LLMs trained on large internet corpora inherit societal biases present in the training data, including gender, racial, and political biases. They can also generate toxic or harmful content. Mitigation involves data filtering, RLHF with safety-focused reward models, and Constitutional AI (CAI), in which the model is trained to critique and revise its own outputs according to a set of human-authored principles.</p>
+<p>LLMs trained on large internet corpora inherit societal biases
+present in the training data, including gender, racial, and political
+biases. They can also generate toxic or harmful content. Mitigation
+involves data filtering, RLHF with safety-focused reward models, and
+Constitutional AI (CAI), in which the model is trained to critique and
+revise its own outputs according to a set of human-authored
+principles.</p>
 <h2 data-number="8.4" id="context-length"><span class="header-section-number">8.4</span> Context Length</h2>
-<p>Standard Transformers have quadratic <span class="math inline">\(O(T^2)\)</span> attention complexity. Early models (GPT-3) supported 2048-token contexts; modern models support 128K–1M tokens through techniques such as FlashAttention (memory-efficient exact attention), RoPE (rotary positional embeddings enabling extrapolation), and sliding-window attention (Mistral, Longformer).</p>
+<p>Standard Transformers have quadratic <span class="math inline">\(O(T^2)\)</span> attention complexity. Early models
+(GPT-3) supported 2048-token contexts; modern models support 128K–1M
+tokens through techniques such as FlashAttention (memory-efficient exact
+attention), RoPE (rotary positional embeddings enabling extrapolation),
+and sliding-window attention (Mistral, Longformer).</p>
 <h1 data-number="9" id="summary"><span class="header-section-number">9.</span> Summary</h1>
-<p>Large Language Models are autoregressive Transformer models pre-trained on massive text corpora via next-token prediction. Scaling laws show that model quality improves predictably with parameters, data, and compute. Fine-tuning via SFT, RLHF, and DPO aligns pre-trained models with human preferences. In-context learning and chain-of-thought prompting are powerful inference-time techniques that require no weight updates. Key limitations include hallucination, bias, and fixed knowledge cutoffs, which motivate retrieval-augmented generation and ongoing alignment research. LLMs now serve as the backbone for a rapidly growing ecosystem of AI applications, from code generation and document summarization to scientific reasoning and dialogue systems.</p>
+<p>Large Language Models are autoregressive Transformer models
+pre-trained on massive text corpora via next-token prediction. Scaling
+laws show that model quality improves predictably with parameters, data,
+and compute. Fine-tuning via SFT, RLHF, and DPO aligns pre-trained
+models with human preferences. In-context learning and chain-of-thought
+prompting are powerful inference-time techniques that require no weight
+updates. Key limitations include hallucination, bias, and fixed
+knowledge cutoffs, which motivate retrieval-augmented generation and
+ongoing alignment research. LLMs now serve as the backbone for a rapidly
+growing ecosystem of AI applications, from code generation and document
+summarization to scientific reasoning and dialogue systems.</p>
 <div class="thebibliography">
-<p><span>9</span> Vaswani, A., et al. “Attention Is All You Need.” <em>NeurIPS</em>, 2017. Hoffmann, J., et al. “Training Compute-Optimal Large Language Models.” <em>arXiv:2203.15556</em>, 2022. Brown, T., et al. “Language Models are Few-Shot Learners.” <em>NeurIPS</em>, 2020. Devlin, J., et al. “BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding.” <em>NAACL</em>, 2019. Ouyang, L., et al. “Training language models to follow instructions with human feedback.” <em>NeurIPS</em>, 2022.</p>
+<p><span>9</span> Vaswani, A., et al. “Attention Is All You Need.”
+<em>NeurIPS</em>, 2017. Hoffmann, J., et al. “Training Compute-Optimal
+Large Language Models.” <em>arXiv:2203.15556</em>, 2022. Brown, T., et
+al. “Language Models are Few-Shot Learners.” <em>NeurIPS</em>, 2020.
+Devlin, J., et al. “BERT: Pre-training of Deep Bidirectional
+Transformers for Language Understanding.” <em>NAACL</em>, 2019. Ouyang,
+L., et al. “Training language models to follow instructions with human
+feedback.” <em>NeurIPS</em>, 2022.</p>
 </div>
 
 </main>

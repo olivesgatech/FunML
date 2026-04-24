@@ -109,118 +109,312 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="recap-and-lecture-objectives"><span class="header-section-number">1.</span> Recap and Lecture Objectives</h1>
-<p>In the previous lecture, we continued our study of regression models and the key tools used to train and evaluate them. We covered optimization methods for fitting regression models, including gradient-based approaches as well as <strong>Newton’s Method</strong> and <strong>Coordinate Search</strong>. We also discussed how <strong>regularization</strong> improves generalization in linear regression, with particular emphasis on <strong>Ridge</strong> and <strong>Lasso</strong>, and we reviewed common performance measures such as Mean Squared Error (MSE), Mean Absolute Error (MAE), and the Coefficient of Determination (<span class="math inline">\(R^2\)</span>).</p>
-<p>In this lecture, we build on those foundations by organizing the regression workflow end-to-end. We begin by summarizing optimization methods beyond basic gradient descent, including <strong>Newton’s Method</strong> (which uses curvature through the Hessian) and <strong>coordinate-based methods</strong> such as Coordinate Search and Coordinate Descent. Next, we revisit <strong>regularization</strong>—including Ridge (<span class="math inline">\(\ell_2\)</span>), Lasso (<span class="math inline">\(\ell_1\)</span>), and Elastic Net—to understand how controlling coefficient magnitudes helps prevent overfitting. We then review key <strong>performance metrics</strong> for regression, including MSE, RMSE, MAE, and <span class="math inline">\(R^2\)</span>.</p>
-<p>Finally, the main focus of this lecture is <strong>model validation and evaluation</strong>. We introduce the train/validation/test split, learning curves, cross-validation, and the bias–variance tradeoff, which together provide a practical framework for understanding model generalization and performance on unseen data. We also highlight how evaluation becomes more subtle when labels are noisy or ambiguous.</p>
-<h1 data-number="2" id="second-order-optimization-newtons-method"><span class="header-section-number">2.</span> Second-Order Optimization: Newton’s Method</h1>
-<p>Second-order optimization methods improve upon Gradient Descent by using curvature information of the loss surface. Instead of relying only on the slope (first derivative), these methods also use second derivatives to better estimate the location of the minimum.</p>
-<h2 data-number="2.1" id="jacobian-and-hessian-matrices"><span class="header-section-number">2.1</span> Jacobian and Hessian Matrices</h2>
-<p>The Jacobian matrix is a matrix composed of first-order partial derivatives of a multivariable function. It describes how a function changes with respect to each variable and is commonly used in optimization and nonlinear systems. The Hessian matrix extends this idea by collecting second-order partial derivatives. It is an <span class="math inline">\(n \times n\)</span> square matrix that captures the curvature of a function and plays a central role in second-order optimization methods.</p>
-<p>For example, consider the function <span class="math inline">\(f(x,y) = x^2y + y^2x\)</span>. The Hessian matrix for this function is <span class="math display">\[H_f(x,y)=
+<p>In the previous lecture, we continued our study of regression models
+and the key tools used to train and evaluate them. We covered
+optimization methods for fitting regression models, including
+gradient-based approaches as well as <strong>Newton’s Method</strong>
+and <strong>Coordinate Search</strong>. We also discussed how
+<strong>regularization</strong> improves generalization in linear
+regression, with particular emphasis on <strong>Ridge</strong> and
+<strong>Lasso</strong>, and we reviewed common performance measures such
+as Mean Squared Error (MSE), Mean Absolute Error (MAE), and the
+Coefficient of Determination (<span class="math inline">\(R^2\)</span>).</p>
+<p>In this lecture, we build on those foundations by organizing the
+regression workflow end-to-end. We begin by summarizing optimization
+methods beyond basic gradient descent, including <strong>Newton’s
+Method</strong> (which uses curvature through the Hessian) and
+<strong>coordinate-based methods</strong> such as Coordinate Search and
+Coordinate Descent. Next, we revisit
+<strong>regularization</strong>—including Ridge (<span class="math inline">\(\ell_2\)</span>), Lasso (<span class="math inline">\(\ell_1\)</span>), and Elastic Net—to understand
+how controlling coefficient magnitudes helps prevent overfitting. We
+then review key <strong>performance metrics</strong> for regression,
+including MSE, RMSE, MAE, and <span class="math inline">\(R^2\)</span>.</p>
+<p>Finally, the main focus of this lecture is <strong>model validation
+and evaluation</strong>. We introduce the train/validation/test split,
+learning curves, cross-validation, and the bias–variance tradeoff, which
+together provide a practical framework for understanding model
+generalization and performance on unseen data. We also highlight how
+evaluation becomes more subtle when labels are noisy or ambiguous.</p>
+<h1 data-number="2" id="second-order-optimization-newtons-method"><span class="header-section-number">2.</span> Second-Order Optimization:
+Newton’s Method</h1>
+<p>Second-order optimization methods improve upon Gradient Descent by
+using curvature information of the loss surface. Instead of relying only
+on the slope (first derivative), these methods also use second
+derivatives to better estimate the location of the minimum.</p>
+<h2 data-number="2.1" id="jacobian-and-hessian-matrices"><span class="header-section-number">2.1</span> Jacobian and Hessian
+Matrices</h2>
+<p>The Jacobian matrix is a matrix composed of first-order partial
+derivatives of a multivariable function. It describes how a function
+changes with respect to each variable and is commonly used in
+optimization and nonlinear systems. The Hessian matrix extends this idea
+by collecting second-order partial derivatives. It is an <span class="math inline">\(n \times n\)</span> square matrix that captures
+the curvature of a function and plays a central role in second-order
+optimization methods.</p>
+<p>For example, consider the function <span class="math inline">\(f(x,y)
+= x^2y + y^2x\)</span>. The Hessian matrix for this function is <span class="math display">\[H_f(x,y)=
 \begin{pmatrix}
 2y &amp; 2x+2y\\
 2x+2y &amp; 2x
 \end{pmatrix}.\]</span></p>
 <h2 data-number="2.2" id="optimization"><span class="header-section-number">2.2</span> Optimization</h2>
-<p>Second-order optimization methods use curvature information to guide the search for a minimum. While first-order methods such as Gradient Descent rely only on the slope of the loss surface, second-order methods additionally use the Hessian matrix to capture how the surface bends. This curvature information allows the optimizer to take more informed steps toward the minimum.</p>
-<p>When the Hessian matrix is positive semi-definite, <span class="math display">\[\Delta\boldsymbol{\theta}^T \mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta} \ge 0
-\quad \text{for any } \Delta\boldsymbol{\theta}.\]</span> the loss surface locally behaves like a convex parabola. In this setting, curvature information can be used to construct a more accurate local model of the loss function.</p>
-<p>Using a second-order Taylor approximation, the loss near a point <span class="math inline">\(\boldsymbol{\theta}\)</span> can be written as <span class="math display">\[L(\boldsymbol{\theta}+\Delta\boldsymbol{\theta})
+<p>Second-order optimization methods use curvature information to guide
+the search for a minimum. While first-order methods such as Gradient
+Descent rely only on the slope of the loss surface, second-order methods
+additionally use the Hessian matrix to capture how the surface bends.
+This curvature information allows the optimizer to take more informed
+steps toward the minimum.</p>
+<p>When the Hessian matrix is positive semi-definite, <span class="math display">\[\Delta\boldsymbol{\theta}^T
+\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta} \ge 0
+\quad \text{for any } \Delta\boldsymbol{\theta}.\]</span> the loss
+surface locally behaves like a convex parabola. In this setting,
+curvature information can be used to construct a more accurate local
+model of the loss function.</p>
+<p>Using a second-order Taylor approximation, the loss near a point
+<span class="math inline">\(\boldsymbol{\theta}\)</span> can be written
+as <span class="math display">\[L(\boldsymbol{\theta}+\Delta\boldsymbol{\theta})
 \approx
 L(\boldsymbol{\theta})
-+\Delta\boldsymbol{\theta}^T\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
-+\frac{1}{2}\Delta\boldsymbol{\theta}^T \mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta}.\]</span> To find the minimum of this quadratic approximation, we set the derivative with respect to <span class="math inline">\(\Delta\theta\)</span> equal to zero: <span class="math display">\[\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})
++\Delta\boldsymbol{\theta}^T\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
++\frac{1}{2}\Delta\boldsymbol{\theta}^T
+\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta}.\]</span> To
+find the minimum of this quadratic approximation, we set the derivative
+with respect to <span class="math inline">\(\Delta\theta\)</span> equal
+to zero: <span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
 +\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta}=0,\]</span></p>
 <p>which yields the optimal update direction <span class="math display">\[\Delta\boldsymbol{\theta}
 =
 -\mathbf{H}(\boldsymbol{\theta})^{-1}
 \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}).\]</span></p>
-<p>Substituting this update into the iterative optimization framework leads to the Newton’s Method update rule <span class="math display">\[\boldsymbol{\theta}^{t+1}
+<p>Substituting this update into the iterative optimization framework
+leads to the Newton’s Method update rule <span class="math display">\[\boldsymbol{\theta}^{t+1}
 =
 \boldsymbol{\theta}^{t}
 -\alpha \mathbf{H}(\boldsymbol{\theta})^{-1}
 \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}).\]</span></p>
-<p>For comparison, standard Gradient Descent uses only first-order information: <span class="math display">\[\boldsymbol{\theta}^{t+1}
+<p>For comparison, standard Gradient Descent uses only first-order
+information: <span class="math display">\[\boldsymbol{\theta}^{t+1}
 =
 \boldsymbol{\theta}^{t}
--\alpha \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}^{t}).\]</span></p>
-<p>A matrix is positive semi-definite when it is symmetric and has non-negative eigenvalues, which guarantees locally convex curvature and enables reliable descent toward a minimum.</p>
-<figure>
-<img alt="Figure 9.1: Visualization of the function with respect to parameters w_1 and w_2 (quadratic function in blue)" id="fig:P2.png" src="img/lecture9/P2.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.1: Visualization of the function with respect to parameters <span class="math inline">\(w_1\)</span> and <span class="math inline">\(w_2\)</span> (quadratic function in blue)</figcaption>
+-\alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}^{t}).\]</span></p>
+<p>A matrix is positive semi-definite when it is symmetric and has
+non-negative eigenvalues, which guarantees locally convex curvature and
+enables reliable descent toward a minimum.</p>
+<figure id="fig:P2.png">
+<img src="img/lecture9/P2.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.1: Visualization of the function with respect to
+parameters <span class="math inline">\(w_1\)</span> and <span class="math inline">\(w_2\)</span> (quadratic function in
+blue)</figcaption>
 </figure>
 <h2 data-number="2.3" id="convexity"><span class="header-section-number">2.3</span> Convexity</h2>
-<p>In optimization, the concept of convexity plays a crucial role in determining how easily we can find the global minimum of a function. A function <span class="math inline">\(f(\boldsymbol{\theta})\)</span> is said to be <em>convex</em> if, for any two points <span class="math inline">\(\boldsymbol{\theta}_1\)</span> and <span class="math inline">\(\boldsymbol{\theta}_2\)</span> within its domain, the line segment connecting <span class="math inline">\(f(\theta_1)\)</span> and <span class="math inline">\(f(\theta_2)\)</span> lies above or on the graph of the function itself. Formally, for any <span class="math inline">\(\boldsymbol{\theta}_1, \boldsymbol{\theta}_2 \in \mathrm{dom}(f)\)</span> and <span class="math inline">\(\lambda \in [0,1]\)</span>: <span class="math display">\[f(\lambda \boldsymbol{\theta}_1 + (1-\lambda) \boldsymbol{\theta}_2)
-\leq \lambda f(\boldsymbol{\theta}_1) + (1-\lambda) f(\boldsymbol{\theta}_2).\]</span></p>
-<p>This property guarantees that the function has a single global minimum and no other local minima, making optimization significantly easier.</p>
-<p>For twice-differentiable functions, convexity can be checked using the Hessian matrix. A function is convex if its Hessian is positive semi-definite everywhere: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta}) \succeq 0.\]</span> This means the loss surface curves upward in every direction, forming a bowl-shaped landscape that guides optimization algorithms toward the global minimum.</p>
-<p>In contrast, <em>non-convex</em> functions do not satisfy the convexity condition. The line segment between two points may lie below the function curve, producing multiple local minima and maxima. In these cases, optimization algorithms such as gradient descent may become trapped in local minima and fail to reach the global solution.</p>
+<p>In optimization, the concept of convexity plays a crucial role in
+determining how easily we can find the global minimum of a function. A
+function <span class="math inline">\(f(\boldsymbol{\theta})\)</span> is
+said to be <em>convex</em> if, for any two points <span class="math inline">\(\boldsymbol{\theta}_1\)</span> and <span class="math inline">\(\boldsymbol{\theta}_2\)</span> within its domain,
+the line segment connecting <span class="math inline">\(f(\theta_1)\)</span> and <span class="math inline">\(f(\theta_2)\)</span> lies above or on the graph of
+the function itself. Formally, for any <span class="math inline">\(\boldsymbol{\theta}_1, \boldsymbol{\theta}_2 \in
+\mathrm{dom}(f)\)</span> and <span class="math inline">\(\lambda \in
+[0,1]\)</span>: <span class="math display">\[f(\lambda
+\boldsymbol{\theta}_1 + (1-\lambda) \boldsymbol{\theta}_2)
+\leq \lambda f(\boldsymbol{\theta}_1) + (1-\lambda)
+f(\boldsymbol{\theta}_2).\]</span></p>
+<p>This property guarantees that the function has a single global
+minimum and no other local minima, making optimization significantly
+easier.</p>
+<p>For twice-differentiable functions, convexity can be checked using
+the Hessian matrix. A function is convex if its Hessian is positive
+semi-definite everywhere: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta}) \succeq
+0.\]</span> This means the loss surface curves upward in every
+direction, forming a bowl-shaped landscape that guides optimization
+algorithms toward the global minimum.</p>
+<p>In contrast, <em>non-convex</em> functions do not satisfy the
+convexity condition. The line segment between two points may lie below
+the function curve, producing multiple local minima and maxima. In these
+cases, optimization algorithms such as gradient descent may become
+trapped in local minima and fail to reach the global solution.</p>
 <h2 data-number="2.4" id="convergence"><span class="header-section-number">2.4</span> Convergence</h2>
-<p>Newton’s method is particularly powerful for minimizing <em>convex</em> functions. Because it incorporates curvature information through the Hessian, it produces a quadratic approximation of the loss surface at every step. This allows the algorithm to move directly toward the minimum rather than following the slower zig-zag path typical of gradient descent.</p>
-<p>Near the optimum, Newton’s method exhibits <strong>quadratic convergence</strong>, meaning the error decreases extremely rapidly once the algorithm is close to the minimum. In contrast, gradient descent typically achieves only <strong>linear convergence</strong>, requiring many more iterations to reach a similar level of accuracy.</p>
-<p>However, Newton’s method becomes less reliable for <em>non-convex</em> functions. When the Hessian is not positive semi-definite, the quadratic approximation may point toward a saddle point or even a local maximum. As illustrated in the figures, the method may converge to an undesirable local minimum, move toward a local maximum, or oscillate between regions due to incorrect curvature information.</p>
-<p>For this reason, Newton’s method is most effective when the loss function is convex or when the optimization has already reached a region close to a local minimum.</p>
-<figure>
-<img alt="Figure 9.2: Newton’s Method Convergence: Convex Functions" id="fig:P3.png" src="img/lecture9/P3.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.2: Newton’s Method Convergence: Convex Functions</figcaption>
+<p>Newton’s method is particularly powerful for minimizing
+<em>convex</em> functions. Because it incorporates curvature information
+through the Hessian, it produces a quadratic approximation of the loss
+surface at every step. This allows the algorithm to move directly toward
+the minimum rather than following the slower zig-zag path typical of
+gradient descent.</p>
+<p>Near the optimum, Newton’s method exhibits <strong>quadratic
+convergence</strong>, meaning the error decreases extremely rapidly once
+the algorithm is close to the minimum. In contrast, gradient descent
+typically achieves only <strong>linear convergence</strong>, requiring
+many more iterations to reach a similar level of accuracy.</p>
+<p>However, Newton’s method becomes less reliable for
+<em>non-convex</em> functions. When the Hessian is not positive
+semi-definite, the quadratic approximation may point toward a saddle
+point or even a local maximum. As illustrated in the figures, the method
+may converge to an undesirable local minimum, move toward a local
+maximum, or oscillate between regions due to incorrect curvature
+information.</p>
+<p>For this reason, Newton’s method is most effective when the loss
+function is convex or when the optimization has already reached a region
+close to a local minimum.</p>
+<figure id="fig:P3.png">
+<img src="img/lecture9/P3.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.2: Newton’s Method Convergence: Convex
+Functions</figcaption>
 </figure>
-<figure>
-<img alt="Figure 9.3: Newton’s Method Convergence: Non-Convex Functions" id="fig:P4.png" src="img/lecture9/P4.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.3: Newton’s Method Convergence: Non-Convex Functions</figcaption>
+<figure id="fig:P4.png">
+<img src="img/lecture9/P4.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.3: Newton’s Method Convergence: Non-Convex
+Functions</figcaption>
 </figure>
 <h2 data-number="2.5" id="computational-complexity"><span class="header-section-number">2.5</span> Computational Complexity</h2>
-<p>Although Newton’s method can converge in fewer iterations than first-order methods, it is significantly more expensive per iteration. The main challenge is the Hessian matrix, which is a <span class="math inline">\(P \times P\)</span> matrix containing all second-order partial derivatives of the loss function.</p>
-<p>Storing the Hessian requires <span class="math inline">\(O(P^2)\)</span> memory, which quickly becomes impractical for models with many parameters. Computing the Hessian itself requires <span class="math inline">\(O(P^2)\)</span> operations, and computing its inverse requires approximately <span class="math inline">\(O(P^3)\)</span> time. Therefore, the total computational cost per Newton update is dominated by the matrix inversion step:</p>
+<p>Although Newton’s method can converge in fewer iterations than
+first-order methods, it is significantly more expensive per iteration.
+The main challenge is the Hessian matrix, which is a <span class="math inline">\(P \times P\)</span> matrix containing all
+second-order partial derivatives of the loss function.</p>
+<p>Storing the Hessian requires <span class="math inline">\(O(P^2)\)</span> memory, which quickly becomes
+impractical for models with many parameters. Computing the Hessian
+itself requires <span class="math inline">\(O(P^2)\)</span> operations,
+and computing its inverse requires approximately <span class="math inline">\(O(P^3)\)</span> time. Therefore, the total
+computational cost per Newton update is dominated by the matrix
+inversion step:</p>
 <p><span class="math display">\[\boldsymbol{\theta}^{t+1}
 =
 \boldsymbol{\theta}^{t}
 -\alpha \mathbf{H}(\boldsymbol{\theta})^{-1}
 \nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})\]</span></p>
-<p>Where <span class="math inline">\(\mathbf{H}(\boldsymbol{\theta})\)</span> is the Hessian matrix: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta})=\nabla_{\boldsymbol{\theta}}^2 L(\boldsymbol{\theta})\]</span></p>
-<p><span class="math display">\[\boxed{\textbf{Total time per iteration of Newton's Method: } O(P^3)}\]</span></p>
-<p>Because modern machine learning models often contain millions of parameters, directly computing and inverting the Hessian is typically infeasible. For this reason, most large-scale learning algorithms rely on first-order methods such as Gradient Descent or use approximate second-order methods (e.g., quasi-Newton methods) that avoid explicit Hessian computation.</p>
+<p>Where <span class="math inline">\(\mathbf{H}(\boldsymbol{\theta})\)</span> is the
+Hessian matrix: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta})=\nabla_{\boldsymbol{\theta}}^2
+L(\boldsymbol{\theta})\]</span></p>
+<p><span class="math display">\[\boxed{\textbf{Total time per iteration
+of Newton's Method: } O(P^3)}\]</span></p>
+<p>Because modern machine learning models often contain millions of
+parameters, directly computing and inverting the Hessian is typically
+infeasible. For this reason, most large-scale learning algorithms rely
+on first-order methods such as Gradient Descent or use approximate
+second-order methods (e.g., quasi-Newton methods) that avoid explicit
+Hessian computation.</p>
 <h1 data-number="3" id="coordinate-search"><span class="header-section-number">3.</span> Coordinate Search</h1>
-<p>When gradient information is unavailable or too expensive to compute, derivative-free optimization methods provide an alternative strategy.</p>
+<p>When gradient information is unavailable or too expensive to compute,
+derivative-free optimization methods provide an alternative
+strategy.</p>
 <h2 data-number="3.1" id="optimization-1"><span class="header-section-number">3.1</span> Optimization</h2>
-<p>Coordinate search is a simple optimization technique that does not rely on gradients or second-order derivatives. Instead of computing the steepest descent direction, the algorithm explores the parameter space by moving along one coordinate axis at a time. At each iteration, the method tests whether moving in the positive or negative direction of a coordinate decreases the loss, and updates the parameters accordingly. The update rule is</p>
+<p>Coordinate search is a simple optimization technique that does not
+rely on gradients or second-order derivatives. Instead of computing the
+steepest descent direction, the algorithm explores the parameter space
+by moving along one coordinate axis at a time. At each iteration, the
+method tests whether moving in the positive or negative direction of a
+coordinate decreases the loss, and updates the parameters accordingly.
+The update rule is</p>
 <p><span class="math display">\[\boldsymbol{\theta}^{t+1}
 =
 \boldsymbol{\theta}^{t}
 \pm \alpha \mathbf{e}_j\]</span></p>
-<p>where <span class="math inline">\(\mathbf{e}_j = [0, \ldots, 1, \ldots, 0]^T\)</span> is the <span class="math inline">\(j\)</span>-th standard basis vector, which selects the coordinate direction being explored.</p>
-<p>This approach is useful when gradients are unavailable, difficult to compute, or expensive to evaluate. Because it does not require derivatives, coordinate search belongs to the class of <em>derivative-free optimization</em> methods. However, this simplicity comes at a cost: the algorithm may require many function evaluations and can be slower than gradient-based methods in high-dimensional problems.</p>
-<p>Figure <a data-reference="fig:P5.png" data-reference-type="ref" href="#fig:P5.png">4</a> illustrates how the algorithm explores descent directions along coordinate axes, moving step-by-step toward lower values of the objective function.</p>
-<figure>
-<img alt="Figure 9.4: Coordinate Search Algorithm: Exploring Descent Directions Along Coordinate Axes" id="fig:P5.png" src="img/lecture9/P5.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.4: Coordinate Search Algorithm: Exploring Descent Directions Along Coordinate Axes</figcaption>
+<p>where <span class="math inline">\(\mathbf{e}_j = [0, \ldots, 1,
+\ldots, 0]^T\)</span> is the <span class="math inline">\(j\)</span>-th
+standard basis vector, which selects the coordinate direction being
+explored.</p>
+<p>This approach is useful when gradients are unavailable, difficult to
+compute, or expensive to evaluate. Because it does not require
+derivatives, coordinate search belongs to the class of
+<em>derivative-free optimization</em> methods. However, this simplicity
+comes at a cost: the algorithm may require many function evaluations and
+can be slower than gradient-based methods in high-dimensional
+problems.</p>
+<p>Figure <a data-reference="fig:P5.png" data-reference-type="ref" href="#fig:P5.png">4</a> illustrates how the algorithm explores
+descent directions along coordinate axes, moving step-by-step toward
+lower values of the objective function.</p>
+<figure id="fig:P5.png">
+<img src="img/lecture9/P5.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.4: Coordinate Search Algorithm: Exploring Descent
+Directions Along Coordinate Axes</figcaption>
 </figure>
 <h1 data-number="4" id="coordinate-descent"><span class="header-section-number">4.</span> Coordinate Descent</h1>
-<p>While Coordinate Search explores directions without using gradients, Coordinate Descent improves efficiency by incorporating partial derivative information.</p>
+<p>While Coordinate Search explores directions without using gradients,
+Coordinate Descent improves efficiency by incorporating partial
+derivative information.</p>
 <h2 data-number="4.1" id="optimization-2"><span class="header-section-number">4.1</span> Optimization</h2>
-<p>Coordinate descent is an optimization strategy that improves the objective function by updating <em>one parameter (one coordinate of <span class="math inline">\(\boldsymbol{\theta}\)</span>) at a time</em>. Instead of computing a full gradient vector across all parameters, the algorithm isolates a single coordinate direction and performs a one–dimensional optimization step along that axis. This greatly simplifies each update and reduces computational cost, especially in high–dimensional problems.</p>
-<p>At each iteration, the algorithm selects a coordinate index <span class="math inline">\(j \in \{1,\dots,P\}\)</span> and updates only the corresponding parameter while keeping all other parameters fixed. For a continuously differentiable loss function <span class="math inline">\(L(\boldsymbol{\theta})\)</span>, the update rule becomes</p>
+<p>Coordinate descent is an optimization strategy that improves the
+objective function by updating <em>one parameter (one coordinate of
+<span class="math inline">\(\boldsymbol{\theta}\)</span>) at a
+time</em>. Instead of computing a full gradient vector across all
+parameters, the algorithm isolates a single coordinate direction and
+performs a one–dimensional optimization step along that axis. This
+greatly simplifies each update and reduces computational cost,
+especially in high–dimensional problems.</p>
+<p>At each iteration, the algorithm selects a coordinate index <span class="math inline">\(j \in \{1,\dots,P\}\)</span> and updates only the
+corresponding parameter while keeping all other parameters fixed. For a
+continuously differentiable loss function <span class="math inline">\(L(\boldsymbol{\theta})\)</span>, the update rule
+becomes</p>
 <p><span class="math display">\[\theta_j^{t+1}
 =
 \theta_j^{t}
 -\alpha \nabla_{\theta_j} L(\boldsymbol{\theta}).\]</span></p>
-<p>This process is repeated across coordinates until convergence. The coordinates may be selected cyclically, randomly, or based on a heuristic such as the largest gradient magnitude. By decomposing a high–dimensional optimization problem into a sequence of simpler one–dimensional updates, coordinate descent can be particularly effective for large-scale machine learning problems where computing full gradients is expensive.</p>
-<figure>
-<img alt="Figure 9.5: Coordinate Descent Algorithm: Stepwise Optimization Along Coordinate Axes" id="fig:P6.png" src="img/lecture9/P6.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.5: Coordinate Descent Algorithm: Stepwise Optimization Along Coordinate Axes</figcaption>
+<p>This process is repeated across coordinates until convergence. The
+coordinates may be selected cyclically, randomly, or based on a
+heuristic such as the largest gradient magnitude. By decomposing a
+high–dimensional optimization problem into a sequence of simpler
+one–dimensional updates, coordinate descent can be particularly
+effective for large-scale machine learning problems where computing full
+gradients is expensive.</p>
+<figure id="fig:P6.png">
+<img src="img/lecture9/P6.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.5: Coordinate Descent Algorithm: Stepwise
+Optimization Along Coordinate Axes</figcaption>
 </figure>
 <h2 data-number="4.2" id="convergence-1"><span class="header-section-number">4.2</span> Convergence</h2>
-<p>In early iterations, coordinate search methods can make progress by exploring all coordinate directions, but coordinate descent quickly becomes more efficient once gradient information is used. Because each step directly follows the partial derivative with respect to a single parameter, the algorithm typically identifies descent directions faster and reduces the loss more effectively than coordinate search.</p>
-<p>As illustrated in Figure <a data-reference="fig:P7.png" data-reference-type="ref" href="#fig:P7.png">6</a>, coordinate descent tends to reach lower-cost regions of the objective function in fewer iterations. Although each step only adjusts one parameter, the repeated sequence of updates gradually drives the parameters toward a minimum. This stepwise progress often produces a characteristic “zig-zag” path toward the optimum.</p>
-<figure>
-<img alt="Figure 9.6: Comparison of Coordinate Search (Left) and Coordinate Descent (Right): Efficiency in Finding Lower Cost Function Values" id="fig:P7.png" src="img/lecture9/P7.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.6: Comparison of Coordinate Search (Left) and Coordinate Descent (Right): Efficiency in Finding Lower Cost Function Values</figcaption>
+<p>In early iterations, coordinate search methods can make progress by
+exploring all coordinate directions, but coordinate descent quickly
+becomes more efficient once gradient information is used. Because each
+step directly follows the partial derivative with respect to a single
+parameter, the algorithm typically identifies descent directions faster
+and reduces the loss more effectively than coordinate search.</p>
+<p>As illustrated in Figure <a data-reference="fig:P7.png" data-reference-type="ref" href="#fig:P7.png">6</a>, coordinate
+descent tends to reach lower-cost regions of the objective function in
+fewer iterations. Although each step only adjusts one parameter, the
+repeated sequence of updates gradually drives the parameters toward a
+minimum. This stepwise progress often produces a characteristic
+“zig-zag” path toward the optimum.</p>
+<figure id="fig:P7.png">
+<img src="img/lecture9/P7.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.6: Comparison of Coordinate Search (Left) and
+Coordinate Descent (Right): Efficiency in Finding Lower Cost Function
+Values</figcaption>
 </figure>
 <h2 data-number="4.3" id="advantages"><span class="header-section-number">4.3</span> Advantages</h2>
-<p>One of the main strengths of coordinate descent is its simplicity. Each update requires only a partial derivative with respect to a single parameter, making the method easy to implement and computationally inexpensive. Unlike second-order methods such as Newton’s method, coordinate descent does not require storing or inverting large matrices, which makes it highly scalable to problems with many parameters.</p>
-<p>Because of its low memory requirements and cheap updates, coordinate descent is widely used in large-scale machine learning applications such as Lasso regression, sparse optimization, and high-dimensional linear models.</p>
+<p>One of the main strengths of coordinate descent is its simplicity.
+Each update requires only a partial derivative with respect to a single
+parameter, making the method easy to implement and computationally
+inexpensive. Unlike second-order methods such as Newton’s method,
+coordinate descent does not require storing or inverting large matrices,
+which makes it highly scalable to problems with many parameters.</p>
+<p>Because of its low memory requirements and cheap updates, coordinate
+descent is widely used in large-scale machine learning applications such
+as Lasso regression, sparse optimization, and high-dimensional linear
+models.</p>
 <h2 data-number="4.4" id="limitations"><span class="header-section-number">4.4</span> Limitations</h2>
-<p>Despite its simplicity, coordinate descent has important limitations. The algorithm can struggle when the objective function is non-smooth or when variables are highly coupled. In such cases, improving one parameter at a time may lead to slow progress, oscillations, or convergence to suboptimal points such as saddle points.</p>
-<p>Figure <a data-reference="fig:P8.png" data-reference-type="ref" href="#fig:P8.png">7</a> illustrates an example of a non-smooth multivariable function. The sharp corners of the level curves make it difficult for the algorithm to determine a consistent descent direction. As a result, the optimization path (shown in red) can stall or progress very slowly toward the global minimum.</p>
-<figure>
-<img alt="Figure 9.7: A Case of Non-Smooth Multivariable Function" id="fig:P8.png" src="img/lecture9/P8.png" style="width:24.00%; max-width:24.00%; height:auto;"/><figcaption aria-hidden="true">Figure 9.7: A Case of Non-Smooth Multivariable Function</figcaption>
+<p>Despite its simplicity, coordinate descent has important limitations.
+The algorithm can struggle when the objective function is non-smooth or
+when variables are highly coupled. In such cases, improving one
+parameter at a time may lead to slow progress, oscillations, or
+convergence to suboptimal points such as saddle points.</p>
+<p>Figure <a data-reference="fig:P8.png" data-reference-type="ref" href="#fig:P8.png">7</a> illustrates an example of a non-smooth
+multivariable function. The sharp corners of the level curves make it
+difficult for the algorithm to determine a consistent descent direction.
+As a result, the optimization path (shown in red) can stall or progress
+very slowly toward the global minimum.</p>
+<figure id="fig:P8.png">
+<img src="img/lecture9/P8.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 9.7: A Case of Non-Smooth Multivariable
+Function</figcaption>
 </figure>
-<p>The red trajectory highlights how the optimization may stagnate or move inefficiently due to the non-smooth geometry of the loss surface.</p>
-<h1 data-number="5" id="summary-of-optimization-methods"><span class="header-section-number">5.</span> Summary of Optimization Methods</h1>
-<p>We now summarize the optimization methods discussed in Lecture 8 (first-order methods) and Lecture 9 (second-order and coordinate-based methods).</p>
+<p>The red trajectory highlights how the optimization may stagnate or
+move inefficiently due to the non-smooth geometry of the loss
+surface.</p>
+<h1 data-number="5" id="summary-of-optimization-methods"><span class="header-section-number">5.</span> Summary of Optimization
+Methods</h1>
+<p>We now summarize the optimization methods discussed in Lecture 8
+(first-order methods) and Lecture 9 (second-order and coordinate-based
+methods).</p>
 <table>
 <caption>Comparison of Optimization Methods</caption>
 <thead>
@@ -258,7 +452,10 @@ L(\boldsymbol{\theta})
 </tr>
 </tbody>
 </table>
-<p>Each method presents a trade-off between computational cost and convergence speed. In practice, the choice of optimizer depends on the size of the dataset, the number of parameters, and the availability of derivative information.</p>
+<p>Each method presents a trade-off between computational cost and
+convergence speed. In practice, the choice of optimizer depends on the
+size of the dataset, the number of parameters, and the availability of
+derivative information.</p>
 
 </main>
 </body>

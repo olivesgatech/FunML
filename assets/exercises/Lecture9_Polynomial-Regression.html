@@ -27,72 +27,127 @@ window.MathJax = {
   <section><h1>Exercises</h1>
 <ol>
 <li><p><strong>Question 1:</strong></p>
-<p>Suppose you are training a machine learning model using Gradient Descent (GD) on a dataset with <span class="math inline">\(N = 1{,}000{,}000\)</span> training examples and <span class="math inline">\(P = 100\)</span> features. You consider the following options:</p>
+<p>Suppose you are training a machine learning model using Gradient
+Descent (GD) on a dataset with <span class="math inline">\(N =
+1{,}000{,}000\)</span> training examples and <span class="math inline">\(P = 100\)</span> features. You consider the
+following options:</p>
 <ul>
 <li><p>Batch Gradient Descent</p></li>
 <li><p>Stochastic Gradient Descent</p></li>
 <li><p>Mini-batch Gradient Descent with a batch size of <span class="math inline">\(b = 10{,}000\)</span></p></li>
 </ul>
-<p>Assuming you perform one full epoch of training for each method, calculate the number of iterations required for each optimization scheme.</p>
+<p>Assuming you perform one full epoch of training for each method,
+calculate the number of iterations required for each optimization
+scheme.</p>
 <ol>
-<li><p>Batch GD: 1 iteration; Stochastic GD: 1<span>,</span>000<span>,</span>000 iterations; Mini-batch GD: 100 iterations</p></li>
-<li><p>Batch GD: 1<span>,</span>000<span>,</span>000 iterations; Stochastic GD: 1 iteration; Mini-batch GD: 100 iterations</p></li>
-<li><p>Batch GD: 100 iterations; Stochastic GD: 10 iterations; Mini-batch GD: 1<span>,</span>000 iterations</p></li>
-<li><p>Batch GD: 1 iteration; Stochastic GD: 100<span>,</span>000 iterations; Mini-batch GD: 10 iterations</p></li>
+<li><p>Batch GD: 1 iteration; Stochastic GD:
+1<span>,</span>000<span>,</span>000 iterations; Mini-batch GD: 100
+iterations</p></li>
+<li><p>Batch GD: 1<span>,</span>000<span>,</span>000 iterations;
+Stochastic GD: 1 iteration; Mini-batch GD: 100 iterations</p></li>
+<li><p>Batch GD: 100 iterations; Stochastic GD: 10 iterations;
+Mini-batch GD: 1<span>,</span>000 iterations</p></li>
+<li><p>Batch GD: 1 iteration; Stochastic GD: 100<span>,</span>000
+iterations; Mini-batch GD: 10 iterations</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>A)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>A)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>In <strong>Batch GD</strong>, one iteration computes the gradient using the <em>entire</em> dataset. Therefore, <strong>one epoch</strong> corresponds to <strong>1 iteration</strong>.</p>
-<p>In <strong>Stochastic GD</strong>, one iteration uses <em>one</em> training example. Therefore, <strong>one epoch</strong> requires <span class="math display">\[N = 1{,}000{,}000 \text{ iterations.}\]</span></p>
-<p>In <strong>Mini-batch GD</strong> with batch size <span class="math inline">\(b = 10{,}000\)</span>, one iteration processes one batch. The number of batches per epoch is <span class="math display">\[\frac{N}{b} \;=\; \frac{1{,}000{,}000}{10{,}000} \;=\; 100,\]</span> so <strong>one epoch</strong> requires <strong>100 iterations</strong>.</p></li>
+<p>In <strong>Batch GD</strong>, one iteration computes the gradient
+using the <em>entire</em> dataset. Therefore, <strong>one epoch</strong>
+corresponds to <strong>1 iteration</strong>.</p>
+<p>In <strong>Stochastic GD</strong>, one iteration uses <em>one</em>
+training example. Therefore, <strong>one epoch</strong> requires <span class="math display">\[N = 1{,}000{,}000 \text{
+iterations.}\]</span></p>
+<p>In <strong>Mini-batch GD</strong> with batch size <span class="math inline">\(b = 10{,}000\)</span>, one iteration processes one
+batch. The number of batches per epoch is <span class="math display">\[\frac{N}{b} \;=\; \frac{1{,}000{,}000}{10{,}000}
+\;=\; 100,\]</span> so <strong>one epoch</strong> requires <strong>100
+iterations</strong>.</p></li>
 <li><p><strong>Question 2:</strong></p>
-<p>Suppose you have a limited memory capacity that allows you to process a maximum of 50<span>,</span>000 data points at a time. Which optimization methods can you use without exceeding the memory limit?</p>
+<p>Suppose you have a limited memory capacity that allows you to process
+a maximum of 50<span>,</span>000 data points at a time. Which
+optimization methods can you use without exceeding the memory limit?</p>
 <ol>
 <li><p>Only Stochastic GD</p></li>
 <li><p>Stochastic GD and Mini-batch GD with <span class="math inline">\(b \leq 50{,}000\)</span></p></li>
-<li><p>Batch GD and Mini-batch GD with <span class="math inline">\(b = 50{,}000\)</span></p></li>
-<li><p>All methods can be used without exceeding the memory limit</p></li>
+<li><p>Batch GD and Mini-batch GD with <span class="math inline">\(b =
+50{,}000\)</span></p></li>
+<li><p>All methods can be used without exceeding the memory
+limit</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>B)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>B)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p><strong>Batch GD</strong> processes the entire dataset per iteration. For <span class="math inline">\(N=1{,}000{,}000\)</span>, this exceeds the memory limit of 50<span>,</span>000 samples.</p>
-<p><strong>Stochastic GD</strong> processes one sample per iteration, which is always within the memory limit.</p>
-<p><strong>Mini-batch GD</strong> processes <span class="math inline">\(b\)</span> samples per iteration, so it is feasible as long as <span class="math inline">\(b \le 50{,}000\)</span>.</p></li>
+<p><strong>Batch GD</strong> processes the entire dataset per iteration.
+For <span class="math inline">\(N=1{,}000{,}000\)</span>, this exceeds
+the memory limit of 50<span>,</span>000 samples.</p>
+<p><strong>Stochastic GD</strong> processes one sample per iteration,
+which is always within the memory limit.</p>
+<p><strong>Mini-batch GD</strong> processes <span class="math inline">\(b\)</span> samples per iteration, so it is
+feasible as long as <span class="math inline">\(b \le
+50{,}000\)</span>.</p></li>
 <li><p><strong>Question 3:</strong></p>
-<p>If you wish to perform 10 full passes over the data using Mini-batch GD with <span class="math inline">\(b = 20{,}000\)</span>, how many iterations will this require?</p>
+<p>If you wish to perform 10 full passes over the data using Mini-batch
+GD with <span class="math inline">\(b = 20{,}000\)</span>, how many
+iterations will this require?</p>
 <ol>
 <li><p>50 iterations</p></li>
 <li><p>5<span>,</span>000 iterations</p></li>
 <li><p>1<span>,</span>000 iterations</p></li>
 <li><p>500 iterations</p></li>
 </ol>
-<p><strong>Answer:</strong> The correct answer is <strong>D)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>D)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>Batches per epoch: <span class="math display">\[\frac{N}{b} \;=\; \frac{1{,}000{,}000}{20{,}000} \;=\; 50.\]</span> For <span class="math inline">\(10\)</span> epochs, total iterations: <span class="math display">\[50 \times 10 \;=\; 500 \text{ iterations.}\]</span></p></li>
+<p>Batches per epoch: <span class="math display">\[\frac{N}{b} \;=\;
+\frac{1{,}000{,}000}{20{,}000} \;=\; 50.\]</span> For <span class="math inline">\(10\)</span> epochs, total iterations: <span class="math display">\[50 \times 10 \;=\; 500 \text{
+iterations.}\]</span></p></li>
 <li><p><strong>Question 4:</strong></p>
-<p>Consider the following contour plot for MSE loss of a 2D linear model, as well as the contour plot for the <span class="math inline">\(L_1\)</span>-norm of the parameters.</p>
+<p>Consider the following contour plot for MSE loss of a 2D linear
+model, as well as the contour plot for the <span class="math inline">\(L_1\)</span>-norm of the parameters.</p>
 <div class="center">
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8 Q4 — L1-Regularized MSE Contour</h3><p>Drag λ to see how the L1 penalty deforms the elliptical MSE contours into axis-aligned kink shapes.</p><iframe class="interactive-notebook-frame" data-default-height="620" loading="lazy" scrolling="no" src="../../lectures/../assets/notebooks/Lecture8_Q4_Interactive_interactive.html" style="height:620px;" title="Interactive Lecture 8 Q4 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Q4_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 </div>
-<p>Which of the following contour plots most likely represents the contour plot for the <span class="math inline">\(L_1\)</span>-regularized MSE loss on the same model?</p>
+<p>Which of the following contour plots most likely represents the
+contour plot for the <span class="math inline">\(L_1\)</span>-regularized MSE loss on the same
+model?</p>
 <div class="center">
 <p><img alt="image" src="../../lectures/img/lecture8/qa-mse-l1-options.png"/></p>
 </div>
-<p><strong>Answer:</strong> The correct answer is <strong>A)</strong>.</p>
+<p><strong>Answer:</strong> The correct answer is
+<strong>A)</strong>.</p>
 <p><strong>Solution:</strong></p>
-<p>The <span class="math inline">\(L_1\)</span>-regularized objective is <span class="math display">\[J(\theta) = \mathrm{MSE}(\theta) + \lambda \|\theta\|_1 .\]</span></p>
+<p>The <span class="math inline">\(L_1\)</span>-regularized objective is
+<span class="math display">\[J(\theta) = \mathrm{MSE}(\theta) + \lambda
+\|\theta\|_1 .\]</span></p>
 <p>This objective combines two different contour geometries:</p>
 <ul>
-<li><p>The MSE loss produces <em>smooth elliptical contours</em>.</p></li>
-<li><p>The <span class="math inline">\(L_1\)</span> norm produces <em>diamond-shaped contours with sharp corners on the coordinate axes</em>.</p></li>
+<li><p>The MSE loss produces <em>smooth elliptical
+contours</em>.</p></li>
+<li><p>The <span class="math inline">\(L_1\)</span> norm produces
+<em>diamond-shaped contours with sharp corners on the coordinate
+axes</em>.</p></li>
 </ul>
-<p>When the <span class="math inline">\(L_1\)</span> penalty is added to the MSE loss, the resulting contours become a <em>distorted ellipse</em> that inherits the <em>axis-aligned corners (kinks)</em> from the <span class="math inline">\(L_1\)</span> norm. These corners reflect the sparsity-inducing behavior of <span class="math inline">\(L_1\)</span> regularization, which encourages parameters to become exactly zero.</p>
-<p>Options (c) and (d) resemble the contours of the individual terms (MSE alone or <span class="math inline">\(L_1\)</span> alone), so they cannot represent the combined objective.</p>
-<p>Among the remaining choices, option (b) still appears too smooth and elliptical, similar to the unregularized MSE loss. Option (a) shows the expected <em>elliptical shape with visible axis-aligned kinks</em>, which is characteristic of an <span class="math inline">\(L_1\)</span>-regularized objective.</p>
+<p>When the <span class="math inline">\(L_1\)</span> penalty is added to
+the MSE loss, the resulting contours become a <em>distorted ellipse</em>
+that inherits the <em>axis-aligned corners (kinks)</em> from the <span class="math inline">\(L_1\)</span> norm. These corners reflect the
+sparsity-inducing behavior of <span class="math inline">\(L_1\)</span>
+regularization, which encourages parameters to become exactly zero.</p>
+<p>Options (c) and (d) resemble the contours of the individual terms
+(MSE alone or <span class="math inline">\(L_1\)</span> alone), so they
+cannot represent the combined objective.</p>
+<p>Among the remaining choices, option (b) still appears too smooth and
+elliptical, similar to the unregularized MSE loss. Option (a) shows the
+expected <em>elliptical shape with visible axis-aligned kinks</em>,
+which is characteristic of an <span class="math inline">\(L_1\)</span>-regularized objective.</p>
 <p>Therefore, option (a) is the correct contour plot.</p></li>
-<li><p><strong>Question 5: Linear vs Polynomial Regression (Numerical + Visual)</strong></p>
-<p>We generate synthetic data from a nonlinear function and compare how well a linear model and a polynomial model fit the data using Mean Squared Error (MSE).</p>
-<p>We sample data from the ground-truth function <span class="math display">\[y = \sin(2\pi x) + \epsilon, \qquad \epsilon \sim \mathcal{N}(0,\,0.1^2).\]</span></p>
+<li><p><strong>Question 5: Linear vs Polynomial Regression (Numerical +
+Visual)</strong></p>
+<p>We generate synthetic data from a nonlinear function and compare how
+well a linear model and a polynomial model fit the data using Mean
+Squared Error (MSE).</p>
+<p>We sample data from the ground-truth function <span class="math display">\[y = \sin(2\pi x) + \epsilon, \qquad \epsilon \sim
+\mathcal{N}(0,\,0.1^2).\]</span></p>
 <p>We fit two models:</p>
 <ul>
 <li><p>Linear regression (degree 1)</p></li>
@@ -102,7 +157,7 @@ window.MathJax = {
 <p><strong>Answer:</strong> Polynomial regression (degree 5).</p>
 <p><strong>Solution:</strong></p>
 <p><strong>Step 1: Generate synthetic dataset</strong></p>
-<p>We sample training inputs and noisy targets: <span class="math display">\[x_i \sim \text{Uniform}(0,1), \qquad 
+<p>We sample training inputs and noisy targets: <span class="math display">\[x_i \sim \text{Uniform}(0,1), \qquad
 y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 <p>This produces a clearly <strong>nonlinear</strong> dataset.</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 8 Q5 — Linear vs Polynomial Regression</h3><p>Adjust noise and polynomial degree to compare linear and polynomial regression fits on sinusoidal data.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../../lectures/../assets/notebooks/Lecture8_Q5_Interactive_interactive.html" style="height:680px;" title="Interactive Lecture 8 Q5 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture8_Q5_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
@@ -113,32 +168,47 @@ y_i = \sin(2\pi x_i) + \epsilon_i.\]</span></p>
 \vdots &amp; \vdots\\
 1 &amp; x_N
 \end{bmatrix}\]</span></p>
-<p>Model: <span class="math display">\[\hat{\mathbf{y}} = \mathbf{X}_{\text{lin}}\boldsymbol{\theta}_{\text{lin}}.\]</span></p>
+<p>Model: <span class="math display">\[\hat{\mathbf{y}} =
+\mathbf{X}_{\text{lin}}\boldsymbol{\theta}_{\text{lin}}.\]</span></p>
 <p>Training MSE: <span class="math display">\[\mathrm{MSE}_{\text{linear}}
 = \frac{1}{N}\|\mathbf{y} - \hat{\mathbf{y}}\|_2^2.\]</span></p>
-<p>Because the true relationship is nonlinear, the linear model has <strong>high bias</strong> and cannot capture the curvature of the data.</p>
+<p>Because the true relationship is nonlinear, the linear model has
+<strong>high bias</strong> and cannot capture the curvature of the
+data.</p>
 <p><strong>Step 3: Fit polynomial regression (degree 5)</strong></p>
-<p>Polynomial feature map: <span class="math display">\[\boldsymbol{\phi}(x) = [1, x, x^2, x^3, x^4, x^5]^T.\]</span></p>
-<p>Design matrix: <span class="math display">\[\mathbf{X}_{\text{poly}} =
+<p>Polynomial feature map: <span class="math display">\[\boldsymbol{\phi}(x) = [1, x, x^2, x^3, x^4,
+x^5]^T.\]</span></p>
+<p>Design matrix: <span class="math display">\[\mathbf{X}_{\text{poly}}
+=
 \begin{bmatrix}
 \boldsymbol{\phi}(x_1)^T\\
 \vdots\\
 \boldsymbol{\phi}(x_N)^T
 \end{bmatrix}.\]</span></p>
-<p>Model: <span class="math display">\[\hat{\mathbf{y}} = \mathbf{X}_{\text{poly}}\boldsymbol{\theta}_{\text{poly}}.\]</span></p>
-<p>This model has greater flexibility and can approximate the sinusoidal shape of the data.</p>
-<p><strong>Step 4: Numerical comparison (reproducible simulation)</strong></p>
+<p>Model: <span class="math display">\[\hat{\mathbf{y}} =
+\mathbf{X}_{\text{poly}}\boldsymbol{\theta}_{\text{poly}}.\]</span></p>
+<p>This model has greater flexibility and can approximate the sinusoidal
+shape of the data.</p>
+<p><strong>Step 4: Numerical comparison (reproducible
+simulation)</strong></p>
 <p>For the generated dataset (<span class="math inline">\(N=50\)</span>):</p>
-<p><span class="math display">\[\mathrm{MSE}_{\text{linear}} = 0.1691\]</span> <span class="math display">\[\mathrm{MSE}_{\text{poly}} = 0.0052\]</span></p>
+<p><span class="math display">\[\mathrm{MSE}_{\text{linear}} =
+0.1691\]</span> <span class="math display">\[\mathrm{MSE}_{\text{poly}}
+= 0.0052\]</span></p>
 <figure>
-<img alt="Training MSE comparison" src="../../lectures/img/lecture8/qa_q5_mse_comparison.png" style="width:33.00%; max-width:33.00%; height:auto;"/><figcaption aria-hidden="true">Training MSE comparison</figcaption>
+<img src="../../lectures/img/lecture8/qa_q5_mse_comparison.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption>Training MSE comparison</figcaption>
 </figure>
-<p>Polynomial regression achieves a dramatically lower training error.</p>
+<p>Polynomial regression achieves a dramatically lower training
+error.</p>
 <p><strong>Key Insight</strong></p>
 <ul>
-<li><p>Linear regression <strong>underfits</strong> nonlinear data (high bias).</p></li>
-<li><p>Polynomial regression reduces bias and captures curvature.</p></li>
-<li><p>Increasing model complexity can significantly reduce training MSE.</p></li>
+<li><p>Linear regression <strong>underfits</strong> nonlinear data (high
+bias).</p></li>
+<li><p>Polynomial regression reduces bias and captures
+curvature.</p></li>
+<li><p>Increasing model complexity can significantly reduce training
+MSE.</p></li>
 </ul></li>
 </ol></section>
 </main>

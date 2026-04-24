@@ -26,35 +26,81 @@ window.MathJax = {
 <main>
   <section><h1>Exercises</h1>
 <ol>
-<li><p><strong>Question:</strong> Why can a standard autoencoder fail when the latent dimension is large?</p>
-<p><strong>Solution:</strong> If the latent space is large, the network has enough capacity to simply copy the input to the output. Instead of learning meaningful structure, it learns a near identity mapping. This limits its usefulness for representation learning because the model memorizes the data instead of extracting meaningful features. Regularization techniques such as sparsity, noise injection, or probabilistic constraints help prevent this behavior.</p></li>
-<li><p><strong>Question:</strong> How does a sparse autoencoder address this issue?</p>
-<p><strong>Solution:</strong> Sparse autoencoders add a penalty that forces most latent neurons to remain inactive. Because only a few neurons can activate at once, the model must learn efficient and informative features instead of copying the entire input. This encourages feature discovery and improves generalization.</p></li>
-<li><p><strong>Question:</strong> What is the main idea behind denoising autoencoders?</p>
-<p><strong>Solution:</strong> Denoising autoencoders are trained on corrupted inputs but must reconstruct the original clean data. This forces the network to learn stable patterns that reflect the underlying structure of the data rather than memorizing pixel-level details. As a result, the learned representation becomes more robust to noise and perturbations.</p></li>
-<li><p><strong>Question:</strong> Why are basic autoencoders not suitable for generating new data?</p>
-<p><strong>Solution:</strong> The latent space in a basic autoencoder is not structured or constrained to follow any particular distribution. Randomly sampling from this space may produce unrealistic outputs because there is no guarantee that sampled points correspond to valid data. Variational autoencoders solve this by enforcing a structured latent distribution.</p></li>
-<li><p><strong>Question:</strong> What distinguishes a Variational Autoencoder (VAE) from other autoencoder variants?</p>
-<p><strong>Solution:</strong> A VAE models the latent space probabilistically and enforces a structured distribution (typically Gaussian). Instead of mapping each input to a single latent vector, the encoder produces a distribution defined by a mean and variance. This makes the latent space continuous and smooth, allowing meaningful sampling and generation of new data.</p></li>
-<li><p><strong>Question:</strong> Why is direct maximum likelihood training difficult in VAEs?</p>
+<li><p><strong>Question:</strong> Why can a standard autoencoder fail
+when the latent dimension is large?</p>
+<p><strong>Solution:</strong> If the latent space is large, the network
+has enough capacity to simply copy the input to the output. Instead of
+learning meaningful structure, it learns a near identity mapping. This
+limits its usefulness for representation learning because the model
+memorizes the data instead of extracting meaningful features.
+Regularization techniques such as sparsity, noise injection, or
+probabilistic constraints help prevent this behavior.</p></li>
+<li><p><strong>Question:</strong> How does a sparse autoencoder address
+this issue?</p>
+<p><strong>Solution:</strong> Sparse autoencoders add a penalty that
+forces most latent neurons to remain inactive. Because only a few
+neurons can activate at once, the model must learn efficient and
+informative features instead of copying the entire input. This
+encourages feature discovery and improves generalization.</p></li>
+<li><p><strong>Question:</strong> What is the main idea behind denoising
+autoencoders?</p>
+<p><strong>Solution:</strong> Denoising autoencoders are trained on
+corrupted inputs but must reconstruct the original clean data. This
+forces the network to learn stable patterns that reflect the underlying
+structure of the data rather than memorizing pixel-level details. As a
+result, the learned representation becomes more robust to noise and
+perturbations.</p></li>
+<li><p><strong>Question:</strong> Why are basic autoencoders not
+suitable for generating new data?</p>
+<p><strong>Solution:</strong> The latent space in a basic autoencoder is
+not structured or constrained to follow any particular distribution.
+Randomly sampling from this space may produce unrealistic outputs
+because there is no guarantee that sampled points correspond to valid
+data. Variational autoencoders solve this by enforcing a structured
+latent distribution.</p></li>
+<li><p><strong>Question:</strong> What distinguishes a Variational
+Autoencoder (VAE) from other autoencoder variants?</p>
+<p><strong>Solution:</strong> A VAE models the latent space
+probabilistically and enforces a structured distribution (typically
+Gaussian). Instead of mapping each input to a single latent vector, the
+encoder produces a distribution defined by a mean and variance. This
+makes the latent space continuous and smooth, allowing meaningful
+sampling and generation of new data.</p></li>
+<li><p><strong>Question:</strong> Why is direct maximum likelihood
+training difficult in VAEs?</p>
 <p><strong>Solution:</strong></p>
-<p>VAEs attempt to maximize the marginal likelihood: <span class="math display">\[p_\phi(x) = \int p_\phi(x|z)p(z)\,dz\]</span> This requires integrating over all possible latent variables <span class="math inline">\(z\)</span>. Since the latent space is typically high dimensional, this integral is computationally intractable. The posterior <span class="math display">\[p_\phi(z|x)=\frac{p_\phi(x|z)p(z)}{p_\phi(x)}\]</span> is also difficult to compute because it depends on the same intractable quantity <span class="math inline">\(p_\phi(x)\)</span>.</p></li>
-<li><p><strong>Question:</strong> What is variational inference in VAEs?</p>
+<p>VAEs attempt to maximize the marginal likelihood: <span class="math display">\[p_\phi(x) = \int p_\phi(x|z)p(z)\,dz\]</span>
+This requires integrating over all possible latent variables <span class="math inline">\(z\)</span>. Since the latent space is typically
+high dimensional, this integral is computationally intractable. The
+posterior <span class="math display">\[p_\phi(z|x)=\frac{p_\phi(x|z)p(z)}{p_\phi(x)}\]</span>
+is also difficult to compute because it depends on the same intractable
+quantity <span class="math inline">\(p_\phi(x)\)</span>.</p></li>
+<li><p><strong>Question:</strong> What is variational inference in
+VAEs?</p>
 <p><strong>Solution:</strong></p>
-<p>Variational inference replaces the true posterior <span class="math inline">\(p_\phi(z|x)\)</span> with a simpler approximation <span class="math inline">\(q_\theta(z|x)\)</span>. Instead of solving the exact inference problem, we optimize <span class="math inline">\(q_\theta(z|x)\)</span> so that it becomes close to the true posterior. In practice, this turns posterior inference into an optimization problem that can be solved efficiently.</p></li>
-<li><p><strong>Question:</strong> Derive the Evidence Lower Bound (ELBO) in a compact form.</p>
+<p>Variational inference replaces the true posterior <span class="math inline">\(p_\phi(z|x)\)</span> with a simpler approximation
+<span class="math inline">\(q_\theta(z|x)\)</span>. Instead of solving
+the exact inference problem, we optimize <span class="math inline">\(q_\theta(z|x)\)</span> so that it becomes close to
+the true posterior. In practice, this turns posterior inference into an
+optimization problem that can be solved efficiently.</p></li>
+<li><p><strong>Question:</strong> Derive the Evidence Lower Bound (ELBO)
+in a compact form.</p>
 <p><strong>Solution:</strong></p>
-<p>Start with the log likelihood: <span class="math display">\[\log p_\phi(x)
+<p>Start with the log likelihood: <span class="math display">\[\log
+p_\phi(x)
 =
-\log \int q_\theta(z|x)\frac{p_\phi(x,z)}{q_\theta(z|x)}\,dz\]</span></p>
-<p>Rewrite it as an expectation: <span class="math display">\[\log p_\phi(x)
+\log \int
+q_\theta(z|x)\frac{p_\phi(x,z)}{q_\theta(z|x)}\,dz\]</span></p>
+<p>Rewrite it as an expectation: <span class="math display">\[\log
+p_\phi(x)
 =
 \log
 \mathbb{E}_{q_\theta(z|x)}
 \left[
 \frac{p_\phi(x,z)}{q_\theta(z|x)}
 \right]\]</span></p>
-<p>Apply Jensen’s inequality: <span class="math display">\[\log p_\phi(x)
+<p>Apply Jensen’s inequality: <span class="math display">\[\log
+p_\phi(x)
 \ge
 \mathbb{E}_{q_\theta(z|x)}
 \left[
@@ -70,18 +116,42 @@ window.MathJax = {
 \mathbb{E}_{q_\theta(z|x)}[\log p_\phi(x|z)]
 -
 D_{KL}(q_\theta(z|x)\|p(z))\]</span></p>
-<p>This is called the Evidence Lower Bound because it is a lower bound on <span class="math inline">\(\log p_\phi(x)\)</span>.</p></li>
-<li><p><strong>Question:</strong> What do the two ELBO terms represent intuitively?</p>
+<p>This is called the Evidence Lower Bound because it is a lower bound
+on <span class="math inline">\(\log p_\phi(x)\)</span>.</p></li>
+<li><p><strong>Question:</strong> What do the two ELBO terms represent
+intuitively?</p>
 <p><strong>Solution:</strong></p>
-<p>The ELBO contains two parts: <span class="math display">\[\mathbb{E}_{q_\theta(z|x)}[\log p_\phi(x|z)]\]</span> is the reconstruction or likelihood term. It encourages the decoder to assign high probability to the observed data, given the latent representation. This is the part responsible for accurate reconstruction.</p>
-<p><span class="math display">\[D_{KL}(q_\theta(z|x)\|p(z))\]</span> is the regularization term. It keeps the learned latent distribution close to the prior <span class="math inline">\(p(z)\)</span>, which helps create a smooth and structured latent space. Thus, in the ELBO, reconstruction comes from the likelihood function, while regularization comes from KL divergence.</p></li>
-<li><p><strong>Question:</strong> Why is the reparameterization trick necessary?</p>
+<p>The ELBO contains two parts: <span class="math display">\[\mathbb{E}_{q_\theta(z|x)}[\log
+p_\phi(x|z)]\]</span> is the reconstruction or likelihood term. It
+encourages the decoder to assign high probability to the observed data,
+given the latent representation. This is the part responsible for
+accurate reconstruction.</p>
+<p><span class="math display">\[D_{KL}(q_\theta(z|x)\|p(z))\]</span> is
+the regularization term. It keeps the learned latent distribution close
+to the prior <span class="math inline">\(p(z)\)</span>, which helps
+create a smooth and structured latent space. Thus, in the ELBO,
+reconstruction comes from the likelihood function, while regularization
+comes from KL divergence.</p></li>
+<li><p><strong>Question:</strong> Why is the reparameterization trick
+necessary?</p>
 <p><strong>Solution:</strong></p>
-<p>If we sample directly as <span class="math display">\[z \sim \mathcal{N}(\mu,\sigma^2),\]</span> then the sampling operation blocks gradient flow. To make backpropagation possible, we rewrite the sample as <span class="math display">\[z = \mu + \sigma \epsilon,
-\qquad \epsilon \sim \mathcal{N}(0,1)\]</span> Now the randomness is isolated in <span class="math inline">\(\epsilon\)</span>, while <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> remain inside a differentiable expression. This allows gradients to flow through the encoder parameters during training.</p></li>
-<li><p><strong>Question:</strong> Why does KL regularization help produce a smooth latent space?</p>
+<p>If we sample directly as <span class="math display">\[z \sim
+\mathcal{N}(\mu,\sigma^2),\]</span> then the sampling operation blocks
+gradient flow. To make backpropagation possible, we rewrite the sample
+as <span class="math display">\[z = \mu + \sigma \epsilon,
+\qquad \epsilon \sim \mathcal{N}(0,1)\]</span> Now the randomness is
+isolated in <span class="math inline">\(\epsilon\)</span>, while <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> remain inside a differentiable
+expression. This allows gradients to flow through the encoder parameters
+during training.</p></li>
+<li><p><strong>Question:</strong> Why does KL regularization help
+produce a smooth latent space?</p>
 <p><strong>Solution:</strong></p>
-<p>The KL term forces the approximate posterior <span class="math inline">\(q_\theta(z|x)\)</span> to remain close to a simple prior such as <span class="math inline">\(\mathcal{N}(0,I)\)</span>. This prevents the latent codes from becoming arbitrarily scattered or forming disconnected regions. As a result, nearby points in latent space tend to decode into similar outputs, enabling smooth interpolation and meaningful sampling.</p></li>
+<p>The KL term forces the approximate posterior <span class="math inline">\(q_\theta(z|x)\)</span> to remain close to a simple
+prior such as <span class="math inline">\(\mathcal{N}(0,I)\)</span>.
+This prevents the latent codes from becoming arbitrarily scattered or
+forming disconnected regions. As a result, nearby points in latent space
+tend to decode into similar outputs, enabling smooth interpolation and
+meaningful sampling.</p></li>
 </ol></section>
 </main>
 </body>

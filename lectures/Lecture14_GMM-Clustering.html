@@ -109,81 +109,210 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In the previous lecture we introduced k-means clustering and its variants as <strong>hard-clustering</strong> methods. In this lecture, we extend clustering to a probabilistic setting by introducing <strong>Gaussian Mixture Models (GMMs)</strong>, which perform <strong>soft clustering</strong> by modeling data as a mixture of multivariate Gaussians and inferring posterior responsibilities. We then study how GMM parameters are estimated using the <strong>Expectation–Maximization (EM)</strong> algorithm (and why EM is needed in latent-variable models compared to direct MLE), and we evaluate clustering quality using both <strong>internal</strong> metrics (e.g., Davies–Bouldin, Dunn, Silhouette) and <strong>external</strong> metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth is available. Finally, we briefly discuss extensions and applications of clustering, including <strong>mean shift</strong>, <strong>Adjusted Rand Index (ARI)</strong>, and <strong>image segmentation</strong>.</p>
+<p>In the previous lecture we introduced k-means clustering and its
+variants as <strong>hard-clustering</strong> methods. In this lecture,
+we extend clustering to a probabilistic setting by introducing
+<strong>Gaussian Mixture Models (GMMs)</strong>, which perform
+<strong>soft clustering</strong> by modeling data as a mixture of
+multivariate Gaussians and inferring posterior responsibilities. We then
+study how GMM parameters are estimated using the
+<strong>Expectation–Maximization (EM)</strong> algorithm (and why EM is
+needed in latent-variable models compared to direct MLE), and we
+evaluate clustering quality using both <strong>internal</strong> metrics
+(e.g., Davies–Bouldin, Dunn, Silhouette) and <strong>external</strong>
+metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth
+is available. Finally, we briefly discuss extensions and applications of
+clustering, including <strong>mean shift</strong>, <strong>Adjusted Rand
+Index (ARI)</strong>, and <strong>image segmentation</strong>.</p>
 <h1 data-number="2" id="gmm-clustering"><span class="header-section-number">2.</span> GMM Clustering</h1>
-<h2 data-number="2.1" id="definition-of-gmm-clustering"><span class="header-section-number">2.1</span> Definition of GMM Clustering</h2>
-<p>Assume the data <span class="math inline">\(x_1,x_2,...x_N \in \mathbb{R}^{p}\)</span> are random variables drawn independent and identically from an unknown distribution with probabilistic density <span class="math inline">\(Q(x)\)</span>. GMM estimates the likelihood of <span class="math inline">\(Q(x)\)</span> with a <strong>linear superposition</strong> of <span class="math inline">\(k\)</span> <strong>multivariate Gaussian distributions</strong> can be denoted by:<span class="math display">\[Q(x) = \sum_{j=1}^{k}\pi_{j}q_{j}(x)=\sum_{j=1}^{k}\pi_{j}\mathcal{N}   (x|\mu_{j},\Sigma_{j})\]</span> Where <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span> is the <strong>Gaussian Distribution</strong> denoted by:<span class="math display">\[\mathcal{N}(x|\mu_{j}\Sigma_{j})=\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu_{j})^{T}\Sigma_{j}^{-1}(x-\mu_{j})}\]</span> in which, the parameters<br/>
-<span class="math inline">\(\mu = \{\mu_1,...\mu_k\}, \: \mu_{j} \in \mathbb{R}^{p}\)</span> is the <strong>cluster means</strong>;<br/>
-<span class="math inline">\(\Sigma = \{\Sigma_1,...,\Sigma_k\}, \: \Sigma_{j} \in \mathbb{R}^{p\times p}\)</span> is the <strong>cluster covariance matrices</strong> (Multi-variant equivalent of standard deviation);<br/>
-<span class="math inline">\(\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in \mathbb{R}\)</span> is the <strong>cluster coefficients</strong> (Multi-variant equivalent of prior/likelihood) selecting <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span>, satisfying <span class="math inline">\(\Sigma_{j}\pi_{j} = 1\)</span><br/>
+<h2 data-number="2.1" id="definition-of-gmm-clustering"><span class="header-section-number">2.1</span> Definition of GMM
+Clustering</h2>
+<p>Assume the data <span class="math inline">\(x_1,x_2,...x_N \in
+\mathbb{R}^{p}\)</span> are random variables drawn independent and
+identically from an unknown distribution with probabilistic density
+<span class="math inline">\(Q(x)\)</span>. GMM estimates the likelihood
+of <span class="math inline">\(Q(x)\)</span> with a <strong>linear
+superposition</strong> of <span class="math inline">\(k\)</span>
+<strong>multivariate Gaussian distributions</strong> can be denoted
+by:<span class="math display">\[Q(x) =
+\sum_{j=1}^{k}\pi_{j}q_{j}(x)=\sum_{j=1}^{k}\pi_{j}\mathcal{N}   (x|\mu_{j},\Sigma_{j})\]</span>
+Where <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span> is the
+<strong>Gaussian Distribution</strong> denoted by:<span class="math display">\[\mathcal{N}(x|\mu_{j}\Sigma_{j})=\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}}e^{-\frac{1}{2}(x-\mu_{j})^{T}\Sigma_{j}^{-1}(x-\mu_{j})}\]</span>
+in which, the parameters<br/>
+<span class="math inline">\(\mu = \{\mu_1,...\mu_k\}, \: \mu_{j} \in
+\mathbb{R}^{p}\)</span> is the <strong>cluster means</strong>;<br/>
+<span class="math inline">\(\Sigma = \{\Sigma_1,...,\Sigma_k\}, \:
+\Sigma_{j} \in \mathbb{R}^{p\times p}\)</span> is the <strong>cluster
+covariance matrices</strong> (Multi-variant equivalent of standard
+deviation);<br/>
+<span class="math inline">\(\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in
+\mathbb{R}\)</span> is the <strong>cluster coefficients</strong>
+(Multi-variant equivalent of prior/likelihood) selecting <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span>,
+satisfying <span class="math inline">\(\Sigma_{j}\pi_{j} =
+1\)</span><br/>
 </p>
-<h4 data-number="2.1.0.1" id="gmm-as-a-generative-model."><span class="header-section-number">2.1.0.1</span> GMM as a generative model.</h4>
-<p>A Gaussian Mixture Model (GMM) is a <em>generative</em> model: it describes a probabilistic mechanism by which the observed data are produced. Concretely, it introduces a latent (unobserved) cluster indicator variable <span class="math inline">\(z_i \in \{1,\dots,k\}\)</span> for each sample <span class="math inline">\(x_i\)</span>. The model specifies (i) a prior distribution over components, <span class="math inline">\(p(z_i=j)=\pi_j\)</span> with <span class="math inline">\(\pi_j \ge 0\)</span> and <span class="math inline">\(\sum_{j=1}^k \pi_j = 1\)</span>, and (ii) a class-conditional distribution for the data given the component, <span class="math inline">\(p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j, \Sigma_j)\)</span>. Marginalizing out the latent variable <span class="math inline">\(z_i\)</span> yields the mixture density <span class="math inline">\(Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j, \Sigma_j)\)</span>.</p>
-<h4 data-number="2.1.0.2" id="soft-clustering-interpretation."><span class="header-section-number">2.1.0.2</span> Soft clustering interpretation.</h4>
-<p>Unlike hard clustering methods (e.g., k-means) that assign each point to exactly one cluster, GMMs provide a <em>soft</em> assignment. For each sample <span class="math inline">\(x_i\)</span>, the model computes a posterior probability of belonging to each component, <span class="math inline">\(\gamma_i^j = p(z_i=j \mid x_i)\)</span>, often called the <em>responsibility</em> of component <span class="math inline">\(j\)</span> for explaining <span class="math inline">\(x_i\)</span>. These responsibilities quantify uncertainty: if <span class="math inline">\(x_i\)</span> lies in an overlap region between clusters, then multiple <span class="math inline">\(\gamma_i^j\)</span> values may be non-negligible. In practice, one may still obtain a hard label by taking <span class="math inline">\(\arg\max_j \gamma_i^j\)</span>, but the probabilistic assignments contain richer information than a single label.</p>
-<h4 data-number="2.1.0.3" id="approximating-arbitrary-densities."><span class="header-section-number">2.1.0.3</span> Approximating arbitrary densities.</h4>
-<p>GMMs are flexible density estimators. Intuitively, each Gaussian component can model a “local” region of the distribution, and the weighted sum of many such components can represent complex, multimodal, and non-spherical shapes. With a sufficiently large number of mixture components (and appropriate parameters), mixtures of Gaussians can approximate a wide class of smooth probability densities on <span class="math inline">\(\mathbb{R}^p\)</span> to arbitrary accuracy. This is one reason GMMs are widely used as a general-purpose probabilistic model for clustering and density estimation.</p>
-<h4 data-number="2.1.0.4" id="connection-to-naive-bayes-and-k-means."><span class="header-section-number">2.1.0.4</span> Connection to Naive Bayes and k-means.</h4>
-<p>A helpful way to view GMM clustering is as combining ideas from probabilistic classification and centroid-based assignment. The posterior responsibility <span class="math inline">\(\gamma_i^j\)</span> follows directly from Bayes’ rule, similar in spirit to a Naive Bayes classifier: it compares how likely <span class="math inline">\(x_i\)</span> is under each component, weighted by the prior <span class="math inline">\(\pi_j\)</span>, and then normalizes across <span class="math inline">\(j\)</span>. At the same time, the iterative EM updates resemble k-means: in the E-step, points are “assigned” (softly) to components via responsibilities; in the M-step, the component parameters are updated using these assignments (with responsibilities acting as weights). In the special case where all covariances are equal and spherical, the EM procedure recovers behavior closely related to k-means, but the full GMM allows elliptical clusters and overlapping components.</p>
-<h2 data-number="2.2" id="estimation-with-gmm-clustering"><span class="header-section-number">2.2</span> Estimation with GMM Clustering</h2>
-<p>Similar as other methods, we could also implement MLE estimation for GMM clustering, and write the likelihood function and log likelihood function as follows:<span class="math display">\[L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\]</span> <span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span> However, since the existing of clustering structure (log of sum), there is <strong>no close-form maxima</strong> for the likelihood function except for <span class="math inline">\(k=1\)</span> (<span class="math inline">\(\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i\)</span>, <span class="math inline">\(\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}\)</span>).<br/>
-Therefore, we could utilize the <strong>Expectation Maximization (EM) Algorithm</strong>, which iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the posterior.<br/>
-The posterior <span class="math inline">\(\gamma_i^{j}\)</span>, which is also known as the <strong>responsibility</strong> of cluster j for sample <span class="math inline">\(x_i\)</span>, can be derived using Bayes Rule:<span class="math display">\[\gamma_i^{j}=p(z_i=j|x_i)=\frac{\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}{\sum_{j=1}^{k}\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}\]</span><br/>
+<h4 data-number="2.1.0.1" id="gmm-as-a-generative-model."><span class="header-section-number">2.1.0.1</span> GMM as a generative
+model.</h4>
+<p>A Gaussian Mixture Model (GMM) is a <em>generative</em> model: it
+describes a probabilistic mechanism by which the observed data are
+produced. Concretely, it introduces a latent (unobserved) cluster
+indicator variable <span class="math inline">\(z_i \in
+\{1,\dots,k\}\)</span> for each sample <span class="math inline">\(x_i\)</span>. The model specifies (i) a prior
+distribution over components, <span class="math inline">\(p(z_i=j)=\pi_j\)</span> with <span class="math inline">\(\pi_j \ge 0\)</span> and <span class="math inline">\(\sum_{j=1}^k \pi_j = 1\)</span>, and (ii) a
+class-conditional distribution for the data given the component, <span class="math inline">\(p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j,
+\Sigma_j)\)</span>. Marginalizing out the latent variable <span class="math inline">\(z_i\)</span> yields the mixture density <span class="math inline">\(Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j,
+\Sigma_j)\)</span>.</p>
+<h4 data-number="2.1.0.2" id="soft-clustering-interpretation."><span class="header-section-number">2.1.0.2</span> Soft clustering
+interpretation.</h4>
+<p>Unlike hard clustering methods (e.g., k-means) that assign each point
+to exactly one cluster, GMMs provide a <em>soft</em> assignment. For
+each sample <span class="math inline">\(x_i\)</span>, the model computes
+a posterior probability of belonging to each component, <span class="math inline">\(\gamma_i^j = p(z_i=j \mid x_i)\)</span>, often
+called the <em>responsibility</em> of component <span class="math inline">\(j\)</span> for explaining <span class="math inline">\(x_i\)</span>. These responsibilities quantify
+uncertainty: if <span class="math inline">\(x_i\)</span> lies in an
+overlap region between clusters, then multiple <span class="math inline">\(\gamma_i^j\)</span> values may be non-negligible.
+In practice, one may still obtain a hard label by taking <span class="math inline">\(\arg\max_j \gamma_i^j\)</span>, but the
+probabilistic assignments contain richer information than a single
+label.</p>
+<h4 data-number="2.1.0.3" id="approximating-arbitrary-densities."><span class="header-section-number">2.1.0.3</span> Approximating arbitrary
+densities.</h4>
+<p>GMMs are flexible density estimators. Intuitively, each Gaussian
+component can model a “local” region of the distribution, and the
+weighted sum of many such components can represent complex, multimodal,
+and non-spherical shapes. With a sufficiently large number of mixture
+components (and appropriate parameters), mixtures of Gaussians can
+approximate a wide class of smooth probability densities on <span class="math inline">\(\mathbb{R}^p\)</span> to arbitrary accuracy. This
+is one reason GMMs are widely used as a general-purpose probabilistic
+model for clustering and density estimation.</p>
+<h4 data-number="2.1.0.4" id="connection-to-naive-bayes-and-k-means."><span class="header-section-number">2.1.0.4</span> Connection to Naive Bayes
+and k-means.</h4>
+<p>A helpful way to view GMM clustering is as combining ideas from
+probabilistic classification and centroid-based assignment. The
+posterior responsibility <span class="math inline">\(\gamma_i^j\)</span>
+follows directly from Bayes’ rule, similar in spirit to a Naive Bayes
+classifier: it compares how likely <span class="math inline">\(x_i\)</span> is under each component, weighted by
+the prior <span class="math inline">\(\pi_j\)</span>, and then
+normalizes across <span class="math inline">\(j\)</span>. At the same
+time, the iterative EM updates resemble k-means: in the E-step, points
+are “assigned” (softly) to components via responsibilities; in the
+M-step, the component parameters are updated using these assignments
+(with responsibilities acting as weights). In the special case where all
+covariances are equal and spherical, the EM procedure recovers behavior
+closely related to k-means, but the full GMM allows elliptical clusters
+and overlapping components.</p>
+<h2 data-number="2.2" id="estimation-with-gmm-clustering"><span class="header-section-number">2.2</span> Estimation with GMM
+Clustering</h2>
+<p>Similar as other methods, we could also implement MLE estimation for
+GMM clustering, and write the likelihood function and log likelihood
+function as follows:<span class="math display">\[L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\]</span>
+<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span>
+However, since the existing of clustering structure (log of sum), there
+is <strong>no close-form maxima</strong> for the likelihood function
+except for <span class="math inline">\(k=1\)</span> (<span class="math inline">\(\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i\)</span>,
+<span class="math inline">\(\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}\)</span>).<br/>
+Therefore, we could utilize the <strong>Expectation Maximization (EM)
+Algorithm</strong>, which iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the
+posterior.<br/>
+The posterior <span class="math inline">\(\gamma_i^{j}\)</span>, which
+is also known as the <strong>responsibility</strong> of cluster j for
+sample <span class="math inline">\(x_i\)</span>, can be derived using
+Bayes Rule:<span class="math display">\[\gamma_i^{j}=p(z_i=j|x_i)=\frac{\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}{\sum_{j=1}^{k}\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}\]</span><br/>
 The specific steps are as following:</p>
 <ol>
-<li><p><strong>Initialization</strong>: Initialize the mean <span class="math inline">\(\mu_j^{(0)}\)</span>, covariance <span class="math inline">\(\Sigma_j^{(0)}\)</span> and mixing coefficient <span class="math inline">\(\pi_j^{(0)}\)</span>.<br/>
-(A good initialization is <span class="math inline">\(\mu_j^{(0)} =\)</span>random sample <span class="math inline">\(x_i\)</span>; <span class="math inline">\(\Sigma_j^(t)=\)</span>sample covariance; <span class="math inline">\(\pi_j^{(0)}=\frac{1}{k}\)</span>)</p></li>
-<li><p><strong>Expectation</strong>: compute the responsibility with current parameters<span class="math display">\[(\gamma_i^j)^{(t)}=\frac{\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}{\sum_{j=1}^{k}\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}\]</span></p></li>
-<li><p><strong>Maximization</strong>: Re-estimate the parameters using the current responsibilities<span class="math display">\[\mu_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}x_i}{\sum_{i=1}^{N}(\gamma_{i}^{j})^{(t)}}\]</span> <span class="math display">\[\Sigma_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}(x_i-\mu_j^{(t+1)})(x_i-\mu_j^{(t+1)})^{T}}{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}}\]</span> <span class="math display">\[\pi_j^{(t+1)}=\frac{1}{N}\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}\]</span></p></li>
-<li><p><strong>Convergence Check</strong>: Evaluate the log likelihood<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span> to see if there’s convergence, given by<span class="math display">\[|(LL(x,\pi,\mu,\Sigma))^{(t+1)} - (LL(x,\pi,\mu,\Sigma))^{(t)}| \leq \epsilon\]</span>if not, go back to step 2.</p></li>
+<li><p><strong>Initialization</strong>: Initialize the mean <span class="math inline">\(\mu_j^{(0)}\)</span>, covariance <span class="math inline">\(\Sigma_j^{(0)}\)</span> and mixing coefficient
+<span class="math inline">\(\pi_j^{(0)}\)</span>.<br/>
+(A good initialization is <span class="math inline">\(\mu_j^{(0)}
+=\)</span>random sample <span class="math inline">\(x_i\)</span>; <span class="math inline">\(\Sigma_j^(t)=\)</span>sample covariance; <span class="math inline">\(\pi_j^{(0)}=\frac{1}{k}\)</span>)</p></li>
+<li><p><strong>Expectation</strong>: compute the responsibility with
+current parameters<span class="math display">\[(\gamma_i^j)^{(t)}=\frac{\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}{\sum_{j=1}^{k}\pi_j^{(t)}\mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})}\]</span></p></li>
+<li><p><strong>Maximization</strong>: Re-estimate the parameters using
+the current responsibilities<span class="math display">\[\mu_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}x_i}{\sum_{i=1}^{N}(\gamma_{i}^{j})^{(t)}}\]</span>
+<span class="math display">\[\Sigma_j^{(t+1)}=\frac{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}(x_i-\mu_j^{(t+1)})(x_i-\mu_j^{(t+1)})^{T}}{\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}}\]</span>
+<span class="math display">\[\pi_j^{(t+1)}=\frac{1}{N}\sum_{i=1}^{N}(\gamma_i^{j})^{(t)}\]</span></p></li>
+<li><p><strong>Convergence Check</strong>: Evaluate the log
+likelihood<span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span>
+to see if there’s convergence, given by<span class="math display">\[|(LL(x,\pi,\mu,\Sigma))^{(t+1)} -
+(LL(x,\pi,\mu,\Sigma))^{(t)}| \leq \epsilon\]</span>if not, go back to
+step 2.</p></li>
 </ol>
 <h2 data-number="2.3" id="aside-em-vs-mle"><span class="header-section-number">2.3</span> Aside: EM vs MLE</h2>
-<p>It is important to distinguish between Maximum Likelihood Estimation (MLE) and the Expectation–Maximization (EM) algorithm introduced above. In classical MLE, we directly maximize the likelihood function with respect to the model parameters. This is feasible when the likelihood has a tractable analytical form or when gradients can be computed directly. However, in many realistic models—including Gaussian Mixture Models—there exist hidden (<strong>latent</strong>) variables that are not observed in the data. The presence of these latent variables makes the likelihood involve a logarithm of a sum, which prevents a closed-form maximization and makes direct MLE (or even MAP estimation) difficult.</p>
-<p>The EM algorithm provides an iterative strategy for obtaining MLE or MAP estimates in such latent-variable models. Rather than optimizing the incomplete-data likelihood directly, EM alternates between estimating the missing latent information and optimizing the parameters given those estimates. Importantly, EM is a general optimization framework and is not limited to GMMs; it is widely used in many probabilistic models that involve hidden variables.</p>
-<p>In the <strong>Expectation step (E-step)</strong>, the algorithm computes the expected value of the complete-data log-likelihood with respect to the current distribution of the latent variables. Intuitively, this step “fills in” the missing information by estimating how likely each latent configuration is under the current parameter values. In the case of GMMs, this corresponds to computing the responsibilities <span class="math inline">\(\gamma_i^j\)</span>, which represent the probability that each data point was generated by each mixture component.</p>
-<p>In the <strong>Maximization step (M-step)</strong>, the algorithm updates the model parameters by maximizing this expected log-likelihood. Using the responsibilities as soft assignments, the parameters are re-estimated to better explain the data. The E-step and M-step are repeated until the log-likelihood converges, guaranteeing a monotonic increase in the likelihood at each iteration.</p>
+<p>It is important to distinguish between Maximum Likelihood Estimation
+(MLE) and the Expectation–Maximization (EM) algorithm introduced above.
+In classical MLE, we directly maximize the likelihood function with
+respect to the model parameters. This is feasible when the likelihood
+has a tractable analytical form or when gradients can be computed
+directly. However, in many realistic models—including Gaussian Mixture
+Models—there exist hidden (<strong>latent</strong>) variables that are
+not observed in the data. The presence of these latent variables makes
+the likelihood involve a logarithm of a sum, which prevents a
+closed-form maximization and makes direct MLE (or even MAP estimation)
+difficult.</p>
+<p>The EM algorithm provides an iterative strategy for obtaining MLE or
+MAP estimates in such latent-variable models. Rather than optimizing the
+incomplete-data likelihood directly, EM alternates between estimating
+the missing latent information and optimizing the parameters given those
+estimates. Importantly, EM is a general optimization framework and is
+not limited to GMMs; it is widely used in many probabilistic models that
+involve hidden variables.</p>
+<p>In the <strong>Expectation step (E-step)</strong>, the algorithm
+computes the expected value of the complete-data log-likelihood with
+respect to the current distribution of the latent variables.
+Intuitively, this step “fills in” the missing information by estimating
+how likely each latent configuration is under the current parameter
+values. In the case of GMMs, this corresponds to computing the
+responsibilities <span class="math inline">\(\gamma_i^j\)</span>, which
+represent the probability that each data point was generated by each
+mixture component.</p>
+<p>In the <strong>Maximization step (M-step)</strong>, the algorithm
+updates the model parameters by maximizing this expected log-likelihood.
+Using the responsibilities as soft assignments, the parameters are
+re-estimated to better explain the data. The E-step and M-step are
+repeated until the log-likelihood converges, guaranteeing a monotonic
+increase in the likelihood at each iteration.</p>
 <h2 data-number="2.4" id="example-of-gmm-clustering"><span class="header-section-number">2.4</span> Example of GMM Clustering</h2>
-<p>We are going to implement EM Algorithm for a Gaussian mixture of 2 models.</p>
+<p>We are going to implement EM Algorithm for a Gaussian mixture of 2
+models.</p>
 <h3 data-number="2.4.1" id="initialization"><span class="header-section-number">2.4.1</span> Initialization</h3>
 <p>We can initialize the EM Algorithm as follows:</p>
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h3 data-number="2.4.2" id="iteration-0"><span class="header-section-number">2.4.2</span> Iteration 0</h3>
 <p>We can calculate the parameters for iteration <span class="math inline">\(0^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
-\end{bmatrix}\]</span> Cluster Means: <span class="math display">\[\mu_1 = 
+\end{bmatrix}\]</span> Cluster Means: <span class="math display">\[\mu_1
+=
 \begin{bmatrix}
 1.1000 \\
 2.1000
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 2.9000 \\
 3.9000
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 1.1052 &amp; 0.0000 \\
 0.0000 &amp; 2.2103
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 3.3155 &amp; 0.0000 \\
 0.0000 &amp; 4.4207
@@ -191,22 +320,22 @@ Cluster Means: <span class="math display">\[\mu_1 =
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h3 data-number="2.4.3" id="iteration-50"><span class="header-section-number">2.4.3</span> Iteration 50</h3>
 <p>We can calculate the new parameters for iteration <span class="math inline">\(50^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 2.0690 \\
 3.0228
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 2.7500 \\
 2.2505
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.5456 &amp; 0.0000 \\
 0.0000 &amp; 7.5187
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 9.9789 &amp; 0.0000 \\
 0.0000 &amp; 7.4052
@@ -214,22 +343,22 @@ Cluster Means: <span class="math display">\[\mu_1 =
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h3 data-number="2.4.4" id="iteration-100"><span class="header-section-number">2.4.4</span> Iteration 100</h3>
 <p>We can calculate the parameters for iteration <span class="math inline">\(100^{th}\)</span> as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
@@ -237,22 +366,22 @@ Cluster Means: <span class="math display">\[\mu_1 =
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <h3 data-number="2.4.5" id="iteration-150"><span class="header-section-number">2.4.5</span> Iteration 150</h3>
 <p>We can calculate the parameters for the <span class="math inline">\(150^{th}\)</span> iteration as following:<br/>
-Cluster Means: <span class="math display">\[\mu_1 = 
+Cluster Means: <span class="math display">\[\mu_1 =
 \begin{bmatrix}
 0.6496 \\
 4.6208
 \end{bmatrix}, \quad
-\mu_2 = 
+\mu_2 =
 \begin{bmatrix}
 4.7642 \\
 0.2020
 \end{bmatrix}\]</span></p>
-<p>Cluster Covariances: <span class="math display">\[\Sigma_1 = 
+<p>Cluster Covariances: <span class="math display">\[\Sigma_1 =
 \begin{bmatrix}
 5.3102 &amp; 0.0000 \\
 0.0000 &amp; 4.2118
 \end{bmatrix}, \quad
-\Sigma_2 = 
+\Sigma_2 =
 \begin{bmatrix}
 5.4851 &amp; 0.0000 \\
 0.0000 &amp; 1.7956
@@ -260,7 +389,8 @@ Cluster Means: <span class="math display">\[\mu_1 =
 <section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <p>Keep iterating until the log likelihood converges. Note:</p>
 <ul>
-<li><p>The diagonals of the cluster covariances are standard deviations and measure the length of the cluster shape on an axis.</p></li>
+<li><p>The diagonals of the cluster covariances are standard deviations
+and measure the length of the cluster shape on an axis.</p></li>
 </ul>
 
 </main>
