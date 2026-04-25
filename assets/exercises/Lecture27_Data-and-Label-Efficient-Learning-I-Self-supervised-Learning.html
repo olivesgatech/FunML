@@ -112,6 +112,24 @@ variance term ensures that each feature dimension maintains sufficient
 spread, and the covariance term reduces redundancy between features.
 Together, these prevent trivial constant representations without
 requiring negative samples.</p></li>
+<li><p><strong>Question:</strong> What is <strong>dimensional
+collapse</strong> in self-supervised learning, and how do modern methods
+prevent it?</p>
+<p><strong>Solution:</strong> Dimensional collapse occurs when learned
+representations collapse to a low-dimensional space or a constant
+vector, resulting in loss of information and poor performance on
+downstream tasks.</p>
+<p>Contrastive methods prevent collapse implicitly by pushing apart
+representations of different samples using negative pairs.</p>
+<p>Decorrelation-based methods such as VICReg prevent collapse
+explicitly by enforcing:</p>
+<ul>
+<li><p>Variance: ensuring each feature dimension maintains sufficient
+spread</p></li>
+<li><p>Covariance: reducing redundancy between features</p></li>
+</ul>
+<p>These constraints encourage high-dimensional, information-rich
+representations.</p></li>
 </ol></section>
 </main>
 </body>

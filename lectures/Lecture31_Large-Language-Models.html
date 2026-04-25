@@ -109,333 +109,1949 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>This lecture introduces Large Language Models (LLMs) as the current
-frontier of sequence modeling and natural language processing. Building
-on the Transformer architecture introduced in earlier lectures, we
-examine how scale — in data, parameters, and compute — produces
-qualitatively new capabilities. We first review the statistical
-formulation of language modeling as next-token prediction and describe
-how Transformers are pre-trained on massive text corpora. We then study
-<em>scaling laws</em> that quantify how performance improves predictably
-with scale, and examine why emergent abilities appear at certain
-parameter thresholds. We discuss fine-tuning strategies including
-supervised fine-tuning (SFT) and instruction tuning, and present
-Reinforcement Learning from Human Feedback (RLHF) as the dominant
-alignment technique. We introduce in-context learning and prompt
-engineering as inference-time techniques that require no weight updates,
-and analyze how chain-of-thought prompting elicits step-by-step
-reasoning. We close with a discussion of evaluation benchmarks, common
-failure modes (hallucination, factual errors, sycophancy), and the role
-of retrieval-augmented generation (RAG) in grounding LLM outputs <span class="citation" data-cites="1 2 3"></span>.</p>
-<h1 data-number="2" id="from-sequence-models-to-language-models"><span class="header-section-number">2.</span> From Sequence Models to Language
-Models</h1>
-<h2 data-number="2.1" id="the-language-modeling-problem"><span class="header-section-number">2.1</span> The Language Modeling
-Problem</h2>
-<p>A language model assigns a probability to a sequence of tokens <span class="math inline">\(w_1, w_2, \ldots, w_T\)</span> drawn from a
-vocabulary <span class="math inline">\(\mathcal{V}\)</span>. By the
-chain rule of probability: <span class="math display">\[P(w_1, w_2,
-\ldots, w_T) = \prod_{t=1}^{T} P(w_t \mid w_1, \ldots,
-w_{t-1}).\]</span> Training maximizes the log-likelihood of observed
-text, which is equivalent to minimizing the cross-entropy loss: <span class="math display">\[\mathcal{L} = -\frac{1}{T} \sum_{t=1}^{T} \log
-P(w_t \mid w_1, \ldots, w_{t-1}).\]</span></p>
-<p>This self-supervised objective requires no labeled data — every
-document in a text corpus provides training signal. The model is trained
-to predict the next token given all preceding tokens, a task known as
-<em>causal</em> or <em>autoregressive</em> language modeling.</p>
-<h2 data-number="2.2" id="tokenization"><span class="header-section-number">2.2</span> Tokenization</h2>
-<p>Raw text is converted to integer tokens before being processed by the
-model. Modern LLMs use <em>subword tokenization</em> methods such as
-Byte-Pair Encoding (BPE) or SentencePiece, which split rare words into
-smaller units while keeping common words whole. A vocabulary of
-32,000–100,000 tokens is typical. Tokenization ensures that the
-vocabulary is finite and manageable while retaining the ability to
-represent arbitrary text, including code, mathematical notation, and
-multilingual content.</p>
-<p>Each token <span class="math inline">\(w_t\)</span> is mapped to a
-dense embedding vector <span class="math inline">\(\mathbf{e}_{w_t} \in
-\mathbb{R}^d\)</span> via a learned embedding matrix <span class="math inline">\(\mathbf{E} \in \mathbb{R}^{|\mathcal{V}| \times
-d}\)</span>. Positional encodings are added to inject sequence order
-information, after which the Transformer processes the sequence as
-described in the previous lecture.</p>
-<h1 data-number="3" id="the-transformer-as-a-language-model"><span class="header-section-number">3.</span> The Transformer as a Language
-Model</h1>
-<h2 data-number="3.1" id="decoder-only-architecture"><span class="header-section-number">3.1</span> Decoder-Only Architecture</h2>
-<p>The most widely deployed LLM architecture is the <em>decoder-only
-Transformer</em>. In this design, the self-attention mechanism applies a
-<em>causal mask</em>: position <span class="math inline">\(t\)</span>
-can only attend to positions <span class="math inline">\(1, \ldots,
-t\)</span>, preventing the model from seeing future tokens during
-training and enabling autoregressive generation. This is in contrast to
-encoder-only models (such as BERT) that attend bidirectionally.</p>
-<p>Given input token embeddings <span class="math inline">\(\mathbf{X}
-\in \mathbb{R}^{T \times d}\)</span>, each Transformer layer computes:
-<span class="math display">\[\begin{aligned}
-\mathbf{Z} &amp;= \mathrm{LayerNorm}\!\left(\mathbf{X} +
-\mathrm{MultiHeadAttention}(\mathbf{X})\right), \\
-\mathbf{X}' &amp;= \mathrm{LayerNorm}\!\left(\mathbf{Z} +
-\mathrm{FFN}(\mathbf{Z})\right),
-\end{aligned}\]</span> where the causal mask ensures that the attention
-matrix <span class="math inline">\(\mathbf{A}\)</span> is
-lower-triangular. The final hidden state <span class="math inline">\(\mathbf{h}_T\)</span> is projected via <span class="math inline">\(\mathbf{W}_\text{out} \in \mathbb{R}^{d \times
-|\mathcal{V}|}\)</span> to produce logits over the vocabulary, followed
-by a softmax to obtain <span class="math inline">\(P(w_{T+1} \mid w_1,
-\ldots, w_T)\)</span>.</p>
-<h2 data-number="3.2" id="from-bert-to-gpt"><span class="header-section-number">3.2</span> From BERT to GPT</h2>
-<p>Two contrasting pre-training paradigms emerged early in the LLM
-era:</p>
+<p>Large language models (LLMs) are extensions of sequence modeling,
+where a model is trained to predict tokens. Unlike traditional
+statistical modeling, neural models are trained in a large-scale
+fashion, utilizing transfer learning so that the models are useful
+across multiple downstream language tasks. This lecture develops the
+topic in four stages. First, it revisits the basic probabilistic view of
+language modeling and explains why sequence data require specialized
+modeling assumptions. Second, it introduces the paradigm shift from
+classical task-specific models to foundation models and LLMs. Third, it
+outlines the main stages of LLM training, from large-scale pretraining
+to instruction tuning, alignment, and domain adaptation. Finally, it
+surveys common evaluation metrics and benchmarks used to compare
+LLMs.</p>
+<h1 data-number="2" id="language-models"><span class="header-section-number">2.</span> Language Models</h1>
+<h2 data-number="2.1" id="sequence-modeling"><span class="header-section-number">2.1</span> Sequence Modeling</h2>
+<p>Natural language is inherently sequential. A sentence is composed of
+a sequence of symbols whose meaning depends on the order in which those
+symbols appear. Sequence data are therefore ordered and variable in
+length. This distinguishes them from modalities such as images or
+tabular data, where dimensionality is usually fixed at training
+time.</p>
+<p>Language modeling is one instance of the broader problem of sequence
+modeling. Related examples include machine translation, text generation,
+and even tasks outside of text such as handwriting generation. In each
+case, the model must process data whose length is not known a priori and
+whose current element depends on previous elements.</p>
+<figure>
+<p><strong>(a) Machine translation</strong><br/>
+<img alt="image" src="img/lecture28/machine_translation.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<p><strong>(b) Text generation</strong><br/>
+<img alt="image" src="img/lecture28/text_generation.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<p><strong>(c) Handwriting generation</strong><br/>
+<img alt="image" src="img/lecture28/handwriting_generation.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<figcaption>Examples of sequence modeling tasks. Sequence models operate
+on ordered, variable-length data across different modalities such as
+machine translation, text generation, and handwriting
+generation.</figcaption>
+</figure>
+<h2 data-number="2.2" id="words-characters-and-tokens"><span class="header-section-number">2.2</span> Words, Characters, and
+Tokens</h2>
+<p>Before a model can process language, the sequence must be represented
+as discrete units. Three common choices are words, characters, and
+tokens.</p>
+<h4 data-number="2.2.0.1" id="words."><span class="header-section-number">2.2.0.1</span> Words.</h4>
+<p>A word-level representation treats each word as a basic symbol. This
+is conceptually simple, but the vocabulary becomes extremely large and
+contains substantial redundancy. Closely related words, such as
+<em>frequentist</em> and <em>conservationist</em>, are treated as
+entirely different symbols unless extra structure is introduced.</p>
+<h4 data-number="2.2.0.2" id="characters."><span class="header-section-number">2.2.0.2</span> Characters.</h4>
+<p>A character-level representation uses individual letters or symbols.
+This drastically reduces vocabulary size, but it increases sequence
+length and makes modeling more computationally expensive because the
+model must reason over many more steps.</p>
+<h4 data-number="2.2.0.3" id="tokens."><span class="header-section-number">2.2.0.3</span> Tokens.</h4>
+<p>Modern LLMs typically use tokenization at the subword level. A token
+may be an entire word, part of a word, punctuation, or a frequent
+character sequence. For example, <span class="math display">\[\texttt{Frequentist} \rightarrow
+\{\texttt{Frequent},\ \texttt{ist}\},
+\qquad
+\texttt{Conservationist} \rightarrow \{\texttt{Conservation},\
+\texttt{ist}\}.\]</span> This strikes a useful balance: tokens are
+expressive enough to reuse common subword pieces, but short enough to
+avoid the large-vocabulary problem of pure word-level modeling.</p>
+<h1 data-number="3" id="probabilistic-view-of-language-modeling"><span class="header-section-number">3.</span> Probabilistic View of Language
+Modeling</h1>
+<p>Let a token sequence be denoted by <span class="math display">\[(y_1,y_2,\dots,y_n).\]</span> A language model
+aims to estimate the joint probability of the full sequence, <span class="math display">\[p(y_1,y_2,\dots,y_n).\]</span> Using the chain
+rule of probability, this joint distribution can be written in
+left-to-right form as <span class="math display">\[p(y_1,y_2,\dots,y_n)=\prod_{t=1}^{n} p(y_t\mid
+y_{&lt;t}),\]</span> where <span class="math inline">\(y_{&lt;t}\)</span> denotes all tokens before
+position <span class="math inline">\(t\)</span>. Expanding the product
+gives <span class="math display">\[p(y_1)p(y_2\mid y_1)p(y_3\mid
+y_1,y_2)\cdots p(y_n\mid y_1,\dots,y_{n-1}).\]</span> This decomposition
+turns language modeling into a sequence of conditional prediction
+problems: at each step, predict the next token using the previous tokens
+as context. This same formulation underlies many modern applications of
+large language models, as discussed next.</p>
+<h4 data-number="3.0.0.1" id="example."><span class="header-section-number">3.0.0.1</span> Example.</h4>
+<p>For instance, in the partial sentence <span class="math display">\[\text{“She poured the coffee into the
+\underline{\hspace{1.2cm}}.”}\]</span> a language model assigns
+probabilities to candidate next tokens such as <em>cup</em>,
+<em>mug</em>, <em>sink</em>, or <em>machine</em>. The best next-token
+prediction is the one with highest conditional probability under the
+model.</p>
+<h2 data-number="3.1" id="applications-of-left-to-right-language-modeling"><span class="header-section-number">3.1</span> Applications of Left-to-Right
+Language Modeling</h2>
+<p>The left-to-right factorization in Eq. (28.1) <span class="math display">\[p(y_1,y_2,\dots,y_n)=\prod_{t=1}^{n} p(y_t\mid
+y_{&lt;t})\]</span> is not only a mathematical decomposition. It also
+provides the core computational framework behind many modern NLP and
+multimodal applications. In each case, the model generates or scores
+output tokens one step at a time, conditioned on all previous
+context.</p>
+<p>A useful way to think about modern LLM systems is that many seemingly
+different tasks can be cast as conditional next-token prediction with an
+appropriately constructed context window.</p>
+<h4 data-number="3.1.0.1" id="zero-shot-prompting."><span class="header-section-number">3.1.0.1</span> Zero-shot prompting.</h4>
+<p>In zero-shot prompting, the user provides only a natural language
+instruction, such as:</p>
+<blockquote>
+<p><em>“Translate the following sentence to French: The weather is nice
+today.”</em></p>
+</blockquote>
+<p>The model then generates the output autoregressively. Formally, the
+generated response is still modeled as <span class="math display">\[P(y
+\mid x) = \prod_{t=1}^{n} P(y_t \mid x, y_{&lt;t}),\]</span> where <span class="math inline">\(x\)</span> is the prompt and <span class="math inline">\(y\)</span> is the generated answer. Thus,
+zero-shot prompting does not require changing the model objective; it
+only changes the conditioning context.</p>
+<h4 data-number="3.1.0.2" id="in-context-learning-and-few-shot-prompting."><span class="header-section-number">3.1.0.2</span> In-context learning and
+few-shot prompting.</h4>
+<p>In in-context learning, the prompt contains demonstrations of the
+task:</p>
+<blockquote>
+<p>input: happy <span class="math inline">\(\rightarrow\)</span>
+positive<br/>
+input: terrible <span class="math inline">\(\rightarrow\)</span>
+negative<br/>
+input: exciting <span class="math inline">\(\rightarrow\)</span></p>
+</blockquote>
+<p>Let <span class="math display">\[\mathcal{D}=\{(x^{(1)},y^{(1)}),\dots,(x^{(K)},y^{(K)})\}\]</span>
+be <span class="math inline">\(K\)</span> example input-output pairs,
+and let <span class="math inline">\(x^{\star}\)</span> denote a new
+query. Then the model predicts <span class="math display">\[p_\theta(y^{\star}_{1:T}\mid
+\mathcal{D},x^{\star})=\prod_{t=1}^{T} p_\theta(y^{\star}_t\mid
+y^{\star}_{&lt;t},\mathcal{D},x^{\star}).\]</span> This perspective
+shows that few-shot prompting is still next-token prediction. The only
+difference is that the prompt now contains demonstrations that
+implicitly specify the desired task behavior.</p>
+<h4 data-number="3.1.0.3" id="chain-of-thought-prompting."><span class="header-section-number">3.1.0.3</span> Chain-of-thought
+prompting.</h4>
+<p>Chain-of-thought prompting encourages the model to generate
+intermediate reasoning steps before the final answer. For example,
+instead of producing only a final numerical output, the model may
+generate a sequence of explanatory tokens that lead to the answer. Under
+the same autoregressive formulation, the reasoning trace itself becomes
+part of the generated sequence: <span class="math display">\[P(\text{reasoning}, \text{answer} \mid x)
+=
+\prod_{t=1}^{n} P(y_t \mid x, y_{&lt;t}).\]</span> This shows that
+multi-step reasoning can still be viewed as next-token prediction,
+except that the target sequence includes intermediate reasoning
+tokens.</p>
+<h4 data-number="3.1.0.4" id="instruction-following."><span class="header-section-number">3.1.0.4</span> Instruction following.</h4>
+<p>Instruction following uses the same left-to-right factorization
+during training, but now the training set contains triples <span class="math inline">\((i,x,y)\)</span> consisting of an instruction,
+optional input, and desired response. The training objective is <span class="math display">\[\max_{\theta} \sum_{(i,x,y)} \log p_\theta(y\mid
+i,x),\]</span> or equivalently, minimizing the negative log-likelihood,
+<span class="math display">\[\mathcal{L}(\theta)=-\sum_{(i,x,y)}\sum_{t=1}^{T}
+\log p_\theta(y_t\mid y_{&lt;t},i,x).\]</span> Thus, instruction tuning
+does not replace language modeling. It reuses the same autoregressive
+loss, but under richer conditioning contexts that teach the model how to
+respond to user requests.</p>
+<h4 data-number="3.1.0.5" id="dialogue-completion-and-chat-systems."><span class="header-section-number">3.1.0.5</span> Dialogue completion and
+chat systems.</h4>
+<p>In dialogue, the context includes the prior conversation turns: <span class="math display">\[P(r_t \mid u_1, r_1, u_2, r_2, \dots,
+u_t),\]</span> where <span class="math inline">\(u_i\)</span> denotes
+user utterances and <span class="math inline">\(r_i\)</span> denotes
+assistant responses. The model generates the next response token by
+token conditioned on the dialogue history. Chat-based LLMs therefore
+remain autoregressive language models operating over a structured
+conversational context.</p>
+<h4 data-number="3.1.0.6" id="retrieval-augmented-generation-rag."><span class="header-section-number">3.1.0.6</span> Retrieval-augmented
+generation (RAG).</h4>
+<p>Retrieval-augmented generation (RAG) enriches the model context using
+external documents. If <span class="math inline">\(x\)</span> is a user
+query and <span class="math inline">\(r_{1:M}\)</span> are retrieved
+passages, then generation can be written as <span class="math display">\[p_\theta(y_{1:T}\mid x,r_{1:M})=\prod_{t=1}^{T}
+p_\theta(y_t\mid y_{&lt;t},x,r_{1:M}).\]</span> This form emphasizes
+that retrieved evidence becomes part of the context for next-token
+prediction. A more probabilistic formulation introduces a latent
+retrieved document <span class="math inline">\(z\)</span>: <span class="math display">\[p(y\mid x)=\sum_{z\in\mathcal{Z}} p_\eta(z\mid
+x)\,p_\theta(y\mid x,z),\]</span> with the conditional generator still
+factorized autoregressively as <span class="math display">\[p_\theta(y\mid x,z)=\prod_{t=1}^{T}
+p_\theta(y_t\mid y_{&lt;t},x,z).\]</span> This decomposition separates
+<em>retrieval</em>, which chooses evidence, from <em>generation</em>,
+which conditions on that evidence.</p>
+<h4 data-number="3.1.0.7" id="reasoning-and-intermediate-steps"><span class="header-section-number">3.1.0.7</span> Reasoning and intermediate
+steps</h4>
+<p>When a model produces intermediate reasoning before a final answer,
+the process can still be written in left-to-right probabilistic form. If
+<span class="math inline">\(r\)</span> denotes a reasoning trace and
+<span class="math inline">\(a\)</span> the final answer, then <span class="math display">\[p_\theta(r,a\mid x)=p_\theta(r\mid
+x)\,p_\theta(a\mid x,r),\]</span> with <span class="math display">\[p_\theta(r\mid x)=\prod_{t=1}^{T_r}
+p_\theta(r_t\mid r_{&lt;t},x),\]</span> and <span class="math display">\[p_\theta(a\mid x,r)=\prod_{t=1}^{T_a}
+p_\theta(a_t\mid a_{&lt;t},x,r).\]</span> Even multi-step reasoning can
+therefore be interpreted as autoregressive token generation over an
+expanded output structure.</p>
+<h4 data-number="3.1.0.8" id="external-tool-use."><span class="header-section-number">3.1.0.8</span> External tool use.</h4>
+<p>Tool-using LLMs can also be viewed in the same framework. A model may
+generate an intermediate tool call, receive the tool output, append that
+result to the context, and continue generation. In effect, tool use
+expands the conditioning sequence over time. The next token is always
+predicted from the updated context, so the overall process remains
+autoregressive even though the system interacts with external
+modules.</p>
+<h4 data-number="3.1.0.9" id="visual-question-answering-vqa-and-multimodal-prompting."><span class="header-section-number">3.1.0.9</span> Visual question answering
+(VQA) and multimodal prompting.</h4>
+<p>In multimodal systems, non-text inputs such as images are first
+converted into embeddings or tokens that can be incorporated into the
+model context. The model then generates a textual answer conditioned on
+both the visual input and the text prompt: <span class="math display">\[P(y \mid x_{\text{text}},
+x_{\text{image}}).\]</span> Although the input is no longer purely
+textual, the output generation process is still left-to-right.</p>
+<h4 data-number="3.1.0.10" id="summary-of-applications."><span class="header-section-number">3.1.0.10</span> Summary of
+applications.</h4>
+<table>
+<caption>Different applications of LLMs as variations of left-to-right
+conditional modeling.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Application</strong></th>
+<th style="text-align: left;"><strong>How it fits left-to-right
+modeling</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Zero-shot prompting</td>
+<td style="text-align: left;">Condition on instruction in context</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">In-context learning</td>
+<td style="text-align: left;">Include examples in context</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Chain-of-thought</td>
+<td style="text-align: left;">Generate intermediate reasoning
+tokens</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Instruction following</td>
+<td style="text-align: left;">Condition on task description</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dialogue</td>
+<td style="text-align: left;">Condition on conversation history</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RAG</td>
+<td style="text-align: left;">Augment context with retrieved
+documents</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tool use</td>
+<td style="text-align: left;">Extend context with tool outputs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">VQA / Multimodal</td>
+<td style="text-align: left;">Condition on non-text embeddings +
+text</td>
+</tr>
+</tbody>
+</table>
+<h4 data-number="3.1.0.11" id="key-takeaway."><span class="header-section-number">3.1.0.11</span> Key takeaway.</h4>
+<p>All modern LLM applications discussed above can be understood as
+different ways of constructing the conditioning context in the same
+probabilistic model defined in Eq. (28.1). Regardless of whether the
+system performs prompting, retrieval, reasoning, or tool use, the
+underlying computation remains unchanged: the model generates outputs by
+estimating conditional probabilities of the form <span class="math inline">\(P(y_t \mid \text{context})\)</span> in a
+left-to-right manner.</p>
+<h2 data-number="3.2" id="n-gram-models"><span class="header-section-number">3.2</span> n-gram Models</h2>
+<p>Directly modeling the full conditional distribution <span class="math inline">\(p(y_t\mid y_{&lt;t})\)</span> is difficult because
+the context can be arbitrarily long. Classical language models address
+this by introducing a Markov assumption: the next token depends only on
+a fixed number of preceding tokens.</p>
+<p>An <span class="math inline">\(n\)</span>-gram model assumes <span class="math display">\[p(y_t\mid y_{&lt;t}) \approx p(y_t\mid
+y_{t-n+1},\dots,y_{t-1}).\]</span> Examples include:</p>
 <ul>
-<li><p><strong>Masked Language Modeling (MLM) — BERT <span class="citation" data-cites="4"></span>:</strong> An encoder-only model
-is trained to predict randomly masked tokens from their bidirectional
-context. BERT and its variants (RoBERTa, DeBERTa) excel at
-classification, named entity recognition, and question answering tasks
-where the full context is available.</p></li>
-<li><p><strong>Causal Language Modeling (CLM) — GPT <span class="citation" data-cites="3"></span>:</strong> A decoder-only model
-is trained with next-token prediction. GPT models generalize naturally
-to open-ended generation, dialogue, and code synthesis. GPT-2 (1.5B),
-GPT-3 (175B), and GPT-4 demonstrated progressively stronger few-shot
-capabilities.</p></li>
+<li><p><strong>Bigram model:</strong> next token depends on one previous
+token.</p></li>
+<li><p><strong>Trigram model:</strong> next token depends on two
+previous tokens.</p></li>
+<li><p><strong>4-gram, 5-gram, etc.:</strong> next token depends on a
+larger but still fixed context.</p></li>
 </ul>
-<p>The current landscape is dominated by decoder-only models due to
-their flexibility at inference time. Open-weight models such as LLaMA,
-Mistral, and Falcon have made large-scale research broadly
-accessible.</p>
-<h1 data-number="4" id="scaling-laws"><span class="header-section-number">4.</span> Scaling Laws</h1>
-<h2 data-number="4.1" id="power-law-behavior"><span class="header-section-number">4.1</span> Power-Law Behavior</h2>
-<p>One of the most important empirical discoveries in LLM research is
-that test loss decreases smoothly as a power law of model size, dataset
-size, and compute budget <span class="citation" data-cites="2"></span>:
-<span class="math display">\[L(N) \approx
-\left(\frac{N_c}{N}\right)^{\alpha_N},\]</span> where <span class="math inline">\(N\)</span> is the number of model parameters,
-<span class="math inline">\(N_c\)</span> is a constant, and <span class="math inline">\(\alpha_N \approx 0.076\)</span> for language
-modeling. Similar laws hold with dataset size <span class="math inline">\(D\)</span> and compute <span class="math inline">\(C = 6ND\)</span> (measured in floating-point
-operations).</p>
-<p>These scaling laws enable practitioners to predict the performance of
-large models before training them by extrapolating from smaller
-experiments. Crucially, they show that performance improvements are
-predictable and smooth — there are no “cliffs” or plateaus in loss at
-any particular scale.</p>
-<h2 data-number="4.2" id="chinchilla-scaling"><span class="header-section-number">4.2</span> Chinchilla Scaling</h2>
-<p>The original GPT-3 scaling analysis suggested investing primarily in
-parameters. Subsequent work by Hoffmann et al. (the <em>Chinchilla</em>
-paper) showed that compute is most efficiently used when model size
-<span class="math inline">\(N\)</span> and dataset size <span class="math inline">\(D\)</span> are scaled proportionally: <span class="math display">\[N_\text{opt} \approx \frac{C^{0.5}}{6}, \qquad
-D_\text{opt} \approx \frac{C^{0.5}}{6} \times 20,\]</span> i.e.,
-approximately 20 tokens per parameter. The 70B-parameter Chinchilla
-model, trained on 1.4 trillion tokens, outperformed the 280B Gopher
-model despite using four times fewer parameters. This shifted the field
-toward training smaller models on more data.</p>
-<h2 data-number="4.3" id="emergent-abilities"><span class="header-section-number">4.3</span> Emergent Abilities</h2>
-<p>Beyond smooth scaling of loss, some capabilities appear abruptly at
-specific scales. Tasks such as multi-step arithmetic, logical reasoning,
-and code generation perform at or near chance level in smaller models
-but jump to substantial accuracy in models above roughly 10–100 billion
-parameters. These <em>emergent abilities</em> are not directly predicted
-by the loss scaling law and remain an active research topic. One
-hypothesis is that emergent tasks require the model to compose multiple
-sub-skills, each of which must independently reach sufficient accuracy,
-leading to a threshold effect.</p>
-<h1 data-number="5" id="pre-training-at-scale"><span class="header-section-number">5.</span> Pre-training at Scale</h1>
-<h2 data-number="5.1" id="data-curation"><span class="header-section-number">5.1</span> Data Curation</h2>
-<p>LLMs are pre-trained on extremely large corpora — often trillions of
-tokens — assembled from web pages (Common Crawl), books, scientific
-papers, code repositories (GitHub), and conversational data. Raw web
-data is noisy and requires extensive filtering: deduplication, quality
-filtering (using classifier-based or heuristic rules), language
-identification, and removal of toxic or private content.</p>
-<p>Data quality has a large impact on downstream model quality. The
-Falcon and LLaMA datasets demonstrated that carefully curated web data
-can match the quality of more expensive, manually assembled datasets.
-The composition of the training corpus also shapes model capabilities:
-code-heavy corpora improve reasoning, while multilingual data enables
-cross-lingual transfer.</p>
-<h2 data-number="5.2" id="training-infrastructure"><span class="header-section-number">5.2</span> Training Infrastructure</h2>
-<p>Training a 70B-parameter model on 2 trillion tokens requires roughly
-<span class="math inline">\(8 \times 10^{23}\)</span> floating-point
-operations, which at 100 teraflops per GPU translates to thousands of
-GPU-months. Modern LLM training uses:</p>
+<p>The appeal of <span class="math inline">\(n\)</span>-gram models is
+computational simplicity. They replace a long-context prediction problem
+with a fixed-context one. Their limitation is equally clear: long-range
+dependencies are discarded. If useful information lies outside the
+selected window, the model cannot use it.</p>
+<h2 data-number="3.3" id="neural-language-models"><span class="header-section-number">3.3</span> Neural Language Models</h2>
+<p>Neural language models replace the explicit Markov truncation with a
+learned representation of context. Instead of conditioning directly on
+raw previous tokens, the model computes a context vector <span class="math display">\[\bm{h}_\theta =
+h_\theta(y_{t-1},y_{t-2},\dots,y_1),\]</span> and then predicts the next
+token from that representation: <span class="math display">\[p(y_t\mid
+y_{&lt;t}) = p(y_t\mid \bm{h}_\theta).\]</span></p>
+<h4 data-number="3.3.0.1" id="connection-to-n-gram-models."><span class="header-section-number">3.3.0.1</span> Connection to <span class="math inline">\(n\)</span>-gram models.</h4>
+<p>Neural language models can be viewed as a generalization of <span class="math inline">\(n\)</span>-gram models. In an <span class="math inline">\(n\)</span>-gram model, conditional probabilities
+are estimated explicitly from counts within a fixed-size context window.
+In contrast, neural models replace these discrete count-based statistics
+with a learned continuous representation <span class="math inline">\(\bm{h}_\theta\)</span> that summarizes context.
+This allows the model to capture similarities between words and phrases,
+and to incorporate information from longer contexts without being
+limited to a fixed window size.</p>
+<p>The function <span class="math inline">\(h_\theta\)</span> is learned
+from data and may be implemented using many neural architectures,
+including multilayer perceptrons, recurrent neural networks, LSTMs,
+GRUs, temporal convolutional networks, and Transformers <span class="citation" data-cites="bengio2003neural">(Bengio, Ducharme, and
+Vincent 2000)</span>.</p>
+<p>The essential idea is that a neural model compresses the available
+context into a dense representation that is easier to use for
+prediction. This removes the rigid fixed-window assumption of <span class="math inline">\(n\)</span>-gram models and allows the model to
+learn which contextual information matters.</p>
+<h1 data-number="4" id="from-language-models-to-large-language-models"><span class="header-section-number">4.</span> From Language Models to Large
+Language Models</h1>
+<figure>
+<img src="img/lecture28/evolution_of_llms.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
+<figcaption>Evolution of large language models over time. The rapid
+growth in model scale, diversity, and capabilities highlights the
+transition from early neural language models to modern large-scale
+foundation models.</figcaption>
+</figure>
+<p>The rapid evolution of large language models reflects advances in
+data, compute, and architecture, which together enabled the transition
+from task-specific models to general-purpose foundation models.</p>
+<h2 data-number="4.1" id="foundation-models-and-the-paradigm-shift"><span class="header-section-number">4.1</span> Foundation Models and the
+Paradigm Shift</h2>
+<p>Traditional machine learning systems are often built around a single
+downstream task. A model is first pretrained or initialized, and then
+fine-tuned for a particular application such as classification,
+translation, or question answering. This workflow has two practical
+limitations:</p>
 <ul>
-<li><p><strong>Data parallelism:</strong> Each device processes a
-different mini-batch; gradients are averaged across devices.</p></li>
-<li><p><strong>Tensor parallelism:</strong> Individual weight matrices
-are sharded across devices.</p></li>
-<li><p><strong>Pipeline parallelism:</strong> Different layers are
-placed on different devices, with micro-batches flowing through the
-pipeline.</p></li>
-<li><p><strong>Mixed precision:</strong> Parameters are stored in 16-bit
-floating point (BF16/FP16) with a 32-bit master copy for gradient
-accumulation, reducing memory and increasing throughput.</p></li>
+<li><p>each trained model is typically specialized to one task,
+and</p></li>
+<li><p>strong performance often requires large amounts of labeled
+task-specific data.</p></li>
 </ul>
-<h1 data-number="6" id="fine-tuning-and-alignment"><span class="header-section-number">6.</span> Fine-Tuning and Alignment</h1>
-<h2 data-number="6.1" id="supervised-fine-tuning-sft"><span class="header-section-number">6.1</span> Supervised Fine-Tuning
-(SFT)</h2>
-<p>A pre-trained LLM is a general-purpose next-token predictor. To make
-it follow user instructions, it is fine-tuned on a dataset of
-(instruction, response) pairs using the same cross-entropy loss: <span class="math display">\[\mathcal{L}_\text{SFT} = -\sum_{t} \log
-P_\theta(w_t \mid \text{instruction}, w_1, \ldots, w_{t-1}).\]</span>
-The loss is computed only over response tokens (not the instruction).
-SFT alone can produce a capable instruction-following model but tends to
-produce outputs that are verbose, sycophantic, or occasionally harmful,
-motivating further alignment steps.</p>
-<h2 data-number="6.2" id="reinforcement-learning-from-human-feedback-rlhf"><span class="header-section-number">6.2</span> Reinforcement Learning from
-Human Feedback (RLHF)</h2>
-<p>RLHF <span class="citation" data-cites="5"></span> is the dominant
-technique for aligning LLMs with human preferences. It consists of three
-stages:</p>
+<p>LLMs represent a shift away from this paradigm. They are <em>general
+models</em> trained at scale on broad corpora and then adapted to many
+tasks through prompting, instructions, tuning, or fine-tuning. In that
+sense, they act as <em>foundation models</em>: large pretrained models
+that serve as reusable bases for a wide range of downstream
+applications.</p>
+<h3 data-number="4.1.1" id="from-single-task-to-general-task-models"><span class="header-section-number">4.1.1</span> From Single-Task to
+General-Task Models</h3>
+<p>A central part of the paradigm shift is the move from models designed
+for one narrowly defined task to models that can perform many tasks
+using the same underlying parameters. In traditional supervised
+learning, a model is often trained to approximate a mapping of the form
+<span class="math display">\[P(\text{output}\mid \text{input}),\]</span>
+where the task is fixed in advance. For example, one model may be
+trained only for sentiment classification, another for translation, and
+another for summarization.</p>
+<p>Large language models instead move toward a more general formulation:
+<span class="math display">\[P(\text{output}\mid \text{input},
+\text{task}).\]</span> Here, the task itself becomes part of the
+conditioning information. In practice, the task may be specified through
+prompts, natural-language instructions, or system prompts. This allows
+the same pretrained model to perform many different tasks without
+retraining a separate model for each one.</p>
+<p>This shift is one of the defining characteristics of foundation
+models. Rather than viewing learning as the construction of many
+isolated task-specific systems, foundation models provide a shared base
+that can be adapted or prompted for many downstream applications.</p>
+<h3 data-number="4.1.2" id="scaling-laws-and-the-need-for-scale"><span class="header-section-number">4.1.2</span> Scaling Laws and the Need for
+Scale</h3>
+<p>Once language modeling is formulated as a general next-token
+prediction problem, performance can often be improved by scaling the
+three main ingredients of learning: model size, dataset size, and
+compute. Larger models can represent more complex statistical patterns,
+larger datasets expose the model to broader linguistic and factual
+structure, and greater compute enables optimization at much larger
+scales.</p>
+<p>Empirically, scaling behavior in language models follows approximate
+power-law relationships <span class="citation" data-cites="kaplan2020scaling">(Kaplan et al. 2020)</span> of the form:
+<span class="math display">\[L(N, D, C) \propto N^{-\alpha} + D^{-\beta}
++ C^{-\gamma},\]</span> where <span class="math inline">\(L\)</span>
+denotes loss, <span class="math inline">\(N\)</span> is model size
+(parameters), <span class="math inline">\(D\)</span> is dataset size,
+and <span class="math inline">\(C\)</span> is compute. These
+relationships suggest that performance improves predictably as each
+component is scaled, provided the others are increased in a balanced
+manner.</p>
+<p>One reason scaling is effective is the increasing availability of
+large text corpora collected from sources such as webpages, books, code
+repositories, scientific articles, and conversational data. With
+sufficiently diverse and large-scale data, LLMs can acquire broad
+knowledge and more general representations that transfer across many
+tasks. In practice, scaling has been closely tied to improvements in
+generation quality, reasoning ability, and in-context learning
+behavior.</p>
+<p>Scaling has also been associated with the appearance of <em>emergent
+abilities</em>, where larger models exhibit behaviors that are weak or
+absent in smaller models. These may include stronger few-shot learning,
+improved reasoning, or better instruction following.</p>
+<figure id="fig:gpt_scaling">
+<img src="img/lecture28/gpt_scaling.png" style="width:42.00%; max-width:42.00%; height:auto;"/>
+<figcaption>Scaling of large language models over time. The figure
+highlights the rapid growth in parameter count, from models such as
+GPT-2 (approximately 1.5B parameters, shown near the bottom of the
+curve) to GPT-3 (175B parameters, highlighted at the top). This dramatic
+increase in scale is closely associated with improvements in performance
+and the emergence of more general capabilities. Adapted from <span class="citation" data-cites="gpt3blog">(Kraft 2020)</span>.</figcaption>
+</figure>
+<p>Figure <a data-reference="fig:gpt_scaling" data-reference-type="ref" href="#fig:gpt_scaling">1</a> illustrates how model size has
+grown rapidly over time. In particular, the transition from GPT-2 to
+GPT-3 represents a major jump in scale, spanning two orders of magnitude
+in parameter count. This increase enabled substantial improvements in
+language modeling performance and contributed to the emergence of more
+general-purpose behavior.</p>
+<p>At the same time, scaling introduces major practical challenges:</p>
+<ul>
+<li><p><strong>Compute constraints:</strong> Training large models
+requires massive GPU or TPU clusters and very long training
+times.</p></li>
+<li><p><strong>Memory limitations:</strong> Model parameters, optimizer
+states, and intermediate activations can exceed the memory capacity of a
+single device.</p></li>
+<li><p><strong>Data storage:</strong> Pretraining corpora can reach
+terabyte scale, creating challenges in storage, retrieval, and data
+pipeline design.</p></li>
+<li><p><strong>Parallelization:</strong> Efficient large-scale training
+requires distributed computation through data parallelism, model
+parallelism, or pipeline parallelism.</p></li>
+<li><p><strong>Engineering complexity:</strong> Reliable scaling demands
+careful system design, including fault tolerance, scheduling,
+checkpointing, and communication optimization.</p></li>
+</ul>
+<p>For these reasons, scaling is not simply a matter of making a model
+larger. It is a combined modeling, systems, and engineering problem that
+requires balancing data quality, hardware limitations, optimization
+stability, and computational cost.</p>
+<h3 data-number="4.1.3" id="transfer-learning-in-foundation-models"><span class="header-section-number">4.1.3</span> Transfer Learning in
+Foundation Models</h3>
+<p>Transfer learning is a central idea underlying modern foundation
+models. It refers to the practice of first training a model on a large,
+general-purpose dataset and then adapting it to a new task or domain. In
+the context of large language models, transfer learning enables a single
+pretrained model to be reused across many downstream applications
+without training a separate model from scratch for each task.</p>
+<h4 data-number="4.1.3.1" id="historical-perspective."><span class="header-section-number">4.1.3.1</span> Historical
+perspective.</h4>
+<p>The concept of transfer learning predates large language models and
+has been widely used in both computer vision and natural language
+processing. In computer vision, models pretrained on large datasets such
+as ImageNet were later fine-tuned for tasks like object detection or
+medical imaging. In NLP, early forms of transfer learning included word
+embeddings such as Word2Vec and GloVe, which provided reusable
+representations for downstream tasks.</p>
+<p>This idea evolved with contextual embeddings such as ELMo and BERT,
+where models were pretrained on large text corpora and then fine-tuned
+for specific tasks. Large language models extend this paradigm further
+by scaling both the model and the data, enabling transfer not only
+through fine-tuning but also through prompting and in-context
+learning.</p>
+<h4 data-number="4.1.3.2" id="mechanism-of-transfer-learning."><span class="header-section-number">4.1.3.2</span> Mechanism of transfer
+learning.</h4>
+<p>Let <span class="math inline">\(\theta\)</span> denote the parameters
+of a model. Transfer learning typically proceeds in two stages:</p>
 <ol>
-<li><p><strong>Reward Model Training:</strong> Human raters compare
-pairs of model responses and indicate a preference. A reward model <span class="math inline">\(r_\phi(x, y)\)</span> is trained to predict these
-preferences via the Bradley-Terry model: <span class="math display">\[P(y_w \succ y_l \mid x) = \sigma\!\left(r_\phi(x,
-y_w) - r_\phi(x, y_l)\right),\]</span> where <span class="math inline">\(y_w\)</span> and <span class="math inline">\(y_l\)</span> are the preferred and rejected
-responses respectively.</p></li>
-<li><p><strong>RL Fine-Tuning with PPO:</strong> The language model
-<span class="math inline">\(\pi_\theta\)</span> is updated using
-Proximal Policy Optimization (PPO) to maximize expected reward, with a
-KL-divergence penalty to prevent the policy from drifting too far from
-the SFT baseline: <span class="math display">\[\mathcal{J}(\theta) =
-\mathbb{E}_{x \sim \mathcal{D},\, y \sim
-\pi_\theta(\cdot|x)}\!\left[r_\phi(x,y) - \beta \log
-\frac{\pi_\theta(y|x)}{\pi_\text{SFT}(y|x)}\right].\]</span></p></li>
-<li><p><strong>Iteration:</strong> The process can be iterated by
-collecting new human feedback on outputs from the updated policy,
-yielding a progressively better reward model and policy.</p></li>
+<li><p><strong>Pretraining:</strong> Learn parameters <span class="math inline">\(\theta\)</span> on a large dataset <span class="math inline">\(\mathcal{D}_{\text{pre}}\)</span> using a general
+objective such as next-token prediction.</p></li>
+<li><p><strong>Adaptation:</strong> Use the pretrained parameters <span class="math inline">\(\theta\)</span> as initialization and adapt them
+to a downstream task with data <span class="math inline">\(\mathcal{D}_{\text{task}}\)</span>.</p></li>
 </ol>
-<h2 data-number="6.3" id="direct-preference-optimization-dpo"><span class="header-section-number">6.3</span> Direct Preference Optimization
-(DPO)</h2>
-<p>RLHF with PPO is complex and unstable to train. Direct Preference
-Optimization (DPO) reformulates the problem as a supervised contrastive
-objective, showing that the optimal RLHF policy satisfies: <span class="math display">\[\mathcal{L}_\text{DPO}(\theta) =
--\mathbb{E}\!\left[\log \sigma\!\left(\beta \log
-\frac{\pi_\theta(y_w|x)}{\pi_\text{ref}(y_w|x)} - \beta \log
-\frac{\pi_\theta(y_l|x)}{\pi_\text{ref}(y_l|x)}\right)\right].\]</span>
-DPO requires no separate reward model and can be applied directly to
-preference data, making it simpler and more computationally efficient
-than RLHF. It has become widely adopted for open-weight model
-alignment.</p>
-<h2 data-number="6.4" id="parameter-efficient-fine-tuning"><span class="header-section-number">6.4</span> Parameter-Efficient
-Fine-Tuning</h2>
-<p>Full fine-tuning of a 70B-parameter model requires tens of GPU-hours
-and large memory. Parameter-efficient fine-tuning (PEFT) methods reduce
-this cost:</p>
+<p>Formally, the goal is to transfer knowledge learned from <span class="math inline">\(\mathcal{D}_{\text{pre}}\)</span> to improve
+performance on <span class="math inline">\(\mathcal{D}_{\text{task}}\)</span>. This is
+especially important when labeled data for the task is limited. In large
+language models, transfer learning is particularly powerful because the
+pretraining objective itself is general-purpose. By learning to predict
+the next token over diverse corpora, the model implicitly acquires
+syntactic, semantic, and world knowledge that can be reused across a
+wide range of downstream tasks.</p>
+<p>The transfer learning process is illustrated in Figure <a data-reference="fig:transfer_learning" data-reference-type="ref" href="#fig:transfer_learning">2</a>, where knowledge learned
+from one task is reused and adapted to a new task through a modified
+prediction head.</p>
+<figure id="fig:transfer_learning">
+<img src="img/lecture28/transfer_learning_pipeline.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Transfer learning across tasks. A model trained on Task 1
+transfers learned representations to Task 2, where only the output head
+is modified while the core model is reused.</figcaption>
+</figure>
+<h4 data-number="4.1.3.3" id="modes-of-adaptation."><span class="header-section-number">4.1.3.3</span> Modes of adaptation.</h4>
+<p>In modern LLMs, transfer learning can take several forms:</p>
 <ul>
-<li><p><strong>LoRA (Low-Rank Adaptation):</strong> Weight updates are
-constrained to a low-rank factorization: <span class="math inline">\(\Delta \mathbf{W} =
-\mathbf{A}\mathbf{B}^T\)</span> where <span class="math inline">\(\mathbf{A} \in \mathbb{R}^{d \times r}\)</span>,
-<span class="math inline">\(\mathbf{B} \in \mathbb{R}^{d \times
-r}\)</span>, and rank <span class="math inline">\(r \ll d\)</span>. Only
-<span class="math inline">\(\mathbf{A}\)</span> and <span class="math inline">\(\mathbf{B}\)</span> are trained. With <span class="math inline">\(r = 16\)</span>, LoRA reduces trainable parameters
-by a factor of <span class="math inline">\(d / (2r)\)</span>, often more
-than 1000<span class="math inline">\(\times\)</span>.</p></li>
-<li><p><strong>Prefix Tuning / Prompt Tuning:</strong> Soft, trainable
-tokens are prepended to the input sequence; the main model weights are
-frozen. This keeps the model completely unmodified and allows different
-prefixes for different tasks.</p></li>
-<li><p><strong>Adapter Layers:</strong> Small bottleneck feed-forward
-modules are inserted between Transformer layers; only adapter weights
-are trained.</p></li>
+<li><p><strong>Fine-tuning:</strong> Update model parameters using
+labeled task-specific data.</p></li>
+<li><p><strong>Instruction tuning:</strong> Train on diverse task
+instructions to improve generalization.</p></li>
+<li><p><strong>Prompting and in-context learning:</strong> Adapt
+behavior without modifying parameters by conditioning on task examples
+at inference time.</p></li>
+<li><p><strong>Parameter-efficient methods:</strong> Techniques such as
+LoRA modify only a small subset of parameters.</p></li>
 </ul>
-<h1 data-number="7" id="in-context-learning-and-prompting"><span class="header-section-number">7.</span> In-Context Learning and
-Prompting</h1>
-<h2 data-number="7.1" id="in-context-learning"><span class="header-section-number">7.1</span> In-Context Learning</h2>
-<p>A remarkable property of large LLMs is <em>in-context learning</em>
-(ICL): by including a few input-output examples in the prompt, the model
-adapts its behavior without any weight updates. Given a prompt: <span class="math display">\[[x_1, y_1], [x_2, y_2], \ldots, [x_k, y_k],
-x_\text{query},\]</span> the model generates <span class="math inline">\(y_\text{query}\)</span> by analogy with the
-demonstrated examples. ICL performance improves with scale and with the
-number and quality of examples. The mechanism is not fully understood,
-but evidence suggests that the Transformer implements a form of
-gradient-based meta-learning within the forward pass.</p>
-<h2 data-number="7.2" id="prompt-engineering"><span class="header-section-number">7.2</span> Prompt Engineering</h2>
-<p>The wording and structure of the prompt strongly influence LLM
-outputs. Key techniques include:</p>
+<h4 data-number="4.1.3.4" id="advantages."><span class="header-section-number">4.1.3.4</span> Advantages.</h4>
+<p>Transfer learning provides several important benefits:</p>
 <ul>
-<li><p><strong>Zero-shot prompting:</strong> Pose the task directly with
-no examples, relying on the model’s pre-trained knowledge.</p></li>
-<li><p><strong>Few-shot prompting:</strong> Provide <span class="math inline">\(k\)</span> labeled examples before the query;
-typically <span class="math inline">\(k \in \{1, 5,
-20\}\)</span>.</p></li>
-<li><p><strong>Chain-of-Thought (CoT) prompting:</strong> Instruct the
-model to “think step by step” or provide examples that include
-intermediate reasoning steps. CoT dramatically improves performance on
-multi-step arithmetic and logical reasoning by encouraging the model to
-generate an explicit intermediate computation trace.</p></li>
-<li><p><strong>Self-consistency:</strong> Sample multiple reasoning
-chains and take the majority vote over final answers, reducing variance
-from individual chain errors.</p></li>
-<li><p><strong>Instruction following:</strong> Models trained with RLHF
-respond well to direct natural-language instructions: “List three
-advantages of X,” “Summarize the following in two sentences.”</p></li>
+<li><p><strong>Data efficiency:</strong> Reduces the need for large
+labeled datasets for each new task.</p></li>
+<li><p><strong>Improved generalization:</strong> Leverages broad
+knowledge acquired during pretraining.</p></li>
+<li><p><strong>Reduced training cost:</strong> Avoids training a new
+model from scratch for every application.</p></li>
+<li><p><strong>Flexibility:</strong> Enables rapid adaptation to new
+tasks and domains.</p></li>
 </ul>
-<h2 data-number="7.3" id="retrieval-augmented-generation-rag"><span class="header-section-number">7.3</span> Retrieval-Augmented Generation
-(RAG)</h2>
-<p>LLMs have a fixed knowledge cutoff date and can hallucinate factual
-information. Retrieval-Augmented Generation (RAG) addresses this by
-retrieving relevant documents from an external knowledge base at
-inference time and including them in the context: <span class="math display">\[P(y \mid q) = \sum_{d \in \text{Retrieve}(q)} P(y
-\mid q, d) \cdot P(d \mid q).\]</span> The retrieval step uses dense
-vector search (embedding the query and documents into a shared space,
-then finding nearest neighbors) or sparse methods (BM25). RAG allows the
-model to access up-to-date information, cite sources, and reduce
-hallucination without retraining.</p>
-<h1 data-number="8" id="evaluation-and-limitations"><span class="header-section-number">8.</span> Evaluation and Limitations</h1>
-<h2 data-number="8.1" id="benchmarks"><span class="header-section-number">8.1</span> Benchmarks</h2>
-<p>LLM capabilities are evaluated on standardized benchmarks:</p>
+<h4 data-number="4.1.3.5" id="limitations."><span class="header-section-number">4.1.3.5</span> Limitations.</h4>
+<p>Despite its advantages, transfer learning also introduces
+challenges:</p>
 <ul>
-<li><p><strong>MMLU</strong> (Massive Multitask Language Understanding):
-Multiple-choice questions spanning 57 academic subjects at undergraduate
-and professional level.</p></li>
-<li><p><strong>HumanEval / MBPP:</strong> Code generation benchmarks
-requiring the model to implement Python functions from
-docstrings.</p></li>
-<li><p><strong>GSM8K / MATH:</strong> Grade-school and competition math
-problems requiring multi-step reasoning.</p></li>
-<li><p><strong>HellaSwag / WinoGrande:</strong> Commonsense inference
-and coreference resolution.</p></li>
-<li><p><strong>BIG-Bench Hard:</strong> A collection of 23 tasks where
-models below GPT-4 scale perform below chance.</p></li>
+<li><p><strong>Domain mismatch:</strong> If the downstream domain
+differs significantly from the pretraining data, performance may
+degrade.</p></li>
+<li><p><strong>Bias transfer:</strong> Undesirable biases present in the
+pretraining data can persist in downstream tasks.</p></li>
+<li><p><strong>Catastrophic forgetting:</strong> Fine-tuning can
+overwrite previously learned knowledge.</p></li>
+<li><p><strong>Overfitting:</strong> Small task-specific datasets may
+lead to poor generalization.</p></li>
 </ul>
-<h2 data-number="8.2" id="hallucination"><span class="header-section-number">8.2</span> Hallucination</h2>
-<p>LLMs frequently generate fluent, confident, but factually incorrect
-statements — a phenomenon called <em>hallucination</em>. This arises
-because the training objective optimizes token prediction probability,
-not factual accuracy. Mitigation strategies include RAG,
-uncertainty-aware decoding (abstaining when confidence is low), grounded
-generation (requiring citations), and RLHF with factuality-focused
-reward signals.</p>
-<h2 data-number="8.3" id="bias-and-toxicity"><span class="header-section-number">8.3</span> Bias and Toxicity</h2>
-<p>LLMs trained on large internet corpora inherit societal biases
-present in the training data, including gender, racial, and political
-biases. They can also generate toxic or harmful content. Mitigation
-involves data filtering, RLHF with safety-focused reward models, and
-Constitutional AI (CAI), in which the model is trained to critique and
-revise its own outputs according to a set of human-authored
-principles.</p>
-<h2 data-number="8.4" id="context-length"><span class="header-section-number">8.4</span> Context Length</h2>
-<p>Standard Transformers have quadratic <span class="math inline">\(O(T^2)\)</span> attention complexity. Early models
-(GPT-3) supported 2048-token contexts; modern models support 128K–1M
-tokens through techniques such as FlashAttention (memory-efficient exact
-attention), RoPE (rotary positional embeddings enabling extrapolation),
-and sliding-window attention (Mistral, Longformer).</p>
-<h1 data-number="9" id="summary"><span class="header-section-number">9.</span> Summary</h1>
-<p>Large Language Models are autoregressive Transformer models
-pre-trained on massive text corpora via next-token prediction. Scaling
-laws show that model quality improves predictably with parameters, data,
-and compute. Fine-tuning via SFT, RLHF, and DPO aligns pre-trained
-models with human preferences. In-context learning and chain-of-thought
-prompting are powerful inference-time techniques that require no weight
-updates. Key limitations include hallucination, bias, and fixed
-knowledge cutoffs, which motivate retrieval-augmented generation and
-ongoing alignment research. LLMs now serve as the backbone for a rapidly
-growing ecosystem of AI applications, from code generation and document
-summarization to scientific reasoning and dialogue systems.</p>
-<div class="thebibliography">
-<p><span>9</span> Vaswani, A., et al. “Attention Is All You Need.”
-<em>NeurIPS</em>, 2017. Hoffmann, J., et al. “Training Compute-Optimal
-Large Language Models.” <em>arXiv:2203.15556</em>, 2022. Brown, T., et
-al. “Language Models are Few-Shot Learners.” <em>NeurIPS</em>, 2020.
-Devlin, J., et al. “BERT: Pre-training of Deep Bidirectional
-Transformers for Language Understanding.” <em>NAACL</em>, 2019. Ouyang,
-L., et al. “Training language models to follow instructions with human
-feedback.” <em>NeurIPS</em>, 2022.</p>
+<h4 data-number="4.1.3.6" id="domain-adaptation."><span class="header-section-number">4.1.3.6</span> Domain adaptation.</h4>
+<p>Domain adaptation is a specialized form of transfer learning in which
+the goal is to adapt a pretrained model to a new data distribution. For
+example, adapting a general-purpose LLM to medical or legal text
+requires additional domain-specific training.</p>
+<p>Let <span class="math inline">\(\mathcal{D}_{\text{pre}}\)</span> and
+<span class="math inline">\(\mathcal{D}_{\text{domain}}\)</span> denote
+the pretraining and target domain distributions. Domain adaptation aims
+to improve performance on <span class="math inline">\(\mathcal{D}_{\text{domain}}\)</span> while
+retaining useful knowledge from <span class="math inline">\(\mathcal{D}_{\text{pre}}\)</span>. This can be
+achieved through continued pretraining, fine-tuning, or
+parameter-efficient adaptation.</p>
+<p>A common approach to domain adaptation is <em>continued
+pretraining</em>, where the model is further trained on domain-specific
+data using the same language modeling objective. This allows the model
+to shift its distribution toward the target domain while retaining
+general knowledge learned during initial pretraining.</p>
+<h4 data-number="4.1.3.7" id="connection-to-foundation-models."><span class="header-section-number">4.1.3.7</span> Connection to foundation
+models.</h4>
+<p>Transfer learning is what enables foundation models to be broadly
+useful. Without transfer, each task would require a separate model and
+dataset. With transfer, a single large model can support a wide range of
+applications through minimal additional training or even through
+prompting alone.</p>
+<p>This ability to transfer knowledge across tasks is one of the key
+reasons why scaling large models is effective, as knowledge learned from
+massive datasets can be reused broadly across downstream
+applications.</p>
+<h2 data-number="4.2" id="emergence-and-generalization"><span class="header-section-number">4.2</span> Emergence and
+Generalization</h2>
+<p>One observation in LLMs is that larger models can display abilities
+that were not explicitly programmed as separate tasks. Informally,
+models show abilities they were “not trained for” or showcase
+<em>emergence</em>. These behaviors are often attributed to the idea
+that a sufficiently powerful next-token predictor can internalize
+abstractions useful for many tasks. Emergent behavior is typically
+evaluated empirically through performance on downstream tasks as a
+function of model scale, rather than derived analytically <span class="citation" data-cites="wei2022emergent">(Wei, Tay, et al.
+2022)</span>.</p>
+<p>This motivates the practical success of LLMs. A single model trained
+on large text corpora can often be used for reasoning, summarization,
+translation, question answering, and code generation with only
+prompt-level adaptation.</p>
+<p>At the same time, scale alone is insufficient. Emergence depends on
+more than parameter count alone. The data, architecture, and training
+strategies also play a critical role. Therefore, performance gains
+should be understood as the result of the full training pipeline, not
+only model size.</p>
+<h4 data-number="4.2.0.1" id="example.-1"><span class="header-section-number">4.2.0.1</span> Example.</h4>
+<p>For instance, small language models may struggle with multi-step
+arithmetic reasoning, while larger models can correctly solve problems
+such as:</p>
+<blockquote>
+<p><em>“If a train travels 60 miles per hour for 2.5 hours, how far does
+it go?”</em></p>
+</blockquote>
+<p>This capability is not explicitly trained as a separate task, but
+instead emerges from scale and exposure to diverse training data.</p>
+<h4 data-number="4.2.0.2" id="additional-examples-of-emergence."><span class="header-section-number">4.2.0.2</span> Additional examples of
+emergence.</h4>
+<p>Emergent abilities are also observed in tasks such as code generation
+and logical reasoning. For example, larger models can translate natural
+language instructions into executable code:</p>
+<blockquote>
+<p><em>“Write a Python function that returns the factorial of a
+number.”</em></p>
+</blockquote>
+<p>A sufficiently large model can generate correct recursive or
+iterative implementations, even though it was not explicitly trained on
+this exact instruction.</p>
+<p>Similarly, in logical reasoning tasks, larger models can perform
+multi-step deductions:</p>
+<blockquote>
+<p><em>“If all mammals are warm-blooded and whales are mammals, are
+whales warm-blooded?”</em></p>
+</blockquote>
+<p>The model correctly infers the conclusion through implicit reasoning
+over learned patterns. These examples illustrate that emergence reflects
+the model’s ability to internalize reusable abstractions rather than
+memorize specific tasks.</p>
+<h1 data-number="5" id="architectural-background"><span class="header-section-number">5.</span> Architectural Background</h1>
+<p>The following three sequence modeling architectures that predate or
+support modern LLMs have already been discussed:</p>
+<ul>
+<li><p><strong>Recurrent neural networks (RNNs):</strong> good at
+modeling long sequences in principle, but hard to parallelize because
+computation is sequential.</p></li>
+<li><p><strong>1D convolutions:</strong> highly parallelizable, but less
+natural for very long context unless many layers are stacked.</p></li>
+<li><p><strong>Self-attention / Transformers:</strong> highly
+parallelizable and strong at long-range dependency modeling, though
+memory intensive.</p></li>
+</ul>
+<figure id="fig:architecture_comparison">
+<img src="img/lecture28/architecture_comparison.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
+<figcaption>Comparison of sequence modeling architectures. Recurrent
+neural networks process inputs sequentially, limiting parallelization.
+Convolutional models allow parallel computation but require deep
+stacking to capture long-range dependencies. Self-attention
+(Transformers) enables both parallel computation and effective
+long-range dependency modeling, making it the dominant architecture for
+large language models.</figcaption>
+</figure>
+<p>This tradeoff explains why Transformer-based architectures became the
+dominant backbone for LLMs. The remainder of the chapter focuses on
+transformers as the architectural backbone.</p>
+<h2 data-number="5.1" id="three-transformer-variants"><span class="header-section-number">5.1</span> Three Transformer Variants</h2>
+<p>The chapter organizes modern language models into three
+Transformer-based families.</p>
+<h3 data-number="5.1.1" id="encoder-only-models"><span class="header-section-number">5.1.1</span> Encoder-only Models</h3>
+<p>Encoder-only models, such as BERT and related masked language models,
+are trained to infer missing words using context from both sides. They
+are especially strong for representation learning and classification,
+but they are not naturally suited to open-ended generation.</p>
+<h3 data-number="5.1.2" id="encoder-decoder-models"><span class="header-section-number">5.1.2</span> Encoder-Decoder Models</h3>
+<p>Encoder-decoder models are designed for sequence-to-sequence mapping.
+The encoder builds a representation of an input sequence, and the
+decoder generates an output sequence conditioned on it. This
+architecture is common in tasks such as machine translation and speech
+recognition. Examples include T0, Flan-T5, and Whisper.</p>
+<h3 data-number="5.1.3" id="decoder-only-models"><span class="header-section-number">5.1.3</span> Decoder-only Models</h3>
+<p>Decoder-only models are causal or autoregressive language models.
+They predict tokens left to right and are the dominant architecture for
+general-purpose LLMs such as GPT, Claude, and LLaMA. Decoder-only models
+show strong generalization behavior, stable training, and fast
+convergence in large-scale generative settings. For modern LLM
+deployment, the decoder-only Transformer is the most common base
+architecture because next-token prediction aligns directly with
+free-form text generation. In addition, decoder-only models are simpler
+to scale, easier to train with large autoregressive datasets, and
+naturally support flexible prompting and in-context learning, which
+makes them well-suited for general-purpose language modeling. These
+differences reflect a tradeoff between bidirectional context modeling
+(encoder-only), structured input-output mapping (encoder-decoder), and
+flexible generative capability (decoder-only).</p>
+<p>Modern large language models are defined not only by their
+architecture, but by the multi-stage training pipeline that shapes their
+behavior and capabilities.</p>
+<h2 data-number="5.2" id="context-length-in-modern-llms"><span class="header-section-number">5.2</span> Context Length in Modern
+LLMs</h2>
+<p>One important practical aspect of large language models is their
+<strong>context length</strong>, which determines how many tokens the
+model can process at once. This directly affects the model’s ability to
+handle long documents, maintain conversation history, and perform
+complex reasoning over extended inputs.</p>
+<h4 data-number="5.2.0.1" id="definition."><span class="header-section-number">5.2.0.1</span> Definition.</h4>
+<p>The context length is the maximum number of tokens that can be
+included in the input sequence: <span class="math display">\[\text{Context length} = |\text{input
+tokens}|\]</span></p>
+<p>If the input exceeds this limit, it must be truncated or processed
+using specialized techniques such as chunking or retrieval.</p>
+<h4 data-number="5.2.0.2" id="representative-context-lengths."><span class="header-section-number">5.2.0.2</span> Representative context
+lengths.</h4>
+<p>Modern LLMs vary widely in their supported context sizes, depending
+on architecture and training design.</p>
+<div id="tab:context_length">
+<table>
+<caption>Approximate context lengths of representative large language
+models. Actual limits may vary depending on model versions and
+deployment settings.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Model</strong></th>
+<th style="text-align: left;"><strong>Context Length</strong></th>
+<th style="text-align: left;"><strong>Notes</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">GPT-3</td>
+<td style="text-align: left;">2K tokens</td>
+<td style="text-align: left;">Early large-scale autoregressive
+model</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GPT-3.5 / GPT-4 (standard)</td>
+<td style="text-align: left;">8K – 32K tokens</td>
+<td style="text-align: left;">Improved long-context handling</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">GPT-4 Turbo / GPT-4o</td>
+<td style="text-align: left;">Up to 128K tokens</td>
+<td style="text-align: left;">Designed for long documents and
+conversations</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Claude (Anthropic)</td>
+<td style="text-align: left;">Up to 200K tokens</td>
+<td style="text-align: left;">Optimized for extremely long contexts</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mistral / Mixtral</td>
+<td style="text-align: left;">8K – 32K tokens</td>
+<td style="text-align: left;">Efficient open-weight models</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Longformer</td>
+<td style="text-align: left;">4K+ tokens</td>
+<td style="text-align: left;">Uses sparse attention for long
+sequences</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LLaMA 2 / 3</td>
+<td style="text-align: left;">4K – 128K tokens (variant-dependent)</td>
+<td style="text-align: left;">Widely used open-weight models</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 data-number="5.2.0.3" id="implications."><span class="header-section-number">5.2.0.3</span> Implications.</h4>
+<p>Context length has several important implications:</p>
+<ul>
+<li><p><strong>Memory constraints:</strong> Longer contexts require more
+GPU memory, especially with KV caching.</p></li>
+<li><p><strong>Computation cost:</strong> Attention mechanisms scale
+with sequence length.</p></li>
+<li><p><strong>Reasoning ability:</strong> Longer context allows models
+to integrate more information.</p></li>
+<li><p><strong>System design:</strong> Applications often combine LLMs
+with retrieval or chunking to overcome context limits.</p></li>
+</ul>
+<h1 data-number="6" id="training-large-language-models"><span class="header-section-number">6.</span> Training Large Language
+Models</h1>
+<p>LLM training is a four-stage pipeline. These stages include:</p>
+<ol>
+<li><p>pretraining,</p></li>
+<li><p>instruction tuning,</p></li>
+<li><p>alignment tuning, and</p></li>
+<li><p>fine-tuning for specific domains or tasks.</p></li>
+</ol>
+<p>These stages are conceptually distinct even when, in practice, a
+system may combine or iterate over them.</p>
+<h2 data-number="6.1" id="stage-1-pretraining"><span class="header-section-number">6.1</span> Stage 1: Pretraining</h2>
+<h3 data-number="6.1.1" id="objective"><span class="header-section-number">6.1.1</span> Objective</h3>
+<p>Pretraining is the large-scale self-supervised stage in which the
+model learns to predict the next token from massive corpora collected
+from the internet, books, scientific sources, conversations, and code.
+The training objective is the standard next-word or next-token
+prediction objective.</p>
+<p>At each time step <span class="math inline">\(t\)</span>, the model
+produces a distribution over vocabulary items and is optimized so that
+high probability is assigned to the true next token.</p>
+<h3 data-number="6.1.2" id="cross-entropy-loss"><span class="header-section-number">6.1.2</span> Cross-Entropy Loss</h3>
+<p>If <span class="math inline">\(y_t(w)\)</span> denotes the true
+distribution over vocabulary word <span class="math inline">\(w\)</span>
+at time <span class="math inline">\(t\)</span> and <span class="math inline">\(\hat{y}_t(w)\)</span> denotes the model
+prediction, the token-level cross-entropy loss is <span class="math display">\[L_{\mathrm{CE}} = -\sum_{w\in V} y_t(w)\log
+\hat{y}_t(w).\]</span> Because the ground-truth target is typically
+one-hot encoded, this reduces to the negative log-probability assigned
+to the correct next token.</p>
+<p>Summed across time, pretraining minimizes the total sequence loss
+over very large corpora. This is the same probabilistic
+language-modeling objective introduced earlier, now optimized at scale
+with gradient-based learning.</p>
+<h3 data-number="6.1.3" id="data-preparation"><span class="header-section-number">6.1.3</span> Data Preparation</h3>
+<p>A major portion of pretraining is data preparation. Unlike
+traditional machine learning pipelines, data preparation for large
+language models operates at massive scale and directly impacts model
+quality, robustness, and safety. Each stage in the pipeline is designed
+to ensure that the training data is diverse, high-quality, and suitable
+for large-scale optimization.</p>
+<h4 data-number="6.1.3.1" id="data-collection."><span class="header-section-number">6.1.3.1</span> Data collection.</h4>
+<p>The process begins with collecting raw corpora from multiple sources
+such as webpages, books, news articles, scientific publications,
+conversational datasets, and code repositories. This diversity is
+critical because it allows the model to learn a wide range of linguistic
+patterns, factual knowledge, and reasoning structures.</p>
+<h4 data-number="6.1.3.2" id="filtering-and-quality-control."><span class="header-section-number">6.1.3.2</span> Filtering and quality
+control.</h4>
+<p>Raw web-scale data contains noise, low-quality text, spam, and
+duplicated content. Filtering techniques are applied to remove
+irrelevant or low-quality samples. These may include heuristic rules,
+language detection, quality classifiers, and content-based filtering.
+The goal is to retain informative and coherent text while discarding
+noisy or harmful data.</p>
+<h4 data-number="6.1.3.3" id="deduplication."><span class="header-section-number">6.1.3.3</span> Deduplication.</h4>
+<p>Large datasets often contain repeated or near-duplicate documents.
+Deduplication removes redundant content to prevent the model from
+overfitting to frequently repeated text and to improve generalization.
+This step is especially important when using web-scale datasets such as
+Common Crawl.</p>
+<h4 data-number="6.1.3.4" id="safety-and-privacy-filtering."><span class="header-section-number">6.1.3.4</span> Safety and privacy
+filtering.</h4>
+<p>Sensitive or unsafe content must be removed before training. This
+includes personally identifiable information (PII), copyrighted material
+(in some pipelines), and harmful or toxic text. Filtering at this stage
+helps reduce the risk of the model memorizing private data or generating
+unsafe outputs.</p>
+<h4 data-number="6.1.3.5" id="tokenization."><span class="header-section-number">6.1.3.5</span> Tokenization.</h4>
+<p>After cleaning, text is converted into tokens using subword
+tokenization methods such as Byte Pair Encoding (BPE) or SentencePiece.
+Tokenization determines the vocabulary and directly affects model
+efficiency, sequence length, and generalization.</p>
+<h4 data-number="6.1.3.6" id="data-packaging-and-batching."><span class="header-section-number">6.1.3.6</span> Data packaging and
+batching.</h4>
+<p>Finally, the processed data is organized into sequences and batches
+suitable for large-scale distributed training. This includes shuffling,
+chunking long documents, and constructing training examples that
+maximize hardware utilization and throughput.</p>
+<h4 data-number="6.1.3.7" id="importance-of-data-quality."><span class="header-section-number">6.1.3.7</span> Importance of data
+quality.</h4>
+<p>The overall effectiveness of an LLM is strongly tied to the quality
+of its training data. Even very large datasets can lead to poor
+performance if they contain excessive noise, bias, or redundancy.
+Conversely, carefully curated datasets can significantly improve model
+performance, stability, and alignment.</p>
+<h4 data-number="6.1.3.8" id="connection-to-scaling."><span class="header-section-number">6.1.3.8</span> Connection to scaling.</h4>
+<p>As discussed earlier, scaling LLMs requires not only larger models
+but also larger and better datasets. Data preparation is therefore a
+critical bottleneck in modern LLM development, requiring both
+algorithmic design and large-scale engineering infrastructure.</p>
+<h3 data-number="6.1.4" id="datasets"><span class="header-section-number">6.1.4</span> Datasets</h3>
+<p>Commonly used pretraining resources include:</p>
+<ul>
+<li><p><strong>Common Crawl:</strong> a publicly available large-scale
+web archive that provides web-extracted text <span class="citation" data-cites="commoncrawl">(Common Crawl Foundation 2008)</span>.</p></li>
+<li><p><strong>C4 (Colossal Clean Crawled Corpus):</strong> a cleaned
+English-language web corpus used prominently for T5 <span class="citation" data-cites="raffel2020t5">(Raffel et al.
+2020)</span>.</p></li>
+</ul>
+<h4 data-number="6.1.4.1" id="representative-pretraining-datasets."><span class="header-section-number">6.1.4.1</span> Representative pretraining
+datasets.</h4>
+<p>Modern large language models are trained on a mixture of large-scale
+datasets with different characteristics. These datasets vary in size,
+modality, and level of curation, and each contributes different types of
+knowledge.</p>
+<div id="tab:llm_datasets">
+<table>
+<caption>Representative datasets used in large language model training.
+Different datasets contribute complementary properties such as broad
+coverage, factual knowledge, long-range coherence, and task-specific
+behavior.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;"><strong>Dataset</strong></th>
+<th style="text-align: left;"><strong>Scale</strong></th>
+<th style="text-align: left;"><strong>Modality</strong></th>
+<th style="text-align: left;"><strong>Typical Use</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Common Crawl</td>
+<td style="text-align: left;">Terabyte-scale</td>
+<td style="text-align: left;">Web text</td>
+<td style="text-align: left;">Broad coverage of internet data for
+general language modeling</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">C4 (Colossal Clean Crawled Corpus)</td>
+<td style="text-align: left;">Hundreds of GB</td>
+<td style="text-align: left;">Cleaned web text</td>
+<td style="text-align: left;">Filtered version of Common Crawl used for
+stable pretraining (e.g., T5)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BooksCorpus / Books datasets</td>
+<td style="text-align: left;">GB-scale</td>
+<td style="text-align: left;">Long-form text</td>
+<td style="text-align: left;">Narrative structure and long-range
+dependencies</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wikipedia</td>
+<td style="text-align: left;">GB-scale</td>
+<td style="text-align: left;">Structured text</td>
+<td style="text-align: left;">Factual knowledge and well-edited
+content</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Code datasets (e.g., GitHub)</td>
+<td style="text-align: left;">Hundreds of GB</td>
+<td style="text-align: left;">Source code</td>
+<td style="text-align: left;">Programming knowledge and structured
+reasoning</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Instruction / Dialogue datasets</td>
+<td style="text-align: left;">Smaller-scale</td>
+<td style="text-align: left;">Conversational text</td>
+<td style="text-align: left;">Instruction following and alignment</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>In practice, modern LLMs are trained on carefully constructed
+mixtures of these datasets, where data quality, diversity, and filtering
+play a critical role in determining final model performance. These
+mixtures often include webpages, books, news, scientific text,
+conversational data, and code in varying proportions across models.</p>
+<h3 data-number="6.1.5" id="limitations-of-pure-pretraining"><span class="header-section-number">6.1.5</span> Limitations of Pure
+Pretraining</h3>
+<p>Although large-scale pretraining enables models to learn rich
+linguistic and statistical structure, it is not sufficient to produce
+useful, reliable, or aligned behavior in practice. Several fundamental
+limitations arise when a model is trained purely with a next-token
+prediction objective.</p>
+<h4 data-number="6.1.5.1" id="lack-of-task-awareness."><span class="header-section-number">6.1.5.1</span> Lack of task
+awareness.</h4>
+<p>The pretraining objective models <span class="math display">\[P(y_t
+\mid y_{&lt;t}),\]</span> which optimizes general sequence prediction
+rather than task-specific behavior. As a result, the model does not
+explicitly learn to follow instructions or solve structured tasks. For
+example, given a prompt such as:</p>
+<blockquote>
+<p><em>“Summarize the following paragraph:”</em></p>
+</blockquote>
+<p>a purely pretrained model may continue generating unrelated text
+rather than producing a concise summary.</p>
+<h4 data-number="6.1.5.2" id="hallucination-and-factual-inconsistency."><span class="header-section-number">6.1.5.2</span> Hallucination and factual
+inconsistency.</h4>
+<p>Because the model is trained to predict likely continuations rather
+than verify correctness, it may generate fluent but factually incorrect
+content. This phenomenon, often referred to as <em>hallucination</em>,
+arises because the objective rewards plausibility rather than truth.</p>
+<h4 data-number="6.1.5.3" id="lack-of-alignment-with-human-preferences."><span class="header-section-number">6.1.5.3</span> Lack of alignment with
+human preferences.</h4>
+<p>Pretraining does not incorporate human judgments about what
+constitutes helpful, safe, or appropriate outputs. As a result, the
+model may produce responses that are:</p>
+<ul>
+<li><p>irrelevant to the user’s intent,</p></li>
+<li><p>overly verbose or unstructured,</p></li>
+<li><p>unsafe, biased, or harmful.</p></li>
+</ul>
+<h4 data-number="6.1.5.4" id="no-control-over-output-behavior."><span class="header-section-number">6.1.5.4</span> No control over output
+behavior.</h4>
+<p>The next-token objective provides no mechanism for enforcing
+properties such as:</p>
+<ul>
+<li><p>following instructions,</p></li>
+<li><p>maintaining tone or style,</p></li>
+<li><p>adhering to safety constraints.</p></li>
+</ul>
+<p>This makes raw pretrained models difficult to use in real-world
+applications without additional conditioning or training.</p>
+<h4 data-number="6.1.5.5" id="distribution-mismatch."><span class="header-section-number">6.1.5.5</span> Distribution mismatch.</h4>
+<p>Pretraining data consists primarily of passive text (e.g., books,
+webpages), while deployment often involves interactive settings (e.g.,
+question answering, dialogue). This mismatch between training and usage
+distributions leads to poor performance on downstream tasks.</p>
+<h4 data-number="6.1.5.6" id="motivation-for-post-training-stages."><span class="header-section-number">6.1.5.6</span> Motivation for
+post-training stages.</h4>
+<p>These limitations motivate the multi-stage LLM training pipeline
+introduced later:</p>
+<ul>
+<li><p><strong>Instruction tuning</strong> addresses task-following
+behavior.</p></li>
+<li><p><strong>Alignment tuning (e.g., RLHF, DPO)</strong> incorporates
+human preferences.</p></li>
+<li><p><strong>Domain adaptation and fine-tuning</strong> specialize the
+model for specific applications.</p></li>
+</ul>
+<p>Thus, pretraining should be viewed as a foundational stage that
+provides general knowledge, while subsequent stages are necessary to
+make the model usable, controllable, and aligned in practice.</p>
+<h2 data-number="6.2" id="hallucinations-in-large-language-models"><span class="header-section-number">6.2</span> Hallucinations in Large
+Language Models</h2>
+<p>One of the most widely observed limitations of large language models
+is the phenomenon of <strong>hallucination</strong>, where a model
+generates outputs that are fluent and plausible but factually incorrect
+or unsupported.</p>
+<h4 data-number="6.2.0.1" id="definition.-1"><span class="header-section-number">6.2.0.1</span> Definition.</h4>
+<p>A hallucination occurs when the model produces information that is
+not grounded in the input, training data, or verifiable facts. For
+example, a model may confidently generate:</p>
+<blockquote>
+<p><em>“The paper was published in Nature in 2012,”</em></p>
+</blockquote>
+<p>even when no such publication exists.</p>
+<h4 data-number="6.2.0.2" id="why-hallucinations-occur."><span class="header-section-number">6.2.0.2</span> Why hallucinations
+occur.</h4>
+<p>Hallucinations arise from several fundamental properties of language
+models:</p>
+<ul>
+<li><p><strong>Next-token prediction objective:</strong> The model is
+trained to maximize <span class="math display">\[P(y_t \mid
+y_{&lt;t}),\]</span> which rewards generating likely continuations
+rather than factually correct ones.</p></li>
+<li><p><strong>Lack of grounding:</strong> The model does not inherently
+verify outputs against external knowledge sources unless explicitly
+connected to them (e.g., via retrieval).</p></li>
+<li><p><strong>Training data noise:</strong> Pretraining data may
+contain inaccuracies, inconsistencies, or outdated information.</p></li>
+<li><p><strong>Distributional generalization:</strong> The model
+extrapolates patterns from training data, which can lead to plausible
+but incorrect conclusions.</p></li>
+<li><p><strong>Overconfidence:</strong> Language models often assign
+high probability to generated tokens even when uncertain, leading to
+confident but incorrect outputs.</p></li>
+</ul>
+<h4 data-number="6.2.0.3" id="connection-to-pretraining."><span class="header-section-number">6.2.0.3</span> Connection to
+pretraining.</h4>
+<p>Hallucination is not a bug but a direct consequence of the training
+objective. Since the model is optimized for likelihood rather than
+truth, it learns to produce statistically plausible text rather than
+guaranteed factual statements.</p>
+<h4 data-number="6.2.0.4" id="mitigation-strategies."><span class="header-section-number">6.2.0.4</span> Mitigation strategies.</h4>
+<p>Several approaches are used in practice to reduce hallucinations:</p>
+<ul>
+<li><p><strong>Retrieval-Augmented Generation (RAG):</strong>
+Incorporates external documents into the context.</p></li>
+<li><p><strong>Tool use:</strong> Allows the model to query databases,
+APIs, or search engines.</p></li>
+<li><p><strong>Alignment tuning:</strong> Encourages more cautious and
+truthful responses.</p></li>
+<li><p><strong>Post-processing and verification:</strong> Uses external
+systems to check outputs.</p></li>
+</ul>
+<h4 data-number="6.2.0.5" id="connection-to-modern-llm-systems."><span class="header-section-number">6.2.0.5</span> Connection to modern LLM
+systems.</h4>
+<p>Many modern techniques introduced later in this lecture, such as
+retrieval-augmented generation, tool use, and alignment tuning, can be
+viewed as direct responses to the hallucination problem. These methods
+aim to ground model outputs, incorporate external knowledge, and improve
+reliability beyond pure next-token prediction.</p>
+<h4 data-number="6.2.0.6" id="key-takeaway.-1"><span class="header-section-number">6.2.0.6</span> Key takeaway.</h4>
+<p>Hallucination highlights a fundamental limitation of autoregressive
+language modeling: generating fluent language does not guarantee
+correctness. Understanding this limitation is essential for designing
+reliable LLM-based systems.</p>
+<h2 data-number="6.3" id="stage-2-instruction-tuning"><span class="header-section-number">6.3</span> Stage 2: Instruction
+Tuning</h2>
+<p>Instruction tuning teaches a pretrained model to respond
+appropriately to prompts phrased as tasks or instructions. Rather than
+only predicting the next token in free-form web text, the model is
+fine-tuned on datasets consisting of instruction-response pairs <span class="citation" data-cites="wei2021finetuned longpre2023flan">(Wei,
+Bosma, et al. 2022; Longpre et al. 2023)</span>.</p>
+<p>Conceptually, instruction tuning transforms a language model from a
+general text predictor into a task-oriented system that can follow user
+intent.</p>
+<h3 data-number="6.3.1" id="instruction-tuning-dataset-structure"><span class="header-section-number">6.3.1</span> Instruction Tuning Dataset
+Structure</h3>
+<p>Instruction tuning datasets typically consist of triples: <span class="math display">\[(x, \text{instruction}, y)\]</span> where:</p>
+<ul>
+<li><p><span class="math inline">\(x\)</span> is optional input context
+(e.g., a paragraph),</p></li>
+<li><p><strong>instruction</strong> specifies the task in natural
+language,</p></li>
+<li><p><span class="math inline">\(y\)</span> is the desired
+output.</p></li>
+</ul>
+<p>Examples include:</p>
+<ul>
+<li><p><em>Instruction:</em> "Translate this sentence to
+French"</p></li>
+<li><p><em>Instruction:</em> "Summarize the following
+paragraph"</p></li>
+<li><p><em>Instruction:</em> "Classify the sentiment as positive or
+negative"</p></li>
+</ul>
+<p>This structure allows the model to learn a mapping: <span class="math display">\[P(y \mid x, \text{instruction})\]</span></p>
+<h3 data-number="6.3.2" id="supervised-fine-tuning-sft"><span class="header-section-number">6.3.2</span> Supervised Fine-Tuning
+(SFT)</h3>
+<p>Instruction tuning is typically implemented using supervised
+fine-tuning (SFT). The model is trained to maximize the likelihood of
+the target response given the instruction.</p>
+<p>The objective is: <span class="math display">\[\max_\theta
+\sum_{(x,y)\in \mathcal{D}} \log P_\theta(y \mid x)\]</span></p>
+<p>This is identical in form to standard language modeling, but the data
+distribution is different: instead of raw text, the model is trained on
+curated instruction-response pairs.</p>
+<h3 data-number="6.3.3" id="instruction-tuning-pipeline"><span class="header-section-number">6.3.3</span> Instruction Tuning
+Pipeline</h3>
+<p>The instruction tuning process can be understood within the broader
+LLM training pipeline:</p>
+<ol>
+<li><p><strong>Pretraining:</strong> Learn general language
+representations from large-scale text corpora.</p></li>
+<li><p><strong>Instruction tuning:</strong> Fine-tune the model on
+diverse instruction-response pairs using supervised learning.</p></li>
+<li><p><strong>Preference alignment:</strong> Further refine outputs
+using human feedback (e.g., RLHF).</p></li>
+</ol>
+<p>This pipeline is illustrated in Figure <a data-reference="fig:instruction_tuning" data-reference-type="ref" href="#fig:instruction_tuning">4</a>.</p>
+<figure id="fig:instruction_tuning">
+<img src="img/lecture28/llm_training_pipeline.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
+<figcaption>Large language model training pipeline. A model is first
+pretrained on large-scale text data, then instruction-tuned on
+task-oriented datasets, and finally aligned using human preference data.
+Instruction tuning plays a critical intermediate role in enabling models
+to follow natural language instructions before alignment methods such as
+RLHF are applied. Figure adapted from course lecture slides <span class="citation" data-cites="zhao2023survey">(Zhao et al.
+2026)</span>.</figcaption>
+</figure>
+<h3 data-number="6.3.4" id="example-method-flan-instruction-tuning"><span class="header-section-number">6.3.4</span> Example Method: FLAN
+Instruction Tuning</h3>
+<p>To better understand instruction tuning in practice, we examine the
+FLAN framework, a widely used large-scale instruction tuning approach
+<span class="citation" data-cites="longpre2023flan">(Longpre et al.
+2023)</span>.</p>
+<h4 data-number="6.3.4.1" id="core-idea."><span class="header-section-number">6.3.4.1</span> Core idea.</h4>
+<p>FLAN (Fine-tuned Language Net) extends standard supervised
+fine-tuning by training on a large and diverse collection of tasks
+expressed in natural language instructions. Instead of optimizing for a
+single task, the model is trained across many tasks simultaneously.</p>
+<h4 data-number="6.3.4.2" id="multi-task-instruction-dataset."><span class="header-section-number">6.3.4.2</span> Multi-task instruction
+dataset.</h4>
+<p>FLAN constructs a dataset consisting of many tasks, each written in
+an instruction format. These include:</p>
+<ul>
+<li><p>question answering,</p></li>
+<li><p>translation,</p></li>
+<li><p>summarization,</p></li>
+<li><p>classification,</p></li>
+<li><p>reasoning tasks.</p></li>
+</ul>
+<p>Each example is formatted as: <span class="math display">\[(\text{instruction}, x, y)\]</span> where the
+instruction describes the task, <span class="math inline">\(x\)</span>
+is the input, and <span class="math inline">\(y\)</span> is the desired
+output.</p>
+<h4 data-number="6.3.4.3" id="training-objective."><span class="header-section-number">6.3.4.3</span> Training objective.</h4>
+<p>The model is trained using the standard conditional likelihood
+objective: <span class="math display">\[\max_\theta
+\sum_{(x,y,\text{instruction})} \log P_\theta(y \mid x,
+\text{instruction})\]</span></p>
+<p>This is identical in form to supervised fine-tuning, but differs in
+scale and diversity.</p>
+<h4 data-number="6.3.4.4" id="key-innovation."><span class="header-section-number">6.3.4.4</span> Key innovation.</h4>
+<p>The key insight of FLAN is that exposing the model to a wide range of
+instruction formats enables it to generalize to new, unseen tasks at
+inference time. Rather than memorizing task-specific patterns, the model
+learns a higher-level mapping between instructions and outputs.</p>
+<h4 data-number="6.3.4.5" id="generalization-behavior."><span class="header-section-number">6.3.4.5</span> Generalization
+behavior.</h4>
+<p>FLAN demonstrates strong zero-shot and few-shot performance. Given a
+new instruction at inference time, the model can:</p>
+<ul>
+<li><p>interpret the task from natural language,</p></li>
+<li><p>apply learned patterns from similar tasks,</p></li>
+<li><p>generate appropriate outputs without explicit
+retraining.</p></li>
+</ul>
+<h4 data-number="6.3.4.6" id="connection-to-llm-pipeline."><span class="header-section-number">6.3.4.6</span> Connection to LLM
+pipeline.</h4>
+<p>FLAN-style instruction tuning serves as the bridge between
+pretraining and alignment:</p>
+<ul>
+<li><p>Pretraining learns general language structure.</p></li>
+<li><p>Instruction tuning teaches task following.</p></li>
+<li><p>Alignment tuning refines behavior according to human
+preferences.</p></li>
+</ul>
+<p>This explains why instruction tuning is a critical intermediate stage
+in modern LLM training pipelines.</p>
+<h3 data-number="6.3.5" id="generalization-and-benefits"><span class="header-section-number">6.3.5</span> Generalization and
+Benefits</h3>
+<p>A key advantage of instruction tuning is improved generalization. By
+training on a diverse set of instructions, the model learns to interpret
+new tasks at inference time, even if they were not explicitly seen
+during training.</p>
+<p>This enables:</p>
+<ul>
+<li><p><strong>Zero-shot generalization:</strong> Perform new tasks
+without retraining</p></li>
+<li><p><strong>Few-shot learning:</strong> Adapt quickly using a few
+examples</p></li>
+<li><p><strong>Improved usability:</strong> Users can interact using
+natural language instructions</p></li>
+</ul>
+<h3 data-number="6.3.6" id="limitations"><span class="header-section-number">6.3.6</span> Limitations</h3>
+<p>Despite its strengths, instruction tuning has limitations:</p>
+<ul>
+<li><p><strong>Data dependence:</strong> Requires high-quality curated
+instruction datasets</p></li>
+<li><p><strong>Coverage limitations:</strong> May not generalize to
+entirely unseen task types</p></li>
+<li><p><strong>Alignment gap:</strong> Does not guarantee safety or
+preference alignment (handled in the next stage)</p></li>
+</ul>
+<h2 data-number="6.4" id="stage-3-alignment-tuning"><span class="header-section-number">6.4</span> Stage 3: Alignment Tuning</h2>
+<p>Alignment tuning uses human preference information to steer the model
+toward outputs that are more helpful and less harmful.</p>
+<h3 data-number="6.4.1" id="preference-data-collection"><span class="header-section-number">6.4.1</span> Preference Data
+Collection</h3>
+<p>A common workflow is shown. A prompt is shown together with several
+candidate model outputs. A human labeler ranks the outputs. The
+resulting comparison data form a preference dataset that can be used to
+train a reward model.</p>
+<h3 data-number="6.4.2" id="reward-modeling-and-reinforcement-learning"><span class="header-section-number">6.4.2</span> Reward Modeling and
+Reinforcement Learning</h3>
+<p>A reward model is trained to score outputs according to human
+preferences. Then a policy model is optimized against this reward model
+using reinforcement learning methods such as PPO or GRPO, as mentioned
+in the slides.</p>
+<p>Formally, the reward model is trained using preference comparisons.
+Given a pair <span class="math inline">\((y^+, y^-)\)</span> where <span class="math inline">\(y^+\)</span> is preferred, the model is trained to
+satisfy: <span class="math display">\[r_\phi(x, y^+) &gt; r_\phi(x,
+y^-),\]</span> often using a logistic loss: <span class="math display">\[\log \sigma(r_\phi(x,y^+) -
+r_\phi(x,y^-)).\]</span> This allows the reward model to approximate
+human preference ordering over outputs.</p>
+<p>The alignment loop can be summarized as follows:</p>
+<ol>
+<li><p>sample a prompt,</p></li>
+<li><p>generate a candidate output from the current policy,</p></li>
+<li><p>score the output using the reward model, and</p></li>
+<li><p>update the policy to prefer higher-reward outputs.</p></li>
+</ol>
+<p>The intended outcome is that the aligned model produces outputs that
+are better matched to human preferences for helpfulness, harmlessness,
+and general appropriateness.</p>
+<h3 data-number="6.4.3" id="reinforcement-learning-from-human-feedback-rlhf"><span class="header-section-number">6.4.3</span> Reinforcement Learning from
+Human Feedback (RLHF)</h3>
+<p>Reinforcement Learning from Human Feedback (RLHF) is a widely used
+approach for aligning large language models with human preferences.
+Instead of relying solely on likelihood-based training, RLHF introduces
+an explicit reward signal that reflects human judgments about output
+quality. RLHF has become a standard post-training approach for aligning
+language models with human preferences <span class="citation" data-cites="bai2022helpful">(Bai et al. 2022)</span>.</p>
+<p>The RLHF pipeline consists of three main stages:</p>
+<ol>
+<li><p><strong>Supervised Fine-Tuning (SFT):</strong> A pretrained model
+is first fine-tuned on high-quality human-written responses.</p></li>
+<li><p><strong>Reward Model Training:</strong> A separate model <span class="math inline">\(r_\phi(x,y)\)</span> is trained to score outputs
+based on human preference data.</p></li>
+<li><p><strong>Policy Optimization:</strong> The language model <span class="math inline">\(\pi_\theta\)</span> is optimized to maximize the
+reward assigned by the reward model.</p></li>
+</ol>
+<h4 data-number="6.4.3.1" id="mathematical-formulation."><span class="header-section-number">6.4.3.1</span> Mathematical
+formulation.</h4>
+<p>Let <span class="math inline">\(x\)</span> denote a prompt and <span class="math inline">\(y\)</span> a generated response. The reward model
+assigns a scalar score: <span class="math display">\[r_\phi(x,y)\]</span></p>
+<p>The policy (language model) is then optimized to maximize expected
+reward: <span class="math display">\[\max_\theta \mathbb{E}_{y \sim
+\pi_\theta(\cdot|x)} \left[ r_\phi(x,y) \right]\]</span></p>
+<p>In practice, optimization is performed using reinforcement learning
+algorithms such as Proximal Policy Optimization (PPO), which balances
+reward maximization with stability constraints.</p>
+<p>The RLHF optimization process is illustrated in Figure <a data-reference="fig:rlhf" data-reference-type="ref" href="#fig:rlhf">5</a>, showing how human preference signals
+are incorporated through a learned reward model and reinforcement
+learning updates.</p>
+<figure id="fig:rlhf">
+<img src="img/lecture28/rlhf_pipeline.png" style="width:54.00%; max-width:54.00%; height:auto;"/>
+<figcaption>Reinforcement Learning from Human Feedback (RLHF). A prompt
+is sampled, the language model generates an output, a reward model
+assigns a score based on human preferences, and the policy is updated
+using reinforcement learning (e.g., PPO).</figcaption>
+</figure>
+<h4 data-number="6.4.3.2" id="key-intuition."><span class="header-section-number">6.4.3.2</span> Key intuition.</h4>
+<p>Unlike standard training, RLHF does not directly optimize likelihood.
+Instead, it optimizes for outputs that humans prefer, such as responses
+that are more helpful, less harmful, and better aligned with user
+intent.</p>
+<h3 data-number="6.4.4" id="direct-preference-optimization-dpo"><span class="header-section-number">6.4.4</span> Direct Preference
+Optimization (DPO)</h3>
+<p>Direct Preference Optimization (DPO) is a more recent alternative to
+RLHF that avoids explicit reinforcement learning <span class="citation" data-cites="rafailov2023direct">(Rafailov et al. 2023)</span>. Instead
+of training a separate reward model and running an RL loop, DPO directly
+optimizes the language model using preference comparisons. DPO was
+proposed as a simpler alternative that removes the explicit
+reward-modeling and reinforcement-learning stages.</p>
+<h4 data-number="6.4.4.1" id="preference-data."><span class="header-section-number">6.4.4.1</span> Preference data.</h4>
+<p>Assume we are given pairs of outputs: <span class="math display">\[(y^+, y^-)\]</span> where <span class="math inline">\(y^+\)</span> is preferred over <span class="math inline">\(y^-\)</span> for a given prompt <span class="math inline">\(x\)</span>.</p>
+<h4 data-number="6.4.4.2" id="objective."><span class="header-section-number">6.4.4.2</span> Objective.</h4>
+<p>DPO defines the following objective: <span class="math display">\[\log \sigma \left( \beta \left[ \log
+\pi_\theta(y^+|x) - \log \pi_\theta(y^-|x) \right] \right)\]</span>
+where <span class="math inline">\(\sigma(\cdot)\)</span> is the sigmoid
+function and <span class="math inline">\(\beta\)</span> controls the
+strength of preference.</p>
+<h4 data-number="6.4.4.3" id="interpretation."><span class="header-section-number">6.4.4.3</span> Interpretation.</h4>
+<p>This objective directly encourages the model to assign higher
+probability to preferred outputs compared to rejected ones, without
+requiring an intermediate reward model or reinforcement learning step.
+Because this objective is differentiable and does not require rollouts
+or policy-gradient updates, DPO can be trained using standard
+gradient-based optimization methods.</p>
+<p>The differences between RLHF and DPO are illustrated in Figure <a data-reference="fig:dpo_vs_rlhf" data-reference-type="ref" href="#fig:dpo_vs_rlhf">6</a>, highlighting the removal of the
+reward modeling and reinforcement learning stages in DPO.</p>
+<figure id="fig:dpo_vs_rlhf">
+<img src="img/lecture28/dpo_vs_rlhf.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Comparison between Reinforcement Learning from Human
+Feedback (RLHF) and Direct Preference Optimization (DPO). RLHF trains a
+reward model and uses reinforcement learning to optimize the policy,
+while DPO directly optimizes the language model using preference data
+without an explicit reward model.</figcaption>
+</figure>
+<h4 data-number="6.4.4.4" id="comparison-with-rlhf."><span class="header-section-number">6.4.4.4</span> Comparison with RLHF.</h4>
+<ul>
+<li><p><strong>RLHF:</strong> More flexible, but requires reward
+modeling and RL optimization.</p></li>
+<li><p><strong>DPO:</strong> Simpler and more stable, but assumes
+preference data is sufficient.</p></li>
+</ul>
+<p>DPO has become increasingly popular due to its simplicity and strong
+empirical performance in preference-based alignment settings <span class="citation" data-cites="rafailov2023direct">(Rafailov et al.
+2023)</span>.</p>
+<h3 data-number="6.4.5" id="example-dataset"><span class="header-section-number">6.4.5</span> Example Dataset</h3>
+<p>The HH-RLHF dataset from Anthropic, where HH stands for
+<em>helpfulness and harmlessness</em> contains paired <em>chosen</em>
+and <em>rejected</em> responses and is used for preference-based
+training.</p>
+<h2 data-number="6.5" id="stage-4-fine-tuning"><span class="header-section-number">6.5</span> Stage 4: Fine-Tuning</h2>
+<p>Unlike instruction tuning and alignment, which aim to improve general
+task-following and human alignment, fine-tuning in this stage focuses on
+specialization. The goal is not to improve general-purpose capabilities,
+but to adapt the model to a specific domain or task distribution.</p>
+<p>After pretraining and alignment, there may still be a need to adapt
+an LLM to a new domain or specialized task. Examples include medical
+language, legal language, or multilingual settings involving
+underrepresented languages.</p>
+<p>In this stage, the pretrained model is adapted using additional
+domain-specific data. Note that the training method and loss function
+often remain the same as in pretraining: next-token prediction with
+cross-entropy loss.</p>
+<h3 data-number="6.5.1" id="advantages-and-limitations"><span class="header-section-number">6.5.1</span> Advantages and
+Limitations</h3>
+<p>Fine-tuning has the clear benefit of strong performance on the
+downstream task. However, it also has several costs:</p>
+<ul>
+<li><p>a curated labeled dataset is often needed for each new
+task,</p></li>
+<li><p>generalization may degrade,</p></li>
+<li><p>the model may exploit spurious features in the fine-tuning data,
+and</p></li>
+<li><p>updating all parameters of a large model is expensive.</p></li>
+</ul>
+<p>These computational and data demands motivate parameter-efficient
+techniques.</p>
+<h2 data-number="6.6" id="parameter-efficient-fine-tuning-with-lora"><span class="header-section-number">6.6</span> Parameter-Efficient Fine-Tuning
+with LoRA</h2>
+<p>Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning
+method that adapts large pretrained models by learning a structured
+low-rank update to existing weights, rather than modifying all
+parameters <span class="citation" data-cites="hu2022lora">(Hu et al.
+2022)</span>.</p>
+<h3 data-number="6.6.1" id="standard-fine-tuning-formulation"><span class="header-section-number">6.6.1</span> Standard fine-tuning
+formulation</h3>
+<p>In standard fine-tuning, a pretrained weight matrix <span class="math inline">\(W \in \mathbb{R}^{D \times N}\)</span> is updated
+to: <span class="math display">\[W' = W + \Delta W,\]</span> where
+<span class="math inline">\(\Delta W\)</span> is a full-rank matrix
+learned during training.</p>
+<p>This requires updating all <span class="math inline">\(DN\)</span>
+parameters, which is computationally expensive for large models.</p>
+<h3 data-number="6.6.2" id="low-rank-parameterization"><span class="header-section-number">6.6.2</span> Low-rank
+parameterization</h3>
+<p>LoRA constrains the update <span class="math inline">\(\Delta
+W\)</span> to be low-rank: <span class="math display">\[\Delta W =
+BA,\]</span> where <span class="math display">\[A \in \mathbb{R}^{r
+\times N}, \quad B \in \mathbb{R}^{D \times r}, \quad r \ll \min(D,
+N).\]</span></p>
+<p>The number of trainable parameters becomes: <span class="math display">\[r(D + N),\]</span> which is much smaller than
+<span class="math inline">\(DN\)</span> when <span class="math inline">\(r\)</span> is small.</p>
+<h3 data-number="6.6.3" id="modified-forward-pass"><span class="header-section-number">6.6.3</span> Modified forward pass</h3>
+<p>Let <span class="math inline">\(x \in \mathbb{R}^N\)</span> be an
+input vector. The standard linear transformation becomes: <span class="math display">\[Wx.\]</span></p>
+<p>With LoRA, the forward pass is modified to: <span class="math display">\[W'x = (W + BA)x = Wx + B(Ax).\]</span></p>
+<p>This can be interpreted as:</p>
+<ul>
+<li><p><span class="math inline">\(Wx\)</span>: the frozen pretrained
+computation,</p></li>
+<li><p><span class="math inline">\(B(Ax)\)</span>: a learned low-rank
+correction.</p></li>
+</ul>
+<p>Thus, LoRA augments the original model with a small, trainable
+residual component.</p>
+<h3 data-number="6.6.4" id="training-dynamics"><span class="header-section-number">6.6.4</span> Training dynamics</h3>
+<p>During training:</p>
+<ul>
+<li><p>The original weights <span class="math inline">\(W\)</span> are
+<strong>frozen</strong>.</p></li>
+<li><p>Only <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> are updated using gradient
+descent.</p></li>
+</ul>
+<p>This significantly reduces:</p>
+<ul>
+<li><p>memory usage (no need to store gradients for <span class="math inline">\(W\)</span>),</p></li>
+<li><p>compute cost (fewer parameters to update),</p></li>
+<li><p>risk of catastrophic forgetting (since <span class="math inline">\(W\)</span> is unchanged).</p></li>
+</ul>
+<h3 data-number="6.6.5" id="rank-constraint-interpretation"><span class="header-section-number">6.6.5</span> Rank constraint
+interpretation</h3>
+<p>The low-rank structure imposes a constraint on the space of allowable
+updates: <span class="math display">\[\mathrm{rank}(\Delta W) \le
+r.\]</span></p>
+<p>This can be interpreted as restricting adaptation to a
+low-dimensional subspace of the full parameter space. Empirically, this
+is sufficient for many downstream tasks, suggesting that task-specific
+updates lie in a low-rank manifold.</p>
+<h3 data-number="6.6.6" id="advantages"><span class="header-section-number">6.6.6</span> Advantages</h3>
+<ul>
+<li><p><strong>Parameter efficiency:</strong> Only a small fraction of
+parameters are trained.</p></li>
+<li><p><strong>Memory efficiency:</strong> Reduced storage for gradients
+and optimizer states.</p></li>
+<li><p><strong>Modularity:</strong> Multiple LoRA adapters can be
+trained for different tasks and swapped in and out.</p></li>
+<li><p><strong>Preservation of pretrained knowledge:</strong> Base model
+weights remain unchanged.</p></li>
+</ul>
+<h3 data-number="6.6.7" id="limitations-1"><span class="header-section-number">6.6.7</span> Limitations</h3>
+<ul>
+<li><p><strong>Rank selection:</strong> Choosing <span class="math inline">\(r\)</span> involves a tradeoff between
+expressivity and efficiency.</p></li>
+<li><p><strong>Limited expressivity:</strong> Very low-rank updates may
+not capture complex task-specific transformations.</p></li>
+<li><p><strong>Layer sensitivity:</strong> Performance depends on where
+LoRA is applied (e.g., attention vs feedforward layers).</p></li>
+</ul>
+<p>LoRA is widely used in modern LLM fine-tuning pipelines because it
+enables efficient adaptation of extremely large models without requiring
+full retraining.</p>
+<h2 data-number="6.7" id="kv-caching-for-efficient-inference"><span class="header-section-number">6.7</span> KV Caching for Efficient
+Inference</h2>
+<p>KV caching is an inference-time optimization for autoregressive
+Transformer models that significantly reduces redundant computation
+during sequence generation.</p>
+<h3 data-number="6.7.1" id="self-attention-computation"><span class="header-section-number">6.7.1</span> Self-attention
+computation</h3>
+<p>In a Transformer, self-attention for a sequence of length <span class="math inline">\(T\)</span> is computed as: <span class="math display">\[\text{Attention}(Q,K,V) =
+\text{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V,\]</span> where
+<span class="math inline">\(Q\)</span>, <span class="math inline">\(K\)</span>, and <span class="math inline">\(V\)</span> are the query, key, and value matrices.
+This formulation follows the standard Transformer self-attention
+mechanism introduced in <span class="citation" data-cites="vaswani2017attention">(Vaswani et al. 2017)</span>.</p>
+<p>At generation step <span class="math inline">\(t\)</span>, the model
+computes: <span class="math display">\[Q_t, \quad K_{1:t}, \quad
+V_{1:t},\]</span> and produces the output: <span class="math display">\[\text{Attention}(Q_t, K_{1:t},
+V_{1:t}).\]</span></p>
+<h3 data-number="6.7.2" id="naive-autoregressive-decoding"><span class="header-section-number">6.7.2</span> Naive autoregressive
+decoding</h3>
+<p>Without caching, at each step <span class="math inline">\(t\)</span>,
+the model recomputes keys and values for the entire sequence: <span class="math display">\[K_{1:t}, \quad V_{1:t}.\]</span></p>
+<p>This leads to a total computational cost of: <span class="math display">\[\mathcal{O}(T^2),\]</span> since each new token
+requires recomputing attention over all previous tokens.</p>
+<h3 data-number="6.7.3" id="key-idea-of-kv-caching"><span class="header-section-number">6.7.3</span> Key idea of KV caching</h3>
+<p>During autoregressive generation, a language model produces tokens
+one at a time. At each step <span class="math inline">\(t\)</span>, the
+model must compute attention over all previously generated tokens. A
+naive implementation recomputes the key and value representations for
+the entire sequence at every step, resulting in quadratic time
+complexity.</p>
+<p>The key observation is that past tokens do not change during
+generation, so their key and value representations can be reused instead
+of recomputed.</p>
+<p>At step <span class="math inline">\(t\)</span>, instead of
+recomputing: <span class="math display">\[K_{1:t}, \quad
+V_{1:t},\]</span> the model reuses cached values: <span class="math display">\[K_{1:t-1}, \quad V_{1:t-1},\]</span> and only
+computes: <span class="math display">\[K_t, \quad V_t.\]</span></p>
+<p>The attention computation becomes: <span class="math display">\[\text{Attention}(Q_t, [K_{1:t-1}, K_t],
+[V_{1:t-1}, V_t]).\]</span></p>
+<figure id="fig:kv_cache">
+<img src="img/lecture28/kv_cache.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>KV caching for efficient autoregressive inference. Top:
+Standard attention recomputes all key and value vectors at each step,
+resulting in quadratic complexity. Bottom: KV caching reuses previously
+computed key and value vectors and computes only the new token’s
+representations, reducing per-step computation to linear
+complexity.</figcaption>
+</figure>
+<p>Figure <a data-reference="fig:kv_cache" data-reference-type="ref" href="#fig:kv_cache">7</a> illustrates this process. The top
+panel shows standard attention, where all key and value vectors are
+recomputed for every token. This results in an <span class="math inline">\(N \times N\)</span> attention computation and
+quadratic cost.</p>
+<p>In contrast, the bottom panel shows KV caching during inference.
+Previously computed keys and values are stored and reused, and only the
+new query, key, and value for the latest token are computed. The
+attention operation is therefore reduced to a <span class="math inline">\(1 \times N\)</span> computation at each step.</p>
+<h3 data-number="6.7.4" id="computational-impact"><span class="header-section-number">6.7.4</span> Computational impact</h3>
+<p>Without KV caching, generating a sequence of length <span class="math inline">\(T\)</span> requires recomputing attention over all
+tokens at each step, leading to: <span class="math display">\[\mathcal{O}(T^2).\]</span></p>
+<p>With KV caching, each step performs attention only between the
+current query and the cached keys and values, resulting in: <span class="math display">\[\mathcal{O}(T).\]</span></p>
+<p>This results in a significant speedup during inference, and forms the
+basis of modern efficient attention implementations widely used in
+modern large-scale LLM deployments <span class="citation" data-cites="brown2020gpt3">(Brown et al. 2020)</span>.</p>
+<h3 data-number="6.7.5" id="trade-offs"><span class="header-section-number">6.7.5</span> Trade-offs</h3>
+<p>While KV caching improves computational efficiency, it introduces
+additional memory overhead. The model must store all past key and value
+tensors: <span class="math display">\[K_{1:T}, \quad
+V_{1:T}.\]</span></p>
+<p>This leads to memory usage that grows linearly with sequence length:
+<span class="math display">\[\mathcal{O}(T \cdot d_k).\]</span></p>
+<p>Thus, KV caching trades computation for memory, and can become
+memory-intensive for long sequences. Despite this trade-off, it is
+widely used due to its substantial speedup in autoregressive
+generation.</p>
+<h3 data-number="6.7.6" id="practical-implications"><span class="header-section-number">6.7.6</span> Practical implications</h3>
+<p>KV caching is essential for real-time LLM applications such as:</p>
+<ul>
+<li><p>chat systems,</p></li>
+<li><p>code generation,</p></li>
+<li><p>interactive assistants.</p></li>
+</ul>
+<p>Without caching, inference latency would grow rapidly with sequence
+length, making deployment impractical.</p>
+<p>However, long-context scenarios introduce additional challenges:</p>
+<ul>
+<li><p>increased GPU memory usage,</p></li>
+<li><p>limits on maximum context length,</p></li>
+<li><p>need for techniques such as memory compression or sliding-window
+attention.</p></li>
+</ul>
+<p>Thus, KV caching represents a tradeoff between computation and memory
+that is central to efficient LLM deployment.</p>
+<h1 data-number="7" id="evaluation-of-large-language-models"><span class="header-section-number">7.</span> Evaluation of Large Language
+Models</h1>
+<p>Evaluating an LLM depends on the intended use. Evaluation is
+typically divided into three categories:</p>
+<ol>
+<li><p><strong>Intrinsic metrics</strong> such as log-likelihood and
+perplexity, which measure next-token prediction quality,</p></li>
+<li><p><strong>Overlap-based metrics</strong> such as BLEU and ROUGE,
+which compare generated outputs with reference text, and</p></li>
+<li><p><strong>Benchmark-based and human evaluation</strong>, which
+assess reasoning ability, generalization, and alignment with human
+preferences.</p></li>
+</ol>
+<h2 data-number="7.1" id="log-likelihood"><span class="header-section-number">7.1</span> Log-Likelihood</h2>
+<p>Because an autoregressive language model defines <span class="math display">\[P(y_{1:n}) = \prod_{i=1}^{n} P(y_i\mid
+y_{&lt;i}),\]</span> a natural way to score a sequence is its
+log-likelihood: <span class="math display">\[\log P(y_{1:n}) = \log
+\prod_{i=1}^{n} P(y_i\mid y_{&lt;i})
+= \sum_{i=1}^{n} \log P(y_i\mid y_{&lt;i}).\]</span> A better language
+model should assign higher probability, and therefore higher
+log-likelihood, to realistic test sequences.</p>
+<p>However, raw sequence probability has two issues. It shrinks as the
+sequence becomes longer, and it depends on the size of the evaluation
+set. This motivates a normalized metric.</p>
+<h2 data-number="7.2" id="perplexity"><span class="header-section-number">7.2</span> Perplexity</h2>
+<p>Perplexity is the inverse probability of a test set normalized by the
+number of words or tokens. For a test set <span class="math inline">\(w_{1:n}\)</span> and model <span class="math inline">\(\theta\)</span>, <span class="math display">\[\mathrm{Perplexity}_\theta(w_{1:n}) =
+\sqrt[n]{\frac{1}{P_\theta(w_{1:n})}}.\]</span> This assumes
+independence across tokens under the chain rule decomposition and
+corresponds to the exponential of the average negative log-likelihood
+per token. Equivalently, perplexity can be understood as the exponential
+of the average negative log-likelihood per token. Lower perplexity
+indicates that the model is less “surprised” by the test sequence and is
+therefore a better next-token predictor.</p>
+<h2 data-number="7.3" id="bleu"><span class="header-section-number">7.3</span> BLEU</h2>
+<p>BLEU (Bilingual Evaluation Understudy) is a reference-based metric
+originally designed for machine translation <span class="citation" data-cites="papineni2002bleu">(Papineni et al. 2002)</span>. It compares
+generated text against one or more reference outputs using clipped <span class="math inline">\(n\)</span>-gram precision.</p>
+<p>Consider a simple example. A degenerate output may contain many
+repeated common words such as “the,” which would artificially inflate
+naive precision. BLEU avoids this by using <em>modified precision</em>,
+in which candidate <span class="math inline">\(n\)</span>-gram counts
+are clipped by their maximum count in the reference set.</p>
+<p>For a candidate output <span class="math inline">\(\hat{y}\)</span>,
+the unigram precision is <span class="math display">\[p_1 =
+\frac{\sum_{\text{unigrams}\in \hat{y}}
+\mathrm{Count}_{\mathrm{clip}}(\text{unigram})}{\sum_{\text{unigrams}\in
+\hat{y}} \mathrm{Count}(\text{unigram})},\]</span> and more generally
+the <span class="math inline">\(n\)</span>-gram precision is <span class="math display">\[p_n = \frac{\sum_{n\text{-grams}\in \hat{y}}
+\mathrm{Count}_{\mathrm{clip}}(n\text{-gram})}{\sum_{n\text{-grams}\in
+\hat{y}} \mathrm{Count}(n\text{-gram})}.\]</span> BLEU then combines
+multiple <span class="math inline">\(n\)</span>-gram precisions
+geometrically and applies a brevity penalty <span class="math inline">\(BP\)</span> to discourage overly short outputs:
+<span class="math display">\[\mathrm{BLEU} = BP\cdot
+\exp\left(\sum_{n=1}^{N} w_n \log p_n\right),
+\qquad w_n = \frac{1}{N}.\]</span></p>
+<p>BLEU is thus closest in spirit to supervised ground-truth matching,
+though in generation tasks there can be multiple valid outputs for the
+same input.</p>
+<h2 data-number="7.4" id="rouge"><span class="header-section-number">7.4</span> ROUGE</h2>
+<p>ROUGE is similar to BLEU but emphasizes recall rather than precision
+<span class="citation" data-cites="lin2004rouge">(Lin 2004)</span>. It
+is commonly used in summarization and related generation tasks where
+covering the important reference content matters.</p>
+<p>Consider simple ROUGE-1 and ROUGE-2 examples to show that ROUGE
+measures how much of the reference content is recovered by the generated
+output. In practice, higher ROUGE indicates stronger overlap with
+reference summaries or target outputs.</p>
+<h2 data-number="7.5" id="illustrative-comparison-of-evaluation-metrics"><span class="header-section-number">7.5</span> Illustrative Comparison of
+Evaluation Metrics</h2>
+<p>To better understand the strengths and weaknesses of different
+evaluation metrics, consider the following reference sentence and
+several candidate outputs. The examples are intentionally chosen to
+highlight different behaviors: exact match, paraphrasing, omission,
+repetition, and complete semantic mismatch.</p>
+<h4 data-number="7.5.0.1" id="reference-text."><span class="header-section-number">7.5.0.1</span> Reference text.</h4>
+<blockquote>
+<p><em>The cat sat on the mat near the window.</em></p>
+</blockquote>
+<h4 data-number="7.5.0.2" id="candidate-outputs."><span class="header-section-number">7.5.0.2</span> Candidate outputs.</h4>
+<ol>
+<li><p><strong>Candidate A (exact match):</strong> <em>The cat sat on
+the mat near the window.</em></p></li>
+<li><p><strong>Candidate B (paraphrase):</strong> <em>A cat sat on the
+mat by the window.</em></p></li>
+<li><p><strong>Candidate C (partial output):</strong> <em>The cat sat on
+the mat.</em></p></li>
+<li><p><strong>Candidate D (repetitive output):</strong> <em>the the the
+the the the the</em></p></li>
+<li><p><strong>Candidate E (unrelated output):</strong> <em>Heavy rain
+flooded the city streets overnight.</em></p></li>
+</ol>
+<h4 data-number="7.5.0.3" id="illustrative-log-likelihood-and-perplexity."><span class="header-section-number">7.5.0.3</span> Illustrative log-likelihood
+and perplexity.</h4>
+<p>Log-likelihood and perplexity depend on the probabilities assigned by
+a particular language model, so the values below are
+<em>illustrative</em>. They are chosen to show how a fluent but
+incomplete output may still receive a relatively good perplexity score,
+while overlap-based metrics may penalize it more strongly.</p>
+<div id="tab:llm_metric_example_ll">
+<table>
+<caption>Illustrative log-likelihood and perplexity values for the
+candidate outputs. Higher log-likelihood and lower perplexity indicate
+that the sequence is more probable under the language model.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>Candidate</strong></th>
+<th style="text-align: center;"><strong>Length</strong></th>
+<th style="text-align: center;"><strong>Log-Likelihood</strong></th>
+<th style="text-align: center;"><strong>Perplexity</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">-8.1</td>
+<td style="text-align: center;">2.46</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">-9.0</td>
+<td style="text-align: center;">2.72</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">-4.8</td>
+<td style="text-align: center;">2.23</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">-9.1</td>
+<td style="text-align: center;">3.67</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">E</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">-12.6</td>
+<td style="text-align: center;">6.05</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 data-number="7.5.0.4" id="illustrative-bleu-1-and-rouge-1-calculations."><span class="header-section-number">7.5.0.4</span> Illustrative BLEU-1 and
+ROUGE-1 calculations.</h4>
+<p>To keep the example simple, consider unigram overlap only. Let the
+reference contain 9 tokens: <span class="math display">\[\{\text{The,
+cat, sat, on, the, mat, near, the, window}\}.\]</span></p>
+<p>For BLEU-1, we use clipped unigram precision, optionally combined
+with a brevity penalty. For ROUGE-1, we use unigram recall: <span class="math display">\[\text{ROUGE-1} = \frac{\text{number of
+overlapping unigrams}}{\text{number of reference
+unigrams}}.\]</span></p>
+<p>For example, Candidate C is <span class="math display">\[\textit{The
+cat sat on the mat,}\]</span> which contains 6 tokens, all of which
+overlap with the reference. Therefore: <span class="math display">\[\text{precision} = \frac{6}{6} = 1.0,
+\qquad
+\text{ROUGE-1} = \frac{6}{9} \approx 0.667.\]</span> Although the
+candidate is incomplete, its unigram precision is perfect. This
+demonstrates why overlap metrics must be interpreted carefully.</p>
+<p>Similarly, Candidate D is <span class="math display">\[\textit{the
+the the the the the the.}\]</span> Because the reference contains the
+token <em>the</em> only three times, the clipped unigram overlap is 3.
+Hence: <span class="math display">\[\text{precision} = \frac{3}{7}
+\approx 0.429,
+\qquad
+\text{ROUGE-1} = \frac{3}{9} \approx 0.333.\]</span> This shows how
+BLEU-style clipped precision penalizes repetition.</p>
+<p>The resulting illustrative scores are shown in Table <a data-reference="tab:llm_metric_example_overlap" data-reference-type="ref" href="#tab:llm_metric_example_overlap">4</a>.</p>
+<div id="tab:llm_metric_example_overlap">
+<table>
+<caption>Illustrative BLEU-1 and ROUGE-1 scores for the candidate
+outputs. BLEU-1 uses clipped unigram precision and brevity penalty (BP),
+while ROUGE-1 emphasizes recall.</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>Candidate</strong></th>
+<th style="text-align: center;"><strong>BLEU-1 Precision</strong></th>
+<th style="text-align: center;"><strong>BLEU-1 (with BP)</strong></th>
+<th style="text-align: center;"><strong>ROUGE-1 Recall</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">1.000</td>
+<td style="text-align: center;">1.000</td>
+<td style="text-align: center;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">0.778</td>
+<td style="text-align: center;">0.778</td>
+<td style="text-align: center;">0.778</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">1.000</td>
+<td style="text-align: center;">0.607</td>
+<td style="text-align: center;">0.667</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">0.429</td>
+<td style="text-align: center;">0.323</td>
+<td style="text-align: center;">0.333</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">E</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.000</td>
+<td style="text-align: center;">0.000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4 data-number="7.5.0.5" id="interpretation.-1"><span class="header-section-number">7.5.0.5</span> Interpretation.</h4>
+<p>This example highlights several important differences among the
+metrics:</p>
+<ul>
+<li><p><strong>Log-likelihood</strong> measures how probable a sequence
+is under a language model, but raw values depend strongly on sequence
+length.</p></li>
+<li><p><strong>Perplexity</strong> normalizes log-likelihood by length,
+making it easier to compare sequences of different sizes. However, a
+fluent but incomplete output such as Candidate C can still obtain a good
+perplexity.</p></li>
+<li><p><strong>BLEU</strong> rewards token overlap and penalizes
+repetition through clipped precision and brevity penalty, but it may
+undervalue semantically correct paraphrases.</p></li>
+<li><p><strong>ROUGE</strong> rewards coverage of reference content,
+making it useful for summarization, but it does not directly measure
+fluency or factual correctness.</p></li>
+</ul>
+<p>Taken together, these examples show that no single metric is
+sufficient. Log-likelihood and perplexity evaluate how well a model
+predicts text, while BLEU and ROUGE evaluate overlap with a reference.
+In practice, these metrics are often used together, along with human
+evaluation and downstream benchmarks.</p>
+<h2 data-number="7.6" id="benchmarks"><span class="header-section-number">7.6</span> Benchmarks</h2>
+<p>In addition to scalar metrics, LLMs are often evaluated on benchmark
+suites. Metrics such as perplexity and BLEU capture local prediction
+quality or overlap, but they do not fully capture reasoning, knowledge,
+or generalization. Benchmark suites are therefore used to evaluate
+higher-level capabilities of language models across diverse tasks. These
+benchmarks are often evaluated in zero-shot or few-shot settings,
+reflecting how LLMs are used in practice.</p>
+<h3 data-number="7.6.1" id="arc"><span class="header-section-number">7.6.1</span> ARC</h3>
+<p>The AI2 Reasoning Challenge (ARC) benchmark contains science
+questions intended to require multi-step reasoning, world knowledge, and
+commonsense understanding <span class="citation" data-cites="clark2018arc">(Clark et al. 2018)</span>. It evaluates
+whether a model can do more than surface-level pattern matching.</p>
+<h3 data-number="7.6.2" id="mmlu"><span class="header-section-number">7.6.2</span> MMLU</h3>
+<p>Massive Multitask Language Understanding (MMLU) is a broad benchmark
+designed to measure knowledge and reasoning ability across many subjects
+<span class="citation" data-cites="hendrycks2021mmlu">(Hendrycks et al.
+2021)</span>. Note that MMLU is a zero-shot or few-shot benchmark for
+testing whether a model can use acquired knowledge across tasks without
+heavy task-specific retraining.</p>
+<h3 data-number="7.6.3" id="additional-benchmarks"><span class="header-section-number">7.6.3</span> Additional Benchmarks</h3>
+<p>Beyond ARC and MMLU, several large-scale benchmark suites are used to
+evaluate LLMs:</p>
+<ul>
+<li><p><strong>BIG-bench:</strong> A diverse collection of tasks
+designed to probe emergent abilities and generalization across
+reasoning, language understanding, and symbolic tasks <span class="citation" data-cites="srivastava2023bigbench">(Srivastava et al.
+2023)</span>.</p></li>
+<li><p><strong>HELM (Holistic Evaluation of Language Models):</strong> A
+comprehensive framework that evaluates models across multiple dimensions
+including accuracy, fairness, robustness, and efficiency <span class="citation" data-cites="liang2023helm">(Liang et al.
+2023)</span>.</p></li>
+<li><p><strong>Human evaluation:</strong> In many real-world
+applications, human judgment remains the gold standard for evaluating
+helpfulness, correctness, and safety of generated outputs.</p></li>
+</ul>
+<h4 data-number="7.6.3.1" id="interpretation-of-benchmark-performance."><span class="header-section-number">7.6.3.1</span> Interpretation of benchmark
+performance.</h4>
+<p>While benchmark scores provide a convenient way to compare models,
+they should be interpreted with care. High performance on benchmarks
+such as ARC or MMLU indicates strong reasoning ability and broad
+knowledge, but does not necessarily translate to reliable real-world
+behavior. Models may exploit dataset biases, memorize patterns, or
+perform well under specific prompting conditions without truly
+understanding the task.</p>
+<p>Moreover, different benchmarks emphasize different capabilities. For
+example, ARC focuses on reasoning, MMLU emphasizes domain knowledge, and
+HELM evaluates broader system-level properties such as fairness and
+robustness. As a result, no single benchmark provides a complete picture
+of model quality. In practice, multiple benchmarks and human evaluation
+are used together to assess overall performance.</p>
+<h1 data-number="8" id="summary"><span class="header-section-number">8.</span> Summary</h1>
+<ol>
+<li><p><strong>Language modeling foundation.</strong> An LLM begins as a
+probabilistic sequence model that predicts the next token using
+left-to-right factorization.</p></li>
+<li><p><strong>Representation choice.</strong> Tokens, rather than words
+or characters alone, provide an efficient unit of modeling.</p></li>
+<li><p><strong>Architectural shift.</strong> Neural language models,
+especially Transformer-based models, replace rigid Markov assumptions
+with learned contextual representations.</p></li>
+<li><p><strong>Foundation-model perspective.</strong> Modern LLMs are
+not just large classifiers or task-specific predictors; they are
+general-purpose sequence models that can be adapted to many
+tasks.</p></li>
+<li><p><strong>Training pipeline.</strong> Practical LLMs require more
+than pretraining. Instruction tuning teaches task following, alignment
+introduces human preference optimization, and fine-tuning supports
+domain adaptation.</p></li>
+<li><p><strong>Efficiency methods.</strong> LoRA reduces fine-tuning
+cost by constraining updates to low-rank parameterizations, while KV
+caching accelerates autoregressive inference by reusing past attention
+states.</p></li>
+<li><p><strong>Evaluation.</strong> Perplexity measures intrinsic
+next-token prediction quality, whereas BLEU, ROUGE, ARC, and MMLU
+measure performance on downstream generation and reasoning
+tasks.</p></li>
+</ol>
+<p>Taken together, these ideas explain why LLMs have become central to
+modern NLP. At their core, they are still language models trained to
+predict tokens, but scale, architecture, data, and post-training have
+transformed that simple objective into a powerful general modeling
+framework.</p>
+<h1 class="unnumbered" id="bibliography">References</h1>
+<div class="references csl-bib-body hanging-indent" id="refs" role="list">
+<div class="csl-entry" id="ref-bai2022helpful" role="listitem">
+Bai, Yuntao, Andy Jones, Kamal Ndousse, Amanda Askell, Anna Chen, Nova
+DasSarma, Dawn Drain, et al. 2022. <span>“Training a Helpful and
+Harmless Assistant with Reinforcement Learning from Human
+Feedback.”</span> <a href="https://arxiv.org/abs/2204.05862" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2204.05862</a>.
+</div>
+<div class="csl-entry" id="ref-bengio2003neural" role="listitem">
+Bengio, Yoshua, Réjean Ducharme, and Pascal Vincent. 2000. <span>“A
+Neural Probabilistic Language Model.”</span> In <em>Advances in Neural
+Information Processing Systems</em>, edited by T. Leen, T. Dietterich,
+and V. Tresp. Vol. 13. MIT Press. <a href="https://proceedings.neurips.cc/paper_files/paper/2000/file/728f206c2a01bf572b5940d7d9a8fa4c-Paper.pdf" rel="noopener noreferrer" target="_blank">https://proceedings.neurips.cc/paper_files/paper/2000/file/728f206c2a01bf572b5940d7d9a8fa4c-Paper.pdf</a>.
+</div>
+<div class="csl-entry" id="ref-brown2020gpt3" role="listitem">
+Brown, Tom B., Benjamin Mann, Nick Ryder, Melanie Subbiah, Jared Kaplan,
+Prafulla Dhariwal, Arvind Neelakantan, et al. 2020. <span>“Language
+Models Are Few-Shot Learners.”</span> In <em>Proceedings of the 34th
+International Conference on Neural Information Processing Systems</em>.
+NIPS ’20. Red Hook, NY, USA: Curran Associates Inc.
+</div>
+<div class="csl-entry" id="ref-clark2018arc" role="listitem">
+Clark, Peter, Isaac Cowhey, Oren Etzioni, Tushar Khot, Ashish Sabharwal,
+Carissa Schoenick, and Oyvind Tafjord. 2018. <span>“Think You Have
+Solved Question Answering? Try ARC, the AI2 Reasoning Challenge.”</span>
+<a href="https://arxiv.org/abs/1803.05457" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1803.05457</a>.
+</div>
+<div class="csl-entry" id="ref-commoncrawl" role="listitem">
+Common Crawl Foundation. 2008. <span>“Common Crawl.”</span> <a href="https://commoncrawl.org/" rel="noopener noreferrer" target="_blank">https://commoncrawl.org/</a>.
+</div>
+<div class="csl-entry" id="ref-hendrycks2021mmlu" role="listitem">
+Hendrycks, Dan, Collin Burns, Steven Basart, Andy Zou, Mantas Mazeika,
+Dawn Song, and Jacob Steinhardt. 2021. <span>“Measuring Massive
+Multitask Language Understanding.”</span> <a href="https://arxiv.org/abs/2009.03300" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2009.03300</a>.
+</div>
+<div class="csl-entry" id="ref-hu2022lora" role="listitem">
+Hu, Edward J., Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi
+Li, Shean Wang, Lu Wang, and Weizhu Chen. 2022. <span>“LoRA: Low-Rank
+Adaptation of Large Language Models.”</span> In <em>ICLR</em>.
+OpenReview.net. <a href="http://dblp.uni-trier.de/db/conf/iclr/iclr2022.html#HuSWALWWC22" rel="noopener noreferrer" target="_blank">http://dblp.uni-trier.de/db/conf/iclr/iclr2022.html#HuSWALWWC22</a>.
+</div>
+<div class="csl-entry" id="ref-kaplan2020scaling" role="listitem">
+Kaplan, Jared, Sam McCandlish, Tom Henighan, Tom B. Brown, Benjamin
+Chess, Rewon Child, Scott Gray, Alec Radford, Jeffrey Wu, and Dario
+Amodei. 2020. <span>“Scaling Laws for Neural Language Models.”</span> <a href="https://arxiv.org/abs/2001.08361" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2001.08361</a>.
+</div>
+<div class="csl-entry" id="ref-gpt3blog" role="listitem">
+Kraft, Benedikt M. 2020. <span>“Why GPT-3 Matters.”</span> <a class="uri" href="https://bmk.sh/2020/05/29/GPT-3-A-Brief-Summary/" rel="noopener noreferrer" target="_blank">https://bmk.sh/2020/05/29/GPT-3-A-Brief-Summary/</a>.
+</div>
+<div class="csl-entry" id="ref-liang2023helm" role="listitem">
+Liang, Percy, Rishi Bommasani, Tony Lee, Dimitris Tsipras, Dilara Soylu,
+Michihiro Yasunaga, Yian Zhang, et al. 2023. <span>“Holistic Evaluation
+of Language Models.”</span> <a href="https://arxiv.org/abs/2211.09110" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2211.09110</a>.
+</div>
+<div class="csl-entry" id="ref-lin2004rouge" role="listitem">
+Lin, Chin-Yew. 2004. <span>“<span>ROUGE</span>: A Package for Automatic
+Evaluation of Summaries.”</span> In <em>Text Summarization Branches
+Out</em>, 74–81. Barcelona, Spain: Association for Computational
+Linguistics. <a href="https://aclanthology.org/W04-1013/" rel="noopener noreferrer" target="_blank">https://aclanthology.org/W04-1013/</a>.
+</div>
+<div class="csl-entry" id="ref-longpre2023flan" role="listitem">
+Longpre, Shayne, Le Hou, Tu Vu, Albert Webson, Hyung Won Chung, Yi Tay,
+Denny Zhou, et al. 2023. <span>“The Flan Collection: Designing Data and
+Methods for Effective Instruction Tuning.”</span> In <em>Proceedings of
+the 40th International Conference on Machine Learning</em>, edited by
+Andreas Krause, Emma Brunskill, Kyunghyun Cho, Barbara Engelhardt, Sivan
+Sabato, and Jonathan Scarlett, 202:22631–48. Proceedings of Machine
+Learning Research. PMLR. <a href="https://proceedings.mlr.press/v202/longpre23a.html" rel="noopener noreferrer" target="_blank">https://proceedings.mlr.press/v202/longpre23a.html</a>.
+</div>
+<div class="csl-entry" id="ref-papineni2002bleu" role="listitem">
+Papineni, Kishore, Salim Roukos, Todd Ward, and Wei-Jing Zhu. 2002.
+<span>“BLEU: A Method for Automatic Evaluation of Machine
+Translation.”</span> In <em>Proceedings of the 40th Annual Meeting on
+Association for Computational Linguistics</em>, 311–18. ACL ’02. USA:
+Association for Computational Linguistics. <a href="https://doi.org/10.3115/1073083.1073135" rel="noopener noreferrer" target="_blank">https://doi.org/10.3115/1073083.1073135</a>.
+</div>
+<div class="csl-entry" id="ref-rafailov2023direct" role="listitem">
+Rafailov, Rafael, Archit Sharma, Eric Mitchell, Stefano Ermon,
+Christopher D. Manning, and Chelsea Finn. 2023. <span>“Direct Preference
+Optimization: Your Language Model Is Secretly a Reward Model.”</span> <a href="https://arxiv.org/abs/2305.18290" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2305.18290</a>.
+</div>
+<div class="csl-entry" id="ref-raffel2020t5" role="listitem">
+Raffel, Colin, Noam Shazeer, Adam Roberts, Katherine Lee, Sharan Narang,
+Michael Matena, Yanqi Zhou, Wei Li, and Peter J. Liu. 2020.
+<span>“Exploring the Limits of Transfer Learning with a Unified
+Text-to-Text Transformer.”</span> <em>J. Mach. Learn. Res.</em> 21 (1).
+</div>
+<div class="csl-entry" id="ref-srivastava2023bigbench" role="listitem">
+Srivastava, Aarohi, Abhinav Rastogi, Abhishek Rao, Abu Awal Md Shoeb,
+Abubakar Abid, Adam Fisch, Adam R. Brown, et al. 2023. <span>“Beyond the
+Imitation Game: Quantifying and Extrapolating the Capabilities of
+Language Models.”</span> <a href="https://arxiv.org/abs/2206.04615" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2206.04615</a>.
+</div>
+<div class="csl-entry" id="ref-vaswani2017attention" role="listitem">
+Vaswani, Ashish, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion
+Jones, Aidan N. Gomez, Lukasz Kaiser, and Illia Polosukhin. 2017.
+<span>“Attention Is All You Need.”</span> <a href="https://arxiv.org/abs/1706.03762" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/1706.03762</a>.
+</div>
+<div class="csl-entry" id="ref-wei2021finetuned" role="listitem">
+Wei, Jason, Maarten Bosma, Vincent Y. Zhao, Kelvin Guu, Adams Wei Yu,
+Brian Lester, Nan Du, Andrew M. Dai, and Quoc V. Le. 2022.
+<span>“Finetuned Language Models Are Zero-Shot Learners.”</span> <a href="https://arxiv.org/abs/2109.01652" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2109.01652</a>.
+</div>
+<div class="csl-entry" id="ref-wei2022emergent" role="listitem">
+Wei, Jason, Yi Tay, Rishi Bommasani, Colin Raffel, Barret Zoph,
+Sebastian Borgeaud, Dani Yogatama, et al. 2022. <span>“Emergent
+Abilities of Large Language Models.”</span> <a href="https://arxiv.org/abs/2206.07682" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2206.07682</a>.
+</div>
+<div class="csl-entry" id="ref-zhao2023survey" role="listitem">
+Zhao, Wayne Xin, Kun Zhou, Junyi Li, Tianyi Tang, Xiaolei Wang, Yupeng
+Hou, Yingqian Min, et al. 2026. <span>“A Survey of Large Language
+Models.”</span> <a href="https://arxiv.org/abs/2303.18223" rel="noopener noreferrer" target="_blank">https://arxiv.org/abs/2303.18223</a>.
+</div>
 </div>
 
 </main>

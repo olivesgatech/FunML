@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>GMM Clustering</title>
+  <title>Gaussian Mixture Models and Image Segmentation</title>
   <link rel="stylesheet" href="../assets/style.css"/>
   <script>
 window.MathJax = {
@@ -109,21 +109,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
-<p>In the previous lecture we introduced k-means clustering and its
-variants as <strong>hard-clustering</strong> methods. In this lecture,
-we extend clustering to a probabilistic setting by introducing
-<strong>Gaussian Mixture Models (GMMs)</strong>, which perform
-<strong>soft clustering</strong> by modeling data as a mixture of
-multivariate Gaussians and inferring posterior responsibilities. We then
+<p>In the previous lecture we introduced k-means clustering as a
+hard-clustering method. In this lecture, we extend clustering to a
+probabilistic setting by introducing <strong>Gaussian Mixture Models
+(GMMs)</strong>, which perform <strong>soft clustering</strong>. We
 study how GMM parameters are estimated using the
-<strong>Expectation–Maximization (EM)</strong> algorithm (and why EM is
-needed in latent-variable models compared to direct MLE), and we
-evaluate clustering quality using both <strong>internal</strong> metrics
-(e.g., Davies–Bouldin, Dunn, Silhouette) and <strong>external</strong>
-metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth
-is available. Finally, we briefly discuss extensions and applications of
-clustering, including <strong>mean shift</strong>, <strong>Adjusted Rand
-Index (ARI)</strong>, and <strong>image segmentation</strong>.</p>
+<strong>Expectation–Maximization (EM)</strong> algorithm. Finally, we
+explore <strong>image segmentation as a clustering problem</strong>,
+including feature representations, color spaces, and clustering-based
+segmentation methods.</p>
 <h1 data-number="2" id="gmm-clustering"><span class="header-section-number">2.</span> GMM Clustering</h1>
 <h2 data-number="2.1" id="definition-of-gmm-clustering"><span class="header-section-number">2.1</span> Definition of GMM
 Clustering</h2>
@@ -148,7 +142,7 @@ deviation);<br/>
 <span class="math inline">\(\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in
 \mathbb{R}\)</span> is the <strong>cluster coefficients</strong>
 (Multi-variant equivalent of prior/likelihood) selecting <span class="math inline">\(\mathcal{N}(x|\mu_{j}\Sigma_{j})\)</span>,
-satisfying <span class="math inline">\(\Sigma_{j}\pi_{j} =
+satisfying <span class="math inline">\(\sum_{j=1}^k \pi_j =
 1\)</span><br/>
 </p>
 <h4 data-number="2.1.0.1" id="gmm-as-a-generative-model."><span class="header-section-number">2.1.0.1</span> GMM as a generative
@@ -161,7 +155,7 @@ indicator variable <span class="math inline">\(z_i \in
 distribution over components, <span class="math inline">\(p(z_i=j)=\pi_j\)</span> with <span class="math inline">\(\pi_j \ge 0\)</span> and <span class="math inline">\(\sum_{j=1}^k \pi_j = 1\)</span>, and (ii) a
 class-conditional distribution for the data given the component, <span class="math inline">\(p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j,
 \Sigma_j)\)</span>. Marginalizing out the latent variable <span class="math inline">\(z_i\)</span> yields the mixture density <span class="math inline">\(Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j,
-\Sigma_j)\)</span>.</p>
+\Sigma_j)\)</span> <span class="citation" data-cites="2"></span>.</p>
 <h4 data-number="2.1.0.2" id="soft-clustering-interpretation."><span class="header-section-number">2.1.0.2</span> Soft clustering
 interpretation.</h4>
 <p>Unlike hard clustering methods (e.g., k-means) that assign each point
@@ -183,7 +177,7 @@ and non-spherical shapes. With a sufficiently large number of mixture
 components (and appropriate parameters), mixtures of Gaussians can
 approximate a wide class of smooth probability densities on <span class="math inline">\(\mathbb{R}^p\)</span> to arbitrary accuracy. This
 is one reason GMMs are widely used as a general-purpose probabilistic
-model for clustering and density estimation.</p>
+model for clustering and density estimation <span class="citation" data-cites="2"></span>.</p>
 <h4 data-number="2.1.0.4" id="connection-to-naive-bayes-and-k-means."><span class="header-section-number">2.1.0.4</span> Connection to Naive Bayes
 and k-means.</h4>
 <p>A helpful way to view GMM clustering is as combining ideas from
@@ -206,12 +200,13 @@ Clustering</h2>
 GMM clustering, and write the likelihood function and log likelihood
 function as follows:<span class="math display">\[L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\]</span>
 <span class="math display">\[LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]</span>
-However, since the existing of clustering structure (log of sum), there
+However, since the existence of clustering structure (log of sum), there
 is <strong>no close-form maxima</strong> for the likelihood function
 except for <span class="math inline">\(k=1\)</span> (<span class="math inline">\(\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i\)</span>,
 <span class="math inline">\(\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}\)</span>).<br/>
 Therefore, we could utilize the <strong>Expectation Maximization (EM)
-Algorithm</strong>, which iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the
+Algorithm</strong> <span class="citation" data-cites="1"></span>, which
+iteratively estimates the mean <span class="math inline">\(\mu_j\)</span> with <span class="math inline">\(\gamma_i^{j}\)</span>, and in turn estimates the
 posterior.<br/>
 The posterior <span class="math inline">\(\gamma_i^{j}\)</span>, which
 is also known as the <strong>responsibility</strong> of cluster j for
@@ -237,16 +232,16 @@ step 2.</p></li>
 </ol>
 <h2 data-number="2.3" id="aside-em-vs-mle"><span class="header-section-number">2.3</span> Aside: EM vs MLE</h2>
 <p>It is important to distinguish between Maximum Likelihood Estimation
-(MLE) and the Expectation–Maximization (EM) algorithm introduced above.
-In classical MLE, we directly maximize the likelihood function with
-respect to the model parameters. This is feasible when the likelihood
-has a tractable analytical form or when gradients can be computed
-directly. However, in many realistic models—including Gaussian Mixture
-Models—there exist hidden (<strong>latent</strong>) variables that are
-not observed in the data. The presence of these latent variables makes
-the likelihood involve a logarithm of a sum, which prevents a
-closed-form maximization and makes direct MLE (or even MAP estimation)
-difficult.</p>
+(MLE) and the Expectation–Maximization (EM) algorithm introduced above
+<span class="citation" data-cites="1 2"></span>. In classical MLE, we
+directly maximize the likelihood function with respect to the model
+parameters. This is feasible when the likelihood has a tractable
+analytical form or when gradients can be computed directly. However, in
+many realistic models—including Gaussian Mixture Models—there exist
+hidden (<strong>latent</strong>) variables that are not observed in the
+data. The presence of these latent variables makes the likelihood
+involve a logarithm of a sum, which prevents a closed-form maximization
+and makes direct MLE (or even MAP estimation) difficult.</p>
 <p>The EM algorithm provides an iterative strategy for obtaining MLE or
 MAP estimates in such latent-variable models. Rather than optimizing the
 incomplete-data likelihood directly, EM alternates between estimating
@@ -392,6 +387,100 @@ Cluster Means: <span class="math display">\[\mu_1 =
 <li><p>The diagonals of the cluster covariances are standard deviations
 and measure the length of the cluster shape on an axis.</p></li>
 </ul>
+<p>While Gaussian Mixture Models provide a flexible probabilistic
+framework for clustering, it is equally important to understand how
+clustering methods are applied in real-world settings. One particularly
+important application is image segmentation, where clustering is used to
+group pixels into meaningful regions based on similarity.</p>
+<h1 data-number="3" id="image-segmentation-as-a-clustering-problem"><span class="header-section-number">3.</span> Image Segmentation as a
+Clustering Problem</h1>
+<p>Clustering methods such as k-means, Gaussian Mixture Models (GMMs),
+and mean shift can be applied to real-world data such as images. One
+important application is <strong>image segmentation</strong>, where the
+goal is to partition an image into meaningful regions.</p>
+<h2 data-number="3.1" id="images-as-feature-representations"><span class="header-section-number">3.1</span> Images as Feature
+Representations</h2>
+<p>An image consists of a grid of pixels. Each pixel can be represented
+as a feature vector. In the simplest case:</p>
+<p><span class="math display">\[x_i = [R_i, G_i, B_i]\]</span></p>
+<p>Segmentation can therefore be formulated as a clustering problem
+where each pixel is assigned to a cluster based on similarity.</p>
+<h2 data-number="3.2" id="color-spaces-for-segmentation"><span class="header-section-number">3.2</span> Color Spaces for
+Segmentation</h2>
+<p>RGB space is not ideal for clustering because it does not align well
+with human perception. Alternative color spaces such as LAB are often
+preferred in image segmentation pipelines because they separate
+luminance and chrominance more effectively <span class="citation" data-cites="4"></span>:</p>
+<p><span class="math display">\[x_i = [L_i, a_i, b_i]\]</span></p>
+<p>This makes clustering more meaningful.</p>
+<figure>
+<img src="img/lecture12/source_image.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>Source Image</strong></p>
+<img src="img/lecture12/gmm.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>GMM (<span class="math inline">\(L^*a^*b^*\)</span>)</strong></p>
+<figcaption>Effect of color space on clustering-based segmentation. The
+source image is shown on the left, while GMM segmentation in the <span class="math inline">\(L^*a^*b^*\)</span> color space is shown on the
+right.</figcaption>
+</figure>
+<h2 data-number="3.3" id="feature-construction-for-pixels"><span class="header-section-number">3.3</span> Feature Construction for
+Pixels</h2>
+<p>Pixel features can include spatial information:</p>
+<p><span class="math display">\[x_i = [L_i, a_i, b_i, x_i,
+y_i]\]</span></p>
+<p>This encourages spatially close pixels to belong to the same
+segment.</p>
+<h2 data-number="3.4" id="clustering-based-segmentation-methods"><span class="header-section-number">3.4</span> Clustering-Based Segmentation
+Methods</h2>
+<ul>
+<li><p><strong>k-means</strong>: a hard-clustering method that assigns
+each pixel to exactly one cluster. It is efficient, but requires
+specifying the number of clusters <span class="math inline">\(k\)</span>
+in advance.</p></li>
+<li><p><strong>GMM</strong>: a soft-clustering method that assigns
+pixels according to posterior probabilities, making it more flexible
+when color distributions overlap.</p></li>
+<li><p><strong>Mean Shift</strong>: a density-based method that finds
+clusters as modes of the feature distribution and does not require
+specifying the number of clusters beforehand <span class="citation" data-cites="3"></span>.</p></li>
+</ul>
+<p>We now compare how different clustering algorithms produce
+segmentation results on the same image:</p>
+<figure>
+<img src="img/lecture12/source_image.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>Source</strong></p>
+<img src="img/lecture12/kmeans.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>k-means</strong></p>
+<img src="img/lecture12/gmm.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>GMM</strong></p>
+<img src="img/lecture12/mean_shift.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<p><strong>Mean Shift</strong></p>
+<figcaption>Segmentation results produced by different clustering
+methods. The original image is shown on the left, followed by
+segmentations obtained using k-means, GMM, and mean shift. Each method
+produces slightly different partitions depending on its modeling
+assumptions.</figcaption>
+</figure>
+<h2 data-number="3.5" id="connection-to-homework-4"><span class="header-section-number">3.5</span> Connection to Homework 4</h2>
+<p><strong>Connection to HW4:</strong> In Homework 4, segmentation is
+performed by clustering pixels into groups based on their feature
+representations. The choice of feature space (RGB vs LAB) and clustering
+method directly affects performance.</p>
+<h1 data-number="5" id="references"><span class="header-section-number">5.</span> References</h1>
+<div class="list">
+<p><span>[]</span><span> </span></p>
+<p>Dempster, A. P., Laird, N. M., &amp; Rubin, D. B. (1977). <em>Maximum
+likelihood from incomplete data via the EM algorithm</em>. Journal of
+the Royal Statistical Society: Series B.</p>
+<p>Bishop, C. M. (2006). <em>Pattern Recognition and Machine
+Learning</em>. Springer.</p>
+<p>Comaniciu, D., &amp; Meer, P. (2002). <em>Mean shift: A robust
+approach toward feature space analysis</em>. IEEE Transactions on
+Pattern Analysis and Machine Intelligence.</p>
+<p>Achanta, R., Shaji, A., Smith, K., Lucchi, A., Fua, P., &amp;
+Süsstrunk, S. (2012). <em>SLIC superpixels compared to state-of-the-art
+superpixel methods</em>. IEEE Transactions on Pattern Analysis and
+Machine Intelligence.</p>
+</div>
 
 </main>
 </body>

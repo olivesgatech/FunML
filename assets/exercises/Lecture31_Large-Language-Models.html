@@ -24,58 +24,117 @@ window.MathJax = {
 </head>
 <body>
 <main>
-  <section><h1 class="unnumbered">Exercises</h1>
-<div class="mdframed">
-<p><strong>Q: Why is causal masking necessary during
-training?</strong></p>
-<p><strong>A:</strong> During training, the model processes all tokens
-in a sequence simultaneously for efficiency. Without causal masking,
-each position could attend to future tokens, making the next-token
-prediction task trivial (the answer is already in the context). The
-causal mask enforces the constraint that <span class="math inline">\(P(w_t \mid w_1, \ldots, w_{t-1})\)</span> is
-computed using only the prefix, which matches the autoregressive
-generation setting at inference time.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: How does RLHF differ from standard supervised
-fine-tuning?</strong></p>
-<p><strong>A:</strong> SFT maximizes the likelihood of specific
-reference responses, which requires high-quality curated demonstrations.
-RLHF instead learns a scalar reward model from pairwise human
-preferences (which response is better) and then uses reinforcement
-learning to optimize the language model policy to maximize this reward.
-RLHF can capture preferences that are difficult to articulate as
-explicit demonstrations, such as helpfulness, harmlessness, and
-calibrated uncertainty. The KL penalty prevents reward hacking by
-keeping the policy close to the SFT baseline.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: What is the difference between in-context learning and
-fine-tuning?</strong></p>
-<p><strong>A:</strong> Fine-tuning updates model weights using gradient
-descent on a training set, permanently changing the model. In-context
-learning provides examples in the input prompt at inference time without
-any weight updates — the model generalizes from the demonstrated
-examples within a single forward pass. Fine-tuning achieves better
-performance when sufficient task-specific data is available and
-computational resources allow it. In-context learning is faster to
-deploy and more flexible but is limited by context length and is
-generally less sample-efficient for specialized tasks.</p>
-</div>
-<div class="mdframed">
-<p><strong>Q: What causes hallucination and how can it be
-mitigated?</strong></p>
-<p><strong>A:</strong> Hallucination arises because the cross-entropy
-pre-training objective rewards fluent, probable token sequences, not
-factual accuracy. The model learns patterns and associations from text
-but does not maintain an explicit knowledge base or verify claims.
-Mitigation strategies include: (1) Retrieval-Augmented Generation (RAG),
-which grounds generation in retrieved documents; (2) RLHF with
-factuality-focused reward signals; (3) uncertainty-based abstention,
-where the model declines to answer when confidence is low; and (4)
-chain-of-thought prompting, which forces explicit intermediate steps
-that can be audited for errors.</p>
-</div></section>
+  <section><h1>Exercises</h1>
+<ol>
+<li><p>What is the main objective of a language model?
+<strong>Answer:</strong> To estimate the probability of a sequence of
+tokens. <strong>Explanation:</strong> A language model assigns
+probabilities to sequences by modeling <span class="math display">\[p(y_1, y_2, \dots, y_n),\]</span> which is
+typically factorized into conditional next-token predictions using the
+chain rule.</p></li>
+<li><p>Why is the chain rule used in language modeling?
+<strong>Answer:</strong> It decomposes a complex joint distribution into
+simpler conditional probabilities. <strong>Explanation:</strong> Instead
+of modeling the full sequence probability directly, the chain rule
+allows the model to predict one token at a time: <span class="math display">\[p(y_1,\dots,y_n)=\prod_{t=1}^{n} p(y_t \mid
+y_{&lt;t}),\]</span> making the problem tractable.</p></li>
+<li><p>What is the key limitation of <span class="math inline">\(n\)</span>-gram models? <strong>Answer:</strong>
+They rely on a fixed-size context window. <strong>Explanation:</strong>
+<span class="math inline">\(n\)</span>-gram models assume that the next
+token depends only on the previous <span class="math inline">\(n-1\)</span> tokens, which prevents them from
+capturing long-range dependencies in sequences.</p></li>
+<li><p>Why are tokens preferred over words or characters in modern LLMs?
+<strong>Answer:</strong> Tokens balance vocabulary size and sequence
+length. <strong>Explanation:</strong> Word-level models have large
+vocabularies, while character-level models produce long sequences.
+Subword tokens reuse common patterns and improve efficiency and
+generalization.</p></li>
+<li><p>What is a foundation model? <strong>Answer:</strong> A large
+pretrained model that can be adapted to many downstream tasks.
+<strong>Explanation:</strong> Unlike task-specific models, foundation
+models are trained on broad data and can generalize across tasks through
+prompting or fine-tuning.</p></li>
+<li><p>Why is pretraining alone not sufficient for LLMs?
+<strong>Answer:</strong> Pretrained models may produce unaligned or
+undesirable outputs. <strong>Explanation:</strong> While pretraining
+captures language structure, it does not ensure that outputs follow user
+intent or human preferences, motivating additional stages such as
+instruction tuning and alignment.</p></li>
+<li><p>What is the goal of instruction tuning? <strong>Answer:</strong>
+To teach the model to follow task-specific instructions.
+<strong>Explanation:</strong> Instruction tuning exposes the model to a
+variety of prompts and tasks, enabling it to generalize to new
+instructions at inference time.</p></li>
+<li><p>What is the purpose of alignment tuning? <strong>Answer:</strong>
+To align model outputs with human preferences.
+<strong>Explanation:</strong> Alignment uses human feedback to train a
+reward model and optimize the language model so that it produces
+helpful, harmless, and appropriate responses.</p></li>
+<li><p>How does LoRA improve fine-tuning efficiency?
+<strong>Answer:</strong> By learning low-rank updates instead of full
+parameter updates. <strong>Explanation:</strong> LoRA parameterizes
+weight updates as <span class="math display">\[\Delta W = BA,\]</span>
+which significantly reduces the number of trainable parameters compared
+to updating the full weight matrix.</p></li>
+<li><p>What does perplexity measure in language modeling?
+<strong>Answer:</strong> How well a model predicts a sequence of tokens.
+<strong>Explanation:</strong> Perplexity is the exponential of the
+average negative log-likelihood per token. Lower perplexity indicates
+better predictive performance.</p></li>
+<li><p>Why are BLEU and ROUGE limited as evaluation metrics?
+<strong>Answer:</strong> They rely on surface-level overlap and may not
+capture semantic correctness.</p>
+<p><strong>Explanation:</strong> BLEU and ROUGE measure n-gram overlap
+with reference text, but multiple valid outputs may exist. They do not
+directly evaluate meaning, reasoning, or factual correctness.</p></li>
+<li><p><strong>Question:</strong> Why do decoder-only Transformer models
+dominate modern LLMs?</p>
+<p><strong>Solution:</strong> Decoder-only models directly implement
+autoregressive next-token prediction, which aligns naturally with text
+generation. They are also efficient to train at scale, support flexible
+prompting, and exhibit strong generalization across tasks.</p></li>
+<li><p><strong>Question:</strong> Can a model have low perplexity but
+still produce poor outputs? Explain.</p>
+<p><strong>Solution:</strong> Yes. Perplexity measures next-token
+prediction accuracy, not usefulness or correctness of generated outputs.
+A model may assign high probability to fluent but incorrect or
+irrelevant text, highlighting the gap between intrinsic metrics and
+real-world performance.</p></li>
+<li><p><strong>Question:</strong> Why is scaling alone not sufficient to
+guarantee strong LLM performance?</p>
+<p><strong>Solution:</strong> While increasing model size, data, and
+compute improves performance, outcomes also depend on data quality,
+architecture, and training strategies. Poor data or suboptimal training
+can limit performance even at large scale.</p></li>
+<li><p>What is transfer learning in the context of large language
+models? <strong>Answer:</strong> Transfer learning is the process of
+reusing a pretrained model for new tasks or domains.
+<strong>Explanation:</strong> A model trained on large-scale data can
+transfer its learned representations to downstream tasks, reducing the
+need for task-specific training from scratch.</p></li>
+<li><p>What is the difference between fine-tuning and prompting?
+<strong>Answer:</strong> Fine-tuning updates model parameters, while
+prompting does not. <strong>Explanation:</strong> Fine-tuning adapts the
+model using labeled data, whereas prompting conditions the model’s
+behavior through input context without modifying its
+parameters.</p></li>
+<li><p>What is domain adaptation and why is it important?
+<strong>Answer:</strong> Domain adaptation is the process of adapting a
+pretrained model to a new data distribution.
+<strong>Explanation:</strong> It allows models to perform well in
+specialized domains such as medical or legal text, where the data
+distribution differs from general pretraining data.</p></li>
+<li><p>What is the main difference between RLHF and DPO?
+<strong>Answer:</strong> RLHF uses a reward model and reinforcement
+learning, while DPO directly optimizes preferences without an explicit
+reward model. <strong>Explanation:</strong> In RLHF, a separate reward
+model <span class="math inline">\(r_\phi(x,y)\)</span> is trained from
+human preferences, and the policy is optimized using reinforcement
+learning (e.g., PPO). In contrast, DPO eliminates the reward model and
+directly updates the language model using preference pairs: <span class="math display">\[(y^+, y^-)\]</span> by increasing the probability
+of preferred outputs. This makes DPO simpler and more stable, while RLHF
+is more flexible but computationally more complex.</p></li>
+</ol></section>
 </main>
 </body>
 </html>

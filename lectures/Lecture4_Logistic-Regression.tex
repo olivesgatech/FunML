@@ -5,7 +5,7 @@
 %%%%%PLEASE CONSIDER CORRECTIONS AT PLACES INDICATED%%%%%%%%
 \documentclass{article}
 %%%%%Packages Used, add more if necessary%%%%
-\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage}
+\usepackage{amsmath,amsfonts,amssymb,graphicx,fullpage,float}
 \setlength{\topmargin}{-0.6 in}
 \setlength{\textheight}{8.5 in}
 \setlength{\headsep}{0.75 in}
@@ -258,7 +258,7 @@ The equations the Naive-Bayes algorithm is predicated on the assumption that fea
 
 \section{Linear Classifiers}
 \subsection{Binary Classifiers}
-To begin our discussion of linear classifiers, we began with a simpler example of binary classifiers. This consists of a classifier operating on a set of tuples containing a single feature and single label $(x_i, y_i)$. The dataset was shown to be separable as linearly adjacent ``steps" as a simple classification scheme.
+To begin our discussion of linear classifiers, we begin with a simple binary classification setting. This consists of a classifier operating on a set of tuples containing a single feature and single label $(x_i, y_i)$. The dataset was shown to be separable as linearly adjacent ``steps" as a simple classification scheme.
 
 % \subsection{Terminology}
 % The following terms were defined and discussed before moving on to other aspects of linear classification:
@@ -278,17 +278,66 @@ To begin our discussion of linear classifiers, we began with a simpler example o
 
 Before developing linear classification models, we clarified several foundational terms that recur throughout machine learning. \textbf{Data} refers to the underlying joint distribution over features and labels, while \textbf{training data} is a finite sample drawn from that distribution. \textbf{Parameters} are the finite set of values that specify a parametric model (for example, $\mu$ and $\sigma$ in a Gaussian), and \textbf{learning} is the process of choosing these parameters from training data. A \textbf{loss function} measures error on a single example, \textbf{empirical risk} aggregates that loss over a dataset (typically without regularization), and a \textbf{cost function} adds regularization terms to encourage robustness and generalization. The \textbf{objective function} describes the optimization goal that the learning algorithm seeks to minimize (or maximize), and \textbf{empirical loss minimization} refers to fitting a parametric mapping $f_\theta:\textbf{X}\rightarrow\textbf{y}$ by optimizing the chosen cost over the training set.
 
+\subsection{Linear Classification as a Decision Boundary}
 
-% \subsection{Parametric Modeling}
-% Parametric models fit data with a fixed set of parameters ($\theta$) to a mapping function ($f_\theta:\textbf{X}\rightarrow\textbf{y}$). 
-% Some example models were given: 
-% \begin{itemize}
-%     \item Logistic Regression
-%     \item Perceptron
-%     \item Linear SVMs
-%     \item Artifical Neural Networks
-%     \item Naive-Bayes - Noted as parametric as mapping of inputs to outputs often depends on input feature distributions (e.g. Gaussian distribution)
-% \end{itemize}
+A central idea in classification is that many models make decisions by separating the input space into regions corresponding to different classes. One of the simplest and most important ways to do this is through a \textbf{linear classifier} \cite{1}.
+
+A linear classifier is based on a linear function of the form:
+\[
+f_{\mathbf{w}}(\mathbf{x}) = \mathbf{w}^T \mathbf{x} + b,
+\]
+where $\mathbf{w}$ is a weight vector and $b$ is a bias term.
+
+For binary classification, predictions are made using the sign of this function \cite{1}:
+\[
+\hat{y} = \text{sign}(\mathbf{w}^T \mathbf{x} + b).
+\]
+
+This means that the classifier assigns inputs to one of two classes depending on which side of a \textbf{decision boundary} they fall on. The decision boundary is defined by:
+\[
+\mathbf{w}^T \mathbf{x} + b = 0,
+\]
+which represents a line in 2D, a plane in 3D, and a hyperplane in higher dimensions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{img/lecture3/linear-boundary.png}
+    \caption{A two-dimensional example of linear classification. Multiple separating hyperplanes may exist (left), and a learned classifier selects a decision boundary that separates the two classes (right), adapted from \cite{1}.}
+    \label{fig:linear_boundary}
+\end{figure}
+
+\noindent
+\textbf{Figure:} A two-dimensional example of linear classification. Multiple separating hyperplanes may exist (left), and a learned classifier selects a decision boundary that separates the two classes (right).
+
+\subsubsection{Geometric Interpretation}
+
+Geometrically, the weight vector $\mathbf{w}$ determines the orientation of the decision boundary, while the bias $b$ shifts it in space. As shown in the figure, many separating hyperplanes may exist for a given dataset, and learning corresponds to selecting one that best separates the classes.
+
+The classifier partitions the feature space into two regions:
+\begin{itemize}
+    \item $\mathbf{w}^T \mathbf{x} + b > 0$ $\rightarrow$ Class 1
+    \item $\mathbf{w}^T \mathbf{x} + b < 0$ $\rightarrow$ Class 0 (or $-1$)
+\end{itemize}
+
+Thus, linear classifiers can be understood as methods for learning a separating hyperplane between classes.
+
+\subsubsection{Why Not Use Linear Regression for Classification?}
+
+Although linear regression also uses a linear function, it is not well-suited for classification tasks \cite{1}. The squared loss used in regression treats prediction errors as numeric differences, which can lead to undesirable behavior.
+
+For example, suppose classes are encoded as $\{0, 1, 2\}$. Predicting class 2 when the true label is 0 results in a larger penalty than predicting class 1, even though both are equally incorrect from a classification perspective.
+
+This highlights a key issue: classification requires modeling \textbf{discrete decisions}, not continuous errors.
+
+\subsubsection{Towards Better Classification Models}
+
+Linear classifiers based on the sign function provide a simple decision rule, but they come with important limitations. In particular, they do not produce probabilities, and the hard threshold at the decision boundary makes optimization difficult due to the lack of smoothness.
+
+These limitations motivate the need for models that retain the linear structure $\mathbf{w}^T \mathbf{x} + b$ while providing smoother and more informative outputs. In practice, we would like a model that produces probabilistic predictions and allows for efficient optimization.
+
+Instead of making a hard decision based only on the sign of $\mathbf{w}^T \mathbf{x} + b$, we can interpret this quantity as a \textbf{score} indicating how confident the model is about its prediction. Large positive values suggest strong evidence for one class, while large negative values suggest strong evidence for the other. This naturally leads to the idea of converting this score into a probability, rather than making a binary decision directly.
+
+\textbf{Logistic regression} addresses these issues by replacing the hard decision rule with a smooth probabilistic mapping using the sigmoid function.
 
 \subsection{Parametric Modeling}
 
@@ -335,9 +384,6 @@ Logistic regression is a type of classifier that models the probability of a two
 \[
 \sigma(x)=\frac{1}{1+e^{-x}}
 \]
-\begin{center}
-    \includegraphics[scale=0.45]{img/lecture3/logis.png}
-\end{center}
 Notice that this function has horizontal asymptotes that bound the $y$-values 0 and 1, has an $S$-shape in the sense that there is an inflection point in the horizontal center, and it is symmetric around the inflection point. The logistic function can be generalized by parameterizing different properties of the curve, e.g. growth rates, $y$-intercept, or even the horizontal asymptotes that define the range. These parameterizations are given by the so-called Richard's curve, although there are several variations (e.g. there is one that doesn't even require symmetry around the inflection point). We consider a few examples of a basic parameterization here, that varies the location of the inflection point ($x_0$) and growth rate around it ($k$).
 \begin{center}
     \includegraphics[scale=0.4]{img/lecture3/gen-logis.png}
@@ -487,9 +533,6 @@ $$\text{sign}(x)=\begin{cases}
     +1 & x > 0 \\ 
     -1 & x < 0
 \end{cases}$$
-\begin{center}
-    \includegraphics[scale=0.5]{img/lecture3/sign.png}
-\end{center}
 Note here that we're assuming $y_i\in\{-1,1\}$ here instead of $\{0,1\}$ as in the logistic model. Hence if we attempt to model the decision boundary with a linear model $\theta^T\textbf{x}$, then we can model the data using:
 $$\text{sign}(\theta^T\textbf{x})=\begin{cases}
     +1 & \theta^T\textbf{x} > 0 \\ 
@@ -676,6 +719,15 @@ Thus, the subgradient of the hinge loss function with respect to \(\mathbf{\thet
 \]
 
 \end{enumerate}
+
+\section{References}
+
+\beginrefs
+
+\bibentry{1}
+N. Osa, R. Johnson, T. Engelder, and N. Taheri, ``Lecture 4: Linear Classifiers II,'' COMP 642 Machine Learning, Rice University, Jan. 19, 2023. Available: \url{https://www.cs.rice.edu/~as143/COMP642_Spring23/Scribes/jan_19.pdf}
+
+\endrefs
 
 
 \pagebreak

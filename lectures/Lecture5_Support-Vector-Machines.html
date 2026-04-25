@@ -464,7 +464,7 @@ not. Based on that information, you can create a decision tree.<br/>
 </tbody>
 </table>
 <p><span id="tab:decisiontree2" label="tab:decisiontree2"></span></p>
-<figcaption>Final decision tree computed based on the
+<figcaption>Figure 4.2: Final decision tree computed based on the
 dataset</figcaption>
 </figure>
 <p>The main difficulty in creating decision trees is knowing which
@@ -544,7 +544,7 @@ hyperplanes satisfy these conditions. In this case, how do we determine
 the “best” one?</p>
 <figure id="fig:multiplehyperplanes">
 <img src="img/lecture4/multiplehyperplanes.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
-<figcaption>Multiple separating hyperplanes</figcaption>
+<figcaption>Figure 4.4: Multiple separating hyperplanes</figcaption>
 </figure>
 <p>The <strong>maximal margin hyperplane</strong> (MMH) is the
 separating hyperplane that is furthest from the training data. The
@@ -556,7 +556,7 @@ that can produce the best MMH. (Best being the highest width and highest
 accuracy).</p>
 <figure id="fig:mmh">
 <img src="img/lecture4/mmh.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Maximal margin hyperplane along with its support
+<figcaption>Figure 4.5: Maximal margin hyperplane along with its support
 vectors</figcaption>
 </figure>
 <h2 data-number="4.4" id="width-of-maximal-margin-classifiers"><span class="header-section-number">4.4</span> Width of Maximal Margin
@@ -576,7 +576,7 @@ region, and the distance between the two supporting hyperplanes becomes
 directly tied to the magnitude of the weight vector <span class="math inline">\(\mathbf{w}\)</span>.</p>
 <figure id="fig:marginwidth">
 <img src="img/lecture4/marginwidth.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
-<figcaption>Maximal margin classifier with margin width
+<figcaption>Figure 4.6: Maximal margin classifier with margin width
 shown</figcaption>
 </figure>
 <p>If <span class="math inline">\(x_A\)</span> and <span class="math inline">\(x_B\)</span> lie on the margin hyperplanes <span class="math inline">\(\mathbf{w}^T x + b = 1\)</span> and <span class="math inline">\(\mathbf{w}^T x + b = -1\)</span> respectively,
@@ -731,8 +731,8 @@ tolerant of outliers/noisy labels.</p>
 </div>
 <figure id="fig:enter-label">
 <img src="img/lecture4/Soft%20Margin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Varying values of <span class="math inline">\(C\)</span>
-result in different margin widths</figcaption>
+<figcaption>Figure 4.7: Varying values of <span class="math inline">\(C\)</span> result in different margin
+widths</figcaption>
 </figure>
 <p>Hard-margin SVMs assume that the data are perfectly linearly
 separable, meaning that even a single outlier can force a drastic shift
@@ -758,8 +758,8 @@ kernel function <span class="math display">\[K(\mathbf{x}_i,\mathbf{x}_j) =
 products in the transformed feature space.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture4/nonlinearsoftmargin.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Adding a new dimension allows a nonlinear dataset to become
-linearly separable</figcaption>
+<figcaption>Figure 4.8: Adding a new dimension allows a nonlinear
+dataset to become linearly separable</figcaption>
 </figure>
 <p>Common examples of kernel functions include:</p>
 <ul>
@@ -864,8 +864,13 @@ problem was solved.</p>
 ResearchGate. For more details, visit: <a class="uri" href="https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915" rel="noopener noreferrer" target="_blank">https://www.researchgate.net/figure/Sketch-of-sigmoid-functions-with-ranged-parameter-pairs-i-i-and-i-i_fig1_319255915</a>
 [accessed 1 Sept 2024].<br/>
 <br/>
-All other images sourced from the lecture video (Lecture 4: Classifiers
-(Logistic Regression &amp; SVM) in Canvas.</p>
+Boser, Bernhard E., Guyon, Isabelle M., and Vapnik, Vladimir N. (1992).
+A Training Algorithm for Optimal Margin Classifiers. <em>Proceedings of
+the Fifth Annual Workshop on Computational Learning Theory (COLT)</em>,
+144–152.<br/>
+<br/>
+Cortes, Corinna and Vapnik, Vladimir (1995). Support-Vector Networks.
+<em>Machine Learning</em>, 20(3), 273–297.</p>
 
 </main>
 </body>

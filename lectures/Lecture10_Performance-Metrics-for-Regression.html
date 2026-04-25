@@ -1,0 +1,530 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Performance Metrics for Regression</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
+</head>
+<body>
+<main>
+  <div class="center">
+</div>
+
+
+
+
+
+<p>This extension to Lecture 9 focuses on evaluating regression models
+using performance metrics and validation techniques. While Lecture 9
+covers optimization and regularization techniques, this document
+introduces the most commonly used performance metrics for regression.
+These metrics quantify how well a trained model fits the data and
+generalizes to unseen examples.</p>
+<p>After training a regression model, we need quantitative ways to
+evaluate how well it performs. The following metrics are commonly used
+to assess how well model predictions match the true target values.
+Different metrics capture distinct aspects of prediction quality, such
+as error magnitude, robustness to outliers, or explained variance. As a
+result, multiple metrics are often reported together in practice.</p>
+<h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
+<p>By the end of this extension, you should be able to:</p>
+<ul>
+<li><p>Define and interpret common regression performance metrics (MSE,
+RMSE, MAE, <span class="math inline">\(R^2\)</span>)</p></li>
+<li><p>Compare metrics based on sensitivity to outliers and
+interpretability</p></li>
+<li><p>Apply model validation techniques including train/validation/test
+splits and cross-validation</p></li>
+<li><p>Diagnose underfitting and overfitting using learning
+curves</p></li>
+<li><p>Understand the relationship between model complexity and
+generalization error</p></li>
+</ul>
+<h1 data-number="2" id="performance-metrics"><span class="header-section-number">2.</span> Performance Metrics</h1>
+<h2 data-number="2.1" id="mean-squared-error-mse"><span class="header-section-number">2.1</span> Mean Squared Error (MSE)</h2>
+<p>The <strong>Mean Squared Error (MSE)</strong> is one of the most
+common metrics for regression. It measures the average squared
+difference between predicted values and true values.</p>
+<p><span class="math display">\[\text{MSE}(\mathbf{X},\boldsymbol{\theta})=\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2\]</span></p>
+<p>where <span class="math inline">\(\hat{y}_i=\boldsymbol{\theta}^T\mathbf{x}_i\)</span>
+is the predicted value.</p>
+<p>Squaring the error has two important effects:</p>
+<ul>
+<li><p>Large errors are penalized more heavily than small
+errors.</p></li>
+<li><p>The function is smooth and differentiable, making it convenient
+for optimization.</p></li>
+</ul>
+<p>However, because errors are squared, MSE can be sensitive to
+outliers.</p>
+<h2 data-number="2.2" id="root-mean-squared-error-rmse"><span class="header-section-number">2.2</span> Root Mean Squared Error
+(RMSE)</h2>
+<p>The <strong>Root Mean Squared Error (RMSE)</strong> is the square
+root of the MSE:</p>
+<p><span class="math display">\[\text{RMSE}(\mathbf{X},\boldsymbol{\theta})=\sqrt{\frac{1}{N}\sum_{i=1}^{N}(\hat{y}_i-y_i)^2}\]</span></p>
+<p>RMSE has the same units as the target variable, making it easier to
+interpret than MSE. For example, if the target variable is measured in
+dollars, RMSE is also measured in dollars.</p>
+<h2 data-number="2.3" id="mean-absolute-error-mae"><span class="header-section-number">2.3</span> Mean Absolute Error (MAE)</h2>
+<p>The <strong>Mean Absolute Error (MAE)</strong> measures the average
+magnitude of prediction errors:</p>
+<p><span class="math display">\[\text{MAE}(\mathbf{X},\boldsymbol{\theta})=\frac{1}{N}\sum_{i=1}^{N}|\hat{y}_i-y_i|\]</span></p>
+<p>Unlike MSE, MAE does not square the error. This makes MAE:</p>
+<ul>
+<li><p>More robust to outliers</p></li>
+<li><p>Less sensitive to large individual errors</p></li>
+</ul>
+<p>In practice, MAE and MSE are often reported together to better
+understand model behavior.</p>
+<h2 data-number="2.4" id="coefficient-of-determination-r2"><span class="header-section-number">2.4</span> Coefficient of Determination
+(<span class="math inline">\(R^2\)</span>)</h2>
+<p>The <strong>Coefficient of Determination</strong> (<span class="math inline">\(R^2\)</span>) measures how well the model explains
+the variance in the target variable. It compares the prediction error of
+the model to the error of a baseline model that always predicts the mean
+of the target variable.</p>
+<p><span class="math display">\[R^2 = 1 -
+\frac{SS_{\text{res}}}{SS_{\text{tot}}}\]</span></p>
+<p>where</p>
+<p><span class="math display">\[SS_{\text{res}}=\sum_{i=1}^{N}(y_i-\hat{y}_i)^2\]</span>
+<span class="math display">\[SS_{\text{tot}}=\sum_{i=1}^{N}(y_i-\bar{y})^2\]</span></p>
+<p>Interpretation:</p>
+<ul>
+<li><p><strong><span class="math inline">\(R^2 = 1\)</span></strong>:
+Perfect predictions.</p></li>
+<li><p><strong><span class="math inline">\(R^2 = 0\)</span></strong>:
+Model performs no better than predicting the mean.</p></li>
+<li><p><strong><span class="math inline">\(R^2 &lt; 0\)</span></strong>:
+Model performs worse than the mean predictor.</p></li>
+</ul>
+<p><span class="math inline">\(R^2\)</span> provides a normalized
+measure of performance and is especially useful when comparing different
+models on the same dataset.</p>
+<h2 data-number="2.5" id="summary-of-metrics"><span class="header-section-number">2.5</span> Summary of Metrics</h2>
+<p>To better understand how these metrics relate to each other, we
+summarize their key properties below. Each metric captures different
+properties of model performance:</p>
+<ul>
+<li><p>MSE and RMSE penalize large errors more heavily.</p></li>
+<li><p>MAE is more robust to outliers and less sensitive to large
+deviations.</p></li>
+<li><p><span class="math inline">\(R^2\)</span> measures how much
+variance in the target variable is explained by the model.</p></li>
+</ul>
+<h1 data-number="3" id="model-validation"><span class="header-section-number">3.</span> Model Validation</h1>
+<p>Machine learning models must be evaluated carefully to ensure they
+generalize to unseen data. In this section, we focus on the procedures
+used for model validation and generalization assessment. Throughout this
+section, we refer to evaluation in terms of error for consistency. In
+general, other metrics (e.g., accuracy or <span class="math inline">\(R^2\)</span>) may also be used depending on the
+task.</p>
+<h2 data-number="3.1" id="trainingvalidationtest-split"><span class="header-section-number">3.1</span> Training/Validation/Test
+Split</h2>
+<p>The test set is kept completely separate from model training and
+validation. Its purpose is to evaluate performance on unseen data and
+simulate real-world deployment. By assessing the model on this
+independent dataset, we ensure that the evaluation reflects real-world
+generalization performance.</p>
+<p>It is critical that the <strong>test set is never used during model
+development</strong>. If the test set influences model design or
+hyperparameter tuning, the evaluation becomes biased and overly
+optimistic. The test set should only be used once, after the final model
+has been selected.</p>
+<p>The training dataset is where the model learns. It’s typically
+divided into two parts:</p>
+<ol>
+<li><p>Training Data: The larger portion used to teach the model by
+adjusting its parameters based on the loss function.</p></li>
+<li><p>Validation Data: A smaller portion used to monitor the model’s
+performance during training. It helps fine-tune hyperparameters and
+assess the risk of overfitting by providing an unbiased
+evaluation.</p></li>
+</ol>
+<p>The validation subset serves as a checkpoint during training. It
+helps identify issues like overfitting and informs adjustments to model
+design and hyperparameters. This ensures that the model remains robust
+and can generalize well to new data. Typically, 20–30% of the dataset is
+reserved for testing, while the remaining data is used for training and
+validation.</p>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-22%20at%206.02.54%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Visualization of dataset split</figcaption>
+</figure>
+<h4 data-number="3.1.0.1" id="k-fold-cross-validation-procedure"><span class="header-section-number">3.1.0.1</span> K-fold Cross-Validation
+Procedure</h4>
+<p>A widely used approach for hyperparameter tuning is <span class="math inline">\(k\)</span>-fold cross-validation. The procedure
+is:</p>
+<ol>
+<li><p>Shuffle the dataset randomly.</p></li>
+<li><p>Split the dataset into <span class="math inline">\(k\)</span>
+roughly equal subsets (folds).</p></li>
+<li><p>For each fold:</p>
+<ul>
+<li><p>Use the fold as the validation set.</p></li>
+<li><p>Use the remaining <span class="math inline">\(k-1\)</span> folds
+as the training set.</p></li>
+<li><p>Train the model and record the validation error.</p></li>
+</ul></li>
+<li><p>Average the validation errors across all folds.</p></li>
+</ol>
+<p>After cross-validation, the model is retrained on the full training
+data before final evaluation on the test set.</p>
+<figure>
+<img src="img/lecture10/crossvalidation.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption>K-fold cross-validation procedure.</figcaption>
+</figure>
+<h2 data-number="3.2" id="learning-curves"><span class="header-section-number">3.2</span> Learning Curves</h2>
+<p>Learning curves are a fundamental diagnostic tool for understanding
+how a model improves with more data. When we evaluate a model’s
+performance, we typically examine two key quantities: the training error
+and the validation error. As we increase the size of the training set,
+these quantities can behave differently, providing valuable insights
+into the model’s learning process and its ability to generalize.</p>
+<ol>
+<li><p><strong>Training Error</strong>: The training error indicates how
+well the model fits the training data. As the size of the training set
+increases, the training error usually decreases initially and then
+stabilizes.</p></li>
+<li><p><strong>Validation Error</strong>: The validation error reflects
+the model’s performance on a separate validation dataset. This quantity
+helps assess how well the model can generalize to unseen data.
+Initially, as the training set size increases, the validation error may
+decrease, indicating that the model is learning relevant
+structure.</p></li>
+</ol>
+<p>Learning curves are a powerful diagnostic tool. By comparing training
+and validation errors as the dataset size increases, we can determine
+whether a model is suffering from underfitting (high bias) or
+overfitting (high variance).</p>
+<h4 data-number="3.2.0.1" id="how-learning-curves-are-generated"><span class="header-section-number">3.2.0.1</span> How Learning Curves Are
+Generated</h4>
+<p>To generate learning curves, we repeatedly train the model using
+increasing amounts of training data and evaluate on a fixed validation
+set:</p>
+<ol>
+<li><p>Reserve a validation set of size <span class="math inline">\(v\)</span> from the dataset of size <span class="math inline">\(n\)</span>.</p></li>
+<li><p>For <span class="math inline">\(k = 1, 2, \dots,
+n-v\)</span>:</p>
+<ul>
+<li><p>Train the model using the first <span class="math inline">\(k\)</span> training samples.</p></li>
+<li><p>Evaluate training and validation error.</p></li>
+</ul></li>
+</ol>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.00%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Underfit linear regression model</figcaption>
+</figure>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-22%20at%206.09.19%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Overfit polynomial regression model</figcaption>
+</figure>
+<p>From these learning curves, the linear model exhibits consistently
+high training and validation error, indicating underfitting. The
+polynomial model achieves lower training error but shows a larger gap
+between training and validation error, indicating overfitting.</p>
+<h2 data-number="3.3" id="cross-validation-interpretation"><span class="header-section-number">3.3</span> Cross-Validation
+(Interpretation)</h2>
+<p>Cross-validation provides a more reliable estimate of generalization
+performance than a single train/validation split by averaging results
+across multiple data partitions. This reduces variance in performance
+estimates and helps prevent overfitting to a specific validation
+set.</p>
+<h2 data-number="3.4" id="model-complexity-vs-prediction-error"><span class="header-section-number">3.4</span> Model Complexity vs Prediction
+Error</h2>
+<p>Model complexity in machine learning, often measured by degrees of
+freedom, refers to a model’s capacity to fit data, as seen in polynomial
+regression. As model complexity increases, training error typically
+decreases because the model can better fit the training data,
+potentially reaching a point where training error approaches zero,
+indicating it captures even the noise. Initially, testing error may also
+decrease as the model learns relevant patterns, but after a certain
+complexity level, testing error begins to rise due to overfitting—where
+the model learns noise instead of generalizable patterns. This
+highlights the bias-variance tradeoff: low-complexity models may have
+high bias, leading to oversimplified patterns, while high-complexity
+models can suffer from high variance, fitting training data well but
+failing on unseen data. Cross-validation helps identify the optimal
+level of complexity that minimizes generalization error, while
+regularization mitigates overfitting by penalizing excessive
+complexity.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.20 Model Complexity</h3><p>Adjust model complexity and observe error behavior.</p><iframe class="interactive-notebook-frame" data-default-height="1080" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" style="height:1080px;" title="Interactive Figure 9.20 Model Complexity Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig920_ModelComplexity.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture10/modelcomplexity.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption>Model complexity vs training and testing error.</figcaption>
+</figure>
+<h1 data-number="4" id="model-complexity"><span class="header-section-number">4.</span> Model Complexity</h1>
+<p>In this final section, we briefly connect the practical ideas from
+this lecture to deeper theoretical concepts from statistical learning
+theory. The goal is not to develop full theory, but to build intuition
+for why model complexity, data size, and regularization are
+fundamentally linked.</p>
+<h2 data-number="4.1" id="model-complexity-1"><span class="header-section-number">4.1</span> Model Complexity</h2>
+<p>So far, we have discussed model complexity intuitively using learning
+curves, regularization, and the bias–variance tradeoff. We now take a
+slightly more formal look at what “model complexity” means.</p>
+<p>In general, <em>model complexity</em> refers to the capacity of a
+model to fit a wide variety of functions or datasets. As discussed
+earlier, a more complex model has a higher capacity to capture intricate
+patterns in the data, but this can also increase the risk of
+overfitting. One way to think about model complexity is in terms of how
+many training samples are needed for the model to learn patterns that
+generalize well to new data, i.e. produce low test error. However, this
+quantity can be difficult to characterize. Here are a few typical
+notions:</p>
+<ul>
+<li><p>The degree of the model (e.g., the degree of a polynomial in
+polynomial regression).</p></li>
+<li><p>The number of parameters in the model (e.g., weights in a neural
+network).</p></li>
+<li><p>The flexibility of the <em>hypothesis space</em> the model
+operates within.</p></li>
+</ul>
+<p>The first two are essentially the same in that they describe the
+<em>size</em> of the hypothesis space. In particular, the hypothesis
+space describes the set of all possible functions the model can select
+from, given the available data and parameters. For finite spaces, the
+size is a fair measure of complexity. In fact, in this case we can show
+that the number of samples needed to adequately fit a model is bounded
+by the (log of the) size of the space. However, when the space is
+infinite, as is often the case with continuous models like neural
+networks, then this notion of counting parameters can break down and we
+need a more careful measure of complexity.</p>
+<p>A classical theoretical way to measure model capacity is the <em>VC
+(Vapnik–Chervonenkis) dimension</em>. You do not need to compute this in
+practice, but it provides useful intuition about why complex models
+require more data. The VC dimension is a theoretical tool used to
+quantify the capacity of a model by determining the maximum number of
+points that a model can <em>shatter</em>. Shattering means that for a
+given set of points, the model can perfectly classify all possible
+binary labelings of those points. The higher the VC dimension, the more
+complex the model and the larger the class of functions it can
+represent.</p>
+<p>For example, a linear classifier in 2D (like a linear SVM or
+perceptron) has a VC dimension of 3, meaning it can shatter any set of 3
+points in the plane, but not necessarily 4.</p>
+<p>In practice, models with high VC dimensions are prone to overfitting,
+as they can represent highly complex decision boundaries. However,
+models with a VC dimension that is too low may underfit, failing to
+capture important relationships in the data. The key is to choose a
+model with an appropriate VC dimension for the problem at hand.</p>
+<p>While VC dimension is a powerful theoretical concept, it is not
+always easy to compute for real-world models. Nonetheless, it serves as
+a guiding principle: models with higher capacity (e.g., more parameters,
+higher VC dimension) need more training data to generalize well, and
+regularization becomes crucial to control overfitting in such cases.</p>
+<p>This theoretical perspective reinforces the key message of this
+lecture: as model capacity increases, we must rely on more data,
+cross-validation, and regularization to ensure good generalization.</p>
+<h2 data-number="4.2" id="model-evaluation-under-ambiguous-ground-truth"><span class="header-section-number">4.2</span> Model Evaluation Under
+Ambiguous Ground Truth</h2>
+<p>So far, we have assumed that every training example has a single
+correct label. However, in many real-world datasets the true label is
+not perfectly known. Different annotators may disagree, labels may be
+noisy, and some examples may naturally belong to multiple categories.
+This situation is known as <strong>ambiguous ground truth</strong> or
+<strong>label noise</strong>.</p>
+<h3 data-number="4.2.1" id="why-accuracy-can-be-misleading"><span class="header-section-number">4.2.1</span> Why Accuracy Can Be
+Misleading</h3>
+<p>Standard accuracy assumes that dataset labels are perfectly correct.
+But suppose that a fraction <span class="math inline">\(\epsilon\)</span> of labels are incorrect or
+uncertain. Even a perfect model cannot exceed the accuracy of the noisy
+labels.</p>
+<p><span class="math display">\[\boxed{
+\text{Observed Accuracy} \;\le\; 1 - \epsilon
+}\]</span></p>
+<p>This means a model might appear to plateau at <span class="math inline">\(90\%\)</span> accuracy even if its true
+performance is much higher. In practice, label noise creates uncertainty
+about how measured accuracy relates to the model’s true accuracy <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086 Quesada2025Largescale"></span>.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.25 Measured vs True Accuracy Under Label Noise</h3><p>Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig925_GTNoise_interactive.html" style="height:860px;" title="Interactive Figure 9.25 Measured vs True Accuracy Under Label Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig925_GTNoise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p>The shaded region illustrates an important takeaway:</p>
+<blockquote>
+<p>Measured accuracy is not a single number — it represents a <em>range
+of possible true performances</em>.</p>
+</blockquote>
+<p>This relationship between measured and true accuracy under noisy
+labels has been studied extensively in recent work <span class="citation" data-cites="DBLP:journals/corr/abs-1908-07086"></span>.</p>
+<h3 data-number="4.2.2" id="human-label-disagreement"><span class="header-section-number">4.2.2</span> Human Label Disagreement</h3>
+<p>In many tasks, disagreement between humans is not a mistake — it is a
+signal of inherent ambiguity in the data. For example, an image might
+contain features of both a dog and a wolf, or a handwritten digit might
+look like both a 3 and an 8.</p>
+<p>Recent research shows that training models using
+<strong>distributions of human labels</strong> instead of single “hard”
+labels can improve generalization and robustness <span class="citation" data-cites="cifar10h"></span>.</p>
+<figure id="fig:human_cnn_uncertainty">
+<img src="img/lecture9/P17.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption><strong>Humans and neural networks disagree in their
+uncertainty.</strong> Top: examples where humans are confident but CNN
+predictions are uncertain. Middle: examples where humans are uncertain
+but CNN predictions are confident. Bottom: examples where both
+distributions diverge. This highlights that label disagreement contains
+useful information about ambiguity in the data.</figcaption>
+</figure>
+<p>Rather than treating disagreement as noise, we can treat it as
+<strong>information about uncertainty</strong>.</p>
+<h3 data-number="4.2.3" id="practical-implications"><span class="header-section-number">4.2.3</span> Practical Implications</h3>
+<p>When labels are noisy or ambiguous, model evaluation becomes more
+subtle. Standard accuracy may <strong>underestimate true model
+performance</strong> because the model is being judged against imperfect
+labels. At the same time, models can <strong>overfit to label
+noise</strong>, memorizing incorrect annotations rather than learning
+generalizable patterns. For this reason, techniques such as
+<strong>cross-validation</strong> become even more important, and
+<strong>regularization</strong> plays a key role in preventing models
+from memorizing incorrect labels.</p>
+<p>These challenges motivate the use of more robust training and
+evaluation strategies. In practice, modern machine learning often relies
+on <strong>robust evaluation metrics</strong>, <strong>label
+smoothing</strong>, and <strong>probabilistic (soft) labels</strong>
+that represent uncertainty in annotations rather than assuming a single
+perfectly correct label. These ideas have become increasingly important
+in modern machine learning, where large-scale datasets often contain
+imperfect or ambiguous annotations <span class="citation" data-cites="Quesada2025Largescale cifar10h"></span>.<br/>
+<br/>
+<strong>Key takeaway:</strong> Modern machine learning increasingly
+treats labels as <em>probabilistic</em> rather than perfectly
+correct.</p>
+<h1 data-number="5" id="bias-variance-tradeoff"><span class="header-section-number">5.</span> Bias-Variance Tradeoff</h1>
+<p>The bias–variance tradeoff provides a theoretical explanation for the
+behavior observed in learning curves and model complexity plots.</p>
+<p>Training a Linear Regression model multiple times with different
+datasets reveals a range of prediction scores, which can provide
+valuable insights into model performance. The average of these scores,
+referred to as bias, indicates how consistently the models perform.
+Models exhibiting high average error are categorized as high-bias, a
+result of low complexity to capture the underlying patterns in the data.
+Such models may cause underfitting. In the context of a high-degree
+Polynomial Regression model, while the bias is significantly reduced due
+to the model’s increased complexity and flexibility, this comes at a
+cost. The predictions for a given test point can vary dramatically
+between different polynomial models, indicating a pronounced sensitivity
+to the training data. This phenomenon, known as variance, arises when
+the model becomes overly tailored to the nuances of the training
+dataset, capturing noise rather than the underlying trend. Consequently,
+high-variance models struggle to generalize effectively to unseen data,
+resulting in substantially higher prediction errors when applied to new
+instances. Moreover, this trade-off highlights the delicate balance
+between bias and variance, underscoring the importance of model
+selection and regularization techniques to mitigate
+overfitting/underfitting while still achieving accurate predictions.</p>
+<h4 data-number="5.0.0.1" id="biasvariance-decomposition"><span class="header-section-number">5.0.0.1</span> Bias–Variance
+Decomposition</h4>
+<p>Let <span class="math inline">\(x\)</span> be a test sample, <span class="math inline">\(f(x)\)</span> the true target, and <span class="math inline">\(\hat{f}(x)\)</span> the model prediction. The
+expected squared error can be decomposed as</p>
+<p><span class="math display">\[E[(f(x) - \hat{f}(x))^2]
+= \underbrace{(E[\hat{f}(x)] - f(x))^2}_{\text{Bias}^2}
++ \underbrace{E[(\hat{f}(x) - E[\hat{f}(x)])^2]}_{\text{Variance}}
++ \underbrace{\sigma_e^2}_{\text{Irreducible Error}}.\]</span></p>
+<p>This decomposition explains why increasing model complexity can
+reduce bias but increase variance, and motivates the search for an
+optimal tradeoff.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.21 Model Complexity vs Error</h3><p>Adjust model complexity and inspect bias/variance trends.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" style="height:900px;" title="Interactive Figure 9.21 Model Complexity vs Error Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig921_ComplexityVsError.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-22%20at%206.30.13%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Diagram depicting the bias-variance tradeoff</figcaption>
+</figure>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-22%20at%206.41.12%E2%80%AFPM.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Bias–variance decomposition showing how bias decreases and
+variance increases with model complexity, resulting in a U-shaped total
+error curve.</figcaption>
+</figure>
+<p>This decomposition motivates the bias–variance tradeoff: increasing
+model complexity typically reduces bias but increases variance.</p>
+
+</main>
+</body>
+</html>

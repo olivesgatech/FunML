@@ -114,11 +114,15 @@
 \newcommand{\dom}{\mathrm{dom}}
 \begin{document}
 
-\lecture{12}{GMM Clustering}{Ghassan AlRegib and Mohit Prabhushankar}{}%
+\lecture{12}{Gaussian Mixture Models and Image Segmentation}{Ghassan AlRegib and Mohit Prabhushankar}{}%
 
 \section{Lecture Objectives}
 
-In the previous lecture we introduced k-means clustering and its variants as \textbf{hard-clustering} methods. In this lecture, we extend clustering to a probabilistic setting by introducing \textbf{Gaussian Mixture Models (GMMs)}, which perform \textbf{soft clustering} by modeling data as a mixture of multivariate Gaussians and inferring posterior responsibilities. We then study how GMM parameters are estimated using the \textbf{Expectation--Maximization (EM)} algorithm (and why EM is needed in latent-variable models compared to direct MLE), and we evaluate clustering quality using both \textbf{internal} metrics (e.g., Davies--Bouldin, Dunn, Silhouette) and \textbf{external} metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth is available. Finally, we briefly discuss extensions and applications of clustering, including \textbf{mean shift}, \textbf{Adjusted Rand Index (ARI)}, and \textbf{image segmentation}.
+In the previous lecture we introduced k-means clustering as a hard-clustering method. In this lecture, we extend clustering to a probabilistic setting by introducing \textbf{Gaussian Mixture Models (GMMs)}, which perform \textbf{soft clustering}. We study how GMM parameters are estimated using the \textbf{Expectation--Maximization (EM)} algorithm. Finally, we explore \textbf{image segmentation as a clustering problem}, including feature representations, color spaces, and clustering-based segmentation methods.
+
+% \section{Lecture Objectives}
+
+% In the previous lecture we introduced k-means clustering and its variants as \textbf{hard-clustering} methods. In this lecture, we extend clustering to a probabilistic setting by introducing \textbf{Gaussian Mixture Models (GMMs)}, which perform \textbf{soft clustering} by modeling data as a mixture of multivariate Gaussians and inferring posterior responsibilities. We then study how GMM parameters are estimated using the \textbf{Expectation--Maximization (EM)} algorithm (and why EM is needed in latent-variable models compared to direct MLE), and we evaluate clustering quality using both \textbf{internal} metrics (e.g., Davies--Bouldin, Dunn, Silhouette) and \textbf{external} metrics (e.g., Rand Index, Mutual Information, Purity) when ground truth is available. Finally, we study \textbf{image segmentation as a clustering problem}, where pixels are grouped into meaningful regions using clustering algorithms such as k-means, GMMs, and mean shift. We also discuss how segmentation performance is evaluated using specialized metrics.
 
 % \section{Recap From Last Lecture} 
 % k-means and its variant are all hard-clustering methods. Thereby those methods fail to works very successfully when:
@@ -143,7 +147,7 @@ Where $\mathcal{N}(x|\mu_{j}\Sigma_{j})$ is the \textbf{Gaussian Distribution} d
 in which, the parameters\\
 $\mu = \{\mu_1,...\mu_k\}, \: \mu_{j} \in \mathbb{R}^{p}$ is the \textbf{cluster means};\\
 $\Sigma = \{\Sigma_1,...,\Sigma_k\}, \: \Sigma_{j} \in \mathbb{R}^{p\times p}$ is the \textbf{cluster covariance matrices} (Multi-variant equivalent of standard deviation);\\
-$\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in \mathbb{R}$ is the \textbf{cluster coefficients} (Multi-variant equivalent of prior/likelihood) selecting $\mathcal{N}(x|\mu_{j}\Sigma_{j})$, satisfying $\Sigma_{j}\pi_{j} = 1$\\
+$\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in \mathbb{R}$ is the \textbf{cluster coefficients} (Multi-variant equivalent of prior/likelihood) selecting $\mathcal{N}(x|\mu_{j}\Sigma_{j})$, satisfying $\sum_{j=1}^k \pi_j = 1$\\
 % Note:
 % \begin{itemize}
 %     \item GMM is a \textbf{Generative model} which specifically model $p(z_i = j)$ and $p(X_i|z_i = j)$
@@ -153,14 +157,14 @@ $\pi = \{\pi_1,...,\pi_k\}, \: \pi_{j}\in \mathbb{R}$ is the \textbf{cluster coe
 % \end{itemize}
 
 \paragraph{GMM as a generative model.}
-A Gaussian Mixture Model (GMM) is a \emph{generative} model: it describes a probabilistic mechanism by which the observed data are produced. Concretely, it introduces a latent (unobserved) cluster indicator variable $z_i \in \{1,\dots,k\}$ for each sample $x_i$. The model specifies (i) a prior distribution over components, $p(z_i=j)=\pi_j$ with $\pi_j \ge 0$ and $\sum_{j=1}^k \pi_j = 1$, and (ii) a class-conditional distribution for the data given the component, $p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j, \Sigma_j)$. Marginalizing out the latent variable $z_i$ yields the mixture density $Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j, \Sigma_j)$.
+A Gaussian Mixture Model (GMM) is a \emph{generative} model: it describes a probabilistic mechanism by which the observed data are produced. Concretely, it introduces a latent (unobserved) cluster indicator variable $z_i \in \{1,\dots,k\}$ for each sample $x_i$. The model specifies (i) a prior distribution over components, $p(z_i=j)=\pi_j$ with $\pi_j \ge 0$ and $\sum_{j=1}^k \pi_j = 1$, and (ii) a class-conditional distribution for the data given the component, $p(x_i \mid z_i=j)=\mathcal{N}(x_i \mid \mu_j, \Sigma_j)$. Marginalizing out the latent variable $z_i$ yields the mixture density $Q(x)=\sum_{j=1}^k \pi_j \mathcal{N}(x \mid \mu_j, \Sigma_j)$ \cite{2}.
 
 \paragraph{Soft clustering interpretation.}
 Unlike hard clustering methods (e.g., k-means) that assign each point to exactly one cluster, GMMs provide a \emph{soft} assignment. For each sample $x_i$, the model computes a posterior probability of belonging to each component,
 $\gamma_i^j = p(z_i=j \mid x_i)$, often called the \emph{responsibility} of component $j$ for explaining $x_i$. These responsibilities quantify uncertainty: if $x_i$ lies in an overlap region between clusters, then multiple $\gamma_i^j$ values may be non-negligible. In practice, one may still obtain a hard label by taking $\arg\max_j \gamma_i^j$, but the probabilistic assignments contain richer information than a single label.
 
 \paragraph{Approximating arbitrary densities.}
-GMMs are flexible density estimators. Intuitively, each Gaussian component can model a “local” region of the distribution, and the weighted sum of many such components can represent complex, multimodal, and non-spherical shapes. With a sufficiently large number of mixture components (and appropriate parameters), mixtures of Gaussians can approximate a wide class of smooth probability densities on $\mathbb{R}^p$ to arbitrary accuracy. This is one reason GMMs are widely used as a general-purpose probabilistic model for clustering and density estimation.
+GMMs are flexible density estimators. Intuitively, each Gaussian component can model a “local” region of the distribution, and the weighted sum of many such components can represent complex, multimodal, and non-spherical shapes. With a sufficiently large number of mixture components (and appropriate parameters), mixtures of Gaussians can approximate a wide class of smooth probability densities on $\mathbb{R}^p$ to arbitrary accuracy. This is one reason GMMs are widely used as a general-purpose probabilistic model for clustering and density estimation \cite{2}.
 
 \paragraph{Connection to Naive Bayes and k-means.}
 A helpful way to view GMM clustering is as combining ideas from probabilistic classification and centroid-based assignment. The posterior responsibility $\gamma_i^j$ follows directly from Bayes’ rule, similar in spirit to a Naive Bayes classifier: it compares how likely $x_i$ is under each component, weighted by the prior $\pi_j$, and then normalizes across $j$. At the same time, the iterative EM updates resemble k-means: in the E-step, points are “assigned” (softly) to components via responsibilities; in the M-step, the component parameters are updated using these assignments (with responsibilities acting as weights). In the special case where all covariances are equal and spherical, the EM procedure recovers behavior closely related to k-means, but the full GMM allows elliptical clusters and overlapping components.
@@ -171,8 +175,8 @@ L(x,\pi,\mu,\Sigma)=\prod_{i=1}^{N}Q(x_i)=\prod_{i=1}^{N}\sum_{j=1}^{k}\pi_{j}\m
 \]
 \[
 LL(x,\pi,\mu,\Sigma)=\sum_{i=1}^{N}log\{\sum_{j=1}^{k}\pi_{j}\mathcal{N}(x|\mu_{j},\Sigma_{j})\}\]
-However, since the existing of clustering structure (log of sum), there is \textbf{no close-form maxima} for the likelihood function except for $k=1$ ($\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i$, $\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}$).\\
-Therefore, we could utilize the \textbf{Expectation Maximization (EM) Algorithm}, which iteratively estimates the mean $\mu_j$ with $\gamma_i^{j}$, and in turn estimates the posterior.\\
+However, since the existence of clustering structure (log of sum), there is \textbf{no close-form maxima} for the likelihood function except for $k=1$ ($\mu_{MLE}=\frac{1}{N}\sum_{i}^{N}x_i$, $\Sigma_{MLE}=\frac{1}{N}\sum_{i=1}^{N}(x_i-\mu_{MLE})(x_i-\mu_{MLE})^{T}$).\\
+Therefore, we could utilize the \textbf{Expectation Maximization (EM) Algorithm} \cite{1}, which iteratively estimates the mean $\mu_j$ with $\gamma_i^{j}$, and in turn estimates the posterior.\\
 The posterior $\gamma_i^{j}$, which is also known as the \textbf{responsibility} of cluster j for sample $x_i$, can be derived using Bayes Rule:\[
 \gamma_i^{j}=p(z_i=j|x_i)=\frac{\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}{\sum_{j=1}^{k}\pi_j\mathcal{N}(x_i|\mu_j,\Sigma_j)}
 \]\\
@@ -207,7 +211,7 @@ The specific steps are as following:
 
 \subsection{Aside: EM vs MLE}
 
-It is important to distinguish between Maximum Likelihood Estimation (MLE) and the Expectation–Maximization (EM) algorithm introduced above. In classical MLE, we directly maximize the likelihood function with respect to the model parameters. This is feasible when the likelihood has a tractable analytical form or when gradients can be computed directly. However, in many realistic models—including Gaussian Mixture Models—there exist hidden (\textbf{latent}) variables that are not observed in the data. The presence of these latent variables makes the likelihood involve a logarithm of a sum, which prevents a closed-form maximization and makes direct MLE (or even MAP estimation) difficult.
+It is important to distinguish between Maximum Likelihood Estimation (MLE) and the Expectation–Maximization (EM) algorithm introduced above \cite{1,2}. In classical MLE, we directly maximize the likelihood function with respect to the model parameters. This is feasible when the likelihood has a tractable analytical form or when gradients can be computed directly. However, in many realistic models—including Gaussian Mixture Models—there exist hidden (\textbf{latent}) variables that are not observed in the data. The presence of these latent variables makes the likelihood involve a logarithm of a sum, which prevents a closed-form maximization and makes direct MLE (or even MAP estimation) difficult.
 
 The EM algorithm provides an iterative strategy for obtaining MLE or MAP estimates in such latent-variable models. Rather than optimizing the incomplete-data likelihood directly, EM alternates between estimating the missing latent information and optimizing the parameters given those estimates. Importantly, EM is a general optimization framework and is not limited to GMMs; it is widely used in many probabilistic models that involve hidden variables.
 
@@ -400,5 +404,192 @@ Keep iterating until the log likelihood converges. Note:
     \item The diagonals of the cluster covariances are standard deviations and measure the length of the cluster shape on an axis.
 \end{itemize}
 
+While Gaussian Mixture Models provide a flexible probabilistic framework for clustering, it is equally important to understand how clustering methods are applied in real-world settings. One particularly important application is image segmentation, where clustering is used to group pixels into meaningful regions based on similarity.
+
+% ============================================================
+% NEW SECTION STARTS HERE
+% ============================================================
+\section{Image Segmentation as a Clustering Problem}
+
+Clustering methods such as k-means, Gaussian Mixture Models (GMMs), and mean shift can be applied to real-world data such as images. One important application is \textbf{image segmentation}, where the goal is to partition an image into meaningful regions.
+
+\subsection{Images as Feature Representations}
+
+An image consists of a grid of pixels. Each pixel can be represented as a feature vector. In the simplest case:
+
+\[
+x_i = [R_i, G_i, B_i]
+\]
+
+Segmentation can therefore be formulated as a clustering problem where each pixel is assigned to a cluster based on similarity.
+
+% % ---------------- FIGURE 1 ----------------
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.6\textwidth]{img/lecture12/segmentation_example.png}
+% \caption{Example of image segmentation where pixels are grouped into clusters based on color similarity.}
+% \end{figure}
+
+\subsection{Color Spaces for Segmentation}
+
+RGB space is not ideal for clustering because it does not align well with human perception. Alternative color spaces such as LAB are often preferred in image segmentation pipelines because they separate luminance and chrominance more effectively \cite{4}:
+
+\[
+x_i = [L_i, a_i, b_i]
+\]
+
+This makes clustering more meaningful.
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.16\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/source_image.png}
+    \vspace{2pt}
+    
+    \textbf{Source Image}
+\end{minipage}
+\hspace{0.02\textwidth}
+\begin{minipage}[t]{0.133\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/gmm.png}
+    \vspace{2pt}
+    
+    \textbf{GMM ($L^*a^*b^*$)}
+\end{minipage}
+
+\caption{Effect of color space on clustering-based segmentation. The source image is shown on the left, while GMM segmentation in the $L^*a^*b^*$ color space is shown on the right.}
+\end{figure}
+
+\subsection{Feature Construction for Pixels}
+
+Pixel features can include spatial information:
+
+\[
+x_i = [L_i, a_i, b_i, x_i, y_i]
+\]
+
+This encourages spatially close pixels to belong to the same segment.
+
+\subsection{Clustering-Based Segmentation Methods}
+
+\begin{itemize}
+    \item \textbf{k-means}: a hard-clustering method that assigns each pixel to exactly one cluster. It is efficient, but requires specifying the number of clusters $k$ in advance.
+    \item \textbf{GMM}: a soft-clustering method that assigns pixels according to posterior probabilities, making it more flexible when color distributions overlap.
+    \item \textbf{Mean Shift}: a density-based method that finds clusters as modes of the feature distribution and does not require specifying the number of clusters beforehand \cite{3}.
+\end{itemize}
+
+We now compare how different clustering algorithms produce segmentation results on the same image:
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.181\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/source_image.png}
+    \vspace{2pt}
+    
+    \textbf{Source}
+\end{minipage}
+\hspace{0.02\textwidth}
+\begin{minipage}[t]{0.15\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/kmeans.png}
+    \vspace{2pt}
+    
+    \textbf{k-means}
+\end{minipage}
+\hspace{0.02\textwidth}
+\begin{minipage}[t]{0.15\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/gmm.png}
+    \vspace{2pt}
+    
+    \textbf{GMM}
+\end{minipage}
+\hspace{0.02\textwidth}
+\begin{minipage}[t]{0.15\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{img/lecture12/mean_shift.png}
+    \vspace{2pt}
+    
+    \textbf{Mean Shift}
+\end{minipage}
+
+\caption{Segmentation results produced by different clustering methods. The original image is shown on the left, followed by segmentations obtained using k-means, GMM, and mean shift. Each method produces slightly different partitions depending on its modeling assumptions.}
+\end{figure}
+
+
+\subsection{Connection to Homework 4}
+
+\textbf{Connection to HW4:} In Homework 4, segmentation is performed by clustering pixels into groups based on their feature representations. The choice of feature space (RGB vs LAB) and clustering method directly affects performance.
+
+\newpage
+
+\section{Q\&A Section}
+
+\begin{enumerate}
+    \item \textbf{Question 1:} \newline
+    Which statement best describes the difference between \textbf{k-means} and \textbf{GMM} clustering?
+    
+    \begin{enumerate}
+        \item k-means performs soft clustering, while GMM performs hard clustering.
+        \item k-means assigns each point to exactly one cluster, while GMM assigns posterior probabilities to clusters.
+        \item k-means models each cluster with a full covariance matrix, while GMM uses only centroids.
+        \item There is no difference; both methods are equivalent in general.
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    The correct answer is \textbf{(b)}. k-means is a \textbf{hard-clustering} method that assigns each sample to exactly one cluster, whereas GMM is a \textbf{soft-clustering} method that computes posterior probabilities (responsibilities) for each cluster.
+
+    \vspace{6pt}
+
+    \item \textbf{Question 2:} \newline
+    In the EM algorithm for GMMs, what is computed during the \textbf{E-step}?
+    
+    \begin{enumerate}
+        \item Updated cluster means and covariance matrices
+        \item Posterior responsibilities for each data point under each component
+        \item The optimal number of clusters
+        \item A hard assignment of each point to its nearest centroid
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    The correct answer is \textbf{(b)}. In the \textbf{E-step}, the algorithm computes the \textbf{responsibilities}
+    \[
+    \gamma_i^j = p(z_i=j \mid x_i),
+    \]
+    which represent the posterior probability that sample $x_i$ was generated by component $j$.
+
+    \vspace{6pt}
+
+    \item \textbf{Question 3:} \newline
+    Why is the \textbf{LAB} color space often preferred over \textbf{RGB} for clustering-based image segmentation?
+    
+    \begin{enumerate}
+        \item LAB always reduces the number of segments.
+        \item LAB separates luminance and chrominance, making perceptual similarity more meaningful for clustering.
+        \item LAB guarantees perfect segmentation.
+        \item RGB cannot be used for clustering.
+    \end{enumerate}
+    
+    \textbf{Solution:} \newline
+    The correct answer is \textbf{(b)}. LAB is often preferred because it separates \textbf{luminance} from \textbf{chrominance}, which better reflects perceptual similarity and can produce more meaningful clusters for segmentation.
+\end{enumerate}
+
+\section{References}
+
+\beginrefs
+
+\bibentry{1} Dempster, A. P., Laird, N. M., \& Rubin, D. B. (1977). \textit{Maximum likelihood from incomplete data via the EM algorithm}. Journal of the Royal Statistical Society: Series B.
+
+\bibentry{2} Bishop, C. M. (2006). \textit{Pattern Recognition and Machine Learning}. Springer.
+
+\bibentry{3} Comaniciu, D., \& Meer, P. (2002). \textit{Mean shift: A robust approach toward feature space analysis}. IEEE Transactions on Pattern Analysis and Machine Intelligence.
+
+\bibentry{4} Achanta, R., Shaji, A., Smith, K., Lucchi, A., Fua, P., \& Süsstrunk, S. (2012). \textit{SLIC superpixels compared to state-of-the-art superpixel methods}. IEEE Transactions on Pattern Analysis and Machine Intelligence.
+
+\endrefs
 
 \end{document}

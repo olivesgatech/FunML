@@ -169,8 +169,9 @@ understanding the underlying concepts. Regularization forces the model
 to extract structure and learn features that generalize to new data.</p>
 <figure id="fig:enter-label">
 <img src="img/lecture19/121mapping1.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Regularization prevents the undesirable identity mapping and
-encourages the model to learn meaningful patterns.</figcaption>
+<figcaption>Figure 18.1: Regularization prevents the undesirable
+identity mapping and encourages the model to learn meaningful
+patterns.</figcaption>
 </figure>
 <h4 data-number="2.1.0.1" id="key-takeaways"><span class="header-section-number">2.1.0.1</span> Key Takeaways</h4>
 <ul>
@@ -200,8 +201,8 @@ to learn reusable features that are useful for downstream tasks such as
 classification and clustering.</p>
 <figure>
 <img src="img/lecture19/SparseMapping.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Sparse autoencoders activate only a subset of neurons for
-any given input.</figcaption>
+<figcaption>Figure 18.2: Sparse autoencoders activate only a subset of
+neurons for any given input.</figcaption>
 </figure>
 <h4 data-number="2.2.0.2" id="how-sparsity-is-enforced."><span class="header-section-number">2.2.0.2</span> How sparsity is
 enforced.</h4>
@@ -222,8 +223,8 @@ copy of the input and instead encourages the network to encode the input
 using only a small set of informative features.</p>
 <figure>
 <img src="img/lecture19/LossFunction4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Sparse autoencoders add a regularization term to the
-reconstruction loss.</figcaption>
+<figcaption>Figure 18.3: Sparse autoencoders add a regularization term
+to the reconstruction loss.</figcaption>
 </figure>
 <p>Figure 18.3 illustrates this idea visually, but the key mathematical
 point is that sparsity is enforced by augmenting the reconstruction
@@ -252,8 +253,8 @@ result, the learned representation becomes compact and selective rather
 than dense and redundant.</p>
 <figure>
 <img src="img/lecture19/L1norm.JPG" style="width:33.00%; max-width:33.00%; height:auto;"/>
-<figcaption>L1 regularization encourages many latent activations to
-become zero.</figcaption>
+<figcaption>Figure 18.4: L1 regularization encourages many latent
+activations to become zero.</figcaption>
 </figure>
 <p>Figure 18.4 provides the geometric intuition behind the <span class="math inline">\(L_1\)</span> penalty. In the sparse autoencoder
 setting, the practical consequence is that different inputs activate
@@ -296,8 +297,8 @@ dataset. This encourages neurons to be active only rarely, which leads
 to specialization and a sparse but still distributed representation.</p>
 <figure>
 <img src="img/lecture19/KL.JPG" style="width:54.00%; max-width:54.00%; height:auto;"/>
-<figcaption>KL divergence penalizes neurons that activate too
-frequently.</figcaption>
+<figcaption>Figure 18.5: KL divergence penalizes neurons that activate
+too frequently.</figcaption>
 </figure>
 <p>Figure 18.5 provides the intuition for the KL penalty. In practice,
 this encourages each latent neuron to specialize in detecting only
@@ -310,8 +311,8 @@ by the hyperparameter <span class="math inline">\(\lambda\)</span>,
 which determines how strongly sparsity is enforced.</p>
 <figure>
 <img src="img/lecture19/Sparse4.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Sparse autoencoders represent inputs using only a few active
-features.</figcaption>
+<figcaption>Figure 18.6: Sparse autoencoders represent inputs using only
+a few active features.</figcaption>
 </figure>
 <h4 data-number="2.2.0.6" id="key-takeaways-1"><span class="header-section-number">2.2.0.6</span> Key Takeaways:</h4>
 <ul>
@@ -338,8 +339,8 @@ directly, it must learn the true structure of the data rather than
 memorizing pixel-level details.</p>
 <figure>
 <img src="img/lecture19/DeNoiseManifold.JPG" style="width:39.00%; max-width:39.00%; height:auto;"/>
-<figcaption>Denoising autoencoder: corrupted inputs are mapped back to
-clean outputs.</figcaption>
+<figcaption>Figure 18.7: Denoising autoencoder: corrupted inputs are
+mapped back to clean outputs.</figcaption>
 </figure>
 <p>A useful way to understand denoising autoencoders is through the
 concept of a <em>data manifold</em>. Real-world data often lies on a
@@ -376,7 +377,7 @@ Thus, the model is trained not to reproduce what it sees, but to infer
 the underlying clean structure from a corrupted observation.</p>
 <figure>
 <img src="img/lecture19/NoiseLoss.JPG" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Loss function used to train a denoising
+<figcaption>Figure 18.8: Loss function used to train a denoising
 autoencoder.</figcaption>
 </figure>
 <p>Figure 18.8 shows this objective visually. The important mathematical
@@ -417,8 +418,9 @@ represents where the data point is likely to lie in the latent
 space.</p>
 <figure>
 <img src="img/lecture19/Structure-of-the-variational-autoencoder-VAE.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Structure of a variational autoencoder. The encoder maps an
-input <span class="math inline">\(X\)</span> to the parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> of the approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>. A latent code <span class="math inline">\(Z\)</span> is sampled from this distribution and
+<figcaption>Figure 18.9: Structure of a variational autoencoder. The
+encoder maps an input <span class="math inline">\(X\)</span> to the
+parameters <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> of the approximate posterior <span class="math inline">\(q_\theta(Z|X)\)</span>. A latent code <span class="math inline">\(Z\)</span> is sampled from this distribution and
 passed through the decoder <span class="math inline">\(p_\phi(X|Z)\)</span> to reconstruct the
 input.</figcaption>
 </figure>
@@ -507,7 +509,8 @@ that the reconstruction quality is averaged over latent samples drawn
 from the encoder distribution.</p>
 <figure>
 <img src="img/lecture19/ELBO2.JPG" style="width:42.00%; max-width:42.00%; height:auto;"/>
-<figcaption>Evidence Lower Bound (ELBO) objective.</figcaption>
+<figcaption>Figure 18.10: Evidence Lower Bound (ELBO)
+objective.</figcaption>
 </figure>
 <p>Unlike a standard autoencoder that maps each input to a single latent
 vector, a VAE maps each input to a distribution in latent space, meaning
@@ -578,7 +581,8 @@ similar outputs. Moving smoothly through latent space therefore produces
 gradual and realistic changes in generated data.</p>
 <figure>
 <img src="img/lecture19/VAEMorphing1.JPG" style="width:45.00%; max-width:45.00%; height:auto;"/>
-<figcaption>Smooth transitions in VAE latent space.</figcaption>
+<figcaption>Figure 18.13: Smooth transitions in VAE latent
+space.</figcaption>
 </figure>
 <h4 data-number="2.4.0.8" id="key-advantages"><span class="header-section-number">2.4.0.8</span> Key Advantages</h4>
 <p>VAEs provide a principled framework for learning meaningful latent

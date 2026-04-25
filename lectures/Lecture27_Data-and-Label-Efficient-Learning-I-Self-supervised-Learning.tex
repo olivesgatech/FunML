@@ -120,7 +120,7 @@
 
 %%%%%CHANGE HERE%%%%%%%%%
 %%%%%\lecture{the ordinal number of the lecture}{lecture title}{Jacob Abernethy}{scriber's name}%%%%%%%%
-\lecture{24}{Data and Label Efficient Learning I: Self-supervised Learning}{Ghassan AlRegib and Mohit Prabhushankar}{}
+\lecture{25}{Data and Label Efficient Learning I: Self-supervised Learning}{Ghassan AlRegib and Mohit Prabhushankar}{}
 
 %%%%%CHANGE HERE%%%%%%%
 %%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
@@ -141,6 +141,63 @@
 \section{Lecture Objectives}
 
 This lecture introduces self-supervised learning as a modern paradigm that bridges supervised and unsupervised learning by leveraging large amounts of unlabeled data. We begin by comparing data requirements and training structures across supervised, unsupervised, and self-supervised learning. We then study the self-supervised learning pipeline, including pseudo-label generation, pre-training, and downstream fine-tuning. Next, we examine common pre-text tasks such as transformation prediction, masked prediction, deep clustering, and contrastive learning, with a detailed look at the SimCLR framework. Finally, we discuss contrastive learning applications, the emergence of foundation models, and the growing importance of self-supervision in modern AI systems.
+
+\section{Foundation Models}
+
+Foundation models represent a major shift in modern machine learning \cite{4}. Instead of training task-specific models from scratch, large models are first trained on massive and diverse datasets using \textbf{self-supervised learning} (the \textbf{pre-training stage}), and are later adapted to many downstream tasks.
+
+In this paradigm, pre-training leverages unlabeled data to learn general-purpose representations. The resulting pre-trained model is referred to as a \textbf{foundation model}, which can then be adapted to downstream tasks.
+
+This training pipeline can be summarized in three stages:
+\begin{itemize}
+\item \textbf{Pre-training (Self-Supervised Learning):} Learn general representations from large-scale unlabeled data
+\item \textbf{Fine-tuning:} Adapt the model to specific downstream tasks using labeled data
+\item \textbf{Alignment (optional):} Further refine model outputs using human feedback or task-specific constraints
+\end{itemize}
+
+Notably, the pre-training stage corresponds directly to the self-supervised learning objectives discussed in this lecture.
+
+\subsection{Recent Developments}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/lecture26/sam.png}
+    \caption{Segment Anything Model (SAM): a large-scale foundation model for image segmentation.}
+    \label{fig:sam}
+\end{figure}
+
+One prominent example of a modern foundation model is the \textbf{Segment Anything Model (SAM)}, released by Meta in April 2023 \cite{5}. As shown in Fig.~\ref{fig:sam}, SAM was trained on an unprecedented dataset containing \textbf{1.1 billion segmentation masks} from \textbf{11 million images}. This scale enables the model to generalize across diverse visual domains and perform segmentation without task-specific training.
+
+\subsection{Historical Evolution}
+
+The rise of foundation models can be understood through the evolution of deep learning architectures.
+
+Prior to 2019, most computer vision systems relied on convolutional architectures such as \textbf{VGG} and \textbf{ResNet}. These models were typically trained in a fully supervised manner for specific tasks. 
+
+After 2019, the field experienced a major transition with the introduction of \textbf{transformer-based architectures} and large-scale \textbf{self-supervised training}. Models such as \textbf{BERT}, \textbf{GPT}, \textbf{DALL-E}, and \textbf{Flamingo} demonstrated that training on massive unlabeled datasets could produce general-purpose representations adaptable to many tasks \cite{3,4}. This shift marks the emergence of the foundation model paradigm.
+
+\subsection{Applications and Impact}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/lecture26/foundation_model.png}
+    \caption{Foundation models trained on diverse multimodal data and adapted to downstream tasks.}
+    \label{fig:foundation_models}
+\end{figure}
+
+Foundation models leverage \textbf{transfer learning at scale} \cite{4}. As illustrated in Fig.~\ref{fig:foundation_models}, these models are trained using diverse data sources and modalities, enabling the emergence of shared representations that transfer across tasks. Increasing model scale often leads to the emergence of higher-level reasoning and generalization capabilities.
+
+The impact of foundation models spans many domains, including \textbf{healthcare}, \textbf{embodied interactive perception}, \textbf{visual knowledge distillation}, and \textbf{temporal and commonsense reasoning}. This paradigm reflects the central theme of this lecture: large-scale self-supervised learning enables the development of flexible, general-purpose representations that transfer across tasks.
+
+\section{Key Insights and Conclusions}
+
+\subsection{Pseudo-Label Generation}
+
+A central idea of \textbf{self-supervised learning} is the design of effective \textbf{pseudo-labels}. The success of this paradigm relies heavily on the creativity used to construct meaningful pre-text tasks that generate supervisory signals directly from unlabeled data. Importantly, pseudo-labels must maintain a meaningful relationship with the true downstream labels so that the learned representations remain useful for real-world tasks. When designed properly, the features learned from pseudo-labels closely align with those required for supervised learning, enabling strong transfer and generalization.
+
+\subsection{Future Directions}
+
+Self-supervision at scale has become a fundamental component of modern AI systems. As datasets and model sizes continue to grow, \textbf{foundation models} trained using self-supervised objectives are expected to play an increasingly dominant role across domains. The continued evolution of these models will further expand their applications, shaping the future of machine learning and artificial intelligence.
 
 \section{Comparison of Data Requirements and Structures}
 
@@ -164,6 +221,14 @@ As illustrated in Fig.~\ref{fig:ssl-comparison}, the primary difference between 
 \subsection*{Self-Supervised Learning}
 
 \textbf{Self-supervised learning (SSL)} bridges the gap between supervised and unsupervised learning by creating supervisory signals directly from unlabeled data. Instead of relying on manual annotations, SSL introduces carefully designed \textbf{pre-text tasks} that automatically generate \textbf{pseudo-labels} $z$ from the raw data $x$. The model first learns useful representations by solving these auxiliary tasks and is later \textbf{fine-tuned} on a downstream task using a smaller labeled dataset. The key distinction between SSL and unsupervised learning is the presence of structured supervisory signals derived from the data itself, enabling the model to learn more task-relevant and transferable representations \cite{1}.
+
+\subsection*{Weakly-Supervised Learning}
+
+\textbf{Weakly-supervised learning} uses labels that are noisy, imprecise, or less informative than fully supervised labels. These labels are often easier and cheaper to obtain, but introduce uncertainty in the training process. The goal is to learn robust representations despite imperfect supervision.
+
+\subsection*{Semi-Supervised Learning}
+
+\textbf{Semi-supervised learning} combines a small amount of labeled data with a large amount of unlabeled data. The model leverages labeled examples for supervision while using unlabeled data to improve generalization. This approach lies between supervised and unsupervised learning in terms of supervision strength.
 
 \section{Self-Supervised Learning (SSL) Structure}
 
@@ -365,11 +430,162 @@ Recent empirical results demonstrate that large-scale \textbf{contrastive learni
 
 This shift has led to a \textbf{modern training paradigm} in which models are first trained using self-supervised objectives to learn general-purpose representations, and are then \textbf{fine-tuned} using supervised learning for specific tasks. Notably, many \textbf{foundation models} and \textbf{large language models} follow this training strategy, highlighting the growing importance of self-supervised learning at scale.
 
-\section{Variations in Contrastive Learning Methods and Applications}
+\section{Variations of Self-Supervised Learning Methods}
 
-Contrastive learning is not defined by a single algorithm, but rather by a general principle: learning representations by distinguishing \textbf{positive pairs} from \textbf{negative pairs}. The primary variation across different methods lies in how these pairs are constructed. Depending on the data modality and task requirements, researchers design creative strategies to define meaningful supervisory signals. We now examine several representative applications that demonstrate the flexibility of contrastive learning.
+Different self-supervised learning methods can be understood as modifications to the underlying learning objective. In particular, many contrastive methods can be interpreted as modifying either the \textbf{numerator} or \textbf{denominator} of the InfoNCE loss, while decorrelation-based methods modify the objective to operate across feature dimensions.
 
-\subsection{Core Concept}
+\subsection{Variations of Contrastive Methods}
+
+Recall the InfoNCE loss:
+
+\[
+\mathcal{L}_{\text{InfoNCE}} = -\log \frac{\exp(\text{sim}(z_i, z_j)/\tau)}{\sum_{k} \exp(\text{sim}(z_i, z_k)/\tau)}
+\]
+
+This formulation consists of:
+\begin{itemize}
+\item \textbf{Numerator:} similarity between a positive pair
+\item \textbf{Denominator:} similarity between the anchor and all other samples (including negatives)
+\end{itemize}
+
+Different methods modify these two components in distinct ways.
+
+\subsubsection*{NNCLR: Modifying the Numerator}
+
+\textbf{NNCLR} (Nearest-Neighbor Contrastive Learning) changes how positive pairs are constructed.
+
+Instead of using only augmented views of the same sample, NNCLR selects a \textbf{nearest neighbor} in the representation space as the positive example. The numerator becomes:
+
+\[
+\exp(\text{sim}(z_i, z_{\text{NN}(i)})/\tau)
+\]
+
+where $z_{\text{NN}(i)}$ is the embedding of the nearest neighbor of sample $i$.
+
+\textbf{Interpretation:}
+\begin{itemize}
+\item Expands the notion of similarity beyond strict augmentations
+\item Encourages clustering of semantically similar samples
+\item Makes the objective more robust to augmentation design
+\end{itemize}
+
+Thus, NNCLR can be viewed as modifying the \textbf{numerator of InfoNCE} to incorporate neighborhood structure in the representation space.
+
+\subsubsection*{MoCo v2: Modifying the Denominator}
+
+\textbf{MoCo v2} (Momentum Contrast) modifies how negative samples are constructed.
+
+Instead of relying only on the current mini-batch, MoCo maintains a \textbf{memory queue} of past embeddings. The denominator becomes:
+
+\[
+\sum_{k \in \mathcal{Q}} \exp(\text{sim}(z_i, z_k)/\tau)
+\]
+
+where $\mathcal{Q}$ is a large queue of negative samples.
+
+\textbf{Interpretation:}
+\begin{itemize}
+\item Provides a much larger and more diverse set of negatives
+\item Improves stability compared to small-batch contrastive learning
+\item Approximates a richer estimate of the data distribution
+\end{itemize}
+
+Thus, MoCo can be viewed as modifying the \textbf{denominator of InfoNCE} to improve negative sampling.
+
+This modification also has an important theoretical interpretation. From a theoretical perspective, these methods can be viewed as improving the estimation of the underlying data distribution. NNCLR enriches the set of positive samples, leading to a better approximation of semantic similarity, while MoCo improves the denominator by providing a larger and more stable set of negative samples. Together, these methods refine the contrastive objective as an approximation to a density-ratio estimation problem.
+
+\subsection{Variations of Decorrelation-Based Methods}
+
+Decorrelation-based methods depart from contrastive learning entirely by removing the need for negative samples. Instead of comparing across samples, they impose constraints across \textbf{feature dimensions}.
+
+\subsubsection*{Dimension-Contrastive Perspective}
+
+In contrastive learning, the objective operates across samples:
+\[
+\text{pull positive samples together, push negative samples apart}
+\]
+
+In decorrelation-based methods, the objective operates across feature dimensions:
+\[
+\text{encourage independence and diversity across features}
+\]
+
+This can be viewed as a form of \textbf{dimension-contrastive learning}.
+
+\subsubsection*{Barlow Twins}
+
+\textbf{Barlow Twins} enforces that the cross-correlation matrix between two views is close to the identity matrix.
+
+\textbf{Interpretation:}
+\begin{itemize}
+\item Diagonal terms enforce invariance (similar representations)
+\item Off-diagonal terms enforce decorrelation (independent features)
+\end{itemize}
+
+\subsubsection*{BYOL and DINO}
+
+\textbf{BYOL} and \textbf{DINO} avoid collapse without negative samples by using:
+\begin{itemize}
+\item Teacher–student architectures
+\item Momentum updates
+\item Implicit regularization through prediction asymmetry
+\end{itemize}
+
+\textbf{Interpretation:}
+\begin{itemize}
+\item These methods rely on architectural asymmetry rather than explicit negative sampling
+\item They still implicitly encourage high-dimensional representations
+\end{itemize}
+
+\subsubsection*{Connection to Dimensionality}
+
+All decorrelation-based methods can be interpreted as directly enforcing:
+
+\begin{itemize}
+\item \textbf{High variance across dimensions}
+\item \textbf{Low redundancy between dimensions}
+\end{itemize}
+
+This connects directly to the earlier discussion on \textbf{dimensional collapse}, where the goal is to prevent representations from collapsing into a low-dimensional space.
+
+Thus, while contrastive methods operate across samples, decorrelation-based methods operate across dimensions, providing an alternative mechanism for learning rich representations.
+
+\section{Dimensionality in Representation Space}
+
+A critical aspect of self-supervised learning is the structure of the learned representation space. Effective representations should preserve meaningful variation across data samples while avoiding collapse to trivial solutions.
+
+\textbf{Dimensional collapse} occurs when representations map to a low-dimensional subspace or a constant vector, resulting in loss of information and poor downstream performance. This phenomenon is illustrated geometrically in Fig.~\ref{fig:ssl_spherical}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{img/lecture26/ssl_spherical_representation.png}
+    \caption{Illustration of representation learning in self-supervised models. 
+    Left: collapsed or poorly distributed representations with limited diversity. 
+    Right: well-distributed representations across the sphere after training, indicating high-dimensional and information-rich embeddings encouraged by modern self-supervised objectives.}
+    \label{fig:ssl_spherical}
+\end{figure}
+
+Contrastive methods such as those based on InfoNCE implicitly prevent collapse by enforcing separation between samples through negative pairs. However, decorrelation-based methods explicitly enforce diversity in the representation space.
+
+For example, in VICReg:
+\begin{itemize}
+\item The \textbf{variance term} ensures each feature dimension maintains sufficient spread
+\item The \textbf{covariance term} reduces redundancy between feature dimensions
+\end{itemize}
+
+These mechanisms encourage the model to learn \textbf{high-dimensional, information-rich representations}, which are critical for generalization.
+
+This perspective highlights that modern self-supervised objectives operate not only across samples, but also across feature dimensions to preserve diversity and prevent collapse.
+
+\section{Domain-Specific Self-Supervised Learning}
+
+Self-supervised learning can be adapted to domain-specific settings by designing pre-text tasks and similarity relationships that reflect the structure of the data. In these cases, the construction of positive and negative pairs is guided by domain knowledge rather than generic data augmentations.
+
+In domain-specific settings, contrastive learning is adapted by redefining how positive and negative pairs are constructed. Rather than relying solely on generic data augmentations, domain knowledge is used to encode meaningful relationships within the data.
+
+% Contrastive learning is not defined by a single algorithm, but rather by a general principle: learning representations by distinguishing \textbf{positive pairs} from \textbf{negative pairs}. The primary variation across different methods lies in how these pairs are constructed. Depending on the data modality and task requirements, researchers design creative strategies to define meaningful supervisory signals. We now examine several representative applications that demonstrate the flexibility of contrastive learning.
+
+\subsection{Domain-Specific Pair Construction}
 
 The key differentiating factor among contrastive learning approaches is the strategy used to generate \textbf{positive and negative pairs}. In computer vision, positive pairs are often constructed using data augmentations of the same image. In domain-specific settings, however, positive relationships may be defined using spatial regions, temporal consistency, patient identity, or semantic similarity. Thus, contrastive learning adapts naturally to the structure of the data.
 
@@ -449,52 +665,6 @@ Although contrastive learning gained prominence in computer vision, it has been 
 
 These examples demonstrate the \textbf{versatility and generality} of contrastive learning across diverse data types. The unifying principle remains the same: representations are learned by structuring similarity relationships within the data.
 
-\section{Foundation Models}
-
-Foundation models represent a major shift in modern machine learning \cite{4}. Instead of training task-specific models from scratch, large models are first trained on massive and diverse datasets using self-supervised objectives, and are later adapted to many downstream tasks. This paradigm connects directly to the self-supervised learning concepts discussed throughout this lecture.
-
-\subsection{Recent Developments}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{img/lecture26/sam.png}
-    \caption{Segment Anything Model (SAM): a large-scale foundation model for image segmentation.}
-    \label{fig:sam}
-\end{figure}
-
-One prominent example of a modern foundation model is the \textbf{Segment Anything Model (SAM)}, released by Meta in April 2023 \cite{5}. As shown in Fig.~\ref{fig:sam}, SAM was trained on an unprecedented dataset containing \textbf{1.1 billion segmentation masks} from \textbf{11 million images}. This scale enables the model to generalize across diverse visual domains and perform segmentation without task-specific training.
-
-\subsection{Historical Evolution}
-
-The rise of foundation models can be understood through the evolution of deep learning architectures.
-
-Prior to 2019, most computer vision systems relied on convolutional architectures such as \textbf{VGG} and \textbf{ResNet}. These models were typically trained in a fully supervised manner for specific tasks. 
-
-After 2019, the field experienced a major transition with the introduction of \textbf{transformer-based architectures} and large-scale \textbf{self-supervised training}. Models such as \textbf{BERT}, \textbf{GPT}, \textbf{DALL-E}, and \textbf{Flamingo} demonstrated that training on massive unlabeled datasets could produce general-purpose representations adaptable to many tasks \cite{3,4}. This shift marks the emergence of the foundation model paradigm.
-
-\subsection{Applications and Impact}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{img/lecture26/foundation_model.png}
-    \caption{Foundation models trained on diverse multimodal data and adapted to downstream tasks.}
-    \label{fig:foundation_models}
-\end{figure}
-
-Foundation models leverage \textbf{transfer learning at scale} \cite{4}. As illustrated in Fig.~\ref{fig:foundation_models}, these models are trained using diverse data sources and modalities, enabling the emergence of shared representations that transfer across tasks. Increasing model scale often leads to the emergence of higher-level reasoning and generalization capabilities.
-
-The impact of foundation models spans many domains, including \textbf{healthcare}, \textbf{embodied interactive perception}, \textbf{visual knowledge distillation}, and \textbf{temporal and commonsense reasoning}. This paradigm represents the culmination of the ideas explored in this lecture: large-scale self-supervised learning enables the development of flexible, general-purpose AI systems.
-
-\section{Key Insights and Conclusions}
-
-\subsection{Pseudo-Label Generation}
-
-A central idea of \textbf{self-supervised learning} is the design of effective \textbf{pseudo-labels}. The success of this paradigm relies heavily on the creativity used to construct meaningful pre-text tasks that generate supervisory signals directly from unlabeled data. Importantly, pseudo-labels must maintain a meaningful relationship with the true downstream labels so that the learned representations remain useful for real-world tasks. When designed properly, the features learned from pseudo-labels closely align with those required for supervised learning, enabling strong transfer and generalization.
-
-\subsection{Future Directions}
-
-Self-supervision at scale has become a fundamental component of modern AI systems. As datasets and model sizes continue to grow, \textbf{foundation models} trained using self-supervised objectives are expected to play an increasingly dominant role across domains. The continued evolution of these models will further expand their applications, shaping the future of machine learning and artificial intelligence.
-
 \section{Q\&A Section}
 
 \begin{enumerate}
@@ -556,6 +726,22 @@ How do decorrelation-based objectives such as VICReg avoid representation collap
 
 \textbf{Solution:}
 Decorrelation-based methods avoid collapse by enforcing three constraints: invariance, variance, and covariance. The invariance term aligns representations of augmented views, the variance term ensures that each feature dimension maintains sufficient spread, and the covariance term reduces redundancy between features. Together, these prevent trivial constant representations without requiring negative samples.
+
+\item \textbf{Question:}
+What is \textbf{dimensional collapse} in self-supervised learning, and how do modern methods prevent it?
+
+\textbf{Solution:}
+Dimensional collapse occurs when learned representations collapse to a low-dimensional space or a constant vector, resulting in loss of information and poor performance on downstream tasks.
+
+Contrastive methods prevent collapse implicitly by pushing apart representations of different samples using negative pairs.
+
+Decorrelation-based methods such as VICReg prevent collapse explicitly by enforcing:
+\begin{itemize}
+\item Variance: ensuring each feature dimension maintains sufficient spread
+\item Covariance: reducing redundancy between features
+\end{itemize}
+
+These constraints encourage high-dimensional, information-rich representations.
 
 \end{enumerate}
 

@@ -1,3 +1,4 @@
+
 %% Adapted from GaTech CS 7545 Machine Learning Theory given by Prof. Jacob Abernathy Fall 2018. Original latex file: https://github.com/mltheory/CS7545/blob/master/scribe/CS7545scribe_template.tex 
 
 
@@ -114,18 +115,15 @@
 \newcommand{\dom}{\mathrm{dom}}
 \begin{document}
 
-\lecture{12}{Clustering Performance Evaluation}{Ghassan AlRegib and Mohit Prabhushankar}{}%
-
+\lecture{12}{Clustering and Segmentation Performance Metrics}{Ghassan AlRegib and Mohit Prabhushankar}{}
 
 \section{Lecture Objectives}
 
-In the previous lecture we covered Gaussian Mixture Models and the EM algorithm for soft
-clustering. In this lecture, we evaluate clustering quality using \textbf{internal} metrics
-(e.g., Silhouette, Davies--Bouldin, Dunn Index) and \textbf{external} metrics
-(e.g., Rand Index, Mutual Information, Purity). We also discuss extensions of clustering
-including Mean Shift, Adjusted Rand Index (ARI), and image segmentation applications.
+In this lecture, we study how to evaluate clustering and segmentation performance. We introduce \textbf{internal clustering metrics} such as Davies--Bouldin, Dunn, and Silhouette, and \textbf{external metrics} such as Rand Index, Adjusted Rand Index, Mutual Information, and Purity. We also introduce \textbf{image segmentation metrics}, including pixel accuracy, Intersection over Union (IoU), Dice coefficient, and Hausdorff distance.
 
 \section{Clustering Performance Evaluation}
+
+Clustering algorithms such as k-means, GMM, and mean shift produce partitions of data, but evaluating their quality is non-trivial. In this lecture, we introduce metrics that quantify clustering and segmentation performance under different assumptions.
 
 To assess the quality of a clustering algorithm, we use evaluation metrics that quantify how well the resulting clusters represent meaningful structure in the data. Broadly, clustering evaluation can be divided into two categories. \textbf{External evaluation} measures how closely the computed clusters match a known ground truth set of classes. In contrast, \textbf{internal evaluation} assesses the clustering structure using only the data itself, typically by measuring how compact clusters are and how well-separated they are from one another.
 
@@ -155,7 +153,7 @@ Cluster $r$ has centroid $m_r$, and $\sigma_r$ denotes the average distance of a
 \]
 The quantity $d(m_r,m_s)$ represents the distance between the centroids of clusters $r$ and $s$.
 
-Intuitively, the DB index measures how similar each cluster is to its most similar neighboring cluster. A smaller DB index indicates better clustering performance, as it reflects compact clusters that are well separated from each other. Therefore, when the goal is to compare cluster separation and compactness, algorithms producing clusters with a \textbf{smaller} DB index are preferred.
+Intuitively, the DB index measures how similar each cluster is to its most similar neighboring cluster. A smaller DB index indicates better clustering performance, as it reflects compact clusters that are well separated from each other. Therefore, when the goal is to compare cluster separation and compactness, algorithms producing clusters with a \textbf{smaller} DB index are preferred \cite{2}. 
 
 \subsubsection{Dunn Index}
 The Dunn Index is denoted by the following formula:\[
@@ -164,12 +162,12 @@ D = \frac{\displaystyle \min_{1\leq r\leq s\leq k}d(m_r,m_s)}{\displaystyle \max
 
 The main part is the ratio between the \textbf{minimal inter-cluster distance to maximal intra-cluster distance.}\\
 Calculation of $d(m_r,m_s)$ is similar to the one in Davis-Bouldin Index, while $d'(z)$ can also be calculated in a variety of ways(e.g. the maximal distance between any pair of element in cluster $z$)\\
-DB Index is used when \textbf{the goal is to identify well-separated, compact clusters}.\\
-Algorithms producing clusters with \textbf{bigger} Dunn Index is ideal.
+The Dunn Index is particularly useful when the goal is to identify well-separated, compact clusters.\\
+Algorithms producing clusters with a \textbf{larger} Dunn Index are preferred \cite{3}.
 
 \subsubsection{Silhouette Coefficient}
 
-The \textbf{Silhouette Coefficient} is an internal clustering metric that evaluates how well each data point fits within its assigned cluster compared to neighboring clusters. It captures both \emph{cluster cohesion} (how close a point is to its own cluster) and \emph{cluster separation} (how far it is from the nearest alternative cluster).
+The \textbf{Silhouette Coefficient} \cite{4} is an internal clustering metric that evaluates how well each data point fits within its assigned cluster compared to neighboring clusters. It captures both \emph{cluster cohesion} (how close a point is to its own cluster) and \emph{cluster separation} (how far it is from the nearest alternative cluster).
 
 The silhouette value for a sample $x_i$ is computed using the following steps:
 
@@ -240,10 +238,50 @@ With the four measurements, Rand Index can be denoted as:\[
 RI(R,Q)=\frac{a+d}{a+b+c+d}
 \]
 Rand index can be used to evaluate generated clustering against a ground truth clustering.\\
-Algorithms producing clusters with \textbf{bigger} rand index is ideal.
+Algorithms producing clusters with a \textbf{larger} Rand Index are preferred \cite{5}.
+
+\subsubsection{Adjusted Rand Index (ARI)}
+
+When ground-truth labels are available, clustering results can be evaluated using 
+external metrics. One widely used metric is the \textbf{Adjusted Rand Index (ARI)}, 
+which measures agreement between two partitions while correcting for chance.
+
+The original Rand Index can vary significantly for random clusterings. 
+The Adjusted Rand Index addresses this by modeling the random case using a 
+generalized hypergeometric distribution \cite{6}. Consequently, the ARI has a maximum value 
+of 1, an expected value of 0 for random cluster assignments, and remains meaningful 
+even when the compared partitions contain different numbers of clusters.
+
+Assume the dataset contains $N$ samples. Using ground-truth clusters $R$ and computed 
+clusters $Q$, we define a \textbf{contingency table} $[n_{ij}]$ where:
+
+\begin{itemize}
+    \item $n_{ij}=|R_i \cap Q_j|$
+    \item $n_{i,}=\sum_j n_{ij}$ and $n_{,j}=\sum_i n_{ij}$
+\end{itemize}
+
+From this table we compute the pair-count quantities of the Rand Index:
+\begin{itemize}
+    \item $a=\displaystyle\sum_{i,j}\binom{n_{ij}}{2}$
+    \item $b=\displaystyle\sum_i\binom{n_{i,}}{2}-a$
+    \item $c=\displaystyle\sum_j\binom{n_{,j}}{2}-a$
+    \item $d=\displaystyle\binom{N}{2}-a-b-c$
+\end{itemize}
+
+The Adjusted Rand Index is then given by:
+\[
+ARI=\frac{\sum_{i,j}\binom{n_{ij}}{2}-\left[\sum_i\binom{n_{i,}}{2}\sum_j\binom{n_{,j}}{2}\right]/\binom{N}{2}}
+{\frac{1}{2}\left[\sum_i\binom{n_{i,}}{2}+\sum_j\binom{n_{,j}}{2}\right]
+-\left[\sum_i\binom{n_{i,}}{2}\sum_j\binom{n_{,j}}{2}\right]/\binom{N}{2}}.
+\]
+
+\paragraph{Interpretation.}
+The numerator represents how much the clustering agreement exceeds chance, while 
+the denominator normalizes the score by the maximum possible agreement. 
+As a result, ARI provides a robust measure of clustering similarity.
 
 \subsubsection{Mutual Information}
-Mutual Information measures the overlap between computed an ground-truth cluster on basis of information theory. The formula for Mutual information score is given as following:\[
+Mutual Information \cite{7} measures the overlap between computed and ground-truth clusters on basis of information theory. The formula for Mutual information score is given as following:\[
 MI(R, Q) = \sum_{i=1}^{|R|} \sum_{j=1}^{|Q|} \frac{|R_i \cap Q_j|}{N} \log \frac{N |R_i \cap Q_j|}{|R_i| |Q_j|}
 \]
 in which,\\
@@ -262,19 +300,124 @@ Purity is defined as how much the \textbf{ground truth} clustering \textbf{match
 In simplistic terms, add the number of matches for each most matched computed clusters and divide that by the number of data points - that is the purity score. The closer to 1 the purity score is, the better the computed cluster is.\\
 The purity score fails to accuracy measure a clustering algorithm if the data is imbalanced between the ground truth clusters.\\
 
-\subsection{Summary of Metrics}
+\subsection{Image Segmentation Metrics}
+
+While the clustering metrics above evaluate general partition quality, image segmentation is often evaluated at the \textbf{pixel level} or the \textbf{boundary level}. This is especially relevant for Homework 4, where the output of clustering is interpreted as a segmentation mask.
+
+\subsubsection{Pixel Accuracy}
+
+The simplest segmentation metric is \textbf{pixel accuracy}, which measures the fraction of pixels that are assigned the correct label:
+
+\[
+\text{Pixel Accuracy} = \frac{\text{Number of correctly labeled pixels}}{\text{Total number of pixels}}
+\]
+
+Pixel accuracy is easy to interpret and is the main metric used in Homework 4. However, it can be misleading when one class dominates the image. For example, if most pixels belong to the background, a method may obtain high pixel accuracy even if it performs poorly on the foreground region.
+
+\subsubsection{Intersection over Union (IoU)}
+
+A more informative overlap-based metric is \textbf{Intersection over Union (IoU)}, also called the \textbf{Jaccard index} \cite{8}. For a predicted segment $P$ and ground-truth segment $G$:
+
+\[
+\text{IoU} = \frac{|P \cap G|}{|P \cup G|}
+\]
+
+IoU measures how much the predicted region overlaps with the true region relative to their union. Larger IoU indicates better segmentation quality. When multiple classes are present, it is common to average the IoU across classes, yielding the \textbf{mean IoU (mIoU)}.
+
+\subsubsection{Dice Coefficient}
+
+Another common overlap-based metric is the \textbf{Dice coefficient} \cite{9}, defined as:
+
+\[
+\text{Dice} = \frac{2|P \cap G|}{|P| + |G|}
+\]
+
+Like IoU, Dice measures region overlap, but it places slightly more emphasis on overlap relative to total predicted and ground-truth area. In many segmentation problems, especially when the foreground region is sparse, Dice is preferred because it is less dominated by the background. In large-scale segmentation benchmarks, Dice is often used as the primary pixel-overlap metric, while Hausdorff distance is used to capture structural deviation \cite{1}.
+
+\subsubsection{Hausdorff Distance}
+
+Overlap-based metrics do not fully capture whether boundaries or thin structures are placed correctly. For this reason, segmentation is also evaluated with distance-based metrics such as the \textbf{Hausdorff distance} \cite{10}. A modified Hausdorff distance can be written as:
+
+\[
+HD = \max \left(
+\frac{1}{N_P}\sum_{p \in P} \min_{g \in G} d(p,g),
+\;
+\frac{1}{N_G}\sum_{g \in G} \min_{p \in P} d(p,g)
+\right)
+\]
+
+where $d(\cdot,\cdot)$ is the Euclidean distance between boundary points, and $N_P$ and $N_G$ are the number of points in the predicted and ground-truth sets, respectively.
+
+Hausdorff distance measures the largest average boundary deviation between the predicted segmentation and the ground truth, and is commonly used to evaluate structural accuracy in segmentation benchmarks \cite{1}. Smaller values are better. It is particularly useful when evaluating thin or structured regions, where even small spatial shifts can matter.
+
+\subsubsection{Why Multiple Metrics Are Needed}
+
+Different segmentation metrics emphasize different notions of quality:
+
+\begin{itemize}
+    \item \textbf{Pixel Accuracy}: overall fraction of correctly labeled pixels
+    \item \textbf{IoU / mIoU}: overlap quality between predicted and true regions
+    \item \textbf{Dice}: overlap quality, especially useful for sparse foregrounds
+    \item \textbf{Hausdorff Distance}: boundary and structural alignment
+\end{itemize}
+
+No single metric is sufficient in all cases. Recent large-scale benchmarks emphasize that overlap-based metrics such as Dice and distance-based metrics such as Hausdorff can disagree, and that some predictions may look visually more reasonable while receiving worse scores under a different metric \cite{1}. This is one reason segmentation performance is often reported using multiple complementary metrics rather than a single number. 
+
+\subsubsection{Connection to Homework 4}
+
+In Homework 4, segmentation quality is primarily evaluated using \textbf{pixel accuracy}. This is a reasonable starting point because it is simple and directly measures the fraction of correctly labeled pixels. However, more advanced segmentation settings often also report IoU, Dice, and Hausdorff distance to better capture overlap quality and structural correctness.
+
+\subsection{Summary of Clustering Metrics}
 
 \begin{center}
 \begin{tabular}{| c | c |}
 \hline
- \textbf{Internal} (Best) & \textbf{External} (Best) \\ 
- \hline
- Davies-Boudlin - Distinctness (Smallest) & Rand-Index - Correctness (Biggest) \\  
- \hline
- Dunn - Density (Biggest) & Mutual Information Score - Overlap (Biggest)\\
- \hline
- Silhouette - Separability (Biggest of 1) & Cluster Purity - Accuracy (Biggest of 1)\\
- \hline
+\textbf{Metric} & \textbf{What it emphasizes} \\ 
+\hline
+
+Davies--Bouldin Index & Cluster compactness vs.\ separation (smaller is better) \\  
+\hline
+
+Dunn Index & Dense, well-separated clusters (larger is better) \\
+\hline
+
+Silhouette Coefficient & Per-sample separability and cohesion (larger is better) \\
+\hline
+
+Rand Index & Agreement with ground truth partition (larger is better) \\
+\hline
+
+Mutual Information & Shared information with ground truth labels (larger is better) \\
+\hline
+
+Cluster Purity & Dominant-class consistency within clusters (larger is better) \\
+\hline
+
+\end{tabular}
+\end{center}
+
+
+
+\subsection{Summary of Image Segmentation Metrics}
+
+\begin{center}
+\begin{tabular}{| c | c |}
+\hline
+\textbf{Metric} & \textbf{What it emphasizes} \\ 
+\hline
+
+Pixel Accuracy & Fraction of correctly labeled pixels (larger is better) \\
+\hline
+
+IoU / mIoU & Region overlap quality (larger is better) \\
+\hline
+
+Dice Coefficient & Overlap quality, especially for sparse foregrounds (larger is better) \\
+\hline
+
+Hausdorff Distance & Boundary and structural alignment (smaller is better) \\
+\hline
+
 \end{tabular}
 \end{center}
 
@@ -367,123 +510,81 @@ The purity score fails to accuracy measure a clustering algorithm if the data is
 % \end{itemize}
 % Because the color spaces in an image are not equally separable, clustering performance depends on the color space used. In general, given an image we can engineer a set of features (e.g. choosing an appropriate color space) that will best help the model we are using to differentiate between the segments of interest.
 
-\section{Extensions and Applications of Clustering}
+% \section{Extensions and Applications of Clustering}
 
-The clustering methods discussed so far form the core toolkit for unsupervised learning. 
-In this section, we introduce several important extensions, evaluation measures, and 
-applications that build on these ideas.
+% The clustering methods discussed so far form the core toolkit for unsupervised learning. 
+% In this section, we introduce several important extensions, evaluation measures, and 
+% applications that build on these ideas.
 
-\subsection{Mean Shift Clustering}
+% \subsection{Mean Shift Clustering}
 
-The \textbf{Mean Shift} algorithm is a non-parametric clustering method that seeks 
-\textbf{modes (local maxima) of a data density function}. Unlike k-means or GMMs, 
-mean shift does \textbf{not require prior knowledge of the number of clusters}. 
-Instead, clusters naturally emerge as groups of points that converge to the same 
-density mode.
+% The \textbf{Mean Shift} algorithm is a non-parametric clustering method that seeks 
+% \textbf{modes (local maxima) of a data density function}. Unlike k-means or GMMs, 
+% mean shift does \textbf{not require prior knowledge of the number of clusters}. 
+% Instead, clusters naturally emerge as groups of points that converge to the same 
+% density mode.
 
-Intuitively, each data point iteratively moves toward regions of higher density. 
-This is achieved by repeatedly shifting a local window toward the weighted mean of 
-the data within that window. The kernel function $K(x_i - x)$ determines how strongly 
-each neighboring sample influences the update.
+% Intuitively, each data point iteratively moves toward regions of higher density. 
+% This is achieved by repeatedly shifting a local window toward the weighted mean of 
+% the data within that window. The kernel function $K(x_i - x)$ determines how strongly 
+% each neighboring sample influences the update.
 
-The algorithm proceeds as follows:
+% The algorithm proceeds as follows:
 
-\begin{enumerate}
-    \item Place a \textbf{window} $W(x)$ around each data point, determined by a 
-    user-defined \textbf{bandwidth} (window size).
+% \begin{enumerate}
+%     \item Place a \textbf{window} $W(x)$ around each data point, determined by a 
+%     user-defined \textbf{bandwidth} (window size).
 
-    \item Compute the weighted mean of the samples inside the window:
-    \[
-    m(x)=\frac{\sum_{x_i\in W(x)} K(x_i-x)x_i}{\sum_{x_i\in W(x)} K(x_i-x)}.
-    \]
+%     \item Compute the weighted mean of the samples inside the window:
+%     \[
+%     m(x)=\frac{\sum_{x_i\in W(x)} K(x_i-x)x_i}{\sum_{x_i\in W(x)} K(x_i-x)}.
+%     \]
 
-    \item \textbf{Shift the window} toward the mean. The vector $m(x)-x$ is called 
-    the \textbf{mean shift}.
+%     \item \textbf{Shift the window} toward the mean. The vector $m(x)-x$ is called 
+%     the \textbf{mean shift}.
 
-    \item Repeat until convergence. The final location $m(x)$ corresponds to a 
-    density mode representing a cluster.
+%     \item Repeat until convergence. The final location $m(x)$ corresponds to a 
+%     density mode representing a cluster.
 
-    \item Merge nearby modes and assign each data point to the mode its window 
-    converges to.
-\end{enumerate}
+%     \item Merge nearby modes and assign each data point to the mode its window 
+%     converges to.
+% \end{enumerate}
 
-\paragraph{Computational considerations.}
-Mean shift can be computationally expensive because a window is shifted for each 
-data sample and many trajectories overlap, leading to redundant computations.
+% \paragraph{Computational considerations.}
+% Mean shift can be computationally expensive because a window is shifted for each 
+% data sample and many trajectories overlap, leading to redundant computations.
 
-\paragraph{Common speedups.}
-\begin{enumerate}
-    \item Assign all points within radius $r$ of a converged mode directly to that mode.
-    \item Assign points within radius $r/c$ of the search trajectory to the same mode.
-\end{enumerate}
+% \paragraph{Common speedups.}
+% \begin{enumerate}
+%     \item Assign all points within radius $r$ of a converged mode directly to that mode.
+%     \item Assign points within radius $r/c$ of the search trajectory to the same mode.
+% \end{enumerate}
 
-\paragraph{Advantages and limitations.}
-Mean shift is appealing because it is \emph{model-free} and makes no assumptions about 
-cluster shape. It uses a single parameter (the bandwidth), which has a clear physical 
-interpretation as the neighborhood size. The method can automatically discover the 
-number of clusters and is generally robust to outliers. 
+% \paragraph{Advantages and limitations.}
+% Mean shift is appealing because it is \emph{model-free} and makes no assumptions about 
+% cluster shape. It uses a single parameter (the bandwidth), which has a clear physical 
+% interpretation as the neighborhood size. The method can automatically discover the 
+% number of clusters and is generally robust to outliers. 
 
-However, the quality of the clustering depends heavily on the choice of bandwidth, 
-which can be difficult to tune. The algorithm is also computationally expensive and 
-does not scale well to high-dimensional data.
+% However, the quality of the clustering depends heavily on the choice of bandwidth, 
+% which can be difficult to tune. The algorithm is also computationally expensive and 
+% does not scale well to high-dimensional data.
 
-\subsection{Adjusted Rand Index (ARI)}
+% \subsection{Application: Image Segmentation}
 
-When ground-truth labels are available, clustering results can be evaluated using 
-external metrics. One widely used metric is the \textbf{Adjusted Rand Index (ARI)}, 
-which measures agreement between two partitions while correcting for chance.
+% An important application of clustering is \textbf{image segmentation}, where the 
+% goal is to divide an image into coherent regions. Clustering algorithms treat 
+% pixel feature vectors as samples and group them into meaningful regions based on 
+% spatial proximity, color similarity, and texture similarity.
 
-The original Rand Index can vary significantly for random clusterings. 
-The Adjusted Rand Index addresses this by modeling the random case using a 
-generalized hypergeometric distribution. Consequently, the ARI has a maximum value 
-of 1, an expected value of 0 for random cluster assignments, and remains meaningful 
-even when the compared partitions contain different numbers of clusters.
+% Each pixel can be represented by feature vectors such as RGB color values 
+% $x_i \in \mathbb{R}^3$, or by perceptual color spaces such as $L^*$ (luminance), 
+% $a^*$ (red–green), and $b^*$ (blue–yellow). Because different color spaces 
+% separate visual information differently, clustering performance depends strongly 
+% on the chosen feature representation.
 
-Assume the dataset contains $N$ samples. Using ground-truth clusters $R$ and computed 
-clusters $Q$, we define a \textbf{contingency table} $[n_{ij}]$ where:
-
-\begin{itemize}
-    \item $n_{ij}=|R_i \cap Q_j|$
-    \item $n_{i,}=\sum_j n_{ij}$ and $n_{,j}=\sum_i n_{ij}$
-\end{itemize}
-
-From this table we compute the pair-count quantities of the Rand Index:
-\begin{itemize}
-    \item $a=\displaystyle\sum_{i,j}\binom{n_{ij}}{2}$
-    \item $b=\displaystyle\sum_i\binom{n_{i,}}{2}-a$
-    \item $c=\displaystyle\sum_j\binom{n_{,j}}{2}-a$
-    \item $d=\displaystyle\binom{N}{2}-a-b-c$
-\end{itemize}
-
-The Adjusted Rand Index is then given by:
-\[
-ARI=\frac{\sum_{i,j}\binom{n_{ij}}{2}-\left[\sum_i\binom{n_{i,}}{2}\sum_j\binom{n_{,j}}{2}\right]/\binom{N}{2}}
-{\frac{1}{2}\left[\sum_i\binom{n_{i,}}{2}+\sum_j\binom{n_{,j}}{2}\right]
--\left[\sum_i\binom{n_{i,}}{2}\sum_j\binom{n_{,j}}{2}\right]/\binom{N}{2}}.
-\]
-
-\paragraph{Interpretation.}
-The numerator represents how much the clustering agreement exceeds chance, while 
-the denominator normalizes the score by the maximum possible agreement. 
-As a result, ARI provides a robust measure of clustering similarity.
-
-\subsection{Application: Image Segmentation}
-
-An important application of clustering is \textbf{image segmentation}, where the 
-goal is to divide an image into coherent regions. Clustering algorithms treat 
-pixel feature vectors as samples and group them into meaningful regions based on 
-spatial proximity, color similarity, and texture similarity.
-
-Each pixel can be represented by feature vectors such as RGB color values 
-$x_i \in \mathbb{R}^3$, or by perceptual color spaces such as $L^*$ (luminance), 
-$a^*$ (red–green), and $b^*$ (blue–yellow). Because different color spaces 
-separate visual information differently, clustering performance depends strongly 
-on the chosen feature representation.
-
-In practice, feature engineering—such as selecting an appropriate color space—plays 
-a key role in producing meaningful segmentation results.
-
-\newpage
+% In practice, feature engineering—such as selecting an appropriate color space—plays 
+% a key role in producing meaningful segmentation results.
 
 \section{Q\&A Section}
 The following table shows the clustering results from two different methods on five samples, along with the ground truth (GT) cluster assignments.
@@ -689,5 +790,31 @@ Hence, the silhouette scores for all samples are shown above.
     The correct answer is \textbf{(b) Silhouette Coefficient}.
 \end{enumerate}
 
+
+\section{References}
+
+\beginrefs
+
+\bibentry{1} Quesada, J., Zhou, C., Chowdhury, P., Alotaibi, M., Mustafa, A., Kumakov, Y., Prabhushankar, M., \& AlRegib, G. (2026). \textit{A Large-scale Benchmark on Geological Fault Delineation Models: Domain Shift, Training Dynamics, Generalizability, Evaluation and Inferential Behavior}. arXiv:2505.08585.
+
+\bibentry{2} Davies, D. L., \& Bouldin, D. W. (1979). \textit{A Cluster Separation Measure}. IEEE Transactions on Pattern Analysis and Machine Intelligence.
+
+\bibentry{3} Dunn, J. C. (1974). \textit{Well-separated clusters and optimal fuzzy partitions}. Journal of Cybernetics.
+
+\bibentry{4} Rousseeuw, P. J. (1987). \textit{Silhouettes: A graphical aid to the interpretation and validation of cluster analysis}. Journal of Computational and Applied Mathematics.
+
+\bibentry{5} Rand, W. M. (1971). \textit{Objective criteria for the evaluation of clustering methods}. Journal of the American Statistical Association.
+
+\bibentry{6} Hubert, L., \& Arabie, P. (1985). \textit{Comparing partitions}. Journal of Classification.
+
+\bibentry{7} Strehl, A., \& Ghosh, J. (2002). \textit{Cluster ensembles—a knowledge reuse framework for combining multiple partitions}. Journal of Machine Learning Research.
+
+\bibentry{8} Jaccard, P. (1912). \textit{The distribution of the flora in the alpine zone}. New Phytologist.
+
+\bibentry{9} Dice, L. R. (1945). \textit{Measures of the amount of ecologic association between species}. Ecology.
+
+\bibentry{10} Huttenlocher, D. P., Klanderman, G. A., \& Rucklidge, W. J. (1993). \textit{Comparing images using the Hausdorff distance}. IEEE Transactions on Pattern Analysis and Machine Intelligence.
+
+\endrefs
 
 \end{document}

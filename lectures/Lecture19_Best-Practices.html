@@ -154,7 +154,7 @@ those introduced in ResNet—can be incorporated to improve gradient flow
 and enable more effective training.</p>
 <figure id="0">
 <img src="img/lecture17/scribeim1.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Classification Pipeline</figcaption>
+<figcaption>Figure 16.1: Classification Pipeline</figcaption>
 </figure>
 <h2 data-number="2.2" id="dense-prediction-architectures"><span class="header-section-number">2.2</span> Dense Prediction
 Architectures</h2>
@@ -194,7 +194,7 @@ contextual information while maintaining high-resolution feature
 maps.</p>
 <figure id="1">
 <img src="img/lecture17/scribeim2.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Dense prediction architecture using mainly
+<figcaption>Figure 16.2: Dense prediction architecture using mainly
 convolution</figcaption>
 </figure>
 <h1 data-number="3" id="loss-functions"><span class="header-section-number">3.</span> Loss Functions</h1>
@@ -392,10 +392,10 @@ data. Therefore, it should be tuned carefully rather than applied
 blindly.</p>
 <figure id="fig:label_smoothing">
 <img src="img/lecture17/label_smoothing_targets.png" style="width:37.20%; max-width:37.20%; height:auto;"/>
-<figcaption>Illustration of label smoothing: a one-hot target
-distribution is replaced by a softened target distribution that assigns
-most of the probability mass to the true class while distributing a
-small amount across the remaining classes.</figcaption>
+<figcaption>Figure 16.4: Illustration of label smoothing: a one-hot
+target distribution is replaced by a softened target distribution that
+assigns most of the probability mass to the true class while
+distributing a small amount across the remaining classes.</figcaption>
 </figure>
 <h2 data-number="5.2" id="temperature-scaling"><span class="header-section-number">5.2</span> Temperature Scaling</h2>
 <p><strong>Temperature scaling</strong> is a post-processing calibration
@@ -464,9 +464,9 @@ and we want to improve the trustworthiness of its confidence scores
 without changing the underlying classifier.</p>
 <figure id="fig:temperature_scaling">
 <img src="img/lecture17/temperature_scaling_reliability.png" style="width:43.20%; max-width:43.20%; height:auto;"/>
-<figcaption>Conceptual illustration of calibration using a reliability
-diagram. A well-calibrated model has accuracy that closely matches
-confidence across prediction bins. Temperature scaling adjusts
+<figcaption>Figure 16.5: Conceptual illustration of calibration using a
+reliability diagram. A well-calibrated model has accuracy that closely
+matches confidence across prediction bins. Temperature scaling adjusts
 confidence values so that the reliability curve moves closer to the
 diagonal.</figcaption>
 </figure>
@@ -576,7 +576,7 @@ value added to prevent numerical instability and division by zero.</p>
 with Various Performance Metrics</h2>
 <figure id="3">
 <img src="img/lecture17/scribeim4.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Image Reconstructions and their Performance
+<figcaption>Figure 16.6: Image Reconstructions and their Performance
 Scores</figcaption>
 </figure>
 <p>This figure above highlights how different image quality metrics can
@@ -627,7 +627,8 @@ decreasing the number of layers or units, or by introducing
 decay, or data augmentation.</p>
 <figure id="4">
 <img src="img/lecture17/scribeim5.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Underfitting, Proper Fitting, and Overfitting</figcaption>
+<figcaption>Figure 16.7: Underfitting, Proper Fitting, and
+Overfitting</figcaption>
 </figure>
 <h1 data-number="8" id="data-augmentation"><span class="header-section-number">8.</span> Data Augmentation</h1>
 <p><strong>Data augmentation</strong> is a technique used to improve
@@ -643,7 +644,8 @@ the model learn invariances to changes in orientation, position, and
 noise, improving generalization to unseen data.</p>
 <figure id="fig:5">
 <img src="img/lecture17/scriveim6.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Examples of Transformations Applied to an Image</figcaption>
+<figcaption>Figure 16.8: Examples of Transformations Applied to an
+Image</figcaption>
 </figure>
 <h1 data-number="9" id="transfer-learning"><span class="header-section-number">9.</span> Transfer Learning</h1>
 <p><strong>Transfer learning</strong> leverages models that have been
@@ -697,8 +699,8 @@ functions, where large negative inputs cause neurons to output zero and
 remain inactive.</p>
 <figure id="fig:6">
 <img src="img/lecture17/scribeim6.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Activation Histogram with Dead Neurons and Vanishing
-Gradients</figcaption>
+<figcaption>Figure 16.9: Activation Histogram with Dead Neurons and
+Vanishing Gradients</figcaption>
 </figure>
 <p>Activation histograms also help diagnose <strong>vanishing and
 exploding gradients</strong>. If activation magnitudes become
@@ -710,7 +712,8 @@ exploding activations, while increasing it or improving initialization
 may help when activations shrink too quickly.</p>
 <figure id="fig:7">
 <img src="img/lecture17/scribeim8.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Activation Histogram with Exploding Gradients</figcaption>
+<figcaption>Figure 16.10: Activation Histogram with Exploding
+Gradients</figcaption>
 </figure>
 <p>A healthy network typically exhibits a <strong>balanced activation
 distribution</strong>, where values are reasonably spread around zero
@@ -719,7 +722,7 @@ parameter updates—often around 1% of parameter magnitudes—can contribute
 to stable training and well-behaved activation distributions.</p>
 <figure id="fig:8">
 <img src="img/lecture17/scribeim9.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
-<figcaption>Ideal Activation Histogram</figcaption>
+<figcaption>Figure 16.11: Ideal Activation Histogram</figcaption>
 </figure>
 <p>Activation histograms can also reveal <strong>outliers</strong>,
 where extremely large or small activation values indicate overactive

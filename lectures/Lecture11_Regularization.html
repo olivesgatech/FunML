@@ -1,0 +1,798 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Regularization</title>
+  <link rel="stylesheet" href="../assets/style.css"/>
+  <script>
+window.MathJax = {
+  tex: {
+    macros: {
+      R: "\\mathbb{R}",
+      N: "\\mathbb{N}",
+      Z: "\\mathbb{Z}",
+      C: "\\mathbb{C}",
+      E: "\\mathbb{E}",
+      Var: "\\operatorname{Var}",
+      Cov: "\\operatorname{Cov}",
+      Tr: "\\operatorname{Tr}",
+    }
+  }
+};
+</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+function setupInteractiveNotebookFrame(frame) {
+  if (!frame) {
+    return;
+  }
+
+  const fallbackHeight = Math.max(
+    420,
+    parseInt(frame.dataset.defaultHeight || frame.style.height || "0", 10) || 420
+  );
+
+  function measureHeight() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc) {
+        return fallbackHeight;
+      }
+      const body = doc.body;
+      const root = doc.documentElement;
+      const measured = Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        root ? root.scrollHeight : 0,
+        root ? root.offsetHeight : 0
+      );
+      return Math.max(420, measured || fallbackHeight);
+    } catch (_err) {
+      return fallbackHeight;
+    }
+  }
+
+  function applyHeight() {
+    frame.style.height = `${measureHeight()}px`;
+  }
+
+  function watchFrameDocument() {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.body) {
+        return;
+      }
+
+      if (frame.__interactiveResizeObserver) {
+        frame.__interactiveResizeObserver.disconnect();
+      }
+
+      const observer = new MutationObserver(applyHeight);
+      observer.observe(doc.body, {
+        attributes: true,
+        childList: true,
+        subtree: true,
+      });
+      frame.__interactiveResizeObserver = observer;
+      frame.contentWindow.addEventListener("resize", applyHeight);
+    } catch (_err) {
+      // Ignore cross-document access failures and keep the fallback height.
+    }
+  }
+
+  frame.addEventListener("load", () => {
+    applyHeight();
+    watchFrameDocument();
+    [120, 400, 900].forEach((delay) => window.setTimeout(applyHeight, delay));
+  });
+
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    applyHeight();
+    watchFrameDocument();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelectorAll(".interactive-notebook-frame")
+    .forEach(setupInteractiveNotebookFrame);
+});
+</script>
+</head>
+<body>
+<main>
+  <div class="center">
+</div>
+
+
+
+
+
+<h1 data-number="1" id="recap-and-lecture-objectives"><span class="header-section-number">1.</span> Recap and Lecture Objectives</h1>
+<p>In the previous lecture, we continued our study of regression models
+and the key tools used to train them. We covered optimization methods
+for fitting regression models, including gradient-based approaches as
+well as <strong>Newton’s Method</strong> and <strong>Coordinate
+Search</strong>. We also discussed how <strong>regularization</strong>
+improves generalization in linear regression, with particular emphasis
+on <strong>Ridge</strong> and <strong>Lasso</strong>.</p>
+<p>In this lecture, we build on those foundations by focusing on
+optimization beyond basic gradient descent and on <strong>regularization
+techniques</strong>. We first summarize second-order and
+coordinate-based optimization methods. We then revisit
+<strong>Ridge</strong>, <strong>Lasso</strong>, and <strong>Elastic
+Net</strong> to understand how controlling coefficient magnitudes helps
+prevent overfitting and improves generalization.</p>
+<p><strong>Note:</strong> Performance metrics for evaluating regression
+models are covered in a separate set of extended notes, which should be
+consulted alongside this lecture.</p>
+<h1 data-number="2" id="second-order-optimization-newtons-method"><span class="header-section-number">2.</span> Second-Order Optimization:
+Newton’s Method</h1>
+<p>Second-order optimization methods improve upon Gradient Descent by
+using curvature information of the loss surface. Instead of relying only
+on the slope (first derivative), these methods also use second
+derivatives to better estimate the location of the minimum.</p>
+<h2 data-number="2.1" id="jacobian-and-hessian-matrices"><span class="header-section-number">2.1</span> Jacobian and Hessian
+Matrices</h2>
+<p>The Jacobian matrix is a matrix composed of first-order partial
+derivatives of a multivariable function. It describes how a function
+changes with respect to each variable and is commonly used in
+optimization and nonlinear systems. The Hessian matrix extends this idea
+by collecting second-order partial derivatives. It is an <span class="math inline">\(n \times n\)</span> square matrix that captures
+the curvature of a function and plays a central role in second-order
+optimization methods.</p>
+<p>For example, consider the function <span class="math inline">\(f(x,y)
+= x^2y + y^2x\)</span>. The Hessian matrix for this function is <span class="math display">\[H_f(x,y)=
+\begin{pmatrix}
+2y &amp; 2x+2y\\
+2x+2y &amp; 2x
+\end{pmatrix}.\]</span></p>
+<h2 data-number="2.2" id="optimization"><span class="header-section-number">2.2</span> Optimization</h2>
+<p>Second-order optimization methods use curvature information to guide
+the search for a minimum. While first-order methods such as Gradient
+Descent rely only on the slope of the loss surface, second-order methods
+additionally use the Hessian matrix to capture how the surface bends.
+This curvature information allows the optimizer to take more informed
+steps toward the minimum.</p>
+<p>When the Hessian matrix is positive semi-definite, <span class="math display">\[\Delta\boldsymbol{\theta}^T
+\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta} \ge 0
+\quad \text{for any } \Delta\boldsymbol{\theta}.\]</span> the loss
+surface locally behaves like a convex parabola. In this setting,
+curvature information can be used to construct a more accurate local
+model of the loss function.</p>
+<p>Using a second-order Taylor approximation, the loss near a point
+<span class="math inline">\(\boldsymbol{\theta}\)</span> can be written
+as <span class="math display">\[L(\boldsymbol{\theta}+\Delta\boldsymbol{\theta})
+\approx
+L(\boldsymbol{\theta})
++\Delta\boldsymbol{\theta}^T\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
++\frac{1}{2}\Delta\boldsymbol{\theta}^T
+\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta}.\]</span> To
+find the minimum of this quadratic approximation, we set the derivative
+with respect to <span class="math inline">\(\Delta\theta\)</span> equal
+to zero: <span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
++\mathbf{H}(\boldsymbol{\theta})\Delta\boldsymbol{\theta}=0,\]</span></p>
+<p>which yields the optimal update direction <span class="math display">\[\Delta\boldsymbol{\theta}
+=
+-\mathbf{H}(\boldsymbol{\theta})^{-1}
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}).\]</span></p>
+<p>Substituting this update into the iterative optimization framework
+leads to the Newton’s Method update rule <span class="math display">\[\boldsymbol{\theta}^{t+1}
+=
+\boldsymbol{\theta}^{t}
+-\alpha \mathbf{H}(\boldsymbol{\theta})^{-1}
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta}).\]</span></p>
+<p>For comparison, standard Gradient Descent uses only first-order
+information: <span class="math display">\[\boldsymbol{\theta}^{t+1}
+=
+\boldsymbol{\theta}^{t}
+-\alpha \nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta}^{t}).\]</span></p>
+<p>A matrix is positive semi-definite when it is symmetric and has
+non-negative eigenvalues, which guarantees locally convex curvature and
+enables reliable descent toward a minimum.</p>
+<figure id="fig:P2.png">
+<img src="img/lecture9/P2.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Visualization of the function with respect to parameters
+<span class="math inline">\(w_1\)</span> and <span class="math inline">\(w_2\)</span> (quadratic function in
+blue)</figcaption>
+</figure>
+<h2 data-number="2.3" id="convexity"><span class="header-section-number">2.3</span> Convexity</h2>
+<p>In optimization, the concept of convexity plays a crucial role in
+determining how easily we can find the global minimum of a function. A
+function <span class="math inline">\(f(\boldsymbol{\theta})\)</span> is
+said to be <em>convex</em> if, for any two points <span class="math inline">\(\boldsymbol{\theta}_1\)</span> and <span class="math inline">\(\boldsymbol{\theta}_2\)</span> within its domain,
+the line segment connecting <span class="math inline">\(f(\theta_1)\)</span> and <span class="math inline">\(f(\theta_2)\)</span> lies above or on the graph of
+the function itself. Formally, for any <span class="math inline">\(\boldsymbol{\theta}_1, \boldsymbol{\theta}_2 \in
+\mathrm{dom}(f)\)</span> and <span class="math inline">\(\lambda \in
+[0,1]\)</span>: <span class="math display">\[f(\lambda
+\boldsymbol{\theta}_1 + (1-\lambda) \boldsymbol{\theta}_2)
+\leq \lambda f(\boldsymbol{\theta}_1) + (1-\lambda)
+f(\boldsymbol{\theta}_2).\]</span></p>
+<p>This property guarantees that the function has a single global
+minimum and no other local minima, making optimization significantly
+easier.</p>
+<p>For twice-differentiable functions, convexity can be checked using
+the Hessian matrix. A function is convex if its Hessian is positive
+semi-definite everywhere: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta}) \succeq
+0.\]</span> This means the loss surface curves upward in every
+direction, forming a bowl-shaped landscape that guides optimization
+algorithms toward the global minimum.</p>
+<p>In contrast, <em>non-convex</em> functions do not satisfy the
+convexity condition. The line segment between two points may lie below
+the function curve, producing multiple local minima and maxima. In these
+cases, optimization algorithms such as gradient descent may become
+trapped in local minima and fail to reach the global solution.</p>
+<h2 data-number="2.4" id="convergence"><span class="header-section-number">2.4</span> Convergence</h2>
+<p>Newton’s method is particularly powerful for minimizing
+<em>convex</em> functions. Because it incorporates curvature information
+through the Hessian, it produces a quadratic approximation of the loss
+surface at every step. This allows the algorithm to move directly toward
+the minimum rather than following the slower zig-zag path typical of
+gradient descent.</p>
+<p>Near the optimum, Newton’s method exhibits <strong>quadratic
+convergence</strong>, meaning the error decreases extremely rapidly once
+the algorithm is close to the minimum. In contrast, gradient descent
+typically achieves only <strong>linear convergence</strong>, requiring
+many more iterations to reach a similar level of accuracy.</p>
+<p>However, Newton’s method becomes less reliable for
+<em>non-convex</em> functions. When the Hessian is not positive
+semi-definite, the quadratic approximation may point toward a saddle
+point or even a local maximum. As illustrated in the figures, the method
+may converge to an undesirable local minimum, move toward a local
+maximum, or oscillate between regions due to incorrect curvature
+information.</p>
+<p>For this reason, Newton’s method is most effective when the loss
+function is convex or when the optimization has already reached a region
+close to a local minimum.</p>
+<figure id="fig:P3.png">
+<img src="img/lecture9/P3.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Newton’s Method Convergence: Convex Functions</figcaption>
+</figure>
+<figure id="fig:P4.png">
+<img src="img/lecture9/P4.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Newton’s Method Convergence: Non-Convex
+Functions</figcaption>
+</figure>
+<h2 data-number="2.5" id="computational-complexity"><span class="header-section-number">2.5</span> Computational Complexity</h2>
+<p>Although Newton’s method can converge in fewer iterations than
+first-order methods, it is significantly more expensive per iteration.
+The main challenge is the Hessian matrix, which is a <span class="math inline">\(P \times P\)</span> matrix containing all
+second-order partial derivatives of the loss function.</p>
+<p>Storing the Hessian requires <span class="math inline">\(O(P^2)\)</span> memory, which quickly becomes
+impractical for models with many parameters. Computing the Hessian
+itself requires <span class="math inline">\(O(P^2)\)</span> operations,
+and computing its inverse requires approximately <span class="math inline">\(O(P^3)\)</span> time. Therefore, the total
+computational cost per Newton update is dominated by the matrix
+inversion step:</p>
+<p><span class="math display">\[\boldsymbol{\theta}^{t+1}
+=
+\boldsymbol{\theta}^{t}
+-\alpha \mathbf{H}(\boldsymbol{\theta})^{-1}
+\nabla_{\boldsymbol{\theta}} L(\boldsymbol{\theta})\]</span></p>
+<p>Where <span class="math inline">\(\mathbf{H}(\boldsymbol{\theta})\)</span> is the
+Hessian matrix: <span class="math display">\[\mathbf{H}(\boldsymbol{\theta})=\nabla_{\boldsymbol{\theta}}^2
+L(\boldsymbol{\theta})\]</span></p>
+<p><span class="math display">\[\boxed{\textbf{Total time per iteration
+of Newton's Method: } O(P^3)}\]</span></p>
+<p>Because modern machine learning models often contain millions of
+parameters, directly computing and inverting the Hessian is typically
+infeasible. For this reason, most large-scale learning algorithms rely
+on first-order methods such as Gradient Descent or use approximate
+second-order methods (e.g., quasi-Newton methods) that avoid explicit
+Hessian computation.</p>
+<h1 data-number="3" id="coordinate-search"><span class="header-section-number">3.</span> Coordinate Search</h1>
+<p>When gradient information is unavailable or too expensive to compute,
+derivative-free optimization methods provide an alternative
+strategy.</p>
+<h2 data-number="3.1" id="optimization-1"><span class="header-section-number">3.1</span> Optimization</h2>
+<p>Coordinate search is a simple optimization technique that does not
+rely on gradients or second-order derivatives. Instead of computing the
+steepest descent direction, the algorithm explores the parameter space
+by moving along one coordinate axis at a time. At each iteration, the
+method tests whether moving in the positive or negative direction of a
+coordinate decreases the loss, and updates the parameters accordingly.
+The update rule is</p>
+<p><span class="math display">\[\boldsymbol{\theta}^{t+1}
+=
+\boldsymbol{\theta}^{t}
+\pm \alpha \mathbf{e}_j\]</span></p>
+<p>where <span class="math inline">\(\mathbf{e}_j = [0, \ldots, 1,
+\ldots, 0]^T\)</span> is the <span class="math inline">\(j\)</span>-th
+standard basis vector, which selects the coordinate direction being
+explored.</p>
+<p>This approach is useful when gradients are unavailable, difficult to
+compute, or expensive to evaluate. Because it does not require
+derivatives, coordinate search belongs to the class of
+<em>derivative-free optimization</em> methods. However, this simplicity
+comes at a cost: the algorithm may require many function evaluations and
+can be slower than gradient-based methods in high-dimensional
+problems.</p>
+<p>Figure <a data-reference="fig:P5.png" data-reference-type="ref" href="#fig:P5.png">4</a> illustrates how the algorithm explores
+descent directions along coordinate axes, moving step-by-step toward
+lower values of the objective function.</p>
+<figure id="fig:P5.png">
+<img src="img/lecture9/P5.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Coordinate Search Algorithm: Exploring Descent Directions
+Along Coordinate Axes</figcaption>
+</figure>
+<h1 data-number="4" id="coordinate-descent"><span class="header-section-number">4.</span> Coordinate Descent</h1>
+<p>While Coordinate Search explores directions without using gradients,
+Coordinate Descent improves efficiency by incorporating partial
+derivative information.</p>
+<h2 data-number="4.1" id="optimization-2"><span class="header-section-number">4.1</span> Optimization</h2>
+<p>Coordinate descent is an optimization strategy that improves the
+objective function by updating <em>one parameter (one coordinate of
+<span class="math inline">\(\boldsymbol{\theta}\)</span>) at a
+time</em>. Instead of computing a full gradient vector across all
+parameters, the algorithm isolates a single coordinate direction and
+performs a one–dimensional optimization step along that axis. This
+greatly simplifies each update and reduces computational cost,
+especially in high–dimensional problems.</p>
+<p>At each iteration, the algorithm selects a coordinate index <span class="math inline">\(j \in \{1,\dots,P\}\)</span> and updates only the
+corresponding parameter while keeping all other parameters fixed. For a
+continuously differentiable loss function <span class="math inline">\(L(\boldsymbol{\theta})\)</span>, the update rule
+becomes</p>
+<p><span class="math display">\[\theta_j^{t+1}
+=
+\theta_j^{t}
+-\alpha \nabla_{\theta_j} L(\boldsymbol{\theta}).\]</span></p>
+<p>This process is repeated across coordinates until convergence. The
+coordinates may be selected cyclically, randomly, or based on a
+heuristic such as the largest gradient magnitude. By decomposing a
+high–dimensional optimization problem into a sequence of simpler
+one–dimensional updates, coordinate descent can be particularly
+effective for large-scale machine learning problems where computing full
+gradients is expensive.</p>
+<figure id="fig:P6.png">
+<img src="img/lecture9/P6.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Coordinate Descent Algorithm: Stepwise Optimization Along
+Coordinate Axes</figcaption>
+</figure>
+<h2 data-number="4.2" id="convergence-1"><span class="header-section-number">4.2</span> Convergence</h2>
+<p>In early iterations, coordinate search methods can make progress by
+exploring all coordinate directions, but coordinate descent quickly
+becomes more efficient once gradient information is used. Because each
+step directly follows the partial derivative with respect to a single
+parameter, the algorithm typically identifies descent directions faster
+and reduces the loss more effectively than coordinate search.</p>
+<p>As illustrated in Figure <a data-reference="fig:P7.png" data-reference-type="ref" href="#fig:P7.png">6</a>, coordinate
+descent tends to reach lower-cost regions of the objective function in
+fewer iterations. Although each step only adjusts one parameter, the
+repeated sequence of updates gradually drives the parameters toward a
+minimum. This stepwise progress often produces a characteristic
+“zig-zag” path toward the optimum.</p>
+<figure id="fig:P7.png">
+<img src="img/lecture9/P7.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Comparison of Coordinate Search (Left) and Coordinate
+Descent (Right): Efficiency in Finding Lower Cost Function
+Values</figcaption>
+</figure>
+<h2 data-number="4.3" id="advantages"><span class="header-section-number">4.3</span> Advantages</h2>
+<p>One of the main strengths of coordinate descent is its simplicity.
+Each update requires only a partial derivative with respect to a single
+parameter, making the method easy to implement and computationally
+inexpensive. Unlike second-order methods such as Newton’s method,
+coordinate descent does not require storing or inverting large matrices,
+which makes it highly scalable to problems with many parameters.</p>
+<p>Because of its low memory requirements and cheap updates, coordinate
+descent is widely used in large-scale machine learning applications such
+as Lasso regression, sparse optimization, and high-dimensional linear
+models.</p>
+<h2 data-number="4.4" id="limitations"><span class="header-section-number">4.4</span> Limitations</h2>
+<p>Despite its simplicity, coordinate descent has important limitations.
+The algorithm can struggle when the objective function is non-smooth or
+when variables are highly coupled. In such cases, improving one
+parameter at a time may lead to slow progress, oscillations, or
+convergence to suboptimal points such as saddle points.</p>
+<p>Figure <a data-reference="fig:P8.png" data-reference-type="ref" href="#fig:P8.png">7</a> illustrates an example of a non-smooth
+multivariable function. The sharp corners of the level curves make it
+difficult for the algorithm to determine a consistent descent direction.
+As a result, the optimization path (shown in red) can stall or progress
+very slowly toward the global minimum.</p>
+<figure id="fig:P8.png">
+<img src="img/lecture9/P8.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>A Case of Non-Smooth Multivariable Function</figcaption>
+</figure>
+<p>The red trajectory highlights how the optimization may stagnate or
+move inefficiently due to the non-smooth geometry of the loss
+surface.</p>
+<h1 data-number="5" id="summary-of-optimization-methods"><span class="header-section-number">5.</span> Summary of Optimization
+Methods</h1>
+<p>We now summarize the optimization methods discussed in Lecture 8
+(first-order methods) and Lecture 9 (second-order and coordinate-based
+methods).</p>
+<table>
+<caption>Comparison of Optimization Methods</caption>
+<thead>
+<tr class="header">
+<th style="text-align: center;"><strong>Method</strong></th>
+<th style="text-align: center;"><strong>Uses Gradient?</strong></th>
+<th style="text-align: center;"><strong>Uses Hessian?</strong></th>
+<th style="text-align: center;"><strong>Per–Iteration Cost</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">Gradient Descent</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Low</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Newton’s Method</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: center;">Yes</td>
+<td style="text-align: center;">Very High (<span class="math inline">\(O(P^3)\)</span>)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Coordinate Search</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Medium</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Coordinate Descent</td>
+<td style="text-align: center;">Partial</td>
+<td style="text-align: center;">No</td>
+<td style="text-align: center;">Low</td>
+</tr>
+</tbody>
+</table>
+<p>Each method presents a trade-off between computational cost and
+convergence speed. In practice, the choice of optimizer depends on the
+size of the dataset, the number of parameters, and the availability of
+derivative information.</p>
+<h1 data-number="6" id="ridge-regularization"><span class="header-section-number">6.</span> Ridge Regularization</h1>
+<h4 data-number="6.0.0.1" id="notation-note."><span class="header-section-number">6.0.0.1</span> Notation note.</h4>
+<p>Some figures in this lecture use the symbol <span class="math inline">\(\gamma\)</span> to denote the regularization
+strength. Throughout the notes, we use <span class="math inline">\(\lambda\)</span> for consistency with the course
+notation. These symbols refer to the same quantity.</p>
+<h2 data-number="6.1" id="formulation"><span class="header-section-number">6.1</span> Formulation</h2>
+<p>Standard linear regression models attempt to fit data samples by
+minimizing the least squares cost. However, this approach can become
+problematic in practical settings. When features contain noise, the
+learned coefficients may change dramatically, making the model unstable.
+Similarly, when only a small amount of training data is available, the
+model can easily overfit and fail to generalize to new data. These
+issues arise because large coefficients can have a disproportionately
+high impact on model predictions.</p>
+<p><strong>Ridge Regression</strong> (also called <strong>Tikhonov
+regularization</strong>) addresses this problem by shrinking the
+regression coefficients <span class="math inline">\(\boldsymbol{\theta}\)</span>. It does so by
+imposing a penalty on the squared <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\|\boldsymbol{\theta}\|_2^2\)</span>, which
+discourages excessively large parameter values. This penalty is
+incorporated directly into the training objective.</p>
+<p>During training, the regularization term is added to the cost
+function: <span class="math display">\[L(\boldsymbol{\theta})
+=
+\frac{1}{N}\sum_{i=1}^{N}
+\left(\boldsymbol{\theta}^T\mathbf{x}_i - y_i\right)^2
++
+\frac{\lambda}{N}\|\boldsymbol{\theta}\|_2^2\]</span></p>
+<p><strong>We use <span class="math inline">\(\lambda\)</span> to denote
+the regularization strength to remain consistent with the course
+notation file.</strong></p>
+<p>where <span class="math inline">\(\lambda &gt; 0\)</span> is a
+hyperparameter that controls the strength of the shrinkage. Larger
+values of <span class="math inline">\(\lambda\)</span> lead to stronger
+regularization and smaller coefficients.</p>
+<p>It is important to note that the regularization term is used only
+during training. Once the model has been trained, its performance is
+evaluated using the standard prediction error without including the
+regularization penalty.</p>
+<h2 data-number="6.2" id="robustness-to-noise"><span class="header-section-number">6.2</span> Robustness to Noise</h2>
+<p>Standard linear regression can be highly sensitive to noise in the
+training data. When small perturbations or noisy samples are introduced,
+the fitted regression line can change dramatically, resulting in large
+variability in the estimated coefficients. This behavior is illustrated
+in Figure <a data-reference="fig:P9.png" data-reference-type="ref" href="#fig:P9.png">8</a>, where multiple models are trained on
+slightly different noisy datasets. The gray regression lines vary
+widely, demonstrating that ordinary least squares can produce unstable
+parameter estimates when the data contains noise.</p>
+<p>Ridge regression addresses this issue by adding an <span class="math inline">\(L_2\)</span> penalty that discourages large
+coefficient values. By shrinking the parameters toward zero, the model
+becomes less sensitive to fluctuations in the data and produces more
+stable predictions. As shown in Figure <a data-reference="fig:P10.png" data-reference-type="ref" href="#fig:P10.png">9</a>, the fitted
+lines produced by ridge regression exhibit significantly less variation
+across noisy datasets. This reduction in variance highlights one of the
+key benefits of regularization: improved robustness to noise and better
+generalization to unseen data.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.8 Noise Sensitivity (OLS)</h3><p>Control noise and compare coefficient variability under OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.8 Noise Sensitivity (OLS) Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig98_OLS_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.9 Ridge Under Noise</h3><p>Control noise and compare ridge robustness to OLS.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" style="height:760px;" title="Interactive Figure 9.9 Ridge Under Noise Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig99_Ridge_Noise.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<h2 data-number="6.3" id="reduce-overfitting-to-limited-training-data"><span class="header-section-number">6.3</span> Reduce Overfitting to Limited
+Training Data</h2>
+<p>Overfitting becomes particularly severe when only a small amount of
+training data is available. In such cases, standard linear regression
+tends to fit the training points too closely, capturing random
+fluctuations rather than the underlying trend. This behavior is
+illustrated in Figure <a data-reference="fig:P11.png" data-reference-type="ref" href="#fig:P11.png">10</a>, where the linear regression model
+(red line) fits the limited training samples almost perfectly but fails
+to generalize well to new data.</p>
+<p>Ridge regression mitigates this problem by constraining the magnitude
+of the coefficients. The resulting model (blue line) does not pass
+exactly through the training points but instead captures a smoother and
+more general trend. As a result, it performs better on unseen test
+samples (green dots). This example demonstrates how regularization
+introduces a small amount of bias in exchange for a large reduction in
+variance, ultimately improving predictive performance.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.10 Sample Count Effect</h3><p>Control number of data points and inspect fit stability.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig910_SampleCount_interactive.html" style="height:680px;" title="Interactive Figure 9.10 Sample Count Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig910_SampleCount.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<h2 data-number="6.4" id="effect-of-lambda-on-boldsymboltheta-magnitudes"><span class="header-section-number">6.4</span> Effect of <span class="math inline">\(\lambda\)</span> on <span class="math inline">\(\boldsymbol{\theta}\)</span> Magnitudes</h2>
+<p>The regularization strength in ridge regression is controlled by the
+hyperparameter <span class="math inline">\(\lambda\)</span>, which
+determines how strongly large coefficients are penalized. When <span class="math inline">\(\lambda\)</span> is very small, the penalty term
+has little influence, and the model behaves similarly to standard linear
+regression. In this regime, the coefficients can take on larger values,
+allowing the model to closely fit the training data.</p>
+<p>As <span class="math inline">\(\lambda\)</span> increases, the
+penalty becomes stronger and the coefficients are increasingly shrunk
+toward zero. This shrinkage reduces model complexity and helps prevent
+overfitting. When <span class="math inline">\(\lambda\)</span> becomes
+very large, the coefficients approach zero and the model converges
+toward a nearly flat line that approximates the mean of the target
+variable. Figures <a data-reference="fig:P12.png" data-reference-type="ref" href="#fig:P12.png">11</a> and <a data-reference="fig:P13.png" data-reference-type="ref" href="#fig:P13.png">12</a> illustrate
+how increasing <span class="math inline">\(\lambda\)</span>
+progressively reduces coefficient magnitudes and simplifies model
+behavior.</p>
+<p>This trade-off between model flexibility and regularization strength
+highlights the bias–variance trade-off: small <span class="math inline">\(\lambda\)</span> values yield low bias but high
+variance, while large <span class="math inline">\(\lambda\)</span>
+values produce higher bias but lower variance.</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.11 Lambda Effect</h3><p>Adjust λ and observe coefficient shrinkage behavior.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" style="height:760px;" title="Interactive Figure 9.11 Lambda Effect Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig911_LambdaEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.12 Lambda vs Model Behavior</h3><p>Adjust λ and inspect resulting model complexity.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" style="height:680px;" title="Interactive Figure 9.12 Lambda vs Model Behavior Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig912_LambdaBehavior.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<h2 data-number="6.5" id="normal-equation"><span class="header-section-number">6.5</span> Normal Equation</h2>
+<p>The optimal parameter vector for ridge regression can be derived
+analytically using the <strong>normal equation</strong>. Recall that
+ridge regression augments the standard least-squares objective with an
+<span class="math inline">\(L_2\)</span> penalty on the parameter
+vector. In matrix form, the ridge loss function is written as</p>
+<p><span class="math display">\[L(\boldsymbol{\theta})
+=
+\frac{1}{N}
+(\mathbf{X}\boldsymbol{\theta}-\mathbf{y})^T
+(\mathbf{X}\boldsymbol{\theta}-\mathbf{y})
++
+\frac{\lambda}{N}\boldsymbol{\theta}^T\boldsymbol{\theta}.\]</span></p>
+<p>where <span class="math inline">\(\mathbf{X}\)</span> is the design
+matrix, <span class="math inline">\(\mathbf{y}\)</span> is the target
+vector, and <span class="math inline">\(\lambda &gt; 0\)</span> is the
+regularization hyperparameter that controls the strength of the
+penalty.</p>
+<p>To obtain the optimal parameters, we differentiate the loss with
+respect to <span class="math inline">\(\boldsymbol{\theta}\)</span> and
+set the gradient equal to zero:</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}L
+=
+2\mathbf{X}^T\mathbf{X}\boldsymbol{\theta}
+-2\mathbf{X}^T\mathbf{y}
++2\lambda\boldsymbol{\theta}.\]</span></p>
+<p>Setting this derivative to zero yields the linear system</p>
+<p><span class="math display">\[(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})\boldsymbol{\theta}
+=
+\mathbf{X}^T\mathbf{y}.\]</span></p>
+<p>where <span class="math inline">\(\mathbf{I}\)</span> is the identity
+matrix. Solving for <span class="math inline">\(\boldsymbol{\theta}\)</span> gives the closed-form
+ridge regression solution</p>
+<p><span class="math display">\[\boldsymbol{\theta}
+=
+(\mathbf{X}^T\mathbf{X}+\lambda\mathbf{I})^{-1}
+\mathbf{X}^T\mathbf{y}.\]</span></p>
+<p>This equation shows how ridge regression stabilizes the solution by
+adding <span class="math inline">\(\lambda \mathbf{I}\)</span> to <span class="math inline">\(\mathbf{X}^T\mathbf{X}\)</span>. This additional
+term improves numerical stability and ensures the matrix is invertible,
+especially when features are highly correlated or when the dataset is
+small.</p>
+<h2 data-number="6.6" id="gradient-descent"><span class="header-section-number">6.6</span> Gradient Descent</h2>
+<p>Although ridge regression admits a closed-form solution, in many
+practical machine learning settings the number of parameters is very
+large. Computing a matrix inverse becomes expensive and memory
+intensive. For this reason, ridge regression is often solved using
+<strong>gradient descent</strong>.</p>
+<p>Starting from an initial parameter vector, gradient descent
+iteratively updates the parameters according to</p>
+<p><span class="math display">\[\boldsymbol{\theta}^{(t+1)}
+=
+\boldsymbol{\theta}^{(t)}
+-\alpha \nabla_{\boldsymbol{\theta}}L.\]</span></p>
+<p>where <span class="math inline">\(\alpha\)</span> is the learning
+rate. For ridge regression, the gradient of the loss function is</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}L
+=
+-\frac{2}{N}\sum_{i=1}^{N}
+(y_i-\boldsymbol{\theta}^T\mathbf{x}_i)\mathbf{x}_i
++\frac{2\lambda}{N}\boldsymbol{\theta}.\]</span></p>
+<p>The hyperparameter <span class="math inline">\(\lambda\)</span>
+controls the trade-off between accurately fitting the training data and
+keeping the parameter magnitudes small. A small <span class="math inline">\(\lambda\)</span> produces behavior similar to
+standard linear regression, while a large <span class="math inline">\(\lambda\)</span> increases regularization and
+produces a smoother, lower-variance model.</p>
+<figure id="fig:P14.png">
+<img src="img/lecture9/P14.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Gradient Descent Path to Optimal Weights: Minimizing Loss in
+Ridge Regression</figcaption>
+</figure>
+<h1 data-number="7" id="lasso-regression-formulation"><span class="header-section-number">7.</span> Lasso Regression:
+Formulation</h1>
+<h2 data-number="7.1" id="overview"><span class="header-section-number">7.1</span> Overview</h2>
+<p><strong>Lasso regression</strong> (Least Absolute Shrinkage and
+Selection Operator) is a linear regression technique that incorporates
+<strong>L1 regularization</strong>, which adds a penalty proportional to
+the absolute value of the regression coefficients.</p>
+<p>This approach is particularly useful when working with datasets that
+contain many features, some of which may be irrelevant or only weakly
+related to the target variable. In such settings, ordinary linear
+regression can produce unstable models that overfit the training data.
+Lasso addresses this issue by encouraging simpler models that rely only
+on the most informative features.</p>
+<h2 data-number="7.2" id="l1-regularization"><span class="header-section-number">7.2</span> L1 Regularization</h2>
+<p>The key difference between Lasso regression and ordinary linear
+regression is the addition of an <strong>L1 penalty</strong> to the loss
+function. This penalty is the sum of the absolute values of the
+regression coefficients, which discourages large parameter values and
+promotes sparsity.</p>
+<p>The Lasso objective function is given by: <span class="math display">\[L(\boldsymbol{\theta})
+=
+\frac{1}{N}\sum_{i=1}^{N}
+(\boldsymbol{\theta}^T\mathbf{x}_i-y_i)^2
++
+\lambda\sum_{j=1}^{P}|\theta_j|\]</span></p>
+<p>The regularization parameter <span class="math inline">\(\lambda\)</span> controls the strength of the
+penalty. When <span class="math inline">\(\lambda=0\)</span>, the model
+reduces to standard linear regression. As <span class="math inline">\(\lambda\)</span> increases, the penalty becomes
+stronger, forcing coefficients to shrink toward zero.</p>
+<h2 data-number="7.3" id="sparse-model"><span class="header-section-number">7.3</span> Sparse Model</h2>
+<p>A defining property of Lasso regression is that it produces a
+<strong>sparse model</strong>. In a sparse model, many regression
+coefficients become exactly zero.</p>
+<p>This behavior occurs because the L1 penalty introduces sharp
+“corners” in the optimization landscape. During optimization, the
+solution often lands exactly on these corners, causing some coefficients
+to become zero. As a result, Lasso automatically removes features that
+do not meaningfully contribute to predicting the target variable.</p>
+<p>This property makes Lasso especially useful for high-dimensional
+datasets where the number of features is large.</p>
+<h2 data-number="7.4" id="feature-selection"><span class="header-section-number">7.4</span> Feature Selection</h2>
+<p>One of the most important advantages of Lasso over Ridge regression
+(which uses L2 regularization) is its ability to perform
+<strong>automatic feature selection</strong>. Because Lasso can drive
+coefficients to exactly zero, it effectively identifies and retains only
+the most relevant features while discarding irrelevant ones.</p>
+<p>This leads to several practical benefits, including:</p>
+<p>- Improved generalization and reduced overfitting</p>
+<p>- Simpler and more interpretable models</p>
+<p>- Reduced computational cost for downstream tasks</p>
+<p>For datasets with many redundant or noisy features, Lasso provides a
+powerful tool for building compact and interpretable models.</p>
+<figure>
+<img src="img/lecture9/Screenshot%202024-09-21%20at%203.39.06%E2%80%AFPM.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>As <span class="math inline">\(\lambda\)</span> increases,
+coefficients of less important features shrink to zero before those of
+more important features.</figcaption>
+</figure>
+<h1 data-number="8" id="lasso-regularization-gradient-descent"><span class="header-section-number">8.</span> Lasso Regularization: Gradient
+Descent</h1>
+<p>Unlike Ridge regression, the L1 penalty used in Lasso is <strong>not
+differentiable at zero</strong>. Therefore, we cannot compute a standard
+gradient. Instead, we use a <strong>subgradient</strong>.</p>
+<p>The subgradient of the Lasso objective is:</p>
+<p><span class="math display">\[\nabla_{\boldsymbol{\theta}}
+L(\boldsymbol{\theta})
+=
+-\frac{2}{N}\sum_{i=1}^{N}
+(y_i-\boldsymbol{\theta}^T\mathbf{x}_i)\mathbf{x}_i
++\lambda\,\text{sign}(\boldsymbol{\theta})\]</span></p>
+<p>where the sign function is defined as</p>
+<p><span class="math display">\[\text{sign}(\theta_j)=
+\begin{cases}
++1 &amp; \theta_j&gt;0\\
+-1 &amp; \theta_j&lt;0\\
+[-1,1] &amp; \theta_j=0
+\end{cases}\]</span></p>
+<p>The hyperparameter <span class="math inline">\(\lambda\)</span>
+controls the balance between fitting the training data and encouraging
+sparsity. As <span class="math inline">\(\lambda\)</span> increases, the
+regularization strength increases, pushing more coefficients toward
+zero.</p>
+<h1 data-number="9" id="lasso-vs-ridge-regression"><span class="header-section-number">9.</span> Lasso vs Ridge Regression</h1>
+<p>We now summarize the key differences between Lasso (L1) and Ridge
+(L2) regularization:</p>
+<p>The key takeaway is that Lasso and Ridge address overfitting in
+different ways. Ridge regression keeps all features in the model but
+reduces their influence by shrinking coefficients smoothly toward zero.
+In contrast, Lasso regression can eliminate features entirely by forcing
+some coefficients to become exactly zero, producing a simpler and more
+interpretable model.</p>
+<p>In practice, Ridge is often preferred when most features are believed
+to contain useful information but may be noisy or correlated. Lasso is
+particularly useful when the dataset contains many irrelevant or
+redundant features and automatic feature selection is desirable.</p>
+<h1 data-number="10" id="elastic-net-regularization"><span class="header-section-number">10.</span> Elastic Net Regularization</h1>
+<h2 data-number="10.1" id="overview-1"><span class="header-section-number">10.1</span> Overview</h2>
+<p>Elastic Net regularization is a linear regression technique that
+combines two regularization methods: <strong>Lasso (L1)
+regularization</strong> and <strong>Ridge (L2) regularization</strong>.
+It’s used to prevent overfitting by penalizing the magnitude of
+regression coefficients, and it is particularly useful when dealing with
+datasets that have a large number of features or when the features are
+highly correlated (multicollinearity).</p>
+<p>The Elastic Net formula is as follows:</p>
+<p><span class="math display">\[L(\boldsymbol{\theta}) =
+\frac{1}{N}\sum_{i=1}^{N}(\boldsymbol{\theta}^T\mathbf{x}_i-y_i)^2
++ \lambda \left(
+r \sum_{j=1}^{P} |\theta_j| + (1 -
+r)\frac{1}{2}\|\boldsymbol{\theta}\|_2^2
+\right)\]</span></p>
+<p>The hyperparameter <span class="math inline">\(r \in [0,1]\)</span>
+controls the balance between the L1 and L2 penalties. When <span class="math inline">\(r = 1\)</span>, Elastic Net becomes Lasso
+regression. When <span class="math inline">\(r = 0\)</span>, Elastic Net
+becomes Ridge regression. Values between 0 and 1 create a weighted
+combination of both penalties.</p>
+<p>Elastic Net was introduced to address limitations of using Lasso or
+Ridge alone. Lasso can perform feature selection, but it may behave
+unstably when features are highly correlated, often selecting only one
+feature from a correlated group. Ridge regression handles correlated
+features well but cannot remove irrelevant features. Elastic Net
+combines the strengths of both methods by encouraging sparsity while
+also stabilizing coefficient estimates in the presence of
+multicollinearity.</p>
+<h2 data-number="10.2" id="compared-to-lasso-and-ridge"><span class="header-section-number">10.2</span> Compared to Lasso and
+Ridge</h2>
+<p>How does Elastic Net compare to Lasso and Ridge regularization
+separately? To highlight their differences, we consider a fixed MSE loss
+with the following contour plot:</p>
+<section class="interactive-notebook"><h3>Interactive Notebook: Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net</h3><p>Explore the L1, L2, and Elastic Net constraint geometry together with their optimization paths.</p><iframe class="interactive-notebook-frame" data-default-height="980" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" style="height:980px;" title="Interactive Figure 9.15 Geometric Intuition for L1, L2, and Elastic Net Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture9_Fig915_OptimizationPath.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p>The figure illustrates the geometric intuition behind L1 and L2
+regularization and helps explain why Elastic Net combines the strengths
+of both approaches.</p>
+<p>The contour lines represent level sets of the Mean Squared Error
+(MSE) loss in parameter space. The goal of training is to move toward
+the minimum of this loss surface. The white dots illustrate the path
+taken by gradient descent starting from an initial point (red square)
+and moving toward the optimal solution.</p>
+<h4 data-number="10.2.0.1" id="top-left-ell_1-penalty-geometry."><span class="header-section-number">10.2.0.1</span> Top-left: <span class="math inline">\(\ell_1\)</span> penalty geometry.</h4>
+<p>The diamond-shaped constraint region corresponds to the L1 penalty
+used in Lasso. Notice that the corners of the diamond lie on the
+coordinate axes. When the loss contours first touch this constraint
+region, they often intersect at one of these corners. Because corners
+lie on the axes, one of the coefficients becomes exactly zero. This
+explains why Lasso produces <strong>sparse solutions</strong> and
+performs <strong>automatic feature selection</strong>.</p>
+<h4 data-number="10.2.0.2" id="top-right-lasso-optimization-path."><span class="header-section-number">10.2.0.2</span> Top-right: Lasso
+optimization path.</h4>
+<p>The gradient descent trajectory shows that the solution is pulled
+toward the coordinate axes. The final optimum lies on the <span class="math inline">\(\theta_2 = 0\)</span> axis, meaning one parameter
+has been eliminated entirely.</p>
+<h4 data-number="10.2.0.3" id="bottom-left-ell_2-penalty-geometry."><span class="header-section-number">10.2.0.3</span> Bottom-left: <span class="math inline">\(\ell_2\)</span> penalty geometry.</h4>
+<p>The circular constraint region corresponds to the L2 penalty used in
+Ridge regression. Unlike the diamond shape, the circle has no sharp
+corners. As a result, the loss contours typically touch the constraint
+boundary at a smooth point rather than on an axis. This leads to
+coefficients being <strong>shrunk toward zero</strong> but rarely
+becoming exactly zero.</p>
+<h4 data-number="10.2.0.4" id="bottom-right-ridge-optimization-path."><span class="header-section-number">10.2.0.4</span> Bottom-right: Ridge
+optimization path.</h4>
+<p>The gradient descent path moves smoothly toward the center. The final
+solution lies near the origin, but both parameters remain nonzero. Ridge
+therefore provides <strong>stability and shrinkage</strong> without
+performing feature selection.</p>
+<h4 data-number="10.2.0.5" id="elastic-net-as-a-compromise."><span class="header-section-number">10.2.0.5</span> Elastic Net as a
+compromise.</h4>
+<p>Elastic Net combines both penalties, creating a constraint region
+that lies between the diamond and the circle. This gives it two key
+advantages:</p>
+<ul>
+<li><p>Like Lasso, it can produce sparse solutions and perform feature
+selection.</p></li>
+<li><p>Like Ridge, it remains stable when features are highly
+correlated, avoiding the instability that Lasso can exhibit in such
+settings.</p></li>
+</ul>
+<p>For this reason, Elastic Net is especially useful in high-dimensional
+datasets where the number of features is large relative to the number of
+training samples.</p>
+
+</main>
+</body>
+</html>
