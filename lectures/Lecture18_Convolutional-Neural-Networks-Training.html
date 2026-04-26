@@ -482,7 +482,12 @@ other non-convex problems that require sustained exploration of the
 parameter space. Later adaptive optimization methods, such as RMSProp
 and Adam, were developed to address this issue by preventing the
 learning rate from decaying too aggressively.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–8 — Optimizer Comparison</h3><p>Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.</p><iframe class="interactive-notebook-frame" data-default-height="1020" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture16_OptimizerComparison_Interactive_interactive.html" style="height:1020px;" title="Interactive Sections 5–8 Optimizer Comparison"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture16_OptimizerComparison_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure id="fig:adagrad_ex">
+<img src="img/lecture16/Adagrad.jpg" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Figure 15.10: AdaGrad adapts the learning rate to follow the
+optimal path in ill-conditioned problems, reducing oscillations compared
+to standard gradient descent.</figcaption>
+</figure>
 <h1 data-number="8" id="rmsprop---root-mean-square-propagation"><span class="header-section-number">8.</span> RMSProp - Root Mean Square
 Propagation</h1>
 <h2 data-number="8.1" id="overview-1"><span class="header-section-number">8.1</span> Overview</h2>

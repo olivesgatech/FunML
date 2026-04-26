@@ -652,7 +652,7 @@ are some workarounds for this problem:</p>
 approximated: <span class="math display">\[\mathcal{L}(\textbf{x},y;\theta)\approx\frac{1}{N}\sum_{i=1}^N
 \log(1+e^{-y_i\theta^T\textbf{x}_i})\]</span></p>
 <div class="center">
-<section class="interactive-notebook"><h3>Interactive Notebook: Hinge Loss Family</h3><p>Covers hinge loss, hinge vs softplus, and subgradient with an adjustable bias term b.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/hinge_loss_interactive.html" style="height:820px;" title="Interactive Hinge Loss Family Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fhinge_loss_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/softplus.png"/></p>
 </div>
 <p>Qualitatively, this is the same as logistic regression.</p></li>
 <li><p>If we’d like to retain and optimize the exact hinge loss, we
@@ -668,7 +668,7 @@ subgradient that can be expressed as: <span class="math display">\[\frac{\partia
         0 &amp; \text{if } -y\mathbf{\theta}^T\mathbf{x} \leq 0
     \end{cases}\]</span></p>
 <div class="center">
-<section class="interactive-notebook"><h3>Interactive Notebook: Hinge Loss Family</h3><p>Covers hinge loss, hinge vs softplus, and subgradient with an adjustable bias term b.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/hinge_loss_interactive.html" style="height:820px;" title="Interactive Hinge Loss Family Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2Fhinge_loss_interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<p><img alt="image" src="img/lecture3/subgrad.png"/></p>
 </div>
 <p>which effectively ignores the single non-differentiable point and
 sets the derivative of the function to <span class="math inline">\(0\)</span> at that point. Note that there are

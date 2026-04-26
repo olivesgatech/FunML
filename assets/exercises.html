@@ -335,9 +335,6 @@ x_{i2}) &gt; 0 \\
 \end{cases}\]</span></p></li>
 </ol></section></section>
 <section><h2>Lecture5 - Support Vector Machines</h2><section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q1_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 1 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q1.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
-<section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q2_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q2.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <section class="interactive-notebook"><h3>Exercises</h3><p>Run and edit this notebook interactively in JupyterLite directly from this lecture section.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../lectures/../assets/notebooks/Lecture4_Q%26A-Q2_interactive.html" style="height:820px;" title="Interactive Notebook - Lecture 4 Q&amp;A 2 Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../lectures/../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture4_Q%26A-Q2.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
 <section><h1>Exercises</h1>
 <ol>
@@ -350,6 +347,7 @@ classifier.</p>
 <p>Now, imagine introducing an outlier close to the decision boundary
 but on the incorrect side of it.</p>
 <div class="center">
+<p><img alt="image" src="../lectures/img/lecture4/qa1-outlier-scatter.png"/></p>
 </div>
 <p>Which classifier will better handle the outlier, and why?</p>
 <ol>
@@ -389,6 +387,7 @@ the decision boundary to perfectly classify all points, including the
 outlier. This can lead to significant changes in the decision boundary,
 potentially resulting in overfitting and poor generalization.</p>
 <div class="center">
+<p><img alt="image" src="../lectures/img/lecture4/qa1-svms-outlier.png"/></p>
 </div></li>
 <li><p>For the next few questions, we’ll be looking at the kernel trick.
 Let’s consider the following dataset:</p>
@@ -402,6 +401,7 @@ example,</p>
 <p><span class="math display">\[\phi: \mathbb{R}^2 \rightarrow
 \mathbb{R}^3 \quad \text{with} \quad (x,y) \mapsto (x,y,xy)\]</span></p>
 <div class="center">
+<p><img alt="image" src="../lectures/img/lecture4/qa2-nonlinear-3d.png"/></p>
 </div>
 <p>Now we can fit a linear boundary (a plane) to separate the data.
 Great, but what if we start in a higher dimension <span class="math inline">\(d\)</span>?</p>

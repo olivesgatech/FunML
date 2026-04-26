@@ -1524,7 +1524,7 @@ LoRA is applied (e.g., attention vs feedforward layers).</p></li>
 enables efficient adaptation of extremely large models without requiring
 full retraining.</p>
 <h2 data-number="6.7" id="kv-caching-for-efficient-inference"><span class="header-section-number">6.7</span> KV Caching for Efficient
-Inference</h2><section class="interactive-notebook"><h3>Interactive Demo — KV Caching (Tab 3 of the Self-Attention Flow notebook)</h3><p>The same Self-Attention Flow notebook used in §5.2 also illustrates KV caching. Open Tab 3 and step through new-token generation with caching on vs off; the FLOP counter shows the O(T²) → O(T) saving in real time.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_SelfAttentionFlow_Interactive_interactive.html" style="height:880px;" title="KV Caching"></iframe></section>
+Inference</h2>
 <p>KV caching is an inference-time optimization for autoregressive
 Transformer models that significantly reduces redundant computation
 during sequence generation.</p>

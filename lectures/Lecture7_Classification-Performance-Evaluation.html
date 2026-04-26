@@ -745,7 +745,11 @@ classification.</figcaption>
 recall vary with the decision threshold. This plot is useful for
 selecting an operating point that matches application costs (e.g., favor
 recall when false negatives are costly).</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figure 6.5 Precision and Recall vs Decision Threshold</h3><p>Adjust the decision threshold and observe precision-recall trade-offs (Figure 6.5).</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture6_ThresholdEffect_interactive.html" style="height:680px;" title="Interactive Notebook - Figure 6.5 Precision and Recall vs Threshold"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture6_ThresholdEffect.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure id="fig:thresh_tradeoff">
+<img src="img/lecture6/threshold_tradeoff.png" style="width:45.00%; max-width:45.00%; height:auto;"/>
+<figcaption>Figure 6.5: Precision and recall as functions of the
+decision threshold.</figcaption>
+</figure>
 <p>Finally, Figure <a data-reference="fig:roc_multiclass" data-reference-type="ref" href="#fig:roc_multiclass">6</a>
 shows a multi-class ROC plot using a One-vs-Rest (OvR) strategy.
 Micro-averaging weights classes by frequency, while macro-averaging

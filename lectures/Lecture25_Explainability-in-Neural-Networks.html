@@ -580,7 +580,12 @@ diagnose model weaknesses, and guide improvements in data collection and
 model design. By revealing when a model is focusing on the wrong
 features, saliency methods provide actionable insights for building more
 robust and trustworthy systems.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Saliency and Attribution Methods</h3><p>Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_Saliency_Interactive_interactive.html" style="height:860px;" title="Interactive Section 4 Saliency Methods"></iframe></section>
+<figure id="fig:salient">
+<img src="img/lecture22/wolf.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<img src="img/lecture22/salient.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Saliency map highlighting snow as the dominant
+feature.</figcaption>
+</figure>
 <h1 data-number="5" id="gradient-based-explanations"><span class="header-section-number">5.</span> Gradient-Based Explanations</h1>
 <p>Gradient-based explanations provide insights into neural network
 decisions by identifying which parts of the input image most influence
@@ -798,7 +803,10 @@ class-specific reasoning.</p>
 <p>These limitations motivate the development of more advanced
 techniques (such as Grad-CAM) that explicitly incorporate class
 information when generating explanations.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Section 4 — Saliency and Attribution Methods</h3><p>Compare occlusion-based, vanilla gradient, guided backpropagation, SmoothGrad, and integrated gradients saliency maps on synthetic input images.</p><iframe class="interactive-notebook-frame" data-default-height="860" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_Saliency_Interactive_interactive.html" style="height:860px;" title="Interactive Section 4 Saliency Methods"></iframe></section>
+<figure id="fig:Example of backdrop">
+<img src="img/lecture22/xdog.png" style="width:18.00%; max-width:18.00%; height:auto;"/>
+<figcaption>Example of noisy gradient-based saliency maps.</figcaption>
+</figure>
 <h2 data-number="5.7" id="summary-of-saliency-maps"><span class="header-section-number">5.7</span> Summary of Saliency Maps</h2>
 <p>Saliency methods can be broadly divided into two categories:
 <em>intervention-based</em> methods and <em>gradient-based</em> methods.
@@ -944,7 +952,12 @@ from the original model, and weighting samples based on their similarity
 to the original input. A simple interpretable model such as linear
 regression is then fit to this locally weighted dataset to estimate
 feature importance. This process is illustrated in Figure <a data-reference="fig:lime" data-reference-type="ref" href="#fig:lime">15</a>.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–6 — GradCAM, LIME, and SHAP</h3><p>Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html" style="height:900px;" title="Interactive Sections 5–6 GradCAM LIME SHAP"></iframe></section>
+<figure id="fig:lime">
+<img src="img/lecture22/lime_pipeline.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>Illustration of the LIME process for generating local
+explanations by sampling perturbations and fitting an interpretable
+surrogate model.</figcaption>
+</figure>
 <h3 data-number="7.1.2" id="method-1"><span class="header-section-number">7.1.2</span> Method</h3>
 <p>Given an input instance <span class="math inline">\(x\)</span> to be
 explained, LIME constructs a local approximation of the model by
@@ -993,7 +1006,11 @@ contribution of feature <span class="math inline">\(i\)</span>, <span class="mat
 and <span class="math inline">\(M\)</span> is the number of
 features.</p>
 <p>This process is illustrated in Figure <a data-reference="fig:shap" data-reference-type="ref" href="#fig:shap">16</a>.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Sections 5–6 — GradCAM, LIME, and SHAP</h3><p>Explore class activation maps (GradCAM), perturbation-based superpixel explanations (LIME), and Shapley value attributions (SHAP) on synthetic images.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture23_GradCAM_LIME_SHAP_Interactive_interactive.html" style="height:900px;" title="Interactive Sections 5–6 GradCAM LIME SHAP"></iframe></section>
+<figure id="fig:shap">
+<img src="img/lecture22/shap.png" style="width:39.00%; max-width:39.00%; height:auto;"/>
+<figcaption>Example SHAP explanation showing how feature contributions
+shift the prediction from a baseline value.</figcaption>
+</figure>
 <h3 data-number="7.2.2" id="method-2"><span class="header-section-number">7.2.2</span> Method</h3>
 <p>Given an input <span class="math inline">\(x\)</span>, SHAP computes
 the contribution of each feature by evaluating how the prediction

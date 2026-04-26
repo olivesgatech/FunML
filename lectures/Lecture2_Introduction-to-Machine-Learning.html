@@ -631,7 +631,16 @@ can be computationally expensive to process and may contain redundant,
 irrelevant, or noisy information. The goal is to find a
 lower-dimensional representation that captures the most significant
 structure of the data.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Section 2.2 — PCA</h3><p>Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions and how a linear AE learns the same subspace.</p><iframe class="interactive-notebook-frame" data-default-height="820" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture18_PCA_Interactive_interactive.html" style="height:820px;" title="Interactive Section 2.2 PCA"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture18_PCA_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure id="fig:pca_example">
+<img src="img/lecture18/output.png" style="width:33.00%; max-width:33.00%; height:auto;"/>
+<figcaption><strong>Illustration of dimensionality reduction using
+PCA.</strong> <strong>Left:</strong> The original dataset in three
+dimensions. The points lie roughly near a lower-dimensional structure,
+indicating that most of the variation occurs along a few directions.
+<strong>Right:</strong> The same dataset projected onto a
+lower-dimensional space. The projection preserves the dominant structure
+while reducing dimensionality from 3D to 2D.</figcaption>
+</figure>
 <p>As illustrated in Figure <a data-reference="fig:pca_example" data-reference-type="ref" href="#fig:pca_example">11</a>,
 dimensionality reduction can be understood as projecting
 high-dimensional data onto a lower-dimensional space that retains the

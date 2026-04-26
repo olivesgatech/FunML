@@ -225,7 +225,11 @@ preferred.</p>
 <p>From the silhouette values, we can also construct a <strong>Cluster
 Silhouette Plot</strong> by sorting the coefficients in descending order
 and plotting them vertically for each cluster.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture12/Clustering%20Performance%20Evaluation/Cluster%20Silhouette%20Plot.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Figure 12.7: Cluster Silhouette Plot of k-means and
+GMMs</figcaption>
+</figure>
 <p>The silhouette plot provides a visual summary of clustering quality.
 Negative coefficients typically correspond to outliers or poorly
 assigned samples. The thickness of each silhouette region reflects the
@@ -263,7 +267,11 @@ both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)<
 <li><p><span class="math inline">\(d\)</span>: in the different class
 for both <span class="math inline">\(R\)</span> and <span class="math inline">\(Q\)</span></p></li>
 </ol>
-<section class="interactive-notebook"><h3>Interactive Notebook: Lecture 12.3 Clustering Metrics</h3><p>Compute internal and external clustering metrics on the same data and compare outcomes.</p><iframe class="interactive-notebook-frame" data-default-height="680" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture12_Metrics_Interactive_interactive.html" style="height:680px;" title="Interactive Clustering Metrics Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture12_Metrics_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture12/Clustering%20Performance%20Evaluation/Rand%20Index.png" style="width:24.00%; max-width:24.00%; height:auto;"/>
+<figcaption>Figure 12.8: Rand Index Parameters
+Demonstration</figcaption>
+</figure>
 <p>With the four measurements, Rand Index can be denoted as:<span class="math display">\[RI(R,Q)=\frac{a+d}{a+b+c+d}\]</span> Rand index
 can be used to evaluate generated clustering against a ground truth
 clustering.<br/>

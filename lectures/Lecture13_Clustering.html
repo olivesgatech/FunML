@@ -366,7 +366,11 @@ forces the algorithm to produce many small clusters that do not match
 the true structure. Notice that increasing <span class="math inline">\(k\)</span> always reduces the SSD objective, but
 this does not necessarily improve the interpretability or quality of the
 clustering.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figure 11.11 Choosing k</h3><p>Vary the number of clusters k and see how the assignment pattern changes.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMeans_Interactive_interactive.html" style="height:920px;" title="Interactive Figure 11.11 Choosing k Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMeans_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure id="fig:k-choice">
+<img src="img/lecture11/Screenshot%202024-09-29%20at%202.21.34%E2%80%AFPM.png" style="width:48.00%; max-width:48.00%; height:auto;"/>
+<figcaption>Figure 11.11: Different choices of <span class="math inline">\(k\)</span> lead to different clustering
+results.</figcaption>
+</figure></li>
 <li><p><strong>Choosing initial centroids.</strong></p>
 <p>Even when the correct value of <span class="math inline">\(k\)</span>
 is chosen, the algorithm may still converge to different solutions
@@ -852,7 +856,10 @@ norm distance (Manhattan distance) metric.</p>
 Randomly assign selected medoids: <span class="math inline">\(\mathbf{m}_1 = \mathbf{x}_4 =\)</span>(4, 7) and
 <span class="math inline">\(\mathbf{m}_2 = \mathbf{x}_9 =
 (8,2)\)</span></p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture11/images/k-med-init-assign.jpg"/>
+<figcaption>Figure 11.17: Initial assignment to clusters</figcaption>
+</figure>
 <p>Each data sample is assigned the medoid which is closer to it. The
 total cost of clustering is computed as the sum of distances of each
 sample from its assigned cluster medoid.</p></li>
@@ -861,45 +868,73 @@ sample from its assigned cluster medoid.</p></li>
 <li><p>Updating medoid <span class="math inline">\(\mathbf{m}_1\)</span>
 : Check samples associated with <span class="math inline">\(\mathbf{m}_1\)</span> to see if any of them can
 provide a better total cost.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture11/images/update_1_a_table.jpg"/>
+<figcaption>Figure 11.18: Computing alternate center costs</figcaption>
+</figure>
 <p>Current medoid <span class="math inline">\(\mathbf{x}_4\)</span> has
 a total cost of 13, which is the minimum cost, so <span class="math inline">\(\mathbf{x}_4\)</span> remains the value of medoid
 <span class="math inline">\(\mathbf{m}_1\)</span></p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure>
+<img src="img/lecture11/images/update_1_a_split.jpg"/>
+<figcaption>Figure 11.19: Clusters after updating <span class="math inline">\(\mathbf{m}_1\)</span></figcaption>
+</figure></li>
 <li><p>Updating medoid <span class="math inline">\(\mathbf{m}_2\)</span>
 : Check samples associated with <span class="math inline">\(\mathbf{m}_2\)</span> to see if any of them can
 provide a better total cost.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture11/images/k-med-update-1-b-table.jpg"/>
+<figcaption>Figure 11.20: Computing alternate center costs</figcaption>
+</figure>
 <p>Sample <span class="math inline">\(\mathbf{x}_7\)</span> provides a
 total cost of 7 which is lower than the total cost of the current medoid
 <span class="math inline">\(\mathbf{x}_9\)</span> which is 11.
 Therefore, medoid <span class="math inline">\(\mathbf{m}_2\)</span>
 moves to <span class="math inline">\(\mathbf{x}_7\)</span>.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure>
+<img src="img/lecture11/images/update_1_b_split.jpg"/>
+<figcaption>Figure 11.21: Clusters after updating <span class="math inline">\(\mathbf{m}_2\)</span></figcaption>
+</figure></li>
 </ol></li>
 <li><p>Update Step: Reassign the entire dataset based on new medoids.
 Recompute distances relative to new medoids: <span class="math inline">\(\mathbf{m}_1 = \mathbf{x}_4 =\)</span> (4,7) and
 <span class="math inline">\(\mathbf{m}_2 = \mathbf{x}_7 =\)</span> (7,3)
 .</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure>
+<img src="img/lecture11/images/k-med-reassign.jpg"/>
+<figcaption>Figure 11.22: Re-assignment of all samples to
+clusters</figcaption>
+</figure></li>
 <li><p>Update Step: Iteration 2</p>
 <ol>
 <li><p>Updating medoid <span class="math inline">\(\mathbf{m}_1\)</span>
 : Check samples associated with <span class="math inline">\(\mathbf{m}_1\)</span> to see if any of them can
 provide a better total cost.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture11/images/update_2_a_table.jpg"/>
+<figcaption>Figure 11.23: Computing alternate center costs</figcaption>
+</figure>
 <p>Current medoid <span class="math inline">\(\mathbf{x}_4\)</span> has
 a total cost of 9, which is the minimum cost, so <span class="math inline">\(\mathbf{x}_4\)</span> remains the value of medoid
 <span class="math inline">\(\mathbf{m}_1\)</span></p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure>
+<img src="img/lecture11/images/udpate_2_a_graph.jpg"/>
+<figcaption>Figure 11.24: Clusters after updating <span class="math inline">\(\mathbf{m}_1\)</span></figcaption>
+</figure></li>
 <li><p>Updating medoid <span class="math inline">\(\mathbf{m}_2\)</span>
 : Check samples associated with <span class="math inline">\(\mathbf{m}_2\)</span> to see if any of them can
 provide a better total cost.</p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section>
+<figure>
+<img src="img/lecture11/images/update_2_b_table.jpg"/>
+<figcaption>Figure 11.25: Computing alternate center costs</figcaption>
+</figure>
 <p>Current medoid <span class="math inline">\(\mathbf{x}_7\)</span> has
 a total cost of 10, which is the minimum cost, so <span class="math inline">\(\mathbf{x}_7\)</span> remains the value of medoid
 <span class="math inline">\(\mathbf{m}_2\)</span></p>
-<section class="interactive-notebook"><h3>Interactive Notebook: Figures 11.16 to 11.26 k-Medoids Walkthrough</h3><p>Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p><iframe class="interactive-notebook-frame" data-default-height="920" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture11_KMedoids_Interactive_interactive.html" style="height:920px;" title="Interactive Figures 11.16 to 11.26 k-Medoids Notebook"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="../assets/jupyterlite/lab/index.html?path=notebooks%2FLecture11_KMedoids_Interactive.ipynb&amp;reset=1" rel="noopener noreferrer" target="_blank">View notebook</a></div></section></li>
+<figure>
+<img src="img/lecture11/images/update_2_b_graph.jpg"/>
+<figcaption>Figure 11.26: Clusters after updating <span class="math inline">\(\mathbf{m}_2\)</span></figcaption>
+</figure></li>
 </ol></li>
 <li><p>Since the cost of clustering does not decrease any more, the
 algorithm terminates.</p></li>

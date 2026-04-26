@@ -1395,6 +1395,13 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
   if not notebook_rules:
     return
 
+  # Track notebooks already embedded on this page so each notebook appears
+  # at most once per lecture, even when multiple images / rules match it.
+  embedded_keys = set()
+
+  def embed_key(rule):
+    return rule.get("external_url", "").strip() or rule.get("notebook_html", "").strip()
+
   # --- Pass 1: section-anchor rules. Insert embed AFTER the matching heading.
   for rule in notebook_rules:
     section_id = rule.get("section_id", "")
@@ -1408,8 +1415,13 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
     heading = soup.find(id=section_id)
     if heading is None:
       continue
+    key = embed_key(rule)
+    if key and key in embedded_keys:
+      continue
     block = build_interactive_block(soup, rule, notebooks_dir, notebook_view_mode)
     heading.insert_after(block)
+    if key:
+      embedded_keys.add(key)
 
   # --- Pass 2: image-match rules (replace matching image with embed).
   for img in soup.find_all("img", src=True):
@@ -1430,6 +1442,12 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       break
 
     if not matched_rule:
+      continue
+
+    # Skip if this notebook was already embedded earlier on the page.
+    # The image is left in place so the figure remains visible to readers.
+    key = embed_key(matched_rule)
+    if key and key in embedded_keys:
       continue
 
     notebook_ipynb = resolve_notebook_ipynb(matched_rule, notebooks_dir)
@@ -1530,9 +1548,13 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
           start_node.insert_before(block)
           for node in nodes_to_remove:
             node.decompose()
+          if key:
+            embedded_keys.add(key)
           continue
 
     replacement_target.replace_with(block)
+    if key:
+      embedded_keys.add(key)
 
 
 def sync_portal_index(index_path: Path, lecture_pages):
