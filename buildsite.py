@@ -1952,10 +1952,162 @@ def build_site(src_root: Path, out_root: Path, write_index: bool):
   # Build a flat search index over lecture section bodies.
   build_search_index(out_root / "lectures", out_root / "assets", lecture_pages)
 
+  # Auto-add any embed_map.json rules to assets/demos.html so the demos page
+  # (and per-lecture filter) stays in sync with what's actually embedded.
+  sync_demos_with_embed_map(
+    out_root / "assets" / "demos.html",
+    notebook_rules,
+    lecture_pages,
+  )
+
   # Keep the portal-style landing page synchronized with the latest lectures.
   synced = sync_portal_index(out_root / "index.html", lecture_pages)
   if not synced and write_index:
     print("Warning: portal landing page not found; wrote minimal index instead.")
+
+
+def sync_demos_with_embed_map(demos_path: Path, notebook_rules, lecture_pages):
+  """Add any missing embed_map rules into assets/demos.html.
+
+  Each rule with lecture_match (and a usable href) becomes a card under a
+  section keyed by the matching lecture's display number. Existing cards
+  (matched by href) are left alone, so hand-curated entries are preserved.
+  Sections are created on the fly when no section claims the lecture yet.
+  """
+  if not demos_path.exists() or not notebook_rules:
+    return
+
+  # Display number = position in lecture_pages (1-based, excluding the preface
+  # which has media_key "lecture0").
+  display_number_by_filename = {}
+  display_number_by_lecture_match = {}
+  display_idx = 0
+  for title, filename, media_key in lecture_pages:
+    if media_key.lower() == "lecture0":
+      continue
+    display_idx += 1
+    display_number_by_filename[filename] = (display_idx, title)
+    # Match by filename stem for lecture_match fields like "Lecture31_Large-Language-Models".
+    stem = Path(filename).stem
+    display_number_by_lecture_match[stem] = (display_idx, title)
+
+  soup = BeautifulSoup(demos_path.read_text(), "html.parser")
+
+  # Index existing sections by the display numbers they cover, plus the set
+  # of hrefs already in each section so we don't add the same card twice
+  # within one section. (The same notebook can legitimately appear in
+  # multiple lectures' sections — e.g. as a preview in Lecture 1 and as
+  # the primary demo in Lecture 11.)
+  sections_by_lecture = {}
+  hrefs_by_section_id = {}  # id(section) -> set of hrefs
+  for sec in soup.select(".section[data-lectures]"):
+    nums = [n.strip() for n in (sec.get("data-lectures") or "").split(",") if n.strip()]
+    for n in nums:
+      sections_by_lecture.setdefault(n, sec)
+    section_hrefs = {a["href"] for a in sec.select(".card .open-btn[href]")}
+    hrefs_by_section_id[id(sec)] = section_hrefs
+
+  added = 0
+  for rule in notebook_rules:
+    lecture_match = (rule.get("lecture_match") or "").strip()
+    if not lecture_match:
+      continue
+    notebook_html = (rule.get("notebook_html") or "").strip()
+    external_url = (rule.get("external_url") or "").strip()
+    if not (notebook_html or external_url):
+      continue
+    href = external_url if external_url else f"notebooks/{notebook_html}"
+
+    # Resolve the display number. lecture_match may be a substring of the
+    # filename stem; pick the first matching lecture.
+    display_number = None
+    lecture_title = None
+    for stem, (num, title) in display_number_by_lecture_match.items():
+      if lecture_match in stem:
+        display_number = num
+        lecture_title = title
+        break
+    if display_number is None:
+      continue
+
+    section = sections_by_lecture.get(str(display_number))
+    if section is None:
+      # Create a new section for this lecture and append it before the
+      # closing wrapper.
+      section = soup.new_tag("div")
+      section["class"] = "section"
+      section["data-section"] = ""
+      section["data-lectures"] = str(display_number)
+
+      head = soup.new_tag("div")
+      head["class"] = "section-head"
+      badge = soup.new_tag("span")
+      badge["class"] = "lec-badge"
+      badge.string = f"Lec {display_number:02d}"
+      head.append(badge)
+      title_el = soup.new_tag("h2")
+      title_el["class"] = "section-title"
+      title_el.string = lecture_title or f"Lecture {display_number}"
+      head.append(title_el)
+      section.append(head)
+
+      grid = soup.new_tag("div")
+      grid["class"] = "grid"
+      section.append(grid)
+
+      page_wrap = soup.select_one(".page") or soup.body
+      if page_wrap is not None:
+        page_wrap.append(section)
+      sections_by_lecture[str(display_number)] = section
+      hrefs_by_section_id[id(section)] = set()
+
+    # Per-section de-dup: skip if the same href is already a card under
+    # this lecture's section (prevents reruns from re-appending).
+    section_hrefs = hrefs_by_section_id.setdefault(id(section), set())
+    if href in section_hrefs:
+      continue
+
+    grid = section.select_one(".grid")
+    if grid is None:
+      grid = soup.new_tag("div")
+      grid["class"] = "grid"
+      section.append(grid)
+
+    card = soup.new_tag("div")
+    card["class"] = "card"
+    card["data-card"] = ""
+
+    title_p = soup.new_tag("p")
+    title_p["class"] = "card-title"
+    title_p.string = (rule.get("section_title") or "Demo").strip()
+    card.append(title_p)
+
+    desc_p = soup.new_tag("p")
+    desc_p["class"] = "card-desc"
+    desc_p.string = (rule.get("description") or "").strip()
+    card.append(desc_p)
+
+    foot = soup.new_tag("div")
+    foot["class"] = "card-foot"
+    open_btn = soup.new_tag("a")
+    open_btn["class"] = "open-btn"
+    open_btn["href"] = href
+    if external_url:
+      open_btn["target"] = "_blank"
+      open_btn["rel"] = "noopener noreferrer"
+    else:
+      open_btn["target"] = "lecture-frame"
+    open_btn.string = "Open"
+    foot.append(open_btn)
+    card.append(foot)
+
+    grid.append(card)
+    section_hrefs.add(href)
+    added += 1
+
+  if added:
+    demos_path.write_text(str(soup))
+    print(f"sync_demos: added {added} card(s) from embed_map.json")
 
 
 def build_search_index(lectures_dir: Path, assets_dir: Path, lecture_pages):

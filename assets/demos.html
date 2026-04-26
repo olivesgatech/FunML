@@ -1,10 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Interactive Demos — FunML</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Interactive Demos — FunML</title>
+<style>
     :root{--blue:#2563eb;--ink:#0f172a;--muted:#475569;--line:#e2e8f0;--bg:#f8fafc;--card:#fff;--tag:#eff6ff;--tag-ink:#1e40af}
     *{box-sizing:border-box}
     body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,Arial,sans-serif;font-size:14px}
@@ -47,449 +48,432 @@
 </head>
 <body>
 <div class="page">
-  <div class="hero">
-    <h1 id="hero-title">Interactive Demos</h1>
-    <p id="hero-desc">60 interactive notebooks — click <strong>Open</strong> to launch a demo in the viewer.</p>
-  </div>
-
-  <div class="search-wrap">
-    <input id="q" type="search" placeholder="Search demos…" autocomplete="off" oninput="filter()"/>
-  </div>
-
-  <div id="no-results" class="no-results">No demos match your search.</div>
-
-  <!-- ───── Lecture 01–02: Introduction & k-NN ───── -->
-  <div class="section" data-section data-lectures="1">
-    <div class="section-head">
-      <span class="lec-badge">Lec 01–02</span>
-      <h2 class="section-title">Introduction to Machine Learning</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">k-NN Example 1</p>
-        <p class="card-desc">Click inside the interactive plot to move the new point. Classification updates automatically.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/knn_example1_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">k-NN Example 2 — Outlier Sensitivity</p>
-        <p class="card-desc">Use Manhattan distance, vary k, and toggle the outlier to see how the prediction changes.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/knn_example2_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 03: Logistic Regression ───── -->
-  <div class="section" data-section data-lectures="3">
-    <div class="section-head">
-      <span class="lec-badge">Lec 03</span>
-      <h2 class="section-title">Logistic Regression</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Generalized Sigmoid Function</p>
-        <p class="card-desc">Adjust scale a, slope b, and shift x₀ in a/(1+e^{−b(x−x₀)}) to see how the sigmoid changes.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/generalized_sigmoid_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Logistic Models and NLL Landscape</p>
-        <p class="card-desc">Tune the logistic model parameters and dataset settings, then compare the current model against the minimum-NLL solution.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/logistic_nll_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Sign Function for Classification</p>
-        <p class="card-desc">Explore the sign-based binary classifier with adjustable class centers, spread, and decision boundary.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/sign_classification_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Linear Separating Hyperplane</p>
-        <p class="card-desc">Adjust the weight vector and bias to see how the hyperplane changes in two dimensions.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/linear_hyperplane_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 04: Support Vector Machines ───── -->
-  <div class="section" data-section data-lectures="4">
-    <div class="section-head">
-      <span class="lec-badge">Lec 04</span>
-      <h2 class="section-title">Support Vector Machines</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Hinge Loss Family</p>
-        <p class="card-desc">Covers hinge loss, hinge vs softplus, and subgradient with an adjustable bias term b.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/hinge_loss_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Q&A 1 — Soft vs Hard Margin</p>
-        <p class="card-desc">Run and edit this notebook interactively in JupyterLite — soft vs hard margin, outlier sensitivity.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture4_Q&A-Q1_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Q&A 2 — Nonlinear Decision Boundaries</p>
-        <p class="card-desc">Run and edit this notebook interactively — nonlinear boundaries and kernel feature maps in 2D/3D.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture4_Q&A-Q2_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 05: Neural Networks ───── -->
-  <div class="section" data-section data-lectures="5">
-    <div class="section-head">
-      <span class="lec-badge">Lec 05</span>
-      <h2 class="section-title">Introduction to Neural Networks</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">SLP Example</p>
-        <p class="card-desc">Run and edit the single-layer perceptron example notebook interactively in JupyterLite.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture5_SLP-Example_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 06: Classification Evaluation ───── -->
-  <div class="section" data-section data-lectures="6">
-    <div class="section-head">
-      <span class="lec-badge">Lec 06</span>
-      <h2 class="section-title">Classification Performance Evaluation</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Figure 6.5 — Precision &amp; Recall vs Decision Threshold</p>
-        <p class="card-desc">Adjust the decision threshold and observe precision-recall trade-offs live.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture6_ThresholdEffect_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 07: Linear Regression ───── -->
-  <div class="section" data-section data-lectures="7">
-    <div class="section-head">
-      <span class="lec-badge">Lec 07</span>
-      <h2 class="section-title">Linear Regression</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Figure 7.3 — Least Squares Loss Contours</p>
-        <p class="card-desc">Explore how changing θ₀ and θ₁ moves the solution on the least-squares contour surface.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Contour_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 7.4 — Linear Subspace Geometry</p>
-        <p class="card-desc">Interact with the 2D subspace spanned by basis vectors and inspect geometric relationships.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture7_Figure74_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 7.5 — Projection and Residual Orthogonality</p>
-        <p class="card-desc">Adjust vectors and observe projection of y onto the subspace with orthogonal residual ŷ.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture7_Figure75_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 08: Polynomial Regression & GD ───── -->
-  <div class="section" data-section data-lectures="8">
-    <div class="section-head">
-      <span class="lec-badge">Lec 08</span>
-      <h2 class="section-title">Polynomial Regression &amp; Gradient Descent</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Figure 8.2 — Polynomial Fit</p>
-        <p class="card-desc">Vary polynomial degree from linear to high-order and watch the fit adapt to the data.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Fig82_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Loss Landscape &amp; Contour Explorer</p>
-        <p class="card-desc">Pick a horizontal plane and observe how the corresponding contour level changes on the loss surface.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_LossContour_Interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 8.4 — Batch Gradient Descent</p>
-        <p class="card-desc">Explore the convergence path of batch GD with controllable learning rate and stopping criteria.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_BatchGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 8.5 — Stochastic Gradient Descent</p>
-        <p class="card-desc">Explore the noisy convergence path of SGD with controllable learning rate and stopping criteria.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_SGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 8.6 — Mini-batch Gradient Descent</p>
-        <p class="card-desc">Explore convergence with mini-batch GD; tune batch size, learning rate, and stopping criteria.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_MiniBatchGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Q1 — Iteration Counter (Batch / SGD / Mini-batch)</p>
-        <p class="card-desc">Interactive iteration counter comparing Batch GD, SGD, and Mini-batch GD update counts.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Q1_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Q2 — Memory Feasibility Checker</p>
-        <p class="card-desc">Interactive memory-feasibility checker for Batch GD, SGD, and Mini-batch GD.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Q2_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 09: Regularization ───── -->
-  <div class="section" data-section data-lectures="10">
-    <div class="section-head">
-      <span class="lec-badge">Lec 09</span>
-      <h2 class="section-title">Regularization &amp; Performance Metrics</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.8 — Noise Sensitivity (OLS)</p>
-        <p class="card-desc">Control noise level and compare coefficient variability under ordinary least squares.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.9 — Ridge Regression Under Noise</p>
-        <p class="card-desc">Control noise and compare ridge regression robustness against OLS.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.10 — Sample Count Effect</p>
-        <p class="card-desc">Control number of data points and inspect fit stability as sample count varies.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig910_SampleCount_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.11 — Lambda Effect</p>
-        <p class="card-desc">Adjust λ and observe coefficient shrinkage behavior under ridge regularization.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.12 — Lambda vs Model Behavior</p>
-        <p class="card-desc">Adjust λ and inspect the resulting model complexity and fit quality.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.15 — L1, L2, and Elastic Net Geometry</p>
-        <p class="card-desc">Explore constraint geometry for L1, L2, and Elastic Net together with their optimization paths.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.20 — Model Complexity</p>
-        <p class="card-desc">Adjust model complexity and observe underfitting/overfitting error behavior.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.21 — Model Complexity vs Error</p>
-        <p class="card-desc">Adjust model complexity and inspect bias/variance trends on train and test error curves.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 9.25 — Measured vs True Accuracy Under Label Noise</p>
-        <p class="card-desc">Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig925_GTNoise_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lectures 10–12: Clustering ───── -->
-  <div class="section" data-section data-lectures="11,12,13,14">
-    <div class="section-head">
-      <span class="lec-badge">Lec 10–12</span>
-      <h2 class="section-title">Clustering &amp; GMMs</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Table 10.1 — Mahalanobis Distance Data-Point Editor</p>
-        <p class="card-desc">Select a point, move it with sliders, and switch between metric views (Tables 10.2–10.5) one at a time.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 10.9 — Sigma Covariance Control</p>
-        <p class="card-desc">Adjust the covariance matrix Σ after Case 5 and observe Mahalanobis geometry changes.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture10_Sigma_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 11.1 — K-Means Steps &amp; Choosing k</p>
-        <p class="card-desc">Choose initial centroids on the plot and walk through assignment and update steps. Vary k to see cluster patterns.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_KMeans_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figure 11.14 — Mini-batch K-Means</p>
-        <p class="card-desc">Compare standard and mini-batch k-means under the same initialization and inspect the optimization tradeoff.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_MiniBatch_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Figures 11.16–11.26 — k-Medoids Walkthrough</p>
-        <p class="card-desc">Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_KMedoids_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Lecture 12.3 — Clustering Metrics</p>
-        <p class="card-desc">Compute internal and external clustering metrics on the same data and compare outcomes.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture12_Metrics_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 13: CNNs ───── -->
-  <div class="section" data-section data-lectures="15">
-    <div class="section-head">
-      <span class="lec-badge">Lec 13</span>
-      <h2 class="section-title">Convolutional Neural Networks</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Section 4.1 — 2D Convolution Kernel Demo</p>
-        <p class="card-desc">Adjust the kernel size and values, then step through positions to see how each output value is computed from the element-wise product.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Kernel_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.2 — Output Size Formula</p>
-        <p class="card-desc">Vary input size N, filter size F, stride S, and padding P to see the output dimensions change live.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_OutputSize_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.3 — Impact of Stride</p>
-        <p class="card-desc">Change the stride to see which positions the filter visits and how skipping positions reduces the output size.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Stride_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.4 — Zero-Padding</p>
-        <p class="card-desc">Adjust zero-padding P to see the padded input and resulting output size, including the "same" convolution special case.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Padding_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 7 — Pooling Layer</p>
-        <p class="card-desc">Choose between max, average, and L2 pooling. Step through the window to see how each operation downsamples the feature map.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Pooling_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lecture 14: CNN Architectures ───── -->
-  <div class="section" data-section data-lectures="16">
-    <div class="section-head">
-      <span class="lec-badge">Lec 14</span>
-      <h2 class="section-title">CNN Architectures</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Section 5 — Vanishing Gradient Problem</p>
-        <p class="card-desc">See how gradient magnitudes shrink through deep networks for different activation functions. Toggle activations and adjust depth.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_VanishingGradient_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.3 — Dropout Regularization</p>
-        <p class="card-desc">Click any hidden neuron to toggle it on/off and simulate dropout. Track the effective dropout rate.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_Dropout_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.4.2 — Training Dynamics</p>
-        <p class="card-desc">Train a small neural network on a toy dataset and compare how different activation functions affect convergence speed and accuracy.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_TrainingDynamics_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6.5.4 — Inter-Channel Normalization (LRN)</p>
-        <p class="card-desc">Adjust LRN parameters k, α, β, and window n to see how channel activations are normalized.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_InterChannelNorm_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 8.3 — Batch Normalizing Transform</p>
-        <p class="card-desc">Adjust batch size, γ (scale), β (shift), and ε to see the three-step BN transform: compute stats → normalize → scale and shift.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_BatchNorm_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 9.1 — Residual Connections</p>
-        <p class="card-desc">Compare gradient flow in plain vs residual networks. Vary depth and weight scale to see how skip connections prevent vanishing gradients.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_ResidualConnection_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lectures 16–17: Training & Optimization ───── -->
-  <div class="section" data-section data-lectures="17,18">
-    <div class="section-head">
-      <span class="lec-badge">Lec 16–17</span>
-      <h2 class="section-title">CNN Training &amp; Optimization</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Section 4.2 — Saddle Points</p>
-        <p class="card-desc">Gradient descent locks onto the saddle point of f(x,y)=x²−y² regardless of learning rate. Toggle modes to see how noise or momentum can escape.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_SaddlePoint_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Sections 5–8 — Optimizer Comparison</p>
-        <p class="card-desc">Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_OptimizerComparison_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 6 — Condition Numbers &amp; Curvature</p>
-        <p class="card-desc">Adjust Hessian eigenvalues λ₁ and λ₂ to change the condition number κ=λ_max/λ_min. See how anisotropic curvature slows GD convergence.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_ConditionNumber_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 9 — Adam Optimizer</p>
-        <p class="card-desc">Adam combines momentum and RMSProp with bias correction. Adjust α, β₁, β₂ and compare against GD, Momentum, and RMSProp.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_Adam_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 4 — CE vs Weighted CE vs Focal Loss</p>
-        <p class="card-desc">Adjust class weights (WCE) and focus parameter γ (Focal Loss) to see how each loss re-weights hard vs easy examples for imbalanced datasets.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture17_LossFunctions_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Sections 10–11 — Weight Init &amp; Activation/Gradient Histograms</p>
-        <p class="card-desc">Select initialization scheme (Zeros, Xavier, Kaiming) and activation function to see activation std and gradient norms per layer. Compare healthy vs broken configurations.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture17_TrainingPlayground_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ───── Lectures 18–19: Autoencoders ───── -->
-  <div class="section" data-section data-lectures="19,20">
-    <div class="section-head">
-      <span class="lec-badge">Lec 18–19</span>
-      <h2 class="section-title">Autoencoders &amp; Generative Models</h2>
-    </div>
-    <div class="grid">
-      <div class="card" data-card>
-        <p class="card-title">Section 2.2 — PCA Explorer</p>
-        <p class="card-desc">Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_PCA_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Sections 2.3–3 — Linear vs Nonlinear Autoencoder</p>
-        <p class="card-desc">Compare linear AE (equivalent to PCA) with nonlinear AEs (Sigmoid, Tanh, ReLU). Adjust latent dimension k and see reconstruction quality.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_AE_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 5.1 — Unpooling Strategies</p>
-        <p class="card-desc">See all three unpooling strategies side by side: max-unpooling, bed-of-nails, and nearest-neighbor. Randomize the input to explore different cases.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_Unpooling_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 5.3 — Transposed Convolution</p>
-        <p class="card-desc">Step through a transposed convolution one input element at a time. See how each input scales the kernel and accumulates in the output.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_TransposedConv_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 5.4 — Convolutional Autoencoder on MNIST</p>
-        <p class="card-desc">Compare FC-AE and Conv-AE reconstruction quality across latent dimensions. Conv-AEs exploit spatial structure for better reconstructions at smaller latent sizes.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_ConvAE_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 2.4 — VAE Training (ELBO &amp; Reparameterization)</p>
-        <p class="card-desc">Adjust μ and σ to see how the posterior q(z|x) compares to the prior N(0,1). See the reparameterization trick z=μ+σε and the full ELBO as a function of μ.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture19_VAETraining_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-      <div class="card" data-card>
-        <p class="card-title">Section 2.4 — VAE Latent Space Explorer</p>
-        <p class="card-desc">Click anywhere in the 2D latent space to decode z directly into a digit — no encoder needed. Explore how different regions generate different digits.</p>
-        <div class="card-foot"><a class="open-btn" href="notebooks/Lecture19_VAEInference_Interactive_interactive.html" target="lecture-frame">Open</a></div>
-      </div>
-    </div>
-  </div>
-
+<div class="hero">
+<h1 id="hero-title">Interactive Demos</h1>
+<p id="hero-desc">60 interactive notebooks — click <strong>Open</strong> to launch a demo in the viewer.</p>
 </div>
-
+<div class="search-wrap">
+<input autocomplete="off" id="q" oninput="filter()" placeholder="Search demos…" type="search"/>
+</div>
+<div class="no-results" id="no-results">No demos match your search.</div>
+<!-- ───── Lecture 01–02: Introduction & k-NN ───── -->
+<div class="section" data-lectures="1" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 01–02</span>
+<h2 class="section-title">Introduction to Machine Learning</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">k-NN Example 1</p>
+<p class="card-desc">Click inside the interactive plot to move the new point. Classification updates automatically.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/knn_example1_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">k-NN Example 2 — Outlier Sensitivity</p>
+<p class="card-desc">Use Manhattan distance, vary k, and toggle the outlier to see how the prediction changes.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/knn_example2_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card=""><p class="card-title">Preview Demo — Polynomial Regression</p><p class="card-desc">Look ahead to the Polynomial Regression lecture: fit a polynomial of varying degree to noisy data and watch the bias–variance trade-off play out.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Polynomial_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — Linear Decision Boundaries</p><p class="card-desc">Look ahead to Logistic Regression: drag the decision boundary to see how a linear classifier separates two classes.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture3_LinearBoundaries_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — K-Means Clustering</p><p class="card-desc">Look ahead to K-Means: pick initial centroids and step through the assign/update iterations.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_KMeans_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — PCA Dimensionality Reduction</p><p class="card-desc">Look ahead to PCA: project a high-dimensional toy dataset onto its top principal components.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_PCA_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — Matrix Transformation (matrix-vector multiplication)</p><p class="card-desc">Apply a 2×2 matrix to the unit circle and see how matrix-vector multiplication stretches, rotates, and shears the input space.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_ConditionNumber_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — Multivariate Gaussian (revisited under GMMs)</p><p class="card-desc">Adjust the covariance matrix Σ and watch the bivariate Gaussian iso-density ellipse change shape and orientation.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture10_Sigma_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Preview Demo — Synthetic Dataset Generation (CNN Architectures §6.4.2)</p><p class="card-desc">From the CNN Architectures lecture: see how a small synthetic dataset is generated and used to train a network. Focus on the data-generation portion at the top.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_TrainingDynamics_Interactive_interactive.html" target="lecture-frame">Open</a></div></div></div>
+</div>
+<!-- ───── Lecture 03: Logistic Regression ───── -->
+<div class="section" data-lectures="3" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 03</span>
+<h2 class="section-title">Logistic Regression</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Generalized Sigmoid Function</p>
+<p class="card-desc">Adjust scale a, slope b, and shift x₀ in a/(1+e^{−b(x−x₀)}) to see how the sigmoid changes.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/generalized_sigmoid_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Logistic Models and NLL Landscape</p>
+<p class="card-desc">Tune the logistic model parameters and dataset settings, then compare the current model against the minimum-NLL solution.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/logistic_nll_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Sign Function for Classification</p>
+<p class="card-desc">Explore the sign-based binary classifier with adjustable class centers, spread, and decision boundary.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/sign_classification_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Linear Separating Hyperplane</p>
+<p class="card-desc">Adjust the weight vector and bias to see how the hyperplane changes in two dimensions.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/linear_hyperplane_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 04: Support Vector Machines ───── -->
+<div class="section" data-lectures="4" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 04</span>
+<h2 class="section-title">Support Vector Machines</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Hinge Loss Family</p>
+<p class="card-desc">Covers hinge loss, hinge vs softplus, and subgradient with an adjustable bias term b.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/hinge_loss_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Q&amp;A 1 — Soft vs Hard Margin</p>
+<p class="card-desc">Run and edit this notebook interactively in JupyterLite — soft vs hard margin, outlier sensitivity.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture4_Q&amp;A-Q1_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Q&amp;A 2 — Nonlinear Decision Boundaries</p>
+<p class="card-desc">Run and edit this notebook interactively — nonlinear boundaries and kernel feature maps in 2D/3D.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture4_Q&amp;A-Q2_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 05: Neural Networks ───── -->
+<div class="section" data-lectures="5" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 05</span>
+<h2 class="section-title">Introduction to Neural Networks</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">SLP Example</p>
+<p class="card-desc">Run and edit the single-layer perceptron example notebook interactively in JupyterLite.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture5_SLP-Example_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 06: Classification Evaluation ───── -->
+<div class="section" data-lectures="6" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 06</span>
+<h2 class="section-title">Classification Performance Evaluation</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Figure 6.5 — Precision &amp; Recall vs Decision Threshold</p>
+<p class="card-desc">Adjust the decision threshold and observe precision-recall trade-offs live.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture6_ThresholdEffect_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 07: Linear Regression ───── -->
+<div class="section" data-lectures="7" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 07</span>
+<h2 class="section-title">Linear Regression</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Figure 7.3 — Least Squares Loss Contours</p>
+<p class="card-desc">Explore how changing θ₀ and θ₁ moves the solution on the least-squares contour surface.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Contour_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 7.4 — Linear Subspace Geometry</p>
+<p class="card-desc">Interact with the 2D subspace spanned by basis vectors and inspect geometric relationships.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture7_Figure74_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 7.5 — Projection and Residual Orthogonality</p>
+<p class="card-desc">Adjust vectors and observe projection of y onto the subspace with orthogonal residual ŷ.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture7_Figure75_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 08: Polynomial Regression & GD ───── -->
+<div class="section" data-lectures="8" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 08</span>
+<h2 class="section-title">Polynomial Regression &amp; Gradient Descent</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Figure 8.2 — Polynomial Fit</p>
+<p class="card-desc">Vary polynomial degree from linear to high-order and watch the fit adapt to the data.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Fig82_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Loss Landscape &amp; Contour Explorer</p>
+<p class="card-desc">Pick a horizontal plane and observe how the corresponding contour level changes on the loss surface.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_LossContour_Interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 8.4 — Batch Gradient Descent</p>
+<p class="card-desc">Explore the convergence path of batch GD with controllable learning rate and stopping criteria.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_BatchGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 8.5 — Stochastic Gradient Descent</p>
+<p class="card-desc">Explore the noisy convergence path of SGD with controllable learning rate and stopping criteria.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_SGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 8.6 — Mini-batch Gradient Descent</p>
+<p class="card-desc">Explore convergence with mini-batch GD; tune batch size, learning rate, and stopping criteria.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_MiniBatchGD_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Q1 — Iteration Counter (Batch / SGD / Mini-batch)</p>
+<p class="card-desc">Interactive iteration counter comparing Batch GD, SGD, and Mini-batch GD update counts.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Q1_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Q2 — Memory Feasibility Checker</p>
+<p class="card-desc">Interactive memory-feasibility checker for Batch GD, SGD, and Mini-batch GD.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture8_Q2_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 09: Regularization ───── -->
+<div class="section" data-lectures="10" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 09</span>
+<h2 class="section-title">Regularization &amp; Performance Metrics</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Figure 9.8 — Noise Sensitivity (OLS)</p>
+<p class="card-desc">Control noise level and compare coefficient variability under ordinary least squares.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig98_OLS_Noise_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.9 — Ridge Regression Under Noise</p>
+<p class="card-desc">Control noise and compare ridge regression robustness against OLS.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig99_Ridge_Noise_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.10 — Sample Count Effect</p>
+<p class="card-desc">Control number of data points and inspect fit stability as sample count varies.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig910_SampleCount_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.11 — Lambda Effect</p>
+<p class="card-desc">Adjust λ and observe coefficient shrinkage behavior under ridge regularization.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig911_LambdaEffect_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.12 — Lambda vs Model Behavior</p>
+<p class="card-desc">Adjust λ and inspect the resulting model complexity and fit quality.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig912_LambdaBehavior_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.15 — L1, L2, and Elastic Net Geometry</p>
+<p class="card-desc">Explore constraint geometry for L1, L2, and Elastic Net together with their optimization paths.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig915_OptimizationPath_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.20 — Model Complexity</p>
+<p class="card-desc">Adjust model complexity and observe underfitting/overfitting error behavior.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig920_ModelComplexity_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.21 — Model Complexity vs Error</p>
+<p class="card-desc">Adjust model complexity and inspect bias/variance trends on train and test error curves.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig921_ComplexityVsError_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 9.25 — Measured vs True Accuracy Under Label Noise</p>
+<p class="card-desc">Adjust label noise and observed accuracy to inspect the range of plausible true accuracies.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture9_Fig925_GTNoise_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lectures 10–12: Clustering ───── -->
+<div class="section" data-lectures="11,12,13,14" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 10–12</span>
+<h2 class="section-title">Clustering &amp; GMMs</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Table 10.1 — Mahalanobis Distance Data-Point Editor</p>
+<p class="card-desc">Select a point, move it with sliders, and switch between metric views (Tables 10.2–10.5) one at a time.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture10_Mahalanobis_Distance_Visualization_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 10.9 — Sigma Covariance Control</p>
+<p class="card-desc">Adjust the covariance matrix Σ after Case 5 and observe Mahalanobis geometry changes.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture10_Sigma_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 11.1 — K-Means Steps &amp; Choosing k</p>
+<p class="card-desc">Choose initial centroids on the plot and walk through assignment and update steps. Vary k to see cluster patterns.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_KMeans_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figure 11.14 — Mini-batch K-Means</p>
+<p class="card-desc">Compare standard and mini-batch k-means under the same initialization and inspect the optimization tradeoff.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_MiniBatch_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Figures 11.16–11.26 — k-Medoids Walkthrough</p>
+<p class="card-desc">Step through the Manhattan-distance k-medoids example and inspect candidate medoid costs at each stage.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture11_KMedoids_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Lecture 12.3 — Clustering Metrics</p>
+<p class="card-desc">Compute internal and external clustering metrics on the same data and compare outcomes.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture12_Metrics_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 13: CNNs ───── -->
+<div class="section" data-lectures="15" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 13</span>
+<h2 class="section-title">Convolutional Neural Networks</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Section 4.1 — 2D Convolution Kernel Demo</p>
+<p class="card-desc">Adjust the kernel size and values, then step through positions to see how each output value is computed from the element-wise product.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Kernel_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.2 — Output Size Formula</p>
+<p class="card-desc">Vary input size N, filter size F, stride S, and padding P to see the output dimensions change live.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_OutputSize_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.3 — Impact of Stride</p>
+<p class="card-desc">Change the stride to see which positions the filter visits and how skipping positions reduces the output size.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Stride_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.4 — Zero-Padding</p>
+<p class="card-desc">Adjust zero-padding P to see the padded input and resulting output size, including the "same" convolution special case.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Padding_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 7 — Pooling Layer</p>
+<p class="card-desc">Choose between max, average, and L2 pooling. Step through the window to see how each operation downsamples the feature map.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture13_Pooling_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lecture 14: CNN Architectures ───── -->
+<div class="section" data-lectures="16" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 14</span>
+<h2 class="section-title">CNN Architectures</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Section 5 — Vanishing Gradient Problem</p>
+<p class="card-desc">See how gradient magnitudes shrink through deep networks for different activation functions. Toggle activations and adjust depth.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_VanishingGradient_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.3 — Dropout Regularization</p>
+<p class="card-desc">Click any hidden neuron to toggle it on/off and simulate dropout. Track the effective dropout rate.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_Dropout_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.4.2 — Training Dynamics</p>
+<p class="card-desc">Train a small neural network on a toy dataset and compare how different activation functions affect convergence speed and accuracy.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_TrainingDynamics_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6.5.4 — Inter-Channel Normalization (LRN)</p>
+<p class="card-desc">Adjust LRN parameters k, α, β, and window n to see how channel activations are normalized.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_InterChannelNorm_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 8.3 — Batch Normalizing Transform</p>
+<p class="card-desc">Adjust batch size, γ (scale), β (shift), and ε to see the three-step BN transform: compute stats → normalize → scale and shift.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_BatchNorm_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 9.1 — Residual Connections</p>
+<p class="card-desc">Compare gradient flow in plain vs residual networks. Vary depth and weight scale to see how skip connections prevent vanishing gradients.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture14_ResidualConnection_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lectures 16–17: Training & Optimization ───── -->
+<div class="section" data-lectures="17,18" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 16–17</span>
+<h2 class="section-title">CNN Training &amp; Optimization</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Section 4.2 — Saddle Points</p>
+<p class="card-desc">Gradient descent locks onto the saddle point of f(x,y)=x²−y² regardless of learning rate. Toggle modes to see how noise or momentum can escape.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_SaddlePoint_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Sections 5–8 — Optimizer Comparison</p>
+<p class="card-desc">Compare Batch GD, Momentum, AdaGrad, and RMSProp on ill-conditioned loss landscapes. Toggle each optimizer and tune parameters independently.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_OptimizerComparison_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 6 — Condition Numbers &amp; Curvature</p>
+<p class="card-desc">Adjust Hessian eigenvalues λ₁ and λ₂ to change the condition number κ=λ_max/λ_min. See how anisotropic curvature slows GD convergence.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_ConditionNumber_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 9 — Adam Optimizer</p>
+<p class="card-desc">Adam combines momentum and RMSProp with bias correction. Adjust α, β₁, β₂ and compare against GD, Momentum, and RMSProp.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture16_Adam_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 4 — CE vs Weighted CE vs Focal Loss</p>
+<p class="card-desc">Adjust class weights (WCE) and focus parameter γ (Focal Loss) to see how each loss re-weights hard vs easy examples for imbalanced datasets.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture17_LossFunctions_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Sections 10–11 — Weight Init &amp; Activation/Gradient Histograms</p>
+<p class="card-desc">Select initialization scheme (Zeros, Xavier, Kaiming) and activation function to see activation std and gradient norms per layer. Compare healthy vs broken configurations.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture17_TrainingPlayground_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<!-- ───── Lectures 18–19: Autoencoders ───── -->
+<div class="section" data-lectures="19,20" data-section="">
+<div class="section-head">
+<span class="lec-badge">Lec 18–19</span>
+<h2 class="section-title">Autoencoders &amp; Generative Models</h2>
+</div>
+<div class="grid">
+<div class="card" data-card="">
+<p class="card-title">Section 2.2 — PCA Explorer</p>
+<p class="card-desc">Explore principal components: adjust data angle, variance ratio, and number of points. See how PC arrows align with maximum variance directions.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_PCA_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Sections 2.3–3 — Linear vs Nonlinear Autoencoder</p>
+<p class="card-desc">Compare linear AE (equivalent to PCA) with nonlinear AEs (Sigmoid, Tanh, ReLU). Adjust latent dimension k and see reconstruction quality.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_AE_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 5.1 — Unpooling Strategies</p>
+<p class="card-desc">See all three unpooling strategies side by side: max-unpooling, bed-of-nails, and nearest-neighbor. Randomize the input to explore different cases.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_Unpooling_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 5.3 — Transposed Convolution</p>
+<p class="card-desc">Step through a transposed convolution one input element at a time. See how each input scales the kernel and accumulates in the output.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_TransposedConv_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 5.4 — Convolutional Autoencoder on MNIST</p>
+<p class="card-desc">Compare FC-AE and Conv-AE reconstruction quality across latent dimensions. Conv-AEs exploit spatial structure for better reconstructions at smaller latent sizes.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture18_ConvAE_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 2.4 — VAE Training (ELBO &amp; Reparameterization)</p>
+<p class="card-desc">Adjust μ and σ to see how the posterior q(z|x) compares to the prior N(0,1). See the reparameterization trick z=μ+σε and the full ELBO as a function of μ.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture19_VAETraining_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+<div class="card" data-card="">
+<p class="card-title">Section 2.4 — VAE Latent Space Explorer</p>
+<p class="card-desc">Click anywhere in the 2D latent space to decode z directly into a digit — no encoder needed. Explore how different regions generate different digits.</p>
+<div class="card-foot"><a class="open-btn" href="notebooks/Lecture19_VAEInference_Interactive_interactive.html" target="lecture-frame">Open</a></div>
+</div>
+</div>
+</div>
+<div class="section" data-lectures="30" data-section=""><div class="section-head"><span class="lec-badge">Lec 30</span><h2 class="section-title">Large Language Models</h2></div><div class="grid"><div class="card" data-card=""><p class="card-title">Interactive Demo — Self-Attention Flow, Context Length &amp; KV Caching</p><p class="card-desc">Walk through Q/K/V projections, attention weights, and the output. Tab 2 plots quadratic attention vs linear projection cost as context length grows; Tab 3 contrasts naive autoregressive generation with KV caching to show the O(T²) → O(T) saving. Inspired by ByHand AI's self-attention-flow visualization.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture28_SelfAttentionFlow_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Interactive Demo — Low-Rank Adaptation (LoRA)</p><p class="card-desc">Vary rank r, scaling α, and matrix dimensions to see how the LoRA update ΔW = (α/r)·BA approximates a full fine-tuning delta. Tab 2 shows parameter savings vs full fine-tuning; Tab 3 plots reconstruction error of a rank-r approximation against the full target via truncated SVD.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture28_LoRA_Interactive_interactive.html" target="lecture-frame">Open</a></div></div><div class="card" data-card=""><p class="card-title">Interactive Demo — LLM Evaluation Metrics</p><p class="card-desc">Edit the reference and candidate text and watch BLEU-1..4, ROUGE-1/2/L, perplexity (from a tiny on-page bigram model), edit distance, and exact match update live with worked-example tables. Inspired by ByHand AI's AI-eval-equations explainer.</p><div class="card-foot"><a class="open-btn" href="notebooks/Lecture28_EvalMetrics_Interactive_interactive.html" target="lecture-frame">Open</a></div></div></div></div></div>
 <script>
 // Read ?lecture=N from URL and hide sections not matching that lecture.
 (function applyLectureFilter(){
