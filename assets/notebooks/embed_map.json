@@ -1208,41 +1208,38 @@
     {
       "lecture_match": "Lecture31_Large-Language-Models",
       "section_id": "context-length-in-modern-llms",
-      "external_url": "https://www.byhand.ai/p/self-attention-flow-new-release",
-      "link_only": true,
-      "section_title": "Demo — Self-Attention Flow & Context Length (also covers KV caching)",
-      "description": "ByHand AI's interactive walk-through of the self-attention computation. Watch how the K/V matrices grow with context length and see the same diagram used to illustrate KV caching (§6.7). Hosted on Substack and cannot be embedded; opens in a new tab.",
-      "iframe_title": "Self-Attention Flow",
-      "iframe_height": 720
+      "notebook_html": "Lecture28_SelfAttentionFlow_Interactive_interactive.html",
+      "section_title": "Interactive Demo — Self-Attention Flow, Context Length & KV Caching",
+      "description": "Walk through Q/K/V projections, attention weights, and the output. Tab 2 plots quadratic attention vs linear projection cost as context length grows; Tab 3 contrasts naive autoregressive generation with KV caching to show the O(T²) → O(T) saving. Inspired by ByHand AI's self-attention-flow visualization.",
+      "iframe_title": "Self-Attention Flow & KV Caching",
+      "iframe_height": 880
     },
     {
       "lecture_match": "Lecture31_Large-Language-Models",
       "section_id": "parameter-efficient-fine-tuning-with-lora",
-      "external_url": "https://pub-c70e14727c3046cf8a36d9e598267788.r2.dev/26443b7e12/index.html",
-      "section_title": "Demo — Low-Rank Adaptation (LoRA)",
-      "description": "Interactive LoRA visualization: change rank r and watch how the low-rank update ΔW = BA approximates a full fine-tuning weight delta with a fraction of the parameters.",
+      "notebook_html": "Lecture28_LoRA_Interactive_interactive.html",
+      "section_title": "Interactive Demo — Low-Rank Adaptation (LoRA)",
+      "description": "Vary rank r, scaling α, and matrix dimensions to see how the LoRA update ΔW = (α/r)·BA approximates a full fine-tuning delta. Tab 2 shows parameter savings vs full fine-tuning; Tab 3 plots reconstruction error of a rank-r approximation against the full target via truncated SVD.",
       "iframe_title": "LoRA Interactive",
-      "iframe_height": 760
+      "iframe_height": 880
     },
     {
       "lecture_match": "Lecture31_Large-Language-Models",
       "section_id": "kv-caching-for-efficient-inference",
-      "external_url": "https://www.byhand.ai/p/self-attention-flow-new-release",
-      "link_only": true,
-      "section_title": "Demo — KV Caching (showcased in the Self-Attention Flow demo)",
-      "description": "The same self-attention flow demo used in §5.2 also illustrates KV caching: watch how prior tokens' K and V vectors get reused at each new generation step instead of recomputed. Opens in a new tab.",
-      "iframe_title": "Self-Attention Flow / KV Caching",
-      "iframe_height": 720
+      "notebook_html": "Lecture28_SelfAttentionFlow_Interactive_interactive.html",
+      "section_title": "Interactive Demo — KV Caching (Tab 3 of the Self-Attention Flow notebook)",
+      "description": "The same Self-Attention Flow notebook used in §5.2 also illustrates KV caching. Open Tab 3 and step through new-token generation with caching on vs off; the FLOP counter shows the O(T²) → O(T) saving in real time.",
+      "iframe_title": "KV Caching",
+      "iframe_height": 880
     },
     {
       "lecture_match": "Lecture31_Large-Language-Models",
       "section_id": "illustrative-comparison-of-evaluation-metrics",
-      "external_url": "https://www.byhand.ai/p/ai-eval-equations-you-must-know",
-      "link_only": true,
-      "section_title": "Demo — AI Evaluation Equations You Must Know",
-      "description": "ByHand AI's visual reference for the core equations behind AI evaluation metrics (perplexity, BLEU, ROUGE, etc.). Useful companion to the worked comparison in §7.5. Opens in a new tab.",
-      "iframe_title": "AI Eval Equations",
-      "iframe_height": 720
+      "notebook_html": "Lecture28_EvalMetrics_Interactive_interactive.html",
+      "section_title": "Interactive Demo — LLM Evaluation Metrics",
+      "description": "Edit the reference and candidate text and watch BLEU-1..4, ROUGE-1/2/L, perplexity (from a tiny on-page bigram model), edit distance, and exact match update live with worked-example tables. Inspired by ByHand AI's AI-eval-equations explainer.",
+      "iframe_title": "LLM Evaluation Metrics",
+      "iframe_height": 900
     }
   ]
 }

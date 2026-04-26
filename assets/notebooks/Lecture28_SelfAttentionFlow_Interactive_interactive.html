@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Self-Attention Flow & KV Caching — Lecture 28</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .ctrl-row label{font-size:.8rem;font-weight:600;color:var(--muted);min-width:160px;}
+  .ctrl-row input[type=range]{flex:1;min-width:0;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:34px;text-align:right;}
+  .tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:7px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.82rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .grid-2-3{display:grid;grid-template-columns:2fr 1fr;gap:10px;}
+  @media(max-width:900px){.grid-3,.grid-2,.grid-2-3{grid-template-columns:1fr;}}
+  .chart{width:100%;height:260px;}
+  .chart-tall{width:100%;height:340px;}
+  .chart-wide{width:100%;height:300px;}
+  .info{font-size:.84rem;line-height:1.6;margin-top:8px;color:var(--text);}
+  .info b{color:var(--blue);}
+  .note{background:#fef3c7;border-left:3px solid var(--amber);padding:8px 12px;
+        font-size:.82rem;border-radius:5px;margin-top:8px;}
+  .metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .metric-card{background:#f1f5f9;border-radius:8px;padding:10px;text-align:center;}
+  .metric-val{font-size:1.25rem;font-weight:700;color:var(--blue);}
+  .metric-label{font-size:.72rem;color:var(--muted);margin-top:2px;}
+  .btn{padding:8px 18px;border-radius:7px;border:1.5px solid var(--blue);background:var(--blue);
+       color:#fff;cursor:pointer;font-weight:600;font-size:.85rem;transition:all .15s;margin-right:6px;}
+  .btn:hover{background:#1d4ed8;}
+  .btn.secondary{background:#fff;color:var(--blue);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .step-counter{display:inline-block;padding:4px 10px;border-radius:5px;background:#dbeafe;
+                color:var(--blue);font-weight:700;font-size:.85rem;margin-left:8px;}
+  .savings{font-size:1.1rem;font-weight:700;color:var(--green);margin-top:8px;}
+  .small-label{font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;
+               letter-spacing:.04em;margin-bottom:4px;}
+  .legend-row{display:flex;gap:14px;font-size:.78rem;margin-top:6px;}
+  .legend-row span{display:flex;align-items:center;gap:5px;}
+  .swatch{display:inline-block;width:14px;height:14px;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<h2>Self-Attention Flow & KV Caching — Interactive Walkthrough</h2>
+<p class="subtitle">Visualize Q/K/V matrices, attention scores, context-length scaling, and how KV caching turns quadratic decoding into linear-per-step.</p>
+
+<!-- ===== Top controls ===== -->
+<div class="panel">
+  <h3>Global Parameters</h3>
+  <div class="grid-2">
+    <div class="ctrl-row">
+      <label>Sequence length n</label>
+      <input type="range" id="n_seq" min="2" max="12" step="1" value="6"/>
+      <span class="val" id="n_seq_val">6</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Embedding dim d_k</label>
+      <input type="range" id="d_k" min="4" max="16" step="1" value="8"/>
+      <span class="val" id="d_k_val">8</span>
+    </div>
+  </div>
+  <div class="tabs" style="margin-top:6px;">
+    <button class="tab active" id="tab-attn" onclick="setTab('attn')">1. Self-Attention Computation</button>
+    <button class="tab" id="tab-ctx" onclick="setTab('ctx')">2. Context Length Growth</button>
+    <button class="tab" id="tab-kv" onclick="setTab('kv')">3. KV Caching</button>
+  </div>
+</div>
+
+<!-- ===== TAB 1: Self-Attention ===== -->
+<div id="view-attn">
+  <div class="panel">
+    <h3>Step 1 — Q, K, V Projections (each n x d_k)</h3>
+    <p class="info" style="margin-top:0;">Token embeddings X (n x d_model) get linearly projected into Query, Key, Value matrices via learned W_Q, W_K, W_V. Values shown are deterministic (mulberry32 seed) in [-1, 1].</p>
+    <div class="grid-3" style="margin-top:8px;">
+      <div><div class="small-label">Q matrix</div><div id="chart-Q" class="chart"></div></div>
+      <div><div class="small-label">K matrix</div><div id="chart-K" class="chart"></div></div>
+      <div><div class="small-label">V matrix</div><div id="chart-V" class="chart"></div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Step 2 — Raw Scores QK^T (n x n) and Causal Mask</h3>
+    <div class="grid-2">
+      <div><div class="small-label">QK^T (raw dot products)</div><div id="chart-QK" class="chart-wide"></div></div>
+      <div><div class="small-label">After causal mask + scale by 1/sqrt(d_k)</div><div id="chart-QKmasked" class="chart-wide"></div></div>
+    </div>
+    <div class="note">Causal mask zeroes out the upper triangle of QK^T before softmax so a token at position t cannot attend to future tokens t+1, ..., n.</div>
+  </div>
+
+  <div class="panel">
+    <h3>Step 3 — Softmax Attention Weights and Output O = A.V</h3>
+    <div class="grid-2">
+      <div><div class="small-label">Attention weights A = softmax(QK^T / sqrt(d_k))</div><div id="chart-A" class="chart-wide"></div></div>
+      <div><div class="small-label">Output O = A . V (n x d_k)</div><div id="chart-O" class="chart-wide"></div></div>
+    </div>
+    <p class="info"><b>Per-row property:</b> each row of A is a probability distribution summing to 1 (over allowed past positions). Row t of O is the value-weighted summary that token t will use downstream.</p>
+  </div>
+</div>
+
+<!-- ===== TAB 2: Context Growth ===== -->
+<div id="view-ctx" style="display:none;">
+  <div class="panel">
+    <h3>Compute Cost vs Sequence Length</h3>
+    <div class="grid-2-3">
+      <div>
+        <div id="chart-ctx" class="chart-tall"></div>
+        <div class="legend-row">
+          <span><span class="swatch" style="background:#dc2626;"></span>Quadratic attention O(n^2 . d)</span>
+          <span><span class="swatch" style="background:#2563eb;"></span>Linear projection O(n . d^2)</span>
+          <span><span class="swatch" style="background:#059669;"></span>Current n</span>
+        </div>
+      </div>
+      <div>
+        <h3 style="font-size:.9rem;margin-bottom:8px;">KV Cache Footprint @ current n</h3>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-val" id="m_kshape">—</div>
+            <div class="metric-label">K cache shape</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val" id="m_vshape">—</div>
+            <div class="metric-label">V cache shape</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val" id="m_floats">—</div>
+            <div class="metric-label">Total floats (K+V)</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-val" id="m_kb">—</div>
+            <div class="metric-label">Bytes (4-byte floats)</div>
+          </div>
+        </div>
+        <div class="note" style="margin-top:10px;">Modern LLMs (GPT-4, Claude) support 100K-1M token contexts; KV cache becomes the dominant memory bottleneck during inference.</div>
+      </div>
+    </div>
+    <p class="info" style="margin-top:10px;"><b>Why it matters:</b> attention compute grows as O(n^2 . d) while the per-layer projection cost is only O(n . d^2). For long contexts, attention dominates &mdash; and the KV cache (n . d_k floats per layer per head) explodes.</p>
+  </div>
+</div>
+
+<!-- ===== TAB 3: KV Caching ===== -->
+<div id="view-kv" style="display:none;">
+  <div class="panel">
+    <h3>Autoregressive Generation: Without vs With KV Cache</h3>
+    <p class="info" style="margin-top:0;">Each step appends one new token. <b>Without cache</b>, K and V are recomputed for the entire sequence. <b>With cache</b>, only the new row is computed; prior K/V rows are reused.</p>
+    <div style="margin:10px 0;">
+      <button class="btn" id="btn-step" onclick="kvStep()">Generate next token</button>
+      <button class="btn secondary" onclick="kvReset()">Reset</button>
+      <span class="step-counter">Tokens generated: <span id="kv_t">0</span> / 8</span>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="small-label" style="color:var(--red);">Without KV cache &mdash; recompute everything</div>
+        <div id="chart-noCache" class="chart-tall"></div>
+      </div>
+      <div>
+        <div class="small-label" style="color:var(--green);">With KV cache &mdash; only new row computed</div>
+        <div id="chart-cache" class="chart-tall"></div>
+      </div>
+    </div>
+    <div class="legend-row">
+      <span><span class="swatch" style="background:#fca5a5;"></span>Recomputed this step</span>
+      <span><span class="swatch" style="background:#86efac;"></span>Cached / reused from prior step</span>
+      <span><span class="swatch" style="background:#e2e8f0;"></span>Not yet generated</span>
+    </div>
+    <div class="grid-2" style="margin-top:12px;">
+      <div class="metric-card">
+        <div class="metric-val" id="m_ops_no">0</div>
+        <div class="metric-label">Cumulative ops (no cache, ~ sum 1..t)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" id="m_ops_yes">0</div>
+        <div class="metric-label">Cumulative ops (with cache, ~ t)</div>
+      </div>
+    </div>
+    <div class="savings" id="savings_text">Compute saved: 0% (0 FLOPs)</div>
+    <p class="info" style="margin-top:8px;"><b>Intuition:</b> at step t the model only needs the new query q_t against all past keys K[0..t]. Past keys/values do not change, so caching them turns O(t) recomputed work per step into O(1) appended work, taking total decode cost from O(T^2) to O(T).</p>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Mulberry32 seeded RNG
+// ============================================================
+function mulberry32(seed){
+  let s = seed >>> 0;
+  return function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function genMatrix(rows, cols, seed){
+  const r = mulberry32(seed);
+  const M = [];
+  for(let i=0;i<rows;i++){
+    const row = [];
+    for(let j=0;j<cols;j++){
+      row.push(2 * r() - 1);
+    }
+    M.push(row);
+  }
+  return M;
+}
+
+function matmul(A, B){
+  const n = A.length, m = B[0].length, p = B.length;
+  const C = [];
+  for(let i=0;i<n;i++){
+    const row = new Array(m).fill(0);
+    for(let k=0;k<p;k++){
+      const aik = A[i][k];
+      for(let j=0;j<m;j++){
+        row[j] += aik * B[k][j];
+      }
+    }
+    C.push(row);
+  }
+  return C;
+}
+
+function transpose(A){
+  const n = A.length, m = A[0].length;
+  const T = [];
+  for(let j=0;j<m;j++){
+    const row = [];
+    for(let i=0;i<n;i++) row.push(A[i][j]);
+    T.push(row);
+  }
+  return T;
+}
+
+function softmaxRows(M){
+  return M.map(row=>{
+    const mx = Math.max(...row);
+    const ex = row.map(v=>Math.exp(v - mx));
+    const s = ex.reduce((a,b)=>a+b, 0);
+    return ex.map(v=>v/s);
+  });
+}
+
+function applyCausalMask(M){
+  const n = M.length;
+  const out = M.map(r=>r.slice());
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      out[i][j] = -1e9;
+    }
+  }
+  return out;
+}
+
+function applyCausalMaskZero(M){
+  // For visualization (zero-out instead of -inf)
+  const n = M.length;
+  const out = M.map(r=>r.slice());
+  for(let i=0;i<n;i++){
+    for(let j=i+1;j<n;j++){
+      out[i][j] = 0;
+    }
+  }
+  return out;
+}
+
+// ============================================================
+// State
+// ============================================================
+let N = 6, DK = 8;
+let currentTab = 'attn';
+let kvT = 0;
+const KV_MAX = 8;
+
+// ============================================================
+// Tab 1: Self-Attention rendering
+// ============================================================
+function renderTab1(){
+  const Q = genMatrix(N, DK, 11);
+  const K = genMatrix(N, DK, 23);
+  const V = genMatrix(N, DK, 47);
+  const tokens = Array.from({length:N}, (_,i)=>'t'+i);
+  const dims = Array.from({length:DK}, (_,i)=>'d'+i);
+
+  const baseLayout = (title)=>({
+    margin:{t:24,b:32,l:38,r:8},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    xaxis:{tickfont:{size:9}}, yaxis:{tickfont:{size:9}, autorange:'reversed'},
+    title:{text:title, font:{size:11}, x:0.5, y:0.97}
+  });
+
+  const cfg = {responsive:true, displayModeBar:false};
+
+  Plotly.newPlot('chart-Q', [{
+    z:Q, x:dims, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    zmin:-1, zmax:1, hovertemplate:'Q[%{y},%{x}] = %{z:.2f}<extra></extra>'
+  }], baseLayout('Q (n='+N+' x d_k='+DK+')'), cfg);
+
+  Plotly.newPlot('chart-K', [{
+    z:K, x:dims, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    zmin:-1, zmax:1, hovertemplate:'K[%{y},%{x}] = %{z:.2f}<extra></extra>'
+  }], baseLayout('K (n='+N+' x d_k='+DK+')'), cfg);
+
+  Plotly.newPlot('chart-V', [{
+    z:V, x:dims, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    zmin:-1, zmax:1, hovertemplate:'V[%{y},%{x}] = %{z:.2f}<extra></extra>'
+  }], baseLayout('V (n='+N+' x d_k='+DK+')'), cfg);
+
+  // QK^T raw
+  const QK = matmul(Q, transpose(K));
+  Plotly.newPlot('chart-QK', [{
+    z:QK, x:tokens, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    hovertemplate:'Q row %{y} . K row %{x} = %{z:.2f}<extra></extra>'
+  }], {
+    ...baseLayout('Raw scores QK^T'),
+    xaxis:{title:'Key position', tickfont:{size:9}},
+    yaxis:{title:'Query position', autorange:'reversed', tickfont:{size:9}}
+  }, cfg);
+
+  // Masked + scaled (visualization)
+  const scale = 1.0 / Math.sqrt(DK);
+  const QKscaled = QK.map(r=>r.map(v=>v*scale));
+  const QKmaskedViz = applyCausalMaskZero(QKscaled);
+  Plotly.newPlot('chart-QKmasked', [{
+    z:QKmaskedViz, x:tokens, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    hovertemplate:'(QK^T/sqrt(d))[%{y},%{x}] = %{z:.2f}<extra></extra>'
+  }], {
+    ...baseLayout('Masked + scaled QK^T / sqrt(d_k)'),
+    xaxis:{title:'Key position', tickfont:{size:9}},
+    yaxis:{title:'Query position', autorange:'reversed', tickfont:{size:9}}
+  }, cfg);
+
+  // Softmax attention (with causal mask)
+  const QKmasked = applyCausalMask(QKscaled);
+  const A = softmaxRows(QKmasked);
+  Plotly.newPlot('chart-A', [{
+    z:A, x:tokens, y:tokens, type:'heatmap', colorscale:'Blues',
+    zmin:0, zmax:1, hovertemplate:'A[%{y},%{x}] = %{z:.3f}<extra></extra>'
+  }], {
+    ...baseLayout('Attention weights A (each row sums to 1)'),
+    xaxis:{title:'Key position', tickfont:{size:9}},
+    yaxis:{title:'Query position', autorange:'reversed', tickfont:{size:9}}
+  }, cfg);
+
+  // Output O = A . V
+  const O = matmul(A, V);
+  Plotly.newPlot('chart-O', [{
+    z:O, x:dims, y:tokens, type:'heatmap', colorscale:'RdBu', reversescale:true,
+    hovertemplate:'O[%{y},%{x}] = %{z:.3f}<extra></extra>'
+  }], {
+    ...baseLayout('Output O = A . V (n x d_k)'),
+    xaxis:{title:'Output dim', tickfont:{size:9}},
+    yaxis:{title:'Token position', autorange:'reversed', tickfont:{size:9}}
+  }, cfg);
+}
+
+// ============================================================
+// Tab 2: Context Length Growth
+// ============================================================
+function renderTab2(){
+  // Use a representative model dim (e.g., 512) for the projection cost so
+  // the curves cross at a meaningful regime; show DK/N effect via marker.
+  const D_MODEL = 512;
+  const xs = [];
+  const yQuad = [];
+  const yLin = [];
+  for(let n=1;n<=512;n++){
+    xs.push(n);
+    yQuad.push(n*n*D_MODEL);     // O(n^2 . d)
+    yLin.push(n*D_MODEL*D_MODEL);// O(n . d^2)
+  }
+
+  const traces = [
+    {x:xs, y:yQuad, mode:'lines', name:'Quadratic attention O(n^2 . d)',
+     line:{color:'#dc2626', width:2.2},
+     hovertemplate:'n=%{x}<br>cost=%{y:.2e}<extra></extra>'},
+    {x:xs, y:yLin, mode:'lines', name:'Linear projection O(n . d^2)',
+     line:{color:'#2563eb', width:2.2},
+     hovertemplate:'n=%{x}<br>cost=%{y:.2e}<extra></extra>'}
+  ];
+
+  Plotly.newPlot('chart-ctx', traces, {
+    margin:{t:30,b:42,l:60,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    xaxis:{title:'Sequence length n', gridcolor:'#e2e8f0'},
+    yaxis:{title:'Compute cost (FLOPs, log scale)', type:'log', gridcolor:'#e2e8f0'},
+    legend:{x:0.02, y:0.98, font:{size:10}, bgcolor:'rgba(255,255,255,0.85)'},
+    title:{text:'Compute scaling (assumed d_model=512)', font:{size:11}, x:0.5},
+    shapes:[{
+      type:'line', xref:'x', yref:'paper',
+      x0:N, x1:N, y0:0, y1:1,
+      line:{color:'#059669', width:2, dash:'dash'}
+    }],
+    annotations:[{
+      x:N, y:1, xref:'x', yref:'paper',
+      text:'n='+N, showarrow:false, yshift:8,
+      font:{size:11, color:'#059669'}
+    }]
+  }, {responsive:true, displayModeBar:false});
+
+  // Side panel: KV cache size
+  const floats = 2 * N * DK; // K + V
+  const bytes  = floats * 4;
+  document.getElementById('m_kshape').textContent = N+' x '+DK;
+  document.getElementById('m_vshape').textContent = N+' x '+DK;
+  document.getElementById('m_floats').textContent = floats.toLocaleString();
+  if(bytes < 1024){
+    document.getElementById('m_kb').textContent = bytes + ' B';
+  } else {
+    document.getElementById('m_kb').textContent = (bytes/1024).toFixed(2) + ' KB';
+  }
+}
+
+// ============================================================
+// Tab 3: KV Caching animation
+// ============================================================
+function renderTab3(){
+  // Build status grids: KV_MAX rows x DK cols
+  // 0 = not yet computed (gray), 1 = cached/green, 2 = recomputed/red
+  const noCache = [];
+  const cache = [];
+  for(let i=0;i<KV_MAX;i++){
+    const rowNo = new Array(DK).fill(0);
+    const rowYes = new Array(DK).fill(0);
+    if(kvT > 0 && i < kvT){
+      // No-cache: every visible row is recomputed at the latest step
+      rowNo.fill(2);
+      // With-cache: prior rows reused (green), only newest is red
+      if(i === kvT - 1) rowYes.fill(2);
+      else rowYes.fill(1);
+    }
+    noCache.push(rowNo);
+    cache.push(rowYes);
+  }
+
+  const tokens = Array.from({length:KV_MAX}, (_,i)=>'t'+i);
+  const dims = Array.from({length:DK}, (_,i)=>'d'+i);
+
+  // Custom 3-color scale: 0=gray, 1=green, 2=red
+  const colorscale = [
+    [0.0,  '#e2e8f0'],
+    [0.49, '#e2e8f0'],
+    [0.5,  '#86efac'],
+    [0.99, '#86efac'],
+    [1.0,  '#fca5a5']
+  ];
+  // For zmin=0, zmax=2, the breakpoints are 0, 0.5, 1.0 in normalized
+  const cs = [
+    [0.00, '#e2e8f0'],
+    [0.33, '#e2e8f0'],
+    [0.34, '#86efac'],
+    [0.66, '#86efac'],
+    [0.67, '#fca5a5'],
+    [1.00, '#fca5a5']
+  ];
+
+  const layoutFn = (title)=>({
+    margin:{t:30,b:32,l:42,r:8},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    xaxis:{title:'d_k dim', tickfont:{size:9}},
+    yaxis:{title:'token position', autorange:'reversed', tickfont:{size:9}},
+    title:{text:title, font:{size:11}, x:0.5}
+  });
+
+  Plotly.newPlot('chart-noCache', [{
+    z:noCache, x:dims, y:tokens, type:'heatmap',
+    colorscale:cs, zmin:0, zmax:2, showscale:false,
+    xgap:1, ygap:1,
+    hovertemplate:'%{y}, %{x}<extra></extra>'
+  }], layoutFn('K / V (recomputed every step)'), {responsive:true, displayModeBar:false});
+
+  Plotly.newPlot('chart-cache', [{
+    z:cache, x:dims, y:tokens, type:'heatmap',
+    colorscale:cs, zmin:0, zmax:2, showscale:false,
+    xgap:1, ygap:1,
+    hovertemplate:'%{y}, %{x}<extra></extra>'
+  }], layoutFn('K / V (cached + 1 new row)'), {responsive:true, displayModeBar:false});
+
+  // Compute counts: ops per matrix entry computed
+  // Without cache: at step i (1-indexed), recompute i rows of K (and V), each row = DK entries
+  // Cumulative through t = sum_{i=1..t} i * DK = t(t+1)/2 * DK (per matrix, but we count both K+V)
+  let opsNo = 0, opsYes = 0;
+  for(let i=1;i<=kvT;i++){
+    opsNo  += i * DK * 2;   // K+V both
+    opsYes += 1 * DK * 2;   // only new row of K+V
+  }
+  document.getElementById('m_ops_no').textContent  = opsNo.toLocaleString();
+  document.getElementById('m_ops_yes').textContent = opsYes.toLocaleString();
+  document.getElementById('kv_t').textContent = kvT;
+
+  let pct = 0;
+  if(opsNo > 0) pct = 100 * (opsNo - opsYes) / opsNo;
+  document.getElementById('savings_text').textContent =
+    'Compute saved: ' + pct.toFixed(1) + '% (' + (opsNo - opsYes).toLocaleString() + ' FLOPs)';
+
+  document.getElementById('btn-step').disabled = (kvT >= KV_MAX);
+}
+
+function kvStep(){
+  if(kvT < KV_MAX){
+    kvT += 1;
+    renderTab3();
+  }
+}
+function kvReset(){
+  kvT = 0;
+  renderTab3();
+}
+
+// ============================================================
+// Tab switching
+// ============================================================
+function setTab(t){
+  currentTab = t;
+  document.getElementById('tab-attn').classList.toggle('active', t==='attn');
+  document.getElementById('tab-ctx').classList.toggle('active',  t==='ctx');
+  document.getElementById('tab-kv').classList.toggle('active',   t==='kv');
+  document.getElementById('view-attn').style.display = t==='attn' ? '' : 'none';
+  document.getElementById('view-ctx').style.display  = t==='ctx'  ? '' : 'none';
+  document.getElementById('view-kv').style.display   = t==='kv'   ? '' : 'none';
+  renderAll();
+}
+
+function renderAll(){
+  if(currentTab === 'attn') renderTab1();
+  else if(currentTab === 'ctx') renderTab2();
+  else if(currentTab === 'kv') renderTab3();
+}
+
+// ============================================================
+// Wire up controls
+// ============================================================
+document.getElementById('n_seq').addEventListener('input', e=>{
+  N = +e.target.value;
+  document.getElementById('n_seq_val').textContent = N;
+  renderAll();
+});
+document.getElementById('d_k').addEventListener('input', e=>{
+  DK = +e.target.value;
+  document.getElementById('d_k_val').textContent = DK;
+  renderAll();
+});
+
+// Initial render
+renderAll();
+</script>
+</body>
+</html>

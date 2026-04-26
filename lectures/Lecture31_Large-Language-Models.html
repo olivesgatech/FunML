@@ -761,7 +761,7 @@ flexible generative capability (decoder-only).</p>
 architecture, but by the multi-stage training pipeline that shapes their
 behavior and capabilities.</p>
 <h2 data-number="5.2" id="context-length-in-modern-llms"><span class="header-section-number">5.2</span> Context Length in Modern
-LLMs</h2><section class="interactive-notebook"><h3>Demo — Self-Attention Flow &amp; Context Length (also covers KV caching)</h3><p>ByHand AI's interactive walk-through of the self-attention computation. Watch how the K/V matrices grow with context length and see the same diagram used to illustrate KV caching (§6.7). Hosted on Substack and cannot be embedded; opens in a new tab.</p><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="https://www.byhand.ai/p/self-attention-flow-new-release" rel="noopener noreferrer" target="_blank">Open demo in new tab ↗</a></div></section>
+LLMs</h2><section class="interactive-notebook"><h3>Interactive Demo — Self-Attention Flow, Context Length &amp; KV Caching</h3><p>Walk through Q/K/V projections, attention weights, and the output. Tab 2 plots quadratic attention vs linear projection cost as context length grows; Tab 3 contrasts naive autoregressive generation with KV caching to show the O(T²) → O(T) saving. Inspired by ByHand AI's self-attention-flow visualization.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_SelfAttentionFlow_Interactive_interactive.html" style="height:880px;" title="Self-Attention Flow &amp; KV Caching"></iframe></section>
 <p>One important practical aspect of large language models is their
 <strong>context length</strong>, which determines how many tokens the
 model can process at once. This directly affects the model’s ability to
@@ -1441,7 +1441,7 @@ and</p></li>
 <p>These computational and data demands motivate parameter-efficient
 techniques.</p>
 <h2 data-number="6.6" id="parameter-efficient-fine-tuning-with-lora"><span class="header-section-number">6.6</span> Parameter-Efficient Fine-Tuning
-with LoRA</h2><section class="interactive-notebook"><h3>Demo — Low-Rank Adaptation (LoRA)</h3><p>Interactive LoRA visualization: change rank r and watch how the low-rank update ΔW = BA approximates a full fine-tuning weight delta with a fraction of the parameters.</p><iframe class="interactive-notebook-frame" data-default-height="760" loading="lazy" referrerpolicy="no-referrer" scrolling="no" src="https://pub-c70e14727c3046cf8a36d9e598267788.r2.dev/26443b7e12/index.html" style="height:760px;" title="LoRA Interactive"></iframe><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="https://pub-c70e14727c3046cf8a36d9e598267788.r2.dev/26443b7e12/index.html" rel="noopener noreferrer" target="_blank">Open in new tab ↗</a></div></section>
+with LoRA</h2><section class="interactive-notebook"><h3>Interactive Demo — Low-Rank Adaptation (LoRA)</h3><p>Vary rank r, scaling α, and matrix dimensions to see how the LoRA update ΔW = (α/r)·BA approximates a full fine-tuning delta. Tab 2 shows parameter savings vs full fine-tuning; Tab 3 plots reconstruction error of a rank-r approximation against the full target via truncated SVD.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_LoRA_Interactive_interactive.html" style="height:880px;" title="LoRA Interactive"></iframe></section>
 <p>Low-Rank Adaptation (LoRA) is a parameter-efficient fine-tuning
 method that adapts large pretrained models by learning a structured
 low-rank update to existing weights, rather than modifying all
@@ -1524,7 +1524,7 @@ LoRA is applied (e.g., attention vs feedforward layers).</p></li>
 enables efficient adaptation of extremely large models without requiring
 full retraining.</p>
 <h2 data-number="6.7" id="kv-caching-for-efficient-inference"><span class="header-section-number">6.7</span> KV Caching for Efficient
-Inference</h2><section class="interactive-notebook"><h3>Demo — KV Caching (showcased in the Self-Attention Flow demo)</h3><p>The same self-attention flow demo used in §5.2 also illustrates KV caching: watch how prior tokens' K and V vectors get reused at each new generation step instead of recomputed. Opens in a new tab.</p><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="https://www.byhand.ai/p/self-attention-flow-new-release" rel="noopener noreferrer" target="_blank">Open demo in new tab ↗</a></div></section>
+Inference</h2><section class="interactive-notebook"><h3>Interactive Demo — KV Caching (Tab 3 of the Self-Attention Flow notebook)</h3><p>The same Self-Attention Flow notebook used in §5.2 also illustrates KV caching. Open Tab 3 and step through new-token generation with caching on vs off; the FLOP counter shows the O(T²) → O(T) saving in real time.</p><iframe class="interactive-notebook-frame" data-default-height="880" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_SelfAttentionFlow_Interactive_interactive.html" style="height:880px;" title="KV Caching"></iframe></section>
 <p>KV caching is an inference-time optimization for autoregressive
 Transformer models that significantly reduces redundant computation
 during sequence generation.</p>
@@ -1684,7 +1684,7 @@ measures how much of the reference content is recovered by the generated
 output. In practice, higher ROUGE indicates stronger overlap with
 reference summaries or target outputs.</p>
 <h2 data-number="7.5" id="illustrative-comparison-of-evaluation-metrics"><span class="header-section-number">7.5</span> Illustrative Comparison of
-Evaluation Metrics</h2><section class="interactive-notebook"><h3>Demo — AI Evaluation Equations You Must Know</h3><p>ByHand AI's visual reference for the core equations behind AI evaluation metrics (perplexity, BLEU, ROUGE, etc.). Useful companion to the worked comparison in §7.5. Opens in a new tab.</p><div class="interactive-notebook-actions"><a class="interactive-notebook-link" href="https://www.byhand.ai/p/ai-eval-equations-you-must-know" rel="noopener noreferrer" target="_blank">Open demo in new tab ↗</a></div></section>
+Evaluation Metrics</h2><section class="interactive-notebook"><h3>Interactive Demo — LLM Evaluation Metrics</h3><p>Edit the reference and candidate text and watch BLEU-1..4, ROUGE-1/2/L, perplexity (from a tiny on-page bigram model), edit distance, and exact match update live with worked-example tables. Inspired by ByHand AI's AI-eval-equations explainer.</p><iframe class="interactive-notebook-frame" data-default-height="900" loading="lazy" scrolling="no" src="../assets/notebooks/Lecture28_EvalMetrics_Interactive_interactive.html" style="height:900px;" title="LLM Evaluation Metrics"></iframe></section>
 <p>To better understand the strengths and weaknesses of different
 evaluation metrics, consider the following reference sentence and
 several candidate outputs. The examples are intentionally chosen to

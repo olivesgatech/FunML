@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>LLM Evaluation Metrics — Lecture 28</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.15rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.83rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .panel h3{font-size:.93rem;margin-bottom:10px;color:var(--blue);}
+  .input-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:780px){.input-grid{grid-template-columns:1fr;}}
+  .input-grid label{font-size:.79rem;font-weight:600;color:var(--muted);display:block;margin-bottom:4px;}
+  .input-grid textarea{width:100%;min-height:60px;padding:8px;border:1.5px solid var(--border);
+                       border-radius:6px;font-family:'Consolas',monospace;font-size:.85rem;resize:vertical;}
+  .input-grid textarea:focus{outline:none;border-color:var(--blue);}
+  .btn{padding:7px 16px;border-radius:7px;border:1.5px solid var(--blue);background:var(--blue);
+       color:#fff;cursor:pointer;font-weight:600;font-size:.82rem;margin-top:8px;}
+  .btn:hover{background:#1d4ed8;}
+  .layout-2col{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;}
+  @media(max-width:900px){.layout-2col{grid-template-columns:1fr;}}
+  .layout-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  @media(max-width:900px){.layout-3col{grid-template-columns:1fr;}}
+  .chart-main{width:100%;height:340px;}
+  .chart-sub{width:100%;height:240px;}
+  .chart-tall{width:100%;height:420px;}
+  .info-box{background:#f1f5f9;border-radius:8px;padding:10px 12px;font-size:.83rem;line-height:1.6;margin-top:8px;}
+  .info-box b{color:var(--blue);}
+  .formula{font-family:'Consolas',monospace;background:#fff;border:1px solid var(--border);
+           border-radius:6px;padding:6px 10px;margin:6px 0;font-size:.82rem;color:var(--text);}
+  .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px;}
+  @media(max-width:600px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+  .metric-card{background:#f1f5f9;border-radius:8px;padding:10px;text-align:center;}
+  .metric-val{font-size:1.25rem;font-weight:700;color:var(--blue);}
+  .metric-val.big{font-size:2rem;}
+  .metric-label{font-size:.72rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.04em;}
+  .token-display{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;line-height:1.8;}
+  .tok{padding:3px 7px;border-radius:4px;font-size:.82rem;font-weight:600;border:1.5px solid;}
+  .tok.match{background:#dcfce7;border-color:#059669;color:#166534;}
+  .tok.miss{background:#f1f5f9;border-color:#cbd5e1;color:#64748b;}
+  .tok.del{background:#fee2e2;border-color:#dc2626;color:#991b1b;}
+  table.calc{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:8px;}
+  table.calc th,table.calc td{border:1px solid var(--border);padding:5px 8px;text-align:center;}
+  table.calc th{background:#f1f5f9;color:var(--muted);font-weight:600;}
+  table.calc td.score{font-weight:700;color:var(--blue);}
+  .badge{display:inline-block;padding:2px 9px;border-radius:11px;font-size:.74rem;font-weight:600;}
+  .badge-yes{background:#dcfce7;color:#166534;}
+  .badge-no{background:#fee2e2;color:#991b1b;}
+</style>
+</head>
+<body>
+
+<h2>LLM Evaluation Metrics — Interactive Demo</h2>
+<p class="subtitle">Edit the reference and candidate sentences below; metrics are recomputed live. Switch tabs to explore overlap, perplexity, and edit-distance views.</p>
+
+<!-- ===== Input Panel (always visible) ===== -->
+<div class="panel">
+  <h3>Inputs</h3>
+  <div class="input-grid">
+    <div>
+      <label>Reference (ground truth)</label>
+      <textarea id="ref_text">the quick brown fox jumps over the lazy dog</textarea>
+    </div>
+    <div>
+      <label>Candidate (model output)</label>
+      <textarea id="cand_text">the fast brown fox jumps over a sleepy dog</textarea>
+    </div>
+  </div>
+  <button class="btn" onclick="recompute()">Re-compute</button>
+  <span style="margin-left:8px;font-size:.78rem;color:var(--muted);">(also auto-updates as you type)</span>
+</div>
+
+<!-- ===== Tabs ===== -->
+<div class="tabs">
+  <button class="tab active" id="tab-overlap"  onclick="setTab('overlap')">1. Token Overlap (BLEU/ROUGE)</button>
+  <button class="tab"        id="tab-ppl"      onclick="setTab('ppl')">2. Perplexity</button>
+  <button class="tab"        id="tab-edit"     onclick="setTab('edit')">3. Edit Distance &amp; Exact Match</button>
+</div>
+
+<!-- ===== TAB 1: Token Overlap ===== -->
+<div id="view-overlap">
+  <div class="layout-2col">
+    <div class="panel">
+      <h3>BLEU &amp; ROUGE Scores</h3>
+      <div id="chart-bars" class="chart-main"></div>
+      <div class="info-box">
+        <b>BLEU-n:</b> n-gram precision in candidate vs reference, with brevity penalty (BP).<br>
+        <span class="formula">BLEU-n = BP &middot; exp((1/n) &Sigma;<sub>k=1..n</sub> log p<sub>k</sub>)</span>
+        where p<sub>k</sub> = (matched k-grams) / (total candidate k-grams), BP = min(1, exp(1 &minus; r/c)).<br>
+        <b>ROUGE-n:</b> recall version &mdash; matched k-grams / total reference k-grams.<br>
+        <b>ROUGE-L:</b> based on Longest Common Subsequence (LCS) length.
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Matched n-grams (highlighted)</h3>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">Highlight n-gram size:</div>
+      <div>
+        <button class="tab" id="hl-1" onclick="setHL(1)">1-gram</button>
+        <button class="tab" id="hl-2" onclick="setHL(2)">2-gram</button>
+        <button class="tab" id="hl-3" onclick="setHL(3)">3-gram</button>
+        <button class="tab" id="hl-4" onclick="setHL(4)">4-gram</button>
+      </div>
+      <div style="margin-top:10px;font-size:.78rem;font-weight:600;color:var(--muted);">Reference:</div>
+      <div class="token-display" id="ref-tokens"></div>
+      <div style="font-size:.78rem;font-weight:600;color:var(--muted);">Candidate:</div>
+      <div class="token-display" id="cand-tokens"></div>
+      <div class="info-box" id="match-info"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Worked computation</h3>
+    <div id="bleu-table"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 2: Perplexity ===== -->
+<div id="view-ppl" style="display:none;">
+  <div class="layout-3col">
+    <div class="panel">
+      <h3>Reference perplexity</h3>
+      <div class="metric-val big" id="ppl-ref" style="text-align:center;">&mdash;</div>
+      <div style="text-align:center;font-size:.76rem;color:var(--muted);">PPL on reference text</div>
+    </div>
+    <div class="panel">
+      <h3>Candidate perplexity</h3>
+      <div class="metric-val big" id="ppl-cand" style="text-align:center;">&mdash;</div>
+      <div style="text-align:center;font-size:.76rem;color:var(--muted);">PPL on candidate text</div>
+    </div>
+    <div class="panel">
+      <h3>Formula</h3>
+      <div class="formula" style="font-size:.78rem;">PPL(W) = exp(&minus;(1/N) &Sigma;<sub>t</sub> log p(c<sub>t</sub>|c<sub>t&minus;1</sub>))</div>
+      <div class="info-box" style="margin-top:8px;">
+        Lower PPL = model finds the text more predictable. Real LLMs use <b>much larger context</b>
+        (thousands of tokens) and <b>vocabularies</b> (50k+ tokens), but the formula is identical.
+      </div>
+    </div>
+  </div>
+
+  <div class="layout-2col">
+    <div class="panel">
+      <h3>Bigram probability heatmap (top-16 chars)</h3>
+      <div id="chart-bigram" class="chart-tall"></div>
+      <div class="info-box">
+        Each cell = p(<i>next char</i> | <i>prev char</i>) estimated by counting from a small English training corpus
+        (about 1 KB of text hardcoded in the page). Dark = high probability.
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Per-character log-prob (candidate)</h3>
+      <div id="chart-logp" class="chart-tall"></div>
+      <div class="info-box">
+        Sharp drops indicate <b>surprising</b> characters (low p under the model). The mean of &minus;log p
+        gives the cross-entropy; PPL = exp(mean &minus;log p).
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 3: Edit Distance & Exact Match ===== -->
+<div id="view-edit" style="display:none;">
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-val" id="ed-char">&mdash;</div>
+      <div class="metric-label">Char edit dist</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" id="ed-norm">&mdash;</div>
+      <div class="metric-label">Normalized (char)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" id="ed-word">&mdash;</div>
+      <div class="metric-label">Word edit dist</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" id="ed-em"><span class="badge badge-no">NO</span></div>
+      <div class="metric-label">Exact match</div>
+    </div>
+  </div>
+
+  <div class="layout-2col" style="margin-top:12px;">
+    <div class="panel">
+      <h3>Levenshtein DP matrix (character-level)</h3>
+      <div id="chart-dp" class="chart-tall"></div>
+      <div class="info-box">
+        Cell (i,j) holds the minimum edit cost to transform the first <i>i</i> chars of the reference into
+        the first <i>j</i> chars of the candidate. Operations: insert, delete, substitute (cost 1 each).
+        The white path traces the optimal alignment via backtrace.
+      </div>
+    </div>
+    <div class="panel">
+      <h3>Aligned operations</h3>
+      <div id="align-display" style="font-family:'Consolas',monospace;font-size:.82rem;line-height:1.8;"></div>
+      <div class="info-box">
+        <b>Exact match (EM):</b> 1 if strings are identical (case + whitespace normalized), else 0.<br>
+        <b>Normalized edit distance:</b> distance / max(len(ref), len(cand)) &mdash; comparable across lengths.<br>
+        <b>Word edit distance:</b> same DP but each unit is a whole token.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// Tokenization helpers
+// ============================================================================
+function tokenize(s){
+  return s.toLowerCase().trim().split(/\s+/).filter(t=>t.length>0);
+}
+function ngrams(tokens, n){
+  const out = [];
+  for(let i=0;i+n<=tokens.length;i++) out.push(tokens.slice(i, i+n).join(' '));
+  return out;
+}
+function counter(arr){
+  const m = new Map();
+  arr.forEach(x=>m.set(x, (m.get(x)||0)+1));
+  return m;
+}
+
+// ============================================================================
+// BLEU
+// ============================================================================
+function bleuPrecision(refTokens, candTokens, n){
+  const refG = counter(ngrams(refTokens, n));
+  const candG = ngrams(candTokens, n);
+  if(candG.length === 0) return {p:0, matched:0, total:0};
+  const candCount = counter(candG);
+  let matched = 0;
+  candCount.forEach((c, g)=>{
+    matched += Math.min(c, refG.get(g)||0);
+  });
+  return {p: matched/candG.length, matched, total: candG.length};
+}
+function brevityPenalty(refLen, candLen){
+  if(candLen >= refLen) return 1;
+  if(candLen === 0) return 0;
+  return Math.exp(1 - refLen/candLen);
+}
+function bleuScores(refTokens, candTokens){
+  const out = [];
+  for(let n=1;n<=4;n++){
+    out.push(bleuPrecision(refTokens, candTokens, n));
+  }
+  const bp = brevityPenalty(refTokens.length, candTokens.length);
+  // Cumulative BLEU-n = BP * geomean(p_1..p_n)
+  const cum = [];
+  for(let n=1;n<=4;n++){
+    let logSum = 0; let valid = true;
+    for(let k=0;k<n;k++){
+      if(out[k].p <= 0){ valid = false; break; }
+      logSum += Math.log(out[k].p);
+    }
+    cum.push(valid ? bp * Math.exp(logSum/n) : 0);
+  }
+  return {perN: out, bp, cum};
+}
+
+// ============================================================================
+// ROUGE-N (recall) and ROUGE-L (LCS-based F1)
+// ============================================================================
+function rougeN(refTokens, candTokens, n){
+  const refG = ngrams(refTokens, n);
+  const candG = counter(ngrams(candTokens, n));
+  const refCount = counter(refG);
+  if(refG.length === 0) return 0;
+  let matched = 0;
+  refCount.forEach((c, g)=>{
+    matched += Math.min(c, candG.get(g)||0);
+  });
+  return matched / refG.length;
+}
+function lcsLen(a, b){
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, ()=>new Array(n+1).fill(0));
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      if(a[i-1] === b[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+      else dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+function rougeL(refTokens, candTokens){
+  const lcs = lcsLen(refTokens, candTokens);
+  if(refTokens.length === 0 || candTokens.length === 0) return 0;
+  const r = lcs / refTokens.length;
+  const p = lcs / candTokens.length;
+  if(r + p === 0) return 0;
+  return 2*r*p/(r+p);
+}
+
+// ============================================================================
+// Edit distance (Levenshtein, generic)
+// ============================================================================
+function levenshtein(a, b){
+  const m = a.length, n = b.length;
+  const dp = Array.from({length:m+1}, ()=>new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++) dp[i][0] = i;
+  for(let j=0;j<=n;j++) dp[0][j] = j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      const cost = (a[i-1] === b[j-1]) ? 0 : 1;
+      dp[i][j] = Math.min(
+        dp[i-1][j] + 1,         // delete
+        dp[i][j-1] + 1,         // insert
+        dp[i-1][j-1] + cost     // substitute / match
+      );
+    }
+  }
+  // Backtrace
+  const path = [[m,n]];
+  let i=m, j=n;
+  const ops = [];
+  while(i>0 || j>0){
+    if(i>0 && j>0 && a[i-1] === b[j-1] && dp[i][j] === dp[i-1][j-1]){
+      ops.push({op:'match', a:a[i-1], b:b[j-1]});
+      i--; j--;
+    } else if(i>0 && j>0 && dp[i][j] === dp[i-1][j-1] + 1){
+      ops.push({op:'sub', a:a[i-1], b:b[j-1]});
+      i--; j--;
+    } else if(i>0 && dp[i][j] === dp[i-1][j] + 1){
+      ops.push({op:'del', a:a[i-1]});
+      i--;
+    } else {
+      ops.push({op:'ins', b:b[j-1]});
+      j--;
+    }
+    path.push([i,j]);
+  }
+  ops.reverse();
+  path.reverse();
+  return {dp, dist:dp[m][n], path, ops};
+}
+
+// ============================================================================
+// Bigram language model (character-level) trained on a small corpus
+// ============================================================================
+const TRAINING_CORPUS = (
+  "the quick brown fox jumps over the lazy dog. " +
+  "a journey of a thousand miles begins with a single step. " +
+  "to be or not to be that is the question. " +
+  "all that glitters is not gold and not all who wander are lost. " +
+  "in the beginning the universe was small dense and very hot. " +
+  "the cat sat on the mat and watched the rain fall outside. " +
+  "machine learning models can generate text that looks fluent and coherent. " +
+  "language models predict the next token given a sequence of previous tokens. " +
+  "every good writer reads more than they write because reading sharpens style. " +
+  "the sun rises in the east and sets in the west each and every day. " +
+  "data scientists analyze patterns in text speech and images to build smart systems. " +
+  "neural networks learn from examples by adjusting their weights through gradient descent."
+).toLowerCase();
+
+const VOCAB_SIZE = 30;  // approximate alphabet size used for smoothing
+function trainBigram(corpus){
+  const counts = new Map();    // (prev, next) -> count
+  const totals = new Map();    // prev -> total count
+  const charSet = new Set();
+  for(let i=0;i<corpus.length-1;i++){
+    const a = corpus[i], b = corpus[i+1];
+    charSet.add(a); charSet.add(b);
+    const key = a + '|' + b;
+    counts.set(key, (counts.get(key)||0) + 1);
+    totals.set(a, (totals.get(a)||0) + 1);
+  }
+  return {counts, totals, chars: Array.from(charSet)};
+}
+function bigramProb(model, prev, next){
+  // Laplace smoothing: (count + 1) / (total + V)
+  const c = model.counts.get(prev + '|' + next) || 0;
+  const t = model.totals.get(prev) || 0;
+  return (c + 1) / (t + VOCAB_SIZE);
+}
+function perplexity(model, text){
+  if(text.length < 2) return {ppl: NaN, logps: []};
+  let logSum = 0;
+  const logps = [];
+  for(let i=1;i<text.length;i++){
+    const p = bigramProb(model, text[i-1], text[i]);
+    const lp = Math.log(p);
+    logps.push(lp);
+    logSum += lp;
+  }
+  const N = text.length - 1;
+  const ppl = Math.exp(-logSum / N);
+  return {ppl, logps};
+}
+
+const BIGRAM_MODEL = trainBigram(TRAINING_CORPUS);
+
+// ============================================================================
+// State + tab routing
+// ============================================================================
+let currentTab = 'overlap';
+let highlightN = 1;
+
+function setTab(t){
+  currentTab = t;
+  ['overlap','ppl','edit'].forEach(id=>{
+    document.getElementById('view-'+id).style.display = (id===t) ? '' : 'none';
+    document.getElementById('tab-'+id).classList.toggle('active', id===t);
+  });
+  recompute();
+}
+function setHL(n){
+  highlightN = n;
+  ['hl-1','hl-2','hl-3','hl-4'].forEach(id=>{
+    document.getElementById(id).classList.toggle('active', id === 'hl-'+n);
+  });
+  if(currentTab === 'overlap') updateOverlap();
+}
+
+// ============================================================================
+// TAB 1: token overlap
+// ============================================================================
+function updateOverlap(){
+  const refStr  = document.getElementById('ref_text').value;
+  const candStr = document.getElementById('cand_text').value;
+  const refT  = tokenize(refStr);
+  const candT = tokenize(candStr);
+
+  const bleu = bleuScores(refT, candT);
+  const r1   = rougeN(refT, candT, 1);
+  const r2   = rougeN(refT, candT, 2);
+  const rL   = rougeL(refT, candT);
+
+  // Bar chart of all 7
+  const labels = ['BLEU-1','BLEU-2','BLEU-3','BLEU-4','ROUGE-1','ROUGE-2','ROUGE-L'];
+  const vals   = [bleu.cum[0], bleu.cum[1], bleu.cum[2], bleu.cum[3], r1, r2, rL];
+  const colors = ['#2563eb','#2563eb','#2563eb','#2563eb','#059669','#059669','#059669'];
+
+  Plotly.newPlot('chart-bars', [{
+    x: labels, y: vals, type:'bar',
+    marker:{color: colors, line:{color:'#fff', width:1}},
+    text: vals.map(v=>v.toFixed(3)),
+    textposition:'outside',
+    hovertemplate:'%{x}<br>score = %{y:.4f}<extra></extra>'
+  }], {
+    yaxis:{title:'Score', range:[0, 1.1], gridcolor:'#f1f5f9'},
+    xaxis:{title:'', gridcolor:'#f1f5f9'},
+    margin:{t:24,b:50,l:50,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  }, {responsive:true, displayModeBar:false});
+
+  // Worked-example table
+  let html = '<table class="calc"><thead><tr>'+
+    '<th>n</th><th>Matched k-grams</th><th>Total candidate k-grams</th>'+
+    '<th>Precision p<sub>n</sub></th><th>Cumulative BLEU-n</th></tr></thead><tbody>';
+  for(let n=0;n<4;n++){
+    const r = bleu.perN[n];
+    html += `<tr><td>${n+1}</td><td>${r.matched}</td><td>${r.total}</td>`+
+            `<td>${r.total>0 ? r.p.toFixed(4) : '0.0000'}</td>`+
+            `<td class="score">${bleu.cum[n].toFixed(4)}</td></tr>`;
+  }
+  html += '</tbody></table>';
+  html += `<div class="info-box" style="margin-top:10px;">`+
+          `Reference length r = <b>${refT.length}</b>, candidate length c = <b>${candT.length}</b>. `+
+          `Brevity penalty BP = <b>${bleu.bp.toFixed(4)}</b> `+
+          `(${candT.length>=refT.length ? 'no penalty since c &ge; r' : 'penalty applied since c &lt; r'}).<br>`+
+          `Worked example: candidate has <b>${candT.length}</b> unigrams; <b>${bleu.perN[0].matched}</b> appear in the reference, `+
+          `so BLEU-1 precision = ${bleu.perN[0].matched}/${candT.length} = `+
+          `<b>${bleu.perN[0].total>0 ? bleu.perN[0].p.toFixed(4) : '0'}</b>.<br>`+
+          `ROUGE-1 (recall) = ${(rougeN(refT, candT, 1)).toFixed(4)}, `+
+          `ROUGE-L = <b>${rL.toFixed(4)}</b> (LCS length = ${lcsLen(refT, candT)}).</div>`;
+  document.getElementById('bleu-table').innerHTML = html;
+
+  // Highlight n-grams of size highlightN
+  const refGrams  = ngrams(refT,  highlightN);
+  const candGrams = ngrams(candT, highlightN);
+  const refSet  = new Set(refGrams);
+  const candSet = new Set(candGrams);
+
+  function colorize(tokens, n, otherSet){
+    // Mark each token position; matched if it participates in any matching n-gram
+    const matched = new Array(tokens.length).fill(false);
+    for(let i=0;i+n<=tokens.length;i++){
+      const g = tokens.slice(i, i+n).join(' ');
+      if(otherSet.has(g)){
+        for(let k=i;k<i+n;k++) matched[k] = true;
+      }
+    }
+    return tokens.map((t, i)=>{
+      const cls = matched[i] ? 'tok match' : 'tok miss';
+      return `<span class="${cls}">${escapeHTML(t)}</span>`;
+    }).join('');
+  }
+  document.getElementById('ref-tokens').innerHTML  = colorize(refT,  highlightN, candSet);
+  document.getElementById('cand-tokens').innerHTML = colorize(candT, highlightN, refSet);
+
+  // Match info
+  const overlap = candGrams.filter(g => refSet.has(g)).length;
+  document.getElementById('match-info').innerHTML =
+    `<b>${highlightN}-gram overlap:</b> ${overlap} of ${candGrams.length} candidate ${highlightN}-grams `+
+    `appear in the reference. Green = matched, gray = unmatched.`;
+
+  // Update highlight button styling
+  ['hl-1','hl-2','hl-3','hl-4'].forEach(id=>{
+    document.getElementById(id).classList.toggle('active', id === 'hl-'+highlightN);
+  });
+}
+
+function escapeHTML(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============================================================================
+// TAB 2: perplexity
+// ============================================================================
+function updatePerplexity(){
+  const refStr  = document.getElementById('ref_text').value.toLowerCase();
+  const candStr = document.getElementById('cand_text').value.toLowerCase();
+
+  const pRef  = perplexity(BIGRAM_MODEL, refStr);
+  const pCand = perplexity(BIGRAM_MODEL, candStr);
+
+  document.getElementById('ppl-ref').textContent  = isFinite(pRef.ppl)  ? pRef.ppl.toFixed(2)  : '—';
+  document.getElementById('ppl-cand').textContent = isFinite(pCand.ppl) ? pCand.ppl.toFixed(2) : '—';
+
+  // Bigram heatmap of top-16 chars by frequency
+  const charFreq = Array.from(BIGRAM_MODEL.totals.entries())
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0, 16)
+    .map(e=>e[0]);
+
+  const z = [];
+  for(const prev of charFreq){
+    const row = [];
+    for(const next of charFreq){
+      row.push(bigramProb(BIGRAM_MODEL, prev, next));
+    }
+    z.push(row);
+  }
+  const labels = charFreq.map(c => c === ' ' ? '␣' : c);
+
+  Plotly.newPlot('chart-bigram', [{
+    z: z, x: labels, y: labels,
+    type:'heatmap', colorscale:'Blues',
+    hovertemplate:'p(%{x} | %{y}) = %{z:.4f}<extra></extra>'
+  }], {
+    xaxis:{title:'next char', side:'bottom'},
+    yaxis:{title:'prev char', autorange:'reversed'},
+    margin:{t:24,b:50,l:60,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  }, {responsive:true, displayModeBar:false});
+
+  // Per-character log-prob line for candidate
+  const xs = [];
+  const ys = [];
+  const labelsLine = [];
+  for(let i=1;i<candStr.length;i++){
+    xs.push(i);
+    ys.push(pCand.logps[i-1]);
+    const a = candStr[i-1] === ' ' ? '␣' : candStr[i-1];
+    const b = candStr[i]   === ' ' ? '␣' : candStr[i];
+    labelsLine.push('p(' + b + ' | ' + a + ')');
+  }
+  Plotly.newPlot('chart-logp', [{
+    x: xs, y: ys, type:'scatter', mode:'lines+markers',
+    line:{color:'#dc2626', width:2},
+    marker:{size:5, color:'#dc2626'},
+    text: labelsLine,
+    hovertemplate:'pos %{x}<br>%{text}<br>log p = %{y:.3f}<extra></extra>'
+  }], {
+    xaxis:{title:'character position', gridcolor:'#f1f5f9'},
+    yaxis:{title:'log p(c_t | c_{t-1})', gridcolor:'#f1f5f9'},
+    margin:{t:24,b:50,l:60,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff'
+  }, {responsive:true, displayModeBar:false});
+}
+
+// ============================================================================
+// TAB 3: edit distance + exact match
+// ============================================================================
+function normalize(s){ return s.toLowerCase().trim().replace(/\s+/g, ' '); }
+
+function updateEdit(){
+  const refStr  = document.getElementById('ref_text').value;
+  const candStr = document.getElementById('cand_text').value;
+
+  const refN  = normalize(refStr);
+  const candN = normalize(candStr);
+  const refChars  = Array.from(refN);
+  const candChars = Array.from(candN);
+
+  const lev  = levenshtein(refChars, candChars);
+  const refW = tokenize(refStr);
+  const candW = tokenize(candStr);
+  const wlev = levenshtein(refW, candW);
+
+  const maxLen = Math.max(refChars.length, candChars.length);
+  const norm   = maxLen > 0 ? lev.dist / maxLen : 0;
+  const em     = (refN === candN) ? 1 : 0;
+
+  document.getElementById('ed-char').textContent = lev.dist;
+  document.getElementById('ed-norm').textContent = norm.toFixed(3);
+  document.getElementById('ed-word').textContent = wlev.dist;
+  document.getElementById('ed-em').innerHTML = em
+    ? '<span class="badge badge-yes">YES</span>'
+    : '<span class="badge badge-no">NO</span>';
+
+  // DP heatmap
+  const z = lev.dp;
+  const xLabels = ['ε', ...candChars.map(c => c === ' ' ? '␣' : c)];
+  const yLabels = ['ε', ...refChars.map(c => c === ' ' ? '␣' : c)];
+
+  // Path overlay: scatter with white markers
+  const px = lev.path.map(p => p[1]);
+  const py = lev.path.map(p => p[0]);
+
+  Plotly.newPlot('chart-dp', [
+    {
+      z: z, x: xLabels, y: yLabels,
+      type:'heatmap', colorscale:'Blues',
+      hovertemplate:'ref[..%{y}] vs cand[..%{x}]<br>cost = %{z}<extra></extra>',
+      showscale: true
+    },
+    {
+      x: px.map(v => xLabels[v]),
+      y: py.map(v => yLabels[v]),
+      type:'scatter', mode:'lines+markers',
+      line:{color:'#ffffff', width:3},
+      marker:{size:7, color:'#dc2626', line:{color:'#fff', width:1.5}},
+      hovertemplate:'optimal path<extra></extra>',
+      name:'optimal path'
+    }
+  ], {
+    xaxis:{title:'candidate prefix', side:'bottom'},
+    yaxis:{title:'reference prefix', autorange:'reversed'},
+    margin:{t:24,b:50,l:60,r:10},
+    plot_bgcolor:'#f8fafc', paper_bgcolor:'#ffffff',
+    showlegend:false
+  }, {responsive:true, displayModeBar:false});
+
+  // Aligned operations
+  let alignHTML = '';
+  let refLine = ''; let candLine = ''; let opLine = '';
+  lev.ops.forEach(o=>{
+    const showA = (o.a === ' ') ? '␣' : (o.a || '-');
+    const showB = (o.b === ' ') ? '␣' : (o.b || '-');
+    if(o.op === 'match'){
+      refLine  += `<span class="tok match">${escapeHTML(showA)}</span>`;
+      candLine += `<span class="tok match">${escapeHTML(showB)}</span>`;
+      opLine   += `<span style="display:inline-block;width:24px;text-align:center;color:#059669;">=</span>`;
+    } else if(o.op === 'sub'){
+      refLine  += `<span class="tok del">${escapeHTML(showA)}</span>`;
+      candLine += `<span class="tok del">${escapeHTML(showB)}</span>`;
+      opLine   += `<span style="display:inline-block;width:24px;text-align:center;color:#d97706;">~</span>`;
+    } else if(o.op === 'del'){
+      refLine  += `<span class="tok del">${escapeHTML(showA)}</span>`;
+      candLine += `<span class="tok miss">-</span>`;
+      opLine   += `<span style="display:inline-block;width:24px;text-align:center;color:#dc2626;">D</span>`;
+    } else if(o.op === 'ins'){
+      refLine  += `<span class="tok miss">-</span>`;
+      candLine += `<span class="tok del">${escapeHTML(showB)}</span>`;
+      opLine   += `<span style="display:inline-block;width:24px;text-align:center;color:#dc2626;">I</span>`;
+    }
+  });
+  alignHTML  = `<div style="font-size:.74rem;color:var(--muted);margin-bottom:4px;">REF</div>`;
+  alignHTML += `<div style="display:flex;flex-wrap:wrap;gap:2px;">${refLine}</div>`;
+  alignHTML += `<div style="font-size:.74rem;color:var(--muted);margin:8px 0 4px;">OP &nbsp;<span style="color:#059669;">=</span> match &nbsp; <span style="color:#d97706;">~</span> substitute &nbsp; <span style="color:#dc2626;">D</span> delete &nbsp; <span style="color:#dc2626;">I</span> insert</div>`;
+  alignHTML += `<div style="display:flex;flex-wrap:wrap;gap:2px;">${opLine}</div>`;
+  alignHTML += `<div style="font-size:.74rem;color:var(--muted);margin:8px 0 4px;">CAND</div>`;
+  alignHTML += `<div style="display:flex;flex-wrap:wrap;gap:2px;">${candLine}</div>`;
+
+  // Word-level summary
+  alignHTML += `<div class="info-box" style="margin-top:12px;">`+
+    `<b>Char-level:</b> distance ${lev.dist} / max ${maxLen} = normalized ${norm.toFixed(3)}.<br>`+
+    `<b>Word-level:</b> distance ${wlev.dist} over ${Math.max(refW.length, candW.length)} max words.<br>`+
+    `<b>Exact match:</b> ${em ? 'strings identical after normalization.' : 'strings differ after normalization.'}</div>`;
+
+  document.getElementById('align-display').innerHTML = alignHTML;
+}
+
+// ============================================================================
+// Master recompute (only updates the active tab to avoid wasted work)
+// ============================================================================
+function recompute(){
+  if(currentTab === 'overlap') updateOverlap();
+  else if(currentTab === 'ppl') updatePerplexity();
+  else if(currentTab === 'edit') updateEdit();
+}
+
+// Auto-recompute on input
+document.getElementById('ref_text').addEventListener('input', recompute);
+document.getElementById('cand_text').addEventListener('input', recompute);
+
+// Initial highlight button state
+setHL(1);
+recompute();
+</script>
+</body>
+</html>

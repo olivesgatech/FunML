@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>LoRA: Low-Rank Adaptation — Lecture 28</title>
+<script src="plotly-2.35.2.min.js"></script>
+<style>
+  :root{
+    --bg:#f8fafc;--panel:#ffffff;--border:#e2e8f0;
+    --blue:#2563eb;--red:#dc2626;--green:#059669;--amber:#d97706;--purple:#7c3aed;
+    --text:#1e293b;--muted:#64748b;--radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:16px;}
+  h2{font-size:1.18rem;margin-bottom:4px;}
+  .subtitle{color:var(--muted);font-size:.875rem;margin-bottom:14px;}
+  .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .tab{padding:7px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+       cursor:pointer;font-weight:600;font-size:.83rem;transition:all .15s;}
+  .tab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;}
+  .panel h3{font-size:.95rem;margin-bottom:10px;color:var(--blue);}
+  .ctrl-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 18px;}
+  @media(max-width:680px){.ctrl-grid{grid-template-columns:1fr;}}
+  .ctrl-row{display:flex;align-items:center;gap:8px;}
+  .ctrl-row label{font-size:.8rem;font-weight:600;color:var(--muted);min-width:140px;}
+  .ctrl-row input[type=range]{flex:1;min-width:0;accent-color:var(--blue);}
+  .ctrl-row .val{font-size:.82rem;font-weight:700;color:var(--blue);min-width:40px;text-align:right;}
+  .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:780px){.row-3,.row-2{grid-template-columns:1fr;}}
+  .heatmap-w{width:100%;height:300px;}
+  .heatmap-ba{width:100%;height:260px;}
+  .heatmap-d{width:100%;height:280px;}
+  .bar-chart{width:100%;height:340px;}
+  .err-chart{width:100%;height:280px;}
+  .info{font-size:.84rem;line-height:1.65;margin-top:8px;color:var(--text);}
+  .info b{color:var(--blue);}
+  .info code{background:#f1f5f9;padding:1px 5px;border-radius:4px;font-family:ui-monospace,Menlo,monospace;font-size:.78rem;}
+  .metrics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px;}
+  .metric-card{background:#f1f5f9;border-radius:8px;padding:12px;text-align:center;}
+  .metric-val{font-size:1.45rem;font-weight:700;color:var(--blue);}
+  .metric-val.green{color:var(--green);}
+  .metric-val.amber{color:var(--amber);}
+  .metric-label{font-size:.74rem;color:var(--muted);margin-top:2px;}
+  .callout{background:#eff6ff;border-left:3px solid var(--blue);padding:10px 12px;border-radius:6px;
+           font-size:.83rem;line-height:1.55;margin-top:10px;color:var(--text);}
+  .callout b{color:var(--blue);}
+  .formula{background:#f8fafc;border:1px dashed var(--border);border-radius:6px;padding:8px 12px;
+           font-family:ui-monospace,Menlo,monospace;font-size:.82rem;text-align:center;margin:8px 0;}
+  .view{display:none;}
+  .view.active{display:block;}
+</style>
+</head>
+<body>
+
+<h2>Low-Rank Adaptation (LoRA) — Parameter-Efficient Fine-Tuning</h2>
+<p class="subtitle">Visualize how LoRA decomposes weight updates into two small matrices, dramatically reducing trainable parameters while preserving expressivity.</p>
+
+<!-- Shared controls -->
+<div class="panel">
+  <h3>Matrix Dimensions &amp; LoRA Hyperparameters</h3>
+  <div class="ctrl-grid">
+    <div class="ctrl-row">
+      <label>Output dim d</label>
+      <input type="range" id="dim_d" min="16" max="128" step="4" value="64"/>
+      <span class="val" id="dim_d_val">64</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Input dim k</label>
+      <input type="range" id="dim_k" min="16" max="128" step="4" value="64"/>
+      <span class="val" id="dim_k_val">64</span>
+    </div>
+    <div class="ctrl-row">
+      <label>LoRA rank r</label>
+      <input type="range" id="dim_r" min="1" max="32" step="1" value="8"/>
+      <span class="val" id="dim_r_val">8</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Scaling alpha</label>
+      <input type="range" id="alpha" min="1" max="32" step="1" value="16"/>
+      <span class="val" id="alpha_val">16</span>
+    </div>
+  </div>
+  <div class="formula">h = W x + (alpha / r) * B A x &nbsp;&nbsp; with W frozen, only B (d x r) and A (r x k) trained</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-decomp" onclick="setTab('decomp')">1. Decomposition Visualization</button>
+  <button class="tab" id="tab-params" onclick="setTab('params')">2. Parameter Savings</button>
+  <button class="tab" id="tab-quality" onclick="setTab('quality')">3. Approximation Quality</button>
+</div>
+
+<!-- ===== TAB 1: DECOMPOSITION ===== -->
+<div id="view-decomp" class="view active">
+  <div class="panel">
+    <h3>Frozen Base Weight W and Trainable Factors B, A</h3>
+    <div class="row-3">
+      <div>
+        <div id="hm_W" class="heatmap-w"></div>
+      </div>
+      <div>
+        <div id="hm_B" class="heatmap-ba"></div>
+      </div>
+      <div>
+        <div id="hm_A" class="heatmap-ba"></div>
+      </div>
+    </div>
+    <div class="callout">
+      <b>B and A are the only trainable parameters. W stays frozen.</b>
+      During fine-tuning, gradients only flow through B and A. The base model W is preserved and shared
+      across many LoRA adapters - one per downstream task.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Effective Update: Delta W = (alpha / r) B A &nbsp; and &nbsp; W + Delta W</h3>
+    <div class="row-2">
+      <div>
+        <div id="hm_dW" class="heatmap-d"></div>
+      </div>
+      <div>
+        <div id="hm_W_plus_dW" class="heatmap-d"></div>
+      </div>
+    </div>
+    <div class="info">
+      <b>Initialization (LoRA paper):</b> A is drawn from a small Gaussian (here with tiny noise so it is visible),
+      and B is initialized near zero. This guarantees Delta W approx 0 at the start of training, so the model
+      behaves identically to the pretrained one before any updates are learned.
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 2: PARAMETER SAVINGS ===== -->
+<div id="view-params" class="view">
+  <div class="row-2">
+    <div class="panel">
+      <h3>Trainable Parameters: Full Fine-Tuning vs LoRA</h3>
+      <div id="bar_params" class="bar-chart"></div>
+    </div>
+    <div class="panel">
+      <h3>By the Numbers</h3>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-val" id="m_full">—</div>
+          <div class="metric-label">Full FT params (d x k)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val green" id="m_lora">—</div>
+          <div class="metric-label">LoRA params r(d+k)</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val amber" id="m_reduction">—</div>
+          <div class="metric-label">Reduction factor</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" id="m_pct">—</div>
+          <div class="metric-label">Trainable as % of full</div>
+        </div>
+      </div>
+      <div class="callout" id="savings_text"></div>
+      <div class="info">
+        <b>Real-world example:</b> Llama-2 7B has ~7e9 parameters. With LoRA r=8 applied to attention
+        projections, only ~4M parameters get trained (~0.06%). This makes fine-tuning feasible on a
+        single consumer GPU and lets you store dozens of task-specific adapters in megabytes instead
+        of tens of gigabytes per checkpoint.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TAB 3: APPROXIMATION QUALITY ===== -->
+<div id="view-quality" class="view">
+  <div class="panel">
+    <h3>Rank-r Approximation of a Target Update Delta W_true</h3>
+    <div class="row-3">
+      <div><div id="hm_target" class="heatmap-d"></div></div>
+      <div><div id="hm_recon"  class="heatmap-d"></div></div>
+      <div><div id="hm_resid"  class="heatmap-d"></div></div>
+    </div>
+    <div class="info">
+      The target Delta W_true is generated from a random matrix with a decaying singular-value spectrum
+      (typical of weight updates). The rank-r reconstruction is the truncated SVD: U[:, :r] diag(s[:r]) V[:, :r]^T.
+      The residual shows what the rank-r LoRA factorization <i>cannot</i> represent.
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Reconstruction Error vs Rank r</h3>
+    <div id="err_chart" class="err-chart"></div>
+    <div class="callout">
+      <b>Higher r captures more of the target update but costs more parameters.</b>
+      Empirically <code>r = 8 to 16</code> is often sufficient for LLM fine-tuning - the intrinsic
+      rank of task-specific updates tends to be very low (Hu et al., 2021).
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// Seeded RNG (mulberry32)
+// ============================================================================
+function mulberry32(seed){
+  let t = seed >>> 0;
+  return function(){
+    t = (t + 0x6D2B79F5) >>> 0;
+    let r = t;
+    r = Math.imul(r ^ (r >>> 15), r | 1);
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gaussian(rng){
+  // Box-Muller
+  let u = 0, v = 0;
+  while(u === 0) u = rng();
+  while(v === 0) v = rng();
+  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
+// ============================================================================
+// Matrix helpers
+// ============================================================================
+function zeros(rows, cols){
+  const M = new Array(rows);
+  for(let i=0;i<rows;i++){
+    M[i] = new Array(cols);
+    for(let j=0;j<cols;j++) M[i][j] = 0;
+  }
+  return M;
+}
+function randn(rows, cols, sigma, seed){
+  const rng = mulberry32(seed);
+  const M = zeros(rows, cols);
+  for(let i=0;i<rows;i++)
+    for(let j=0;j<cols;j++)
+      M[i][j] = gaussian(rng) * sigma;
+  return M;
+}
+function matmul(A, B){
+  const ar = A.length, ac = A[0].length, bc = B[0].length;
+  const C = zeros(ar, bc);
+  for(let i=0;i<ar;i++){
+    for(let kk=0;kk<ac;kk++){
+      const a = A[i][kk];
+      if(a === 0) continue;
+      const Brow = B[kk];
+      const Crow = C[i];
+      for(let j=0;j<bc;j++) Crow[j] += a * Brow[j];
+    }
+  }
+  return C;
+}
+function scale(A, s){
+  return A.map(row => row.map(v => v * s));
+}
+function add(A, B){
+  return A.map((row,i) => row.map((v,j) => v + B[i][j]));
+}
+function sub(A, B){
+  return A.map((row,i) => row.map((v,j) => v - B[i][j]));
+}
+function frob(A){
+  let s = 0;
+  for(let i=0;i<A.length;i++)
+    for(let j=0;j<A[0].length;j++)
+      s += A[i][j] * A[i][j];
+  return Math.sqrt(s);
+}
+function transpose(A){
+  const r = A.length, c = A[0].length;
+  const T = zeros(c, r);
+  for(let i=0;i<r;i++)
+    for(let j=0;j<c;j++)
+      T[j][i] = A[i][j];
+  return T;
+}
+
+// ============================================================================
+// Symmetric eigendecomposition via cyclic Jacobi rotations
+// Returns {V, eig} where A = V diag(eig) V^T  (eigenvalues NOT sorted)
+// ============================================================================
+function jacobiEigen(Ain, maxSweeps){
+  const n = Ain.length;
+  // Copy A
+  const A = zeros(n, n);
+  for(let i=0;i<n;i++)
+    for(let j=0;j<n;j++)
+      A[i][j] = Ain[i][j];
+  // V starts as identity
+  const V = zeros(n, n);
+  for(let i=0;i<n;i++) V[i][i] = 1;
+
+  const tol = 1e-9;
+  for(let sweep=0; sweep<maxSweeps; sweep++){
+    let off = 0;
+    for(let p=0;p<n-1;p++)
+      for(let q=p+1;q<n;q++)
+        off += A[p][q] * A[p][q];
+    if(off < tol) break;
+    for(let p=0;p<n-1;p++){
+      for(let q=p+1;q<n;q++){
+        const apq = A[p][q];
+        if(Math.abs(apq) < 1e-14) continue;
+        const app = A[p][p], aqq = A[q][q];
+        const theta = (aqq - app) / (2 * apq);
+        let t;
+        if(Math.abs(theta) > 1e15) t = 1 / (2 * theta);
+        else {
+          const sgn = theta >= 0 ? 1 : -1;
+          t = sgn / (Math.abs(theta) + Math.sqrt(theta*theta + 1));
+        }
+        const c = 1 / Math.sqrt(t*t + 1);
+        const s = t * c;
+        // Update A
+        A[p][p] = app - t * apq;
+        A[q][q] = aqq + t * apq;
+        A[p][q] = 0; A[q][p] = 0;
+        for(let i=0;i<n;i++){
+          if(i !== p && i !== q){
+            const aip = A[i][p], aiq = A[i][q];
+            A[i][p] = c * aip - s * aiq;
+            A[p][i] = A[i][p];
+            A[i][q] = s * aip + c * aiq;
+            A[q][i] = A[i][q];
+          }
+        }
+        // Update V
+        for(let i=0;i<n;i++){
+          const vip = V[i][p], viq = V[i][q];
+          V[i][p] = c * vip - s * viq;
+          V[i][q] = s * vip + c * viq;
+        }
+      }
+    }
+  }
+  const eig = new Array(n);
+  for(let i=0;i<n;i++) eig[i] = A[i][i];
+  return {V, eig};
+}
+
+// ============================================================================
+// SVD of M (m x n) via eigendecomposition of M^T M  (assumes m >= n preferred)
+// Returns {U (m x k), s (length k), V (n x k)} with singular values sorted desc
+// k = min(m, n)
+// ============================================================================
+function svd(M){
+  const m = M.length, n = M[0].length;
+  let A, transposed = false;
+  if(n > m){
+    // Work with the smaller side
+    A = matmul(M, transpose(M));   // m x m
+    transposed = true;
+  } else {
+    A = matmul(transpose(M), M);   // n x n
+  }
+  const dim = A.length;
+  const {V: Q, eig} = jacobiEigen(A, 60);
+  // Sort eigenvalues descending
+  const idx = eig.map((v, i) => i).sort((a, b) => eig[b] - eig[a]);
+  const k = Math.min(m, n);
+  const sing = new Array(k);
+  for(let i=0;i<k;i++) sing[i] = Math.sqrt(Math.max(eig[idx[i]], 0));
+
+  if(!transposed){
+    // A = M^T M (n x n). Q columns are right singular vectors V.
+    const Vmat = zeros(n, k);
+    for(let i=0;i<n;i++)
+      for(let j=0;j<k;j++)
+        Vmat[i][j] = Q[i][idx[j]];
+    // U = M V diag(1/s)
+    const Umat = zeros(m, k);
+    const MV = matmul(M, Vmat); // m x k
+    for(let i=0;i<m;i++)
+      for(let j=0;j<k;j++)
+        Umat[i][j] = sing[j] > 1e-10 ? MV[i][j] / sing[j] : 0;
+    return {U: Umat, s: sing, V: Vmat};
+  } else {
+    // A = M M^T (m x m). Q columns are left singular vectors U.
+    const Umat = zeros(m, k);
+    for(let i=0;i<m;i++)
+      for(let j=0;j<k;j++)
+        Umat[i][j] = Q[i][idx[j]];
+    // V = M^T U diag(1/s)
+    const Vmat = zeros(n, k);
+    const MtU = matmul(transpose(M), Umat); // n x k
+    for(let i=0;i<n;i++)
+      for(let j=0;j<k;j++)
+        Vmat[i][j] = sing[j] > 1e-10 ? MtU[i][j] / sing[j] : 0;
+    return {U: Umat, s: sing, V: Vmat};
+  }
+}
+
+// ============================================================================
+// Tab switching
+// ============================================================================
+let currentTab = 'decomp';
+function setTab(t){
+  currentTab = t;
+  ['decomp','params','quality'].forEach(name => {
+    document.getElementById('tab-'+name).classList.toggle('active', name===t);
+    document.getElementById('view-'+name).classList.toggle('active', name===t);
+  });
+  render();
+}
+
+// ============================================================================
+// Heatmap helper
+// ============================================================================
+function heatmap(divId, Z, title, opts){
+  opts = opts || {};
+  const data = [{
+    z: Z,
+    type: 'heatmap',
+    colorscale: opts.colorscale || 'RdBu',
+    reversescale: opts.colorscale ? false : true,
+    zmid: opts.zmid !== undefined ? opts.zmid : 0,
+    zmin: opts.zmin,
+    zmax: opts.zmax,
+    showscale: opts.showscale !== false,
+    hovertemplate: 'row %{y}, col %{x}<br>val %{z:.3f}<extra></extra>'
+  }];
+  const layout = {
+    title: { text: title, font: { size: 12 }, x: 0.5 },
+    margin: { t: 36, b: 30, l: 30, r: 10 },
+    plot_bgcolor: '#f8fafc',
+    paper_bgcolor: '#ffffff',
+    xaxis: { showticklabels: false, ticks: '' },
+    yaxis: { showticklabels: false, ticks: '', autorange: 'reversed' }
+  };
+  Plotly.newPlot(divId, data, layout, { responsive: true, displayModeBar: false });
+}
+
+// ============================================================================
+// Main render loop
+// ============================================================================
+function readCtrls(){
+  const d = +document.getElementById('dim_d').value;
+  const k = +document.getElementById('dim_k').value;
+  const r = +document.getElementById('dim_r').value;
+  const a = +document.getElementById('alpha').value;
+  document.getElementById('dim_d_val').textContent = d;
+  document.getElementById('dim_k_val').textContent = k;
+  document.getElementById('dim_r_val').textContent = r;
+  document.getElementById('alpha_val').textContent = a;
+  // Clamp r so it never exceeds min(d, k)
+  const rMax = Math.min(d, k, 32);
+  document.getElementById('dim_r').max = rMax;
+  const rEff = Math.min(r, rMax);
+  return { d, k, r: rEff, alpha: a };
+}
+
+function renderDecomposition(d, k, r, alpha){
+  // Frozen base W: smooth, structured matrix (deterministic seed)
+  const seedW = 12345;
+  const rngW = mulberry32(seedW);
+  const W = zeros(d, k);
+  // Mix a few low-frequency components plus small noise so it looks pretrained
+  const nComp = 6;
+  const comps = [];
+  for(let c=0;c<nComp;c++){
+    comps.push({
+      fr: 0.5 + rngW() * 2.5,
+      fc: 0.5 + rngW() * 2.5,
+      pr: rngW() * 6.28,
+      pc: rngW() * 6.28,
+      amp: (rngW() - 0.5) * 1.2
+    });
+  }
+  for(let i=0;i<d;i++){
+    for(let j=0;j<k;j++){
+      let v = 0;
+      const ui = i / Math.max(1, d-1);
+      const uj = j / Math.max(1, k-1);
+      for(const c of comps){
+        v += c.amp * Math.cos(c.fr * Math.PI * ui + c.pr) *
+                     Math.cos(c.fc * Math.PI * uj + c.pc);
+      }
+      v += (rngW() - 0.5) * 0.05;
+      W[i][j] = v;
+    }
+  }
+
+  // LoRA factors (typical init: A ~ N(0, sigma^2), B ~ 0).
+  // For visualization purposes we add a tiny perturbation to B so it isn't all zero.
+  const sigmaA = 1.0 / Math.sqrt(r);
+  const A = randn(r, k, sigmaA, 67890 + r * 31);   // r x k
+  const B = randn(d, r, 0.4,    24680 + r * 17);   // d x r (perturbed)
+
+  // Delta W = (alpha / r) * B A
+  const BA = matmul(B, A);
+  const dW = scale(BA, alpha / r);
+  const Weff = add(W, dW);
+
+  // Find a common color range for W and Weff
+  const allW = [];
+  for(let i=0;i<d;i++) for(let j=0;j<k;j++){ allW.push(W[i][j]); allW.push(Weff[i][j]); }
+  const wMax = Math.max.apply(null, allW.map(Math.abs));
+  const dMax = Math.max(...dW.flat().map(Math.abs));
+  const baMaxB = Math.max(...B.flat().map(Math.abs));
+  const baMaxA = Math.max(...A.flat().map(Math.abs));
+
+  heatmap('hm_W', W, 'W (' + d + ' x ' + k + ') - frozen base',
+    { zmin: -wMax, zmax: wMax });
+  heatmap('hm_B', B, 'B (' + d + ' x ' + r + ') - trainable',
+    { zmin: -baMaxB, zmax: baMaxB });
+  heatmap('hm_A', A, 'A (' + r + ' x ' + k + ') - trainable',
+    { zmin: -baMaxA, zmax: baMaxA });
+  heatmap('hm_dW', dW, 'Delta W = (alpha/r) B A &nbsp; max|val| = ' + dMax.toFixed(2),
+    { zmin: -dMax, zmax: dMax });
+  heatmap('hm_W_plus_dW', Weff, 'W + Delta W (effective weight)',
+    { zmin: -wMax, zmax: wMax });
+}
+
+function renderParams(d, k, r){
+  const fullP = d * k;
+  const loraP = r * (d + k);
+  const saved = Math.max(0, fullP - loraP);
+  const reduction = fullP / Math.max(1, loraP);
+  const pct = 100 * loraP / Math.max(1, fullP);
+
+  document.getElementById('m_full').textContent      = fullP.toLocaleString();
+  document.getElementById('m_lora').textContent      = loraP.toLocaleString();
+  document.getElementById('m_reduction').textContent = reduction.toFixed(1) + 'x';
+  document.getElementById('m_pct').textContent       = pct.toFixed(2) + '%';
+
+  const savingsMsg = (loraP < fullP)
+    ? '<b>LoRA trains ' + loraP.toLocaleString() + ' parameters vs ' +
+      fullP.toLocaleString() + ' for full fine-tuning</b> - a ' +
+      reduction.toFixed(1) + 'x reduction. ' +
+      'Memory for optimizer state (Adam stores 2x params) shrinks by the same factor, ' +
+      'and adapter checkpoints are tiny.'
+    : '<b>At this rank LoRA actually uses MORE parameters than full fine-tuning</b> ' +
+      '(' + loraP.toLocaleString() + ' vs ' + fullP.toLocaleString() + '). ' +
+      'In practice we choose r &lt;&lt; min(d, k) so that r(d+k) &lt; d*k.';
+  document.getElementById('savings_text').innerHTML = savingsMsg;
+
+  // Use linear scale; log scale breaks when fullP - loraP <= 0.
+  Plotly.newPlot('bar_params', [{
+    x: ['Full fine-tuning', 'LoRA r=' + r, 'Saved'],
+    y: [fullP, loraP, saved],
+    type: 'bar',
+    marker: {
+      color: ['#dc2626', '#059669', '#2563eb'],
+      line: { color: '#fff', width: 1 }
+    },
+    text: [
+      fullP.toLocaleString(),
+      loraP.toLocaleString() + ' (' + pct.toFixed(2) + '%)',
+      saved.toLocaleString()
+    ],
+    textposition: 'outside',
+    hovertemplate: '%{x}<br>%{y:,} params<extra></extra>'
+  }], {
+    title: { text: 'Trainable parameters for one weight matrix (d=' + d + ', k=' + k + ', r=' + r + ')',
+             font: { size: 12 }, x: 0.5 },
+    xaxis: { gridcolor: '#f1f5f9' },
+    yaxis: { title: 'parameters', gridcolor: '#f1f5f9', rangemode: 'tozero' },
+    margin: { t: 50, b: 40, l: 70, r: 10 },
+    plot_bgcolor: '#f8fafc',
+    paper_bgcolor: '#ffffff'
+  }, { responsive: true, displayModeBar: false });
+}
+
+// Cache the SVD of the target so it doesn't recompute when only r/alpha change
+let qualityCache = { d: null, k: null, target: null, U: null, s: null, V: null };
+
+function renderQuality(d, k, r){
+  // Limit SVD size for snappiness; downsample dimensions if needed
+  const maxDim = 96;
+  const dq = Math.min(d, maxDim);
+  const kq = Math.min(k, maxDim);
+  const rq = Math.min(r, dq, kq);
+
+  if(qualityCache.d !== dq || qualityCache.k !== kq){
+    // Build a target Delta W with a decaying singular spectrum
+    const seed = 4242 + dq * 101 + kq * 7;
+    const G = randn(dq, kq, 1.0, seed);
+    // Compute SVD; replace singular values with a decaying spectrum to make
+    // low-rank approximation meaningful
+    const sv = svd(G);
+    const kk = sv.s.length;
+    const sNew = new Array(kk);
+    for(let i=0;i<kk;i++){
+      // Geometric decay: large first few, small tail
+      sNew[i] = 4.0 * Math.exp(-i / 5.0) + 0.05;
+    }
+    // Reconstruct target with new spectrum: U diag(sNew) V^T
+    const target = zeros(dq, kq);
+    for(let i=0;i<dq;i++){
+      for(let j=0;j<kq;j++){
+        let v = 0;
+        for(let t=0;t<kk;t++){
+          v += sv.U[i][t] * sNew[t] * sv.V[j][t];
+        }
+        target[i][j] = v;
+      }
+    }
+    qualityCache = { d: dq, k: kq, target, U: sv.U, s: sNew, V: sv.V };
+  }
+
+  const { target, U, s, V } = qualityCache;
+  const kk = s.length;
+
+  // Rank-r reconstruction
+  const recon = zeros(dq, kq);
+  for(let i=0;i<dq;i++){
+    for(let j=0;j<kq;j++){
+      let v = 0;
+      for(let t=0;t<rq;t++){
+        v += U[i][t] * s[t] * V[j][t];
+      }
+      recon[i][j] = v;
+    }
+  }
+  const resid = sub(target, recon);
+
+  const tMax = Math.max(...target.flat().map(Math.abs));
+  const rMaxV = Math.max(...resid.flat().map(Math.abs));
+  const errFrac = frob(resid) / Math.max(1e-12, frob(target));
+
+  heatmap('hm_target', target, 'Delta W_true (' + dq + ' x ' + kq + ')',
+    { zmin: -tMax, zmax: tMax });
+  heatmap('hm_recon',  recon,  'rank-' + rq + ' reconstruction',
+    { zmin: -tMax, zmax: tMax });
+  heatmap('hm_resid',  resid,  'residual &nbsp; ||resid||/||target|| = ' + errFrac.toFixed(3),
+    { zmin: -rMaxV, zmax: rMaxV });
+
+  // Error curve over r = 1 .. min(d,k,32)
+  const rMax = Math.min(dq, kq, 32);
+  const rs = [];
+  const errs = [];
+  // Precompute squared singular value tail sums for fast Frobenius residuals
+  // For SVD-truncation: ||M - M_r||_F^2 = sum_{i>r} s_i^2
+  let tot = 0;
+  for(let i=0;i<kk;i++) tot += s[i] * s[i];
+  let cum = 0;
+  const errArr = new Array(kk + 1);
+  errArr[0] = 1.0;
+  for(let i=0;i<kk;i++){
+    cum += s[i] * s[i];
+    errArr[i+1] = Math.sqrt(Math.max(0, tot - cum) / Math.max(1e-12, tot));
+  }
+  for(let i=1;i<=rMax;i++){
+    rs.push(i);
+    errs.push(errArr[i]);
+  }
+
+  const traceErr = {
+    x: rs, y: errs,
+    type: 'scatter', mode: 'lines+markers',
+    line: { color: '#2563eb', width: 2.5 },
+    marker: { color: '#2563eb', size: 6 },
+    hovertemplate: 'r = %{x}<br>relative error = %{y:.3f}<extra></extra>',
+    name: 'rel. Frobenius error'
+  };
+  const traceMarker = {
+    x: [rq, rq], y: [0, 1],
+    type: 'scatter', mode: 'lines',
+    line: { color: '#dc2626', width: 2, dash: 'dash' },
+    hoverinfo: 'skip', showlegend: false
+  };
+
+  Plotly.newPlot('err_chart', [traceErr, traceMarker], {
+    title: { text: 'Relative reconstruction error  ||Delta W_true - rank-r approx||_F / ||Delta W_true||_F',
+             font: { size: 12 }, x: 0.5 },
+    xaxis: { title: 'rank r', gridcolor: '#f1f5f9', dtick: 2 },
+    yaxis: { title: 'relative error', gridcolor: '#f1f5f9', range: [0, 1.05] },
+    margin: { t: 46, b: 44, l: 60, r: 10 },
+    plot_bgcolor: '#f8fafc',
+    paper_bgcolor: '#ffffff',
+    showlegend: false,
+    annotations: [{
+      x: rq, y: errs[rq-1] !== undefined ? errs[rq-1] : 0,
+      xref: 'x', yref: 'y',
+      text: 'r = ' + rq + ' &rarr; err = ' + (errs[rq-1] !== undefined ? errs[rq-1].toFixed(3) : '—'),
+      showarrow: true, arrowhead: 4, ax: 30, ay: -30,
+      font: { color: '#dc2626', size: 11 },
+      bgcolor: '#fff', bordercolor: '#dc2626', borderwidth: 1, borderpad: 4
+    }]
+  }, { responsive: true, displayModeBar: false });
+}
+
+function render(){
+  const { d, k, r, alpha } = readCtrls();
+  if(currentTab === 'decomp'){
+    renderDecomposition(d, k, r, alpha);
+  } else if(currentTab === 'params'){
+    renderParams(d, k, r);
+  } else if(currentTab === 'quality'){
+    renderQuality(d, k, r);
+  }
+}
+
+// Hook up sliders
+['dim_d','dim_k','dim_r','alpha'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+});
+
+// Initial render
+render();
+</script>
+</body>
+</html>
