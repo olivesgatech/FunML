@@ -1999,19 +1999,21 @@ def sync_demos_with_embed_map(demos_path: Path, notebook_rules, lecture_pages):
   if not demos_path.exists() or not notebook_rules:
     return
 
-  # Display number = position in lecture_pages (1-based, excluding the preface
-  # which has media_key "lecture0").
+  # Display number is parsed from the filename (e.g., Lecture31_*.html → 31)
+  # so the number stays aligned with the actual published lecture page even
+  # when the preface (media_key "lecture0") is present in lecture_pages.
   display_number_by_filename = {}
   display_number_by_lecture_match = {}
-  display_idx = 0
   for title, filename, media_key in lecture_pages:
     if media_key.lower() == "lecture0":
       continue
-    display_idx += 1
-    display_number_by_filename[filename] = (display_idx, title)
-    # Match by filename stem for lecture_match fields like "Lecture31_Large-Language-Models".
+    m = re.match(r"Lecture(\d+)_", filename)
+    if not m:
+      continue
+    file_num = int(m.group(1))
+    display_number_by_filename[filename] = (file_num, title)
     stem = Path(filename).stem
-    display_number_by_lecture_match[stem] = (display_idx, title)
+    display_number_by_lecture_match[stem] = (file_num, title)
 
   soup = BeautifulSoup(demos_path.read_text(), "html.parser")
 
