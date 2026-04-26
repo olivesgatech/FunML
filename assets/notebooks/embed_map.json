@@ -1134,6 +1134,76 @@
       "description": "Simulate autoencoder reconstruction error for normal vs anomalous patches. Adjust latent dimension and error threshold to see how the bottleneck capacity affects detection sensitivity.",
       "iframe_title": "Interactive Autoencoder Reconstruction-based Anomaly Detection",
       "iframe_height": 880
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "regression",
+      "notebook_html": "Lecture8_Polynomial_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — Polynomial Regression",
+      "description": "Look ahead to the Polynomial Regression lecture: fit a polynomial of varying degree to noisy data and watch the bias–variance trade-off play out.",
+      "iframe_title": "Preview: Polynomial Regression",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "classification",
+      "notebook_html": "Lecture3_LinearBoundaries_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — Linear Decision Boundaries",
+      "description": "Look ahead to Logistic Regression: drag the decision boundary to see how a linear classifier separates two classes.",
+      "iframe_title": "Preview: Linear Decision Boundaries",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "clustering",
+      "notebook_html": "Lecture11_KMeans_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — K-Means Clustering",
+      "description": "Look ahead to K-Means: pick initial centroids and step through the assign/update iterations.",
+      "iframe_title": "Preview: K-Means Clustering",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "dimensionality-reduction",
+      "notebook_html": "Lecture18_PCA_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — PCA Dimensionality Reduction",
+      "description": "Look ahead to PCA: project a high-dimensional toy dataset onto its top principal components.",
+      "iframe_title": "Preview: PCA",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "core-linear-algebra-operations",
+      "notebook_html": "Lecture16_ConditionNumber_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — Matrix Transformation (matrix-vector multiplication)",
+      "description": "Apply a 2×2 matrix to the unit circle and see how matrix-vector multiplication stretches, rotates, and shears the input space.",
+      "iframe_title": "Preview: Matrix Transformation",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "important-distributions",
+      "notebook_html": "Lecture10_Sigma_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — Multivariate Gaussian (revisited under GMMs)",
+      "description": "Adjust the covariance matrix Σ and watch the bivariate Gaussian iso-density ellipse change shape and orientation.",
+      "iframe_title": "Preview: Multivariate Gaussian Σ",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture2_Introduction-to-Machine-Learning",
+      "section_id": "synthetic-datasets",
+      "notebook_html": "Lecture14_TrainingDynamics_Interactive_interactive.html",
+      "notebook_ipynb": "",
+      "section_title": "Preview Demo — Synthetic Dataset Generation (CNN Architectures §6.4.2)",
+      "description": "From the CNN Architectures lecture: see how a small synthetic dataset is generated and used to train a network. Focus on the data-generation portion at the top.",
+      "iframe_title": "Preview: Synthetic Data Generation",
+      "iframe_height": 760
     }
   ]
 }

@@ -835,6 +835,7 @@ def build_single_html(
     notebook_rules,
     notebooks_dir,
     notebook_view_mode,
+    out_html_path.name,
   )
   body = normalize_backtick_quotes(body)
   qanda_html = [normalize_backtick_quotes(section) for section in qanda_html]
@@ -996,12 +997,15 @@ def load_notebook_embed_rules(assets_dir: Path):
     if not isinstance(rule, dict):
       continue
     image_match = str(rule.get("image_match", "")).strip().lower()
+    section_id = str(rule.get("section_id", "")).strip()
     notebook_html = str(rule.get("notebook_html", "")).strip()
-    if not image_match or not notebook_html:
+    if not notebook_html or not (image_match or section_id):
       continue
     rules.append(
       {
         "image_match": image_match,
+        "section_id": section_id,
+        "lecture_match": str(rule.get("lecture_match", "")).strip(),
         "notebook_html": notebook_html,
         "notebook_ipynb": str(rule.get("notebook_ipynb", "")).strip(),
         "section_title": str(rule.get("section_title", "")).strip(),
@@ -1302,10 +1306,76 @@ def notebook_view_href_for(ipynb_name: str, notebook_view_mode: str):
   return normalize_web_path(f"../assets/notebooks/{rendered_notebook_filename(ipynb_name)}")
 
 
-def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, notebook_view_mode: str):
+def build_interactive_block(soup, rule, notebooks_dir: Path, notebook_view_mode: str,
+                            section_title_default: str = "Interactive Notebook"):
+  """Construct an .interactive-notebook <section> for a single embed rule."""
+  notebook_ipynb = resolve_notebook_ipynb(rule, notebooks_dir)
+  iframe_src = normalize_web_path(f"../assets/notebooks/{rule['notebook_html']}")
+  section_title = rule.get("section_title") or section_title_default
+  description = rule.get("description") or "Interactive demo for this section."
+  iframe_title = rule.get("iframe_title") or section_title
+  try:
+    iframe_height = int(rule.get("iframe_height", 680))
+  except (TypeError, ValueError):
+    iframe_height = 680
+  iframe_height = max(420, min(iframe_height, 1800))
+
+  block = soup.new_tag("section")
+  block["class"] = ["interactive-notebook"]
+  h = soup.new_tag("h3")
+  h.string = section_title
+  block.append(h)
+
+  p = soup.new_tag("p")
+  p.string = description
+  block.append(p)
+
+  iframe = soup.new_tag("iframe")
+  iframe["src"] = iframe_src
+  iframe["title"] = iframe_title
+  iframe["loading"] = "lazy"
+  iframe["scrolling"] = "no"
+  iframe["class"] = ["interactive-notebook-frame"]
+  iframe["data-default-height"] = str(iframe_height)
+  iframe["style"] = f"height:{iframe_height}px;"
+  block.append(iframe)
+
+  if notebook_ipynb:
+    actions = soup.new_tag("div")
+    actions["class"] = ["interactive-notebook-actions"]
+    notebook_link = soup.new_tag("a")
+    notebook_link["class"] = ["interactive-notebook-link"]
+    notebook_link["href"] = notebook_view_href_for(notebook_ipynb, notebook_view_mode)
+    notebook_link["target"] = "_blank"
+    notebook_link["rel"] = "noopener noreferrer"
+    notebook_link.string = "View notebook"
+    actions.append(notebook_link)
+    block.append(actions)
+
+  return block
+
+
+def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, notebook_view_mode: str,
+                                 lecture_filename: str = ""):
   if not notebook_rules:
     return
 
+  # --- Pass 1: section-anchor rules. Insert embed AFTER the matching heading.
+  for rule in notebook_rules:
+    section_id = rule.get("section_id", "")
+    if not section_id:
+      continue
+    if rule.get("lecture_match") and rule["lecture_match"] not in lecture_filename:
+      continue
+    if not (notebooks_dir / rule["notebook_html"]).exists():
+      continue
+    heading = soup.find(id=section_id)
+    if heading is None:
+      continue
+    block = build_interactive_block(soup, rule, notebooks_dir, notebook_view_mode)
+    heading.insert_after(block)
+
+  # --- Pass 2: image-match rules (replace matching image with embed).
   for img in soup.find_all("img", src=True):
     src = unquote(img.get("src", "")).replace("\\", "/").lower()
     if not src:
@@ -1313,6 +1383,8 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
 
     matched_rule = None
     for rule in notebook_rules:
+      if not rule.get("image_match"):
+        continue
       if not image_matches_rule(src, rule["image_match"]):
         continue
       notebook_html = rule["notebook_html"]
@@ -1520,6 +1592,7 @@ def clean_lecture_body(
   notebook_rules,
   notebooks_dir: Path,
   notebook_view_mode: str,
+  lecture_filename: str = "",
 ):
   soup = BeautifulSoup(body_html, "html.parser")
 
@@ -1583,7 +1656,7 @@ def clean_lecture_body(
     if existing_style:
       img["style"] = scale_percent_style(existing_style, INCLUDEGRAPHICS_WIDTH_SCALE)
 
-  inject_interactive_notebooks(soup, notebook_rules, notebooks_dir, notebook_view_mode)
+  inject_interactive_notebooks(soup, notebook_rules, notebooks_dir, notebook_view_mode, lecture_filename)
 
   # Remove repeated boilerplate block that appears at the top of many lectures.
   boilerplate_keys = {
