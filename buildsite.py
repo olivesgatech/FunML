@@ -999,7 +999,10 @@ def load_notebook_embed_rules(assets_dir: Path):
     image_match = str(rule.get("image_match", "")).strip().lower()
     section_id = str(rule.get("section_id", "")).strip()
     notebook_html = str(rule.get("notebook_html", "")).strip()
-    if not notebook_html or not (image_match or section_id):
+    external_url = str(rule.get("external_url", "")).strip()
+    if not (notebook_html or external_url):
+      continue
+    if not (image_match or section_id):
       continue
     rules.append(
       {
@@ -1007,6 +1010,7 @@ def load_notebook_embed_rules(assets_dir: Path):
         "section_id": section_id,
         "lecture_match": str(rule.get("lecture_match", "")).strip(),
         "notebook_html": notebook_html,
+        "external_url": external_url,
         "notebook_ipynb": str(rule.get("notebook_ipynb", "")).strip(),
         "section_title": str(rule.get("section_title", "")).strip(),
         "description": str(rule.get("description", "")).strip(),
@@ -1308,9 +1312,17 @@ def notebook_view_href_for(ipynb_name: str, notebook_view_mode: str):
 
 def build_interactive_block(soup, rule, notebooks_dir: Path, notebook_view_mode: str,
                             section_title_default: str = "Interactive Notebook"):
-  """Construct an .interactive-notebook <section> for a single embed rule."""
-  notebook_ipynb = resolve_notebook_ipynb(rule, notebooks_dir)
-  iframe_src = normalize_web_path(f"../assets/notebooks/{rule['notebook_html']}")
+  """Construct an .interactive-notebook <section> for a single embed rule.
+
+  Supports two modes:
+  - Local notebook: rule has `notebook_html` → iframe to local file + optional
+    "View notebook" Jupyter link.
+  - External URL: rule has `external_url` (no notebook_html) → iframe to external
+    site + "Open in new tab" link as a fallback for sites that block embedding.
+  """
+  external_url = rule.get("external_url", "").strip()
+  notebook_html = rule.get("notebook_html", "").strip()
+
   section_title = rule.get("section_title") or section_title_default
   description = rule.get("description") or "Interactive demo for this section."
   iframe_title = rule.get("iframe_title") or section_title
@@ -1319,6 +1331,11 @@ def build_interactive_block(soup, rule, notebooks_dir: Path, notebook_view_mode:
   except (TypeError, ValueError):
     iframe_height = 680
   iframe_height = max(420, min(iframe_height, 1800))
+
+  if external_url:
+    iframe_src = external_url
+  else:
+    iframe_src = normalize_web_path(f"../assets/notebooks/{notebook_html}")
 
   block = soup.new_tag("section")
   block["class"] = ["interactive-notebook"]
@@ -1338,18 +1355,33 @@ def build_interactive_block(soup, rule, notebooks_dir: Path, notebook_view_mode:
   iframe["class"] = ["interactive-notebook-frame"]
   iframe["data-default-height"] = str(iframe_height)
   iframe["style"] = f"height:{iframe_height}px;"
+  if external_url:
+    iframe["referrerpolicy"] = "no-referrer"
   block.append(iframe)
 
-  if notebook_ipynb:
-    actions = soup.new_tag("div")
-    actions["class"] = ["interactive-notebook-actions"]
-    notebook_link = soup.new_tag("a")
-    notebook_link["class"] = ["interactive-notebook-link"]
-    notebook_link["href"] = notebook_view_href_for(notebook_ipynb, notebook_view_mode)
-    notebook_link["target"] = "_blank"
-    notebook_link["rel"] = "noopener noreferrer"
-    notebook_link.string = "View notebook"
-    actions.append(notebook_link)
+  actions = soup.new_tag("div")
+  actions["class"] = ["interactive-notebook-actions"]
+
+  if external_url:
+    open_link = soup.new_tag("a")
+    open_link["class"] = ["interactive-notebook-link"]
+    open_link["href"] = external_url
+    open_link["target"] = "_blank"
+    open_link["rel"] = "noopener noreferrer"
+    open_link.string = "Open in new tab ↗"
+    actions.append(open_link)
+  else:
+    notebook_ipynb = resolve_notebook_ipynb(rule, notebooks_dir)
+    if notebook_ipynb:
+      notebook_link = soup.new_tag("a")
+      notebook_link["class"] = ["interactive-notebook-link"]
+      notebook_link["href"] = notebook_view_href_for(notebook_ipynb, notebook_view_mode)
+      notebook_link["target"] = "_blank"
+      notebook_link["rel"] = "noopener noreferrer"
+      notebook_link.string = "View notebook"
+      actions.append(notebook_link)
+
+  if actions.contents:
     block.append(actions)
 
   return block
@@ -1367,7 +1399,8 @@ def inject_interactive_notebooks(soup, notebook_rules, notebooks_dir: Path, note
       continue
     if rule.get("lecture_match") and rule["lecture_match"] not in lecture_filename:
       continue
-    if not (notebooks_dir / rule["notebook_html"]).exists():
+    notebook_html = rule.get("notebook_html", "")
+    if notebook_html and not (notebooks_dir / notebook_html).exists():
       continue
     heading = soup.find(id=section_id)
     if heading is None:

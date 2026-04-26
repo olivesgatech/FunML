@@ -1204,6 +1204,42 @@
       "description": "From the CNN Architectures lecture: see how a small synthetic dataset is generated and used to train a network. Focus on the data-generation portion at the top.",
       "iframe_title": "Preview: Synthetic Data Generation",
       "iframe_height": 760
+    },
+    {
+      "lecture_match": "Lecture31_Large-Language-Models",
+      "section_id": "context-length-in-modern-llms",
+      "external_url": "https://www.byhand.ai/p/self-attention-flow-new-release",
+      "section_title": "Demo — Self-Attention Flow & Context Length (also covers KV caching)",
+      "description": "ByHand AI's interactive walk-through of the self-attention computation. Watch how the K/V matrices grow with context length and see the same diagram used to illustrate KV caching (§6.7).",
+      "iframe_title": "Self-Attention Flow",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture31_Large-Language-Models",
+      "section_id": "parameter-efficient-fine-tuning-with-lora",
+      "external_url": "https://pub-c70e14727c3046cf8a36d9e598267788.r2.dev/26443b7e12/index.html",
+      "section_title": "Demo — Low-Rank Adaptation (LoRA)",
+      "description": "Interactive LoRA visualization: change rank r and watch how the low-rank update ΔW = BA approximates a full fine-tuning weight delta with a fraction of the parameters.",
+      "iframe_title": "LoRA Interactive",
+      "iframe_height": 760
+    },
+    {
+      "lecture_match": "Lecture31_Large-Language-Models",
+      "section_id": "kv-caching-for-efficient-inference",
+      "external_url": "https://www.byhand.ai/p/self-attention-flow-new-release",
+      "section_title": "Demo — KV Caching (showcased in the Self-Attention Flow demo)",
+      "description": "The same self-attention flow demo used in §5.2 also illustrates KV caching: watch how prior tokens' K and V vectors get reused at each new generation step instead of recomputed.",
+      "iframe_title": "Self-Attention Flow / KV Caching",
+      "iframe_height": 720
+    },
+    {
+      "lecture_match": "Lecture31_Large-Language-Models",
+      "section_id": "illustrative-comparison-of-evaluation-metrics",
+      "external_url": "https://www.byhand.ai/p/ai-eval-equations-you-must-know",
+      "section_title": "Demo — AI Evaluation Equations You Must Know",
+      "description": "ByHand AI's visual reference for the core equations behind AI evaluation metrics (perplexity, BLEU, ROUGE, etc.). Useful companion to the worked comparison in §7.5.",
+      "iframe_title": "AI Eval Equations",
+      "iframe_height": 720
     }
   ]
 }
