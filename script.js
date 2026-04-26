@@ -598,7 +598,9 @@ const runSearch = (query) => {
       });
     }
   }
-  matches.sort((a, b) => b.score - a.score || (a.num - b.num));
+  // Sort lecture-wise: lower lecture number first; within a lecture, heading
+  // hits before body hits so the most direct match appears at the top.
+  matches.sort((a, b) => (Number(a.num) - Number(b.num)) || (b.score - a.score));
   renderSearchResults(query, matches.slice(0, 60));
 };
 
