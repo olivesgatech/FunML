@@ -644,17 +644,5 @@ document.addEventListener('click', (e) => {
 
 fetch('assets/search-index.json')
   .then((r) => (r.ok ? r.json() : null))
-  .then((data) => {
-    searchIndex = data;
-    // If the page was loaded with ?q=foo (e.g. from a lecture-tag click),
-    // pre-fill the search box and run the query immediately.
-    try {
-      const q = new URLSearchParams(window.location.search).get('q');
-      if (q && searchInput) {
-        searchInput.value = q;
-        runSearch(q);
-        searchInput.focus();
-      }
-    } catch (_) {}
-  })
+  .then((data) => { searchIndex = data; })
   .catch(() => { searchIndex = null; });

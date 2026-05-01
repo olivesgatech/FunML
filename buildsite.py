@@ -155,6 +155,105 @@ pre, code {
   border-color: #6366f1;
 }
 
+.lecture-tag.is-active {
+  background: #4f46e5;
+  color: #fff;
+  border-color: #4f46e5;
+}
+
+.lecture-tag-results {
+  margin: -8px 0 18px;
+  padding: 10px 14px;
+  border: 1px solid #c7d2fe;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  background: #f5f7ff;
+  font-size: 13.5px;
+}
+
+.lecture-tag-results[hidden] {
+  display: none;
+}
+
+.lecture-tag-results .ltr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  color: #475569;
+  font-size: 12.5px;
+}
+
+.lecture-tag-results .ltr-close {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.lecture-tag-results .ltr-close:hover {
+  color: #0f172a;
+}
+
+.lecture-tag-results .ltr-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lecture-tag-results .ltr-list li {
+  padding: 4px 0;
+}
+
+.lecture-tag-results .ltr-num {
+  display: inline-block;
+  min-width: 56px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  margin-right: 6px;
+}
+
+.lecture-tag-results .ltr-link {
+  color: #1e3a8a;
+  text-decoration: none;
+}
+
+.lecture-tag-results .ltr-link:hover {
+  text-decoration: underline;
+}
+
+.lecture-tag-results .ltr-snippet {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.lecture-tag-results .ltr-current {
+  color: #475569;
+  font-style: italic;
+}
+
+.lecture-tag-results .ltr-current em {
+  color: #94a3b8;
+  font-size: 11.5px;
+}
+
+.lecture-tag-results .ltr-empty,
+.lecture-tag-results .ltr-loading {
+  color: #64748b;
+  font-style: italic;
+}
+
 .interactive-notebook {
   margin: 14px 0 18px;
   padding: 12px;
@@ -386,6 +485,116 @@ window.addEventListener("DOMContentLoaded", () => {
     .querySelectorAll(".interactive-notebook-frame")
     .forEach(setupInteractiveNotebookFrame);
 });
+</script>"""
+
+LECTURE_TAGS_SCRIPT = """<script>
+(function() {
+  let indexPromise = null;
+  function loadIndex() {
+    if (!indexPromise) {
+      indexPromise = fetch("../assets/search-index.json")
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null);
+    }
+    return indexPromise;
+  }
+
+  function htmlEscape(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function findMatches(data, keyword) {
+    if (!data || !data.lectures) return [];
+    const kw = keyword.toLowerCase();
+    const here = (location.pathname.split("/").pop() || "").toLowerCase();
+    const results = [];
+    for (const lec of data.lectures) {
+      let matched = false;
+      let snippet = "";
+      for (const sec of (lec.sections || [])) {
+        const text = (sec.text || "").toLowerCase();
+        if (text.includes(kw) || (sec.heading || "").toLowerCase().includes(kw)) {
+          matched = true;
+          if (!snippet) snippet = sec.heading || "";
+          break;
+        }
+      }
+      if (matched) {
+        results.push({
+          file: lec.file,
+          num: lec.num,
+          title: lec.title,
+          snippet,
+          isCurrent: (lec.file || "").toLowerCase() === here,
+        });
+      }
+    }
+    return results;
+  }
+
+  function render(panel, keyword, results) {
+    if (results.length === 0) {
+      panel.innerHTML = '<div class="ltr-empty">No other lectures matched "' + htmlEscape(keyword) + '".</div>';
+      return;
+    }
+    const others = results.filter(r => !r.isCurrent);
+    const here = results.find(r => r.isCurrent);
+    let html = '<div class="ltr-head">' +
+               results.length + ' lecture' + (results.length === 1 ? '' : 's') +
+               ' tagged "<strong>' + htmlEscape(keyword) + '</strong>"' +
+               '<button class="ltr-close" type="button" aria-label="Close">×</button></div>';
+    html += '<ul class="ltr-list">';
+    if (here) {
+      html += '<li class="ltr-current"><span class="ltr-num">Lec ' + htmlEscape(here.num) + '</span> ' +
+              htmlEscape(here.title) + ' <em>(this lecture)</em></li>';
+    }
+    for (const r of others) {
+      html += '<li><a href="' + htmlEscape(r.file) + '" class="ltr-link">' +
+              '<span class="ltr-num">Lec ' + htmlEscape(r.num) + '</span> ' +
+              htmlEscape(r.title) + '</a>' +
+              (r.snippet ? ' <span class="ltr-snippet">— ' + htmlEscape(r.snippet) + '</span>' : '') +
+              '</li>';
+    }
+    html += '</ul>';
+    panel.innerHTML = html;
+  }
+
+  document.addEventListener("click", function(e) {
+    const tag = e.target.closest && e.target.closest(".lecture-tag");
+    if (tag) {
+      e.preventDefault();
+      const kw = tag.dataset.keyword || tag.textContent.trim();
+      const tagsBox = tag.closest(".lecture-tags");
+      const panel = tagsBox && tagsBox.nextElementSibling;
+      if (!panel || !panel.classList.contains("lecture-tag-results")) return;
+      // Toggle: clicking the same active tag again closes the panel
+      const active = tagsBox.querySelector(".lecture-tag.is-active");
+      if (active === tag && !panel.hidden) {
+        panel.hidden = true;
+        tag.classList.remove("is-active");
+        return;
+      }
+      if (active) active.classList.remove("is-active");
+      tag.classList.add("is-active");
+      panel.hidden = false;
+      panel.innerHTML = '<div class="ltr-loading">Searching for "' + htmlEscape(kw) + '"…</div>';
+      loadIndex().then(data => render(panel, kw, findMatches(data, kw)));
+      return;
+    }
+    const close = e.target.closest && e.target.closest(".ltr-close");
+    if (close) {
+      const panel = close.closest(".lecture-tag-results");
+      const tagsBox = panel && panel.previousElementSibling;
+      if (panel) panel.hidden = true;
+      if (tagsBox) {
+        const active = tagsBox.querySelector(".lecture-tag.is-active");
+        if (active) active.classList.remove("is-active");
+      }
+    }
+  });
+})();
 </script>"""
 
 
@@ -886,6 +1095,7 @@ def build_single_html(
   {MATHJAX_CONFIG}
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   {INTERACTIVE_NOTEBOOK_RESIZE_SCRIPT}
+  {LECTURE_TAGS_SCRIPT}
 </head>
 <body>
 <main>
@@ -1777,11 +1987,17 @@ def clean_lecture_body(
     for kw in keywords:
       a = soup.new_tag("a")
       a["class"] = ["lecture-tag"]
-      a["href"] = f"../index.html?q={quote(kw)}"
-      a["title"] = f"Search lectures for: {kw}"
+      a["href"] = "#"
+      a["data-keyword"] = kw
+      a["title"] = f"Show other lectures with: {kw}"
       a.string = kw
       container.append(a)
+    # Empty results panel that the tag-click script populates in place.
+    panel = soup.new_tag("div")
+    panel["class"] = ["lecture-tag-results"]
+    panel["hidden"] = ""
     p.replace_with(container)
+    container.insert_after(panel)
 
   # Remove repeated boilerplate block that appears at the top of many lectures.
   boilerplate_keys = {

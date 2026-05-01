@@ -98,6 +98,115 @@ window.addEventListener("DOMContentLoaded", () => {
     .forEach(setupInteractiveNotebookFrame);
 });
 </script>
+  <script>
+(function() {
+  let indexPromise = null;
+  function loadIndex() {
+    if (!indexPromise) {
+      indexPromise = fetch("../assets/search-index.json")
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null);
+    }
+    return indexPromise;
+  }
+
+  function htmlEscape(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function findMatches(data, keyword) {
+    if (!data || !data.lectures) return [];
+    const kw = keyword.toLowerCase();
+    const here = (location.pathname.split("/").pop() || "").toLowerCase();
+    const results = [];
+    for (const lec of data.lectures) {
+      let matched = false;
+      let snippet = "";
+      for (const sec of (lec.sections || [])) {
+        const text = (sec.text || "").toLowerCase();
+        if (text.includes(kw) || (sec.heading || "").toLowerCase().includes(kw)) {
+          matched = true;
+          if (!snippet) snippet = sec.heading || "";
+          break;
+        }
+      }
+      if (matched) {
+        results.push({
+          file: lec.file,
+          num: lec.num,
+          title: lec.title,
+          snippet,
+          isCurrent: (lec.file || "").toLowerCase() === here,
+        });
+      }
+    }
+    return results;
+  }
+
+  function render(panel, keyword, results) {
+    if (results.length === 0) {
+      panel.innerHTML = '<div class="ltr-empty">No other lectures matched "' + htmlEscape(keyword) + '".</div>';
+      return;
+    }
+    const others = results.filter(r => !r.isCurrent);
+    const here = results.find(r => r.isCurrent);
+    let html = '<div class="ltr-head">' +
+               results.length + ' lecture' + (results.length === 1 ? '' : 's') +
+               ' tagged "<strong>' + htmlEscape(keyword) + '</strong>"' +
+               '<button class="ltr-close" type="button" aria-label="Close">×</button></div>';
+    html += '<ul class="ltr-list">';
+    if (here) {
+      html += '<li class="ltr-current"><span class="ltr-num">Lec ' + htmlEscape(here.num) + '</span> ' +
+              htmlEscape(here.title) + ' <em>(this lecture)</em></li>';
+    }
+    for (const r of others) {
+      html += '<li><a href="' + htmlEscape(r.file) + '" class="ltr-link">' +
+              '<span class="ltr-num">Lec ' + htmlEscape(r.num) + '</span> ' +
+              htmlEscape(r.title) + '</a>' +
+              (r.snippet ? ' <span class="ltr-snippet">— ' + htmlEscape(r.snippet) + '</span>' : '') +
+              '</li>';
+    }
+    html += '</ul>';
+    panel.innerHTML = html;
+  }
+
+  document.addEventListener("click", function(e) {
+    const tag = e.target.closest && e.target.closest(".lecture-tag");
+    if (tag) {
+      e.preventDefault();
+      const kw = tag.dataset.keyword || tag.textContent.trim();
+      const tagsBox = tag.closest(".lecture-tags");
+      const panel = tagsBox && tagsBox.nextElementSibling;
+      if (!panel || !panel.classList.contains("lecture-tag-results")) return;
+      // Toggle: clicking the same active tag again closes the panel
+      const active = tagsBox.querySelector(".lecture-tag.is-active");
+      if (active === tag && !panel.hidden) {
+        panel.hidden = true;
+        tag.classList.remove("is-active");
+        return;
+      }
+      if (active) active.classList.remove("is-active");
+      tag.classList.add("is-active");
+      panel.hidden = false;
+      panel.innerHTML = '<div class="ltr-loading">Searching for "' + htmlEscape(kw) + '"…</div>';
+      loadIndex().then(data => render(panel, kw, findMatches(data, kw)));
+      return;
+    }
+    const close = e.target.closest && e.target.closest(".ltr-close");
+    if (close) {
+      const panel = close.closest(".lecture-tag-results");
+      const tagsBox = panel && panel.previousElementSibling;
+      if (panel) panel.hidden = true;
+      if (tagsBox) {
+        const active = tagsBox.querySelector(".lecture-tag.is-active");
+        if (active) active.classList.remove("is-active");
+      }
+    }
+  });
+})();
+</script>
 </head>
 <body>
 <main>
@@ -108,11 +217,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-<div class="lecture-tags"><span class="lecture-tags-label">Keywords:</span><a class="lecture-tag" href="../index.html?q=Sequence%20modeling" title="Search lectures for: Sequence modeling">Sequence modeling</a><a class="lecture-tag" href="../index.html?q=recurrent%20neural%0Anetworks" title="Search lectures for: recurrent neural
+<div class="lecture-tags"><span class="lecture-tags-label">Keywords:</span><a class="lecture-tag" data-keyword="Sequence modeling" href="#" title="Show other lectures with: Sequence modeling">Sequence modeling</a><a class="lecture-tag" data-keyword="recurrent neural
+networks" href="#" title="Show other lectures with: recurrent neural
 networks">recurrent neural
-networks</a><a class="lecture-tag" href="../index.html?q=long%20short-term%20memory" title="Search lectures for: long short-term memory">long short-term memory</a><a class="lecture-tag" href="../index.html?q=gated%20recurrent%20units" title="Search lectures for: gated recurrent units">gated recurrent units</a><a class="lecture-tag" href="../index.html?q=language%0Amodeling" title="Search lectures for: language
+networks</a><a class="lecture-tag" data-keyword="long short-term memory" href="#" title="Show other lectures with: long short-term memory">long short-term memory</a><a class="lecture-tag" data-keyword="gated recurrent units" href="#" title="Show other lectures with: gated recurrent units">gated recurrent units</a><a class="lecture-tag" data-keyword="language
+modeling" href="#" title="Show other lectures with: language
 modeling">language
-modeling</a></div>
+modeling</a></div><div class="lecture-tag-results" hidden=""></div>
 <h1 data-number="1" id="learning-objectives"><span class="header-section-number">1.</span> Learning Objectives</h1>
 <p>This lecture introduces sequence modeling for data with temporal or
 ordered structure, such as time-series signals and natural language. We
