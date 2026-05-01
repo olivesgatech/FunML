@@ -1810,7 +1810,11 @@ def clean_lecture_body(
       continue
     raw = p.get_text(" ", strip=True)
     raw = re.sub(r"^\s*Keywords\s*:?\s*", "", raw, flags=re.IGNORECASE)
-    keywords = [k.strip() for k in raw.split(",") if k.strip()]
+    # Collapse any internal whitespace (newlines from line-wrapped LaTeX,
+    # multiple spaces) so keywords like "unsupervised learning" are not
+    # rendered as "unsupervised\nlearning".
+    keywords = [re.sub(r"\s+", " ", k).strip() for k in raw.split(",")]
+    keywords = [k for k in keywords if k]
     if not keywords:
       continue
     container = soup.new_tag("div")
