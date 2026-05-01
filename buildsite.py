@@ -146,6 +146,7 @@ pre, code {
   font-size: 12.5px;
   text-decoration: none;
   border: 1px solid #c7d2fe;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 
