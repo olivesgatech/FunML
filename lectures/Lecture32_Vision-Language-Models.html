@@ -108,6 +108,969 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
+<div class="lecture-tags"><span class="lecture-tags-label">Keywords:</span><a class="lecture-tag" href="../index.html?q=Vision-language%20models" title="Search lectures for: Vision-language models">Vision-language models</a><a class="lecture-tag" href="../index.html?q=multimodal%0Alearning" title="Search lectures for: multimodal
+learning">multimodal
+learning</a><a class="lecture-tag" href="../index.html?q=CLIP" title="Search lectures for: CLIP">CLIP</a><a class="lecture-tag" href="../index.html?q=cross-attention" title="Search lectures for: cross-attention">cross-attention</a><a class="lecture-tag" href="../index.html?q=fusion" title="Search lectures for: fusion">fusion</a><a class="lecture-tag" href="../index.html?q=generative%20AI" title="Search lectures for: generative AI">generative AI</a><a class="lecture-tag" href="../index.html?q=alignment" title="Search lectures for: alignment">alignment</a><a class="lecture-tag" href="../index.html?q=RLHF" title="Search lectures for: RLHF">RLHF</a><a class="lecture-tag" href="../index.html?q=DPO" title="Search lectures for: DPO">DPO</a></div>
+<h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
+<p>This lecture extends the previous discussion of large language models
+(LLMs) to the multimodal setting, where models must reason jointly over
+images and text. We extend the probabilistic left-to-right sequence
+modeling for multimodal heterogeneous inputs. Heterogeneous inputs refer
+to data originating from different modalities or sources. For instance,
+one of the inputs may be visual rather than linguistic. To address this,
+the lecture first motivates multimodal learning and its practical
+challenges, then introduces the main tasks and architectures used in
+vision-language modeling, and finally discusses training, evaluation,
+and the broader move from bi-modal systems to multimodal large language
+models (MLLMs).</p>
+<p>By the end of this lecture, students should be able to:</p>
+<ul>
+<li><p>explain why many real-world machine learning problems are
+inherently multimodal,</p></li>
+<li><p>identify the main challenges of multimodal learning, including
+alignment, missing modalities, and evaluation,</p></li>
+<li><p>describe common vision-language tasks such as image captioning
+and visual grounding,</p></li>
+<li><p>explain how images can be represented as token sequences and
+processed by Transformer-based vision encoders,</p></li>
+<li><p>write the conditional left-to-right probability model used in
+generative VLMs,</p></li>
+<li><p>distinguish between early fusion and late fusion
+strategies,</p></li>
+<li><p>compare CNN-based and ViT-based visual encoders,</p></li>
+<li><p>explain how pretrained LLMs serve as decoders in modern
+VLMs,</p></li>
+<li><p>describe the stages of VLM training, from pretraining to
+instruction tuning, alignment, and fine-tuning, and</p></li>
+<li><p>understand how VLMs generalize to broader MLLM systems that
+include more than two modalities.</p></li>
+</ul>
+<h1 data-number="2" id="left-to-right-probability"><span class="header-section-number">2.</span> Left-to-Right Probability</h1>
+<p>The previous lecture established the left-to-right probability
+modeling of next-token prediction, <span class="math display">\[p(y_{1:n}) = \prod_{t=1}^{n} p(y_t \mid
+y_{&lt;t}).\]</span> The present lecture expands the conditioning
+context from just linguistic tokens to multimodal (specifically
+vision-based) tokens. In a VLM, the model is no longer asked to generate
+text from only prior text. Instead, it is asked to generate text
+conditioned on visual input, or to jointly embed images and text into a
+shared semantic space. Hence, VLMs are a multimodal extension of the
+same principle in LLMs including tokenization, sequence representation,
+transformer processing, conditional generation, and scaling. An LLM
+learns to condition on previous text, while a VLM learns to condition on
+previous text <em>and</em> visual tokens or visual features. The
+engineering challenge and novelty lies in the input representation and
+the mechanism used to fuse visual and textual information.</p>
+<h1 data-number="3" id="multimodal-learning-foundations"><span class="header-section-number">3.</span> Multimodal Learning
+Foundations</h1>
+<h2 data-number="3.1" id="motivation"><span class="header-section-number">3.1</span> Motivation</h2>
+<p>Human perception is fundamentally multimodal. We do not understand
+the world through language alone, or through vision alone; rather, we
+integrate multiple sources of information such as sight, sound, touch,
+language, and physiological signals. To imbue trust in their decision
+processes, machine learning systems should do the same, provided the
+application clearly benefits from it.</p>
+<p>Many real-world datasets are inherently multimodal. An encyclopedia
+page combines images and text. A radiology workflow combines medical
+images with accompanying reports. Activity understanding may require RGB
+video, depth, force or pressure signals, and biosignals. In all such
+examples, the goal is not simply to process each modality independently,
+but to extract shared semantics across modalities.</p>
+<p>Foundation models in vision and language therefore aim to distill
+multimodal sensory information into reusable knowledge representations.
+This broadens the traditional scope of machine learning from narrowly
+defined perception tasks to higher-order reasoning, grounding, and
+interaction.</p>
+<h2 data-number="3.2" id="examples-of-multimodal-tasks"><span class="header-section-number">3.2</span> Examples of Multimodal
+Tasks</h2>
+<h4 data-number="3.2.0.1" id="image-captioning."><span class="header-section-number">3.2.0.1</span> Image captioning.</h4>
+<p>Image captioning is a fundamental vision-language task studied
+extensively in the literature <span class="citation" data-cites="hossain2019"></span>. The input consists of an image, and
+the output is a textual caption. Formally, if <span class="math inline">\(x\)</span> denotes an image and <span class="math inline">\(y_{1:n}\)</span> a caption, then the task is to
+model a conditional distribution <span class="math inline">\(p(y_{1:n}\mid x)\)</span>. This is an
+image-conditioned text generation problem.</p>
+<figure>
+<img src="img/lecture29/image_captioning.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Example of image captioning: generating natural language
+descriptions from visual input.</figcaption>
+</figure>
+<h4 data-number="3.2.0.2" id="visual-grounding."><span class="header-section-number">3.2.0.2</span> Visual grounding.</h4>
+<p>Visual grounding, also known as referring expression comprehension,
+has been studied in works such as <span class="citation" data-cites="yu2016"></span>. The input consists of an image and a text
+description or referring expression. The output is a spatial
+localization in the image, often represented as a bounding box. In this
+case the model must connect language to a specific visual region, rather
+than generate free-form text.</p>
+<figure>
+<img src="img/lecture29/visual_grounding.png" style="width:36.00%; max-width:36.00%; height:auto;"/>
+<figcaption>Example of visual grounding: aligning language with specific
+regions in an image.</figcaption>
+</figure>
+<h3 data-number="3.2.1" id="extended-vision-language-tasks"><span class="header-section-number">3.2.1</span> Extended Vision-Language
+Tasks</h3>
+<p>Modern VLMs support a wide range of tasks, all of which can be
+interpreted as instances of left-to-right conditional sequence modeling,
+where the model generates outputs token by token conditioned on
+multimodal inputs. All tasks can be written either in full-sequence form
+<span class="math inline">\(p(y_{1:n} \mid \cdot)\)</span> or token-wise
+autoregressive form <span class="math inline">\(p(y_t \mid y_{&lt;t},
+\cdot)\)</span>.</p>
+<p><strong>Visual Question Answering (VQA).</strong> Given an image
+<span class="math inline">\(x\)</span> and a question <span class="math inline">\(q\)</span>, the model generates an answer grounded
+in visual evidence: <span class="math display">\[p(y_{1:n} \mid x,
+q)\]</span></p>
+<p><strong>Visual Dialogue.</strong> Given an image and dialogue history
+<span class="math inline">\(h\)</span>, the model generates the next
+response in a multimodal conversation: <span class="math display">\[p(y_t \mid y_{&lt;t}, x, h)\]</span></p>
+<p><strong>Instruction Following.</strong> Given an image and an
+instruction <span class="math inline">\(I\)</span>, the model generates
+an output conditioned on both: <span class="math display">\[p(y_{1:n}
+\mid x, I)\]</span></p>
+<p><strong>Optical Character Recognition (OCR).</strong> The model
+extracts textual content directly from the image: <span class="math display">\[p(y_{1:n} \mid x)\]</span></p>
+<p><strong>Dense Captioning.</strong> The model generates multiple
+captions corresponding to different image regions: <span class="math display">\[p(y^{(k)}_{1:n} \mid x, r_k)\]</span></p>
+<p><strong>Explanation Generation.</strong> The model produces reasoning
+or justification for predictions: <span class="math display">\[p(y_{1:n}
+\mid x, \text{prediction})\]</span></p>
+<p><strong>Image-Conditioned Translation.</strong> The model translates
+text conditioned on visual context: <span class="math display">\[p(y_{1:n}^{\text{target}} \mid x,
+y^{\text{source}})\]</span></p>
+<p><strong>Multimodal Retrieval-Augmented Generation (RAG).</strong> The
+model generates responses using retrieved multimodal context: <span class="math display">\[p(y_{1:n} \mid x,
+\mathcal{D}_{\text{retrieved}})\]</span></p>
+<p><strong>Multimodal Chain-of-Thought (CoT).</strong> The model
+generates intermediate reasoning steps alongside outputs: <span class="math display">\[p(y_{1:n} \mid x) \text{ where } y \text{
+includes reasoning tokens}\]</span></p>
+<p><strong>Multimodal Summarization.</strong> The model summarizes
+multimodal inputs such as images and associated text: <span class="math display">\[p(y_{1:n} \mid x, d)\]</span> where <span class="math inline">\(d\)</span> denotes auxiliary textual context.</p>
+<blockquote>
+<p><strong>Key Idea:</strong> All VLM tasks can be interpreted as
+conditional sequence modeling where the conditioning context includes
+both visual and textual tokens.</p>
+</blockquote>
+<p>These tasks highlight that VLMs must support both <em>generation</em>
+(producing language) and <em>grounding</em> (linking language to visual
+evidence). The ability to unify these within a single probabilistic
+framework is a defining feature of modern VLMs.</p>
+<h2 data-number="3.3" id="challenges-in-multimodal-learning"><span class="header-section-number">3.3</span> Challenges in Multimodal
+Learning</h2>
+<p>Multimodal learning is more difficult than single-modality learning
+because the model must reconcile heterogeneous signals across
+modalities <span class="citation" data-cites="baltrusaitis2018"></span>.
+There are several recurring challenges.</p>
+<h4 data-number="3.3.0.1" id="heterogeneous-representations."><span class="header-section-number">3.3.0.1</span> Heterogeneous
+representations.</h4>
+<p>Images, text, audio, IMU measurements, and physiological signals
+differ in dimensionality, scale, sampling rate, and statistical
+structure. A model therefore cannot assume that all inputs live in the
+same feature space.</p>
+<h4 data-number="3.3.0.2" id="alignment-and-synchronization."><span class="header-section-number">3.3.0.2</span> Alignment and
+synchronization.</h4>
+<p>Corresponding information across modalities may be weakly paired,
+partially missing, delayed, or noisy. A caption may describe only part
+of an image. A speech transcript may lag the corresponding lip movement.
+A sensor signal may be sampled at a very different frequency from
+video.</p>
+<h4 data-number="3.3.0.3" id="fusion-under-missing-data."><span class="header-section-number">3.3.0.3</span> Fusion under missing
+data.</h4>
+<p>At training time or test time, one or more modalities may be
+unavailable or corrupted. A robust multimodal model should not fail
+catastrophically when one modality is absent.</p>
+<h4 data-number="3.3.0.4" id="data-curation-cost."><span class="header-section-number">3.3.0.4</span> Data curation cost.</h4>
+<p>Paired multimodal data are expensive to gather, store, clean, and
+balance. Large-scale image-text pairs are easier to acquire than
+carefully annotated grounding or reasoning datasets.</p>
+<h4 data-number="3.3.0.5" id="reasoning-and-grounding."><span class="header-section-number">3.3.0.5</span> Reasoning and
+grounding.</h4>
+<p>A model may exploit superficial correlations rather than true shared
+semantics. For example, it may memorize frequent image-caption
+co-occurrences without actually understanding the visual evidence
+supporting a response.</p>
+<h4 data-number="3.3.0.6" id="robustness-bias-and-evaluation."><span class="header-section-number">3.3.0.6</span> Robustness, bias, and
+evaluation.</h4>
+<p>Hallucination, modality imbalance, and distribution shift make
+evaluation more difficult than in single-modality settings. Even if a
+response sounds plausible, it may not be visually grounded.</p>
+<p>The primary challenge in multimodal analytics is learning <em>shared
+semantics</em> that remains generalizable across heterogeneous, noisy,
+and only partially aligned inputs.</p>
+<h1 data-number="4" id="vision-language-models"><span class="header-section-number">4.</span> Vision-Language Models</h1>
+<h2 data-number="4.1" id="definition"><span class="header-section-number">4.1</span> Definition</h2>
+<p>A vision-language model (VLM) is a model that processes both visual
+input and language input in order to align, retrieve, ground, classify,
+or generate outputs. Some VLMs are contrastive and focus on matching
+images with text. Others are generative and produce free-form language
+conditioned on images. Note that the recent evolution of VLMs has been
+driven strongly by the progress of LLMs, since pretrained language
+decoders provide general reasoning and generation ability that can be
+augmented with visual perception. From a probabilistic perspective,
+multimodal learning in VLMs can be understood as extending left-to-right
+sequence modeling to heterogeneous inputs, where the conditioning
+context includes both visual and linguistic tokens. This unifies
+multimodal reasoning under the same autoregressive framework introduced
+in the LLM setting.</p>
+<h4 data-number="4.1.0.1" id="multimodal-left-to-right-modeling."><span class="header-section-number">4.1.0.1</span> Multimodal Left-to-Right
+Modeling.</h4>
+<p>We extend the left-to-right probabilistic formulation from the
+previous lecture to the multimodal setting. Let <span class="math inline">\(x\)</span> denote an image and <span class="math inline">\(y_{1:n}\)</span> denote a sequence of output
+tokens (e.g., a caption or answer). A generative VLM models: <span class="math display">\[p(y_{1:n} \mid x) = \prod_{t=1}^{n} p(y_t \mid
+y_{&lt;t}, x).\]</span></p>
+<p>If the image is tokenized into visual tokens <span class="math inline">\(v_{1:m}\)</span>, then the conditioning context
+becomes: <span class="math display">\[p(y_{1:n} \mid v_{1:m}) =
+\prod_{t=1}^{n} p(y_t \mid y_{&lt;t}, v_{1:m}).\]</span></p>
+<p>Thus, a VLM is fundamentally a <strong>multimodal extension of
+left-to-right sequence modeling</strong>, where the model conditions not
+only on previous text tokens but also on visual tokens. The key
+challenge is to construct a fused representation that preserves both
+visual semantics and linguistic structure.</p>
+<h2 data-number="4.2" id="evolution-of-vlms"><span class="header-section-number">4.2</span> Evolution of VLMs</h2>
+<p>Vision-language models have evolved rapidly from early multimodal
+pipelines to modern large-scale systems <span class="citation" data-cites="yin2024"></span>. A key trend is that improvements in the
+language backbone significantly enhance multimodal capabilities,
+provided that visual information can be effectively incorporated into
+the model.</p>
+<p>This evolution is illustrated in Figure <a data-reference="fig:vlm_evolution" data-reference-type="ref" href="#fig:vlm_evolution">1</a>.</p>
+<figure id="fig:vlm_evolution">
+<img src="img/lecture29/vlm_evolution.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
+<figcaption>Evolution of vision-language models from early multimodal
+systems (2022) to large-scale multimodal models (2024), highlighting
+increasing model capability and integration across
+modalities.</figcaption>
+</figure>
+<p>From the figure, we observe several important trends:</p>
+<ul>
+<li><p>a shift from loosely coupled multimodal pipelines to tightly
+integrated architectures,</p></li>
+<li><p>increasing reliance on large pretrained language models as the
+core reasoning backbone, and</p></li>
+<li><p>rapid growth in capability, including improved reasoning,
+grounding, and multimodal interaction.</p></li>
+</ul>
+<p>These trends explain why recent VLM development often focuses on
+three fundamental design questions:</p>
+<ol>
+<li><p>How should the image be encoded?</p></li>
+<li><p>How should the visual representation be fused with the text
+representation?</p></li>
+<li><p>How should the fused representation be consumed by a decoder or
+predictor?</p></li>
+</ol>
+<blockquote>
+<p><strong>Key Idea:</strong> Modern VLM progress is driven primarily by
+advances in language models, combined with improved mechanisms for
+integrating visual information.</p>
+</blockquote>
+<h2 data-number="4.3" id="images-as-sequence-data"><span class="header-section-number">4.3</span> Images as Sequence Data</h2>
+<p>A crucial connection from the previous lecture on LLMs is the
+treatment of vision as sequence modeling. In a Vision Transformer, an
+image is split into patches, each patch is flattened and linearly
+projected into a vector, and positional embeddings are added. The
+resulting patch embeddings behave like tokens in a sequence model.</p>
+<p>This process is illustrated in Figure <a data-reference="fig:vit_sequence" data-reference-type="ref" href="#fig:vit_sequence">2</a>, where
+an image is decomposed into a grid of patches and then transformed into
+a sequence of embeddings that are processed by a Transformer.</p>
+<figure id="fig:vit_sequence">
+<img src="img/lecture29/vit_patching.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<img src="img/lecture29/vit_pipeline.png" style="width:60.00%; max-width:60.00%; height:auto;"/>
+<figcaption>Vision Transformer pipeline: an image is divided into
+patches, which are then projected into embeddings, combined with
+positional encodings, and processed by a Transformer as a
+sequence.</figcaption>
+</figure>
+<p>Suppose an image of height <span class="math inline">\(H\)</span>,
+width <span class="math inline">\(W\)</span>, and <span class="math inline">\(C\)</span> channels is divided into patches of
+size <span class="math inline">\(P\times P\)</span>. Then the number of
+patches is <span class="math display">\[m = \frac{HW}{P^2}.\]</span></p>
+<p>Each patch is flattened into a vector in <span class="math inline">\(\mathbb{R}^{P^2C}\)</span> and then linearly
+projected into a <span class="math inline">\(D\)</span>-dimensional
+embedding space. If the projected visual tokens are denoted by <span class="math display">\[(v_1, v_2, \dots, v_m),\]</span> then the image
+can be viewed as a sequence of visual tokens.</p>
+<p>This representation establishes a direct parallel between images and
+text: just as sentences are represented as sequences of tokens in
+language models, images can be represented as sequences of patch
+embeddings in vision models. This is the main reason that Transformer
+architectures developed for text can also be used for visual data.</p>
+<h2 data-number="4.4" id="probabilistic-modeling-in-generative-vlms"><span class="header-section-number">4.4</span> Probabilistic Modeling in
+Generative VLMs</h2>
+<p>Consider left-to-right modeling in LLMs. For pure language modeling,
+<span class="math display">\[p(y_{1:n}) = \prod_{t=1}^{n} p(y_t \mid
+y_{&lt;t}).\]</span></p>
+<p>For image-conditioned text generation, the image <span class="math inline">\(x\)</span> becomes an additional conditioning
+variable: <span class="math display">\[p(y_{1:n} \mid x) =
+\prod_{t=1}^{n} p(y_t \mid y_{&lt;t}, x).\]</span></p>
+<p>Equivalently, this can be expressed in token-wise form as <span class="math display">\[p(y_t \mid y_{&lt;t}, x),\]</span> which
+highlights the autoregressive nature of generation.</p>
+<p>If the image has already been converted into visual tokens <span class="math inline">\(v_{1:m}\)</span>, then generation may be
+understood as conditioning on a fused multimodal representation formed
+from visual and textual tokens. A common conceptual representation is
+<span class="math display">\[z = [v_1,v_2,\dots,v_m,
+y_1,y_2,\dots,y_n],\]</span> where <span class="math inline">\(z\)</span> denotes a joint token sequence or fused
+embedding space used by the model.</p>
+<p>This fusion of visual and textual tokens can be visualized as
+follows:</p>
+<figure>
+<img src="img/lecture29/fused_tokens.png" style="width:30.00%; max-width:30.00%; height:auto;"/>
+<figcaption>Fusion of visual tokens <span class="math inline">\(v_{1:m}\)</span> and text tokens <span class="math inline">\(y_{1:n}\)</span> into a joint representation used
+for multimodal reasoning.</figcaption>
+</figure>
+<p>This fused representation is processed by a Transformer, enabling
+attention-based interactions between visual and textual tokens.</p>
+<p>This formulation reveals the main challenge in generative VLMs:
+obtaining a fused representation that preserves the semantics of the
+image while remaining compatible with a language decoder.</p>
+<p>Unlike contrastive models such as CLIP, which learn aligned
+embeddings, generative VLMs explicitly model conditional sequence
+generation.</p>
+<h2 data-number="4.5" id="contrastive-vlms"><span class="header-section-number">4.5</span> Contrastive VLMs</h2>
+<p>Not all VLMs follow the autoregressive formulation above. A model
+such as CLIP is trained contrastively <span class="citation" data-cites="radford2021"></span>: it learns image and text encoders
+whose outputs are close for matched pairs and far apart for mismatched
+pairs. Such a model is extremely effective for retrieval and zero-shot
+classification, but it is not itself a left-to-right generative language
+model. It is trained contrastively rather than autoregressively. In
+these models, an image encoder and a text encoder produce embeddings
+<span class="math inline">\(v_i\)</span> and <span class="math inline">\(t_i\)</span>, and the objective is to make matched
+image-text pairs similar while pushing mismatched pairs apart. A
+standard contrastive objective for an image-text pair in a batch is
+<span class="math display">\[\mathcal{L}_{\text{InfoNCE}}
+=
+-\log
+\frac{\exp(\mathrm{sim}(v_i,t_i)/\tau)}
+{\sum_{j=1}^{B}\exp(\mathrm{sim}(v_i,t_j)/\tau)}.\]</span> This differs
+fundamentally from generative VLMs, which predict the next token
+conditioned on the image.</p>
+<p>By contrast, image captioning systems and instruction-following VLMs
+are generative: they explicitly model language output token by token
+conditioned on visual information. Hence, the probabilistic modeling
+differs fundamentally from CLIP.</p>
+<h1 data-number="5" id="vlm-architecture"><span class="header-section-number">5.</span> VLM Architecture</h1>
+<h2 data-number="5.1" id="a-general-architectural-template"><span class="header-section-number">5.1</span> A General Architectural
+Template</h2>
+<p>A general Transformer-based framework for VLMs has the following
+components:</p>
+<ol>
+<li><p>an image encoder,</p></li>
+<li><p>a text encoder,</p></li>
+<li><p>a multimodal fusion module,</p></li>
+<li><p>an optional decoder, and</p></li>
+<li><p>task-specific outputs.</p></li>
+</ol>
+<p>This general architectural template follows established formulations
+in vision-language pretraining literature <span class="citation" data-cites="gan2022"></span>.</p>
+<p>This overall architecture can be visualized as follows:</p>
+<figure>
+<img src="img/lecture29/vlm_encoder_architecture.png" style="width:51.00%; max-width:51.00%; height:auto;"/>
+<figcaption>General architecture of a vision-language model, consisting
+of an image encoder, a text encoder, a multimodal fusion module, and an
+optional decoder supporting various pretraining objectives and
+downstream tasks.</figcaption>
+</figure>
+<p>The figure illustrates how visual and textual inputs are encoded
+separately, fused through attention mechanisms, and passed to a decoder
+for downstream tasks.</p>
+<p>Depending on the objective, the outputs may support masked language
+modeling, masked image modeling, image-text matching, image-text
+contrastive learning, visual question answering, image captioning,
+text-image retrieval, or phrase grounding.</p>
+<p>This template is broad enough to include both encoder-based alignment
+models and decoder-based generative models.</p>
+<h2 data-number="5.2" id="vision-encoders"><span class="header-section-number">5.2</span> Vision Encoders</h2>
+<p>There are two broad classes of end-to-end vision encoders used in
+VLMs.</p>
+<h3 data-number="5.2.1" id="cnn-based-encoders"><span class="header-section-number">5.2.1</span> CNN-based Encoders</h3>
+<p>A CNN-based encoder processes the image through convolutional layers
+and extracts spatial feature maps or grid features, which are then
+passed to a Transformer layer or fusion module. Earlier VLMs often
+relied on CNN feature extractors because convolutional vision backbones
+were already strong and widely available.</p>
+<p>The strength of CNN-based encoders is their inductive bias toward
+locality and translation structure. Their limitation is that the output
+representation is less naturally tokenized than in a pure ViT
+pipeline.</p>
+<h3 data-number="5.2.2" id="vit-based-encoders"><span class="header-section-number">5.2.2</span> ViT-based Encoders</h3>
+<p>A ViT-based encoder first splits the image into patches, flattens
+them, projects them into embeddings, adds positional information, and
+then processes them with a Transformer. This makes the visual pipeline
+structurally closer to the text pipeline, which simplifies multimodal
+fusion.</p>
+<p>Popular variants include ViT, DeiT, BEiT, Swin Transformer, and
+CLIP-ViT. In modern VLMs, ViT-based encoders are common because they
+scale naturally with Transformer-based language backbones.</p>
+<h2 data-number="5.3" id="cnn-based-versus-vit-based-visual-encoders"><span class="header-section-number">5.3</span> CNN-based versus ViT-based
+Visual Encoders</h2>
+<p>Conceptually, the difference between CNN-based and ViT-based visual
+encoders parallels the earlier discussion of convolutional neural
+networks and Vision Transformers.</p>
+<p>This distinction is illustrated in Figure <a data-reference="fig:cnn_vit_comparison" data-reference-type="ref" href="#fig:cnn_vit_comparison">3</a>, where CNN-based encoders
+process images through convolutional feature extraction, while ViT-based
+encoders convert images into sequences of patch embeddings that are
+processed by a Transformer.</p>
+<figure id="fig:cnn_vit_comparison">
+<img src="img/lecture29/cnn_vit_comparison.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
+<figcaption>Comparison between CNN-based and ViT-based visual encoders.
+CNNs extract hierarchical spatial features through convolutional layers,
+while Vision Transformers represent images as sequences of patch
+embeddings processed by a Transformer architecture.</figcaption>
+</figure>
+<h4 data-number="5.3.0.1" id="cnn-based-encoders."><span class="header-section-number">5.3.0.1</span> CNN-based encoders.</h4>
+<p>CNN-based encoders process images using convolutional filters that
+exploit spatial locality and weight sharing. These models build
+hierarchical feature representations, starting from low-level edges and
+textures and progressing to higher-level semantic features. Because of
+their inductive biases toward locality and translation invariance, CNNs
+are often more parameter-efficient and perform well in lower-data
+regimes.</p>
+<h4 data-number="5.3.0.2" id="vit-based-encoders."><span class="header-section-number">5.3.0.2</span> ViT-based encoders.</h4>
+<p>ViT-based encoders represent images as sequences of patch embeddings,
+as discussed in the previous section. Each patch is treated as a token
+and processed using self-attention mechanisms within a Transformer. This
+token-based representation integrates naturally with language models and
+multimodal architectures, making ViTs particularly well-suited for
+large-scale multimodal pretraining, where alignment between visual and
+textual tokens is required.</p>
+<h2 data-number="5.4" id="text-encoder"><span class="header-section-number">5.4</span> Text Encoder</h2>
+<p>In addition to a vision encoder, VLMs also rely on a text encoder to
+process linguistic inputs. The text encoder maps tokens <span class="math inline">\(y_1, y_2, \dots, y_n\)</span> into embeddings:
+<span class="math display">\[t_i = f_{\text{text}}(y_i)\]</span></p>
+<p>In multimodal settings, the text encoder must produce representations
+that are compatible with visual embeddings, either through shared
+embedding spaces or through downstream fusion mechanisms such as
+cross-attention.</p>
+<p>Common text encoders include Transformer-based architectures such as
+BERT, RoBERTa, or pretrained LLM embeddings. These embeddings capture
+semantic and contextual information in the input text.</p>
+<p>The text encoder plays two key roles:</p>
+<ul>
+<li><p>providing contextual representations for language understanding
+tasks,</p></li>
+<li><p>enabling alignment with visual embeddings in a shared
+space.</p></li>
+</ul>
+<p>In generative VLMs, the text encoder may be integrated into the
+decoder itself, while in contrastive models (e.g., CLIP), it remains a
+separate module.</p>
+<h2 data-number="5.5" id="multimodal-fusion"><span class="header-section-number">5.5</span> Multimodal Fusion</h2>
+<p>Fusion is the central architectural problem in a VLM. Once an image
+encoder and text encoder produce their respective representations, the
+model must decide how and when to combine them.</p>
+<p>Several fusion mechanisms include merged attention, co-attention, and
+dot-product alignment. These can be grouped into two main
+strategies.</p>
+<p>This distinction is illustrated in Figure <a data-reference="fig:fusion_comparison" data-reference-type="ref" href="#fig:fusion_comparison">4</a>, where early fusion
+integrates modalities at the token level, while late fusion combines
+modality-specific representations at a later stage.</p>
+<figure id="fig:fusion_comparison">
+<p><strong>Early Fusion</strong><br/>
+<img alt="image" src="img/lecture29/early_fusion.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<p><strong>Late Fusion</strong><br/>
+<img alt="image" src="img/lecture29/late_fusion.png" style="width:60.00%; max-width:60.00%; height:auto;"/></p>
+<figcaption>Comparison of multimodal fusion strategies. Early fusion
+integrates visual and textual information at the token level within a
+shared sequence model, while late fusion processes modalities separately
+and combines them through a fusion mechanism such as
+cross-attention.</figcaption>
+</figure>
+<h3 data-number="5.5.1" id="early-fusion"><span class="header-section-number">5.5.1</span> Early Fusion</h3>
+<p>In early fusion, different modalities are converted into discrete
+tokens with a shared or jointly compatible vocabulary, and a shared
+representation is learned at an early stage. The model operates on
+multimodal tokens as part of a common processing pipeline.</p>
+<p>Some examples include SimVLM, Frozen, Chameleon, and Show-o.</p>
+<p>The advantage of early fusion is that the model can learn rich
+cross-modal interactions from the start. The limitation is that it
+places a greater burden on token compatibility and shared representation
+design.</p>
+<h3 data-number="5.5.2" id="late-fusion"><span class="header-section-number">5.5.2</span> Late Fusion</h3>
+<p>In late fusion, each modality is encoded separately using its own
+encoder, and the resulting representations are fused later. Some
+examples include CLIP, Flamingo, ViLT, LLaVA, and Unified-IO.</p>
+<p>The advantage of late fusion is modularity. A strong image encoder
+and a strong language model can be pretrained separately and then
+combined through a fusion mechanism such as cross-attention or a learned
+projector. The limitation is that the model may not learn as deep an
+early shared representation as an early-fusion design.</p>
+<blockquote>
+<p><strong>Key Idea:</strong> Early fusion emphasizes a shared
+multimodal representation from the start. Late fusion emphasizes modular
+encoders followed by an interaction layer or bridge.</p>
+</blockquote>
+<h2 data-number="5.6" id="examples-of-early-fusion-models"><span class="header-section-number">5.6</span> Examples of Early-Fusion
+Models</h2>
+<h4 data-number="5.6.0.1" id="simvlm."><span class="header-section-number">5.6.0.1</span> SimVLM.</h4>
+<p>SimVLM illustrates a mixed-modal autoregressive formulation in which
+image and text tokens are processed in a common sequence model. This is
+conceptually close to the generative left-to-right viewpoint discussed
+earlier.</p>
+<h4 data-number="5.6.0.2" id="frozen."><span class="header-section-number">5.6.0.2</span> Frozen.</h4>
+<p>Frozen uses a frozen language model and trains the visual front end
+so that gradients flowing through the language model’s self-attention
+layers help align visual representations to the text-generation
+pipeline. This is a useful example because it shows that not all
+parameters in a VLM need to be retrained jointly.</p>
+<p>We now describe representative late-fusion models, building on the
+contrastive formulation introduced earlier.</p>
+<h2 data-number="5.7" id="examples-of-late-fusion-models"><span class="header-section-number">5.7</span> Examples of Late-Fusion
+Models</h2>
+<h4 data-number="5.7.0.1" id="clip."><span class="header-section-number">5.7.0.1</span> CLIP.</h4>
+<p>Building on the contrastive formulation introduced earlier, CLIP uses
+a dual-encoder architecture consisting of a text encoder and an image
+encoder trained with a contrastive objective <span class="citation" data-cites="radford2021"></span>. It learns a shared embedding space in
+which matched image-text pairs are close and mismatched pairs are far
+apart. This enables strong performance in retrieval and zero-shot
+classification, although it lacks the generative capabilities of
+autoregressive VLMs.</p>
+<h4 data-number="5.7.0.2" id="align."><span class="header-section-number">5.7.0.2</span> ALIGN.</h4>
+<p>ALIGN follows a large-scale noisy text supervision paradigm for
+vision-language learning <span class="citation" data-cites="jia2021"></span>, enabling image-text representation
+learning that supports retrieval and zero-shot transfer.</p>
+<h4 data-number="5.7.0.3" id="flamingo."><span class="header-section-number">5.7.0.3</span> Flamingo.</h4>
+<p>Flamingo combines a pretrained and frozen vision encoder with a
+pretrained and frozen language model, using intermediate modules such as
+the Perceiver Resampler and gated cross-attention blocks to inject
+visual information into the language model <span class="citation" data-cites="alayrac2022"></span>. This design is influential because it
+preserves the strengths of the language model while enabling effective
+multimodal conditioning.</p>
+<blockquote>
+<p><strong>Key Idea:</strong> Contrastive models such as CLIP and ALIGN
+learn shared embedding spaces for alignment, while models such as
+Flamingo extend pretrained language models to enable multimodal
+generation through cross-attention.</p>
+</blockquote>
+<h2 data-number="5.8" id="clip-fusion-and-shared-embedding-spaces"><span class="header-section-number">5.8</span> CLIP Fusion and Shared
+Embedding Spaces</h2>
+<p>CLIP is an intuitive solution to multimodal alignment. Text is mapped
+by a text encoder into an embedding, images are mapped by an image
+encoder into another embedding, and a contrastive objective encourages
+matched image-text pairs to lie close in representation space.</p>
+<p>Although CLIP is not a generative captioning model by itself, it is
+foundational in multimodal learning because it creates a shared semantic
+geometry. This geometry can then be used for retrieval, zero-shot
+classification, or as a component in larger generation systems.</p>
+<h2 data-number="5.9" id="fusion-encoder-versus-dual-encoder-views"><span class="header-section-number">5.9</span> Fusion-Encoder versus
+Dual-Encoder Views</h2>
+<h4 data-number="5.9.0.1" id="dual-encoder-models."><span class="header-section-number">5.9.0.1</span> Dual-encoder models.</h4>
+<p>These keep the image encoder and text encoder separate and align
+their representations through similarity-based objectives. CLIP is the
+canonical example.</p>
+<h4 data-number="5.9.0.2" id="fusion-encoder-models."><span class="header-section-number">5.9.0.2</span> Fusion-encoder models.</h4>
+<p>These explicitly mix visual and textual features through joint
+attention, co-attention, or a common Transformer stack. Such models are
+better suited when the task requires fine-grained interaction between
+modalities, such as visual question answering or grounded
+generation.</p>
+<p>A dual-encoder is often preferable for retrieval because image and
+text embeddings can be precomputed independently. A fusion-encoder is
+often preferable for reasoning-heavy tasks because it permits repeated
+interaction between modalities.</p>
+<h2 data-number="5.10" id="decoders-in-modern-vlms"><span class="header-section-number">5.10</span> Decoders in Modern VLMs</h2>
+<p>Many modern VLMs use a pretrained LLM as the decoder. This design
+follows the intuition that strong text generation, instruction
+following, and reasoning are already present in large pretrained
+language models; the remaining challenge is to connect visual
+information to that decoder.</p>
+<p>Examples include Flan-T5, the LLaMA family, Vicuna, Qwen, and smaller
+deployment-oriented models such as MobileLLaMA. Additionally, as the
+parameter count of the language decoder grows, VLM capability often
+improves as well.</p>
+<h3 data-number="5.10.1" id="paligemma-as-an-example"><span class="header-section-number">5.10.1</span> PaliGemma as an Example</h3>
+<p>PaliGemma is presented as an example of a compact but capable VLM. It
+uses SigLIP, a CLIP-like vision encoder, together with Gemma, a 2B
+language model. A learned projector maps the visual embeddings into the
+token space consumed by the language model decoder.</p>
+<p>This architecture is important pedagogically because it makes the
+bridge explicit. The image encoder does not directly generate language.
+Instead, it produces visual embeddings, a projector maps those
+embeddings into the decoder’s input space, and then the decoder performs
+language generation.</p>
+<h3 data-number="5.10.2" id="image-decoder-plus-text-decoder"><span class="header-section-number">5.10.2</span> Image Decoder plus Text
+Decoder</h3>
+<p>Similar to LLMs, architectures that support multiple output
+modalities, such as a shared Transformer backbone followed by an image
+decoder and a text decoder can be used. Gemini is a representative
+example. This anticipates the broader MLLM setting, where a single model
+may accept text, images, audio, and video, and may also produce outputs
+in more than one modality.</p>
+<h2 data-number="5.11" id="generative-modeling-in-vlms"><span class="header-section-number">5.11</span> Generative Modeling in
+VLMs</h2>
+<p>Generative VLMs extend autoregressive language modeling by
+conditioning on visual inputs. Unlike contrastive models such as CLIP,
+which learn shared embedding spaces, generative VLMs explicitly model
+conditional sequence generation and produce outputs token by token.</p>
+<p>The training objective follows: <span class="math display">\[\mathcal{L}_{\text{gen}} = - \sum_{t=1}^{n} \log
+p(y_t \mid y_{&lt;t}, x)\]</span></p>
+<p>Key characteristics:</p>
+<ul>
+<li><p>Visual tokens are injected into the Transformer via
+cross-attention or prefix tokens</p></li>
+<li><p>The decoder generates language autoregressively</p></li>
+<li><p>Supports open-ended tasks such as captioning, reasoning, and
+dialogue</p></li>
+</ul>
+<p>Examples include:</p>
+<ul>
+<li><p>Flamingo</p></li>
+<li><p>LLaVA</p></li>
+<li><p>Gemini</p></li>
+</ul>
+<blockquote>
+<p><strong>Key Idea:</strong> Generative VLMs unify perception and
+reasoning by extending next-token prediction to multimodal contexts.</p>
+</blockquote>
+<blockquote>
+<p><strong>Key Idea:</strong> All modern VLM architectures can be
+understood as variations of a single principle: extending sequence
+modeling to multimodal inputs through appropriate representation and
+fusion mechanisms.</p>
+</blockquote>
+<h1 data-number="6" id="training-vision-language-models"><span class="header-section-number">6.</span> Training Vision-Language
+Models</h1>
+<p>VLMs mirror the LLM training pipeline and present four stages:</p>
+<ol>
+<li><p>pretraining,</p></li>
+<li><p>instruction tuning,</p></li>
+<li><p>alignment tuning, and</p></li>
+<li><p>supervised fine-tuning.</p></li>
+</ol>
+<p>This pipeline is illustrated in Figure <a data-reference="fig:vlm_training_pipeline" data-reference-type="ref" href="#fig:vlm_training_pipeline">5</a>, which shows the
+progression from pretraining to instruction tuning and preference
+alignment.</p>
+<figure id="fig:vlm_training_pipeline">
+<img src="img/lecture29/vlm_training_pipeline.png" style="width:57.00%; max-width:57.00%; height:auto;"/>
+<figcaption>Training pipeline for modern VLMs. The model is first
+pretrained on large-scale data, then instruction-tuned on task-specific
+data, and finally aligned using human preference data through methods
+such as RLHF or DPO.</figcaption>
+</figure>
+<p>Note that the key difference between LLMs and VLMs is that the data
+and objectives are now multimodal.</p>
+<h2 data-number="6.1" id="pretraining"><span class="header-section-number">6.1</span> Pretraining</h2>
+<p>In pretraining, the main goal is to align modalities and learn broad
+multimodal knowledge from large-scale image-text data. Representative
+datasets include CC3M, LAION-5B, and COYO-700M, with a noted trend
+toward higher-quality fine-grained data such as GPT-4V-assisted
+datasets.</p>
+<p>Depending on the architecture, pretraining objectives may
+include:</p>
+<ul>
+<li><p>image-text contrastive learning,</p></li>
+<li><p>image-text matching,</p></li>
+<li><p>masked language modeling,</p></li>
+<li><p>masked image modeling, and</p></li>
+<li><p>autoregressive image-conditioned text generation.</p></li>
+</ul>
+<p>A simple contrastive pretraining view can be written as learning
+encoders <span class="math inline">\(f_{\text{img}}(x)\)</span> and
+<span class="math inline">\(f_{\text{text}}(y)\)</span> so that matched
+pairs have high similarity: <span class="math display">\[s(x,y) =
+\frac{f_{\text{img}}(x)^\top
+f_{\text{text}}(y)}{\|f_{\text{img}}(x)\|\,\|f_{\text{text}}(y)\|}.\]</span></p>
+<p>Generative pretraining instead adopts the conditional autoregressive
+loss <span class="math display">\[\mathcal{L}_{\text{gen}} =
+-\sum_{t=1}^{n} \log p_\theta(y_t \mid y_{&lt;t}, x).\]</span></p>
+<p>These two families of objectives explain why some VLMs are better
+suited for retrieval, while others are better suited for open-ended
+generation.</p>
+<h2 data-number="6.2" id="instruction-tuning"><span class="header-section-number">6.2</span> Instruction Tuning</h2>
+<p>Instruction tuning teaches the model to follow multimodal
+instructions. The central training unit becomes a triplet such as <span class="math display">\[(\text{instruction}, \text{input},
+\text{output}),\]</span> where the input may include an image, text, or
+both.</p>
+<p>Consider the following three data collection approaches:</p>
+<ol>
+<li><p>adapting existing datasets, such as converting captions or
+bounding-box annotations into instruction-response format,</p></li>
+<li><p>using self-instruction, where LLMs help generate
+instruction-following data, and</p></li>
+<li><p>mixing unimodal text instruction data with multimodal instruction
+data to improve conversation quality.</p></li>
+</ol>
+<p>The training objective remains autoregressive cross-entropy, but now
+over multimodal instruction-response pairs: <span class="math display">\[\mathcal{L}_{\text{inst}} = -\sum_{t=1}^{n} \log
+p_\theta(y_t \mid y_{&lt;t}, i, x),\]</span> where <span class="math inline">\(i\)</span> denotes the instruction and <span class="math inline">\(x\)</span> may include an image and optional text
+context.</p>
+<h2 data-number="6.3" id="alignment-tuning"><span class="header-section-number">6.3</span> Alignment Tuning</h2>
+<p>Instruction tuning makes the model responsive to user prompts, but it
+does not guarantee that the model’s outputs are aligned with human
+preferences. Alignment tuning therefore aims to shape the model’s
+behavior so that its responses are more helpful, less harmful, and more
+consistent with user expectations.</p>
+<p>Referring back to the training pipeline in Figure <a data-reference="fig:vlm_training_pipeline" data-reference-type="ref" href="#fig:vlm_training_pipeline">5</a>, alignment tuning
+corresponds to the stage where human preference data is used to refine
+the behavior of the model.</p>
+<p>As in LLMs, alignment tuning typically relies on human feedback or
+preference data to guide the model toward desirable outputs. This
+process is particularly important in multimodal settings, where models
+must not only generate fluent text but also ensure that their responses
+are grounded in visual content and socially appropriate.</p>
+<p>There are two main approaches to alignment.</p>
+<h3 data-number="6.3.1" id="rlhf"><span class="header-section-number">6.3.1</span> RLHF</h3>
+<p>Reinforcement learning from human feedback (RLHF) proceeds in three
+stages:</p>
+<ol>
+<li><p>supervised fine-tuning of an initial policy model,</p></li>
+<li><p>reward model training from ranked human preferences, and</p></li>
+<li><p>reinforcement learning, often with PPO or GRPO, to optimize the
+policy against the reward model.</p></li>
+</ol>
+<p>In a VLM setting, the prompts may themselves be multimodal, such as
+image-question pairs. The reward model then evaluates not only
+linguistic quality but also whether the answer is grounded in the visual
+evidence.</p>
+<h3 data-number="6.3.2" id="dpo"><span class="header-section-number">6.3.2</span> DPO</h3>
+<p>Direct Preference Optimization (DPO) simplifies the RLHF pipeline by
+removing the explicit reward-model-plus-RL stage. Instead, the model is
+directly optimized from pairwise preference data. Conceptually, DPO asks
+the model to increase the probability of preferred outputs relative to
+dispreferred outputs under a classification-like objective.</p>
+<p>Compared to RLHF, DPO avoids the need for training a separate reward
+model and performing reinforcement learning, resulting in a simpler and
+more stable training process while preserving the same alignment
+objective.</p>
+<blockquote>
+<p><strong>Key Idea:</strong> Alignment tuning ensures that VLMs produce
+outputs that are not only correct but also helpful, safe, and grounded
+in multimodal context. Methods such as RLHF and DPO achieve this by
+leveraging human preference data to guide model behavior.</p>
+</blockquote>
+<h2 data-number="6.4" id="supervised-fine-tuning-and-domain-adaptation"><span class="header-section-number">6.4</span> Supervised Fine-Tuning and
+Domain Adaptation</h2>
+<p>The final stage adapts the model to specific tasks or domains.
+Examples might include medical image reporting, document understanding,
+embodied perception, or specialized multilingual settings. Fine-tuning
+may update the full model or only a subset of parameters, depending on
+deployment constraints.</p>
+<p>As in the LLM lecture, fine-tuning improves specialization but may
+reduce generality if the task distribution is narrow. Therefore, the
+best practice is often to begin from a strong pretrained and
+instruction-tuned model, then adapt conservatively to the target
+domain.</p>
+<h1 data-number="7" id="evaluation-of-vlms-and-mllms"><span class="header-section-number">7.</span> Evaluation of VLMs and MLLMs</h1>
+<h2 data-number="7.1" id="closed-set-versus-open-set-evaluation"><span class="header-section-number">7.1</span> Closed-Set versus Open-Set
+Evaluation</h2>
+<p>VLM evaluation is divided into two broad regimes.</p>
+<h4 data-number="7.1.0.1" id="closed-set-evaluation."><span class="header-section-number">7.1.0.1</span> Closed-set evaluation.</h4>
+<p>Here the answer space is predefined and finite. Accuracy is an
+appropriate metric when the task reduces to selecting from a limited set
+of choices. For instance, ScienceQA is a representative benchmark, where
+systems such as InstructBLIP or LLaVA may report zero-shot or fine-tuned
+accuracy. In this setting, evaluation resembles traditional
+classification tasks.</p>
+<h4 data-number="7.1.0.2" id="open-set-evaluation."><span class="header-section-number">7.1.0.2</span> Open-set evaluation.</h4>
+<p>Here the model produces free-form responses, often in chatbot style.
+This setting is substantially harder to evaluate because there may be
+many acceptable responses. There are three common open-set evaluation
+strategies:</p>
+<ul>
+<li><p>manual human scoring,</p></li>
+<li><p>scoring with a stronger model such as GPT-4 or GPT-4V,
+and</p></li>
+<li><p>case studies comparing qualitative capabilities.</p></li>
+</ul>
+<p>This distinction parallels the earlier contrast between
+classification-style evaluation and open-ended generation evaluation in
+LLMs.</p>
+<p>Evaluation in VLMs is inherently application-dependent, as different
+tasks require different notions of correctness, ranging from discrete
+answer accuracy to perceptual similarity and semantic alignment.</p>
+<h2 data-number="7.2" id="application-specific-evaluation"><span class="header-section-number">7.2</span> Application-Specific
+Evaluation</h2>
+<p>While the closed-set vs. open-set distinction is useful, VLM
+evaluation is highly task-dependent. Different applications require
+different datasets and metrics.</p>
+<h3 data-number="7.2.1" id="visual-question-answering-vqa"><span class="header-section-number">7.2.1</span> Visual Question Answering
+(VQA)</h3>
+<p>In VQA, the model must answer a question based on an image. Common
+datasets include:</p>
+<ul>
+<li><p>ScienceQA,</p></li>
+<li><p>VizWiz, and</p></li>
+<li><p>GQA.</p></li>
+</ul>
+<p>Evaluation metrics go beyond simple accuracy:</p>
+<ul>
+<li><p><strong>Accuracy:</strong> Correctness of the predicted
+answer,</p></li>
+<li><p><strong>Per-type accuracy:</strong> Performance across question
+categories,</p></li>
+<li><p><strong>Consistency:</strong> Logical consistency across related
+questions,</p></li>
+<li><p><strong>Plausibility:</strong> Whether answers are reasonable
+given the image,</p></li>
+<li><p><strong>Calibration:</strong> Alignment between confidence and
+correctness.</p></li>
+</ul>
+<p>These metrics reflect the need for both reasoning and visual
+grounding.</p>
+<h3 data-number="7.2.2" id="text-to-image-generation"><span class="header-section-number">7.2.2</span> Text-to-Image Generation</h3>
+<p>In text-to-image generation, the model must produce images aligned
+with a textual prompt. Common benchmarks include:</p>
+<ul>
+<li><p>GenEval, and</p></li>
+<li><p>TIFA.</p></li>
+</ul>
+<p>Evaluation metrics include:</p>
+<ul>
+<li><p><strong>Fréchet Inception Distance (FID):</strong> Measures
+similarity between generated and real image distributions,</p></li>
+<li><p><strong>CLIPScore:</strong> Measures alignment between generated
+images and text prompts,</p></li>
+<li><p><strong>Image-text alignment metrics:</strong> Evaluate semantic
+consistency between modalities.</p></li>
+</ul>
+<p>Unlike VQA, evaluation here focuses on perceptual quality and
+semantic alignment.</p>
+<h3 data-number="7.2.3" id="image-captioning"><span class="header-section-number">7.2.3</span> Image Captioning</h3>
+<p>In image captioning, the model generates a textual description of an
+image. Evaluation often uses metrics from language modeling:</p>
+<ul>
+<li><p><strong>BLEU:</strong> Measures n-gram precision,</p></li>
+<li><p><strong>METEOR:</strong> Incorporates semantic matching,</p></li>
+<li><p><strong>ROUGE:</strong> Measures recall-based overlap,</p></li>
+<li><p><strong>CIDEr:</strong> Designed specifically for captioning
+tasks,</p></li>
+<li><p><strong>CLIPScore:</strong> Measures alignment between image and
+generated caption.</p></li>
+</ul>
+<p>These metrics highlight the challenge of evaluating both linguistic
+quality and visual relevance.</p>
+<h3 data-number="7.2.4" id="example-caption-evaluation"><span class="header-section-number">7.2.4</span> Example: Caption
+Evaluation</h3>
+<p>To better understand how these metrics behave in practice, consider
+the following example.</p>
+<figure>
+<img src="img/lecture29/cat_sitting_on_mat.jpg" style="width:21.00%; max-width:21.00%; height:auto;"/>
+<figcaption>Example image used for caption evaluation.</figcaption>
+</figure>
+<p>Consider an image of a cat sitting on a mat.</p>
+<p><strong>Ground truth:</strong></p>
+<blockquote>
+<p>A cat sits on a mat.</p>
+</blockquote>
+<p><strong>Generated caption:</strong></p>
+<blockquote>
+<p>A small cat is sitting on the floor.</p>
+</blockquote>
+<p>Evaluation:</p>
+<ul>
+<li><p><strong>BLEU:</strong> measures n-gram overlap between generated
+and reference captions</p></li>
+<li><p><strong>ROUGE:</strong> measures recall-based overlap of key
+phrases</p></li>
+<li><p><strong>CLIPScore:</strong> measures semantic alignment between
+the generated caption and the image</p></li>
+</ul>
+<blockquote>
+<p><strong>Key Idea:</strong> Unlike pure text evaluation, multimodal
+evaluation must assess both linguistic quality and visual grounding.</p>
+</blockquote>
+<h2 data-number="7.3" id="why-evaluation-is-harder-in-vlms-compared-to-llms"><span class="header-section-number">7.3</span> Why Evaluation Is Harder in
+VLMs compared to LLMs</h2>
+<p>VLM evaluation is challenging because correctness is not purely
+linguistic. A response may be fluent but visually unsupported.
+Conversely, a response may mention relevant visual evidence but be
+awkwardly phrased. Robust evaluation therefore requires judging both
+language quality and grounding quality.</p>
+<p>A good evaluation protocol for VLMs should ideally assess:</p>
+<ul>
+<li><p>semantic correctness,</p></li>
+<li><p>visual grounding,</p></li>
+<li><p>helpfulness and safety,</p></li>
+<li><p>robustness to distribution shift, and</p></li>
+<li><p>consistency across modalities.</p></li>
+</ul>
+<h2 data-number="7.4" id="beyond-bi-modality-mllms"><span class="header-section-number">7.4</span> Beyond Bi-Modality: MLLMs</h2>
+<p>Finally, vision-language models may be extended to multimodal large
+language models (MLLMs), which incorporate more than two modalities,
+such as vision, audio, and text.</p>
+<p>The same architectural pattern persists:</p>
+<ol>
+<li><p>modality-specific encoders process different inputs,</p></li>
+<li><p>a fusion module integrates those representations, and</p></li>
+<li><p>one or more decoders produce task outputs.</p></li>
+</ol>
+<p>Qwen3-Omni is an example of a model that accepts vision, audio, and
+text. A comparison with Flamingo shows that the core VLM ideas remain
+relevant: modality encoders, fusion mechanisms, and decoder backbones.
+The main difference is that the model now manages more channels of
+information and potentially more than one output type.</p>
+<blockquote>
+<p><strong>Key Idea:</strong> An MLLM can be understood as a natural
+generalization of a VLM: replace a single visual encoder with multiple
+modality-specific encoders, retain a fusion mechanism, and use a strong
+language-centric decoder or multimodal output stack.</p>
+</blockquote>
+<h1 data-number="8" id="summary"><span class="header-section-number">8.</span> Summary</h1>
+<p>This lecture extends the framework of LLMs to multimodal reasoning
+with images and language. The key conceptual bridge is that images can
+be tokenized into patch representations and processed by
+Transformer-based encoders, allowing VLMs to inherit much of the
+machinery developed for language models. Generative VLMs preserve the
+left-to-right next-token perspective by modeling text conditioned on
+visual input, while contrastive VLMs focus on learning shared image-text
+embedding spaces.</p>
+<p>Architecturally, VLMs combine image encoders, text encoders, fusion
+modules, and often pretrained LLM decoders. Fusion may happen early or
+late, and systems may be organized as dual encoders, fusion encoders, or
+decoder-based generative models. Training follows a familiar progression
+from pretraining to instruction tuning, alignment, and fine-tuning, but
+now with multimodal data and objectives. Evaluation is correspondingly
+harder because the model must be both linguistically coherent and
+visually grounded. Finally, the same ideas generalize beyond bi-modality
+to richer MLLM systems that integrate vision, language, audio, and other
+inputs.</p>
+<ul>
+<li><p>Multimodal learning is motivated by the fact that many real-world
+data sources are inherently composed of more than one modality.</p></li>
+<li><p>VLMs extend the ideas of LLMs by conditioning generation and
+reasoning on visual input in addition to text.</p></li>
+<li><p>Images can be represented as token sequences using patch
+embeddings, making them compatible with Transformer-based
+processing.</p></li>
+<li><p>Generative VLMs model <span class="math display">\[p(y_{1:n}\mid
+x)=\prod_{t=1}^{n} p(y_t\mid y_{&lt;t},x),\]</span> while contrastive
+VLMs learn aligned image-text embedding spaces.</p></li>
+<li><p>CNN-based and ViT-based encoders provide different tradeoffs for
+visual representation learning.</p></li>
+<li><p>Early fusion learns joint multimodal representations early, while
+late fusion first encodes modalities separately and fuses them
+later.</p></li>
+<li><p>Modern VLMs often use pretrained LLMs as decoders, with learned
+projectors or cross-attention modules bridging vision and
+language.</p></li>
+<li><p>The VLM training pipeline mirrors the LLM pipeline: pretraining,
+instruction tuning, alignment tuning, and fine-tuning.</p></li>
+<li><p>Evaluating VLMs requires attention not only to textual quality
+but also to visual grounding.</p></li>
+<li><p>MLLMs generalize VLM ideas to more than two modalities.</p></li>
+</ul>
+<div class="thebibliography">
+<p><span>9</span></p>
+<p>T. Baltrušaitis, C. Ahuja, and L.-P. Morency, “Multimodal machine
+learning: A survey and taxonomy,” <em>IEEE Transactions on Pattern
+Analysis and Machine Intelligence</em>, vol. 41, no. 2, pp. 423–443,
+2018.</p>
+<p>M. Z. Hossain, F. Sohel, M. F. Shiratuddin, and H. Laga, “A
+comprehensive survey of deep learning for image captioning,” <em>ACM
+Computing Surveys</em>, vol. 51, no. 6, pp. 1–36, 2019.</p>
+<p>L. Yu, P. Poirson, S. Yang, A. C. Berg, and T. L. Berg, “Modeling
+context in referring expressions,” in <em>European Conference on
+Computer Vision (ECCV)</em>, 2016, pp. 69–85.</p>
+<p>S. Yin, C. Fu, S. Zhao, K. Li, X. Sun, T. Xu, and E. Chen, “A survey
+on multimodal large language models,” <em>National Science Review</em>,
+vol. 11, no. 12, 2024.</p>
+<p>Z. Gan, L. Li, C. Li, L. Wang, Z. Liu, and J. Gao, “Vision-language
+pre-training: Basics, recent advances, and future trends,” <em>arXiv
+preprint arXiv:2210.09263</em>, 2022.</p>
+<p>A. Radford et al., “Learning transferable visual models from natural
+language supervision,” in <em>International Conference on Machine
+Learning (ICML)</em>, 2021, pp. 8748–8763.</p>
+<p>J.-B. Alayrac et al., “Flamingo: a visual language model for few-shot
+learning,” in <em>Advances in Neural Information Processing Systems
+(NeurIPS)</em>, 2022.</p>
+<p>C. Jia et al., “Scaling up visual and vision-language representation
+learning with noisy text supervision,” in <em>International Conference
+on Machine Learning (ICML)</em>, 2021, pp. 4904–4916.</p>
+</div>
 
 </main>
 </body>

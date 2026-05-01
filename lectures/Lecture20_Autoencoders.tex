@@ -125,6 +125,8 @@
 %%%%%CHANGE HERE%%%%%%%
 %%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
 
+\noindent\textbf{Keywords:} Autoencoders, latent representations, representation learning, unsupervised learning, neural networks
+
 \section{Lecture Objectives}
 
 This lecture introduces autoencoders as an unsupervised learning approach for learning compact latent representations that preserve the essential structure of the data while enabling reconstruction of the original inputs. We begin by motivating representation learning through dimensionality reduction and briefly connecting autoencoders to principal component analysis as a linear baseline for capturing dominant variance. We then develop the core encoder--decoder framework and compare linear autoencoders with nonlinear autoencoders, emphasizing how nonlinearities allow the model to represent more complex, non-linear structure beyond a single subspace. Next, we study practical architectures on MNIST, including fully-connected and convolutional autoencoders, and examine how their learned latent spaces and reconstructions differ in quality. Finally, we discuss how convolutional decoders restore spatial resolution through upsampling mechanisms such as unpooling, max-unpooling with indices, and transposed convolution (including how to compute output sizes), and we conclude with qualitative reconstruction examples and latent-space visualizations.

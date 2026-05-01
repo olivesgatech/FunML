@@ -118,6 +118,43 @@ pre, code {
   overflow: hidden;
 }
 
+.lecture-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 8px 0 18px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.lecture-tags-label {
+  font-weight: 700;
+  color: #475569;
+  font-size: 13px;
+  margin-right: 4px;
+}
+
+.lecture-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 12.5px;
+  text-decoration: none;
+  border: 1px solid #c7d2fe;
+  transition: background 0.15s, color 0.15s;
+}
+
+.lecture-tag:hover {
+  background: #6366f1;
+  color: #fff;
+  border-color: #6366f1;
+}
+
 .interactive-notebook {
   margin: 14px 0 18px;
   padding: 12px;
@@ -1716,6 +1753,36 @@ def clean_lecture_body(
 
   inject_interactive_notebooks(soup, notebook_rules, notebooks_dir, notebook_view_mode, lecture_filename)
 
+  # Convert "Keywords: a, b, c" paragraphs into a styled chip strip whose
+  # links go to the search page. Run after URL porting so the hrefs we
+  # write are not rewritten as if they were local assets.
+  for p in soup.find_all("p"):
+    strong = p.find("strong")
+    if not strong:
+      continue
+    label = strong.get_text(strip=True).rstrip(":").strip().lower()
+    if label != "keywords":
+      continue
+    raw = p.get_text(" ", strip=True)
+    raw = re.sub(r"^\s*Keywords\s*:?\s*", "", raw, flags=re.IGNORECASE)
+    keywords = [k.strip() for k in raw.split(",") if k.strip()]
+    if not keywords:
+      continue
+    container = soup.new_tag("div")
+    container["class"] = ["lecture-tags"]
+    label_span = soup.new_tag("span")
+    label_span["class"] = ["lecture-tags-label"]
+    label_span.string = "Keywords:"
+    container.append(label_span)
+    for kw in keywords:
+      a = soup.new_tag("a")
+      a["class"] = ["lecture-tag"]
+      a["href"] = f"../index.html?q={quote(kw)}"
+      a["title"] = f"Search lectures for: {kw}"
+      a.string = kw
+      container.append(a)
+    p.replace_with(container)
+
   # Remove repeated boilerplate block that appears at the top of many lectures.
   boilerplate_keys = {
     "contributors:",
@@ -2158,7 +2225,14 @@ def build_search_index(lectures_dir: Path, assets_dir: Path, lecture_pages):
       tag.decompose()
     sections = []
     current = {"heading": title, "id": "", "parts": []}
-    for el in body.find_all(["h1", "h2", "h3", "h4", "p", "li"], recursive=True):
+    for el in body.find_all(["h1", "h2", "h3", "h4", "p", "li", "div"], recursive=True):
+      # Only index <div> elements that we know carry searchable content
+      # (e.g. the lecture-tags chip strip). Skip generic divs to avoid
+      # double-counting nested content.
+      if el.name == "div":
+        cls = el.get("class", []) or []
+        if "lecture-tags" not in cls:
+          continue
       if el.name in ("h1", "h2", "h3", "h4"):
         if current["parts"]:
           sections.append(current)

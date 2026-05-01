@@ -124,6 +124,8 @@
 %%%%%CHANGE HERE%%%%%%%
 %%%%%\section{title of the section} similarly with the rest \section{} or \subsection{} or \subsubsection{} etc
 
+\noindent\textbf{Keywords:} Anomaly detection, uncertainty quantification, representation learning, autoencoders, performance metrics
+
 \section{Lecture Objectives}
 
 This lecture introduces anomaly detection as a machine learning framework for identifying rare, unusual, or unexpected patterns relative to a learned notion of normal behavior. We formalize anomaly detection in a statistical framework by defining anomalies via normal and anomalous data-generating distributions, and by presenting the two core components of a detector: a statistic (or anomaly score) and a decision rule (typically thresholding). We then develop evaluation methodology for anomaly detection under class imbalance, including TPR, FPR, precision, ROC curves, and AUC, and we analyze how the decision threshold controls the trade-off between missed detections and false alarms. Next, we study two practical learning settings---semi-supervised (novelty detection) and unsupervised anomaly detection---highlighting their assumptions and representative techniques such as density-based detection, distance-based methods, and Isolation Forest. Finally, we focus on image anomaly detection methods, including patch-based statistical modeling, adjacent pixel-value correlation structure, and neural network-based confidence scoring via Maximum Softmax Probability (MSP), and we connect these ideas to the manifold hypothesis and reconstruction-based approaches (e.g., autoencoders), including gradient-based regularization such as GradCON and hybrid/ensemble strategies for robust detection in high-dimensional settings \cite{5,7}.

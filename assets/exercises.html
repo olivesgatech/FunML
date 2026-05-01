@@ -3795,6 +3795,56 @@ directly updates the language model using preference pairs: <span class="math di
 of preferred outputs. This makes DPO simpler and more stable, while RLHF
 is more flexible but computationally more complex.</p></li>
 </ol></section></section>
+<section><h2>Lecture32 - Vision-Language Models</h2><section><h1>Exercises</h1>
+<ol>
+<li><p>Why are VLMs modeled using left-to-right probability?
+<strong>Answer:</strong> Because they extend LLMs to multimodal
+settings. <strong>Explanation:</strong> VLMs follow the same
+autoregressive principle as LLMs, where tokens are generated
+sequentially. The difference is that the conditioning context includes
+both previous text tokens and visual tokens extracted from
+images.</p></li>
+<li><p>What is the main difference between CLIP and generative VLMs?
+<strong>Answer:</strong> CLIP is contrastive, while generative VLMs are
+autoregressive. <strong>Explanation:</strong> CLIP learns aligned
+embeddings for images and text using a contrastive loss, but does not
+generate text. Generative VLMs explicitly model <span class="math inline">\(p(y \mid x)\)</span> and produce outputs token by
+token.</p></li>
+<li><p>Why is multimodal fusion difficult? <strong>Answer:</strong>
+Because modalities are heterogeneous and often misaligned.
+<strong>Explanation:</strong> Images and text differ in structure,
+scale, and representation. Additionally, corresponding information may
+be incomplete, noisy, or temporally misaligned, making it difficult to
+learn a shared representation.</p></li>
+<li><p>Why are ViT-based encoders preferred in modern VLMs?
+<strong>Answer:</strong> Because they produce token-based
+representations. <strong>Explanation:</strong> Vision Transformers
+convert images into sequences of tokens, which align naturally with
+Transformer-based language models. This simplifies multimodal fusion
+compared to CNN-based feature maps.</p></li>
+<li><p>What makes evaluation harder in VLMs than in LLMs?
+<strong>Answer:</strong> Evaluation must consider both language quality
+and visual grounding. <strong>Explanation:</strong> Unlike LLMs, VLMs
+must ensure that outputs are not only fluent but also consistent with
+the visual input. This introduces additional challenges such as
+grounding, hallucination detection, and multimodal alignment.</p></li>
+<li><p>What is the difference between early fusion and late fusion?
+<strong>Answer:</strong> Early fusion combines modalities at the token
+level, while late fusion combines them after separate encoding.
+<strong>Explanation:</strong> In early fusion, visual and textual tokens
+are processed together in a shared sequence model, enabling rich
+cross-modal interactions from the start. In late fusion, each modality
+is encoded separately and combined later through mechanisms such as
+cross-attention, which improves modularity but may limit early
+interaction.</p></li>
+<li><p>What is the purpose of alignment tuning in VLMs?
+<strong>Answer:</strong> To ensure outputs are helpful, safe, and
+aligned with human preferences. <strong>Explanation:</strong> Alignment
+tuning uses human feedback or preference data to refine model behavior
+beyond instruction following. Methods such as RLHF and DPO help ensure
+that responses are not only correct and grounded in visual input but
+also appropriate and aligned with user expectations.</p></li>
+</ol></section></section>
 </main>
 </body>
 </html>
