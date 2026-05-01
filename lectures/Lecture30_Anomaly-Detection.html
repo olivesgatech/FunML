@@ -100,109 +100,37 @@ window.addEventListener("DOMContentLoaded", () => {
 </script>
   <script>
 (function() {
-  let indexPromise = null;
-  function loadIndex() {
-    if (!indexPromise) {
-      indexPromise = fetch("../assets/search-index.json")
-        .then(r => r.ok ? r.json() : null)
-        .catch(() => null);
-    }
-    return indexPromise;
-  }
-
-  function htmlEscape(s) {
-    return String(s).replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    }[c]));
-  }
-
-  function findMatches(data, keyword) {
-    if (!data || !data.lectures) return [];
-    const kw = keyword.toLowerCase();
-    const here = (location.pathname.split("/").pop() || "").toLowerCase();
-    const results = [];
-    for (const lec of data.lectures) {
-      let matched = false;
-      let snippet = "";
-      for (const sec of (lec.sections || [])) {
-        const text = (sec.text || "").toLowerCase();
-        if (text.includes(kw) || (sec.heading || "").toLowerCase().includes(kw)) {
-          matched = true;
-          if (!snippet) snippet = sec.heading || "";
-          break;
-        }
-      }
-      if (matched) {
-        results.push({
-          file: lec.file,
-          num: lec.num,
-          title: lec.title,
-          snippet,
-          isCurrent: (lec.file || "").toLowerCase() === here,
-        });
-      }
-    }
-    return results;
-  }
-
-  function render(panel, keyword, results) {
-    if (results.length === 0) {
-      panel.innerHTML = '<div class="ltr-empty">No other lectures matched "' + htmlEscape(keyword) + '".</div>';
-      return;
-    }
-    const others = results.filter(r => !r.isCurrent);
-    const here = results.find(r => r.isCurrent);
-    let html = '<div class="ltr-head">' +
-               results.length + ' lecture' + (results.length === 1 ? '' : 's') +
-               ' tagged "<strong>' + htmlEscape(keyword) + '</strong>"' +
-               '<button class="ltr-close" type="button" aria-label="Close">×</button></div>';
-    html += '<ul class="ltr-list">';
-    if (here) {
-      html += '<li class="ltr-current"><span class="ltr-num">Lec ' + htmlEscape(here.num) + '</span> ' +
-              htmlEscape(here.title) + ' <em>(this lecture)</em></li>';
-    }
-    for (const r of others) {
-      html += '<li><a href="' + htmlEscape(r.file) + '" class="ltr-link">' +
-              '<span class="ltr-num">Lec ' + htmlEscape(r.num) + '</span> ' +
-              htmlEscape(r.title) + '</a>' +
-              (r.snippet ? ' <span class="ltr-snippet">— ' + htmlEscape(r.snippet) + '</span>' : '') +
-              '</li>';
-    }
-    html += '</ul>';
-    panel.innerHTML = html;
-  }
-
+  // When a keyword tag is clicked, trigger the parent index page's global
+  // search box for that keyword so the standard search results dropdown
+  // appears. Falls back to navigating to ../index.html?q=... if this page
+  // is opened standalone (not inside the lecture iframe).
   document.addEventListener("click", function(e) {
     const tag = e.target.closest && e.target.closest(".lecture-tag");
-    if (tag) {
-      e.preventDefault();
-      const kw = tag.dataset.keyword || tag.textContent.trim();
+    if (!tag) return;
+    e.preventDefault();
+    const kw = tag.dataset.keyword || tag.textContent.trim();
+    if (!kw) return;
+
+    let parentDoc = null;
+    try {
+      if (window.parent && window.parent !== window) parentDoc = window.parent.document;
+    } catch (_) { parentDoc = null; }
+
+    const input = parentDoc && parentDoc.getElementById("global-search");
+    if (input) {
+      input.value = kw;
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.focus();
+      // Mark the active tag for visual feedback
       const tagsBox = tag.closest(".lecture-tags");
-      const panel = tagsBox && tagsBox.nextElementSibling;
-      if (!panel || !panel.classList.contains("lecture-tag-results")) return;
-      // Toggle: clicking the same active tag again closes the panel
-      const active = tagsBox.querySelector(".lecture-tag.is-active");
-      if (active === tag && !panel.hidden) {
-        panel.hidden = true;
-        tag.classList.remove("is-active");
-        return;
-      }
-      if (active) active.classList.remove("is-active");
-      tag.classList.add("is-active");
-      panel.hidden = false;
-      panel.innerHTML = '<div class="ltr-loading">Searching for "' + htmlEscape(kw) + '"…</div>';
-      loadIndex().then(data => render(panel, kw, findMatches(data, kw)));
-      return;
-    }
-    const close = e.target.closest && e.target.closest(".ltr-close");
-    if (close) {
-      const panel = close.closest(".lecture-tag-results");
-      const tagsBox = panel && panel.previousElementSibling;
-      if (panel) panel.hidden = true;
       if (tagsBox) {
-        const active = tagsBox.querySelector(".lecture-tag.is-active");
-        if (active) active.classList.remove("is-active");
+        const prev = tagsBox.querySelector(".lecture-tag.is-active");
+        if (prev) prev.classList.remove("is-active");
+        tag.classList.add("is-active");
       }
+    } else {
+      // Standalone (no parent search box): fall back to query-string search
+      window.location.href = "../index.html?q=" + encodeURIComponent(kw);
     }
   });
 })();
@@ -217,13 +145,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-<div class="lecture-tags"><span class="lecture-tags-label">Keywords:</span><a class="lecture-tag" data-keyword="Anomaly detection" href="#" title="Show other lectures with: Anomaly detection">Anomaly detection</a><a class="lecture-tag" data-keyword="uncertainty
-quantification" href="#" title="Show other lectures with: uncertainty
+<div class="lecture-tags"><span class="lecture-tags-label">Keywords:</span><a class="lecture-tag" data-keyword="Anomaly detection" href="#" title="Search lectures for: Anomaly detection">Anomaly detection</a><a class="lecture-tag" data-keyword="uncertainty
+quantification" href="#" title="Search lectures for: uncertainty
 quantification">uncertainty
-quantification</a><a class="lecture-tag" data-keyword="representation learning" href="#" title="Show other lectures with: representation learning">representation learning</a><a class="lecture-tag" data-keyword="autoencoders" href="#" title="Show other lectures with: autoencoders">autoencoders</a><a class="lecture-tag" data-keyword="performance
-metrics" href="#" title="Show other lectures with: performance
+quantification</a><a class="lecture-tag" data-keyword="representation learning" href="#" title="Search lectures for: representation learning">representation learning</a><a class="lecture-tag" data-keyword="autoencoders" href="#" title="Search lectures for: autoencoders">autoencoders</a><a class="lecture-tag" data-keyword="performance
+metrics" href="#" title="Search lectures for: performance
 metrics">performance
-metrics</a></div><div class="lecture-tag-results" hidden=""></div>
+metrics</a></div>
 <h1 data-number="1" id="lecture-objectives"><span class="header-section-number">1.</span> Lecture Objectives</h1>
 <p>This lecture introduces anomaly detection as a machine learning
 framework for identifying rare, unusual, or unexpected patterns relative
