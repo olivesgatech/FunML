@@ -698,6 +698,39 @@ def clean_title_candidate(raw_title: str):
   return title
 
 
+# Match "Module Name N: Subtitle" where N is a roman numeral. Used to keep
+# the parsed (module, numeral, subtitle) data while rendering only the
+# subtitle in the lecture page title and sidebar.
+MODULE_TITLE_PAT = re.compile(
+  r"^\s*(?P<module>.+?)\s+(?P<numeral>I|II|III|IV|V|VI|VII|VIII|IX|X)\s*:\s*(?P<subtitle>.+?)\s*$"
+)
+
+ROMAN_TO_INT = {
+  "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5,
+  "VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10,
+}
+
+
+def parse_module_title(title: str):
+  """Return (module, numeral, position, subtitle) when title matches the
+  "Module Name N: Subtitle" pattern, else None."""
+  if not title:
+    return None
+  m = MODULE_TITLE_PAT.match(title)
+  if not m:
+    return None
+  numeral = m.group("numeral")
+  return (m.group("module").strip(), numeral, ROMAN_TO_INT[numeral], m.group("subtitle").strip())
+
+
+def display_title(title: str):
+  """Strip the 'Module N: ' prefix when present, returning only the subtitle.
+  Lecture pages, the sidebar, and filenames all use this short form so the
+  reader is not shown the module/numeral noise."""
+  parsed = parse_module_title(title)
+  return parsed[3] if parsed else title
+
+
 def extract_title(tex_path):
   text = normalize_course_numbers(tex_path.read_text(errors="ignore"))
   # Prefer the title from \lecture{N}{Title}{...}{...} and skip template placeholders.
@@ -707,21 +740,21 @@ def extract_title(tex_path):
   for m in lecture_macro.finditer(text):
     title = clean_title_candidate(m.group(2))
     if title:
-      return title
+      return display_title(title)
 
   latex_title = clean_title_candidate(extract_command_argument(text, "title"))
   if latex_title:
-    return latex_title
+    return display_title(latex_title)
 
   header_title = clean_title_candidate(extract_command_argument(text, "lhead"))
   if header_title:
-    return header_title
+    return display_title(header_title)
 
   m = re.search(r"Lecture\s+\d+[:\-]?\s*(.*)", text)
   if m:
     fallback = clean_title_candidate(m.group(0))
     if fallback:
-      return fallback
+      return display_title(fallback)
 
   directory_fallback = clean_title_candidate(tex_path.parent.name.replace("_", " "))
   if directory_fallback:
