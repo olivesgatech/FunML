@@ -162,6 +162,64 @@ pre, code {
   border-color: #4f46e5;
 }
 
+.lecture-handouts {
+  margin: 32px 0 12px;
+  padding: 18px 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fefce8;
+}
+
+.lecture-handouts h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  color: #713f12;
+}
+
+.lecture-handouts .handout-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lecture-handouts .handout-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.lecture-handouts a {
+  color: #1e3a8a;
+  text-decoration: none;
+}
+
+.lecture-handouts a:hover {
+  text-decoration: underline;
+}
+
+.handout-kind {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #e5e7eb;
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.handout-kind-paper       { background: #fee2e2; color: #991b1b; }
+.handout-kind-reading     { background: #dbeafe; color: #1e3a8a; }
+.handout-kind-video       { background: #fce7f3; color: #9d174d; }
+.handout-kind-interactive { background: #d1fae5; color: #065f46; }
+.handout-kind-dataset     { background: #ede9fe; color: #5b21b6; }
+
 .interactive-notebook {
   margin: 14px 0 18px;
   padding: 12px;
@@ -1941,7 +1999,73 @@ def clean_lecture_body(
     for n in nodes:
       n.extract()
 
+  # Append per-lecture handouts (further reading & references) when defined
+  # in assets/handouts.json. Keyed by the lecture display number parsed
+  # from the output filename like "Lecture7_Performance-Metrics.html".
+  inject_lecture_handouts(soup, lecture_filename)
+
   return str(soup), qanda_sections
+
+
+_HANDOUTS_CACHE = None
+
+
+def load_handouts():
+  global _HANDOUTS_CACHE
+  if _HANDOUTS_CACHE is not None:
+    return _HANDOUTS_CACHE
+  path = SCRIPT_ROOT / "assets" / "handouts.json"
+  if not path.exists():
+    _HANDOUTS_CACHE = {}
+    return _HANDOUTS_CACHE
+  try:
+    data = json.loads(path.read_text())
+  except Exception as exc:
+    print(f"Warning: could not parse handouts.json: {exc}")
+    _HANDOUTS_CACHE = {}
+    return _HANDOUTS_CACHE
+  # Drop the leading underscore comment key if present.
+  _HANDOUTS_CACHE = {k: v for k, v in data.items() if not k.startswith("_")}
+  return _HANDOUTS_CACHE
+
+
+def inject_lecture_handouts(soup, lecture_filename: str):
+  m = re.match(r"Lecture(\d+)_", lecture_filename or "")
+  if not m:
+    return
+  lec_num = m.group(1)
+  handouts = load_handouts().get(lec_num)
+  if not handouts:
+    return
+
+  body = soup.find("body") or soup
+  section = soup.new_tag("section")
+  section["class"] = ["lecture-handouts"]
+  section["id"] = "further-reading"
+
+  heading = soup.new_tag("h2")
+  heading.string = "Further Reading & References"
+  section.append(heading)
+
+  ul = soup.new_tag("ul")
+  ul["class"] = ["handout-list"]
+  for entry in handouts:
+    li = soup.new_tag("li")
+    kind = (entry.get("kind") or "").strip().lower()
+    if kind:
+      tag = soup.new_tag("span")
+      tag["class"] = ["handout-kind", f"handout-kind-{kind}"]
+      tag.string = kind
+      li.append(tag)
+    a = soup.new_tag("a")
+    a["href"] = entry.get("url", "#")
+    a["target"] = "_blank"
+    a["rel"] = "noopener noreferrer"
+    a.string = entry.get("label", entry.get("url", "Resource"))
+    li.append(a)
+    ul.append(li)
+  section.append(ul)
+  body.append(section)
 
 
 def build_site(src_root: Path, out_root: Path, write_index: bool):
