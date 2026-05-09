@@ -10,6 +10,7 @@ const viewerFoot = document.querySelector('.viewer-actions .viewer-foot');
 const notesLink = document.getElementById('notes-link');
 const slidesLink = document.getElementById('slides-link');
 const exerciseLink = document.getElementById('exercise-link');
+const handoutsLink = document.getElementById('handouts-link');
 const videoLinks = document.getElementById('video-links');
 const demosLink = document.getElementById('demos-link');
 const topDemosLink = document.getElementById('top-demos-link');
@@ -21,6 +22,7 @@ const topExercisesMenu = document.getElementById('top-exercises-menu');
 const topHandoutDemos = document.getElementById('top-handout-demos');
 const topHandoutDisclaimer = document.getElementById('top-handout-disclaimer');
 let lectureMedia = {};
+let lectureHandouts = {};
 
 const closeAllDropdowns = () => {
   dropdownToggles.forEach((toggle) => {
@@ -158,6 +160,20 @@ const updateLectureMedia = () => {
   updateResourceLink(slidesLink, slideEmbed, slideEmbed ? 'Slides' : 'No slides posted');
   updateResourceLink(exerciseLink, exerciseHref, 'Exercises');
   updateResourceLink(demosLink, demoHref, 'Demos');
+
+  // Handouts: enable when assets/handouts.json has entries for this lecture's
+  // display number (parsed from the LectureN_*.html filename). The link
+  // navigates to the Further Reading & References anchor inside the lecture.
+  const filenameMatch = lectureNotesHref ? lectureNotesHref.match(/Lecture(\d+)_/) : null;
+  const lecNumber = filenameMatch ? filenameMatch[1] : '';
+  const handoutsList = (lecNumber && lectureHandouts[lecNumber]) || [];
+  const handoutsHref = (handoutsList.length && lectureNotesHref)
+    ? `${lectureNotesHref}#further-reading`
+    : '';
+  const handoutsLabel = handoutsList.length
+    ? `Handouts (${handoutsList.length})`
+    : 'No handouts';
+  updateResourceLink(handoutsLink, handoutsHref, handoutsLabel);
   if (!videoLinks) return;
 
   const recordings = media.recordings || [];
@@ -321,6 +337,17 @@ fetch('assets/media_resources.json')
     updateTopMenus();
   });
 
+fetch('assets/handouts.json')
+  .then((response) => (response.ok ? response.json() : {}))
+  .then((data) => {
+    lectureHandouts = data || {};
+    updateLectureMedia();
+  })
+  .catch(() => {
+    lectureHandouts = {};
+    updateLectureMedia();
+  });
+
 if (slidesLink) {
   slidesLink.addEventListener('click', (event) => openResourceInViewer(event, 'Slides'));
 }
@@ -335,6 +362,10 @@ if (notesLink) {
 
 if (demosLink) {
   demosLink.addEventListener('click', (event) => openResourceInViewer(event, 'Demos'));
+}
+
+if (handoutsLink) {
+  handoutsLink.addEventListener('click', (event) => openResourceInViewer(event, 'Handouts'));
 }
 
 if (topDemosLink) {
@@ -425,7 +456,9 @@ document.querySelectorAll('.click-card').forEach((card) => {
           ? 'Lecture Notes'
           : link.id === 'demos-link'
             ? 'Demos'
-            : 'Video';
+            : link.id === 'handouts-link'
+              ? 'Handouts'
+              : 'Video';
     openResourceHref(link.getAttribute('href'), kind);
   });
 });
