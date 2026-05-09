@@ -345,6 +345,47 @@ body.landing-page-active .viewer-actions {
   gap: 10px;
 }
 
+.lecture-module {
+  border: 1px solid rgba(0, 48, 87, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  padding: 4px 6px;
+}
+
+.lecture-module > .lecture-module-head {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.lecture-module > .lecture-module-head::-webkit-details-marker { display: none; }
+
+.lecture-module > .lecture-module-head::before {
+  content: "▸";
+  display: inline-block;
+  font-size: 11px;
+  color: #64748b;
+  transition: transform 0.15s;
+}
+
+.lecture-module[open] > .lecture-module-head::before {
+  transform: rotate(90deg);
+}
+
+.lecture-module-body {
+  display: grid;
+  gap: 6px;
+  padding: 4px 4px 8px;
+}
+
 .lecture-item {
   display: grid;
   grid-template-columns: 44px 1fr;

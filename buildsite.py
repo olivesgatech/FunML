@@ -1786,12 +1786,70 @@ def sync_portal_index(index_path: Path, lecture_pages):
     a.append(info)
     return a
 
+  # For each lecture, look up its source-side title (preserved in the
+  # copied .tex file in lectures/) so we can parse the "Module N: Subtitle"
+  # prefix and group items in the sidebar.
+  lectures_dir = index_path.parent / "lectures"
+  def raw_title_for(filename: str):
+    tex_path = lectures_dir / f"{Path(filename).stem}.tex"
+    if not tex_path.exists():
+      return None
+    text = tex_path.read_text(errors="ignore")
+    for line in text.splitlines():
+      if line.lstrip().startswith("%"):
+        continue
+      m = re.search(r"\\lecture\{[^}]*\}\{([^}]*)\}", line)
+      if m:
+        return m.group(1).strip()
+    return None
+
   lecture_list.clear()
   if landing_entry:
     lecture_list.append(build_lecture_item(None, landing_entry[0], landing_entry[1], landing_entry[2], label="Preface"))
     lecture_list.append("\n")
+
+  # First pass: classify each lecture as ungrouped or assigned to a module,
+  # remembering the (numeral position, idx) for sorting within a module.
+  ungrouped = []      # list of (idx, title, filename, media_key)
+  by_module = {}      # module_name -> list of (numeral_position, idx, title, filename, media_key)
+  module_order = []   # module names in order of first appearance
   for idx, (title, filename, media_key) in enumerate(display_lectures, start=1):
+    raw = raw_title_for(filename)
+    parsed = parse_module_title(raw) if raw else None
+    if not parsed:
+      ungrouped.append((idx, title, filename, media_key))
+      continue
+    module, _numeral, position, _subtitle = parsed
+    if module not in by_module:
+      by_module[module] = []
+      module_order.append(module)
+    by_module[module].append((position, idx, title, filename, media_key))
+
+  # Render ungrouped items first (Preface comes from landing_entry above;
+  # ungrouped here covers things like the "Introduction to Machine Learning"
+  # lecture that does not belong to any module).
+  for idx, title, filename, media_key in ungrouped:
     lecture_list.append(build_lecture_item(idx, title, filename, media_key))
+    lecture_list.append("\n")
+
+  # Then render each module as a collapsible group, with sub-items sorted
+  # by Roman-numeral position so the reader always sees I -> II -> III ...
+  for module in module_order:
+    items = sorted(by_module[module], key=lambda t: (t[0], t[1]))
+    details = soup.new_tag("details")
+    details["class"] = ["lecture-module"]
+    details["open"] = ""
+    summary = soup.new_tag("summary")
+    summary["class"] = ["lecture-module-head"]
+    summary.string = module
+    details.append(summary)
+    group_list = soup.new_tag("div")
+    group_list["class"] = ["lecture-module-body"]
+    details.append(group_list)
+    for _pos, idx, title, filename, media_key in items:
+      group_list.append(build_lecture_item(idx, title, filename, media_key))
+      group_list.append("\n")
+    lecture_list.append(details)
     lecture_list.append("\n")
 
   sidebar_caption = soup.find(class_="sidebar-caption")
