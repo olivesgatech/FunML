@@ -388,7 +388,7 @@ body.landing-page-active .viewer-actions {
 
 .lecture-item {
   display: grid;
-  grid-template-columns: 44px 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 16px;

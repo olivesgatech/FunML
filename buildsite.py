@@ -1772,12 +1772,6 @@ def sync_portal_index(index_path: Path, lecture_pages):
     a["href"] = "#"
     a["role"] = "listitem"
 
-    if idx is not None:
-      num = soup.new_tag("span")
-      num["class"] = "lecture-num"
-      num.string = f"{idx:02d}"
-      a.append(num)
-
     info = soup.new_tag("div")
     title_div = soup.new_tag("div")
     title_div["class"] = "lecture-title"
