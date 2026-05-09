@@ -91,9 +91,20 @@ const getActiveLectureItem = () => document.querySelector('.lecture-item.active'
 const itemHasDisabledSlides = (item) => item?.dataset?.disableSlides === 'true';
 const itemHidesViewerActions = (item) => item?.dataset?.hideViewerActions === 'true';
 
+const lectureHasHandouts = (item) => {
+  const filename = item?.dataset?.lecture || '';
+  const m = filename.match(/Lecture(\d+)_/);
+  if (!m) return false;
+  const list = lectureHandouts[m[1]];
+  return Array.isArray(list) && list.length > 0;
+};
+
 const syncViewerActionsVisibility = (item) => {
   if (!viewerFoot) return;
-  const shouldHide = itemHidesViewerActions(item);
+  // Hide the row for landing-style lectures EXCEPT when they have handouts
+  // worth surfacing — in that case keep the row so the Handouts card is
+  // reachable. Other cards within the row will disable themselves.
+  const shouldHide = itemHidesViewerActions(item) && !lectureHasHandouts(item);
   viewerFoot.hidden = shouldHide;
   if (shouldHide) {
     closeVideoDropdown();
