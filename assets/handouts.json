@@ -1,66 +1,215 @@
 {
   "_comment": "Per-lecture supplementary readings, references, and external resources. Keyed by current website lecture display number. Each entry is a list of {label, url, kind?} objects.",
-  "1": [
-    { "label": "Python/Colab Tutorial Video — Ahmad Mustafa", "url": "https://cdnapisec.kaltura.com/p/2019031/sp/201903100/embedIframeJs/uiconf_id/32364501/partner_id/2019031?iframeembed=true&playerId=kaltura_player&entry_id=1_p2ykihwd", "kind": "video" },
-    { "label": "Canvas — gatech.edu", "url": "https://canvas.gatech.edu/" },
-    { "label": "Google Colab", "url": "https://colab.research.google.com/" },
-    { "label": "Markdown syntax reference", "url": "https://daringfireball.net/projects/markdown/syntax" },
-    { "label": "Colaboratory markdown guide", "url": "https://colab.research.google.com/notebooks/markdown_guide.ipynb" },
-    { "label": "Introduction to NumPy", "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/02.00-Introduction-to-NumPy.ipynb" },
-    { "label": "Visualization with Matplotlib", "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/04.00-Introduction-To-Matplotlib.ipynb" },
-    { "label": "Introducing Scikit-Learn", "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/05.02-Introducing-Scikit-Learn.ipynb" },
-    { "label": "SciPy — scientific algorithms for Python", "url": "https://colab.research.google.com/github/jrjohansson/scientific-python-lectures/blob/master/Lecture-3-Scipy.ipynb" },
-    { "label": "Intro to pandas", "url": "https://colab.research.google.com/notebooks/mlcc/intro_to_pandas.ipynb" },
-    { "label": "NumPy general guide", "url": "https://numpy.org/devdocs/user/quickstart.html" },
-    { "label": "NumPy broadcasting", "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html" },
-    { "label": "NumPy indexing", "url": "https://numpy.org/doc/stable/user/basics.indexing.html" },
-    { "label": "Boolean arrays and masks tutorial", "url": "https://jakevdp.github.io/PythonDataScienceHandbook/02.06-boolean-arrays-and-masks.html" }
-  ],
   "2": [
-    { "label": "Deep Learning Book (Goodfellow et al.) — Ch. 1 and Ch. 5 pp. 97–105", "url": "https://www.deeplearningbook.org/", "kind": "reading" },
-    { "label": "CheatSheet for Linear Algebra (Canvas)", "url": "https://gatech.instructure.com/courses/496060/files/69754763?wrap=1", "kind": "reading" },
-    { "label": "CheatSheet for Probability (Canvas)", "url": "https://gatech.instructure.com/courses/496060/files/69754759?wrap=1", "kind": "reading" },
-    { "label": "Neocognitron paper (Fukushima)", "url": "https://gatech.instructure.com/courses/496060/files/69754867?wrap=1", "kind": "paper" },
-    { "label": "The Matrix Cookbook — comprehensive Linear Algebra reference", "url": "https://gatech.instructure.com/courses/496060/files/69754876?wrap=1", "kind": "reading" }
+    {
+      "label": "Python/Colab Tutorial Video \u2014 Ahmad Mustafa",
+      "url": "https://cdnapisec.kaltura.com/p/2019031/sp/201903100/embedIframeJs/uiconf_id/32364501/partner_id/2019031?iframeembed=true&playerId=kaltura_player&entry_id=1_p2ykihwd",
+      "kind": "video"
+    },
+    {
+      "label": "Canvas \u2014 gatech.edu",
+      "url": "https://canvas.gatech.edu/"
+    },
+    {
+      "label": "Google Colab",
+      "url": "https://colab.research.google.com/"
+    },
+    {
+      "label": "Markdown syntax reference",
+      "url": "https://daringfireball.net/projects/markdown/syntax"
+    },
+    {
+      "label": "Colaboratory markdown guide",
+      "url": "https://colab.research.google.com/notebooks/markdown_guide.ipynb"
+    },
+    {
+      "label": "Introduction to NumPy",
+      "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/02.00-Introduction-to-NumPy.ipynb"
+    },
+    {
+      "label": "Visualization with Matplotlib",
+      "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/04.00-Introduction-To-Matplotlib.ipynb"
+    },
+    {
+      "label": "Introducing Scikit-Learn",
+      "url": "https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/05.02-Introducing-Scikit-Learn.ipynb"
+    },
+    {
+      "label": "SciPy \u2014 scientific algorithms for Python",
+      "url": "https://colab.research.google.com/github/jrjohansson/scientific-python-lectures/blob/master/Lecture-3-Scipy.ipynb"
+    },
+    {
+      "label": "Intro to pandas",
+      "url": "https://colab.research.google.com/notebooks/mlcc/intro_to_pandas.ipynb"
+    },
+    {
+      "label": "NumPy general guide",
+      "url": "https://numpy.org/devdocs/user/quickstart.html"
+    },
+    {
+      "label": "NumPy broadcasting",
+      "url": "https://numpy.org/doc/stable/user/basics.broadcasting.html"
+    },
+    {
+      "label": "NumPy indexing",
+      "url": "https://numpy.org/doc/stable/user/basics.indexing.html"
+    },
+    {
+      "label": "Boolean arrays and masks tutorial",
+      "url": "https://jakevdp.github.io/PythonDataScienceHandbook/02.06-boolean-arrays-and-masks.html"
+    },
+    {
+      "label": "Deep Learning Book (Goodfellow et al.) \u2014 Ch. 1 and Ch. 5 pp. 97\u2013105",
+      "url": "https://www.deeplearningbook.org/",
+      "kind": "reading"
+    },
+    {
+      "label": "CheatSheet for Linear Algebra (Canvas)",
+      "url": "https://gatech.instructure.com/courses/496060/files/69754763?wrap=1",
+      "kind": "reading"
+    },
+    {
+      "label": "CheatSheet for Probability (Canvas)",
+      "url": "https://gatech.instructure.com/courses/496060/files/69754759?wrap=1",
+      "kind": "reading"
+    },
+    {
+      "label": "Neocognitron paper (Fukushima)",
+      "url": "https://gatech.instructure.com/courses/496060/files/69754867?wrap=1",
+      "kind": "paper"
+    },
+    {
+      "label": "The Matrix Cookbook \u2014 comprehensive Linear Algebra reference",
+      "url": "https://gatech.instructure.com/courses/496060/files/69754876?wrap=1",
+      "kind": "reading"
+    }
   ],
   "5": [
-    { "label": "A Gentle Introduction to Lagrange Multipliers", "url": "https://machinelearningmastery.com/a-gentle-introduction-to-method-of-lagrange-multipliers-the-foundation-of-the-optimization-introduction/", "kind": "reading" }
+    {
+      "label": "A Gentle Introduction to Lagrange Multipliers",
+      "url": "https://machinelearningmastery.com/a-gentle-introduction-to-method-of-lagrange-multipliers-the-foundation-of-the-optimization-introduction/",
+      "kind": "reading"
+    }
   ],
   "6": [
-    { "label": "CS231n — Neural Networks Overview", "url": "https://cs231n.github.io/neural-networks-1/", "kind": "reading" },
-    { "label": "CS231n — Linear Classifiers", "url": "https://cs231n.github.io/linear-classify/", "kind": "reading" },
-    { "label": "TensorFlow Playground — visualization tool", "url": "https://playground.tensorflow.org/", "kind": "interactive" }
+    {
+      "label": "CS231n \u2014 Neural Networks Overview",
+      "url": "https://cs231n.github.io/neural-networks-1/",
+      "kind": "reading"
+    },
+    {
+      "label": "CS231n \u2014 Linear Classifiers",
+      "url": "https://cs231n.github.io/linear-classify/",
+      "kind": "reading"
+    },
+    {
+      "label": "TensorFlow Playground \u2014 visualization tool",
+      "url": "https://playground.tensorflow.org/",
+      "kind": "interactive"
+    }
   ],
   "7": [
-    { "label": "ROC and Precision-Recall Curves on Imbalanced Data", "url": "https://machinelearningmastery.com/roc-curves-and-precision-recall-curves-for-imbalanced-classification/", "kind": "reading" },
-    { "label": "Davis & Goadrich — The Relationship Between Precision-Recall and ROC Curves (paper)", "url": "https://pages.cs.wisc.edu/~jdavis/davisgoadrichcamera2.pdf", "kind": "paper" }
+    {
+      "label": "ROC and Precision-Recall Curves on Imbalanced Data",
+      "url": "https://machinelearningmastery.com/roc-curves-and-precision-recall-curves-for-imbalanced-classification/",
+      "kind": "reading"
+    },
+    {
+      "label": "Davis & Goadrich \u2014 The Relationship Between Precision-Recall and ROC Curves (paper)",
+      "url": "https://pages.cs.wisc.edu/~jdavis/davisgoadrichcamera2.pdf",
+      "kind": "paper"
+    }
   ],
   "8": [
-    { "label": "SVD and Low-Rank Approximation (course PDF)", "url": "https://gatech.instructure.com/courses/1205/files/47564825?wrap=1", "kind": "reading" }
+    {
+      "label": "SVD and Low-Rank Approximation (course PDF)",
+      "url": "https://gatech.instructure.com/courses/1205/files/47564825?wrap=1",
+      "kind": "reading"
+    }
   ],
   "17": [
-    { "label": "Interactive NN Visualization — adamharley.com/nn_vis", "url": "https://adamharley.com/nn_vis/", "kind": "interactive" }
+    {
+      "label": "Interactive NN Visualization \u2014 adamharley.com/nn_vis",
+      "url": "https://adamharley.com/nn_vis/",
+      "kind": "interactive"
+    }
   ],
   "19": [
-    { "label": "A Guide to Convolution Arithmetic for Deep Learning (paper)", "url": "https://gatech.instructure.com/courses/1205/files/47564909?wrap=1", "kind": "paper" },
-    { "label": "A Survey of the Recent Architectures of Deep CNNs (paper)", "url": "https://gatech.instructure.com/courses/1205/files/47564908?wrap=1", "kind": "paper" }
+    {
+      "label": "A Guide to Convolution Arithmetic for Deep Learning (paper)",
+      "url": "https://gatech.instructure.com/courses/1205/files/47564909?wrap=1",
+      "kind": "paper"
+    },
+    {
+      "label": "A Survey of the Recent Architectures of Deep CNNs (paper)",
+      "url": "https://gatech.instructure.com/courses/1205/files/47564908?wrap=1",
+      "kind": "paper"
+    }
   ],
   "20": [
-    { "label": "gradient_descent_viz (interactive GD visualizer)", "url": "https://github.com/lilipads/gradient_descent_viz", "kind": "interactive" },
-    { "label": "Autoencoders intro recording (YouTube)", "url": "https://youtu.be/MMenEZ7SlXQ", "kind": "video" }
+    {
+      "label": "gradient_descent_viz (interactive GD visualizer)",
+      "url": "https://github.com/lilipads/gradient_descent_viz",
+      "kind": "interactive"
+    },
+    {
+      "label": "Autoencoders intro recording (YouTube)",
+      "url": "https://youtu.be/MMenEZ7SlXQ",
+      "kind": "video"
+    }
   ],
   "23": [
-    { "label": "Sequence prediction overview", "url": "https://machinelearningmastery.com/sequence-prediction/", "kind": "reading" },
-    { "label": "Goodfellow, Bengio, Courville — Deep Learning (Chapter 10, MIT Press 2016)", "url": "https://www.deeplearningbook.org/", "kind": "reading" },
-    { "label": "Derivation of common neural network activation functions", "url": "https://dustinstansbury.github.io/theclevermachine/derivation-common-neural-network-activation-functions", "kind": "reading" },
-    { "label": "Bai, Kolter, Koltun — An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling (TCN paper)", "url": "https://arxiv.org/abs/1803.01271", "kind": "paper" }
+    {
+      "label": "Sequence prediction overview",
+      "url": "https://machinelearningmastery.com/sequence-prediction/",
+      "kind": "reading"
+    },
+    {
+      "label": "Goodfellow, Bengio, Courville \u2014 Deep Learning (Chapter 10, MIT Press 2016)",
+      "url": "https://www.deeplearningbook.org/",
+      "kind": "reading"
+    },
+    {
+      "label": "Derivation of common neural network activation functions",
+      "url": "https://dustinstansbury.github.io/theclevermachine/derivation-common-neural-network-activation-functions",
+      "kind": "reading"
+    },
+    {
+      "label": "Bai, Kolter, Koltun \u2014 An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling (TCN paper)",
+      "url": "https://arxiv.org/abs/1803.01271",
+      "kind": "paper"
+    }
   ],
   "25": [
-    { "label": "AlRegib & Prabhushankar — Explanatory Paradigms in Neural Networks", "url": "https://arxiv.org/abs/2202.11838", "kind": "paper" },
-    { "label": "Prabhushankar & AlRegib — Contrastive Reasoning in Neural Networks (Abductive Reasoning topic)", "url": "https://arxiv.org/abs/2103.12329", "kind": "paper" },
-    { "label": "Selvaraju et al. — Grad-CAM: Visual Explanations from Deep Networks", "url": "https://openaccess.thecvf.com/content_iccv_2017/html/Selvaraju_Grad-CAM_Visual_Explanations_ICCV_2017_paper.html", "kind": "paper" },
-    { "label": "Prabhushankar et al. — Contrastive Explanations in Neural Networks (Contrast-CAM, ICIP 2020)", "url": "https://arxiv.org/abs/2008.00178", "kind": "paper" },
-    { "label": "Temel et al. — CURE-TSR dataset", "url": "https://arxiv.org/abs/1712.02463", "kind": "dataset" },
-    { "label": "Sun, Prabhushankar, AlRegib — Implicit saliency in deep neural networks (ICIP 2020)", "url": "https://arxiv.org/abs/2008.01874", "kind": "paper" }
+    {
+      "label": "AlRegib & Prabhushankar \u2014 Explanatory Paradigms in Neural Networks",
+      "url": "https://arxiv.org/abs/2202.11838",
+      "kind": "paper"
+    },
+    {
+      "label": "Prabhushankar & AlRegib \u2014 Contrastive Reasoning in Neural Networks (Abductive Reasoning topic)",
+      "url": "https://arxiv.org/abs/2103.12329",
+      "kind": "paper"
+    },
+    {
+      "label": "Selvaraju et al. \u2014 Grad-CAM: Visual Explanations from Deep Networks",
+      "url": "https://openaccess.thecvf.com/content_iccv_2017/html/Selvaraju_Grad-CAM_Visual_Explanations_ICCV_2017_paper.html",
+      "kind": "paper"
+    },
+    {
+      "label": "Prabhushankar et al. \u2014 Contrastive Explanations in Neural Networks (Contrast-CAM, ICIP 2020)",
+      "url": "https://arxiv.org/abs/2008.00178",
+      "kind": "paper"
+    },
+    {
+      "label": "Temel et al. \u2014 CURE-TSR dataset",
+      "url": "https://arxiv.org/abs/1712.02463",
+      "kind": "dataset"
+    },
+    {
+      "label": "Sun, Prabhushankar, AlRegib \u2014 Implicit saliency in deep neural networks (ICIP 2020)",
+      "url": "https://arxiv.org/abs/2008.01874",
+      "kind": "paper"
+    }
   ]
 }
